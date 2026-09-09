@@ -124,7 +124,7 @@ export default async function renderHome(container, params) {
     <div class="page-content animate-page-enter">
 
       <!-- Greeting Strip -->
-      <div class="greeting-strip" style="margin-top: var(--space-6);">
+      <div class="greeting-strip" style="margin-top: var(--space-2);">
         <div class="greeting-kuroni kuroni-state-floating">
           ${KURONI.getSVG('calm')}
         </div>

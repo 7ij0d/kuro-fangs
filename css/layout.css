@@ -326,6 +326,10 @@
   display: flex;
   flex-direction: column;
   transition: margin-right var(--transition-smooth);
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-top: 0;
 }
 
 .main-content.sidebar-collapsed {
@@ -334,8 +338,8 @@
 
 /* Page Header */
 .page-header {
-  padding: var(--space-8) var(--space-8) 0;
-  margin-bottom: var(--space-6);
+  padding: var(--space-4) var(--space-8) 0;
+  margin-bottom: var(--space-4);
 }
 
 .page-title {
@@ -400,24 +404,32 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
   gap: var(--space-4);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-4);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-4);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-4);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ─── Horizontal Scroll Row ─────────────────────────────── */
@@ -429,6 +441,8 @@
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .scroll-row::-webkit-scrollbar { display: none; }
 .scroll-row > * { scroll-snap-align: start; flex-shrink: 0; }
@@ -443,37 +457,71 @@
 
 /* ─── Responsive ────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  :root {
-    --nav-width: 220px;
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    height: 100dvh;
+    z-index: var(--z-modal, 400);
+    transition: right var(--transition-smooth);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
   }
-  .page-header,
-  .page-content {
-    padding-right: var(--space-6);
-    padding-left: var(--space-6);
+
+  .sidebar.open {
+    right: 0;
   }
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
-}
 
-@media (max-width: 768px) {
-  .sidebar { display: none; }
-  .topbar { display: flex; }
-  .bottom-nav { display: block; }
+  .topbar {
+    display: flex;
+  }
 
-  .main-content {
-    margin-right: 0;
+  .bottom-nav {
+    display: block;
+  }
+
+  .main-content,
+  .main-content.sidebar-collapsed {
+    margin-right: 0 !important;
     padding-top: var(--topbar-height);
     padding-bottom: var(--bottom-nav-height);
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .page-header {
-    padding: var(--space-5) var(--space-4) 0;
+    padding: var(--space-3) var(--space-5) 0;
+    margin-bottom: var(--space-3);
   }
 
   .page-content {
-    padding: 0 var(--space-4) var(--space-10);
+    padding: 0 var(--space-5) var(--space-10);
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
-  .page-title { font-size: var(--fs-xl); }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: var(--space-2) var(--space-4) 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .page-content {
+    padding: 0 var(--space-4) var(--space-8);
+  }
+
+  .page-title {
+    font-size: var(--fs-xl);
+  }
 
   .grid-2, .grid-3, .grid-4 {
     grid-template-columns: 1fr;
@@ -488,15 +536,26 @@
   .grid-auto {
     grid-template-columns: 1fr;
   }
+  .page-header {
+    padding: var(--space-2) var(--space-3) 0;
+  }
+  .page-content {
+    padding: 0 var(--space-3) var(--space-8);
+  }
 }
 
 /* ─── Mobile Sidebar Drawer ─────────────────────────────── */
 .mobile-drawer-overlay {
   display: none;
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.5);
-  z-index: var(--z-overlay);
+  z-index: var(--z-overlay, 300);
   animation: overlayEnter 200ms ease;
 }
 
@@ -506,11 +565,13 @@
   right: -100%;
   width: 280px;
   height: 100vh;
+  height: 100dvh;
   background: var(--color-surface);
-  z-index: var(--z-modal);
+  z-index: var(--z-modal, 400);
   transition: right var(--transition-smooth);
   display: flex;
   flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
 }
 
 .mobile-drawer.open {

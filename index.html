@@ -324,12 +324,14 @@
 
     // ── Mobile Nav ────────────────────────────────────────────
     window.openMobileNav = () => {
-      document.getElementById('mobile-overlay').classList.add('visible');
-      document.getElementById('mobile-drawer').classList.add('open');
+      document.getElementById('mobile-overlay')?.classList.add('visible');
+      document.getElementById('mobile-drawer')?.classList.add('open');
+      document.getElementById('sidebar')?.classList.add('open');
     };
     window.closeMobileNav = () => {
-      document.getElementById('mobile-overlay').classList.remove('visible');
-      document.getElementById('mobile-drawer').classList.remove('open');
+      document.getElementById('mobile-overlay')?.classList.remove('visible');
+      document.getElementById('mobile-drawer')?.classList.remove('open');
+      document.getElementById('sidebar')?.classList.remove('open');
     };
 
     // ── Sidebar Toggle ────────────────────────────────────────
@@ -453,14 +455,24 @@
   <style>
     /* ── Inline critical styles for splash to avoid FOUC ──── */
     #splash-screen {
-      position: fixed; inset: 0;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
       background: #F5F2E8;
-      z-index: 999;
+      z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 24px;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 16px;
       transition: opacity 400ms ease, transform 400ms ease;
     }
     #splash-screen.dismissing {
