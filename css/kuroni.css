@@ -1,0 +1,287 @@
+/* ═══════════════════════════════════════════════════════════
+   KURO FANGS — Kuroni Mascot Styles
+   Expression containers, animation wrappers, splash screen
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Splash Screen ────────────────────────────────────── */
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--kf-cream);
+  z-index: var(--z-splash);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+#splash-screen.dismissing {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+.splash-kuroni {
+  width: 140px;
+  height: 140px;
+  animation: splashReveal 600ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.splash-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  animation: slideInUp 400ms 300ms both;
+}
+
+.splash-brand-name {
+  font-family: var(--font-primary);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  color: var(--kf-black);
+  letter-spacing: -0.03em;
+  direction: ltr;
+}
+
+.splash-brand-sub {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.splash-progress {
+  width: 120px;
+  height: 3px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  animation: fadeIn 200ms 500ms both;
+}
+
+.splash-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--kf-lime), var(--kf-lime-dark));
+  border-radius: var(--radius-full);
+  animation: progressBar 1800ms 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.splash-message {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  animation: fadeIn 200ms 800ms both;
+}
+
+/* ─── Kuroni Expression Container ──────────────────────── */
+.kuroni-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.kuroni-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Expression size variants */
+.kuroni-xs  { width: 40px;  height: 40px; }
+.kuroni-sm  { width: 60px;  height: 60px; }
+.kuroni-md  { width: 90px;  height: 90px; }
+.kuroni-lg  { width: 120px; height: 120px; }
+.kuroni-xl  { width: 160px; height: 160px; }
+.kuroni-2xl { width: 200px; height: 200px; }
+
+/* ─── Expression States ─────────────────────────────────── */
+/* Applied to .kuroni-container via JS */
+
+.kuroni-state-loading .kuroni-svg {
+  animation: kuroniPulse 1.2s ease-in-out infinite;
+}
+
+.kuroni-state-floating .kuroni-svg {
+  animation: kuroniFloat 3s ease-in-out infinite;
+}
+
+.kuroni-state-excited .kuroni-svg {
+  animation: kuroniBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.kuroni-state-warning .kuroni-svg {
+  animation: kuroniShake 0.5s ease-in-out;
+}
+
+.kuroni-state-thinking .kuroni-svg {
+  animation: kuroniWiggle 1.5s ease-in-out infinite;
+}
+
+/* ─── Inline Decorative Kuroni ─────────────────────────── */
+.kuroni-decoration {
+  position: absolute;
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── Loading State Cards ───────────────────────────────── */
+.kuroni-loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-10);
+  text-align: center;
+}
+
+.kuroni-loading-label {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  animation: kuroniThinkDots 1.4s ease-in-out infinite;
+}
+
+/* ─── Zzz Sleep bubbles ─────────────────────────────────── */
+.zzz-bubble {
+  position: absolute;
+  top: -10px;
+  right: -5px;
+  font-size: var(--fs-sm);
+  color: var(--kf-blue-pale);
+  animation: kuroniSleepZzz 2s ease-in-out infinite;
+}
+
+.zzz-bubble:nth-child(2) { animation-delay: 0.5s; font-size: var(--fs-xs); right: 5px; top: -18px; }
+.zzz-bubble:nth-child(3) { animation-delay: 1s;   font-size: 10px; right: 14px; top: -26px; }
+
+/* ─── Think bubble ─────────────────────────────────────── */
+.think-dots {
+  position: absolute;
+  top: -14px;
+  right: -16px;
+  display: flex;
+  gap: 3px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px 8px;
+}
+
+.think-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+  animation: kuroniThinkDots 1.4s ease-in-out infinite;
+}
+
+.think-dot:nth-child(2) { animation-delay: 0.2s; }
+.think-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ─── Sidebar Kuroni Watermark ─────────────────────────── */
+.sidebar-kuroni-watermark {
+  opacity: 0.05;
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  width: 80px;
+  pointer-events: none;
+}
+
+/* ─── Achievement Banner ────────────────────────────────── */
+.achievement-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: linear-gradient(135deg, var(--kf-black) 0%, var(--kf-black-soft) 100%);
+  border-radius: var(--radius-xl);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-banner::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(180,212,85,0.3) 0%, transparent 70%);
+}
+
+.achievement-kuroni {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  animation: kuroniFloat 3s ease-in-out infinite;
+}
+
+.achievement-text .achievement-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--kf-lime);
+}
+
+.achievement-text .achievement-sub {
+  font-size: var(--fs-sm);
+  color: rgba(255,255,255,0.7);
+}
+
+/* ─── Home greeting strip ───────────────────────────────── */
+.greeting-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-8);
+  background: linear-gradient(135deg, var(--kf-black) 0%, #2A2A30 100%);
+  border-radius: var(--radius-2xl);
+  margin-bottom: var(--space-8);
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.greeting-strip::after {
+  content: '';
+  position: absolute;
+  top: -30px;
+  left: 20px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(180,212,85,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.greeting-kuroni {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  animation: kuroniFloat 3s ease-in-out infinite;
+}
+
+.greeting-text { flex: 1; }
+
+.greeting-hello {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  line-height: 1;
+  color: white;
+}
+
+.greeting-hello .lime { color: var(--kf-lime); }
+
+.greeting-sub {
+  font-size: var(--fs-sm);
+  color: rgba(255,255,255,0.6);
+  margin-top: var(--space-1);
+}
+
+.greeting-date {
+  font-size: var(--fs-xs);
+  color: rgba(255,255,255,0.4);
+  font-family: var(--font-primary);
+  direction: ltr;
+}

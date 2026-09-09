@@ -1,0 +1,269 @@
+{
+  "questions": [
+    {
+      "id": "q001",
+      "subject_id": "oral-path",
+      "subject_name": "علم أمراض الفم",
+      "question": "What is the cardinal sign of acute inflammation characterized by redness due to arteriolar dilation?",
+      "question_ar": "أي من علامات الالتهاب الحاد الرئيسية تتميز بالاحمرار الناتج عن تمدد الشرايين وزيادة تدفق الدم؟",
+      "options": ["Tumor", "Rubor", "Calor", "Dolor"],
+      "correct": 1,
+      "explanation": "Rubor (Redness) results from arteriolar dilation and increased blood flow (hyperemia) to the inflamed area.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q002",
+      "subject_id": "oral-path",
+      "subject_name": "علم أمراض الفم",
+      "question": "Which cellular adaptation is characterized by a reversible change from one adult cell type to another?",
+      "question_ar": "أي تكيف خلوي يتميز بتغير عكوس لنوع خلوي ناضج إلى نوع خلوي ناضج آخر؟",
+      "options": ["Hyperplasia", "Hypertrophy", "Metaplasia", "Dysplasia"],
+      "correct": 2,
+      "explanation": "Metaplasia is a reversible change where one differentiated adult cell type is replaced by another (e.g., respiratory columnar to stratified squamous epithelium in smokers).",
+      "difficulty": "medium",
+      "year_tag": "2022"
+    },
+    {
+      "id": "q003",
+      "subject_id": "oral-path",
+      "subject_name": "علم أمراض الفم",
+      "question": "What type of necrosis is most commonly seen in severe bacterial/pyogenic infections and brain infarcts?",
+      "question_ar": "ما هو نوع النخر (Necrosis) الأكثر شيوعاً في حالات العدوى البكتيرية القيحية واحتشاء الدماغ؟",
+      "options": ["Coagulative necrosis", "Liquefactive necrosis", "Caseous necrosis", "Fat necrosis"],
+      "correct": 1,
+      "explanation": "Liquefactive necrosis occurs in focal bacterial or fungal infections due to rapid accumulation of neutrophils whose lysosomal enzymes digest tissue into a viscous liquid mass (pus).",
+      "difficulty": "medium",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q004",
+      "subject_id": "oral-path",
+      "subject_name": "علم أمراض الفم",
+      "question": "Which histological feature is hallmark of tuberculosis granuloma?",
+      "question_ar": "أي ميزة نسيجية تعتبر السمة المميزة لورم السل الحبيبي (Tuberculous Granuloma)؟",
+      "options": ["Caseous necrosis with Langhans giant cells", "Non-caseating granuloma only", "Abundant neutrophils and microabscesses", "Hyaline membrane formation"],
+      "correct": 0,
+      "explanation": "Tuberculous granulomas (caseating) typically exhibit central acellular eosinophilic caseous necrosis surrounded by epithelioid histiocytes, lymphocytes, and horseshoe-shaped Langhans multinucleated giant cells.",
+      "difficulty": "medium",
+      "year_tag": "2021"
+    },
+    {
+      "id": "q005",
+      "subject_id": "prostho",
+      "subject_name": "الاستعاضة المتحركة",
+      "question": "In the edentulous mandible, the buccal shelf area is considered a primary stress-bearing area because:",
+      "question_ar": "في الفك السفلي الأدرد، تُعتبر منطقة الرف الدهليزي (Buccal Shelf Area) منطقة دعم أولية للضغط لأنها:",
+      "options": [
+        "It is covered by thin, loose non-keratinized mucosa",
+        "It lies perpendicular to vertical occlusal forces and has dense cortical bone",
+        "It undergoes rapid progressive bone resorption",
+        "It contains the mental foramen"
+      ],
+      "correct": 1,
+      "explanation": "The buccal shelf of the mandible is bounded laterally by the external oblique ridge and medially by the alveolar crest; its surface is perpendicular to vertical masticatory forces and composed of dense cortical bone.",
+      "difficulty": "medium",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q006",
+      "subject_id": "prostho",
+      "subject_name": "الاستعاضة المتحركة",
+      "question": "What is the primary anatomical landmark determining the posterior vibrating line of the maxillary complete denture?",
+      "question_ar": "ما هو المعلم التشريحي الأساسي الذي يحدد خط الاهتزاز الخلفي لطقم الأسنان العلوي الكامل؟",
+      "options": ["Incisive papilla", "Fovea palatinae junction with moving soft palate", "Maxillary tuberosity", "Midpalatal suture"],
+      "correct": 1,
+      "explanation": "The vibrating line (posterior palatal seal line) is located near or slightly posterior to the fovea palatinae, marking the junction between movable and immovable tissues of the soft palate during phonation of 'Ah'.",
+      "difficulty": "easy",
+      "year_tag": "2022"
+    },
+    {
+      "id": "q007",
+      "subject_id": "prostho",
+      "subject_name": "الاستعاضة المتحركة",
+      "question": "According to Kennedy's classification, a bilateral edentulous area located posterior to all remaining natural teeth is:",
+      "question_ar": "وفقاً لتصنيف كينيدي (Kennedy Classification)، فإن الفقد العظمي/السني الثنائي خلف جميع الأسنان المتبقية هو:",
+      "options": ["Kennedy Class I", "Kennedy Class II", "Kennedy Class III", "Kennedy Class IV"],
+      "correct": 0,
+      "explanation": "Kennedy Class I represents bilateral free-end edentulous areas posterior to the remaining natural teeth.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q008",
+      "subject_id": "cons",
+      "subject_name": "طب الأسنان التحفظي",
+      "question": "According to G.V. Black's classification, a cavity occurring in pits and fissures of molars and premolars is:",
+      "question_ar": "وفقاً لتصنيف G.V. Black، فإن النخر أو التجويف الواقع في وهاد وشقوق الأضراس والضواحك هو:",
+      "options": ["Class I", "Class II", "Class III", "Class V"],
+      "correct": 0,
+      "explanation": "Class I cavities occur in anatomical pits and fissures of occlusal surfaces of molars/premolars, occlusal two-thirds of facial/lingual surfaces of molars, and lingual pits of maxillary incisors.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q009",
+      "subject_id": "cons",
+      "subject_name": "طب الأسنان التحفظي",
+      "question": "In Class II amalgam cavity preparation, the axiopulpal line angle should be:",
+      "question_ar": "في تحضير كافيتي كلاس 2 للأملغم، يجب أن تكون الزاوية الخطية المحورية اللبية (Axiopulpal Line Angle):",
+      "options": ["Sharp 90 degrees", "Beveled or rounded", "Undercut", "Inverted"],
+      "correct": 1,
+      "explanation": "Rounding or beveling the axiopulpal line angle reduces stress concentration and prevents fracture of the amalgam restoration at the isthmus area.",
+      "difficulty": "medium",
+      "year_tag": "2022"
+    },
+    {
+      "id": "q010",
+      "subject_id": "cons",
+      "subject_name": "طب الأسنان التحفظي",
+      "question": "What is the primary mechanism of adhesion of conventional Glass Ionomer Cement (GIC) to enamel and dentin?",
+      "question_ar": "ما هي الآلية الأساسية لالتصاق أسمنت الزجاج الشاردي (GIC) التقليدي بالمينا والعاج؟",
+      "options": [
+        "Mechanical interlocking via macro-tags",
+        "Chemical chelation between carboxylate groups and calcium ions of hydroxyapatite",
+        "Pure micro-mechanical retention via acid-etch resin tags",
+        "Van der Waals forces only"
+      ],
+      "correct": 1,
+      "explanation": "GIC adheres chemically through chelation: polyacrylic acid carboxyl groups form ionic bonds with calcium ions in tooth hydroxyapatite.",
+      "difficulty": "medium",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q011",
+      "subject_id": "crown",
+      "subject_name": "التيجان والجسور",
+      "question": "Which finish line margin design is generally recommended for the metal-only margin of a full cast gold or metal crown?",
+      "question_ar": "ما هو خط الإنهاء (Finish line) الموصى به عموماً لحواف التيجان المعدنية الكاملة (Full Cast Crown)؟",
+      "options": ["90° Shoulder", "Chamfer", "Shoulder with bevel", "Knife edge only"],
+      "correct": 1,
+      "explanation": "A Chamfer finish line is the preferred finish line for cast metal crowns because it provides adequate bulk without overcontouring, has clear distinct margins, and minimizes stress concentration.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q012",
+      "subject_id": "crown",
+      "subject_name": "التيجان والجسور",
+      "question": "For a Porcelain-Fused-to-Metal (PFM) crown, the facial/buccal reduction requires approximately how much clearance?",
+      "question_ar": "في تحضير تاج الخزف المنصهر على معدن (PFM)، كم تبلغ كمية التخفيض المطلوبة في السطح الدهليزي؟",
+      "options": ["0.5 mm", "1.2 to 1.5 mm", "2.5 to 3.0 mm", "0.8 mm"],
+      "correct": 1,
+      "explanation": "Facial reduction for a PFM crown requires 1.2 to 1.5 mm (0.3-0.5 mm for metal coping + 0.2 mm opaque porcelain + 0.8-1.0 mm body/incisal porcelain) to achieve optimal aesthetics without overcontouring.",
+      "difficulty": "medium",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q013",
+      "subject_id": "crown",
+      "subject_name": "التيجان والجسور",
+      "question": "What is the primary purpose of a finish line shoulder with a 45-degree bevel?",
+      "question_ar": "ما هو الهدف الأساسي من إضافة شطب بزاوية 45 درجة (Bevel) لخط الكتف (Shoulder) في التيجان؟",
+      "options": [
+        "To increase porcelain thickness",
+        "To improve marginal adaptation and burnishability of the metal margin",
+        "To reduce subgingival crown extension",
+        "To make tooth preparation faster"
+      ],
+      "correct": 1,
+      "explanation": "A bevel allows burnishing of the metal margin, improving marginal seal and seat while reducing the marginal gap discrepancy.",
+      "difficulty": "medium",
+      "year_tag": "2022"
+    },
+    {
+      "id": "q014",
+      "subject_id": "pharma",
+      "subject_name": "علم الأدوية",
+      "question": "Which local anesthetic agent is metabolized primarily in the plasma by pseudocholinesterase rather than the liver?",
+      "question_ar": "أي من المخدرات الموضعية التالية يتم استقلابه أساساً في بلازما الدم بواسطة إنزيم الكولينستراز الزائف وليس الكبد؟",
+      "options": ["Lidocaine", "Articaine & Procaine", "Bupivacaine", "Mepivacaine"],
+      "correct": 1,
+      "explanation": "Ester local anesthetics (like Procaine) and the hybrid amide Articaine (due to its ester side chain) undergo rapid plasma hydrolysis by pseudocholinesterase.",
+      "difficulty": "medium",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q015",
+      "subject_id": "pharma",
+      "subject_name": "علم الأدوية",
+      "question": "What is the standard first-line antibiotic and dose for an odontogenic infection in a non-allergic adult patient?",
+      "question_ar": "ما هو المضاد الحيوي الأول وجرعته النموذجية لعلاج عدوى الأسنان في مريض بالغ لا يعاني من حساسية؟",
+      "options": [
+        "Amoxicillin 500 mg orally every 8 hours",
+        "Ciprofloxacin 750 mg every 12 hours",
+        "Metronidazole 200 mg single dose",
+        "Gentamicin 80 mg IM daily"
+      ],
+      "correct": 0,
+      "explanation": "Amoxicillin 500 mg every 8 hours (or 875 mg every 12 hours) is the first-line empirical antibiotic for acute dental infections.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q016",
+      "subject_id": "pharma",
+      "subject_name": "علم الأدوية",
+      "question": "Which analgesic should be strictly avoided in patients with a history of severe peptic ulcer bleeding?",
+      "question_ar": "أي من المسكنات التالية يجب تجنبه تماماً في المرضى الذين لديهم تاريخ نزيف قرحة هضمية حادة؟",
+      "options": ["Paracetamol (Acetaminophen)", "Ibuprofen / NSAIDs", "Codeine", "Lidocaine viscous"],
+      "correct": 1,
+      "explanation": "Nonsteroidal anti-inflammatory drugs (NSAIDs) like Ibuprofen inhibit COX-1, decreasing protective gastric prostaglandins and increasing the risk of mucosal ulceration and hemorrhage.",
+      "difficulty": "easy",
+      "year_tag": "2022"
+    },
+    {
+      "id": "q017",
+      "subject_id": "microbiology",
+      "subject_name": "علم الأحياء الدقيقة",
+      "question": "Which primary bacterial species is recognized as the major causative agent in initiation of human dental caries?",
+      "question_ar": "أي نوع بكتيري يعتبر العامل المسبب الرئيسي في بداية نشوء وتطور تسوس الأسنان؟",
+      "options": ["Streptococcus mutans", "Porphyromonas gingivalis", "Treponema denticola", "Aggregatibacter actinomycetemcomitans"],
+      "correct": 0,
+      "explanation": "Streptococcus mutans produces dextran/glucan biofilms from sucrose and ferments sugars to lactic acid (acidogenic & aciduric), initiating enamel demineralization.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q018",
+      "subject_id": "microbiology",
+      "subject_name": "علم الأحياء الدقيقة",
+      "question": "What are the standard operational parameters for autoclave steam sterilization in dental clinics?",
+      "question_ar": "ما هي المعايير القياسية للتعقيم بالبخار المضغوط (Autoclave) في عيادات ومختبرات الأسنان؟",
+      "options": [
+        "100°C at 5 psi for 60 minutes",
+        "121°C at 15 psi (1 atmosphere) for 15–20 minutes",
+        "160°C dry heat for 2 hours",
+        "85°C boiling water for 30 minutes"
+      ],
+      "correct": 1,
+      "explanation": "Standard autoclave cycles require saturated steam at 121°C (250°F) under 15 pounds per square inch (psi) gauge pressure for a minimum of 15 to 20 minutes (or 134°C at 30 psi for 3–5 minutes).",
+      "difficulty": "medium",
+      "year_tag": "2022"
+    },
+    {
+      "id": "q019",
+      "subject_id": "gen-surgery",
+      "subject_name": "الجراحة العامة",
+      "question": "What is the most effective initial method to control brisk arterial surgical bleeding?",
+      "question_ar": "ما هي أكثر وسيلة أولية فعالة للسيطرة على النزيف الشرياني الحاد أثناء الجراحة؟",
+      "options": ["Direct firm pressure with gauze packs", "Application of ice bags", "Lowering the patient's head below heart level", "Oral tranexamic acid"],
+      "correct": 0,
+      "explanation": "Direct manual pressure with sterile gauze packs is the fastest, safest, and most effective first step for controlling acute hemorrhage before definitive ligating or electrocautery.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    },
+    {
+      "id": "q020",
+      "subject_id": "medicine",
+      "subject_name": "الطب الداخلي",
+      "question": "What is the recommended target HbA1c level indicating good glycemic control in diabetic patients prior to elective dental surgery?",
+      "question_ar": "ما هو مستوى السكر التراكمي (HbA1c) المستهدف الذي يشير لضبط جيد لمريض السكري قبل الجراحة الانتقائية؟",
+      "options": ["Less than 7.0%", "Above 10.0%", "Between 11% and 13%", "Under 3.5%"],
+      "correct": 0,
+      "explanation": "An HbA1c level below 7.0% (and generally < 8.0% for dental procedures) indicates good long-term glycemic control with low risk of infection or delayed wound healing.",
+      "difficulty": "easy",
+      "year_tag": "2023"
+    }
+  ]
+}

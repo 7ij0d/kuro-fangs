@@ -1,0 +1,404 @@
+/* ═══════════════════════════════════════════════════════════
+   KURO FANGS — Admin Panel Styles
+   Separate from student-facing styles
+   ═══════════════════════════════════════════════════════════ */
+
+.admin-body {
+  display: flex;
+  min-height: 100vh;
+  background: #F0EEE6;
+  font-family: 'Noto Kufi Arabic', 'Outfit', sans-serif;
+  direction: rtl;
+}
+
+/* ─── Admin Sidebar ─────────────────────────────────────── */
+.admin-sidebar {
+  width: 240px;
+  background: #1A1A1A;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-logo-wrap {
+  flex-shrink: 0;
+}
+
+.admin-brand > div:last-child > div:first-child {
+  color: #B4D455;
+}
+
+.admin-brand > div:last-child > div:last-child {
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+}
+
+/* Admin Nav */
+.admin-nav {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.admin-nav-item:hover {
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+
+.admin-nav-item.active {
+  background: rgba(180,212,85,0.15);
+  color: #B4D455;
+}
+
+/* ─── Admin Main ────────────────────────────────────────── */
+.admin-main {
+  flex: 1;
+  margin-right: 240px;
+  min-height: 100vh;
+}
+
+#admin-content {
+  padding: 32px;
+}
+
+/* ─── Admin Page Header ─────────────────────────────────── */
+.admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-page-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+/* ─── Stat Cards ────────────────────────────────────────── */
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.admin-stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1A1A1A;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #7A7A7A;
+  margin-top: 6px;
+}
+
+/* ─── Admin Section ─────────────────────────────────────── */
+.admin-section {
+  margin-bottom: 32px;
+}
+
+.admin-section h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+/* ─── Admin Table ───────────────────────────────────────── */
+.admin-table-wrap {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.08);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table th {
+  background: #F5F2E8;
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  color: #4A4A4A;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover td {
+  background: #FAFAF5;
+}
+
+/* ─── Admin Grid ────────────────────────────────────────── */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* ─── Admin Card ────────────────────────────────────────── */
+.admin-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* ─── Admin Buttons ─────────────────────────────────────── */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.admin-btn-primary {
+  background: #1A1A1A;
+  color: #B4D455;
+}
+.admin-btn-primary:hover { background: #2A2A2A; transform: translateY(-1px); }
+
+.admin-btn-ghost {
+  background: transparent;
+  color: #4A4A4A;
+  border: 1.5px solid #DDD;
+}
+.admin-btn-ghost:hover { border-color: #999; }
+
+.admin-btn-sm {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: white;
+  transition: all 0.12s ease;
+}
+.admin-btn-sm:hover { background: #F5F2E8; }
+.admin-btn-sm.danger { color: #FF6B6B; }
+.admin-btn-sm.danger:hover { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); }
+
+/* ─── Admin Tags ────────────────────────────────────────── */
+.admin-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(180,212,85,0.15);
+  color: #6A8A1F;
+  border: 1px solid rgba(180,212,85,0.3);
+}
+
+/* ─── Upload Modal ──────────────────────────────────────── */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.admin-modal {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.admin-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+.admin-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.admin-modal-body {
+  padding: 24px;
+}
+
+/* ─── Form Elements ─────────────────────────────────────── */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4A4A4A;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1A1A1A;
+  background: white;
+  transition: border-color 0.15s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #B4D455;
+  box-shadow: 0 0 0 3px rgba(180,212,85,0.2);
+}
+
+.form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1A1A1A;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.form-select:focus {
+  outline: none;
+  border-color: #B4D455;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── Content Type Selector ─────────────────────────────── */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.type-select-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: 12px;
+  border: 2px solid rgba(0,0,0,0.08);
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.type-select-btn:hover { border-color: #B4D455; background: rgba(180,212,85,0.08); }
+.type-select-btn.selected { border-color: #1A1A1A; background: #1A1A1A; color: #B4D455; }
+
+/* ─── Drop Zone ─────────────────────────────────────────── */
+.drop-zone {
+  border: 2px dashed rgba(0,0,0,0.15);
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #FAFAF5;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: #B4D455;
+  background: rgba(180,212,85,0.05);
+}
+
+.drop-zone p {
+  font-size: 14px;
+  color: #6A6A6A;
+}
+
+/* ─── English text ──────────────────────────────────────── */
+.en {
+  font-family: 'Outfit', sans-serif;
+  direction: ltr;
+}

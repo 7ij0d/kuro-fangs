@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kuro Fangs — منصة الدراسة الذكية لطلاب كلية طب الأسنان، جامعة طرابلس. السنة الثالثة.">
+  <meta name="theme-color" content="#1A1A1A">
+  <title>Kuro Fangs — كلية طب الأسنان</title>
+
+  <!-- Preconnect fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/kuroni.css">
+</head>
+<body>
+
+  <!-- ─── Splash Screen ─────────────────────────────────────── -->
+  <div id="splash-screen">
+    <div class="splash-kuroni kuroni-state-loading">
+      <!-- Kuroni Loading SVG -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="50" cy="65" rx="28" ry="25" fill="#1A1A1A"/>
+        <circle cx="50" cy="42" r="30" fill="#1A1A1A"/>
+        <polygon points="26,20 18,4 34,14" fill="#1A1A1A"/>
+        <polygon points="74,20 82,4 66,14" fill="#1A1A1A"/>
+        <polygon points="26,18 20,8 32,15" fill="#B4D455" opacity="0.8"/>
+        <polygon points="74,18 80,8 68,15" fill="#B4D455" opacity="0.8"/>
+        <circle cx="38" cy="42" r="12" fill="#B4D455" opacity="0.9"/>
+        <circle cx="62" cy="42" r="12" fill="#B4D455" opacity="0.9"/>
+        <circle cx="38" cy="42" r="9" fill="#0A0A0A"/>
+        <circle cx="62" cy="42" r="9" fill="#0A0A0A"/>
+        <path d="M27,42 A11,11 0 0,1 38,31" stroke="#B4D455" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+        <path d="M51,42 A11,11 0 0,1 62,31" stroke="#B4D455" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+        <circle cx="41" cy="39" r="2.5" fill="white" opacity="0.7"/>
+        <circle cx="65" cy="39" r="2.5" fill="white" opacity="0.7"/>
+        <polygon points="50,53 48,56 52,56" fill="#A8C9E8"/>
+        <path d="M44,59 Q50,65 56,59" stroke="#FF6B6B" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="50" cy="80" r="5" fill="#B4D455" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="splash-brand">
+      <div class="splash-brand-name">Kuro Fangs</div>
+      <div class="splash-brand-sub">كلية طب الأسنان — جامعة طرابلس</div>
+    </div>
+    <div class="splash-progress">
+      <div class="splash-progress-fill"></div>
+    </div>
+    <div class="splash-message">جاري تحضير كوروني...</div>
+  </div>
+
+  <!-- ─── App Shell ──────────────────────────────────────────── -->
+  <div id="app">
+
+    <!-- Desktop Sidebar -->
+    <nav class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
+      <!-- Brand -->
+      <div class="sidebar-brand">
+        <svg class="brand-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="#1A1A1A"/>
+          <circle cx="20" cy="17" r="11" fill="#1A1A1A"/>
+          <polygon points="11,9 8,2 15,7"  fill="#B4D455" opacity="0.9"/>
+          <polygon points="29,9 32,2 25,7" fill="#B4D455" opacity="0.9"/>
+          <circle cx="15" cy="17" r="4.5" fill="#B4D455" opacity="0.9"/>
+          <circle cx="25" cy="17" r="4.5" fill="#B4D455" opacity="0.9"/>
+          <circle cx="15" cy="17" r="3" fill="#0A0A0A"/>
+          <circle cx="25" cy="17" r="3" fill="#0A0A0A"/>
+          <path d="M15,24 Q20,28 25,24" stroke="#FF6B6B" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="brand-text">
+          <div class="brand-name">Kuro Fangs</div>
+          <div class="brand-sub">السنة الثالثة — طب الأسنان</div>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" title="تصغير القائمة">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Nav Items -->
+      <div class="sidebar-nav">
+
+        <div class="nav-group">
+          <div class="nav-group-label">الرئيسي</div>
+          <a class="nav-item active" data-route="/" onclick="navigate('/')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="nav-label">الرئيسية</span>
+          </a>
+          <a class="nav-item" data-route="/subjects" onclick="navigate('/subjects')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span class="nav-label">المواد الدراسية</span>
+          </a>
+          <a class="nav-item" data-route="/search" onclick="navigate('/search')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="nav-label">البحث</span>
+          </a>
+          <a class="nav-item" data-route="/alerts" onclick="navigate('/alerts')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="nav-label">تنبيهات الأطباء</span>
+            <span class="nav-badge">3</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">المحتوى</div>
+          <a class="nav-item" data-route="/sheets" onclick="navigate('/sheets')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span class="nav-label">الملازم</span>
+          </a>
+          <a class="nav-item" data-route="/summaries" onclick="navigate('/summaries')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span class="nav-label">الملخصات</span>
+          </a>
+          <a class="nav-item" data-route="/videos" onclick="navigate('/videos')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            <span class="nav-label">التسجيلات</span>
+          </a>
+          <a class="nav-item" data-route="/images" onclick="navigate('/images')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="nav-label">الصور</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">الدراسة والعملي</div>
+          <a class="nav-item" data-route="/requirements" onclick="navigate('/requirements')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C9.5 2 7 3.5 7 7c0 2.5 1 4.5 2 6.5.5 1 .5 2 .5 3v2c0 2 1.5 3.5 3 3.5s3-1.5 3-3.5v-2c0-1 0-2 .5-3 1-2 2-4 2-6.5 0-3.5-2.5-5-5-5Z"/></svg>
+            <span class="nav-label">متطلبات المعمل 🦷</span>
+          </a>
+          <a class="nav-item" data-route="/calculator" onclick="navigate('/calculator')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01"/><path d="M12 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/></svg>
+            <span class="nav-label">حاسبة الدرجات 🧮</span>
+          </a>
+          <a class="nav-item" data-route="/quizzes" onclick="navigate('/quizzes')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span class="nav-label">الكويز التفاعلي</span>
+          </a>
+          <a class="nav-item" data-route="/previous-years" onclick="navigate('/previous-years')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="nav-label">سنوات سابقة</span>
+          </a>
+          <a class="nav-item" data-route="/flashcards" onclick="navigate('/flashcards')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v4"/><path d="M8 12h8"/></svg>
+            <span class="nav-label">البطاقات التعليمية</span>
+          </a>
+          <a class="nav-item" data-route="/questions" onclick="navigate('/questions')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span class="nav-label">بنك الأسئلة</span>
+          </a>
+          <a class="nav-item" data-route="/exams" onclick="navigate('/exams')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span class="nav-label">الامتحانات</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">شخصي</div>
+          <a class="nav-item" data-route="/notes" onclick="navigate('/notes')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span class="nav-label">ملاحظاتي</span>
+          </a>
+          <a class="nav-item" data-route="/favorites" onclick="navigate('/favorites')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="nav-label">المفضلة</span>
+          </a>
+          <a class="nav-item" data-route="/saved" onclick="navigate('/saved')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            <span class="nav-label">المحفوظات</span>
+          </a>
+          <a class="nav-item" data-route="/badges" onclick="navigate('/badges')">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            <span class="nav-label">الإنجازات</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="user-card" onclick="navigate('/profile')">
+          <div class="user-avatar" id="user-avatar">🐱</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">الزائر</div>
+            <div class="user-year">السنة الثالثة</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.4;transform:scaleX(-1)"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+
+      <!-- Kuroni Watermark -->
+      <svg class="sidebar-kuroni-watermark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="50" cy="65" rx="28" ry="25" fill="#1A1A1A"/>
+        <circle cx="50" cy="42" r="30" fill="#1A1A1A"/>
+        <polygon points="26,20 18,4 34,14" fill="#1A1A1A"/>
+        <polygon points="74,20 82,4 66,14" fill="#1A1A1A"/>
+        <polygon points="26,18 20,8 32,15" fill="#B4D455" opacity="0.8"/>
+        <polygon points="74,18 80,8 68,15" fill="#B4D455" opacity="0.8"/>
+        <circle cx="38" cy="42" r="11" fill="#B4D455"/>
+        <circle cx="62" cy="42" r="11" fill="#B4D455"/>
+        <circle cx="38" cy="42" r="8" fill="#0A0A0A"/>
+        <circle cx="62" cy="42" r="8" fill="#0A0A0A"/>
+      </svg>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="main-content">
+
+      <!-- Mobile Topbar -->
+      <header class="topbar" id="topbar">
+        <button class="btn btn-icon" onclick="openMobileNav()" title="القائمة">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div class="topbar-brand">
+          <svg width="30" height="30" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <rect width="40" height="40" rx="10" fill="#1A1A1A"/>
+            <polygon points="11,9 8,2 15,7" fill="#B4D455" opacity="0.9"/>
+            <polygon points="29,9 32,2 25,7" fill="#B4D455" opacity="0.9"/>
+            <circle cx="15" cy="18" r="4.5" fill="#B4D455" opacity="0.9"/>
+            <circle cx="25" cy="18" r="4.5" fill="#B4D455" opacity="0.9"/>
+            <circle cx="15" cy="18" r="3" fill="#0A0A0A"/>
+            <circle cx="25" cy="18" r="3" fill="#0A0A0A"/>
+          </svg>
+          <span style="font-family:var(--font-primary);font-weight:var(--fw-bold);direction:ltr;">Kuro Fangs</span>
+        </div>
+        <button class="btn btn-icon" onclick="navigate('/search')" title="البحث">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Page Container -->
+      <div id="page-container" style="min-height:100%;"></div>
+
+      <!-- Bottom Navigation (Mobile) -->
+      <nav class="bottom-nav" aria-label="القائمة السفلية">
+        <div class="bottom-nav-inner">
+          <a class="bottom-nav-item active" data-route="/" onclick="navigate('/')">
+            <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="bnav-label">الرئيسية</span>
+          </a>
+          <a class="bottom-nav-item" data-route="/subjects" onclick="navigate('/subjects')">
+            <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span class="bnav-label">المواد</span>
+          </a>
+          <a class="bottom-nav-item" data-route="/search" onclick="navigate('/search')">
+            <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="bnav-label">بحث</span>
+          </a>
+          <a class="bottom-nav-item" data-route="/saved" onclick="navigate('/saved')">
+            <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            <span class="bnav-label">محفوظ</span>
+          </a>
+          <a class="bottom-nav-item" data-route="/profile" onclick="navigate('/profile')">
+            <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="bnav-label">ملفي</span>
+          </a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="mobile-drawer-overlay" id="mobile-overlay" onclick="closeMobileNav()"></div>
+  <div class="mobile-drawer" id="mobile-drawer">
+    <!-- cloned from sidebar by JS -->
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ─── Main Application Script ───────────────────────── -->
+  <script type="module">
+    import KF_DATA  from './js/data.js';
+    import KF_STORE from './js/store.js';
+    import KURONI   from './js/kuroni.js';
+    import ROUTER   from './js/router.js';
+
+    // Import all page modules
+    import renderHome from './js/pages/home.js';
+    import {
+      renderSheets, renderSummaries, renderVideos, renderImages,
+      renderQuestions, renderFlashcards, renderPreviousYears,
+      renderQuizzes, renderExams, renderProfile, renderSaved, renderAuth
+    } from './js/pages/secondary.js';
+
+    // Make globals accessible for onclick handlers
+    window.KF_DATA  = KF_DATA;
+    window.KF_STORE = KF_STORE;
+    window.KURONI   = KURONI;
+    window.ROUTER   = ROUTER;
+
+    // ── Toast System ─────────────────────────────────────────
+    window.showToast = (msg, duration = 2500) => {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = `<span class="toast-message">${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.animation = 'toastOut 280ms ease both';
+        setTimeout(() => t.remove(), 280);
+      }, duration);
+    };
+
+    // ── Navigation helper ─────────────────────────────────────
+    window.navigate = (path) => {
+      ROUTER.navigate(path);
+      closeMobileNav();
+    };
+
+    // ── Mobile Nav ────────────────────────────────────────────
+    window.openMobileNav = () => {
+      document.getElementById('mobile-overlay').classList.add('visible');
+      document.getElementById('mobile-drawer').classList.add('open');
+    };
+    window.closeMobileNav = () => {
+      document.getElementById('mobile-overlay').classList.remove('visible');
+      document.getElementById('mobile-drawer').classList.remove('open');
+    };
+
+    // ── Sidebar Toggle ────────────────────────────────────────
+    document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+      const sidebar = document.getElementById('sidebar');
+      const main    = document.getElementById('main-content');
+      sidebar.classList.toggle('collapsed');
+      main.classList.toggle('sidebar-collapsed');
+    });
+
+    // ── Register Routes ───────────────────────────────────────
+    ROUTER.register('/',               renderHome);
+    ROUTER.register('/subjects',       async (c,p) => {
+      const { default: fn } = await import('./js/pages/subjects.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/subjects/:id',   async (c,p) => {
+      const { default: fn } = await import('./js/pages/subject-detail.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/sheets',         renderSheets);
+    ROUTER.register('/sheets/:id',     async (c,p) => {
+      const { default: fn } = await import('./js/pages/sheet-detail.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/summaries',      renderSummaries);
+    ROUTER.register('/videos',         renderVideos);
+    ROUTER.register('/images',         renderImages);
+    ROUTER.register('/questions',      renderQuestions);
+    ROUTER.register('/flashcards',     renderFlashcards);
+    ROUTER.register('/requirements',   async (c,p) => {
+      const { default: fn } = await import('./js/pages/requirements.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/calculator',     async (c,p) => {
+      const { default: fn } = await import('./js/pages/calculator.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/previous-years', renderPreviousYears);
+    ROUTER.register('/quizzes',        renderQuizzes);
+    ROUTER.register('/exams',          renderExams);
+    ROUTER.register('/alerts',         async (c,p) => {
+      const { default: fn } = await import('./js/pages/alerts.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/notes',          async (c,p) => {
+      const { default: fn } = await import('./js/pages/notes.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/favorites',      async (c,p) => {
+      const { default: fn } = await import('./js/pages/favorites.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/saved',          renderSaved);
+    ROUTER.register('/badges',         async (c,p) => {
+      const { default: fn } = await import('./js/pages/badges.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/search',         async (c,p) => {
+      const { default: fn } = await import('./js/pages/search.js');
+      return fn(c, p);
+    });
+    ROUTER.register('/profile',        renderProfile);
+    ROUTER.register('/login',          renderAuth);
+
+    // ── Initialize ────────────────────────────────────────────
+    async function init() {
+      // Init store and apply theme
+      KF_STORE.init();
+      KF_STORE.applyTheme();
+
+      // Update user display
+      const user = KF_STORE.getUser();
+      if (user) {
+        const nameEl = document.getElementById('user-name');
+        if (nameEl) nameEl.textContent = user.name;
+      }
+
+      // Load data
+      await KF_DATA.init();
+
+      // Start router
+      ROUTER.init();
+
+      // Clone sidebar into mobile drawer
+      const sidebarNav = document.querySelector('.sidebar-nav');
+      const mobileDrawer = document.getElementById('mobile-drawer');
+      if (sidebarNav && mobileDrawer) {
+        const clone = sidebarNav.cloneNode(true);
+        mobileDrawer.innerHTML = `
+          <div class="sidebar-brand" style="padding:var(--space-4);">
+            <span class="brand-name" style="font-family:var(--font-primary);font-size:var(--fs-lg);font-weight:var(--fw-bold);">Kuro Fangs</span>
+            <button class="btn btn-icon" onclick="closeMobileNav()">✕</button>
+          </div>`;
+        mobileDrawer.appendChild(clone);
+      }
+
+      // Dismiss splash screen
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.classList.add('dismissing');
+          setTimeout(() => splash.remove(), 400);
+        }
+      }, 2200);
+
+      // Badge events
+      window.addEventListener('kf:badge-earned', (e) => {
+        showToast(`🏆 إنجاز جديد مفتوح!`);
+      });
+
+      // Points update → update sidebar display
+      window.addEventListener('kf:points-updated', (e) => {
+        // Could update a points display in sidebar if needed
+      });
+    }
+
+    init();
+  </script>
+
+  <style>
+    /* ── Inline critical styles for splash to avoid FOUC ──── */
+    #splash-screen {
+      position: fixed; inset: 0;
+      background: #F5F2E8;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      transition: opacity 400ms ease, transform 400ms ease;
+    }
+    #splash-screen.dismissing {
+      opacity: 0; transform: scale(1.03); pointer-events: none;
+    }
+    #app { display: none; }
+    #app.ready { display: flex; }
+  </style>
+
+  <script>
+    // Show app after a brief moment even if module loading is slow
+    setTimeout(() => {
+      document.getElementById('app')?.classList.add('ready');
+    }, 100);
+  </script>
+
+</body>
+</html>

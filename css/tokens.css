@@ -1,0 +1,178 @@
+/* ═══════════════════════════════════════════════════════════
+   KURO FANGS — Design Tokens
+   The master source of truth for all visual properties.
+   All themes override only these variables.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ─── Brand Colors ─────────────────────────────────────── */
+  --kf-lime:          #B4D455;   /* Kuroni signature green */
+  --kf-lime-light:    #CDE877;
+  --kf-lime-dark:     #8AAD2E;
+  --kf-lime-muted:    rgba(180, 212, 85, 0.15);
+
+  --kf-black:         #1A1A1A;   /* Deep body black */
+  --kf-black-soft:    #2A2A2A;
+  --kf-black-muted:   #3D3D3D;
+
+  --kf-cream:         #F5F2E8;   /* Creamy white background */
+  --kf-cream-dark:    #EDE9D8;
+  --kf-cream-card:    #FFFFFF;
+
+  --kf-blue-pale:     #A8C9E8;   /* Accent: Pale blue */
+  --kf-blue-soft:     #D0E8F5;
+
+  /* ─── Semantic UI Colors ───────────────────────────────── */
+  --color-bg:           var(--kf-cream);
+  --color-bg-alt:       var(--kf-cream-dark);
+  --color-surface:      var(--kf-cream-card);
+  --color-surface-2:    #F9F7EF;
+  --color-border:       rgba(26, 26, 26, 0.1);
+  --color-border-strong:rgba(26, 26, 26, 0.2);
+
+  --color-primary:      var(--kf-lime);
+  --color-primary-light:var(--kf-lime-light);
+  --color-primary-dark: var(--kf-lime-dark);
+  --color-primary-muted:var(--kf-lime-muted);
+
+  --color-text-primary: var(--kf-black);
+  --color-text-secondary:#4A4A4A;
+  --color-text-muted:   #7A7A7A;
+  --color-text-inverse: #FFFFFF;
+
+  /* ─── Tag / Status Colors ──────────────────────────────── */
+  --tag-exam:           #FF6B6B;
+  --tag-exam-bg:        rgba(255, 107, 107, 0.12);
+  --tag-new:            #4ECDC4;
+  --tag-new-bg:         rgba(78, 205, 196, 0.12);
+  --tag-important:      #FFD93D;
+  --tag-important-bg:   rgba(255, 217, 61, 0.15);
+  --tag-split:          #A78BFA;
+  --tag-split-bg:       rgba(167, 139, 250, 0.12);
+  --tag-warning:        #FF8C42;
+  --tag-warning-bg:     rgba(255, 140, 66, 0.12);
+  --tag-success:        #52C98A;
+  --tag-success-bg:     rgba(82, 201, 138, 0.12);
+
+  /* ─── Subject Colors (each subject has a unique accent) ── */
+  --subj-oral-path:     #E8A0BF;  /* dusty pink */
+  --subj-gen-surgery:   #FF8C42;  /* warm orange */
+  --subj-medicine:      #52C98A;  /* emerald */
+  --subj-cons:          #4ECDC4;  /* teal */
+  --subj-crown:         #A78BFA;  /* lavender */
+  --subj-prostho:       #FFD93D;  /* amber */
+  --subj-prevention:    #B4D455;  /* lime (main brand) */
+  --subj-perio:         #FF6B6B;  /* coral */
+  --subj-oral-surg:     #5BA4CF;  /* sky blue */
+  --subj-oral-med:      #E8845C;  /* terracotta */
+  --subj-ortho:         #82C0CC;  /* muted cyan */
+  --subj-pedo:          #F7B2BD;  /* soft rose */
+
+  /* ─── Typography ───────────────────────────────────────── */
+  --font-primary:     'Outfit', 'Segoe UI', sans-serif;
+  --font-arabic:      'Noto Kufi Arabic', 'Cairo', 'Segoe UI', sans-serif;
+  --font-mono:        'JetBrains Mono', 'Courier New', monospace;
+
+  --fs-xs:   0.688rem;  /* 11px */
+  --fs-sm:   0.813rem;  /* 13px */
+  --fs-base: 0.938rem;  /* 15px */
+  --fs-md:   1.063rem;  /* 17px */
+  --fs-lg:   1.25rem;   /* 20px */
+  --fs-xl:   1.5rem;    /* 24px */
+  --fs-2xl:  1.875rem;  /* 30px */
+  --fs-3xl:  2.25rem;   /* 36px */
+
+  --fw-normal:  400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+  --fw-black:   800;
+
+  --lh-tight:   1.2;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.75;
+
+  /* ─── Spacing Scale ────────────────────────────────────── */
+  --space-1:  0.25rem;   /* 4px  */
+  --space-2:  0.5rem;    /* 8px  */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+
+  /* ─── Border Radius ────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   24px;
+  --radius-2xl:  32px;
+  --radius-full: 9999px;
+
+  /* ─── Shadows ───────────────────────────────────────────── */
+  --shadow-xs:  0 1px 2px rgba(26,26,26,0.05);
+  --shadow-sm:  0 2px 8px rgba(26,26,26,0.07);
+  --shadow-md:  0 4px 16px rgba(26,26,26,0.09);
+  --shadow-lg:  0 8px 32px rgba(26,26,26,0.12);
+  --shadow-xl:  0 16px 48px rgba(26,26,26,0.15);
+  --shadow-lime:0 4px 20px rgba(180,212,85,0.30);
+  --shadow-card:0 2px 12px rgba(26,26,26,0.07), 0 1px 3px rgba(26,26,26,0.05);
+
+  /* ─── Transitions ──────────────────────────────────────── */
+  --transition-fast:    100ms ease-out;
+  --transition-base:    180ms ease-out;
+  --transition-smooth:  280ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-bounce:  400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-page:    220ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ─── Z-Index Scale ────────────────────────────────────── */
+  --z-below:   -1;
+  --z-base:     0;
+  --z-raised:   10;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+  --z-splash:   999;
+
+  /* ─── Layout ───────────────────────────────────────────── */
+  --nav-width:        260px;
+  --nav-width-collapsed: 70px;
+  --topbar-height:    64px;
+  --bottom-nav-height:70px;
+  --content-max-width:1200px;
+  --card-min-width:   220px;
+}
+
+/* ─── Dark Academic Theme (stub — future) ──────────────── */
+[data-theme="dark"] {
+  --color-bg:           #0F0F12;
+  --color-bg-alt:       #1A1A1F;
+  --color-surface:      #1E1E24;
+  --color-surface-2:    #26262E;
+  --color-border:       rgba(255,255,255,0.08);
+  --color-border-strong:rgba(255,255,255,0.15);
+  --color-text-primary: #F0EDDF;
+  --color-text-secondary:#B8B4A8;
+  --color-text-muted:   #7A7870;
+  --shadow-card:        0 2px 12px rgba(0,0,0,0.35);
+}
+
+/* ─── Girls Theme (stub — future) ──────────────────────── */
+[data-theme="girls"] {
+  --color-primary:      #F7A8C4;
+  --color-primary-light:#FBCAD8;
+  --color-bg:           #FFF5F8;
+}
+
+/* ─── Night Theme (stub — future) ──────────────────────── */
+[data-theme="night"] {
+  --color-bg:           #0D1117;
+  --color-surface:      #161B22;
+  --color-primary:      #7EE7B8;
+}

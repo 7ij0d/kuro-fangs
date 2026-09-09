@@ -1,0 +1,60 @@
+{
+  "departments": [
+    {
+      "id": "cons",
+      "name_ar": "طب الأسنان التحفظي (Conservative)",
+      "icon": "🔬",
+      "color": "#4ECDC4",
+      "description": "متطلبات تحضير التجاويف والحشوات على الفانتوم هيد (Phantom Head)",
+      "items": [
+        { "id": "cons_cl1_molar", "name": "Class I Cavity — Molar (Amalgam)", "target": 5, "unit": "تجاويف", "notes": "عمق 1.5 - 2 ملم مع الحفاظ على الـ Marginal Ridges" },
+        { "id": "cons_cl1_premolar", "name": "Class I Cavity — Premolar", "target": 4, "unit": "تجاويف", "notes": "شكل الفراشة مع تجنب الـ Transverse Ridge في Lower 4" },
+        { "id": "cons_cl2_premolar", "name": "Class II MO/DO — Premolar", "target": 4, "unit": "تجاويف", "notes": "Proximal box بعمق تحت نقطة التماس وبزاوية 90 درجة" },
+        { "id": "cons_cl2_molar", "name": "Class II MOD — Molar", "target": 3, "unit": "تجاويف", "notes": "تحضير مزدوج مع الحفاظ على Cusp tips" },
+        { "id": "cons_cl5", "name": "Class V Cavity", "target": 3, "unit": "تجاويف", "notes": "Kidney shape عند عنق السن للكومبوزيت أو الأملغم" },
+        { "id": "cons_amalgam_condense", "name": "Amalgam Restoration & Carving", "target": 4, "unit": "حشوات", "notes": "تكثيف ونحت الأملغم مع ضبط الـ Anatomy" },
+        { "id": "cons_composite_ant", "name": "Composite Restoration (Class III / IV)", "target": 3, "unit": "حشوات", "notes": "تخريش وحفر بيفل وبناء طبقي مع التصليد الضوئي" }
+      ]
+    },
+    {
+      "id": "crown",
+      "name_ar": "التيجان والجسور (Crown & Bridge)",
+      "icon": "👑",
+      "color": "#A78BFA",
+      "description": "متطلبات تحضير الأسنان وخطوط الإنهاء لتعويضات الأسنان الثابتة",
+      "items": [
+        { "id": "cb_full_metal", "name": "Full Cast Metal Crown — Lower Molar", "target": 3, "unit": "تحضيرات", "notes": "تقليل إطباقي 1.5 ملم مع Chamfer finish line متجانس" },
+        { "id": "cb_pfm_anterior", "name": "PFM Crown — Upper Central Incisor", "target": 4, "unit": "تحضيرات", "notes": "Shoulder finish line دهليزياً و Chamfer لسانياً" },
+        { "id": "cb_pfm_posterior", "name": "PFM Crown — Upper Premolar", "target": 3, "unit": "تحضيرات", "notes": "مساحة كافية للمعدن والخزف (2 ملم إطباقياً)" },
+        { "id": "cb_temp_crown", "name": "Provisional / Temporary Crown", "target": 3, "unit": "تيجان", "notes": "صناعة تاج مؤقت بـ Acryl مع تشطيب ونعومة الأطراف" },
+        { "id": "cb_impression", "name": "Elastomeric Impression (Putty / Light Body)", "target": 2, "unit": "طبعات", "notes": "طبعة دقيقة تُظهر خط الإنهاء بدون فقاعات هواء" }
+      ]
+    },
+    {
+      "id": "prostho",
+      "name_ar": "الاستعاضة المتحركة (Prosthodontics)",
+      "icon": "🦷",
+      "color": "#FFD93D",
+      "description": "خطوات تصنيع أطقم الأسنان الكاملة والجزئية في المعمل",
+      "items": [
+        { "id": "pros_primary_imp", "name": "Primary Casts & Study Models", "target": 2, "unit": "كاستات", "notes": "صب طبعات الألجينات بحجر الجبس والتنظيف والتسطيح" },
+        { "id": "pros_special_tray", "name": "Special Tray (Maxillary & Mandibular)", "target": 2, "unit": "طوابع", "notes": "عمل طابع خاص بأبعاد 2 ملم قبل الـ Sulcus مع Stop" },
+        { "id": "pros_bite_rims", "name": "Occlusion Rims (Wax Blocks)", "target": 2, "unit": "ارتفاعات", "notes": "أبعاد الشمع 22 ملم أمامياً و 18 ملم خلفياً للعلوي" },
+        { "id": "pros_teeth_arrange", "name": "Complete Denture Teeth Arrangement (Class I)", "target": 2, "unit": "أطقم", "notes": "رص الأسنان الأمامية والخلفية وتطبيق الـ Compensating Curves" },
+        { "id": "pros_waxup", "name": "Festooning & Final Wax-up", "target": 2, "unit": "نحت", "notes": "تشكيل اللثة الشمعية ومحاكاة الجذور قبل خطوة الطبخ" }
+      ]
+    },
+    {
+      "id": "labs",
+      "name_ar": "المعامل الطبية (Patho, Micro & Pharma)",
+      "icon": "🧪",
+      "color": "#FF6B6B",
+      "description": "متطلبات الحضور والشرائح المعملية والتجارب",
+      "items": [
+        { "id": "lab_patho_slides", "name": "Histopathology Slide Identification", "target": 10, "unit": "شرائح", "notes": "التعرف على شرائح الالتهاب والأورام والأنسجة الحبيبية" },
+        { "id": "lab_micro_stains", "name": "Gram Stain & Bacterial Morphology", "target": 5, "unit": "تجارب", "notes": "صبغة غرام والتعرف على البكتيريا الكروية والعصوية" },
+        { "id": "lab_pharma_presc", "name": "Dental Prescription Writing", "target": 6, "unit": "وصفات", "notes": "كتابة وصفات المضادات الحيوية والمسكنات وجرعات الأطفال" }
+      ]
+    }
+  ]
+}
