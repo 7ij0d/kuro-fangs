@@ -1,86 +1,80 @@
 /* ==========================================================================
-   KURO FANGS — LOCK-IN DESIGN TOKENS
-   Theme: Midnight Obsidian & Warm Amber/Gold (#F59E0B)
-   Inspired by Lock-in SaaS aesthetic
+   KURO FANGS — DESIGN TOKENS (ROYAL BURGUNDY THEME)
+   Dental College Platform — Year 3
+   Luxury Academic Aesthetic: Burgundy (#881337) on Crisp Modern Canvas
    ========================================================================== */
 
 :root {
-  /* Surface & Backgrounds (Deep Midnight Slate) */
-  --bg-app: #080C14;
-  --bg-surface: #0E1424;
-  --bg-surface-subtle: #141C30;
-  --bg-card: #12192B;
-  --bg-card-subtle: #172036;
-  --bg-hover: #1C263E;
-  --bg-active: rgba(245, 158, 11, 0.12);
-  --bg-input: #0B101D;
-  
-  /* Amber & Gold Accents (Lock-in Theme) */
-  --brand-primary: #F59E0B;
-  --brand-primary-hover: #D97706;
-  --brand-gold: #FBBF24;
-  --brand-amber: #D97706;
-  --brand-primary-light: rgba(245, 158, 11, 0.14);
-  --brand-primary-border: rgba(245, 158, 11, 0.35);
-  --brand-glow: 0 4px 20px rgba(245, 158, 11, 0.22);
-  --brand-glow-lg: 0 8px 30px rgba(245, 158, 11, 0.3);
+  /* Surfaces & Backgrounds */
+  --bg-app: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FFFFFF;
+  --bg-hover: #F8FAFC;
+  --bg-input: #FFFFFF;
 
-  /* Academic Green Accent (Legacy Kuro Fangs element) */
-  --academic-green: #10B981;
-  --academic-green-light: rgba(16, 185, 129, 0.15);
+  /* Royal Burgundy Primary (#881337 / #800020) */
+  --brand-burgundy: #881337;
+  --brand-burgundy-hover: #4C0519;
+  --brand-burgundy-deep: #4C0519;
+  --brand-burgundy-light: #FFF1F2;
+  --brand-burgundy-surface: #FDF2F4;
+  --brand-burgundy-border: #FDA4AF;
+  --brand-burgundy-glow: 0 4px 20px rgba(136, 19, 55, 0.18);
+  --brand-burgundy-gradient: linear-gradient(135deg, #9F1239 0%, #881337 50%, #4C0519 100%);
 
-  /* Neutrals & Typography */
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --text-inverted: #080C14;
-  
-  /* Glassmorphic Borders & Dividers */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-card: rgba(255, 255, 255, 0.09);
-  --border-card-hover: rgba(245, 158, 11, 0.4);
-  --border-focus: #F59E0B;
+  /* Neutrals & Text */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverted: #FFFFFF;
 
-  /* Metric Badges (Exact match to Lock-in screenshot) */
-  --badge-done-bg: rgba(16, 185, 129, 0.16);
-  --badge-done-text: #34D399;
-  --badge-done-border: rgba(16, 185, 129, 0.3);
+  /* Borders & Dividers */
+  --border-subtle: #E2E8F0;
+  --border-card: #E2E8F0;
+  --border-card-hover: #FDA4AF;
+  --border-focus: #881337;
 
-  --badge-saved-bg: rgba(139, 92, 246, 0.16);
-  --badge-saved-text: #A78BFA;
-  --badge-saved-border: rgba(139, 92, 246, 0.3);
+  /* Status Accents (Carefully balanced) */
+  --color-success: #059669;
+  --color-success-bg: #ECFDF5;
+  --color-success-border: #A7F3D0;
 
-  --badge-due-bg: rgba(245, 158, 11, 0.16);
-  --badge-due-text: #FBBF24;
-  --badge-due-border: rgba(245, 158, 11, 0.3);
+  --color-warning: #D97706;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-border: #FDE68A;
 
-  --badge-live-bg: rgba(34, 197, 94, 0.16);
-  --badge-live-text: #4ADE80;
-  --badge-live-border: rgba(34, 197, 94, 0.3);
+  --color-info: #0284C7;
+  --color-info-bg: #F0F9FF;
+  --color-info-border: #BAE6FD;
+
+  --color-purple: #7C3AED;
+  --color-purple-bg: #F5F3FF;
+  --color-purple-border: #DDD6FE;
 
   /* Elevation & Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.45);
-  --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.6);
-  --shadow-glow-amber: 0 0 25px rgba(245, 158, 11, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 3px 12px rgba(15, 23, 42, 0.05);
+  --shadow-card-hover: 0 10px 28px rgba(136, 19, 55, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
 
   /* Radius */
   --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-card: 18px;
-  --radius-xl: 24px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-card: 20px;
+  --radius-modal: 24px;
   --radius-pill: 9999px;
 
   /* Typography */
-  --font-arabic: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+  --font-arabic: 'Tajawal', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Layout Spacing */
-  --sidebar-width: 240px;
-  --header-height: 64px;
-  --container-max: 1340px;
-  
+  --header-height: 70px;
+  --container-max: 1280px;
+
   /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-base: 0.25s ease-in-out;

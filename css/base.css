@@ -1,9 +1,9 @@
 /* ==========================================================================
-   KURO FANGS — BASE STYLES & RESET (LOCK-IN DARK LUXURY)
-   Direction: RTL | Arabic: IBM Plex Sans Arabic & Tajawal
+   KURO FANGS — BASE STYLES & RESET (BURGUNDY THEME)
+   Direction: RTL | Arabic: Tajawal & IBM Plex Sans Arabic
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800;900&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -15,7 +15,6 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  background-color: var(--bg-app);
 }
 
 body {
@@ -38,20 +37,20 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
 }
 
-h1 { font-size: 1.65rem; letter-spacing: -0.02em; }
-h2 { font-size: 1.35rem; letter-spacing: -0.01em; }
-h3 { font-size: 1.1rem; }
-h4 { font-size: 0.95rem; }
+h1 { font-size: 1.85rem; letter-spacing: -0.02em; font-weight: 800; }
+h2 { font-size: 1.45rem; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1rem; }
 
 p {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.925rem;
 }
 
 a {
   color: inherit;
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 img, svg {
@@ -69,55 +68,61 @@ button {
 
 input, select, textarea {
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.925rem;
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background-color: var(--bg-input);
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  border-color: var(--brand-burgundy);
+  box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.12);
 }
 
 /* ==========================================================================
-   BUTTONS (Including the signature Lock-in Gold Pill button)
+   BUTTONS (Burgundy Theme)
    ========================================================================== */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  padding: 8px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 10px 20px;
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
   text-decoration: none;
   white-space: nowrap;
 }
 
-/* Lock-in Gold Action Button (like "Browse materials") */
-.btn-gold {
-  background: var(--brand-gold);
-  color: #080C14;
-  font-weight: 700;
-  border-radius: var(--radius-pill);
-  padding: 10px 22px;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+.btn-burgundy {
+  background: var(--brand-burgundy);
+  color: #FFFFFF;
+  box-shadow: var(--brand-burgundy-glow);
 }
 
-.btn-gold:hover {
-  background: #FCD34D;
+.btn-burgundy:hover {
+  background: var(--brand-burgundy-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 6px 22px rgba(136, 19, 55, 0.28);
+}
+
+.btn-soft-burgundy {
+  background: var(--brand-burgundy-light);
+  color: var(--brand-burgundy);
+  border: 1px solid var(--brand-burgundy-border);
+}
+
+.btn-soft-burgundy:hover {
+  background: #FFE4E6;
 }
 
 .btn-secondary {
-  background: var(--bg-card);
+  background: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
 }
@@ -127,95 +132,42 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--text-muted);
 }
 
-.btn-soft {
-  background: var(--brand-primary-light);
-  color: var(--brand-gold);
-  border: 1px solid var(--brand-primary-border);
-}
-
-.btn-soft:hover {
-  background: rgba(245, 158, 11, 0.22);
-}
-
-/* Keyboard Shortcut Badge `<kbd>` */
-kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: var(--text-secondary);
-  line-height: 1;
-}
-
-/* Status Badges */
+/* Badges */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.725rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
   line-height: 1;
-  letter-spacing: 0.02em;
 }
 
-.badge-done {
-  background: var(--badge-done-bg);
-  color: var(--badge-done-text);
-  border: 1px solid var(--badge-done-border);
+.badge-burgundy {
+  background: var(--brand-burgundy-light);
+  color: var(--brand-burgundy);
+  border: 1px solid var(--brand-burgundy-border);
 }
 
-.badge-saved {
-  background: var(--badge-saved-bg);
-  color: var(--badge-saved-text);
-  border: 1px solid var(--badge-saved-border);
-}
-
-.badge-due {
-  background: var(--badge-due-bg);
-  color: var(--badge-due-text);
-  border: 1px solid var(--badge-due-border);
-}
-
-.badge-live {
-  background: var(--badge-live-bg);
-  color: var(--badge-live-text);
-  border: 1px solid var(--badge-live-border);
-}
-
-/* Pulsing Live Dot Animation */
-.live-pulse-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--badge-live-text);
-  box-shadow: 0 0 8px var(--badge-live-text);
-  animation: livePulse 1.8s infinite ease-in-out;
-}
-
-@keyframes livePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.3); }
+.badge-gray {
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #CBD5E1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 158, 11, 0.4);
+  background: var(--brand-burgundy-border);
 }
