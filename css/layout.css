@@ -157,6 +157,22 @@ html[dir="rtl"] .app-sidebar {
   height: 18px;
 }
 
+.sidebar-cat-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  display: block;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sidebar-menu-item:hover .sidebar-cat-icon,
+.sidebar-menu-item.active .sidebar-cat-icon {
+  border-color: #BE123C;
+  transform: scale(1.15);
+}
+
 .sidebar-menu-text {
   flex: 1;
   white-space: nowrap;

@@ -66,7 +66,7 @@ const SubjectModal = {
         id: 'sheets',
         title: t('catSheets'),
         desc: t('catSheetsDesc'),
-        icon: '📄'
+        icon: '<img src="assets/icons/sheets_cat.png" alt="Sheets & Lectures" class="sheets-cat-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />'
       },
       {
         id: 'recordings',
@@ -270,7 +270,7 @@ const SubjectModal = {
               <!-- Top: Type Badge + Lecture Title -->
               <div class="modal-file-top">
                 <span class="sheet-type-pill">
-                  <i data-lucide="file-text" style="width: 12px; height: 12px;"></i>
+                  <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 4px;" />
                   ${item.type || 'PDF Sheet'}
                 </span>
                 <h3 class="modal-file-title">${item.title}</h3>

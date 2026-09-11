@@ -58,7 +58,8 @@ const SheetDetailPage = {
       <div class="sheet-detail-wrapper">
         <!-- Breadcrumb / Back Link -->
         <div class="sheet-detail-back-bar">
-          <a href="#/sheets" class="btn btn-secondary btn-sm">
+          <a href="#/sheets" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 8px;">
+            <img src="assets/icons/sheets_cat.png" alt="Sheets" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-subtle);" />
             <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 14px; height: 14px;"></i>
             <span>${isAr ? 'العودة لكافة الشيتات والمحاضرات' : 'Back to all Lectures'}</span>
           </a>
@@ -69,8 +70,8 @@ const SheetDetailPage = {
           <!-- Top Section: Type Badge + Lecture Title -->
           <div class="sheet-card-top">
             <div class="sheet-badge-group">
-              <span class="sheet-type-pill">
-                <i data-lucide="file-text" style="width: 13px; height: 13px;"></i>
+              <span class="sheet-type-pill" style="display: inline-flex; align-items: center; gap: 6px;">
+                <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover;" />
                 ${fileType}
               </span>
               <span class="sheet-verified-pill">
@@ -136,7 +137,7 @@ const SheetDetailPage = {
         <div class="sheet-inapp-viewer-container">
           <div class="inapp-viewer-toolbar">
             <div class="viewer-toolbar-info">
-              <i data-lucide="file-check" style="color: #10B981; width: 18px; height: 18px;"></i>
+              <img src="assets/icons/sheets_cat.png" alt="Sheets" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1.5px solid #10B981;" />
               <span class="viewer-toolbar-title">${isAr ? 'مُشاهد PDF المباشر — مطالعة فورية دون تنزيل' : 'Direct In-App Document Reader — Read without downloading'}</span>
             </div>
 

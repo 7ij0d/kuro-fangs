@@ -423,7 +423,7 @@ const HomePage = {
               <!-- Content Breakdown Badges (Dynamic from real data: 0 lectures • 0 summaries • 0 exams) -->
               <div class="card-stats-badges">
                 <span class="card-stat-pill">
-                  <i data-lucide="file-text"></i>
+                  <img src="assets/icons/sheets_cat.png" alt="Lectures" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover;" />
                   ${lecturesCount} ${t('lectures')}
                 </span>
                 <span class="card-stat-pill">

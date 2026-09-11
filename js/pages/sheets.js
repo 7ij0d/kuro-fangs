@@ -84,8 +84,8 @@ const SheetsPage = {
           <!-- Top: Type Badge + Lecture Title -->
           <div class="sheet-card-top">
             <div class="sheet-badge-group">
-              <span class="sheet-type-pill">
-                <i data-lucide="file-text" style="width: 12px; height: 12px;"></i>
+              <span class="sheet-type-pill" style="display: inline-flex; align-items: center; gap: 6px;">
+                <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;" />
                 ${item.type || 'PDF Sheet'}
               </span>
               <span class="sheet-verified-pill">
@@ -196,7 +196,7 @@ const SheetsPage = {
       <div class="page-title-bar">
         <div class="page-title-group">
           <h1>
-            <i data-lucide="file-text" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
+            <img src="assets/icons/sheets_cat.png" alt="Sheets & Lectures" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1.5px solid var(--border-subtle);" />
             ${isAr ? 'المحاضرات والملازم الدراسية' : 'Lectures & Study Sheets'}
           </h1>
           <p>${isAr ? 'شيتات وتفريغات مواد السنة الثالثة طب وجراحة الفم والأسنان بصيغة PDF' : 'Third Year Dental Surgery lecture notes, handouts, and official transcripts'}</p>
