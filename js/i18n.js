@@ -68,16 +68,16 @@ class I18nManager {
         academicYear: 'Year 3 — Faculty of Dentistry',
 
         // Fox Mascot Skins Hub
-        foxSkinsHubTitle: 'Fox Mascot Skins Hub (6 Mascots)',
-        foxSkinsHubSubtitle: 'Unlock, equip, and customize your official dental mascots using earned academic points',
+        foxSkinsHubTitle: 'Fox Mascot Skins & Site Themes (4 Mascots)',
+        foxSkinsHubSubtitle: 'Unlock and equip the 4 official dental mascots; each skin transforms the full site-wide theme',
         myAcademicBalance: 'My Academic Points',
-        equippedActive: '✓ Currently Equipped',
-        equipAction: 'Equip Mascot',
+        equippedActive: '✓ Active Skin & Theme',
+        equipAction: 'Equip Skin & Theme',
         unlockAction: 'Unlock Skin',
         lockedPoints: 'Locked',
         freeDefault: 'Free (Default)',
-        equippedSuccess: 'Mascot skin equipped successfully! Avatars updated.',
-        unlockedSuccess: 'Congratulations! New Fox Mascot skin unlocked and equipped!',
+        equippedSuccess: 'Mascot skin equipped & full site theme activated successfully! 🦊✨',
+        unlockedSuccess: 'Congratulations! New Fox Mascot skin unlocked, equipped, and theme activated!',
         notEnoughPoints: 'Not enough academic points to unlock this skin.',
 
 
@@ -173,16 +173,16 @@ class I18nManager {
         academicYear: 'السنة الثالثة — كلية طب الأسنان',
 
         // Fox Mascot Skins Hub
-        foxSkinsHubTitle: 'متجر سكنات وشخصيات الثعلب الـ 6',
-        foxSkinsHubSubtitle: 'فتح وتجهيز وتخصيص شخصيات وتمائم الثعلب الرسمية باستخدام نقاطك الأكاديمية',
+        foxSkinsHubTitle: 'متجر سكنات الثعلب الـ 4 وثيمات المنصة',
+        foxSkinsHubSubtitle: 'افتح شخصيات الثعلب الـ 4 الرسمية؛ كل سكن يحول مظهر وثيم الموقع بالكامل فور ارتدائه',
         myAcademicBalance: 'رصيدي الأكاديمي',
-        equippedActive: '✓ مُرتدى حالياً',
-        equipAction: 'ارتداء السكن',
+        equippedActive: '✓ السكن والثيم النشط حالياً',
+        equipAction: 'ارتداء السكن وتفعيل الثيم',
         unlockAction: 'فتح السكن',
         lockedPoints: 'مقفل',
         freeDefault: 'مجاناً (الافتراضي)',
-        equippedSuccess: 'تم ارتداء سكن الثعلب وتحديث جميع الواجهات بنجاح!',
-        unlockedSuccess: 'مبارك! تم فتح السكن وارتداؤه بنجاح!',
+        equippedSuccess: 'تم ارتداء سكن الثعلب وتفعيل الثيم الشامل للموقع بنجاح! 🦊✨',
+        unlockedSuccess: 'مبارك! تم فتح السكن وتجهيزه وتفعيل ثيمه الجديد بنجاح!',
         notEnoughPoints: 'عذراً، رصيدك من النقاط الأكاديمية لا يكفي لفتح هذا السكن.',
 
 

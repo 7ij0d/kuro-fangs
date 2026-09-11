@@ -5,75 +5,67 @@
 const FOX_SKINS = [
   {
     id: 'fox_skin_1',
+    theme: 'classic',
     name_en: 'Classic Kuro Fox',
     name_ar: 'الثعلب الكلاسيكي',
     cost: 0,
     isFree: true,
     image: 'assets/fox_skins/fox_skin_1.jpg',
-    tag_en: 'Default Mascot',
-    tag_ar: 'الافتراضي - مجاناً',
-    desc_en: 'The official original mascot for Kuro Fangs dental students.',
-    desc_ar: 'التميمة الأصلية الرسمية المعتمدة لدفعة طب وجراحة الفم والأسنان.'
+    tag_en: 'Royal Burgundy Academia',
+    tag_ar: 'البرغندي الملكي الأكاديمي',
+    theme_name_ar: 'ثيم البرغندي الملكي الفاتح',
+    theme_name_en: 'Classic Royal Burgundy Theme',
+    theme_colors: ['#881337', '#BE123C', '#F5F8FA'],
+    desc_en: 'The official original mascot for Kuro Fangs dental students. Unlocks the iconic Royal Burgundy academia light theme.',
+    desc_ar: 'التميمة الأصلية الرسمية المعتمدة لدفعة طب وجراحة الفم والأسنان. تفعّل ثيم البرغندي الملكي الأكاديمي الأصيل.'
   },
   {
     id: 'fox_skin_2',
+    theme: 'surgeon',
     name_en: 'Surgeon Fox',
     name_ar: 'الثعلب الجراح',
     cost: 40,
     isFree: false,
     image: 'assets/fox_skins/fox_skin_2.jpg',
-    tag_en: 'Surgical & Phantom',
-    tag_ar: 'جراحة وفانتوم',
-    desc_en: 'Equipped with sterile surgical scrubs, gloves, and clinical precision.',
-    desc_ar: 'جاهز للعمليات الجراحية في العيادات ومعامل الفانتوم بدقة متناهية.'
+    tag_en: 'Clinical & Surgical',
+    tag_ar: 'أزرق سريري ونعناعي',
+    theme_name_ar: 'ثيم العيادات والأزرق السريري',
+    theme_name_en: 'Clinical & Surgical Teal Theme',
+    theme_colors: ['#0284C7', '#0D9488', '#F0F7FB'],
+    desc_en: 'Equipped with sterile surgical scrubs and clinical precision. Transforms the site into a modern clinical medical-blue and mint theme.',
+    desc_ar: 'جاهز للعمليات الجراحية في العيادات ومعامل الفانتوم بدقة متناهية. يحول واجهة الموقع لثيم أزرق سريري وأخضر جراحي منعش.'
   },
   {
     id: 'fox_skin_3',
+    theme: 'ninja',
     name_en: 'Study Ninja Fox',
-    name_ar: 'الثعلب النينجا للمذاكرة',
+    name_ar: 'ثعلب النينجا للمذاكرة',
     cost: 45,
     isFree: false,
     image: 'assets/fox_skins/fox_skin_3.jpg',
-    tag_en: 'Hyper Focus',
-    tag_ar: 'تركيز فائق وسرعة',
-    desc_en: 'Stealth speed and razor-sharp focus for all-night cram sessions.',
-    desc_ar: 'سرعة خاطفة في إنجاز الشيتات وسحق ليلة الامتحان بتركيز نينجا لا يهدأ.'
+    tag_en: 'Nocturnal Study',
+    tag_ar: 'ثيم ليلي متوهج فائق التركيز',
+    theme_name_ar: 'ثيم النينجا الليلي المتوهج',
+    theme_name_en: 'Nocturnal Cyber Violet Theme',
+    theme_colors: ['#8B5CF6', '#06B6D4', '#0B0F19'],
+    desc_en: 'Stealth speed and razor-sharp focus for all-night cram sessions. Activates a focused nocturnal dark theme with electric violet & cyan glow.',
+    desc_ar: 'سرعة خاطفة في إنجاز الشيتات وسحق ليلة الامتحان بتركيز نينجا لا يهدأ. يفعّل ثيماً مظلماً هادئاً للمذاكرة الليلية بإضاءات بنفسجية ونيون.'
   },
   {
     id: 'fox_skin_4',
-    name_en: 'Smart Scholar Fox',
-    name_ar: 'الثعلب الأكاديمي الذكي',
+    theme: 'scholar',
+    name_en: 'Academic Scholar',
+    name_ar: 'المتفوق الأكاديمي',
     cost: 50,
     isFree: false,
     image: 'assets/fox_skins/fox_skin_4.jpg',
     tag_en: 'Academic Pro',
-    tag_ar: 'أكاديمي متفوق',
-    desc_en: 'Armed with dental textbooks, high-yield notes, and top GPA power.',
-    desc_ar: 'حامل مذكرات الأسنان والمراجع العلمية وصاحب المعدلات التراكمية العليا.'
-  },
-  {
-    id: 'fox_skin_5',
-    name_en: 'Royal Professor Fox',
-    name_ar: 'الثعلب البروفيسور الملكي',
-    cost: 55,
-    isFree: false,
-    image: 'assets/fox_skins/fox_skin_5.jpg',
-    tag_en: 'Consultant Tier',
-    tag_ar: 'بروفيسور استشاري',
-    desc_en: 'Distinguished royal robe representing mastery of oral pathology and surgery.',
-    desc_ar: 'رداء الأستاذ الجامعي الفخم وخبرة السنين في طب الفم والتشخيص المتقدم.'
-  },
-  {
-    id: 'fox_skin_6',
-    name_en: 'Cyber Night Fox',
-    name_ar: 'الثعلب السايبر الليلي',
-    cost: 60,
-    isFree: false,
-    image: 'assets/fox_skins/fox_skin_6.jpg',
-    tag_en: 'Cyber Neon',
-    tag_ar: 'سايبر نيون رقمي',
-    desc_en: 'Futuristic neon aesthetics tuned for modern digital dentistry & CAD/CAM.',
-    desc_ar: 'ثعلب رقمي مستقبلي بإضاءات نيون وتقنيات طب الأسنان الرقمية والطباعة ثلاثية الأبعاد.'
+    tag_ar: 'وردي دافئ وكهرمان ذهبي',
+    theme_name_ar: 'ثيم المتفوق الأكاديمي الدافئ',
+    theme_name_en: 'Warm Rose & Amber Scholar Theme',
+    theme_colors: ['#D97706', '#E11D48', '#FFFBF7'],
+    desc_en: 'Armed with dental textbooks, high-yield notes, and top GPA power. Unlocks an elegant warm academia theme in soft rose and amber-gold.',
+    desc_ar: 'حامل مذكرات الأسنان والمراجع العلمية وصاحب المعدلات التراكمية العليا. يفعّل ثيماً أكاديمياً دافئاً وراقياً بلمسات وردية وكهرمانية مريحة للعين.'
   }
 ];
 
@@ -95,22 +87,44 @@ class AppStore {
   }
 
   initDefaults() {
-    // 1. Theme (Default: Clean Light)
-    if (!localStorage.getItem(this.STORAGE_KEYS.THEME)) {
-      localStorage.setItem(this.STORAGE_KEYS.THEME, 'light');
+    // 1. Fox Mascot Skins Hub (Sanitize to 4 Core Skins)
+    const validSkinIds = ['fox_skin_1', 'fox_skin_2', 'fox_skin_3', 'fox_skin_4'];
+    let owned = ['fox_skin_1'];
+    try {
+      const storedOwned = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.OWNED_SKINS));
+      if (Array.isArray(storedOwned)) {
+        owned = storedOwned.filter(id => validSkinIds.includes(id));
+      }
+    } catch (e) {
+      owned = ['fox_skin_1'];
+    }
+    if (!owned.includes('fox_skin_1')) owned.unshift('fox_skin_1');
+    localStorage.setItem(this.STORAGE_KEYS.OWNED_SKINS, JSON.stringify(owned));
+
+    let equipped = localStorage.getItem(this.STORAGE_KEYS.EQUIPPED_SKIN) || 'fox_skin_1';
+    if (!validSkinIds.includes(equipped)) {
+      equipped = 'fox_skin_1';
+      localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, equipped);
     }
 
-    // 2. Language (Default: English)
+    // 2. Site-wide Theme (Coupled to equipped mascot skin or saved theme)
+    const skinData = this.getSkinById(equipped) || FOX_SKINS[0];
+    const savedTheme = localStorage.getItem(this.STORAGE_KEYS.THEME);
+    const initialTheme = savedTheme || (skinData ? skinData.theme : 'classic');
+    localStorage.setItem(this.STORAGE_KEYS.THEME, initialTheme);
+    document.documentElement.setAttribute('data-theme', initialTheme);
+
+    // 3. Language (Default: English)
     if (!localStorage.getItem(this.STORAGE_KEYS.LANG)) {
       localStorage.setItem(this.STORAGE_KEYS.LANG, 'en');
     }
 
-    // 3. Points
+    // 4. Points
     if (localStorage.getItem(this.STORAGE_KEYS.POINTS) === null) {
       localStorage.setItem(this.STORAGE_KEYS.POINTS, '25');
     }
 
-    // 4. Favorites
+    // 5. Favorites
     if (!localStorage.getItem(this.STORAGE_KEYS.FAVORITES)) {
       localStorage.setItem(this.STORAGE_KEYS.FAVORITES, JSON.stringify([
         { id: 'sh-1', title: 'Local Anesthesia Techniques & Landmarks', type: 'sheet', subject_name: 'OMFS I' },
@@ -118,7 +132,7 @@ class AppStore {
       ]));
     }
 
-    // 5. Notes
+    // 6. Notes
     if (!localStorage.getItem(this.STORAGE_KEYS.NOTES)) {
       localStorage.setItem(this.STORAGE_KEYS.NOTES, JSON.stringify([
         {
@@ -131,21 +145,13 @@ class AppStore {
       ]));
     }
 
-    // 6. User Info
+    // 7. User Info
     if (!localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) {
       localStorage.setItem(this.STORAGE_KEYS.USER_INFO, JSON.stringify({
         name: 'Kuro Student',
         title: 'Year 3 Dental Student',
         avatarText: 'K'
       }));
-    }
-
-    // 7. Fox Mascot Skins Hub
-    if (!localStorage.getItem(this.STORAGE_KEYS.OWNED_SKINS)) {
-      localStorage.setItem(this.STORAGE_KEYS.OWNED_SKINS, JSON.stringify(['fox_skin_1']));
-    }
-    if (!localStorage.getItem(this.STORAGE_KEYS.EQUIPPED_SKIN)) {
-      localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, 'fox_skin_1');
     }
   }
 
@@ -160,13 +166,14 @@ class AppStore {
     });
   }
 
-  // Theme (Light / Dark)
+  // Theme Manager: Supports 4 Mascot Themes (classic, surgeon, ninja, scholar) + light/dark fallbacks
   getTheme() {
-    return localStorage.getItem(this.STORAGE_KEYS.THEME) || 'light';
+    return localStorage.getItem(this.STORAGE_KEYS.THEME) || 'classic';
   }
 
   setTheme(theme) {
-    if (theme !== 'light' && theme !== 'dark') theme = 'light';
+    const validThemes = ['classic', 'surgeon', 'ninja', 'scholar', 'light', 'dark'];
+    if (!validThemes.includes(theme)) theme = 'classic';
     localStorage.setItem(this.STORAGE_KEYS.THEME, theme);
     document.documentElement.setAttribute('data-theme', theme);
     this.notify('theme_changed', theme);
@@ -175,7 +182,7 @@ class AppStore {
 
   toggleTheme() {
     const current = this.getTheme();
-    const next = current === 'dark' ? 'light' : 'dark';
+    const next = (current === 'ninja' || current === 'dark') ? 'classic' : 'ninja';
     return this.setTheme(next);
   }
 
@@ -349,6 +356,11 @@ class AppStore {
     if (!this.isSkinOwned(skinId)) return false;
     localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, skinId);
     const skin = this.getSkinById(skinId);
+
+    // Bind equipped skin directly to the site-wide theme
+    if (skin && skin.theme) {
+      this.setTheme(skin.theme);
+    }
 
     if (typeof window.updateGlobalMascotAvatars === 'function') {
       window.updateGlobalMascotAvatars();

@@ -88,12 +88,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const initialLang = window.I18N.getLang();
   applyLanguage(initialLang);
 
-  // 4. Setup Initial Theme (Light by Default)
+  // 4. Setup Initial Theme
   const applyTheme = (theme) => {
     document.documentElement.setAttribute('data-theme', theme);
     const themeIcon = document.getElementById('theme-icon');
     if (themeIcon) {
-      themeIcon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+      themeIcon.setAttribute('data-lucide', (theme === 'ninja' || theme === 'dark') ? 'sun' : 'moon');
       if (window.lucide) window.lucide.createIcons();
     }
   };
@@ -208,13 +208,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.updateGlobalMascotAvatars = updateGlobalMascotAvatars;
 
-  // 10. Synchronize Points & Mascot Skins
-  window.STORE.subscribe((event) => {
+  // 10. Synchronize Points, Themes & Mascot Skins
+  window.STORE.subscribe((event, data) => {
     if (event === 'points_changed') {
       const pointsEl = document.getElementById('header-points-text');
       if (pointsEl) {
         pointsEl.textContent = `${window.STORE.getPoints()} ${window.I18N.t('pointsSuffix')}`;
       }
+    }
+    if (event === 'theme_changed') {
+      applyTheme(data);
     }
     if (event === 'skin_equipped' || event === 'skins_changed' || event === 'skin_unlocked') {
       updateGlobalMascotAvatars();

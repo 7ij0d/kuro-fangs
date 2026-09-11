@@ -83,53 +83,200 @@
 }
 
 /* ==========================================================================
-   DARK MODE SPECIFICATIONS (data-theme="dark")
-   Background: #151521 | Cards: #1E1E2D | Borders: #2B2B40 | Text: #FFFFFF
+   THEME 1: CLASSIC KURO FOX (data-theme="classic" / default light)
+   Royal Burgundy Academia Palette
    ========================================================================== */
+[data-theme="classic"],
+[data-theme="light"] {
+  --bg-sidebar: #1E1E2D;
+  --bg-sidebar-hover: #252538;
+  --bg-sidebar-active: #2B2B40;
+  --sidebar-text: #9899AC;
+  --sidebar-text-muted: #6B6C80;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-border: #2B2B40;
+  --sidebar-indicator: #BE123C;
+  --sidebar-indicator-glow: 0 0 10px rgba(190, 18, 60, 0.7);
+
+  --bg-app: #F5F8FA;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #EEF3F7;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FFFFFF;
+  --bg-hover: #F1F4F8;
+  --bg-input: #FFFFFF;
+
+  --brand-burgundy: #881337;
+  --brand-burgundy-hover: #5D0C25;
+  --brand-burgundy-light: #FFF1F2;
+  --brand-burgundy-surface: #FDF2F4;
+  --brand-burgundy-border: #FDA4AF;
+  --brand-burgundy-glow: 0 4px 18px rgba(136, 19, 55, 0.16);
+  --brand-burgundy-gradient: linear-gradient(135deg, #A2143D 0%, #881337 50%, #5B0C24 100%);
+  --brand-accent: #BE123C;
+  --brand-primary: #881337;
+
+  --text-primary: #181C32;
+  --text-secondary: #5E6278;
+  --text-muted: #A1A5B7;
+  --text-inverted: #FFFFFF;
+
+  --border-subtle: #E4E6EF;
+  --border-card: #E4E6EF;
+  --border-card-hover: #D1D5E4;
+  --border-focus: #881337;
+
+  --progress-track: #E4E6EF;
+  --progress-fill: #10B981;
+  --progress-fill-accent: #881337;
+}
+
+/* ==========================================================================
+   THEME 2: SURGEON FOX (data-theme="surgeon")
+   Medical Blue & Clinical Mint/Teal Surgical Palette
+   ========================================================================== */
+[data-theme="surgeon"] {
+  --bg-sidebar: #0B1E28;
+  --bg-sidebar-hover: #122B3A;
+  --bg-sidebar-active: #183749;
+  --sidebar-text: #94A3B8;
+  --sidebar-text-muted: #64748B;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-border: #163242;
+  --sidebar-indicator: #0EA5E9;
+  --sidebar-indicator-glow: 0 0 12px rgba(14, 165, 233, 0.7);
+
+  --bg-app: #F0F7FB;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #E2EFF7;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FFFFFF;
+  --bg-hover: #E0F2FE;
+  --bg-input: #FFFFFF;
+
+  --brand-burgundy: #0284C7;
+  --brand-burgundy-hover: #0369A1;
+  --brand-burgundy-light: #E0F2FE;
+  --brand-burgundy-surface: #F0F9FF;
+  --brand-burgundy-border: #7DD3FC;
+  --brand-burgundy-glow: 0 4px 18px rgba(2, 132, 199, 0.2);
+  --brand-burgundy-gradient: linear-gradient(135deg, #0284C7 0%, #0D9488 100%);
+  --brand-accent: #0D9488;
+  --brand-primary: #0284C7;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverted: #FFFFFF;
+
+  --border-subtle: #D2E7F5;
+  --border-card: #D2E7F5;
+  --border-card-hover: #7DD3FC;
+  --border-focus: #0284C7;
+
+  --progress-track: #E2E8F0;
+  --progress-fill: #0D9488;
+  --progress-fill-accent: #0284C7;
+}
+
+/* ==========================================================================
+   THEME 3: NINJA STUDY FOX (data-theme="ninja" / data-theme="dark")
+   Glowing Nocturnal Dark Theme with Electric Violet & Cyber Cyan
+   ========================================================================== */
+[data-theme="ninja"],
 [data-theme="dark"] {
-  --bg-sidebar: #11111B;
-  --bg-sidebar-hover: #1A1A28;
-  --bg-sidebar-active: #222234;
-  --sidebar-border: #1F1F30;
+  --bg-sidebar: #090D16;
+  --bg-sidebar-hover: #111827;
+  --bg-sidebar-active: #1F2937;
+  --sidebar-border: #1F293D;
+  --sidebar-text: #94A3B8;
+  --sidebar-text-muted: #64748B;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-indicator: #8B5CF6;
+  --sidebar-indicator-glow: 0 0 14px rgba(139, 92, 246, 0.8);
 
-  --bg-app: #151521;
-  --bg-surface: #1E1E2D;
-  --bg-surface-subtle: #232336;
-  --bg-card: #1E1E2D;
-  --bg-card-hover: #252538;
-  --bg-hover: #26263A;
-  --bg-input: #151521;
+  --bg-app: #0B0F19;
+  --bg-surface: #111827;
+  --bg-surface-subtle: #162032;
+  --bg-card: #151D2E;
+  --bg-card-hover: #1B253B;
+  --bg-hover: #1F293D;
+  --bg-input: #0F172A;
 
-  /* Burgundy Adjusted for Dark Mode */
-  --brand-burgundy: #BE123C;
-  --brand-burgundy-hover: #E11D48;
-  --brand-burgundy-light: rgba(190, 18, 60, 0.18);
-  --brand-burgundy-surface: rgba(190, 18, 60, 0.12);
-  --brand-burgundy-border: rgba(190, 18, 60, 0.45);
-  --brand-burgundy-glow: 0 4px 22px rgba(190, 18, 60, 0.35);
-  --brand-burgundy-gradient: linear-gradient(135deg, #BE123C 0%, #9F1239 100%);
+  --brand-burgundy: #8B5CF6;
+  --brand-burgundy-hover: #A78BFA;
+  --brand-burgundy-light: rgba(139, 92, 246, 0.18);
+  --brand-burgundy-surface: rgba(139, 92, 246, 0.12);
+  --brand-burgundy-border: rgba(139, 92, 246, 0.45);
+  --brand-burgundy-glow: 0 4px 22px rgba(139, 92, 246, 0.4);
+  --brand-burgundy-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+  --brand-accent: #06B6D4;
+  --brand-primary: #8B5CF6;
 
-  /* Neutrals & Text (Dark Mode) */
-  --text-primary: #FFFFFF;
-  --text-secondary: #92929F;
-  --text-muted: #6D6D80;
-  --text-inverted: #151521;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverted: #0F172A;
 
-  /* Borders (Dark Mode) */
-  --border-subtle: #2B2B40;
-  --border-card: #2B2B40;
-  --border-card-hover: rgba(190, 18, 60, 0.6);
-  --border-focus: #BE123C;
+  --border-subtle: #1F293D;
+  --border-card: #1F293D;
+  --border-card-hover: rgba(139, 92, 246, 0.6);
+  --border-focus: #8B5CF6;
 
-  /* Progress Bar (Dark Mode) */
-  --progress-track: #2B2B40;
+  --progress-track: #1F293D;
+  --progress-fill: #06B6D4;
+  --progress-fill-accent: #8B5CF6;
 
-  /* Modal Backdrop (Dark Mode) */
-  --backdrop-color: rgba(10, 10, 18, 0.82);
-
-  /* Shadows (Dark Mode) */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.35);
-  --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.55), 0 0 15px rgba(190, 18, 60, 0.25);
+  --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.55), 0 0 15px rgba(139, 92, 246, 0.3);
   --shadow-modal: 0 25px 60px -10px rgba(0, 0, 0, 0.9);
+}
+
+/* ==========================================================================
+   THEME 4: ACADEMIC SCHOLAR (data-theme="scholar")
+   Soft Academic Rose-Pink & Warm Amber-Gold Palette
+   ========================================================================== */
+[data-theme="scholar"] {
+  --bg-sidebar: #261C1E;
+  --bg-sidebar-hover: #362629;
+  --bg-sidebar-active: #473236;
+  --sidebar-border: #3D2B2E;
+  --sidebar-text: #BCA3A7;
+  --sidebar-text-muted: #8F767A;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-indicator: #F59E0B;
+  --sidebar-indicator-glow: 0 0 12px rgba(245, 158, 11, 0.7);
+
+  --bg-app: #FFFBF7;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #FFF1E6;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FFFFFF;
+  --bg-hover: #FDF2E9;
+  --bg-input: #FFFFFF;
+
+  --brand-burgundy: #D97706;
+  --brand-burgundy-hover: #B45309;
+  --brand-burgundy-light: #FEF3C7;
+  --brand-burgundy-surface: #FFFBEB;
+  --brand-burgundy-border: #FCD34D;
+  --brand-burgundy-glow: 0 4px 18px rgba(217, 119, 6, 0.22);
+  --brand-burgundy-gradient: linear-gradient(135deg, #E11D48 0%, #D97706 100%);
+  --brand-accent: #E11D48;
+  --brand-primary: #D97706;
+
+  --text-primary: #292524;
+  --text-secondary: #57534E;
+  --text-muted: #A8A29E;
+  --text-inverted: #FFFFFF;
+
+  --border-subtle: #F3E4D8;
+  --border-card: #F3E4D8;
+  --border-card-hover: #FCD34D;
+  --border-focus: #D97706;
+
+  --progress-track: #F3E4D8;
+  --progress-fill: #E11D48;
+  --progress-fill-accent: #D97706;
 }
