@@ -1,6 +1,6 @@
 /**
  * KURO FANGS — DATA SERVICE
- * Loads and provides curriculum data for Year 3 Dentistry
+ * Dental Curriculum Data for Year 3 with Subject Cover Images
  */
 
 class DataService {
@@ -14,6 +14,22 @@ class DataService {
     this.previousExams = [];
     this.requirements = [];
     this.loaded = false;
+
+    // High quality tailored cover banners for each of the 12 dental subjects
+    this.subjectCovers = {
+      'gen-med': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80',
+      'gen-surgery': 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&auto=format&fit=crop&q=80',
+      'fixed-pros': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80',
+      'omfs': 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&auto=format&fit=crop&q=80',
+      'oral-diseases': 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&auto=format&fit=crop&q=80',
+      'endo': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&auto=format&fit=crop&q=80',
+      'omdr': 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&auto=format&fit=crop&q=80',
+      'preventive': 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format&fit=crop&q=80',
+      'cons-endo': 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=600&auto=format&fit=crop&q=80',
+      'ortho': 'https://images.unsplash.com/photo-1593054942475-b82772549a17?w=600&auto=format&fit=crop&q=80',
+      'pediatric': 'https://images.unsplash.com/photo-1588776814546-daab30f310ce?w=600&auto=format&fit=crop&q=80',
+      'removable-pros': 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=600&auto=format&fit=crop&q=80'
+    };
   }
 
   async init() {
@@ -68,10 +84,15 @@ class DataService {
       console.warn('Could not load all JSON files via fetch, using fallback data:', err);
     }
 
-    // Fallback if subjects empty (guarantees the 12 dental subjects are always available)
     if (!this.subjects || this.subjects.length === 0) {
       this.subjects = this.getDefaultSubjects();
     }
+
+    // Attach high-res cover images to each subject
+    this.subjects.forEach(s => {
+      s.cover_image = this.subjectCovers[s.id] || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80';
+    });
+
     if (!this.alerts || this.alerts.length === 0) {
       this.alerts = this.getDefaultAlerts();
     }
@@ -115,18 +136,18 @@ class DataService {
   // 12 Official Dental Subjects Fallback
   getDefaultSubjects() {
     return [
-      { id: 'gen-med', name_ar: 'الطب العام (الباطنة)', name_en: 'General Medicine', code: 'MED-301', color: '#0284C7', icon: '💊', sheet_count: 20, description_ar: 'أمراض الباطنة والقلب والغدد الصماء وعلاقتها بصحة الفم وممارسة طب الأسنان' },
-      { id: 'gen-surgery', name_ar: 'الجراحة العامة', name_en: 'General Surgery', code: 'GS-301', color: '#EA580C', icon: '⚕️', sheet_count: 22, description_ar: 'أساسيات الجراحة العامة، التعقيم، التئام الجروح، النزيف، الصدمة، والحروق' },
-      { id: 'fixed-pros', name_ar: 'الاستعاضة السنية الثابتة 2', name_en: 'Fixed Prosthodontics II', code: 'FP-302', color: '#7C3AED', icon: '👑', sheet_count: 18, description_ar: 'تحضير التيجان والجسور، خطوط الإنهاء، الطبعات المطاطية، والتركيبات الثابتة' },
-      { id: 'omfs', name_ar: 'جراحة الفم والوجه والفكين 1', name_en: 'Oral & Maxillofacial Surgery I', code: 'OMS-301', color: '#2563EB', icon: '🔪', sheet_count: 16, description_ar: 'التخدير الموضعي، تقنيات قلع الأسنان، مضاعفات القلع، والعدوى السنية' },
-      { id: 'oral-diseases', name_ar: 'علم أمراض الفم', name_en: 'Oral Diseases / Pathology', code: 'OD-301', color: '#DB2777', icon: '🔬', sheet_count: 24, description_ar: 'دراسة الأمراض والآفات التي تصيب الأنسجة الفموية، الأورام، والآفات المخاطية' },
-      { id: 'endo', name_ar: 'علاج لب الأسنان 1 (علاج العصب)', name_en: 'Endodontics I', code: 'END-301', color: '#DC2626', icon: '⚡', sheet_count: 16, description_ar: 'تشخيص أمراض اللب والذروة، فتح الحجرة اللبية، تنظيف وتوسيع القنوات، وحشو الجذور' },
-      { id: 'omdr', name_ar: 'طب الفم والتشخيص والأشعة 1', name_en: 'OMDR I', code: 'OMDR-301', color: '#0D9488', icon: '🩻', sheet_count: 19, description_ar: 'الفحص السريري، أخذ السيرة المرضية، قراءة وتفسير صور الأشعة الفموية وتطبيقاتها' },
-      { id: 'preventive', name_ar: 'طب الأسنان الوقائي', name_en: 'Preventive Dentistry', code: 'PREV-301', color: '#059669', icon: '🛡️', sheet_count: 14, description_ar: 'طرق الوقاية من نخر الأسنان، الفلورايد، المواد السادة للشقوق، وصحة الفم المجتمعية' },
-      { id: 'cons-endo', name_ar: 'العلاج التحفظي 2', name_en: 'Cons & Endo II', code: 'CONS-302', color: '#D97706', icon: '✨', sheet_count: 20, description_ar: 'حشوات الكومبوزيت المتقدمة، حشوات الأملغم، التثبيت بالبراغي، والترميمات التجميلية' },
-      { id: 'ortho', name_ar: 'تقويم الأسنان 1', name_en: 'Orthodontics I', code: 'ORTH-301', color: '#4F46E5', icon: '📐', sheet_count: 15, description_ar: 'تصنيف إنجل، نمو وتطور الوجه والفكين، تشخيص سوء الإطباق، والأجهزة التقويمية' },
-      { id: 'pediatric', name_ar: 'طب أسنان الأطفال 1', name_en: 'Pediatric Dentistry I', code: 'PEDO-301', color: '#EC4899', icon: '🧸', sheet_count: 15, description_ar: 'التعامل السلوكي مع الأطفال، تخدير الأطفال، بتر وحشو لب الأسنان اللبنية وحافظات المسافة' },
-      { id: 'removable-pros', name_ar: 'الاستعاضة السنية المتحركة 2', name_en: 'Removable Prosthodontics II', code: 'RP-302', color: '#0891B2', icon: '🦷', sheet_count: 17, description_ar: 'الأطقم الجزئية المتحركة، تصميم الكروم كوبالت، والروابط والخطافات الإطباقية' }
+      { id: 'gen-med', name_ar: 'الطب العام (الباطنة)', name_en: 'General Medicine', code: 'MED-301', sheet_count: 20, description_ar: 'أمراض الباطنة والقلب والغدد وعلاقتها بممارسة طب الأسنان', description_en: 'Internal medicine, cardiovascular and systemic diseases in dental practice' },
+      { id: 'gen-surgery', name_ar: 'الجراحة العامة', name_en: 'General Surgery', code: 'GS-301', sheet_count: 22, description_ar: 'أساسيات الجراحة العامة والتعقيم والتئام الجروح والنزيف والحروق', description_en: 'General surgical principles, wound healing, hemostasis, and shock management' },
+      { id: 'fixed-pros', name_ar: 'الاستعاضة السنية الثابتة 2', name_en: 'Fixed Prosthodontics II', code: 'FP-302', sheet_count: 18, description_ar: 'تحضير التيجان والجسور وخطوط الإنهاء والطبعات المطاطية', description_en: 'Crown and bridge preparation, finish lines, and impression techniques' },
+      { id: 'omfs', name_ar: 'جراحة الفم والوجه والفكين 1', name_en: 'Oral & Maxillofacial Surgery I', code: 'OMS-301', sheet_count: 16, description_ar: 'التخدير الموضعي وتقنيات قلع الأسنان ومضاعفات القلع', description_en: 'Local anesthesia techniques, exodontia protocols, and surgical complications' },
+      { id: 'oral-diseases', name_ar: 'علم أمراض الفم', name_en: 'Oral Diseases / Pathology', code: 'OD-301', sheet_count: 24, description_ar: 'دراسة الأمراض والآفات التي تصيب الأنسجة الفموية والأورام', description_en: 'Oral mucosal lesions, cysts, odontogenic tumors, and bone pathologies' },
+      { id: 'endo', name_ar: 'علاج لب الأسنان 1 (علاج العصب)', name_en: 'Endodontics I', code: 'END-301', sheet_count: 16, description_ar: 'تشخيص أمراض اللب والذروة وتنظيف وتوسيع القنوات وحشو الجذور', description_en: 'Pulp pathology, access cavity design, biomechanical cleaning, and obturation' },
+      { id: 'omdr', name_ar: 'طب الفم والتشخيص والأشعة 1', name_en: 'OMDR I', code: 'OMDR-301', sheet_count: 19, description_ar: 'الفحص السريري وقراءة وتفسير صور الأشعة البانورامية وتطبيقاتها', description_en: 'Clinical examination, panoramic radiographs, and radiographic interpretation' },
+      { id: 'preventive', name_ar: 'طب الأسنان الوقائي', name_en: 'Preventive Dentistry', code: 'PREV-301', sheet_count: 14, description_ar: 'طرق الوقاية من نخر الأسنان، الفلورايد، والمواد السادة للشقوق', description_en: 'Caries prevention, fluoride modalities, pit and fissure sealants, and oral hygiene' },
+      { id: 'cons-endo', name_ar: 'العلاج التحفظي 2', name_en: 'Cons & Endo II', code: 'CONS-302', sheet_count: 20, description_ar: 'حشوات الكومبوزيت المتقدمة والترميمات التجميلية للأسنان', description_en: 'Advanced composite restorations, amalgam techniques, and aesthetic dentistry' },
+      { id: 'ortho', name_ar: 'تقويم الأسنان 1', name_en: 'Orthodontics I', code: 'ORTH-301', sheet_count: 15, description_ar: 'تصنيف إنجل، نمو وتطور الوجه والفكين، وتشخيص سوء الإطباق', description_en: 'Angle classification, craniofacial growth, and malocclusion diagnostics' },
+      { id: 'pediatric', name_ar: 'طب أسنان الأطفال 1', name_en: 'Pediatric Dentistry I', code: 'PEDO-301', sheet_count: 15, description_ar: 'التعامل السلوكي مع الأطفال، تخدير الأطفال، وبتر لب الأسنان اللبنية', description_en: 'Behavior management, pediatric pulp therapy, and space maintainers' },
+      { id: 'removable-pros', name_ar: 'الاستعاضة السنية المتحركة 2', name_en: 'Removable Prosthodontics II', code: 'RP-302', sheet_count: 17, description_ar: 'الأطقم الجزئية المتحركة وتصميم الكروم كوبالت والروابط الإطباقية', description_en: 'Removable partial dentures, cobalt-chromium framework design, and clasps' }
     ];
   }
 
@@ -134,29 +155,17 @@ class DataService {
     return [
       {
         id: 'alt-1',
-        title: 'تحديد موعد الامتحان النصفي — جراحة الفم والفكين 1',
-        message: 'تم تحديد الامتحان النصفي يوم الأحد 25 أكتوبر في المدرج الرئيسي الساعة 10:00 صباحاً.',
+        title: 'Midterm Exam Schedule: OMFS I',
+        message: 'Exam scheduled on Sunday Oct 25 at 10:00 AM in Main Lecture Hall.',
         type: 'urgent',
-        created_at: 'منذ يومين'
-      },
-      {
-        id: 'alt-2',
-        title: 'رفع شيت المحاضرة الخامسة: علم أمراض الفم',
-        message: 'تمت إضافة شيت "Benign Odontogenic Tumors" مع التسجيل الصوتي والملاحظات الهامة.',
-        type: 'info',
-        created_at: 'منذ 3 ساعات'
+        created_at: '2 days ago'
       }
     ];
   }
 
   getDefaultSheets() {
     return [
-      { id: 'sh-1', title: 'Local Anesthesia Techniques & Landmarks', subject_id: 'omfs', subject_name: 'جراحة الفم والفكين 1', doctor_name: 'د. يوسف التاجوري', date: '2026-09-09', type: 'شيت محاضرة', file_type: 'PDF' },
-      { id: 'sh-2', title: 'Preparation of Full Veneer Crown', subject_id: 'fixed-pros', subject_name: 'الاستعاضة السنية الثابتة 2', doctor_name: 'د. نادية عبدالحميد', date: '2026-09-08', type: 'ملخص عملي', file_type: 'PDF' },
-      { id: 'sh-3', title: 'Pulp and Periapical Pathosis', subject_id: 'endo', subject_name: 'علاج العصب 1', doctor_name: 'د. خالد الصالح', date: '2026-09-07', type: 'شيت محاضرة', file_type: 'PDF' },
-      { id: 'sh-4', title: 'Cardiovascular Diseases in Dental Practice', subject_id: 'gen-med', subject_name: 'الطب العام', doctor_name: 'د. سارة المنصوري', date: '2026-09-05', type: 'مذكرة دراسية', file_type: 'PDF' },
-      { id: 'sh-5', title: 'Angle Classification & Malocclusion Analysis', subject_id: 'ortho', subject_name: 'تقويم الأسنان 1', doctor_name: 'د. طارق السنوسي', date: '2026-09-04', type: 'شيت محاضرة', file_type: 'PDF' },
-      { id: 'sh-6', title: 'White & Red Lesions of Oral Mucosa', subject_id: 'oral-diseases', subject_name: 'علم أمراض الفم', doctor_name: 'د. أحمد المهدي', date: '2026-09-02', type: 'مذكرة تلخيص', file_type: 'PDF' }
+      { id: 'sh-1', title: 'Local Anesthesia Techniques & Landmarks', subject_id: 'omfs', subject_name: 'Oral Surgery I', doctor_name: 'Dr. Youssef', date: '2026-09-09', type: 'Lecture Sheet', file_type: 'PDF' }
     ];
   }
 }

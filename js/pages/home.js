@@ -1,6 +1,6 @@
 /**
- * KURO FANGS — HOME DASHBOARD (SUBJECTS-FIRST WITH i18n)
- * Default English with instant Arabic toggle support
+ * KURO FANGS — HOME DASHBOARD (SUBJECTS-FIRST WITH 120px COVER BANNERS)
+ * Modern cards with tailored dental photography covers & no old circular icons
  */
 
 const HomePage = {
@@ -50,7 +50,7 @@ const HomePage = {
 
     let filtered = allSubjects;
 
-    // Filter by semester if applicable
+    // Filter by semester
     if (HomePage.currentFilter === 'sem1') {
       filtered = allSubjects.slice(0, 6);
     } else if (HomePage.currentFilter === 'sem2') {
@@ -82,30 +82,34 @@ const HomePage = {
       const primaryTitle = isAr ? subj.name_ar : subj.name_en;
       const subTitle = isAr ? subj.name_en : subj.name_ar;
       const desc = isAr ? (subj.description_ar || '') : (subj.description_en || subj.description_ar || '');
+      const coverImg = subj.cover_image || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80';
 
       return `
         <div class="subject-card" onclick="window.SubjectModal.open('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
-          <div>
-            <div class="subject-card-header">
-              <div class="subject-icon-wrap">
-                ${subj.icon || '🦷'}
-              </div>
-              <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
-            </div>
-
-            <h3 class="subject-title-primary">${primaryTitle}</h3>
-            <div class="subject-title-sub">${subTitle}</div>
-            <p class="subject-description">${desc}</p>
+          <!-- 120px Subject Cover Banner with Smooth Gradient Overlay -->
+          <div class="subject-cover-wrap">
+            <img src="${coverImg}" alt="${primaryTitle}" class="subject-cover-img" loading="lazy" />
+            <div class="subject-cover-gradient"></div>
+            <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
           </div>
 
-          <div class="subject-card-footer">
-            <div class="subject-pill-tag">
-              <i data-lucide="layers" style="width: 15px; height: 15px; color: var(--brand-burgundy);"></i>
-              <span>${t('contentHubsCount')}</span>
+          <!-- Subject Content Details -->
+          <div class="subject-card-body">
+            <div>
+              <h3 class="subject-title-primary">${primaryTitle}</h3>
+              <div class="subject-title-sub">${subTitle}</div>
+              <p class="subject-description">${desc}</p>
             </div>
-            <div class="subject-cta-btn">
-              <span>${t('subjectExplore')}</span>
-              <i data-lucide="${arrowIcon}" style="width: 15px; height: 15px;"></i>
+
+            <div class="subject-card-footer">
+              <div class="subject-pill-tag">
+                <i data-lucide="layers" style="width: 15px; height: 15px; color: var(--brand-burgundy);"></i>
+                <span>${t('contentHubsCount')}</span>
+              </div>
+              <div class="subject-cta-btn">
+                <span>${t('subjectExplore')}</span>
+                <i data-lucide="${arrowIcon}" style="width: 15px; height: 15px;"></i>
+              </div>
             </div>
           </div>
         </div>

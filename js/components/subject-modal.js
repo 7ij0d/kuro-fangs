@@ -112,14 +112,15 @@ const SubjectModal = {
       }
     ];
 
+    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80';
     const arrowIcon = isAr ? 'arrow-left' : 'arrow-right';
 
     modalBox.innerHTML = `
       <!-- Header -->
       <div class="modal-header">
         <div class="modal-header-meta">
-          <div class="modal-subject-icon">
-            ${subject.icon || '🦷'}
+          <div class="modal-subject-banner-thumb">
+            <img src="${coverImg}" alt="${primaryTitle}" />
           </div>
           <div class="modal-title-wrap">
             <h2>${primaryTitle}</h2>

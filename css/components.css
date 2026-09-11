@@ -1,7 +1,7 @@
 /* ==========================================================================
    KURO FANGS — COMPONENTS (BURGUNDY THEME)
-   The 12 Subjects Grid & The Floating Interactive Subject Modal
-   Light & Dark Mode + LTR / RTL Support
+   The 12 Subjects Grid with 120px High-Quality Cover Banners
+   The Floating Interactive Subject Modal
    ========================================================================== */
 
 /* Hero Banner Bar */
@@ -54,7 +54,7 @@
 }
 
 /* ==========================================================================
-   1. THE 12 SUBJECTS SHOWCASE GRID
+   1. THE 12 SUBJECTS SHOWCASE GRID (With 120px Cover Banners)
    ========================================================================== */
 .subjects-showcase-grid {
   display: grid;
@@ -66,7 +66,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  padding: 24px;
+  padding: 0; /* Edge to edge for cover banner */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -77,64 +77,77 @@
   overflow: hidden;
 }
 
-.subject-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 4px;
-  background: var(--brand-burgundy-gradient);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
 .subject-card:hover {
   transform: translateY(-4px);
   border-color: var(--border-card-hover);
   box-shadow: var(--shadow-card-hover);
 }
 
-.subject-card:hover::before {
-  opacity: 1;
+/* 120px Subject Cover Banner */
+.subject-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  background-color: var(--bg-surface-subtle);
 }
 
-.subject-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 14px;
+.subject-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
 }
 
-.subject-icon-wrap {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  background: var(--brand-burgundy-light);
-  border: 1px solid var(--brand-burgundy-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  transition: transform var(--transition-fast);
+.subject-card:hover .subject-cover-img {
+  transform: scale(1.08);
 }
 
-.subject-card:hover .subject-icon-wrap {
-  transform: scale(1.05);
+/* Gradient Overlay to seamlessly blend with card background */
+.subject-cover-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.05) 45%, var(--bg-card) 100%);
+  pointer-events: none;
 }
 
+/* Floating Glassmorphic Subject Code Badge */
 .subject-code-badge {
+  position: absolute;
+  top: 12px;
   font-size: 0.725rem;
   font-weight: 800;
   font-family: var(--font-mono);
-  color: var(--brand-burgundy);
-  background: var(--brand-burgundy-light);
+  color: #FFFFFF;
+  background: rgba(136, 19, 55, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   padding: 4px 10px;
   border-radius: var(--radius-pill);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 2;
+}
+
+html[dir="ltr"] .subject-code-badge {
+  left: 14px;
+}
+html[dir="rtl"] .subject-code-badge {
+  right: 14px;
+}
+
+/* Card Body */
+.subject-card-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
 }
 
 .subject-title-primary {
-  font-size: 1.15rem;
+  font-size: 1.125rem;
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 3px;
@@ -142,10 +155,11 @@
 }
 
 .subject-title-sub {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-size: 0.775rem;
+  color: var(--brand-burgundy);
+  font-weight: 700;
   font-family: var(--font-mono);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .subject-description {
@@ -156,12 +170,12 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .subject-card-footer {
   border-top: 1px solid var(--border-subtle);
-  padding-top: 14px;
+  padding-top: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -252,16 +266,31 @@ html[dir="ltr"] .subject-card:hover .subject-cta-btn {
   gap: 16px;
 }
 
+.modal-subject-banner-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 2px solid var(--brand-burgundy-border);
+  flex-shrink: 0;
+}
+
+.modal-subject-banner-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .modal-subject-icon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-md);
   background: var(--brand-burgundy-light);
-  border: 1px solid var(--brand-burgundy-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
+  border: 1px solid var(--brand-burgundy-border);
   flex-shrink: 0;
 }
 
@@ -274,8 +303,9 @@ html[dir="ltr"] .subject-card:hover .subject-cta-btn {
 
 .modal-title-wrap p {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--brand-burgundy);
   font-family: var(--font-mono);
+  font-weight: 700;
 }
 
 .modal-close-btn {
