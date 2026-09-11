@@ -78,6 +78,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideSaved = document.getElementById('side-nav-saved');
     if (sideSaved) sideSaved.textContent = t('sideNavSaved');
 
+    const sideRewards = document.getElementById('side-nav-rewards');
+    if (sideRewards) sideRewards.textContent = t('sideNavRewards');
+
     const sideUserSub = document.getElementById('sidebar-user-sub');
     if (sideUserSub) sideUserSub.textContent = t('academicYear');
   };
@@ -106,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       applyLanguage(newLang);
       // Re-render current page
       window.ROUTER.handleRoute();
+      updateGlobalMascotAvatars();
       if (window.lucide) window.lucide.createIcons();
     });
   }
@@ -167,8 +171,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/previous-years', (c, q) => window.PreviousYearsPage.render(c, q));
   router.register('/favorites', (c, q) => window.SecondaryPages.renderFavorites(c, q));
   router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
+  router.register('/rewards', (c, q) => window.SecondaryPages.renderRewards(c, q));
 
-  // 9. Synchronize Points
+  // 9. Global Mascot Avatars & Watermark Synchronization
+  const updateGlobalMascotAvatars = () => {
+    if (!window.STORE) return;
+    const equipped = window.STORE.getEquippedSkinData();
+    if (!equipped || !equipped.image) return;
+
+    // 1. Sidebar user avatar
+    const sideAvatar = document.getElementById('sidebar-user-avatar-img');
+    if (sideAvatar) {
+      sideAvatar.src = equipped.image;
+      sideAvatar.alt = equipped.name_ar;
+    }
+
+    // 2. Sidebar Mascot Subtle Watermark
+    const sideWatermark = document.getElementById('sidebar-watermark-img');
+    if (sideWatermark) {
+      sideWatermark.src = equipped.image;
+    }
+
+    // 3. Header Mascot Avatar Button
+    const headerAvatar = document.getElementById('header-mascot-avatar-img');
+    if (headerAvatar) {
+      headerAvatar.src = equipped.image;
+      headerAvatar.alt = equipped.name_ar;
+    }
+
+    // 4. Any other on-screen current mascot images (profile, rewards, etc.)
+    document.querySelectorAll('.current-mascot-img').forEach(img => {
+      img.src = equipped.image;
+      img.alt = equipped.name_ar;
+    });
+  };
+
+  window.updateGlobalMascotAvatars = updateGlobalMascotAvatars;
+
+  // 10. Synchronize Points & Mascot Skins
   window.STORE.subscribe((event) => {
     if (event === 'points_changed') {
       const pointsEl = document.getElementById('header-points-text');
@@ -176,9 +216,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         pointsEl.textContent = `${window.STORE.getPoints()} ${window.I18N.t('pointsSuffix')}`;
       }
     }
+    if (event === 'skin_equipped' || event === 'skins_changed' || event === 'skin_unlocked') {
+      updateGlobalMascotAvatars();
+    }
   });
 
-  // 10. Update Active Sidebar Link on route change (Activates Radiant Vertical Light Line)
+  // 11. Update Active Sidebar Link on route change (Activates Radiant Vertical Light Line)
   const updateActiveSidebarNav = (path) => {
     document.querySelectorAll('.sidebar-menu-item').forEach(btn => {
       const target = btn.getAttribute('data-route') || btn.getAttribute('href')?.replace('#', '');
@@ -195,9 +238,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('hashchange', () => {
     const p = window.location.hash.slice(1).split('?')[0] || '/';
     updateActiveSidebarNav(p);
+    updateGlobalMascotAvatars();
   });
 
-  // 11. Handle Initial Route
+  // 12. Handle Initial Route & Initial Mascot Sync
+  updateGlobalMascotAvatars();
   router.handleRoute();
   updateActiveSidebarNav(window.location.hash.slice(1).split('?')[0] || '/');
 });

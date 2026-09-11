@@ -109,17 +109,29 @@
           <span class="sidebar-menu-icon-wrap"><i data-lucide="bookmark"></i></span>
           <span class="sidebar-menu-text" id="side-nav-saved">Saved Bookmarks</span>
         </a>
+
+        <a href="#/rewards" class="sidebar-menu-item" data-route="/rewards">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="sparkles"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-rewards">Fox Mascot Hub</span>
+        </a>
       </nav>
 
-      <!-- Sidebar Footer (Student Profile Info) -->
+      <!-- Fox Mascot Subtle Watermark -->
+      <div id="sidebar-mascot-watermark" class="sidebar-mascot-watermark" aria-hidden="true">
+        <img id="sidebar-watermark-img" src="assets/fox_skins/fox_skin_1.jpg" alt="" />
+      </div>
+
+      <!-- Sidebar Footer (Student Profile & Equipped Mascot) -->
       <div class="sidebar-footer">
-        <div class="sidebar-user-card">
-          <div class="sidebar-user-avatar">KF</div>
+        <a href="#/rewards" class="sidebar-user-card" title="Fox Mascot Skins Hub & Student Profile">
+          <div class="sidebar-user-avatar">
+            <img id="sidebar-user-avatar-img" src="assets/fox_skins/fox_skin_1.jpg" alt="Mascot Avatar" class="mascot-avatar-img" />
+          </div>
           <div class="sidebar-user-meta">
             <span class="sidebar-user-name">Dental Student</span>
             <span class="sidebar-user-sub" id="sidebar-user-sub">Year 3 Dentistry</span>
           </div>
-        </div>
+        </a>
       </div>
     </aside>
 
@@ -140,7 +152,7 @@
           </div>
         </div>
 
-        <!-- Header Actions: Language, Theme & Points -->
+        <!-- Header Actions: Language, Theme, Points & Mascot Profile -->
         <div class="header-actions">
           <!-- Language Toggle Button (EN / AR) -->
           <button id="lang-toggle-btn" class="header-toggle-btn" title="Switch Language (English / العربية)">
@@ -153,11 +165,17 @@
             <i data-lucide="moon" id="theme-icon"></i>
           </button>
 
-          <!-- Academic Points Pill -->
-          <div class="points-pill" title="Academic Points">
+          <!-- Academic Points Pill (Clickable to /rewards) -->
+          <a href="#/rewards" class="points-pill" title="Academic Points — Open Mascot Hub">
             <i data-lucide="sparkles"></i>
             <span id="header-points-text">25 pts</span>
-          </div>
+          </a>
+
+          <!-- Top Header Fox Mascot Profile Avatar Button -->
+          <a href="#/rewards" class="header-mascot-avatar-btn" id="header-mascot-btn" title="Fox Mascot Skins Hub & Rewards">
+            <img id="header-mascot-avatar-img" src="assets/fox_skins/fox_skin_1.jpg" alt="Fox Mascot" class="header-mascot-img" />
+            <span class="header-mascot-pulse"></span>
+          </a>
         </div>
       </header>
 

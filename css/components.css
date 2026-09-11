@@ -2582,5 +2582,302 @@ html[dir="ltr"] .academia-exam-table {
   margin: 0;
 }
 
+/* ==========================================================================
+   FOX MASCOT SKINS HUB (6 MASCOT CHARACTERS & REWARDS)
+   ========================================================================== */
+.fox-skins-header-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
 
+.fox-skins-header-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #BE123C 0%, #0B3B36 50%, #BE123C 100%);
+}
 
+.fox-skins-header-info {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.fox-current-equipped-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #BE123C;
+  box-shadow: 0 4px 14px rgba(190, 18, 60, 0.25);
+  flex-shrink: 0;
+  animation: pulseGlow 3s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 4px 14px rgba(190, 18, 60, 0.25); }
+  100% { box-shadow: 0 4px 22px rgba(190, 18, 60, 0.55); }
+}
+
+.fox-current-equipped-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fox-balance-pill {
+  background: rgba(11, 59, 54, 0.08);
+  border: 1.5px solid rgba(11, 59, 54, 0.2);
+  border-radius: 14px;
+  padding: 12px 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .fox-balance-pill {
+  background: rgba(190, 18, 60, 0.12);
+  border-color: rgba(190, 18, 60, 0.3);
+}
+
+.fox-balance-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--brand-primary, #0B3B36);
+  line-height: 1.1;
+}
+
+[data-theme="dark"] .fox-balance-val {
+  color: #FDA4AF;
+}
+
+.fox-balance-lbl {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Grid of 6 Skins */
+.fox-skins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 22px;
+  margin-bottom: 36px;
+}
+
+.fox-skin-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.fox-skin-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(190, 18, 60, 0.4);
+}
+
+.fox-skin-card.is-equipped {
+  border: 2px solid #10B981;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+}
+
+.fox-skin-card.is-equipped::after {
+  content: '✓ EQUIPPED';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #10B981;
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  z-index: 2;
+}
+
+html[dir="rtl"] .fox-skin-card.is-equipped::after {
+  right: auto;
+  left: 12px;
+  content: '✓ مُرتدى حالياً';
+}
+
+.fox-skin-visual {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  background: #0B1727;
+}
+
+.fox-skin-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+  display: block;
+}
+
+.fox-skin-card:hover .fox-skin-visual img {
+  transform: scale(1.05);
+}
+
+.fox-skin-tag-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 2;
+}
+
+html[dir="rtl"] .fox-skin-tag-badge {
+  left: auto;
+  right: 12px;
+}
+
+.fox-skin-cost-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(190, 18, 60, 0.9);
+  backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+html[dir="rtl"] .fox-skin-cost-badge {
+  left: auto;
+  right: 12px;
+}
+
+.fox-skin-content {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.fox-skin-title-wrap {
+  margin-bottom: 12px;
+}
+
+.fox-skin-name-ar {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.fox-skin-name-en {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.fox-skin-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 18px;
+  min-height: 48px;
+}
+
+.fox-skin-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-skin-action {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.btn-skin-equip {
+  background: var(--brand-primary, #0B3B36);
+  color: #FFFFFF;
+}
+
+.btn-skin-equip:hover {
+  background: #082825;
+  box-shadow: 0 4px 12px rgba(11, 59, 54, 0.3);
+}
+
+.btn-skin-unlock {
+  background: linear-gradient(135deg, #BE123C 0%, #881337 100%);
+  color: #FFFFFF;
+  box-shadow: 0 3px 12px rgba(190, 18, 60, 0.3);
+}
+
+.btn-skin-unlock:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-skin-locked {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border: 1px dashed var(--border-subtle);
+}
+
+.btn-skin-current {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+  cursor: default;
+}
+
+[data-theme="dark"] .btn-skin-current {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6EE7B7;
+  border-color: rgba(16, 185, 129, 0.3);
+}

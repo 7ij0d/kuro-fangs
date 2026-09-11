@@ -63,8 +63,23 @@ class I18nManager {
         sideNavCalc: 'Exam Schedule',
         sideNavExamsSchedule: 'Exam Schedule',
         sideNavSaved: 'Bookmarks',
+        sideNavRewards: 'Fox Mascot Hub',
         studentRole: 'Dental Surgery Student',
         academicYear: 'Year 3 — Faculty of Dentistry',
+
+        // Fox Mascot Skins Hub
+        foxSkinsHubTitle: 'Fox Mascot Skins Hub (6 Mascots)',
+        foxSkinsHubSubtitle: 'Unlock, equip, and customize your official dental mascots using earned academic points',
+        myAcademicBalance: 'My Academic Points',
+        equippedActive: '✓ Currently Equipped',
+        equipAction: 'Equip Mascot',
+        unlockAction: 'Unlock Skin',
+        lockedPoints: 'Locked',
+        freeDefault: 'Free (Default)',
+        equippedSuccess: 'Mascot skin equipped successfully! Avatars updated.',
+        unlockedSuccess: 'Congratulations! New Fox Mascot skin unlocked and equipped!',
+        notEnoughPoints: 'Not enough academic points to unlock this skin.',
+
 
         // Modal
         modalPrompt: 'Choose the academic section you want to open:',
@@ -153,8 +168,23 @@ class I18nManager {
         sideNavCalc: 'جدول الامتحانات',
         sideNavExamsSchedule: 'جدول الامتحانات',
         sideNavSaved: 'المحفوظات',
+        sideNavRewards: 'متجر سكنات الثعلب',
         studentRole: 'طالب طب وجراحة الأسنان',
         academicYear: 'السنة الثالثة — كلية طب الأسنان',
+
+        // Fox Mascot Skins Hub
+        foxSkinsHubTitle: 'متجر سكنات وشخصيات الثعلب الـ 6',
+        foxSkinsHubSubtitle: 'فتح وتجهيز وتخصيص شخصيات وتمائم الثعلب الرسمية باستخدام نقاطك الأكاديمية',
+        myAcademicBalance: 'رصيدي الأكاديمي',
+        equippedActive: '✓ مُرتدى حالياً',
+        equipAction: 'ارتداء السكن',
+        unlockAction: 'فتح السكن',
+        lockedPoints: 'مقفل',
+        freeDefault: 'مجاناً (الافتراضي)',
+        equippedSuccess: 'تم ارتداء سكن الثعلب وتحديث جميع الواجهات بنجاح!',
+        unlockedSuccess: 'مبارك! تم فتح السكن وارتداؤه بنجاح!',
+        notEnoughPoints: 'عذراً، رصيدك من النقاط الأكاديمية لا يكفي لفتح هذا السكن.',
+
 
         // Modal
         modalPrompt: 'اختر القسم الأكاديمي الذي تريد فتحه:',
