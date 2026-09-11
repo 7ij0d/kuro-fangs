@@ -135,16 +135,16 @@ const HomePage = {
 
       return `
         <div class="subject-card" onclick="window.SubjectModal.open('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
-          <!-- 135px Subject Cover Header -->
-          <div class="subject-cover-wrap">
-            <img src="${coverImg}" alt="${primaryTitle}" class="subject-cover-img" loading="eager" onerror="this.onerror=null; this.src='assets/covers/gen-med.jpg';" />
+          <!-- 130px Subject Cover Header -->
+          <div class="subject-cover-wrap card-banner">
+            <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" loading="eager" onerror="this.onerror=null; this.src='assets/covers/gen-med.jpg';" />
             <div class="subject-cover-gradient"></div>
             <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
             ${subj.is_popular ? `<span class="subject-popular-tag">🔥 ${isAr ? 'شائع' : 'Popular'}</span>` : ''}
           </div>
 
           <!-- Subject Content Details -->
-          <div class="subject-card-body">
+          <div class="subject-card-body card-body">
             <div>
               <h3 class="subject-title-primary">${primaryTitle}</h3>
               <div class="subject-title-sub">${subTitle}</div>
