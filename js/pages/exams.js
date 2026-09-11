@@ -99,6 +99,12 @@ const ExamsPage = {
 
       <!-- Schedule Tabs Bar -->
       <div class="schedule-tabs-bar no-print">
+        <button class="schedule-tab-btn ${ExamsPage.currentTab === 'theory' ? 'active' : ''}" data-tab="theory">
+          <i data-lucide="book-open"></i>
+          <span>${isAr ? 'جدول المحاضرات النظري الأسبوعي' : 'Weekly Theory Lectures'}</span>
+          <span class="tab-count-pill" style="background: var(--brand-burgundy); color: #fff;">أسبوعي</span>
+        </button>
+
         <button class="schedule-tab-btn ${ExamsPage.currentTab === 'practical' ? 'active' : ''}" data-tab="practical">
           <i data-lucide="microscope"></i>
           <span>${isAr ? 'جدول المعامل والعيادات العملي/السريري' : 'Clinical & Lab Schedule'}</span>
@@ -107,13 +113,13 @@ const ExamsPage = {
 
         <button class="schedule-tab-btn ${ExamsPage.currentTab === 'midterm' ? 'active' : ''}" data-tab="midterm">
           <i data-lucide="file-text"></i>
-          <span>${isAr ? 'جدول النظري النصفي' : 'Midterm Theory'}</span>
+          <span>${isAr ? 'جدول الامتحانات النصفي' : 'Midterm Theory Exams'}</span>
           <span class="tab-count-pill">12</span>
         </button>
 
         <button class="schedule-tab-btn ${ExamsPage.currentTab === 'final' ? 'active' : ''}" data-tab="final">
           <i data-lucide="award"></i>
-          <span>${isAr ? 'جدول النظري النهائي (الفاينل)' : 'Final Theory Exams'}</span>
+          <span>${isAr ? 'جدول الامتحانات النهائي (الفاينل)' : 'Final Theory Exams'}</span>
           <span class="tab-count-pill">3</span>
         </button>
       </div>
@@ -132,7 +138,9 @@ const ExamsPage = {
     const contentArea = document.getElementById('exams-content-area');
     if (!contentArea) return;
 
-    if (ExamsPage.currentTab === 'practical') {
+    if (ExamsPage.currentTab === 'theory') {
+      contentArea.innerHTML = ExamsPage.renderTheoryView(isAr);
+    } else if (ExamsPage.currentTab === 'practical') {
       contentArea.innerHTML = ExamsPage.renderPracticalView(isAr);
       ExamsPage.setupPracticalListeners(isAr);
     } else if (ExamsPage.currentTab === 'midterm') {
@@ -142,6 +150,91 @@ const ExamsPage = {
     }
 
     if (window.lucide) window.lucide.createIcons();
+  },
+
+  renderTheoryView(isAr) {
+    const title = isAr ? 'جدول المحاضرات النظري الأسبوعي — السنة الثالثة 2026 / 2027' : 'Weekly Theory Lectures Timetable — Year 3 (2026 / 2027)';
+    const subtitle = isAr ? 'جدول المواعيد الأسبوعية الثابتة للمحاضرات النظرية بقاعات ومدرجات الكلية الرئيسية' : 'Official weekly timetable for theoretical lectures across main faculty auditoriums';
+
+    const scheduleDays = [
+      {
+        day: isAr ? 'الأحد' : 'Sunday',
+        slots: [
+          { time: '08:30 - 10:00', subject: isAr ? 'الباطنة العامة (MS 310)' : 'General Medicine (MS 310)', hall: isAr ? 'المدرج الرئيسي' : 'Main Auditorium', doctor: isAr ? 'د. طارق الزاوي' : 'Dr. Tarek' },
+          { time: '10:15 - 11:45', subject: isAr ? 'جراحة الفم والوجه والفكين 1 (DS 341)' : 'OMFS I (DS 341)', hall: isAr ? 'مدرج د. الشريف' : 'Dr. El-Sherif Hall', doctor: isAr ? 'د. عبدالسلام الشريف' : 'Dr. El-Sherif' },
+          { time: '12:00 - 01:30', subject: isAr ? 'الاستعاضة السنية المتحركة 2 (DS 321)' : 'Removable Pros II (DS 321)', hall: isAr ? 'القاعة 1' : 'Hall 1', doctor: isAr ? 'د. محمد القمودي' : 'Dr. El-Gammudi' }
+        ]
+      },
+      {
+        day: isAr ? 'الإثنين' : 'Monday',
+        slots: [
+          { time: '08:30 - 10:00', subject: isAr ? 'العلاج التحفظي وعلاج الجذور 2 (DS 311)' : 'Cons & Endo II (DS 311)', hall: isAr ? 'القاعة الكبرى' : 'Grand Hall', doctor: isAr ? 'د. منيرة الفيتوري' : 'Dr. El-Fituri' },
+          { time: '10:15 - 11:45', subject: isAr ? 'أمراض الفم (DS 380)' : 'Oral Diseases (DS 380)', hall: isAr ? 'مدرج أ' : 'Auditorium A', doctor: isAr ? 'د. فاطمة الماجري' : 'Dr. El-Majri' },
+          { time: '12:00 - 01:30', subject: isAr ? 'أمراض وعلاج اللثة 1 (DS 351)' : 'Periodontology I (DS 351)', hall: isAr ? 'القاعة 2' : 'Hall 2', doctor: isAr ? 'د. وليد البوسيفي' : 'Dr. El-Busefi' }
+        ]
+      },
+      {
+        day: isAr ? 'الثلاثاء' : 'Tuesday',
+        slots: [
+          { time: '08:30 - 10:00', subject: isAr ? 'الجراحة العامة (MS 320)' : 'General Surgery (MS 320)', hall: isAr ? 'المدرج الرئيسي' : 'Main Auditorium', doctor: isAr ? 'د. خالد الورفلي' : 'Dr. El-Warfali' },
+          { time: '10:15 - 11:45', subject: isAr ? 'الاستعاضة السنية الثابتة 2 (DS 331)' : 'Fixed Pros II (DS 331)', hall: isAr ? 'القاعة 2' : 'Hall 2', doctor: isAr ? 'د. عبدالسلام الشريف' : 'Dr. El-Sherif' },
+          { time: '12:00 - 01:30', subject: isAr ? 'طب الأسنان الوقائي (DS 381)' : 'Preventive Dentistry (DS 381)', hall: isAr ? 'مدرج ب' : 'Auditorium B', doctor: isAr ? 'د. إيناس الترهوني' : 'Dr. El-Tarhuni' }
+        ]
+      },
+      {
+        day: isAr ? 'الأربعاء' : 'Wednesday',
+        slots: [
+          { time: '08:30 - 10:00', subject: isAr ? 'طب الفم والتشخيص والأشعة 1 (DS 361)' : 'OMDR I (DS 361)', hall: isAr ? 'مدرج الأشعة' : 'Radiology Hall', doctor: isAr ? 'د. حاتم كشرود' : 'Dr. Kashrud' },
+          { time: '10:15 - 11:45', subject: isAr ? 'تقويم الأسنان 1 (DS 371)' : 'Orthodontics I (DS 371)', hall: isAr ? 'القاعة 3' : 'Hall 3', doctor: isAr ? 'د. ريم الفرجاني' : 'Dr. El-Ferjani' },
+          { time: '12:00 - 01:30', subject: isAr ? 'طب أسنان الأطفال 1 (DS 470)' : 'Pediatric Dentistry I (DS 470)', hall: isAr ? 'مدرج الأطفال' : 'Pedo Hall', doctor: isAr ? 'د. هدى السويح' : 'Dr. El-Sweih' }
+        ]
+      },
+      {
+        day: isAr ? 'الخميس' : 'Thursday',
+        slots: [
+          { time: '09:00 - 12:00', subject: isAr ? 'جلسات المراجعة الأكاديمية والمناقشات السريرية' : 'Academic Seminars & Clinical Case Review', hall: isAr ? 'عيادات ومبنى الكلية' : 'Faculty Clinical Wings', doctor: isAr ? 'هيئة التدريس' : 'Faculty Board' }
+        ]
+      }
+    ];
+
+    return `
+      <div class="exams-table-card card">
+        <div class="table-card-header">
+          <div>
+            <h2>📚 ${title}</h2>
+            <p>${subtitle}</p>
+          </div>
+          <div class="print-watermark">KURO FANGS • THEORETICAL LECTURE SCHEDULE</div>
+        </div>
+
+        <div class="table-responsive" style="margin-top: 14px;">
+          <table class="academia-exam-table">
+            <thead>
+              <tr>
+                <th style="width: 120px;">${isAr ? 'اليوم' : 'Day'}</th>
+                <th style="width: 140px;">${isAr ? 'التوقيت' : 'Time'}</th>
+                <th>${isAr ? 'المادة الدراسية' : 'Course Subject'}</th>
+                <th>${isAr ? 'القاعة / المدرج' : 'Hall / Auditorium'}</th>
+                <th>${isAr ? 'أستاذ المادة' : 'Lecturer'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${scheduleDays.map(dayObj => {
+                return dayObj.slots.map((slot, sIdx) => `
+                  <tr>
+                    ${sIdx === 0 ? `<td rowspan="${dayObj.slots.length}" style="font-weight: 800; background: var(--bg-hover); vertical-align: middle; text-align: center;">${dayObj.day}</td>` : ''}
+                    <td style="font-weight: 700; direction: ltr; text-align: center;">${slot.time}</td>
+                    <td style="font-weight: 700; color: var(--text-primary);">${slot.subject}</td>
+                    <td><span class="badge badge-subtle" style="font-size: 0.775rem;">🏛️ ${slot.hall}</span></td>
+                    <td><span style="font-size: 0.8rem; color: var(--text-secondary);">👨‍🏫 ${slot.doctor}</span></td>
+                  </tr>
+                `).join('');
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
   },
 
   renderMidtermView(isAr) {

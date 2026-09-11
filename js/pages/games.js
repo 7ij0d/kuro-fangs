@@ -300,179 +300,75 @@ window.GamesPage = (function () {
   const VISUAL_DATA = [
     {
       id: 'mouth_mirror',
-      name_en: 'Mouth Mirror',
       name_ar: 'مرآة الفم التشخيصية',
-      icon: '🪞',
-      badge_en: 'Diagnostic',
+      name_en: 'Diagnostic Mouth Mirror',
+      img_url: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'أدوات التشخيص',
-      hint_en: 'Indirect vision & tissue retraction',
-      hint_ar: 'الرؤية غير المباشرة وإبعاد الأنسجة',
+      badge_en: 'Diagnostic',
       accent: '#0284C7'
     },
     {
       id: 'explorer_probe',
-      name_en: 'Explorer Probe',
       name_ar: 'مسبار الفحص السريري',
-      icon: '🔍',
-      badge_en: 'Diagnostic',
+      name_en: 'Clinical Explorer Probe',
+      img_url: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'أدوات التشخيص',
-      hint_en: 'Tactile detection of caries & margins',
-      hint_ar: 'تحسس التسوس ونعومة الحواف',
+      badge_en: 'Diagnostic',
       accent: '#0284C7'
     },
     {
       id: 'extraction_forceps',
-      name_en: 'Extraction Forceps',
       name_ar: 'كلابة خلع الأسنان',
-      icon: '🗜️',
-      badge_en: 'Surgical',
+      name_en: 'Extraction Forceps',
+      img_url: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'جراحة الفم',
-      hint_en: 'Beaks & hinge for tooth delivery',
-      hint_ar: 'أداة خلع السن وقبض التاج',
+      badge_en: 'Oral Surgery',
       accent: '#BE123C'
     },
     {
       id: 'high_speed_handpiece',
-      name_en: 'High-Speed Handpiece',
       name_ar: 'قبضة التوربين السريعة',
-      icon: '🌪️',
-      badge_en: 'Operative',
+      name_en: 'High-Speed Handpiece',
+      img_url: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'حشوات الأسنان',
-      hint_en: '400,000 RPM water-cooled cutting',
-      hint_ar: 'حفر وتجويف وتبريد مائي فائق',
+      badge_en: 'Operative',
       accent: '#D97706'
     },
     {
       id: 'curing_light',
-      name_en: 'LED Curing Light',
       name_ar: 'جهاز البلمرة الضوئية',
-      icon: '🔦',
-      badge_en: 'Restorative',
+      name_en: 'LED Curing Light',
+      img_url: 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'حشوات تجميلية',
-      hint_en: 'Blue spectrum photo-polymerization',
-      hint_ar: 'تصلب الكومبوزيت بالضوء الأزرق',
+      badge_en: 'Restorative',
       accent: '#8B5CF6'
     },
     {
       id: 'bitewing_xray',
-      name_en: 'Bitewing X-Ray',
       name_ar: 'أشعة بايت وينج السنية',
-      icon: '🩻',
-      badge_en: 'Radiology',
+      name_en: 'Dental Bitewing X-Ray',
+      img_url: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'الأشعة السنية',
-      hint_en: 'Interproximal caries diagnosis',
-      hint_ar: 'كشف التسوس بين الأسطح الملاصقة',
-      accent: '#475569'
-    },
-    {
-      id: 'panoramic_opg',
-      name_en: 'Panoramic OPG Radiograph',
-      name_ar: 'أشعة البانوراما الكاملة',
-      icon: '🌐',
-      badge_en: 'Maxillofacial',
-      badge_ar: 'أشعة الفكين',
-      hint_en: 'Full arch & TMJ comprehensive scan',
-      hint_ar: 'تصوير الفكين ومفصل الفك بالكامل',
+      badge_en: 'Radiology',
       accent: '#475569'
     },
     {
       id: 'phantom_head',
-      name_en: 'Phantom Head Simulator',
       name_ar: 'مجسم محاكاة الفانتوم',
-      icon: '🤖',
-      badge_en: 'Pre-clinical',
+      name_en: 'Phantom Head Simulator',
+      img_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'معمل الفانتوم',
-      hint_en: 'Pre-clinical lifelike student station',
-      hint_ar: 'محاكاة مريض العيادة للتدريب العملي',
+      badge_en: 'Phantom Lab',
       accent: '#059669'
     },
     {
       id: 'rotary_endo_file',
-      name_en: 'Rotary NiTi Endo File',
       name_ar: 'مبارد علاج العصب الآلية',
-      icon: '🌀',
-      badge_en: 'Endodontics',
+      name_en: 'Rotary NiTi Endo Files',
+      img_url: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&auto=format&fit=crop&q=80',
       badge_ar: 'علاج الجذور',
-      hint_en: 'Root canal shaping & tapering',
-      hint_ar: 'توسيع وتنظيف قنوات الجذر بدقة',
+      badge_en: 'Endodontics',
       accent: '#DC2626'
-    },
-    {
-      id: 'dental_chair',
-      name_en: 'Dental Chair Delivery Unit',
-      name_ar: 'كرسي العيادة السريري المتكامل',
-      icon: '🛋️',
-      badge_en: 'Clinical',
-      badge_ar: 'العيادات السريرية',
-      hint_en: 'Patient unit, suction & lighting',
-      hint_ar: 'وحدة الطبيب والمريض والإضاءة والشفط',
-      accent: '#2563EB'
-    },
-    {
-      id: 'rubber_dam',
-      name_en: 'Rubber Dam Isolation Kit',
-      name_ar: 'طقم الحاجز المطاطي للعزل',
-      icon: '🛡️',
-      badge_en: 'Isolation',
-      badge_ar: 'العزل والتعقيم',
-      hint_en: 'Aseptic moisture and airway safety',
-      hint_ar: 'عزل اللعاب والرطوبة وحماية المريض',
-      accent: '#0D9488'
-    },
-    {
-      id: 'ultrasonic_scaler',
-      name_en: 'Ultrasonic Piezo Scaler',
-      name_ar: 'جهاز إزالة الجير بالموجات',
-      icon: '⚡',
-      badge_en: 'Periodontics',
-      badge_ar: 'تنظيف اللثة',
-      hint_en: 'Calculus and plaque cavitation',
-      hint_ar: 'تفتيت الرواسب الكلسية بالموجات',
-      accent: '#0891B2'
-    },
-    {
-      id: 'articulating_paper',
-      name_en: 'Articulating Paper & Forceps',
-      name_ar: 'ورق فحص الإطباق والعضة',
-      icon: '📄',
-      badge_en: 'Occlusion',
-      badge_ar: 'فحص الإطباق',
-      hint_en: 'Detecting high occlusal contacts',
-      hint_ar: 'تحديد نقاط العضة المرتفعة بعد الحشو',
-      accent: '#7C3AED'
-    },
-    {
-      id: 'straight_elevator',
-      name_en: 'Straight Root Elevator',
-      name_ar: 'رافعة الجذور المستقيمة',
-      icon: '🥄',
-      badge_en: 'Surgical',
-      badge_ar: 'جراحة الفم',
-      hint_en: 'Luxation wedge principle for roots',
-      hint_ar: 'خلخلة السن والجذور بمبدأ الرافعة',
-      accent: '#BE123C'
-    },
-    {
-      id: 'impression_tray',
-      name_en: 'Alginate Impression Tray',
-      name_ar: 'ملعقة أخذ الطبعات الفموية',
-      icon: '📐',
-      badge_en: 'Prostho',
-      badge_ar: 'الاستعاضة الصناعية',
-      hint_en: 'Cast study models and custom trays',
-      hint_ar: 'صب قوالب الفم لمقاسات التركيبات',
-      accent: '#D97706'
-    },
-    {
-      id: 'titanium_implant',
-      name_en: 'Titanium Dental Implant',
-      name_ar: 'غرسة التيتانيوم السنية',
-      icon: '🔩',
-      badge_en: 'Implantology',
-      badge_ar: 'زراعة الأسنان',
-      hint_en: 'Osseointegrated bone fixture replacement',
-      hint_ar: 'الالتحام العظمي لتعويض السن المفقود',
-      accent: '#4F46E5'
     }
   ];
 
@@ -713,10 +609,10 @@ window.GamesPage = (function () {
   };
 
   const VISUAL_LEVEL_CONFIG = {
-    easy: { pairs: 4, points: 30, label_ar: '🟢 سهل (8 كروت)', label_en: '🟢 Easy (8 Cards)', cols: 4 },
-    medium: { pairs: 8, points: 30, label_ar: '🟡 متوسط (16 كرت)', label_en: '🟡 Medium (16 Cards)', cols: 4 },
-    hard: { pairs: 12, points: 30, label_ar: '🔴 متقدم (24 كرت)', label_en: '🔴 Hard (24 Cards)', cols: 6 },
-    expert: { pairs: 16, points: 30, label_ar: '🔥 خبير (32 كرت)', label_en: '🔥 Expert (32 Cards)', cols: 8 }
+    easy: { pairs: 4, points: 20, label_ar: '🟢 سهل (8 كروت)', label_en: '🟢 Easy (8 Cards)', cols: 4 },
+    medium: { pairs: 8, points: 30, label_ar: '🟡 كامل (16 كرت)', label_en: '🟡 Full Set (16 Cards)', cols: 4 },
+    hard: { pairs: 8, points: 35, label_ar: '🔴 متقدم (16 كرت)', label_en: '🔴 Advanced (16 Cards)', cols: 4 },
+    expert: { pairs: 8, points: 50, label_ar: '🔥 خبير (16 كرت)', label_en: '🔥 Expert (16 Cards)', cols: 4 }
   };
 
   function shuffle(arr) {
@@ -1018,8 +914,9 @@ window.GamesPage = (function () {
         updateVisualStatsBar();
         renderVisualBoard();
 
-        const cfg = VISUAL_LEVEL_CONFIG[state.visualLevel];
-        if (state.visualMatched === cfg.pairs) {
+        const cfg = VISUAL_LEVEL_CONFIG[state.visualLevel] || VISUAL_LEVEL_CONFIG.easy;
+        const targetPairs = Math.min(cfg.pairs, VISUAL_DATA.length);
+        if (state.visualMatched === targetPairs) {
           // VICTORY!
           state.visualWon = true;
           clearInterval(state.visualTimer);
@@ -1027,7 +924,7 @@ window.GamesPage = (function () {
           launchConfetti();
 
           // Award +30 Points
-          const pts = 30;
+          const pts = cfg.points || 30;
           if (window.STORE && typeof window.STORE.addPoints === 'function') {
             window.STORE.addPoints(pts);
           }
@@ -1059,8 +956,9 @@ window.GamesPage = (function () {
     if (movesEl) movesEl.textContent = state.visualMoves;
 
     const matchedEl = document.getElementById('visual-matched-val');
-    const cfg = VISUAL_LEVEL_CONFIG[state.visualLevel];
-    if (matchedEl) matchedEl.textContent = `${state.visualMatched} / ${cfg.pairs}`;
+    const cfg = VISUAL_LEVEL_CONFIG[state.visualLevel] || VISUAL_LEVEL_CONFIG.easy;
+    const targetPairs = Math.min(cfg.pairs, VISUAL_DATA.length);
+    if (matchedEl) matchedEl.textContent = `${state.visualMatched} / ${targetPairs}`;
   }
 
   function renderVisualBoard() {
@@ -1084,16 +982,15 @@ window.GamesPage = (function () {
               </div>
             </div>
 
-            <!-- Back (Revealed Instrument Visual Card) -->
-            <div class="memory-card-back visual-card-back">
-              <div class="visual-card-dept-badge" style="background: ${d.accent}20; color: ${d.accent}; border-color: ${d.accent}40;">
-                ${isAr ? d.badge_ar : d.badge_en}
+            <!-- Back (Revealed Instrument Visual Card with Real Image) -->
+            <div class="memory-card-back visual-card-back" style="padding: 8px; display: flex; flex-direction: column; align-items: center;">
+              <div class="visual-card-dept-badge" style="background: ${d.accent}20; color: ${d.accent}; border-color: ${d.accent}40; margin-bottom: 4px; font-size: 0.65rem;">
+                ${isAr ? d.badge_ar : (d.badge_en || d.badge_ar)}
               </div>
-              <div class="visual-instrument-icon-box" style="box-shadow: 0 4px 14px ${d.accent}25;">
-                <span class="visual-instrument-symbol">${d.icon}</span>
+              <div class="visual-instrument-img-box" style="width: 100%; height: 85px; overflow: hidden; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 6px;">
+                <img src="${d.img_url}" alt="${isAr ? d.name_ar : (d.name_en || d.name_ar)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.src='https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&auto=format&fit=crop&q=80'" />
               </div>
-              <div class="visual-card-name">${isAr ? d.name_ar : d.name_en}</div>
-              <div class="visual-card-hint">${isAr ? d.hint_ar : d.hint_en}</div>
+              <div class="visual-card-name" style="font-size: 0.775rem; font-weight: 700; text-align: center; color: var(--text-primary); line-height: 1.2;">${isAr ? d.name_ar : (d.name_en || d.name_ar)}</div>
             </div>
           </div>
         </div>
@@ -1361,10 +1258,9 @@ window.GamesPage = (function () {
     const equipped = window.STORE ? window.STORE.getEquippedSkinData() : null;
     const currentPoints = window.STORE ? window.STORE.getPoints() : 25;
 
-    // Check query param for default tab
-    const requestedTab = queryParams?.get('tab');
-    if (requestedTab && ['terms', 'visual', 'quiz'].includes(requestedTab)) {
-      state.activeTab = requestedTab;
+    const playMode = queryParams?.get('play') || queryParams?.get('tab');
+    if (playMode && ['terms', 'visual', 'quiz'].includes(playMode)) {
+      state.activeTab = playMode;
     }
 
     container.innerHTML = `
@@ -1372,17 +1268,23 @@ window.GamesPage = (function () {
         <!-- Hero Header -->
         <div class="arcade-hero-card">
           <div class="arcade-hero-content">
-            <div class="arcade-hero-badge">
-              <span class="badge-pulse-dot"></span>
-              <span>🎮 ${isAr ? 'مركز الألعاب والترفيه الأكاديمي' : 'Arcade & Dental Games Hub'}</span>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+              <a href="#/games" class="btn btn-secondary btn-sm" onclick="window.GamesPage.switchTab('terms')" style="gap: 6px; font-weight: 700;">
+                <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 14px; height: 14px;"></i>
+                <span>${isAr ? 'مركز الألعاب الرئيسي' : 'Arcade Hub'}</span>
+              </a>
+              <div class="arcade-hero-badge">
+                <span class="badge-pulse-dot"></span>
+                <span>🎮 ${isAr ? 'مركز الألعاب السريرية' : 'Dental Games Arena'}</span>
+              </div>
             </div>
             <h1 class="arcade-hero-title">
               ${isAr ? 'ألعاب وتحديات الذاكرة السريرية' : 'Dental Arcade & Memory Challenges'}
             </h1>
             <p class="arcade-hero-sub">
               ${isAr
-                ? 'استمتع بالألعاب السريرية وتحديات المصطلحات، اختبر سرعة بديهتك، واكسب نقاطاً أكاديمية لاستبدال سكنات الثعلب الـ 4 وثيمات المنصة!'
-                : 'Enjoy interactive dental challenges, master medical terms, test your clinic reflexes, and earn academic points for mascot skins!'}
+                ? 'اختبر سرعة بديهتك، واكسب نقاطاً أكاديمية لفتح سكنات الثعلب وثيمات المنصة!'
+                : 'Test your clinical reflexes, master terms, and earn points for mascot skins!'}
             </p>
           </div>
 
@@ -1401,21 +1303,21 @@ window.GamesPage = (function () {
           </div>
         </div>
 
-        <!-- Game Select Tabs Bar -->
+        <!-- Game Select Tabs Bar (Dedicated Views Selector) -->
         <div class="arcade-tabs-bar">
+          <button class="arcade-tab-btn ${state.activeTab === 'visual' ? 'active' : ''}" onclick="window.GamesPage.switchTab('visual')">
+            <span class="tab-icon">🪞</span>
+            <div class="tab-label-group">
+              <span class="tab-main-label">${isAr ? 'مطابقة صور أدوات العيادة (HD)' : 'Visual Instrument Matching'}</span>
+              <span class="tab-sub-label">${isAr ? 'صور أدوات حقيقية (+30 نقطة)' : 'Real Instrument Photos (+30 pts)'}</span>
+            </div>
+          </button>
+
           <button class="arcade-tab-btn ${state.activeTab === 'terms' ? 'active' : ''}" onclick="window.GamesPage.switchTab('terms')">
             <span class="tab-icon">🧠</span>
             <div class="tab-label-group">
               <span class="tab-main-label">${isAr ? 'ذاكرة المصطلحات الطبية' : 'Dental Terms Memory'}</span>
-              <span class="tab-sub-label">${isAr ? '4 مستويات (+10 إلى +50 نقطة)' : '4 Levels (+10 to +50 pts)'}</span>
-            </div>
-          </button>
-
-          <button class="arcade-tab-btn ${state.activeTab === 'visual' ? 'active' : ''}" onclick="window.GamesPage.switchTab('visual')">
-            <span class="tab-icon">🪞</span>
-            <div class="tab-label-group">
-              <span class="tab-main-label">${isAr ? 'مطابقة أدوات العيادة البصرية' : 'Visual Instruments Match'}</span>
-              <span class="tab-sub-label">${isAr ? 'أدوات وفانتوم وأشعة (+30 نقطة)' : 'Instruments & Phantom (+30 pts)'}</span>
+              <span class="tab-sub-label">${isAr ? '4 مستويات صعوبة (+10 لـ +50)' : '4 Levels (+10 to +50 pts)'}</span>
             </div>
           </button>
 
@@ -1428,7 +1330,7 @@ window.GamesPage = (function () {
           </button>
         </div>
 
-        <!-- Dynamic Game Stage -->
+        <!-- Dedicated Dynamic Game Arena Stage -->
         <div id="arcade-dynamic-stage" class="arcade-stage-wrapper"></div>
 
         <!-- Modal Container for Wins -->

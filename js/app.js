@@ -190,8 +190,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/sheet/:id', (c, id, q) => window.SheetDetailPage.render(c, id, q));
   router.register('/videos', (c, q) => window.SecondaryPages.renderVideos(c, q));
   router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
-  router.register('/exams', (c, q) => window.ExamsPage.render(c, q));
-  router.register('/calculator', (c, q) => window.ExamsPage.render(c, q));
+  router.register('/lecture-schedule', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'theory'; window.ExamsPage.render(c, q); });
+  router.register('/practical-schedule', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'practical'; window.ExamsPage.render(c, q); });
+  router.register('/exams', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'midterm'; window.ExamsPage.render(c, q); });
+  router.register('/calculator', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'midterm'; window.ExamsPage.render(c, q); });
   router.register('/quizzes', (c, q) => window.QuizzesPage.render(c, q));
   router.register('/questions', (c, q) => window.QuestionsPage.render(c, q));
   router.register('/flashcards', (c, q) => window.FlashcardsPage.render(c, q));
