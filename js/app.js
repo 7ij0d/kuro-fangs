@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideRewards = document.getElementById('side-nav-rewards');
     if (sideRewards) sideRewards.textContent = t('sideNavRewards');
 
+    const sideGames = document.getElementById('side-nav-games');
+    if (sideGames) sideGames.textContent = t('sideNavGames');
+
     const sideUserSub = document.getElementById('sidebar-user-sub');
     if (sideUserSub) sideUserSub.textContent = t('academicYear');
   };
@@ -172,6 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/favorites', (c, q) => window.SecondaryPages.renderFavorites(c, q));
   router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
   router.register('/rewards', (c, q) => window.SecondaryPages.renderRewards(c, q));
+  router.register('/games', (c, q) => window.GamesPage.render(c, q));
 
   // 9. Global Mascot Avatars & Watermark Synchronization
   const updateGlobalMascotAvatars = () => {
