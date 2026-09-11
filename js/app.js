@@ -88,15 +88,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 7. Register Routes
   const router = window.ROUTER;
 
-  router.register('/', (c) => window.HomePage.render(c));
-  router.register('/calculator', (c) => window.CalculatorPage.render(c));
-  router.register('/quizzes', (c) => window.QuizzesPage.render(c));
-  router.register('/questions', (c) => window.QuestionsPage.render(c));
-  router.register('/flashcards', (c) => window.FlashcardsPage.render(c));
-  router.register('/notes', (c) => window.NotesPage.render(c));
-  router.register('/previous-years', (c) => window.PreviousYearsPage.render(c));
-  router.register('/favorites', (c) => window.SecondaryPages.renderFavorites(c));
-  router.register('/profile', (c) => window.SecondaryPages.renderProfile(c));
+  router.register('/', (c, q) => window.HomePage.render(c, q));
+  router.register('/sheets', (c, q) => window.SheetsPage.render(c, q));
+  router.register('/videos', (c, q) => window.SecondaryPages.renderVideos(c, q));
+  router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
+  router.register('/calculator', (c, q) => window.CalculatorPage.render(c, q));
+  router.register('/quizzes', (c, q) => window.QuizzesPage.render(c, q));
+  router.register('/questions', (c, q) => window.QuestionsPage.render(c, q));
+  router.register('/flashcards', (c, q) => window.FlashcardsPage.render(c, q));
+  router.register('/notes', (c, q) => window.NotesPage.render(c, q));
+  router.register('/previous-years', (c, q) => window.PreviousYearsPage.render(c, q));
+  router.register('/favorites', (c, q) => window.SecondaryPages.renderFavorites(c, q));
+  router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
 
   // 8. Synchronize Points
   window.STORE.subscribe((event) => {
