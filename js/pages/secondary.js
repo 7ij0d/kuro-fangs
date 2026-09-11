@@ -488,19 +488,20 @@ const SecondaryPages = {
   // Alerts
   renderAlerts(container) {
     const alerts = window.DATA.getAlerts();
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
 
     container.innerHTML = `
       <div class="page-title-bar">
         <div class="page-title-group">
           <h1>
             <i data-lucide="bell" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
-            مركز التنبيهات والإعلانات الرسمية
+            ${isAr ? 'مركز التنبيهات والإعلانات الرسمية' : 'Official Faculty Announcements & Alerts'}
           </h1>
-          <p>كافة التبليغات الصادرة عن إدارة كلية طب وجراحة الفم والأسنان ومنسقي المقررات</p>
+          <p>${isAr ? 'كافة التبليغات الصادرة عن قسم الدراسة والامتحانات – كلية طب وجراحة الفم والأسنان' : 'All official announcements from the Study & Exams Department — Faculty of Dentistry'}</p>
         </div>
       </div>
 
-      <div class="compact-alerts-list">
+      <div class="compact-alerts-list" style="display: flex; flex-direction: column; gap: 16px;">
         ${alerts.length === 0 ? (
           window.renderEmptyState
             ? window.renderEmptyState()
@@ -509,26 +510,68 @@ const SecondaryPages = {
                 <div class="empty-state-icon-wrap">
                   <i data-lucide="folder-open"></i>
                 </div>
-                <h3 class="empty-state-title">لا توجد محتويات مضافة حالياً</h3>
-                <p class="empty-state-subtitle">جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً</p>
+                <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No announcements available yet'}</h3>
+                <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الإعلانات والمحتوى الأكاديمي قريباً' : 'Official notices and curriculum updates will be published soon.'}</p>
               </div>
             `
-        ) : alerts.map(a => `
-          <div class="compact-alert-card ${a.type === 'urgent' ? 'alert-urgent' : 'alert-warning'}">
-            <div class="alert-left-content">
-              <div class="alert-icon-pill ${a.type === 'urgent' ? 'badge-danger' : 'badge-warning'}">
-                <i data-lucide="${a.type === 'urgent' ? 'alert-triangle' : 'info'}"></i>
+        ) : alerts.map(a => {
+          const title = (isAr ? a.title_ar : (a.title_en || a.title_ar)) || a.title || '';
+          const content = (isAr ? a.content_ar : (a.content_en || a.content_ar)) || a.message || '';
+          const badge = (isAr ? a.badge_ar : (a.badge_en || a.badge_ar)) || '';
+          const publisher = (isAr ? a.publisher_ar : (a.publisher_en || a.publisher_ar)) || '';
+          const dateTime = [a.date, a.time].filter(Boolean).join(' • ') || a.created_at || (isAr ? 'حديثاً' : 'Recent');
+
+          let iconName = 'info';
+          let borderClass = 'alert-warning';
+          let badgeClass = 'badge-warning';
+
+          if (a.type === 'urgent') {
+            iconName = 'alert-triangle';
+            borderClass = 'alert-urgent';
+            badgeClass = 'badge-danger';
+          } else if (a.type === 'exam') {
+            iconName = 'calendar';
+            borderClass = 'alert-warning';
+            badgeClass = 'badge-primary';
+          } else if (a.type === 'link') {
+            iconName = 'external-link';
+            borderClass = 'alert-info';
+            badgeClass = 'badge-info';
+          } else if (a.type === 'plan') {
+            iconName = 'file-text';
+            borderClass = 'alert-success';
+            badgeClass = 'badge-success';
+          }
+
+          return `
+            <div class="compact-alert-card ${borderClass}" style="padding: 16px 20px; border-radius: var(--radius-md); background: var(--bg-surface); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="alert-icon-pill ${badgeClass}" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px;">
+                    <i data-lucide="${iconName}" style="width: 18px; height: 18px;"></i>
+                  </span>
+                  ${badge ? `<span style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--bg-hover); color: var(--text-primary); border: 1px solid var(--border-subtle);">${badge}</span>` : ''}
+                </div>
+                <div class="alert-meta" style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+                  <span>${dateTime}</span>
+                </div>
               </div>
+
               <div class="alert-text-group">
-                <span class="alert-headline">${a.title}</span>
-                <span class="alert-description">${a.message}</span>
+                <h3 class="alert-headline" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">${title}</h3>
+                <div class="alert-description" style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; white-space: pre-line;">${content}</div>
               </div>
+
+              ${publisher || a.url ? `
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 0.8rem; color: var(--text-tertiary);">
+                  ${publisher ? `<span style="display: flex; align-items: center; gap: 5px;"><i data-lucide="shield-check" style="width: 14px; height: 14px; color: var(--brand-primary);"></i> ${publisher}</span>` : '<span></span>'}
+                  ${a.url ? `<a href="${a.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 4px 12px; border-radius: var(--radius-sm);"><i data-lucide="external-link" style="width: 12px; height: 12px;"></i> ${isAr ? 'فتح البوابة الرسمية' : 'Open Portal'}</a>` : ''}
+                </div>
+              ` : ''}
             </div>
-            <div class="alert-meta">
-              <span class="alert-time">${a.created_at || 'حديثاً'}</span>
-            </div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     `;
 
