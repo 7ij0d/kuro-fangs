@@ -152,15 +152,12 @@ const SheetsPage = {
 
       if (window.lucide) window.lucide.createIcons();
 
-      // View Buttons (In-App Document Viewer)
+      // View Buttons (Navigate to Dedicated Full Page Sheet Route)
       listContainer.querySelectorAll('.view-sheet-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const sheetId = btn.getAttribute('data-id');
-          const doc = filtered.find(s => s.id === sheetId);
-          if (window.DocumentViewer) {
-            window.DocumentViewer.open(doc || { title: 'Dental Sheet' });
-          }
+          window.location.hash = '#/sheet-detail?id=' + sheetId;
         });
       });
 

@@ -1,12 +1,15 @@
 /**
- * KURO FANGS — IN-APP INTERACTIVE PDF / DOCUMENT VIEWER & ANNOTATION STUDIO
- * Supports Direct Reading, Highlighter, Freehand Drawing, Text Notes, PDF Download & Cloud Account Saving.
+ * KURO FANGS — JNOTES / GOODNOTES STYLE INTERACTIVE NOTE STUDIO & PDF VIEWER
+ * Features Tablet Fullscreen Workspace, JNotes Floating Header Palette, Left Thumbnail Drawer,
+ * Pen Drawing, Translucent Highlighting, Eraser, Drag-&-Drop Sticky Notes, Color Swatches & Local Account Sync.
  */
 
 const DocumentViewer = {
   currentDoc: null,
-  currentTool: 'highlighter',
   isOpen: false,
+  activeTool: 'pan', // 'pan', 'pen', 'highlighter', 'eraser', 'note'
+  activeColor: '#FEF08A', // default yellow
+  activeStroke: 4, // 2, 4, 8
 
   init() {
     if (document.getElementById('doc-viewer-modal')) return;
@@ -14,67 +17,89 @@ const DocumentViewer = {
     const modalMarkup = `
       <div id="doc-viewer-modal" class="doc-viewer-backdrop" aria-hidden="true">
         <div class="doc-viewer-window" role="dialog" aria-modal="true">
-          <!-- Viewer Top Header Toolbar -->
+          
+          <!-- Top JNotes Studio Navigation & Tool Palette Header -->
           <div class="doc-viewer-header">
+            <!-- Left: Back & Doc Info -->
             <div class="doc-viewer-title-group">
-              <span class="doc-badge-type" id="doc-viewer-badge">PDF • HD</span>
+              <button id="doc-viewer-close-btn" class="doc-viewer-close-btn" title="إغلاق والعودة (Close / Back)">
+                ✕
+              </button>
+              <button id="doc-toggle-sidebar-btn" class="btn-annotation-tool" title="تبديل القائمة الجانبية للصفحات (Thumbnails Drawer)">
+                🗂️ <span id="sidebar-toggle-text">الصفحات</span>
+              </button>
+              <span class="doc-badge-type" id="doc-viewer-badge">FIXED PROS</span>
               <div class="doc-viewer-meta-text">
-                <h3 id="doc-viewer-title">Lecture Document</h3>
-                <p id="doc-viewer-subtitle">Dental Surgery • Year 3</p>
+                <h3 id="doc-viewer-title">Provisional Restoration & Temporization</h3>
+                <p id="doc-viewer-subtitle">د. هالة الحويج • 17 صفحة</p>
               </div>
             </div>
 
-            <!-- Student Annotation Studio Tools (Highlighter, Pen, Text Notes, Save) -->
-            <div class="doc-viewer-annotation-bar" id="doc-annotation-toolbar">
-              <button id="doc-tool-highlighter" class="btn-annotation-tool active" title="قلم التظليل الأصفر (Text Highlighter)">
+            <!-- Center: JNotes Note Studio Tool Bar -->
+            <div class="doc-viewer-annotation-bar">
+              <button id="jtool-pan" class="btn-annotation-tool active" title="وضع القراءة والتصفح (Pan / Read Mode)">
+                🖐️ <span>قراءة</span>
+              </button>
+
+              <button id="jtool-pen" class="btn-annotation-tool" title="قلم الكتابة والرسم الحر (Gel Pen)">
+                ✏️ <span>قلم</span>
+              </button>
+
+              <button id="jtool-highlighter" class="btn-annotation-tool" title="قلم التظليل المضيء (Translucent Highlighter)">
                 🖍️ <span>تظليل</span>
               </button>
 
-              <button id="doc-tool-pen" class="btn-annotation-tool" title="قلم الرسم والتعليم اليدوي (Pen Overlay)">
-                ✏️ <span>قلم رسم</span>
+              <button id="jtool-eraser" class="btn-annotation-tool" title="ممحاة الرسوم والتعديلات (Eraser)">
+                🧹 <span>مسح</span>
               </button>
 
-              <button id="doc-tool-note" class="btn-annotation-tool" title="إضافة ملاحظة وتعليق نصي (Text Note)">
+              <button id="jtool-note" class="btn-annotation-tool" title="إضافة ملاحظة نصية لاصقة (Sticky Note)">
                 📝 <span>ملاحظة</span>
               </button>
 
-              <button id="doc-save-annotations-btn" class="btn-annotation-tool save-tool" title="حفظ جميع التعديلات والملاحظات في حسابي">
-                💾 <span id="doc-save-btn-text">حفظ بحسابي (+5)</span>
-              </button>
+              <!-- Color Palette Swatches -->
+              <div class="jnotes-color-swatches" id="jnotes-swatches-box">
+                <div class="swatch-dot active" data-color="#FEF08A" style="background-color: #FEF08A;" title="أصفر تظليل (Yellow)"></div>
+                <div class="swatch-dot" data-color="#86EFAC" style="background-color: #86EFAC;" title="أخضر نعناعي (Mint Green)"></div>
+                <div class="swatch-dot" data-color="#F472B6" style="background-color: #F472B6;" title="وردي زاهي (Pink)"></div>
+                <div class="swatch-dot" data-color="#38BDF8" style="background-color: #38BDF8;" title="أزرق ساطع (Cyan Blue)"></div>
+                <div class="swatch-dot" data-color="#F87171" style="background-color: #F87171;" title="أحمر مرجاني (Coral Red)"></div>
+                <div class="swatch-dot" data-color="#0F172A" style="background-color: #0F172A;" title="أسود قلم (Dark Ink)"></div>
+              </div>
 
-              <button id="doc-clear-annotations-btn" class="btn-annotation-tool clear-tool" title="مسح التعديلات">
-                🧹 <span>مسح</span>
-              </button>
+              <!-- Stroke Thickness Selector -->
+              <div class="jnotes-stroke-selector">
+                <button class="stroke-btn" data-stroke="2" title="خط رفيع (2px)">● 2</button>
+                <button class="stroke-btn active" data-stroke="4" title="خط متوسط (4px)">● 4</button>
+                <button class="stroke-btn" data-stroke="8" title="خط عريض (8px)">● 8</button>
+              </div>
             </div>
 
+            <!-- Right: Actions (Save, Download, Print) -->
             <div class="doc-viewer-actions">
-              <span class="doc-pages-indicator" id="doc-viewer-pages-pill">
+              <span class="doc-pages-indicator" id="doc-viewer-pages-pill" title="الصفحة الحالية من الإجمالي">
                 <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
-                <span id="doc-viewer-pages-text">17 Pages</span>
+                <span id="doc-viewer-pages-text">1 / 17</span>
               </span>
 
-              <button id="doc-viewer-download-btn" class="btn btn-primary btn-sm" title="Download PDF">
+              <button id="doc-save-annotations-btn" class="btn-annotation-tool save-tool" title="حفظ التعديلات في حسابي (+5 نقاط)">
+                💾 <span id="doc-save-btn-text">حفظ بحسابي</span>
+              </button>
+
+              <button id="doc-clear-annotations-btn" class="btn-annotation-tool clear-tool" title="تصفير ومسح التعديلات">
+                🗑️ <span>تصفير</span>
+              </button>
+
+              <button id="doc-viewer-download-btn" class="btn btn-primary btn-sm" title="تنزيل الشيت بصيغة PDF">
                 <i data-lucide="download" style="width: 15px; height: 15px;"></i>
-                <span id="doc-viewer-download-text">Download</span>
-              </button>
-
-              <button id="doc-viewer-print-btn" class="btn btn-secondary btn-sm" title="Print Document">
-                <i data-lucide="printer" style="width: 15px; height: 15px;"></i>
-              </button>
-
-              <button id="doc-viewer-fullscreen-btn" class="btn btn-secondary btn-sm" title="Toggle Fullscreen">
-                <i data-lucide="maximize" style="width: 15px; height: 15px;"></i>
-              </button>
-
-              <button id="doc-viewer-close-btn" class="doc-viewer-close-btn" aria-label="Close Viewer">
-                ✕
+                <span>PDF تنزيل</span>
               </button>
             </div>
           </div>
 
-          <!-- Document Viewport Frame -->
+          <!-- Document Viewport Canvas Area -->
           <div class="doc-viewer-body">
-            <iframe id="doc-viewer-iframe" class="doc-viewer-iframe" title="Interactive PDF Document Preview" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+            <iframe id="doc-viewer-iframe" class="doc-viewer-iframe" title="JNotes Interactive Document Reader Studio" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
           </div>
         </div>
       </div>
@@ -86,29 +111,23 @@ const DocumentViewer = {
     const modalEl = document.getElementById('doc-viewer-modal');
     const closeBtn = document.getElementById('doc-viewer-close-btn');
     const downloadBtn = document.getElementById('doc-viewer-download-btn');
-    const printBtn = document.getElementById('doc-viewer-print-btn');
-    const fsBtn = document.getElementById('doc-viewer-fullscreen-btn');
     const saveAnnBtn = document.getElementById('doc-save-annotations-btn');
     const clearAnnBtn = document.getElementById('doc-clear-annotations-btn');
-
-    const toolHighlighterBtn = document.getElementById('doc-tool-highlighter');
-    const toolPenBtn = document.getElementById('doc-tool-pen');
-    const toolNoteBtn = document.getElementById('doc-tool-note');
-
-    if (toolHighlighterBtn) {
-      toolHighlighterBtn.addEventListener('click', () => DocumentViewer.setActiveTool('highlighter'));
-    }
-    if (toolPenBtn) {
-      toolPenBtn.addEventListener('click', () => DocumentViewer.setActiveTool('pen'));
-    }
-    if (toolNoteBtn) {
-      toolNoteBtn.addEventListener('click', () => DocumentViewer.setActiveTool('note'));
-    }
+    const toggleSidebarBtn = document.getElementById('doc-toggle-sidebar-btn');
 
     if (closeBtn) closeBtn.addEventListener('click', () => DocumentViewer.close());
     if (modalEl) {
       modalEl.addEventListener('click', (e) => {
         if (e.target === modalEl) DocumentViewer.close();
+      });
+    }
+
+    if (toggleSidebarBtn) {
+      toggleSidebarBtn.addEventListener('click', () => {
+        const iframe = document.getElementById('doc-viewer-iframe');
+        if (iframe && iframe.contentWindow && typeof iframe.contentWindow.toggleSidebar === 'function') {
+          iframe.contentWindow.toggleSidebar();
+        }
       });
     }
 
@@ -120,46 +139,17 @@ const DocumentViewer = {
       });
     }
 
-    if (printBtn) {
-      printBtn.addEventListener('click', () => {
-        const iframe = document.getElementById('doc-viewer-iframe');
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.focus();
-          iframe.contentWindow.print();
-        }
-      });
-    }
-
-    if (fsBtn) {
-      fsBtn.addEventListener('click', () => {
-        const win = document.querySelector('.doc-viewer-window');
-        if (win) {
-          win.classList.toggle('fullscreen');
-        }
-      });
-    }
-
     if (saveAnnBtn) {
       saveAnnBtn.addEventListener('click', () => {
         const iframe = document.getElementById('doc-viewer-iframe');
         if (iframe && iframe.contentWindow && typeof iframe.contentWindow.saveAnnotations === 'function') {
           iframe.contentWindow.saveAnnotations();
-          if (window.STORE && typeof window.STORE.addPoints === 'function') {
-            window.STORE.addPoints(5);
-          }
+          window.STORE.addPoints(5);
           const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-          if (typeof window.showToast === 'function') {
-            window.showToast(
-              isAr ? 'تم حفظ تظليلاتك ورسوماتك وملاحظاتك بنجاح في حسابك! (+5 نقاط)' : 'Annotations, drawings & notes saved to your account! (+5 pts)',
-              { type: 'success', points: 5 }
-            );
-          }
-          const saveText = document.getElementById('doc-save-btn-text');
-          if (saveText) {
-            const orig = saveText.textContent;
-            saveText.textContent = isAr ? '✅ تم الحفظ!' : '✅ Saved!';
-            setTimeout(() => { saveText.textContent = orig; }, 2000);
-          }
+          window.showToast(
+            isAr ? 'تم حفظ تظليلاتك وملاحظاتك بنجاح في حسابك! (+5 نقاط)' : 'Annotations & notes saved to your account! (+5 pts)',
+            { type: 'success', points: 5 }
+          );
         }
       });
     }
@@ -170,12 +160,47 @@ const DocumentViewer = {
         if (iframe && iframe.contentWindow && typeof iframe.contentWindow.clearAnnotations === 'function') {
           iframe.contentWindow.clearAnnotations();
           const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-          if (typeof window.showToast === 'function') {
-            window.showToast(isAr ? 'تم مسح جميع التعديلات والملاحظات.' : 'All annotations cleared.', { type: 'info' });
-          }
+          window.showToast(isAr ? 'تم مسح التعديلات.' : 'Annotations cleared.', { type: 'info' });
         }
       });
     }
+
+    // Attach tool switcher handlers for top bar
+    const toolBtns = ['pan', 'pen', 'highlighter', 'eraser', 'note'];
+    toolBtns.forEach(tool => {
+      const btn = document.getElementById(`jtool-${tool}`);
+      if (btn) {
+        btn.addEventListener('click', () => DocumentViewer.setActiveTool(tool));
+      }
+    });
+
+    // Swatches click
+    document.querySelectorAll('.swatch-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        document.querySelectorAll('.swatch-dot').forEach(d => d.classList.remove('active'));
+        dot.classList.add('active');
+        const color = dot.getAttribute('data-color');
+        DocumentViewer.activeColor = color;
+        const iframe = document.getElementById('doc-viewer-iframe');
+        if (iframe && iframe.contentWindow && typeof iframe.contentWindow.setStudioColor === 'function') {
+          iframe.contentWindow.setStudioColor(color);
+        }
+      });
+    });
+
+    // Stroke size click
+    document.querySelectorAll('.stroke-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.stroke-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const stroke = parseInt(btn.getAttribute('data-stroke'), 10);
+        DocumentViewer.activeStroke = stroke;
+        const iframe = document.getElementById('doc-viewer-iframe');
+        if (iframe && iframe.contentWindow && typeof iframe.contentWindow.setStudioStroke === 'function') {
+          iframe.contentWindow.setStudioStroke(stroke);
+        }
+      });
+    });
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && DocumentViewer.isOpen) {
@@ -187,17 +212,15 @@ const DocumentViewer = {
   },
 
   setActiveTool(tool) {
-    DocumentViewer.currentTool = tool;
-    const hBtn = document.getElementById('doc-tool-highlighter');
-    const pBtn = document.getElementById('doc-tool-pen');
-    const nBtn = document.getElementById('doc-tool-note');
-    if (hBtn) hBtn.classList.toggle('active', tool === 'highlighter');
-    if (pBtn) pBtn.classList.toggle('active', tool === 'pen');
-    if (nBtn) nBtn.classList.toggle('active', tool === 'note');
+    DocumentViewer.activeTool = tool;
+    ['pan', 'pen', 'highlighter', 'eraser', 'note'].forEach(t => {
+      const btn = document.getElementById(`jtool-${t}`);
+      if (btn) btn.classList.toggle('active', t === tool);
+    });
 
     const iframe = document.getElementById('doc-viewer-iframe');
     if (iframe && iframe.contentWindow && typeof iframe.contentWindow.setStudioTool === 'function') {
-      iframe.contentWindow.setStudioTool(tool);
+      iframe.contentWindow.setStudioTool(tool, DocumentViewer.activeColor, DocumentViewer.activeStroke);
     }
   },
 
@@ -207,8 +230,6 @@ const DocumentViewer = {
     DocumentViewer.currentDoc = doc || {
       id: 'sh-fixed-provisional',
       title: 'Provisional Restoration & Temporization',
-      title_ar: 'Provisional Restoration & Temporization (التركيبات المؤقتة وطرق إعدادها)',
-      title_en: 'Provisional Restoration & Temporization',
       subject_name: 'Fixed Prosthodontics II',
       doctor_name: 'د. هالة الحويج (Dr. Hala Alhawij)',
       pages: 17,
@@ -222,38 +243,16 @@ const DocumentViewer = {
     const modalEl = document.getElementById('doc-viewer-modal');
     const titleEl = document.getElementById('doc-viewer-title');
     const subEl = document.getElementById('doc-viewer-subtitle');
-    const pagesTextEl = document.getElementById('doc-viewer-pages-text');
-    const downloadText = document.getElementById('doc-viewer-download-text');
     const iframe = document.getElementById('doc-viewer-iframe');
 
-    const targetDoc = DocumentViewer.currentDoc;
-    const docTitle = targetDoc.title || (isAr ? targetDoc.title_ar : targetDoc.title_en) || 'Provisional Restoration & Temporization';
-    const docSubject = targetDoc.subject_name || (isAr ? 'الاستعاضة السنية الثابتة 2 (Fixed Pros II)' : 'Fixed Prosthodontics II');
-    const docDoctor = targetDoc.doctor_name || (isAr ? 'د. هالة الحويج (Dr. Hala Alhawij)' : 'Dr. Hala Alhawij');
-    const docPages = targetDoc.pages || 17;
-    const docSize = targetDoc.size || '2.8 MB';
+    const docTitle = doc.title || (isAr ? doc.title_ar : doc.title_en) || 'Provisional Restoration & Temporization';
+    const docDoctor = doc.doctor_name || 'د. هالة الحويج';
 
     if (titleEl) titleEl.textContent = docTitle;
-    if (subEl) subEl.textContent = `${docSubject} • ${docDoctor} • ${docSize}`;
-    if (pagesTextEl) pagesTextEl.textContent = `${docPages} ${isAr ? 'صفحة' : 'Pages'}`;
-    if (downloadText) downloadText.textContent = isAr ? 'تنزيل PDF' : 'Download PDF';
+    if (subEl) subEl.textContent = `${docDoctor} • ${doc.pages || 17} صفحة • ${doc.size || '2.8 MB'}`;
 
-    // Reset tool to highlighter
-    DocumentViewer.setActiveTool(DocumentViewer.currentTool || 'highlighter');
-
-    // Generate interactive editable HTML for the document
-    const srcDocContent = DocumentViewer.generateDocHTML(targetDoc, isAr);
+    const srcDocContent = DocumentViewer.generateDocHTML(doc, isAr);
     if (iframe) {
-      iframe.onload = () => {
-        try {
-          if (iframe.contentWindow && typeof iframe.contentWindow.setStudioTool === 'function') {
-            iframe.contentWindow.setStudioTool(DocumentViewer.currentTool || 'highlighter');
-          }
-          if (iframe.contentWindow && typeof iframe.contentWindow.loadSavedAnnotations === 'function') {
-            iframe.contentWindow.loadSavedAnnotations();
-          }
-        } catch (e) {}
-      };
       iframe.srcdoc = srcDocContent;
     }
 
@@ -263,6 +262,11 @@ const DocumentViewer = {
     }
 
     document.body.style.overflow = 'hidden';
+
+    // Set initial tool
+    setTimeout(() => {
+      DocumentViewer.setActiveTool('pan');
+    }, 300);
 
     if (window.lucide) window.lucide.createIcons();
   },
@@ -275,9 +279,6 @@ const DocumentViewer = {
       modalEl.setAttribute('aria-hidden', 'true');
     }
 
-    const win = document.querySelector('.doc-viewer-window');
-    if (win) win.classList.remove('fullscreen');
-
     const iframe = document.getElementById('doc-viewer-iframe');
     if (iframe) {
       iframe.srcdoc = '';
@@ -287,183 +288,186 @@ const DocumentViewer = {
   },
 
   download(doc) {
-    if (window.STORE && typeof window.STORE.addPoints === 'function') {
-      window.STORE.addPoints(10);
-    }
+    window.STORE.addPoints(10);
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
     const title = doc?.title || doc?.title_ar || doc?.title_en || 'Provisional Restoration & Temporization';
     const msg = isAr 
       ? `تم بدء تنزيل الشيت بنجاح! (+10 نقاط أكاديمية) — [${title}]`
       : `Download started! (+10 pts earned) — [${title}]`;
-    if (typeof window.showToast === 'function') {
-      window.showToast(msg, { type: 'success', points: 10 });
-    }
+    window.showToast(msg, { type: 'success', points: 10 });
   },
 
   generateDocHTML(doc, isAr) {
-    const docId = doc?.id || 'sh-fixed-provisional';
-    const title = doc?.title || (isAr ? doc?.title_ar : doc?.title_en) || 'Provisional Restoration & Temporization';
-    const doctor = doc?.doctor_name || 'د. هالة الحويج (Dr. Hala Alhawij)';
-    const university = doc?.university || 'University of Tripoli - School of Dentistry';
-    const year = doc?.year || '2025-2026';
-    const totalPages = doc?.pages || 17;
+    const docId = doc.id || 'sh-fixed-provisional';
+    const title = doc.title || (isAr ? doc.title_ar : doc.title_en) || 'Provisional Restoration & Temporization';
+    const doctor = doc.doctor_name || 'Dr. Hala Alhawij';
+    const university = doc.university || 'University of Tripoli - School of Dentistry';
+    const year = doc.year || '2025-2026';
 
     return `<!DOCTYPE html>
-<html lang="${isAr ? 'ar' : 'en'}" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --brand: #0284C7;
       --brand-dark: #0369A1;
-      --highlight: #FEF08A;
       --paper-bg: #FFFFFF;
-      --bg: #0F172A;
+      --bg: #141522;
       --text: #0F172A;
       --text-sub: #475569;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
-      background-color: #0B1120;
+      font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+      background-color: var(--bg);
       color: var(--text);
-      line-height: 1.65;
-      padding: 24px 14px 60px;
+      line-height: 1.6;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      user-select: text;
+    }
+
+    /* JNotes Left Sidebar (Collapsible Page Thumbnails) */
+    .jnotes-sidebar {
+      width: 240px;
+      background: #181926;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      transition: margin-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .jnotes-sidebar.collapsed {
+      margin-right: -240px;
+    }
+
+    .sidebar-header {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: #F8FAFC;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-thumbnails-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .thumb-card {
+      background: #232536;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .thumb-card:hover, .thumb-card.active {
+      border-color: #0284C7;
+      background: rgba(2, 132, 199, 0.15);
+    }
+
+    .thumb-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #0284C7;
+      color: #FFF;
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .thumb-info {
+      overflow: hidden;
+    }
+
+    .thumb-info h5 {
+      color: #F8FAFC;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .thumb-info p {
+      color: #94A3B8;
+      font-size: 0.675rem;
+    }
+
+    /* Main Viewport Workspace */
+    .jnotes-viewport {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 30px 20px 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-    }
-
-    /* Floating Studio Toolbar inside Document Viewport */
-    .toolbar-sticky-indicator {
-      position: sticky;
-      top: 10px;
-      z-index: 1000;
-      background: rgba(15, 23, 42, 0.94);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #FFFFFF;
-      padding: 8px 16px;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      width: 100%;
-      max-width: 860px;
-    }
-
-    .toolbar-sticky-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-    }
-
-    .toolbar-sticky-right {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .btn-inpage-tool {
-      background: rgba(255, 255, 255, 0.1);
-      color: #F8FAFC;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      padding: 5px 11px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-
-    .btn-inpage-tool:hover {
-      background: rgba(255, 255, 255, 0.22);
-      transform: translateY(-1px);
-    }
-
-    .btn-inpage-tool.active {
-      background: #0284C7 !important;
-      color: #FFFFFF !important;
-      border-color: #38BDF8 !important;
-      box-shadow: 0 0 12px rgba(2, 132, 199, 0.6);
-    }
-
-    .btn-inpage-tool.inpage-save {
-      background: rgba(16, 185, 129, 0.25);
-      color: #34D399;
-      border-color: rgba(16, 185, 129, 0.45);
-    }
-    .btn-inpage-tool.inpage-save:hover {
-      background: #10B981;
-      color: #FFFFFF;
-    }
-
-    .btn-inpage-tool.inpage-clear {
-      background: rgba(239, 68, 68, 0.2);
-      color: #F87171;
-      border-color: rgba(239, 68, 68, 0.35);
-    }
-    .btn-inpage-tool.inpage-clear:hover {
-      background: #EF4444;
-      color: #FFFFFF;
+      gap: 32px;
+      scroll-behavior: smooth;
+      background: #141522;
     }
 
     .doc-page {
       background: var(--paper-bg);
       width: 100%;
       max-width: 840px;
-      min-height: 1080px;
-      border-radius: 10px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
-      padding: 48px 54px 60px;
-      margin-bottom: 32px;
+      min-height: 1100px;
+      border-radius: 8px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      padding: 48px 56px;
       position: relative;
       user-select: text;
-      border: 1px solid #E2E8F0;
+      direction: ltr; /* English dental lecture content retains clean LTR formatting */
+      text-align: left;
     }
 
-    /* Highlighter Mode Hover & Active State */
-    .doc-page.mode-highlighter p:hover, 
-    .doc-page.mode-highlighter li:hover,
-    .doc-page.mode-highlighter h3:hover,
-    .doc-page.mode-highlighter h4:hover {
+    /* Studio Modes */
+    .doc-page.mode-pan { cursor: default; }
+    .doc-page.mode-highlighter p:hover, .doc-page.mode-highlighter li:hover, .doc-page.mode-highlighter h3:hover {
       background-color: rgba(254, 240, 138, 0.35);
       cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .highlighted, mark.studio-highlight {
-      background-color: #FEF08A !important;
-      color: #0F172A !important;
       border-radius: 3px;
+    }
+
+    .doc-page.mode-pen { cursor: crosshair; }
+    .doc-page.mode-note { cursor: copy; }
+
+    /* Highlighted Elements */
+    .highlighted {
+      background-color: var(--highlight-color, #FEF08A) !important;
+      border-radius: 4px;
       padding: 1px 4px;
-      box-shadow: 0 0 10px rgba(254, 240, 138, 0.7) !important;
-      font-weight: 600;
+      box-shadow: 0 0 4px rgba(254, 240, 138, 0.4);
     }
 
-    mark.studio-highlight {
-      cursor: pointer;
-    }
-
-    /* Canvas Drawing Overlay */
+    /* HTML5 Canvas Overlay for Pen & Drawing */
     .canvas-overlay {
       position: absolute;
       top: 0;
@@ -471,90 +475,69 @@ const DocumentViewer = {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 20;
+      z-index: 10;
     }
 
     .canvas-overlay.pen-active {
-      pointer-events: auto !important;
-      cursor: crosshair !important;
-      touch-action: none;
+      pointer-events: auto;
     }
 
-    .doc-page.mode-pen {
-      user-select: none;
-    }
-
-    /* Sticky Text Notes Tool */
-    .doc-page.mode-note {
-      cursor: copy;
-    }
-
+    /* Drag & Drop Sticky Note Box */
     .sticky-note-box {
       position: absolute;
-      background: #FEF3C7;
-      border: 1.5px solid #F59E0B;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 0.85rem;
+      background: #FEF9C3;
+      border: 1px solid #F59E0B;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.825rem;
       color: #78350F;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
-      z-index: 35;
-      width: 230px;
-      cursor: default;
-      user-select: text;
-      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes popIn {
-      from { transform: scale(0.85); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      z-index: 20;
+      min-width: 180px;
+      direction: rtl;
+      text-align: right;
     }
 
     .sticky-note-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: grab;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      border-bottom: 1px dashed rgba(245, 158, 11, 0.4);
       padding-bottom: 4px;
-      border-bottom: 1px dashed rgba(245, 158, 11, 0.5);
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #92400E;
+      cursor: move;
     }
 
-    .sticky-note-header .btn-delete-note {
-      background: transparent;
-      border: none;
-      color: #DC2626;
+    .sticky-note-header span {
       font-weight: 800;
-      cursor: pointer;
-      font-size: 0.9rem;
-      line-height: 1;
-      padding: 1px 4px;
-      border-radius: 4px;
-    }
-    .sticky-note-header .btn-delete-note:hover {
-      background: #FEE2E2;
+      font-size: 0.725rem;
     }
 
-    .sticky-note-textarea {
+    .sticky-note-close {
+      background: none;
+      border: none;
+      color: #B45309;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .sticky-note-box textarea {
       width: 100%;
-      height: 75px;
+      height: 70px;
       background: transparent;
       border: none;
+      resize: both;
       font-family: inherit;
       font-size: 0.825rem;
-      color: #451A03;
-      resize: vertical;
+      color: #78350F;
       outline: none;
-      line-height: 1.45;
     }
 
-    /* Academic Handout Typography & Layout */
+    /* Page Typography & Layout */
     .page-header {
       border-bottom: 2px solid #0284C7;
-      padding-bottom: 10px;
+      padding-bottom: 12px;
       margin-bottom: 24px;
       display: flex;
       justify-content: space-between;
@@ -563,7 +546,7 @@ const DocumentViewer = {
 
     .page-header h4 {
       color: #0284C7;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -572,17 +555,16 @@ const DocumentViewer = {
     .page-header span {
       font-size: 0.75rem;
       color: var(--text-sub);
-      font-weight: 600;
     }
 
     h1.title-main {
-      font-size: 2.15rem;
+      font-size: 2.2rem;
       font-weight: 900;
       color: #0284C7;
-      margin-top: 70px;
-      margin-bottom: 8px;
+      margin-top: 100px;
+      margin-bottom: 10px;
       text-align: center;
-      letter-spacing: -0.5px;
+      line-height: 1.25;
     }
 
     h2.title-sub {
@@ -590,7 +572,7 @@ const DocumentViewer = {
       font-weight: 800;
       color: #0369A1;
       text-align: center;
-      margin-bottom: 45px;
+      margin-bottom: 50px;
     }
 
     .meta-center {
@@ -605,12 +587,12 @@ const DocumentViewer = {
       background: #F0F9FF;
       border: 1px solid #BAE6FD;
       border-radius: 10px;
-      padding: 24px 28px;
+      padding: 24px;
       margin-top: 30px;
     }
 
     .agenda-box h3 {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       color: #0369A1;
       margin-bottom: 12px;
       border-bottom: 1px dashed #BAE6FD;
@@ -620,27 +602,23 @@ const DocumentViewer = {
     .section-title {
       font-size: 1.15rem;
       font-weight: 800;
-      color: #881337;
+      color: #0F172A;
       margin: 22px 0 12px;
       padding-bottom: 4px;
-      border-bottom: 1.5px solid #FECDD3;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      border-bottom: 1.5px solid #0284C7;
     }
 
     .bullet-list {
       list-style-type: none;
       padding-left: 0;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .bullet-list li {
       position: relative;
-      padding-left: 22px;
-      margin-bottom: 8px;
+      padding-left: 20px;
+      margin-bottom: 10px;
       font-size: 0.925rem;
-      line-height: 1.6;
     }
 
     .bullet-list li::before {
@@ -648,105 +626,201 @@ const DocumentViewer = {
       color: #0284C7;
       font-size: 1.4rem;
       position: absolute;
-      left: 2px;
+      left: 0;
       top: -3px;
-    }
-
-    .clinical-callout {
-      background: #EFF6FF;
-      border-left: 4px solid #3B82F6;
-      border-radius: 6px;
-      padding: 14px 18px;
-      margin: 18px 0;
-      font-size: 0.885rem;
-      color: #1E3A8A;
-      line-height: 1.6;
-    }
-
-    .warning-callout {
-      background: #FFF1F2;
-      border-left: 4px solid #E11D48;
-      border-radius: 6px;
-      padding: 14px 18px;
-      margin: 18px 0;
-      font-size: 0.885rem;
-      color: #881337;
-      line-height: 1.6;
     }
 
     .table-spec {
       width: 100%;
       border-collapse: collapse;
-      margin: 18px 0;
-      font-size: 0.85rem;
+      margin: 16px 0 24px;
+      font-size: 0.875rem;
     }
 
     .table-spec th, .table-spec td {
       border: 1px solid #CBD5E1;
-      padding: 8px 12px;
+      padding: 10px 14px;
       text-align: left;
     }
 
     .table-spec th {
-      background: #F1F5F9;
+      background: #0284C7;
+      color: #FFF;
       font-weight: 700;
-      color: #1E293B;
+    }
+
+    .table-spec tr:nth-child(even) {
+      background: #F8FAFC;
+    }
+
+    .clinical-callout {
+      background: #FFFBEB;
+      border-left: 4px solid #F59E0B;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 18px 0;
+      font-size: 0.875rem;
+      color: #78350F;
     }
 
     .page-footer {
       position: absolute;
       bottom: 20px;
-      left: 54px;
-      right: 54px;
+      left: 56px;
+      right: 56px;
       display: flex;
       justify-content: space-between;
-      font-size: 0.75rem;
+      font-size: 0.725rem;
       color: var(--text-sub);
       border-top: 1px solid #E2E8F0;
       padding-top: 10px;
-      font-weight: 600;
     }
   </style>
 </head>
-<body id="doc-body">
+<body>
 
-  <!-- Sticky In-Document Studio Control Bar -->
-  <div class="toolbar-sticky-indicator">
-    <div class="toolbar-sticky-left">
-      <span id="current-tool-icon">⚡</span>
-      <span id="current-tool-label">وضع التظليل الأصفر (انقر على الفقرات أو ظلل النص)</span>
-      <span id="save-feedback-badge" style="display: none; background: #10B981; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">✅ تم الحفظ (+5)</span>
+  <!-- JNotes Collapsible Page Thumbnail Sidebar -->
+  <div class="jnotes-sidebar" id="jnotes-sidebar">
+    <div class="sidebar-header">
+      <span>🗂️ فهرس الصفحات (17)</span>
+      <small style="color: #94A3B8;">JNotes Studio</small>
     </div>
-    <div class="toolbar-sticky-right">
-      <button class="btn-inpage-tool active" data-tool="highlighter" onclick="window.setStudioTool('highlighter')">
-        🖍️ <span>تظليل</span>
-      </button>
-      <button class="btn-inpage-tool" data-tool="pen" onclick="window.setStudioTool('pen')">
-        ✏️ <span>قلم رسم</span>
-      </button>
-      <button class="btn-inpage-tool" data-tool="note" onclick="window.setStudioTool('note')">
-        📝 <span>ملاحظة</span>
-      </button>
-      <button class="btn-inpage-tool inpage-save" onclick="handleInpageSave()">
-        💾 <span>حفظ التعديلات (+5)</span>
-      </button>
-      <button class="btn-inpage-tool inpage-clear" onclick="handleInpageClear()">
-        🧹 <span>مسح</span>
-      </button>
+    <div class="sidebar-thumbnails-list">
+      <div class="thumb-card active" onclick="scrollToPage(1)">
+        <div class="thumb-num">1</div>
+        <div class="thumb-info">
+          <h5>غلاف المحاضرة</h5>
+          <p>Title & Agenda</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(2)">
+        <div class="thumb-num">2</div>
+        <div class="thumb-info">
+          <h5>القسم 1: المفاهيم الأساسية</h5>
+          <p>Definitions & Triad</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(3)">
+        <div class="thumb-num">3</div>
+        <div class="thumb-info">
+          <h5>القسم 2: المتطلبات الحيوية</h5>
+          <p>Biological Requirements</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(4)">
+        <div class="thumb-num">4</div>
+        <div class="thumb-info">
+          <h5>القسم 3: الميكانيكية والجمالية</h5>
+          <p>Mechanical & Esthetic</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(5)">
+        <div class="thumb-num">5</div>
+        <div class="thumb-info">
+          <h5>القسم 4: تصنيف التركيبات</h5>
+          <p>Classification Matrix</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(6)">
+        <div class="thumb-num">6</div>
+        <div class="thumb-info">
+          <h5>القسم 5: التيجان المعدنية Preformed</h5>
+          <p>Aluminum Crowns</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(7)">
+        <div class="thumb-num">7</div>
+        <div class="thumb-info">
+          <h5>القسم 6: التيجان البلاستيكية</h5>
+          <p>Polycarbonate Crowns</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(8)">
+        <div class="thumb-num">8</div>
+        <div class="thumb-info">
+          <h5>القسم 7: التركيبات المخصصة</h5>
+          <p>Custom Provisionals</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(9)">
+        <div class="thumb-num">9</div>
+        <div class="thumb-info">
+          <h5>القسم 8: التقنية المباشرة</h5>
+          <p>Direct Technique</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(10)">
+        <div class="thumb-num">10</div>
+        <div class="thumb-info">
+          <h5>القسم 9: التقنية غير المباشرة</h5>
+          <p>Indirect Lab Technique</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(11)">
+        <div class="thumb-num">11</div>
+        <div class="thumb-info">
+          <h5>القسم 10: مصفوفة Vacuum Matrix</h5>
+          <p>Vacuum Shell Form</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(12)">
+        <div class="thumb-num">12</div>
+        <div class="thumb-info">
+          <h5>القسم 11: مقارنة المواد</h5>
+          <p>Acrylic vs Composite</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(13)">
+        <div class="thumb-num">13</div>
+        <div class="thumb-info">
+          <h5>القسم 12: أسمنت التثبيت المؤقت</h5>
+          <p>Provisional Cements</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(14)">
+        <div class="thumb-num">14</div>
+        <div class="thumb-info">
+          <h5>القسم 13: الجسور متعددة الوحدات</h5>
+          <p>Pontic Designs & Bridges</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(15)">
+        <div class="thumb-num">15</div>
+        <div class="thumb-info">
+          <h5>القسم 14: المضاعفات الإكلينيكية</h5>
+          <p>Complications & Fixes</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(16)">
+        <div class="thumb-num">16</div>
+        <div class="thumb-info">
+          <h5>القسم 15: التلميع والعناية</h5>
+          <p>Finishing & Maintenance</p>
+        </div>
+      </div>
+      <div class="thumb-card" onclick="scrollToPage(17)">
+        <div class="thumb-num">17</div>
+        <div class="thumb-info">
+          <h5>القسم 16: أسئلة المراجعة</h5>
+          <p>Exam Review & MCQs</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="pdf-page-container">
+  <!-- Document Paper Scroll Viewport -->
+  <div class="jnotes-viewport" id="jnotes-viewport">
+
     <!-- PAGE 1 -->
-    <div class="doc-page mode-highlighter" id="page-1">
+    <div class="doc-page" id="page-1" data-page="1">
       <canvas class="canvas-overlay" id="canvas-1"></canvas>
       <div class="page-header">
-        <h4>Fixed Prosthodontics II • Official Handout</h4>
+        <h4>Fixed Prosthodontics II • Lecture Handout</h4>
         <span>${university}</span>
       </div>
 
       <h1 class="title-main">PROVISIONAL RESTORATION AND TEMPORIZATION</h1>
-      <h2 class="title-sub">CLINICAL TECHNIQUES & CONTEMPORARY PROTOCOLS</h2>
+      <h2 class="title-sub">CLINICAL PROTOCOLS & CONTEMPORARY TECHNIQUES</h2>
 
       <div class="meta-center">
         <p><strong>${doctor}</strong></p>
@@ -755,28 +829,25 @@ const DocumentViewer = {
       </div>
 
       <div class="agenda-box">
-        <h3>ACADEMIC LECTURE AGENDA & CORE MODULES</h3>
+        <h3>LECTURE AGENDA & CORE MODULES</h3>
         <ul class="bullet-list">
           <li><strong>Module 1:</strong> Definition, Terminology, and Differences vs. Permanent Restorations</li>
           <li><strong>Module 2:</strong> Triad of Requirements (Biologic, Mechanical, and Esthetic)</li>
-          <li><strong>Module 3:</strong> Comprehensive Classification of Provisional Restorations</li>
-          <li><strong>Module 4:</strong> Preformed Crowns (Aluminum, Stainless Steel, Polycarbonate, Celluloid)</li>
-          <li><strong>Module 5:</strong> Custom Fabrication Techniques (Direct, Indirect, Direct-Indirect)</li>
-          <li><strong>Module 6:</strong> Contemporary Resins & Material Science (PMMA, PEMA, Bis-Acryl, UDMA)</li>
-          <li><strong>Module 7:</strong> Provisional Cements & The Critical Eugenol Incompatibility Warning</li>
-          <li><strong>Module 8:</strong> Biologic Emergence Profile, Contouring, and Polishing Protocol</li>
-          <li><strong>Module 9:</strong> Clinical Complications, Debonding Management, and High-Yield Board Exam Takeaways</li>
+          <li><strong>Module 3:</strong> Classification of Provisional Restorations & Preformed Crowns</li>
+          <li><strong>Module 4:</strong> Direct vs. Indirect Fabrication Protocols & Vacuum Shells</li>
+          <li><strong>Module 5:</strong> Comparative Analysis of Restorative Resins & Provisional Cements</li>
+          <li><strong>Module 6:</strong> Pontic Design, Clinical Troubleshooting, and Exam Review</li>
         </ul>
       </div>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 1 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 2 -->
-    <div class="doc-page mode-highlighter" id="page-2">
+    <div class="doc-page" id="page-2" data-page="2">
       <canvas class="canvas-overlay" id="canvas-2"></canvas>
       <div class="page-header">
         <h4>Module 1: Fundamentals</h4>
@@ -787,7 +858,7 @@ const DocumentViewer = {
       <p><strong>Definition of Provisional Restoration:</strong></p>
       <p style="margin-bottom: 14px;">A temporary or interim dental prosthesis designed to enhance esthetics, stabilization, and function for a limited period of time, after which it is replaced by a definitive permanent dental prosthesis.</p>
 
-      <p><strong>Common Synonyms in Prosthodontic Literature:</strong></p>
+      <p><strong>Synonyms in Prosthodontic Literature:</strong></p>
       <p style="margin-bottom: 20px;">Provisional Restoration | Transitional Crown | Temporary Prosthesis | Interim Treatment Restoration.</p>
 
       <h3 class="section-title">KEY DIFFERENCES: PROVISIONAL VS. PERMANENT RESTORATIONS</h3>
@@ -796,7 +867,7 @@ const DocumentViewer = {
           <tr>
             <th>Characteristic</th>
             <th>Provisional Restoration</th>
-            <th>Permanent Definitive Restoration</th>
+            <th>Permanent Restoration</th>
           </tr>
         </thead>
         <tbody>
@@ -812,8 +883,8 @@ const DocumentViewer = {
           </tr>
           <tr>
             <td><strong>Fabrication Speed</strong></td>
-            <td>Fast chairside or rapid laboratory fabrication</td>
-            <td>Multi-step casting, pressing, sintering, or CAD/CAM milling</td>
+            <td>Rapid chairside or laboratory fabrication</td>
+            <td>Precision casting, pressing, sintering, or CAD/CAM</td>
           </tr>
           <tr>
             <td><strong>Retrievability</strong></td>
@@ -823,784 +894,685 @@ const DocumentViewer = {
         </tbody>
       </table>
 
-      <h3 class="section-title">THE TRIAD OF REQUIREMENTS</h3>
-      <p>An ideal provisional restoration must simultaneously satisfy three interdependent categories of requirements:</p>
-      <ul class="bullet-list">
-        <li><strong>A) Biologic Requirements:</strong> Pulp protection, periodontal maintenance, and positional stability.</li>
-        <li><strong>B) Mechanical Requirements:</strong> Resistance to functional masticatory forces, displacement resistance, and reuse.</li>
-        <li><strong>C) Esthetic Requirements:</strong> Natural tooth shade matching, translucency, and phonetic guidance.</li>
-      </ul>
-
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 2 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 3 -->
-    <div class="doc-page mode-highlighter" id="page-3">
+    <div class="doc-page" id="page-3" data-page="3">
       <canvas class="canvas-overlay" id="canvas-3"></canvas>
       <div class="page-header">
-        <h4>Module 2: Biologic Requirements</h4>
+        <h4>Module 2: Biological Requirements</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 2: BIOLOGIC REQUIREMENTS (PART 1)</h3>
+      <h3 class="section-title">SECTION 2: BIOLOGICAL REQUIREMENTS</h3>
       
       <p><strong>1. Pulp Protection:</strong></p>
-      <p style="margin-bottom: 14px;">Vital dentin contains 30,000 to 45,000 tubules per mm² near the pulp. Crown preparation removes the protective enamel layer, exposing millions of open dentinal tubules. Without a hermetic seal, the pulp is subjected to thermal shocks (cold and hot beverages), hypertonic chemical stimuli (sugars, acids), and bacterial ingress resulting in pulpitis. The provisional restoration must effectively seal these dentinal tubules.</p>
+      <p style="margin-bottom: 14px;">During tooth preparation, dentinal tubules are exposed (over 30,000 to 40,000 tubules per mm²). The provisional restoration seals dentin from microleakage, thermal shock, chemical irritation from cements, and bacterial invasion.</p>
+
+      <p><strong>2. Periodontal Health & Gingival Margins:</strong></p>
+      <p style="margin-bottom: 14px;">Smooth, well-contoured subgingival or supragingival margins prevent plaque accumulation and gingival inflammation. Over-extended margins cause gingival ischemia and tissue recession; under-extended margins lead to gingival hyperplasia.</p>
+
+      <p><strong>3. Positional Stability:</strong></p>
+      <p style="margin-bottom: 14px;">Maintains inter-arch occlusal contacts and intra-arch proximal contact points. Prevents supra-eruption of opposing teeth and mesial/distal drifting of prepared teeth.</p>
+
+      <p><strong>4. Prevention of Tooth Structure Fracture:</strong></p>
+      <p style="margin-bottom: 14px;">Protects weakened prepared cusps, especially in partial-coverage preparations (onlays/inlays) and endodontically treated teeth from masticatory fracture forces.</p>
 
       <div class="clinical-callout">
-        <strong>Clinical Pearl:</strong> Desensitizing agents or dentin bonding resin coats applied to prepared dentin prior to temporization significantly reduce post-operative sensitivity without hampering provisional retention.
+        <strong>CRITICAL CLINICAL PEARL:</strong> A poorly contoured provisional margin is the #1 cause of marginal bleeding during final impression and luting procedures!
       </div>
 
-      <p><strong>2. Periodontal Health:</strong></p>
-      <p style="margin-bottom: 14px;">The provisional restoration must harmonize with the marginal periodontium:</p>
-      <ul class="bullet-list">
-        <li><strong>Marginal Fit:</strong> Overextended margins violate the biologic width and induce chronic gingival inflammation, bleeding, and bone resorption.</li>
-        <li><strong>Under-extended Margins:</strong> Leave exposed sensitive dentin and encourage rapid gingival proliferation over the finish line, compromising the definitive impression.</li>
-        <li><strong>Surface Finish:</strong> Rough, unpolished provisional acrylic acts as a nidus for plaque biofilm retention and bacterial colonization.</li>
-      </ul>
-
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 3 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 4 -->
-    <div class="doc-page mode-highlighter" id="page-4">
+    <div class="doc-page" id="page-4" data-page="4">
       <canvas class="canvas-overlay" id="canvas-4"></canvas>
       <div class="page-header">
-        <h4>Module 2: Biologic Requirements</h4>
+        <h4>Module 3: Mechanical & Esthetic</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 3: BIOLOGIC REQUIREMENTS (PART 2)</h3>
-      
-      <p><strong>3. Positional Stability (Arch Integrity):</strong></p>
-      <p style="margin-bottom: 14px;">Unprepared or prepared teeth without stable proximal and occlusal contacts drift within days:</p>
+      <h3 class="section-title">SECTION 3: MECHANICAL & ESTHETIC REQUIREMENTS</h3>
+
+      <p><strong>1. Mechanical Requirements:</strong></p>
       <ul class="bullet-list">
-        <li><strong>Opposing Teeth:</strong> Supra-erupt into the preparation space, altering the occlusal plane and eliminating crucial interocclusal clearance for the definitive crown.</li>
-        <li><strong>Adjacent Teeth:</strong> Tip or migrate mesially or distally into the preparation zone, resulting in tight proximal contacts or loss of space.</li>
-        <li><strong>Occlusal Harmony:</strong> The provisional must provide accurate centric stops and canine/group guidance without premature contacts.</li>
+        <li><strong>Functional Strength:</strong> Must withstand functional occlusal forces without fracture or excessive flexure (especially in long-span multi-unit bridges).</li>
+        <li><strong>Retention & Resistance:</strong> Must resist displacement under dislodging forces. Internal adaptation to preparation taper is essential.</li>
+        <li><strong>Retrievability & Reusability:</strong> Must allow intact removal for diagnostic try-ins of final frameworks and re-cementation without structural collapse.</li>
       </ul>
 
-      <p><strong>4. Prevention of Prepared Tooth Fracture:</strong></p>
-      <p style="margin-bottom: 14px;">Prepared teeth—especially those with extensive MOD restorations, endodontically treated teeth, or partial coverage onlay preparations—exhibit significantly weakened cuspal stiffness. The provisional crown shields these vulnerable cusps from fracture under masticatory bolus impacts.</p>
-
-      <div class="clinical-callout">
-        <strong>Diagnostic Value:</strong> A provisional restoration serves as a diagnostic template. If the patient develops muscle tenderness or TMJ symptoms, the occlusion of the provisional can be adjusted and refined before committing to permanent porcelain.
-      </div>
+      <p><strong>2. Esthetic Requirements:</strong></p>
+      <ul class="bullet-list">
+        <li>Matching optical shade, translucency, and surface texture of adjacent natural dentition.</li>
+        <li>Guide for definitive restoration contour, lip support, and anterior guidance line.</li>
+        <li>Maintaining proper phonetics (especially labiodental 'F/V' sounds and linguopalatal 'S/Z' sounds).</li>
+      </ul>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 4 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 5 -->
-    <div class="doc-page mode-highlighter" id="page-5">
+    <div class="doc-page" id="page-5" data-page="5">
       <canvas class="canvas-overlay" id="canvas-5"></canvas>
       <div class="page-header">
-        <h4>Module 2: Mechanical & Functional</h4>
+        <h4>Module 4: Classification</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 4: MECHANICAL AND FUNCTIONAL REQUIREMENTS</h3>
-      
-      <p><strong>1. Resistance to Functional Loads (Strength):</strong></p>
-      <p style="margin-bottom: 14px;">Provisional materials exhibit lower compressive and flexural strength than porcelain-fused-to-metal or zirconia. Nonetheless, the restoration must endure normal masticatory cycles without chipping or fracturing, particularly across multi-unit bridge connectors.</p>
+      <h3 class="section-title">SECTION 4: CLASSIFICATION OF PROVISIONAL RESTORATIONS</h3>
 
-      <p><strong>2. Retention and Resistance to Displacement:</strong></p>
-      <p style="margin-bottom: 14px;">The restoration must remain firmly seated during functional eating, swallowing, and speaking. Good internal adaptation prevents dislodgement when chewing sticky food.</p>
+      <p><strong>A) By Fabrication Method:</strong></p>
+      <ul class="bullet-list">
+        <li><strong>Preformed Shells:</strong> Prefabricated stock crowns (Metal or Polycarbonate).</li>
+        <li><strong>Custom-Made:</strong> Molded chairside or in lab specifically for patient's anatomical prep.</li>
+      </ul>
 
-      <p><strong>3. Retrievability and Reusability:</strong></p>
-      <p style="margin-bottom: 14px;">Unlike permanent restorations, the provisional restoration must be easily removed by the clinician during subsequent appointments (e.g., framework trial, shade matching, impression verification) and securely re-cemented without shattering.</p>
+      <p><strong>B) By Clinical Technique:</strong></p>
+      <ul class="bullet-list">
+        <li><strong>Direct Technique:</strong> Fabricated directly inside patient's mouth.</li>
+        <li><strong>Indirect Technique:</strong> Fabricated outside mouth on a stone cast.</li>
+        <li><strong>Direct-Indirect Combination:</strong> Pre-fabricated shell relined intraorally.</li>
+      </ul>
 
-      <div class="warning-callout">
-        <strong>Caution:</strong> Excessive retention caused by deep undercuts on adjacent teeth or locked resin margins makes removal hazardous and may accidentally avulse or fracture the underlying preparation.
-      </div>
+      <h3 class="section-title">TYPES OF PREFORMED STOCK CROWNS</h3>
+      <table class="table-spec">
+        <thead>
+          <tr>
+            <th>Material Type</th>
+            <th>Specific Examples</th>
+            <th>Primary Clinical Indications</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Metal Shells</strong></td>
+            <td>Aluminum, Ni-Cr, Stainless Steel</td>
+            <td>Posterior molars & premolars (high masticatory strength)</td>
+          </tr>
+          <tr>
+            <td><strong>Plastic Shells</strong></td>
+            <td>Polycarbonate, Micro-filled Acrylic, Celluloid</td>
+            <td>Anterior incisors & canines (high esthetic demand)</td>
+          </tr>
+        </tbody>
+      </table>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 5 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 6 -->
-    <div class="doc-page mode-highlighter" id="page-6">
+    <div class="doc-page" id="page-6" data-page="6">
       <canvas class="canvas-overlay" id="canvas-6"></canvas>
       <div class="page-header">
-        <h4>Module 2: Esthetic & Phonetic</h4>
+        <h4>Module 5: Aluminum Crowns</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 5: ESTHETIC AND PHONETIC REQUIREMENTS</h3>
-      
-      <p><strong>1. Shade Compatibility and Color Stability:</strong></p>
-      <p style="margin-bottom: 14px;">In anterior teeth, the provisional must blend imperceptibly with neighboring dentition. It must resist dietary staining from coffee, tea, chlorhexidine rinses, and tobacco throughout the interim period.</p>
+      <h3 class="section-title">SECTION 5: CLINICAL PROCEDURE - ALUMINUM PREFORMED CROWNS</h3>
 
-      <p><strong>2. Phonetic Guide:</strong></p>
-      <p style="margin-bottom: 14px;">The provisional contours directly guide speech production:</p>
+      <p><strong>Step-by-Step Clinical Protocol:</strong></p>
       <ul class="bullet-list">
-        <li><strong>F and V Sounds (Labiodental fricatives):</strong> Verified by checking that the maxillary incisal edge contacts the vermilion border / wet-dry line of the lower lip.</li>
-        <li><strong>S and Z Sounds (Linguopalatal sibilants):</strong> Controlled by the palatal contour and cingulum anatomy, maintaining a 1.0 to 1.5 mm speaking space.</li>
+        <li><strong>Step 1: Size Selection:</strong> Measure mesio-distal space using a divider or calipers. Select matching size (Range: 2 to 19).</li>
+        <li><strong>Step 2: Cervical Trimming:</strong> Trim cervical margins using curved crown and collar scissors to follow curvature of free gingival margin.</li>
+        <li><strong>Step 3: Seating & Occlusal Adjustment:</strong> Seat on prepared tooth, check contact points and occlusal clearance with articulation paper.</li>
+        <li><strong>Step 4: Edge Smoothing:</strong> Smooth cut metal edges with green stone bur and rubber wheel to prevent soft tissue laceration.</li>
+        <li><strong>Step 5: Luting:</strong> Cement with Zinc Oxide Eugenol (ZOE) temporary cement. Remove all interproximal excess cement.</li>
       </ul>
 
-      <p><strong>3. Patient Acceptance Blueprint:</strong></p>
-      <p style="margin-bottom: 14px;">The provisional crown is the clinical prototype. It confirms patient satisfaction regarding tooth length, incisal display at rest, and smile line before ceramic fabrication.</p>
+      <div class="clinical-callout">
+        <strong>SAFETY NOTE:</strong> Unsmoothed cut aluminum margins cause severe traumatic gingival laceration and necrosis! Always polish trimmed margins thoroughly.
+      </div>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 6 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 7 -->
-    <div class="doc-page mode-highlighter" id="page-7">
+    <div class="doc-page" id="page-7" data-page="7">
       <canvas class="canvas-overlay" id="canvas-7"></canvas>
       <div class="page-header">
-        <h4>Module 3: Classification</h4>
+        <h4>Module 6: Polycarbonate Crowns</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 6: COMPREHENSIVE CLASSIFICATION</h3>
-      
-      <p><strong>A) Classification by Fabrication Method:</strong></p>
-      <ul class="bullet-list">
-        <li><strong>Preformed (Prefabricated) Crowns:</strong> Factory-manufactured anatomical shells selected to match tooth size.</li>
-        <li><strong>Custom-Made Restorations:</strong> Individually fabricated using impression matrices, putty indices, or CAD/CAM milling.</li>
-      </ul>
+      <h3 class="section-title">SECTION 6: CLINICAL PROCEDURE - POLYCARBONATE PREFORMED CROWNS</h3>
 
-      <p><strong>B) Classification by Clinical Technique:</strong></p>
+      <p><strong>Relining Protocol with Acrylic Resin:</strong></p>
       <ul class="bullet-list">
-        <li><strong>Direct Technique:</strong> Entirely fabricated chairside in the patient's mouth.</li>
-        <li><strong>Indirect Technique:</strong> Fabricated extraorally in the laboratory on a stone model cast.</li>
-        <li><strong>Direct-Indirect Technique:</strong> Hybrid combination; shell made on model, relined chairside.</li>
-      </ul>
-
-      <p><strong>C) Classification by Intended Clinical Duration:</strong></p>
-      <ul class="bullet-list">
-        <li><strong>Short-Term (< 4 weeks):</strong> Standard single crowns and small FPDs.</li>
-        <li><strong>Medium-Term (1 to 3 months):</strong> Periodontal splinting, tissue healing, or endodontic observation.</li>
-        <li><strong>Long-Term / Extended (3 to 12 months):</strong> Full-mouth rehabilitation, TMJ therapy, and implant osseointegration.</li>
+        <li><strong>Step 1:</strong> Select translucent polycarbonate crown matching tooth shade and anatomical width.</li>
+        <li><strong>Step 2:</strong> Apply petroleum jelly (separating medium) over prepared tooth stump and adjacent gingiva.</li>
+        <li><strong>Step 3:</strong> Adapt cervical margin of shell using acrylic bur.</li>
+        <li><strong>Step 4:</strong> Mix self-curing PMMA or PEMA resin to doughy stage and fill inside shell.</li>
+        <li><strong>Step 5:</strong> Seat shell over tooth prep, align incisal edge with adjacent teeth.</li>
+        <li><strong>Step 6:</strong> Remove from mouth before full polymerization heat peak to prevent thermal pulp injury!</li>
+        <li><strong>Step 7:</strong> Trim flash excess, polish with pumice, and cement with non-eugenol or ZOE cement.</li>
       </ul>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 7 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 8 -->
-    <div class="doc-page mode-highlighter" id="page-8">
+    <div class="doc-page" id="page-8" data-page="8">
       <canvas class="canvas-overlay" id="canvas-8"></canvas>
       <div class="page-header">
-        <h4>Module 4: Preformed Crowns</h4>
+        <h4>Module 7: Custom Restorations</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 7: PREFORMED CROWN TYPES & CHARACTERISTICS</h3>
-      
-      <p><strong>1. Metallic Preformed Crowns (Posterior Indications):</strong></p>
-      <ul class="bullet-list">
-        <li><strong>Aluminum Shell Crowns:</strong> Soft, highly ductile, easily trimmed with scissors, ideal for posterior emergency temporization.</li>
-        <li><strong>Anatomic Aluminum & Tin-Silver Shells:</strong> Feature preformed occlusal anatomy; offer good wear resistance.</li>
-        <li><strong>Stainless Steel & Nickel-Chromium Crowns:</strong> Hard, durable; predominantly used in pediatric dentistry and extended posterior provisionalization.</li>
-      </ul>
+      <h3 class="section-title">SECTION 7: CUSTOM PROVISIONAL RESTORATIONS OVERVIEW</h3>
 
-      <p><strong>2. Non-Metallic Preformed Crowns (Anterior & Premolar Indications):</strong></p>
-      <ul class="bullet-list">
-        <li><strong>Polycarbonate Crowns:</strong> Rigid, tooth-colored thermoplastic shells. They bond chemically with acrylic reline materials and offer high esthetics for incisors and canines.</li>
-        <li><strong>Cellulose Acetate (Celluloid) Crown Forms:</strong> Thin, completely transparent plastic molds. They act merely as a carrier matrix and are peeled off and discarded after the resin sets.</li>
-      </ul>
+      <p>Custom provisionals provide superior anatomical accuracy, precise fit, and optimal emergence profile compared to preformed stock crowns.</p>
+
+      <table class="table-spec">
+        <thead>
+          <tr>
+            <th>Technique Type</th>
+            <th>Key Advantages</th>
+            <th>Primary Disadvantages</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Direct Technique</strong></td>
+            <td>No lab turnaround time, cost-effective, immediate delivery</td>
+            <td>Monomer toxicity risk, exothermic heat on pulp, higher shrinkage</td>
+          </tr>
+          <tr>
+            <td><strong>Indirect Technique</strong></td>
+            <td>Pulp protection, optimal marginal fit, saves chairside time</td>
+            <td>Requires stone cast pouring, longer clinical turnover</td>
+          </tr>
+        </tbody>
+      </table>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 8 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 9 -->
-    <div class="doc-page mode-highlighter" id="page-9">
+    <div class="doc-page" id="page-9" data-page="9">
       <canvas class="canvas-overlay" id="canvas-9"></canvas>
       <div class="page-header">
-        <h4>Module 4: Preformed Procedure</h4>
+        <h4>Module 8: Direct Technique</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 8: CLINICAL PROTOCOL - ALUMINUM PREFORMED CROWNS</h3>
-      
+      <h3 class="section-title">SECTION 8: DIRECT TECHNIQUE DETAILED PROTOCOL</h3>
+
       <p><strong>Step-by-Step Clinical Procedure:</strong></p>
       <ul class="bullet-list">
-        <li><strong>Step 1 (Measurement):</strong> Measure the mesiodistal space of the prepared abutment with a Boley gauge or divider.</li>
-        <li><strong>Step 2 (Selection):</strong> Select the closest shell size (sizes 2 to 19).</li>
-        <li><strong>Step 3 (Cervical Trimming):</strong> Trim cervical margins using curved crown and collar scissors, tracing the gingival crest contours.</li>
-        <li><strong>Step 4 (Crimping & Smoothing):</strong> Crimp the cervical edge inwards using crimping pliers for marginal adaptation. Smooth sharp borders with a green carborundum stone bur.</li>
-        <li><strong>Step 5 (Occlusal Check):</strong> Seat on preparation and evaluate interocclusal contact with 40 µm articulating paper.</li>
-        <li><strong>Step 6 (Cementation):</strong> Lute with Zinc Oxide Eugenol (ZOE) temporary cement. Remove all subgingival excess cement before dismissal.</li>
+        <li><strong>Step 1: Pre-operative Impression:</strong> Take an elastomeric rubber base (putty) or alginate impression prior to tooth preparation.</li>
+        <li><strong>Step 2: Tooth Preparation:</strong> Complete crown preparation following standard reduction guidelines.</li>
+        <li><strong>Step 3: Separating Medium:</strong> Liberally coat prep and surrounding tissues with mineral oil or vaseline.</li>
+        <li><strong>Step 4: Resin Loading:</strong> Mix auto-polymerizing resin and inject into matrix corresponding to prep site.</li>
+        <li><strong>Step 5: Intraoral Seating:</strong> Seat matrix in mouth. Monitor resin polymerization state.</li>
+        <li><strong>Step 6: Timed Removal:</strong> Remove matrix when resin reaches rubbery elastomeric phase (approx. 2-3 mins). DO NOT leave until fully set!</li>
+        <li><strong>Step 7: Trim & Polish:</strong> Trim cervical flash under magnification, adjust occlusion, and polish to high gloss.</li>
       </ul>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 9 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 10 -->
-    <div class="doc-page mode-highlighter" id="page-10">
+    <div class="doc-page" id="page-10" data-page="10">
       <canvas class="canvas-overlay" id="canvas-10"></canvas>
       <div class="page-header">
-        <h4>Module 4: Polycarbonate Crowns</h4>
+        <h4>Module 9: Indirect Technique</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 9: CLINICAL PROTOCOL - POLYCARBONATE CROWNS</h3>
-      
-      <p><strong>Step-by-Step Reline Procedure:</strong></p>
+      <h3 class="section-title">SECTION 9: INDIRECT LABORATORY TECHNIQUE PROTOCOL</h3>
+
+      <p><strong>Why Choose Indirect Technique?</strong></p>
+      <p style="margin-bottom: 14px;">The indirect method completely eliminates pulp exposure to free monomer chemical irritation and exothermic polymerization heat (up to 70°C in direct PMMA setting!).</p>
+
+      <p><strong>Protocol Steps:</strong></p>
       <ul class="bullet-list">
-        <li><strong>Step 1:</strong> Select the polycarbonate mold matching the contralateral natural tooth width and contour.</li>
-        <li><strong>Step 2:</strong> Trim the cervical margin with an acrylic bur until the crown seats without blanching gingival tissue.</li>
-        <li><strong>Step 3:</strong> Apply petroleum jelly or cocoa butter as a separating medium onto the prepared tooth.</li>
-        <li><strong>Step 4:</strong> Mix auto-polymerizing polyethyl methacrylate (PEMA) or methyl methacrylate resin to dough stage.</li>
-        <li><strong>Step 5:</strong> Fill the crown shell and firmly seat it onto the lubricated prepared tooth.</li>
-        <li><strong>Step 6:</strong> CRITICAL: Remove the crown when the resin enters the rubbery stage (2 to 3 minutes) to prevent locking into proximal undercuts!</li>
-        <li><strong>Step 7:</strong> Allow final setting extraorally in warm water (45°C) to accelerate polymerization.</li>
-        <li><strong>Step 8:</strong> Trim flash, contour emergence profile, polish with pumice, and cement with non-eugenol temporary cement.</li>
+        <li><strong>Step 1:</strong> Take quick-setting alginate impression of prepared tooth.</li>
+        <li><strong>Step 2:</strong> Pour impression with fast-setting stone (Snap-stone or plaster).</li>
+        <li><strong>Step 3:</strong> Apply separator to stone cast prep site.</li>
+        <li><strong>Step 4:</strong> Seat pre-op matrix loaded with resin onto stone cast and clamp tightly.</li>
+        <li><strong>Step 5:</strong> Place in pressure pot (20 psi warm water) for 5 minutes for dense, bubble-free polymerization.</li>
+        <li><strong>Step 6:</strong> Retrieve provisional, polish, and try in patient's mouth.</li>
       </ul>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 10 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 11 -->
-    <div class="doc-page mode-highlighter" id="page-11">
+    <div class="doc-page" id="page-11" data-page="11">
       <canvas class="canvas-overlay" id="canvas-11"></canvas>
       <div class="page-header">
-        <h4>Module 5: Custom Direct Technique</h4>
+        <h4>Module 10: Vacuum Matrix</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 10: CUSTOM PROVISIONAL RESTORATIONS - DIRECT TECHNIQUE</h3>
-      
-      <p><strong>Pre-operative Matrix Options:</strong></p>
-      <ul class="bullet-list">
-        <li><strong>1. Pre-operative Alginate Impression:</strong> Rapid, economical; must be kept in a moist napkin to prevent syneresis.</li>
-        <li><strong>2. Putty Elastomeric (Silicone) Index:</strong> Excellent dimensional stability, reusable, rigid support for multiple units.</li>
-        <li><strong>3. Vacuum-Formed Thermoplastic Matrix:</strong> Transparent 0.020-inch sheet made on a diagnostic cast or wax-up.</li>
-      </ul>
+      <h3 class="section-title">SECTION 10: VACUUM-FORMED CLEAR PLASTIC SHELL TECHNIQUE</h3>
 
-      <p><strong>Clinical Execution Workflow:</strong></p>
+      <p><strong>Procedure:</strong></p>
       <ul class="bullet-list">
-        <li>Take pre-operative matrix before initiating tooth preparation.</li>
-        <li>Complete tooth reduction, refine finish lines, and thoroughly lubricate preparation with water-soluble lubricant.</li>
-        <li>Dispense auto-mix Bis-acryl composite resin into the matrix to prevent air voids.</li>
-        <li>Seat matrix in mouth; hold firmly for 2.5 minutes until initial rubbery polymerization.</li>
-        <li>Remove matrix, retrieve provisional, trim excess flash with fine carbide finishing burs, and glaze.</li>
+        <li>Fabricate diagnostic wax-up of ideal tooth contours on preliminary study model.</li>
+        <li>Form a 0.020-inch clear thermoplastic sheet over wax-up model using vacuum former machine.</li>
+        <li>Trim plastic shell 2mm beyond gingival margins.</li>
+        <li>Load clear matrix with Bis-acryl composite resin and position over prep.</li>
+        <li>Translucent shell allows direct light-curing and visual inspection of complete seating!</li>
       </ul>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 11 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 12 -->
-    <div class="doc-page mode-highlighter" id="page-12">
+    <div class="doc-page" id="page-12" data-page="12">
       <canvas class="canvas-overlay" id="canvas-12"></canvas>
       <div class="page-header">
-        <h4>Module 5: Custom Indirect Technique</h4>
+        <h4>Module 11: Materials Comparison</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 11: CUSTOM PROVISIONAL RESTORATIONS - INDIRECT TECHNIQUE</h3>
-      
-      <p><strong>Why Indirect Fabrication? (Major Clinical Advantages):</strong></p>
-      <ul class="bullet-list">
-        <li><strong>Elimination of Pulp Thermal Trauma:</strong> All exothermic heat from acrylic polymerization occurs outside the oral cavity.</li>
-        <li><strong>Protection of Soft Tissues:</strong> Zero toxic free-monomer exposure to oral mucosa and marginal gingiva.</li>
-        <li><strong>Superior Marginal Accuracy:</strong> Acrylic shrinkage occurs on a stone die rather than in the mouth.</li>
-        <li><strong>Ideal for Long-Span Bridges:</strong> Essential for full-arch rehabilitations where multiple preparations are present.</li>
-      </ul>
+      <h3 class="section-title">SECTION 11: PROVISIONAL MATERIALS COMPARATIVE MATRIX</h3>
 
-      <p><strong>Laboratory Procedure:</strong></p>
-      <ul class="bullet-list">
-        <li>Make an irreversible hydrocolloid (alginate) impression immediately after tooth preparation.</li>
-        <li>Pour with fast-setting dental stone / quick plaster (sets in 5 minutes).</li>
-        <li>Apply separating liquid to stone model.</li>
-        <li>Load vacuum-formed template with PMMA or light-cured resin and seat under pressure.</li>
-        <li>Trim, polish on laboratory lathe, and seat chairside with temporary luting agent.</li>
-      </ul>
+      <table class="table-spec">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>PMMA (Polymethyl Met.)</th>
+            <th>PEMA (Polyethyl Met.)</th>
+            <th>Bis-Acryl Composite</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Exothermic Heat</strong></td>
+            <td>High (Pulp hazard)</td>
+            <td>Low / Moderate</td>
+            <td>Very Low (Safe)</td>
+          </tr>
+          <tr>
+            <td><strong>Shrinkage</strong></td>
+            <td>High (6-8% volume)</td>
+            <td>Low (1-2%)</td>
+            <td>Minimal (< 1.5%)</td>
+          </tr>
+          <tr>
+            <td><strong>Flexural Strength</strong></td>
+            <td>High (Excellent)</td>
+            <td>Moderate</td>
+            <td>High (Brittle in thin areas)</td>
+          </tr>
+          <tr>
+            <td><strong>Shade Stability</strong></td>
+            <td>Good</td>
+            <td>Fair (Porous)</td>
+            <td>Excellent</td>
+          </tr>
+        </tbody>
+      </table>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 12 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 13 -->
-    <div class="doc-page mode-highlighter" id="page-13">
+    <div class="doc-page" id="page-13" data-page="13">
       <canvas class="canvas-overlay" id="canvas-13"></canvas>
       <div class="page-header">
-        <h4>Module 6: Materials Science</h4>
+        <h4>Module 12: Provisional Cements</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 12: CONTEMPORARY PROVISIONAL RESTORATIVE MATERIALS</h3>
-      
-      <p><strong>1. Polymethyl Methacrylate (PMMA - e.g., Jet, Alike):</strong></p>
-      <p style="margin-bottom: 12px;">Classic powder/liquid acrylic. Offers exceptional transverse strength, excellent polishability, and low material cost. However, it generates intense exothermic heat (temperatures up to 70°C) and experiences significant volumetric polymerization shrinkage (~8%).</p>
+      <h3 class="section-title">SECTION 12: PROVISIONAL LUTING CEMENTS & EUGENOL IMPACT</h3>
 
-      <p><strong>2. Polyethyl Methacrylate (PEMA - e.g., Snap, Trim):</strong></p>
-      <p style="margin-bottom: 12px;">Higher molecular weight methacrylate. Exhibits milder exothermic heat and lower polymerization shrinkage. Ideal for chairside relining of preformed crowns, though wear resistance is slightly lower than PMMA.</p>
+      <p><strong>1. Zinc Oxide Eugenol (ZOE):</strong></p>
+      <p style="margin-bottom: 12px;">Excellent sedative effect on pulp. Provides good seal.</p>
 
-      <p><strong>3. Bis-Acryl Composite Resins (e.g., Protemp, Integrity, Luxatemp):</strong></p>
-      <p style="margin-bottom: 12px;">Auto-mixing cartridge delivery. Contains multifunctional methacrylate monomers with inorganic filler particles. Minimal polymerization shrinkage (1-2%), negligible exothermic rise, superb esthetics, and high initial surface gloss.</p>
+      <div class="clinical-callout">
+        <strong>IMPORTANT WARNING:</strong> Free Eugenol inhibits free-radical polymerization of permanent resin cements and composite core buildups! Use Non-Eugenol Zinc Oxide (NEZO) if final restoration is to be bonded with resin cement!
+      </div>
 
-      <p><strong>4. Light-Activated Urethane Dimethacrylate (UDMA - e.g., Revotek50):</strong></p>
-      <p style="margin-bottom: 12px;">Putty-stick formulation cured on demand with dental LED curing units. Provides unlimited working time, zero odor, and good mechanical properties.</p>
+      <p><strong>2. Non-Eugenol Cements (NEZO):</strong></p>
+      <p style="margin-bottom: 12px;">Formulated with carboxylic acids. Compatible with all definitive resin luting agents.</p>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 13 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 14 -->
-    <div class="doc-page mode-highlighter" id="page-14">
+    <div class="doc-page" id="page-14" data-page="14">
       <canvas class="canvas-overlay" id="canvas-14"></canvas>
       <div class="page-header">
-        <h4>Module 6: Comparative Matrix</h4>
+        <h4>Module 13: Multi-Unit Bridges</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 13: COMPREHENSIVE MATERIAL COMPARISON MATRIX</h3>
-      
-      <table class="table-spec">
-        <thead>
-          <tr>
-            <th>Property</th>
-            <th>PMMA</th>
-            <th>PEMA</th>
-            <th>Bis-Acryl Composite</th>
-            <th>UDMA Resin</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Exothermic Reaction</strong></td>
-            <td>High (up to 70°C)</td>
-            <td>Low (35°C - 40°C)</td>
-            <td>Very Low (37°C - 42°C)</td>
-            <td>Minimal</td>
-          </tr>
-          <tr>
-            <td><strong>Polymerization Shrinkage</strong></td>
-            <td>High (~8.0%)</td>
-            <td>Moderate (~5.0%)</td>
-            <td>Low (1.0% - 2.0%)</td>
-            <td>Low (< 2.0%)</td>
-          </tr>
-          <tr>
-            <td><strong>Flexural Strength</strong></td>
-            <td>Very High (95 MPa)</td>
-            <td>Moderate (60 MPa)</td>
-            <td>High (85 - 100 MPa)</td>
-            <td>High (90 MPa)</td>
-          </tr>
-          <tr>
-            <td><strong>Esthetics & Polish</strong></td>
-            <td>Excellent</td>
-            <td>Good</td>
-            <td>Superior Gloss</td>
-            <td>Superior</td>
-          </tr>
-          <tr>
-            <td><strong>Repairability</strong></td>
-            <td>Very Easy (Chemical bond)</td>
-            <td>Very Easy</td>
-            <td>Requires flowable composite</td>
-            <td>Good with bond</td>
-          </tr>
-          <tr>
-            <td><strong>Odor & Irritation</strong></td>
-            <td>Strong monomer odor</td>
-            <td>Mild odor</td>
-            <td>Odorless</td>
-            <td>Odorless</td>
-          </tr>
-        </tbody>
-      </table>
+      <h3 class="section-title">SECTION 13: MULTI-UNIT PROVISIONAL BRIDGES & PONTICS</h3>
+
+      <ul class="bullet-list">
+        <li><strong>Connector Thickness:</strong> Connectors between abutment and pontic must be reinforced (minimum 3mm x 3mm cross-section).</li>
+        <li><strong>Modified Ridge Lap Pontic:</strong> Recommended pontic design for anterior provisionals (contact only on facial ridge aspect).</li>
+        <li><strong>Hygiene Embrasure:</strong> Interdental embrasures must remain open to allow passage of superfloss and interdental brushes.</li>
+      </ul>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 14 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 15 -->
-    <div class="doc-page mode-highlighter" id="page-15">
+    <div class="doc-page" id="page-15" data-page="15">
       <canvas class="canvas-overlay" id="canvas-15"></canvas>
       <div class="page-header">
-        <h4>Module 7: Cements & Eugenol Warning</h4>
+        <h4>Module 14: Complications</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 14: PROVISIONAL CEMENTS & THE CRITICAL EUGENOL WARNING</h3>
-      
-      <p><strong>Classification of Provisional Cements:</strong></p>
-      <ul class="bullet-list">
-        <li><strong>Zinc Oxide Eugenol (ZOE - e.g., Temp-Bond):</strong> Excellent sedative obtundent effect on hyperemic pulp; bacteriostatic.</li>
-        <li><strong>Non-Eugenol Zinc Oxide (e.g., Temp-Bond NE, RelyX Temp NE):</strong> Formulated with carboxylic acid oils, safe for all bonded restorations.</li>
-        <li><strong>Polycarboxylate Temporary Cements:</strong> High retention, biocompatible, excellent for short abutments with poor retention.</li>
-        <li><strong>Resin-Based Temporary Cements:</strong> High translucency for anterior veneers and thin all-ceramic crowns.</li>
-      </ul>
+      <h3 class="section-title">SECTION 14: CLINICAL COMPLICATIONS & TROUBLESHOOTING</h3>
 
-      <div class="warning-callout">
-        <strong>⚠️ CRITICAL BOARD EXAMINATION PEARL (EUGENOL INHIBITION):</strong><br>
-        Eugenol is a phenolic radical scavenger. Free eugenol oil penetrates dentinal tubules and chemically inhibits the free-radical polymerization of permanent resin cements (Panavia, RelyX Ultimate, Multilink) and dentin bonding agents. This causes incomplete cure, dramatically reduced bond strength (up to 50% drop), and microleakage.<br>
-        <strong>RULE:</strong> If the definitive crown will be bonded using a resin cement or universal adhesive, ALWAYS use a NON-EUGENOL temporary cement!
-      </div>
+      <p><strong>1. Debonding / Loss of Retention:</strong></p>
+      <p style="margin-bottom: 12px;">Causes: Over-tapered prep, weak cement, occlusal interference. Fix: Reline provisional internally with resin or use stronger provisional cement.</p>
+
+      <p><strong>2. Fracture of Provisional:</strong></p>
+      <p style="margin-bottom: 12px;">Causes: Inadequate occlusal clearance, thin connector. Fix: Repair with light-cure flowable composite chairside.</p>
+
+      <p><strong>3. Gingival Inflammation & Bleeding:</strong></p>
+      <p style="margin-bottom: 12px;">Causes: Over-extended rough margins, unremoved excess cement. Fix: Re-contour margin and polish smooth.</p>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 15 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 16 -->
-    <div class="doc-page mode-highlighter" id="page-16">
+    <div class="doc-page" id="page-16" data-page="16">
       <canvas class="canvas-overlay" id="canvas-16"></canvas>
       <div class="page-header">
-        <h4>Module 8: Emergence Profile & Polishing</h4>
+        <h4>Module 15: Finishing & Maintenance</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 15: EMERGENCE PROFILE AND POLISHING PROTOCOL</h3>
-      
-      <p><strong>The Biologic Emergence Profile:</strong></p>
-      <p style="margin-bottom: 14px;">The contour of the provisional restoration as it emerges from the gingival sulcus must be straight or slightly concave, precisely replicating the original anatomical tooth profile.</p>
+      <h3 class="section-title">SECTION 15: FINISHING, POLISHING & PATIENT MAINTENANCE</h3>
 
-      <ul class="bullet-list">
-        <li><strong>Overcontoured Margins:</strong> Create stagnant niches, impingement on interdental papillae, and chronic localized gingivitis.</li>
-        <li><strong>Undercontoured Margins:</strong> Inadequately deflect food boluses during mastication, causing direct gingival trauma.</li>
-      </ul>
+      <p><strong>Finishing Sequence:</strong></p>
+      <ol style="margin-left: 20px; margin-bottom: 16px; font-size: 0.9rem;">
+        <li>Trim gross excess with cross-cut carbide bur.</li>
+        <li>Refine embrasures with fine diamond burs.</li>
+        <li>Smooth surfaces with silicone rubber polishers.</li>
+        <li>High-gloss glaze polish with flour of pumice and Robinson rag wheel.</li>
+      </ol>
 
-      <h3 class="section-title">CHAIRSIDE POLISHING SEQUENTIAL PROTOCOL</h3>
+      <p><strong>Home Care Instructions for Patient:</strong></p>
       <ul class="bullet-list">
-        <li><strong>Stage 1 (Contouring):</strong> 12-fluted multi-blade tungsten carbide burs (7901 / 7902) to define embrasures and anatomy.</li>
-        <li><strong>Stage 2 (Smoothing):</strong> Silicone polishing wheels (coarse brown, medium green).</li>
-        <li><strong>Stage 3 (High Shine):</strong> Robinson bristle brush mounted on a slow-speed handpiece with wet slurry of pumice flour.</li>
-        <li><strong>Stage 4 (Final Glaze):</strong> Light-cured resin glaze (e.g., BisCover, Optiglaze) cured for 30 seconds for a glass-like finish.</li>
+        <li>Avoid chewing hard, sticky foods (caramel, chewing gum).</li>
+        <li>Pull dental floss sideways through interproximal spaces rather than popping upward!</li>
       </ul>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
         <span>Page 16 of 17</span>
       </div>
     </div>
 
     <!-- PAGE 17 -->
-    <div class="doc-page mode-highlighter" id="page-17">
+    <div class="doc-page" id="page-17" data-page="17">
       <canvas class="canvas-overlay" id="canvas-17"></canvas>
       <div class="page-header">
-        <h4>Module 9: Complications & Exam Pearls</h4>
+        <h4>Module 16: Exam Review</h4>
         <span>Provisional Restoration & Temporization</span>
       </div>
 
-      <h3 class="section-title">SECTION 16: CLINICAL COMPLICATIONS AND MANAGEMENT</h3>
-      
-      <table class="table-spec">
-        <thead>
-          <tr>
-            <th>Complication</th>
-            <th>Etiology / Cause</th>
-            <th>Clinical Management</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Frequent Debonding</strong></td>
-            <td>Short abutment, excessive taper (>20°), or heavy occlusal contacts</td>
-            <td>Relieve occlusion; switch to polycarboxylate temporary cement or reline.</td>
-          </tr>
-          <tr>
-            <td><strong>Connector Fracture</strong></td>
-            <td>Inadequate connector height (< 3.0 mm) or heavy load</td>
-            <td>Reinforce connector with braided polyethylene/glass fibers (Ribbond).</td>
-          </tr>
-          <tr>
-            <td><strong>Marginal Discrepancy</strong></td>
-            <td>Polymerization shrinkage or distorted matrix</td>
-            <td>Bead-brush marginal reline technique using PEMA or flowable resin.</td>
-          </tr>
-          <tr>
-            <td><strong>Severe Pulpitis</strong></td>
-            <td>Heat generation during intraoral set or open tubules</td>
-            <td>Cool copious water irrigation during setting; desensitize dentin.</td>
-          </tr>
-        </tbody>
-      </table>
+      <h3 class="section-title">SECTION 16: SUMMARY & EXAM PRACTICE MCQs</h3>
 
-      <h3 class="section-title">SUMMARY & KEY TAKEAWAYS FOR FACULTY EXAMS</h3>
-      <ul class="bullet-list">
-        <li>Never let PMMA polymerize completely inside the mouth; remove at rubbery stage to prevent undercut lock-in and thermal injury.</li>
-        <li>Provisional crowns are essential for biologic pulp health, periodontal integrity, and tooth positional stability.</li>
-        <li>Always avoid Eugenol-containing cements when planning definitive adhesive resin bonding.</li>
-        <li>Finish lines and emergence profiles must be meticulously polished to ensure healthy pink gingiva on the day of final cementation.</li>
-      </ul>
+      <p style="margin-bottom: 16px;"><strong>Question 1: Which provisional material generates the highest exothermic heat during setting?</strong></p>
+      <p style="color: #0369A1; margin-bottom: 16px;">✓ <strong>Answer:</strong> Polymethyl Methacrylate (PMMA). Must be removed before full set.</p>
+
+      <p style="margin-bottom: 16px;"><strong>Question 2: Why is Eugenol cement contraindicated prior to bonding resin crowns?</strong></p>
+      <p style="color: #0369A1; margin-bottom: 16px;">✓ <strong>Answer:</strong> Eugenol inhibits free-radical resin polymerization.</p>
+
+      <p style="margin-bottom: 16px;"><strong>Question 3: What is the primary biological requirement of a provisional crown?</strong></p>
+      <p style="color: #0369A1;">✓ <strong>Answer:</strong> Pulp protection and sealing exposed dentinal tubules.</p>
 
       <div class="page-footer">
-        <span>Dr. Hala Alhawij | Fixed Prosthodontics</span>
-        <span>Page 17 of 17 • Syllabus Complete</span>
+        <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
+        <span>Page 17 of 17</span>
       </div>
     </div>
+
   </div>
 
-  <!-- Interactive Annotation & Studio Script -->
+  <!-- JNotes Interactive Studio Logic Script -->
   <script>
     const docId = "${docId}";
-    let currentTool = 'highlighter'; // 'highlighter' | 'pen' | 'note'
-    let isDrawing = false;
-    let currentCanvasId = null;
-    let currentStroke = null;
-    let strokes = {}; // { [canvasId]: [ { color, size, points: [{x,y}, ...] } ] }
-    let notes = []; // [ { id, pageId, top, left, text } ]
-    let noteIdCounter = 1;
+    let currentTool = 'pan'; // pan, pen, highlighter, eraser, note
+    let currentColor = '#FEF08A';
+    let currentStroke = 4;
 
-    // 1. Initialize Canvases
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let strokes = {}; // canvasId -> array of stroke objects
+    let notes = [];
+
+    // Scroll to page thumbnail
+    window.scrollToPage = function(pageNum) {
+      const pageEl = document.getElementById('page-' + pageNum);
+      if (pageEl) {
+        pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.thumb-card').forEach((c, idx) => {
+          c.classList.toggle('active', idx + 1 === pageNum);
+        });
+        updatePagePill(pageNum);
+      }
+    };
+
+    // Toggle Sidebar
+    window.toggleSidebar = function() {
+      const sidebar = document.getElementById('jnotes-sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('collapsed');
+      }
+    };
+
+    // Set Tool from Parent Header
+    window.setStudioTool = function(tool, color, stroke) {
+      currentTool = tool || 'pan';
+      if (color) currentColor = color;
+      if (stroke) currentStroke = stroke;
+
+      document.querySelectorAll('.doc-page').forEach(p => {
+        p.classList.remove('mode-pan', 'mode-pen', 'mode-highlighter', 'mode-eraser', 'mode-note');
+        p.classList.add('mode-' + currentTool);
+      });
+
+      document.querySelectorAll('.canvas-overlay').forEach(c => {
+        c.classList.toggle('pen-active', currentTool === 'pen' || currentTool === 'highlighter' || currentTool === 'eraser');
+      });
+    };
+
+    window.setStudioColor = function(color) {
+      currentColor = color;
+      document.documentElement.style.setProperty('--highlight-color', color);
+    };
+
+    window.setStudioStroke = function(stroke) {
+      currentStroke = stroke;
+    };
+
+    // Canvas Drawing Initialization
     function initCanvases() {
-      document.querySelectorAll('.canvas-overlay').forEach(canvas => {
-        const page = canvas.parentElement;
-        if (page) {
-          canvas.width = page.clientWidth || 840;
-          canvas.height = page.clientHeight || 1080;
-        }
+      document.querySelectorAll('.doc-page').forEach(page => {
+        const pageNum = page.getAttribute('data-page');
+        const canvas = document.getElementById('canvas-' + pageNum);
+        if (!canvas) return;
+
+        canvas.width = page.offsetWidth;
+        canvas.height = page.offsetHeight;
+
+        const ctx = canvas.getContext('2d');
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Mouse & Touch Handlers
+        canvas.onmousedown = (e) => startDraw(e, canvas, pageNum);
+        canvas.onmousemove = (e) => draw(e, canvas, pageNum);
+        canvas.onmouseup = () => stopDraw(pageNum);
+        canvas.onmouseleave = () => stopDraw(pageNum);
+
+        canvas.ontouchstart = (e) => {
+          if (e.touches.length === 1) {
+            startDraw(e.touches[0], canvas, pageNum);
+            e.preventDefault();
+          }
+        };
+        canvas.ontouchmove = (e) => {
+          if (e.touches.length === 1) {
+            draw(e.touches[0], canvas, pageNum);
+            e.preventDefault();
+          }
+        };
+        canvas.ontouchend = () => stopDraw(pageNum);
       });
     }
 
-    function getCanvasCoords(canvas, e) {
+    function startDraw(e, canvas, pageNum) {
+      if (currentTool !== 'pen' && currentTool !== 'highlighter' && currentTool !== 'eraser') return;
+      isDrawing = true;
       const rect = canvas.getBoundingClientRect();
-      const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-      const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-      };
+      lastX = e.clientX - rect.left;
+      lastY = e.clientY - rect.top;
+
+      if (!strokes[pageNum]) strokes[pageNum] = [];
+
+      if (currentTool === 'eraser') {
+        eraseAt(pageNum, lastX, lastY);
+      } else {
+        strokes[pageNum].push({
+          tool: currentTool,
+          color: currentColor,
+          strokeWidth: currentStroke,
+          points: [{ x: lastX, y: lastY }]
+        });
+      }
     }
 
-    function redrawCanvas(canvasId) {
-      const canvas = document.getElementById(canvasId);
+    function draw(e, canvas, pageNum) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (currentTool === 'eraser') {
+        eraseAt(pageNum, x, y);
+      } else {
+        const currStrokes = strokes[pageNum];
+        if (currStrokes && currStrokes.length > 0) {
+          const currentPath = currStrokes[currStrokes.length - 1];
+          currentPath.points.push({ x, y });
+          redrawCanvas(pageNum);
+        }
+      }
+
+      lastX = x;
+      lastY = y;
+    }
+
+    function stopDraw(pageNum) {
+      isDrawing = false;
+    }
+
+    function eraseAt(pageNum, x, y) {
+      if (!strokes[pageNum]) return;
+      const radius = currentStroke * 4;
+      strokes[pageNum] = strokes[pageNum].filter(st => {
+        return !st.points.some(p => Math.hypot(p.x - x, p.y - y) < radius);
+      });
+      redrawCanvas(pageNum);
+    }
+
+    function redrawCanvas(pageNum) {
+      const canvas = document.getElementById('canvas-' + pageNum);
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const list = strokes[canvasId] || [];
-      list.forEach(str => {
-        if (!str.points || str.points.length === 0) return;
+
+      const pageStrokes = strokes[pageNum] || [];
+      pageStrokes.forEach(st => {
+        if (st.points.length < 2) return;
+        ctx.save();
         ctx.beginPath();
-        ctx.strokeStyle = str.color || '#E11D48';
-        ctx.lineWidth = str.size || 3;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.moveTo(str.points[0].x, str.points[0].y);
-        for (let i = 1; i < str.points.length; i++) {
-          ctx.lineTo(str.points[i].x, str.points[i].y);
+        ctx.moveTo(st.points[0].x, st.points[0].y);
+
+        for (let i = 1; i < st.points.length; i++) {
+          ctx.lineTo(st.points[i].x, st.points[i].y);
         }
+
+        if (st.tool === 'highlighter') {
+          ctx.globalAlpha = 0.45;
+          ctx.strokeStyle = st.color;
+          ctx.lineWidth = st.strokeWidth * 3.5;
+        } else {
+          ctx.globalAlpha = 1.0;
+          ctx.strokeStyle = st.color;
+          ctx.lineWidth = st.strokeWidth;
+        }
+
         ctx.stroke();
+        ctx.restore();
       });
     }
 
-    // 2. Setup Drawing on Each Canvas
-    document.querySelectorAll('.canvas-overlay').forEach(canvas => {
-      const cid = canvas.id;
-      strokes[cid] = strokes[cid] || [];
-
-      function startDraw(e) {
-        if (currentTool !== 'pen') return;
-        if (canvas.width === 0 || canvas.height === 0) {
-          canvas.width = canvas.parentElement.clientWidth || 840;
-          canvas.height = canvas.parentElement.clientHeight || 1080;
-        }
-        isDrawing = true;
-        currentCanvasId = cid;
-        const pt = getCanvasCoords(canvas, e);
-        currentStroke = { color: '#E11D48', size: 3, points: [pt] };
-        const ctx = canvas.getContext('2d');
-        ctx.beginPath();
-        ctx.strokeStyle = currentStroke.color;
-        ctx.lineWidth = currentStroke.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.moveTo(pt.x, pt.y);
-        ctx.lineTo(pt.x + 0.1, pt.y + 0.1);
-        ctx.stroke();
-      }
-
-      function moveDraw(e) {
-        if (!isDrawing || currentCanvasId !== cid || currentTool !== 'pen') return;
-        if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
-        const pt = getCanvasCoords(canvas, e);
-        currentStroke.points.push(pt);
-        const ctx = canvas.getContext('2d');
-        ctx.lineTo(pt.x, pt.y);
-        ctx.stroke();
-      }
-
-      function endDraw() {
-        if (!isDrawing || currentCanvasId !== cid) return;
-        isDrawing = false;
-        if (currentStroke && currentStroke.points.length > 0) {
-          strokes[cid].push(currentStroke);
-        }
-        currentStroke = null;
-        currentCanvasId = null;
-      }
-
-      canvas.addEventListener('mousedown', startDraw);
-      canvas.addEventListener('mousemove', moveDraw);
-      canvas.addEventListener('mouseup', endDraw);
-      canvas.addEventListener('mouseleave', endDraw);
-
-      canvas.addEventListener('touchstart', startDraw, { passive: false });
-      canvas.addEventListener('touchmove', moveDraw, { passive: false });
-      canvas.addEventListener('touchend', endDraw);
-    });
-
-    // 3. Setup Text Highlighting
-    document.querySelectorAll('.doc-page p, .doc-page li, .doc-page h3, .doc-page h4').forEach((el, idx) => {
+    // Text Element Highlighting
+    document.querySelectorAll('.doc-page p, .doc-page li, .doc-page h3').forEach((el, idx) => {
       el.setAttribute('data-idx', idx);
       el.addEventListener('click', (e) => {
         if (currentTool === 'highlighter') {
           el.classList.toggle('highlighted');
+          el.style.setProperty('--highlight-color', currentColor);
+        } else if (currentTool === 'eraser') {
+          el.classList.remove('highlighted');
         }
       });
     });
 
-    // Mouseup selection highlighter
-    document.addEventListener('mouseup', () => {
-      if (currentTool !== 'highlighter') return;
-      const sel = window.getSelection();
-      if (!sel || sel.isCollapsed || !sel.rangeCount) return;
-      const text = sel.toString().trim();
-      if (text.length < 2) return;
-
-      const range = sel.getRangeAt(0);
-      const container = range.commonAncestorContainer;
-      const page = container.nodeType === 1 ? container.closest('.doc-page') : (container.parentElement ? container.parentElement.closest('.doc-page') : null);
-      if (!page) return;
-
-      try {
-        const mark = document.createElement('mark');
-        mark.className = 'studio-highlight';
-        mark.title = 'انقر لإلغاء التظليل';
-        mark.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const parent = mark.parentNode;
-          while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
-          parent.removeChild(mark);
-        });
-        range.surroundContents(mark);
-        sel.removeAllRanges();
-      } catch (err) {
-        const block = container.nodeType === 1 ? container.closest('p, li, h3, h4') : (container.parentElement ? container.parentElement.closest('p, li, h3, h4') : null);
-        if (block) block.classList.add('highlighted');
-      }
-    });
-
-    // 4. Sticky Notes Creation & Management
-    function createStickyNote(pageEl, x, y, initialText = '', id = null) {
-      const noteId = id || 'sn_' + Date.now() + '_' + (noteIdCounter++);
-      const noteBox = document.createElement('div');
-      noteBox.className = 'sticky-note-box';
-      noteBox.id = noteId;
-      noteBox.style.left = Math.max(10, Math.min(x, (pageEl.clientWidth || 800) - 240)) + 'px';
-      noteBox.style.top = Math.max(10, Math.min(y, (pageEl.clientHeight || 1000) - 130)) + 'px';
-
-      noteBox.innerHTML = 
-        '<div class="sticky-note-header">' +
-          '<span class="note-handle">📌 ملاحظة طالب</span>' +
-          '<button type="button" class="btn-delete-note" title="حذف الملاحظة">✕</button>' +
-        '</div>' +
-        '<textarea class="sticky-note-textarea" placeholder="اكتب ملاحظتك الأكاديمية هنا..."></textarea>';
-
-      const textarea = noteBox.querySelector('textarea');
-      if (textarea) textarea.value = initialText || '';
-      const deleteBtn = noteBox.querySelector('.btn-delete-note');
-      const header = noteBox.querySelector('.sticky-note-header');
-
-      deleteBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        noteBox.remove();
-        notes = notes.filter(n => n.id !== noteId);
-      });
-
-      textarea.addEventListener('input', () => {
-        const n = notes.find(item => item.id === noteId);
-        if (n) n.text = textarea.value;
-      });
-
-      // Draggable logic
-      let isDragging = false;
-      let dragStartX = 0, dragStartY = 0;
-      let initLeft = 0, initTop = 0;
-
-      header.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        isDragging = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        initLeft = parseInt(noteBox.style.left, 10) || 0;
-        initTop = parseInt(noteBox.style.top, 10) || 0;
-        header.style.cursor = 'grabbing';
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - dragStartX;
-        const dy = e.clientY - dragStartY;
-        const maxLeft = (pageEl.clientWidth || 800) - noteBox.offsetWidth - 10;
-        const maxTop = (pageEl.clientHeight || 1000) - noteBox.offsetHeight - 10;
-        const newLeft = Math.max(10, Math.min(initLeft + dx, maxLeft));
-        const newTop = Math.max(10, Math.min(initTop + dy, maxTop));
-        noteBox.style.left = newLeft + 'px';
-        noteBox.style.top = newTop + 'px';
-
-        const n = notes.find(item => item.id === noteId);
-        if (n) {
-          n.left = newLeft;
-          n.top = newTop;
-        }
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isDragging) {
-          isDragging = false;
-          header.style.cursor = 'grab';
-        }
-      });
-
-      pageEl.appendChild(noteBox);
-
-      const existing = notes.find(n => n.id === noteId);
-      if (!existing) {
-        notes.push({
-          id: noteId,
-          pageId: pageEl.id,
-          left: parseInt(noteBox.style.left, 10),
-          top: parseInt(noteBox.style.top, 10),
-          text: initialText
-        });
-      }
-    }
-
-    // Click on page in note mode spawns a note
+    // Sticky Notes Creation
     document.querySelectorAll('.doc-page').forEach(page => {
       page.addEventListener('click', (e) => {
         if (currentTool !== 'note') return;
-        if (e.target.closest('.sticky-note-box') || e.target.closest('.toolbar-sticky-indicator')) return;
+        if (e.target.closest('.sticky-note-box')) return;
         const rect = page.getBoundingClientRect();
         const x = e.clientX - rect.left - 20;
         const y = e.clientY - rect.top - 20;
@@ -1608,45 +1580,73 @@ const DocumentViewer = {
       });
     });
 
-    // 5. Tool Switcher
-    window.setStudioTool = function(tool) {
-      currentTool = tool;
-      document.querySelectorAll('.btn-inpage-tool').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tool') === tool);
-      });
+    function createStickyNote(pageEl, x, y, textContent, existingId) {
+      const noteId = existingId || 'note_' + Date.now();
+      const note = document.createElement('div');
+      note.className = 'sticky-note-box';
+      note.style.left = x + 'px';
+      note.style.top = y + 'px';
+      note.setAttribute('data-id', noteId);
 
-      const label = document.getElementById('current-tool-label');
-      if (label) {
-        if (tool === 'highlighter') label.textContent = '🖍️ وضع التظليل الأصفر (انقر على الفقرات أو ظلل النص)';
-        else if (tool === 'pen') label.textContent = '✏️ وضع الرسم الحر (اسحب الماوس/القلم للتعليم على الصفحة)';
-        else if (tool === 'note') label.textContent = '📝 وضع الملاحظات (انقر في أي مكان لإضافة بطاقة ملاحظة)';
+      note.innerHTML = \`
+        <div class="sticky-note-header">
+          <span>📌 ملاحظة طالب</span>
+          <button class="sticky-note-close" onclick="this.parentNode.parentNode.remove()">✕</button>
+        </div>
+        <textarea placeholder="اكتب ملاحظاتك هنا...">${textContent || ''}</textarea>
+      \`;
+
+      pageEl.appendChild(note);
+    }
+
+    // Update Top Header Page Pill on Scroll
+    const viewport = document.getElementById('jnotes-viewport');
+    if (viewport) {
+      viewport.addEventListener('scroll', () => {
+        const pages = document.querySelectorAll('.doc-page');
+        pages.forEach((p, idx) => {
+          const rect = p.getBoundingClientRect();
+          if (rect.top >= 0 && rect.top < window.innerHeight / 2) {
+            updatePagePill(idx + 1);
+          }
+        });
+      });
+    }
+
+    function updatePagePill(pageNum) {
+      if (window.parent && window.parent.document.getElementById('doc-viewer-pages-text')) {
+        window.parent.document.getElementById('doc-viewer-pages-text').textContent = pageNum + ' / 17';
       }
+    }
 
-      document.querySelectorAll('.doc-page').forEach(p => {
-        p.classList.toggle('mode-highlighter', tool === 'highlighter');
-        p.classList.toggle('mode-pen', tool === 'pen');
-        p.classList.toggle('mode-note', tool === 'note');
-      });
-
-      document.querySelectorAll('.canvas-overlay').forEach(c => {
-        c.classList.toggle('pen-active', tool === 'pen');
-      });
-    };
-
-    // 6. Save Annotations to Account & LocalStorage
+    // Save Annotations
     window.saveAnnotations = function() {
       const highlights = [];
-      document.querySelectorAll('.doc-page p, .doc-page li, .doc-page h3, .doc-page h4').forEach(el => {
-        if (el.classList.contains('highlighted')) {
-          highlights.push(parseInt(el.getAttribute('data-idx'), 10));
-        }
+      document.querySelectorAll('.highlighted').forEach(el => {
+        highlights.push({
+          idx: parseInt(el.getAttribute('data-idx'), 10),
+          color: el.style.getPropertyValue('--highlight-color') || '#FEF08A'
+        });
+      });
+
+      const noteData = [];
+      document.querySelectorAll('.sticky-note-box').forEach(n => {
+        const pageId = n.parentNode.id;
+        const ta = n.querySelector('textarea');
+        noteData.push({
+          id: n.getAttribute('data-id'),
+          pageId: pageId,
+          left: parseInt(n.style.left, 10),
+          top: parseInt(n.style.top, 10),
+          text: ta ? ta.value : ''
+        });
       });
 
       const data = {
         docId: docId,
         highlights: highlights,
         strokes: strokes,
-        notes: notes,
+        notes: noteData,
         updatedAt: new Date().toISOString()
       };
 
@@ -1654,86 +1654,38 @@ const DocumentViewer = {
         localStorage.setItem('kf_doc_annotations_' + docId, JSON.stringify(data));
       } catch (e) {}
 
-      const badge = document.getElementById('save-feedback-badge');
-      if (badge) {
-        badge.style.display = 'inline-flex';
-        setTimeout(() => { badge.style.display = 'none'; }, 2500);
-      }
-
       return data;
     };
 
-    function handleInpageSave() {
-      window.saveAnnotations();
-      if (window.parent && window.parent.STORE && typeof window.parent.STORE.addPoints === 'function') {
-        window.parent.STORE.addPoints(5);
-      }
-      if (window.parent && typeof window.parent.showToast === 'function') {
-        window.parent.showToast('تم حفظ تظليلاتك ورسوماتك وملاحظاتك بنجاح في حسابك! (+5 نقاط)', { type: 'success', points: 5 });
-      }
-    }
-
-    // 7. Clear Annotations
-    window.clearAnnotations = function() {
-      document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));
-      document.querySelectorAll('mark.studio-highlight').forEach(mark => {
-        const p = mark.parentNode;
-        while (mark.firstChild) p.insertBefore(mark.firstChild, mark);
-        p.removeChild(mark);
-      });
-
-      strokes = {};
-      document.querySelectorAll('.canvas-overlay').forEach(c => {
-        const ctx = c.getContext('2d');
-        ctx.clearRect(0, 0, c.width, c.height);
-      });
-
-      document.querySelectorAll('.sticky-note-box').forEach(n => n.remove());
-      notes = [];
-
-      try {
-        localStorage.removeItem('kf_doc_annotations_' + docId);
-      } catch (e) {}
-    };
-
-    function handleInpageClear() {
-      window.clearAnnotations();
-      if (window.parent && typeof window.parent.showToast === 'function') {
-        window.parent.showToast('تم مسح جميع التعديلات.', { type: 'info' });
-      }
-    }
-
-    // 8. Load Saved Annotations
+    // Load Annotations
     window.loadSavedAnnotations = function() {
       try {
         const saved = localStorage.getItem('kf_doc_annotations_' + docId);
         if (!saved) return;
         const data = JSON.parse(saved);
 
-        // 1. Highlights
         if (Array.isArray(data.highlights)) {
-          const allTextEls = document.querySelectorAll('.doc-page p, .doc-page li, .doc-page h3, .doc-page h4');
-          data.highlights.forEach(idx => {
-            if (allTextEls[idx]) allTextEls[idx].classList.add('highlighted');
+          const allTextEls = document.querySelectorAll('.doc-page p, .doc-page li, .doc-page h3');
+          data.highlights.forEach(h => {
+            const el = allTextEls[typeof h === 'object' ? h.idx : h];
+            if (el) {
+              el.classList.add('highlighted');
+              if (typeof h === 'object' && h.color) {
+                el.style.setProperty('--highlight-color', h.color);
+              }
+            }
           });
         }
 
-        // 2. Strokes
-        if (data.strokes && typeof data.strokes === 'object') {
+        if (data.strokes) {
           strokes = data.strokes;
-          Object.keys(strokes).forEach(cid => {
-            redrawCanvas(cid);
-          });
+          Object.keys(strokes).forEach(pNum => redrawCanvas(pNum));
         }
 
-        // 3. Notes
         if (Array.isArray(data.notes)) {
-          notes = [];
           data.notes.forEach(n => {
             const pageEl = document.getElementById(n.pageId);
-            if (pageEl) {
-              createStickyNote(pageEl, n.left, n.top, n.text, n.id);
-            }
+            if (pageEl) createStickyNote(pageEl, n.left, n.top, n.text, n.id);
           });
         }
       } catch (e) {}
@@ -1747,7 +1699,7 @@ const DocumentViewer = {
     setTimeout(() => {
       initCanvases();
       loadSavedAnnotations();
-    }, 200);
+    }, 250);
   </script>
 </body>
 </html>`;

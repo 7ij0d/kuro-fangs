@@ -338,9 +338,8 @@ const SubjectModal = {
       date: '2026-09-12'
     };
 
-    if (window.DocumentViewer) {
-      window.DocumentViewer.open(doc);
-    }
+    SubjectModal.close();
+    window.location.hash = '#/sheet-detail?id=' + docId;
   },
 
   downloadDoc(docId) {

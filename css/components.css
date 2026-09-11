@@ -2447,17 +2447,20 @@ html[dir="ltr"] .academia-exam-table {
 /* ==========================================================================
    GLASSMORPHIС IN-APP DOCUMENT VIEWER MODAL (<iframe />)
    ========================================================================== */
+/* ==========================================================================
+   JNOTES / GOODNOTES STYLE DOCUMENT VIEWER & NOTE STUDIO
+   ========================================================================== */
 .doc-viewer-backdrop {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(10, 11, 18, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 0;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
@@ -2469,14 +2472,14 @@ html[dir="ltr"] .academia-exam-table {
 }
 
 .doc-viewer-window {
-  width: 94%;
-  max-width: 980px;
-  height: 88vh;
-  max-height: 940px;
-  background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  background: #12131F;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2484,7 +2487,7 @@ html[dir="ltr"] .academia-exam-table {
 }
 
 @keyframes docZoomIn {
-  from { opacity: 0; transform: scale(0.96); }
+  from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -2497,38 +2500,40 @@ html[dir="ltr"] .academia-exam-table {
 }
 
 .doc-viewer-header {
-  padding: 14px 22px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-subtle);
+  height: 62px;
+  padding: 0 18px;
+  background: #1B1D2C;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 12px;
+  user-select: none;
+  z-index: 10;
 }
 
 .doc-viewer-title-group {
   display: flex;
   align-items: center;
   gap: 12px;
-  max-width: 60%;
+  max-width: 320px;
 }
 
 .doc-badge-type {
-  background: #BE123C;
+  background: #0284C7;
   color: #FFFFFF;
-  font-size: 0.725rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 6px;
   letter-spacing: 0.05em;
   flex-shrink: 0;
 }
 
 .doc-viewer-meta-text h3 {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: #F8FAFC;
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -2536,18 +2541,20 @@ html[dir="ltr"] .academia-exam-table {
 }
 
 .doc-viewer-meta-text p {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.725rem;
+  color: #94A3B8;
 }
 
+/* JNotes Studio Floating Center Palette */
 .doc-viewer-annotation-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: var(--bg-surface-subtle, rgba(255, 255, 255, 0.08));
-  padding: 4px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 5px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .btn-annotation-tool {
@@ -2556,10 +2563,10 @@ html[dir="ltr"] .academia-exam-table {
   gap: 6px;
   background: transparent;
   border: 1px solid transparent;
-  color: var(--text-secondary, #94A3B8);
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 0.775rem;
+  color: #94A3B8;
+  padding: 5px 12px;
+  border-radius: 9px;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2567,21 +2574,72 @@ html[dir="ltr"] .academia-exam-table {
 }
 
 .btn-annotation-tool:hover {
-  background: var(--bg-surface, rgba(255, 255, 255, 0.12));
-  color: var(--text-primary, #F8FAFC);
+  background: rgba(255, 255, 255, 0.1);
+  color: #F8FAFC;
 }
 
 .btn-annotation-tool.active {
-  background: var(--brand-primary, #0284C7) !important;
+  background: #0284C7 !important;
   color: #FFFFFF !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+}
+
+.jnotes-color-swatches {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 6px;
+  padding: 0 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.swatch-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.swatch-dot:hover {
+  transform: scale(1.2);
+}
+
+.swatch-dot.active {
+  border-color: #FFFFFF;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  transform: scale(1.15);
+}
+
+.jnotes-stroke-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stroke-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94A3B8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stroke-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
 }
 
 .btn-annotation-tool.save-tool {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10B981;
-  border-color: rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.18);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .btn-annotation-tool.save-tool:hover {
@@ -2590,9 +2648,9 @@ html[dir="ltr"] .academia-exam-table {
 }
 
 .btn-annotation-tool.clear-tool {
-  background: rgba(239, 68, 68, 0.12);
-  color: #EF4444;
-  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border-color: rgba(239, 68, 68, 0.25);
 }
 
 .btn-annotation-tool.clear-tool:hover {
@@ -2611,27 +2669,28 @@ html[dir="ltr"] .academia-exam-table {
   align-items: center;
   gap: 5px;
   font-size: 0.775rem;
-  color: var(--text-secondary);
-  background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-subtle);
-  padding: 5px 10px;
-  border-radius: var(--radius-pill);
-  font-weight: 600;
+  color: #CBD5E1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .doc-viewer-close-btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  font-size: 1.05rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #F8FAFC;
+  font-size: 1.1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .doc-viewer-close-btn:hover {
@@ -2643,9 +2702,10 @@ html[dir="ltr"] .academia-exam-table {
 .doc-viewer-body {
   flex: 1;
   width: 100%;
-  height: 100%;
-  background: #F1F5F9;
+  height: calc(100vh - 62px);
+  background: #12131F;
   overflow: hidden;
+  display: flex;
 }
 
 .doc-viewer-iframe {
@@ -2653,6 +2713,7 @@ html[dir="ltr"] .academia-exam-table {
   height: 100%;
   border: none;
   display: block;
+}
 }
 
 /* ==========================================================================
