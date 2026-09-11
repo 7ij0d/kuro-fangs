@@ -22,49 +22,49 @@ const ExamsPage = {
     return sanitized;
   },
 
-  // Weekly Theoretical Lectures Timetable (Sunday - Thursday)
+  // Official Weekly Theoretical Lectures Timetable (Official Faculty of Dentistry Schedule)
   theoryScheduleDays: [
     {
-      day_ar: 'الأحد',
-      day_en: 'Sunday',
+      day_ar: 'السبت', day_en: 'Saturday',
       slots: [
-        { time: '08:30 - 10:00', code: 'MS 310', subject_ar: 'الباطنة العامة', subject_en: 'General Medicine', hall_ar: 'المدرج الرئيسي', hall_en: 'Main Auditorium', doctor_ar: 'د. طارق الزاوي', doctor_en: 'Dr. Tarek' },
-        { time: '10:15 - 11:45', code: 'DS 341', subject_ar: 'جراحة الفم والوجه والفكين 1', subject_en: 'OMFS I', hall_ar: 'مدرج د. الشريف', hall_en: 'Dr. El-Sherif Hall', doctor_ar: 'د. عبدالسلام الشريف', doctor_en: 'Dr. El-Sherif' },
-        { time: '12:00 - 01:30', code: 'DS 321', subject_ar: 'الاستعاضة السنية المتحركة 2', subject_en: 'Removable Pros II', hall_ar: 'القاعة 1', hall_en: 'Hall 1', doctor_ar: 'د. محمد القمودي', doctor_en: 'Dr. El-Gammudi' }
+        { time: '08:00 - 10:00', code: 'MS310', subject_ar: 'الباطنة العامة', subject_en: 'General Medicine', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
+        { time: '10:00 - 12:00', code: 'MS320', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
       ]
     },
     {
-      day_ar: 'الإثنين',
-      day_en: 'Monday',
+      day_ar: 'الأحد', day_en: 'Sunday',
       slots: [
-        { time: '08:30 - 10:00', code: 'DS 311', subject_ar: 'العلاج التحفظي وعلاج الجذور 2', subject_en: 'Cons & Endo II', hall_ar: 'القاعة الكبرى', hall_en: 'Grand Hall', doctor_ar: 'د. منيرة الفيتوري', doctor_en: 'Dr. El-Fituri' },
-        { time: '10:15 - 11:45', code: 'DS 380', subject_ar: 'أمراض الفم', subject_en: 'Oral Diseases', hall_ar: 'مدرج أ', hall_en: 'Auditorium A', doctor_ar: 'د. فاطمة الماجري', doctor_en: 'Dr. El-Majri' },
-        { time: '12:00 - 01:30', code: 'DS 351', subject_ar: 'أمراض وعلاج اللثة 1', subject_en: 'Periodontology I', hall_ar: 'القاعة 2', hall_en: 'Hall 2', doctor_ar: 'د. وليد البوسيفي', doctor_en: 'Dr. El-Busefi' }
+        { time: '08:00 - 10:00', code: 'DS331', subject_ar: 'الاستعاضة السنية الثابتة 2', subject_en: 'Fixed Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
+        { time: '10:00 - 12:00', code: 'DS341', subject_ar: 'جراحة الفم والوجه والفكين 1', subject_en: 'OMFS I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
       ]
     },
     {
-      day_ar: 'الثلاثاء',
-      day_en: 'Tuesday',
+      day_ar: 'الإثنين', day_en: 'Monday',
       slots: [
-        { time: '08:30 - 10:00', code: 'MS 320', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery', hall_ar: 'المدرج الرئيسي', hall_en: 'Main Auditorium', doctor_ar: 'د. خالد الورفلي', doctor_en: 'Dr. El-Warfali' },
-        { time: '10:15 - 11:45', code: 'DS 331', subject_ar: 'الاستعاضة السنية الثابتة 2', subject_en: 'Fixed Pros II', hall_ar: 'القاعة 2', hall_en: 'Hall 2', doctor_ar: 'د. عبدالسلام الشريف', doctor_en: 'Dr. El-Sherif' },
-        { time: '12:00 - 01:30', code: 'DS 381', subject_ar: 'طب الأسنان الوقائي', subject_en: 'Preventive Dentistry', hall_ar: 'مدرج ب', hall_en: 'Auditorium B', doctor_ar: 'د. إيناس الترهوني', doctor_en: 'Dr. El-Tarhuni' }
+        { time: '08:00 - 10:00', code: 'DS380', subject_ar: 'أمراض الفم', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
+        { time: '10:00 - 12:00', code: 'DS351', subject_ar: 'أمراض وعلاج اللثة 1', subject_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
       ]
     },
     {
-      day_ar: 'الأربعاء',
-      day_en: 'Wednesday',
+      day_ar: 'الثلاثاء', day_en: 'Tuesday',
       slots: [
-        { time: '08:30 - 10:00', code: 'DS 361', subject_ar: 'طب الفم والتشخيص والأشعة 1', subject_en: 'OMDR I', hall_ar: 'مدرج الأشعة', hall_en: 'Radiology Hall', doctor_ar: 'د. حاتم كشرود', doctor_en: 'Dr. Kashrud' },
-        { time: '10:15 - 11:45', code: 'DS 371', subject_ar: 'تقويم الأسنان 1', subject_en: 'Orthodontics I', hall_ar: 'القاعة 3', hall_en: 'Hall 3', doctor_ar: 'د. ريم الفرجاني', doctor_en: 'Dr. El-Ferjani' },
-        { time: '12:00 - 01:30', code: 'DS 470', subject_ar: 'طب أسنان الأطفال 1', subject_en: 'Pediatric Dentistry I', hall_ar: 'مدرج الأطفال', hall_en: 'Pedo Hall', doctor_ar: 'د. هدى السويح', doctor_en: 'Dr. El-Sweih' }
+        { time: '08:00 - 10:00', code: 'DS381', subject_ar: 'طب الأسنان الوقائي', subject_en: 'Preventive Dentistry', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
+        { time: '10:00 - 12:00', code: 'DS361', subject_ar: 'طب الفم والتشخيص والأشعة 1', subject_en: 'OMDR I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
       ]
     },
     {
-      day_ar: 'الخميس',
-      day_en: 'Thursday',
+      day_ar: 'الأربعاء', day_en: 'Wednesday',
       slots: [
-        { time: '09:00 - 12:00', code: 'ACAD 300', subject_ar: 'جلسات المراجعة الأكاديمية والمناقشات السريرية', subject_en: 'Academic Seminars & Clinical Case Review', hall_ar: 'عيادات ومبنى الكلية', hall_en: 'Faculty Clinical Wings', doctor_ar: 'هيئة التدريس', doctor_en: 'Faculty Board' }
+        { time: '08:00 - 10:00', code: 'DS311', subject_ar: 'العلاج التحفظي وعلاج الجذور 2', subject_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
+        { time: '10:00 - 12:00', code: 'DS371', subject_ar: 'تقويم الأسنان 1', subject_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
+        { time: '02:00 - 04:00', code: 'DS380', subject_ar: 'أمراض الفم (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
+      ]
+    },
+    {
+      day_ar: 'الخميس', day_en: 'Thursday',
+      slots: [
+        { time: '08:00 - 10:00', code: 'DS321', subject_ar: 'الاستعاضة السنية المتحركة 2', subject_en: 'Removable Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
+        { time: '10:00 - 12:00', code: 'DS470', subject_ar: 'طب أسنان الأطفال 1', subject_en: 'Pediatric Dentistry I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
       ]
     }
   ],
@@ -181,11 +181,10 @@ const ExamsPage = {
             <thead>
               <tr>
                 <th style="width: 130px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
-                <th style="width: 140px; text-align: center;">${isAr ? 'التوقيت' : 'Time'}</th>
+                <th style="width: 150px; text-align: center;">${isAr ? 'التوقيت' : 'Time'}</th>
                 <th style="width: 110px; text-align: center;">${isAr ? 'رمز المقرر' : 'Code'}</th>
                 <th>${isAr ? 'المادة الدراسية' : 'Course Subject'}</th>
-                <th>${isAr ? 'القاعة / المدرج' : 'Hall / Auditorium'}</th>
-                <th>${isAr ? 'أستاذ المادة' : 'Lecturer'}</th>
+                <th style="width: 150px; text-align: center;">${isAr ? 'المدرج' : 'Auditorium'}</th>
               </tr>
             </thead>
             <tbody>
@@ -213,11 +212,10 @@ const ExamsPage = {
                         <span class="subject-sub-name">${isAr ? slot.subject_en : slot.subject_ar}</span>
                       </div>
                     </td>
-                    <td>
-                      <span class="badge badge-subtle" style="font-size: 0.775rem; font-weight: 700;">🏛️ ${isAr ? slot.hall_ar : slot.hall_en}</span>
-                    </td>
-                    <td>
-                      <span style="font-size: 0.825rem; font-weight: 600; color: var(--text-secondary);">👨‍🏫 ${isAr ? slot.doctor_ar : slot.doctor_en}</span>
+                    <td style="text-align: center;">
+                      <span class="badge badge-subtle" style="font-size: 0.8rem; font-weight: 700; color: var(--brand-burgundy); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); padding: 4px 12px; border-radius: 20px;">
+                        🏛️ ${isAr ? slot.hall_ar : slot.hall_en}
+                      </span>
                     </td>
                   </tr>
                 `).join('');
