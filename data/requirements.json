@@ -1,59 +1,78 @@
 {
   "departments": [
     {
-      "id": "cons",
-      "name_ar": "طب الأسنان التحفظي (Conservative)",
+      "id": "cons-endo",
+      "name_ar": "طب الأسنان التحفظي 2 (Conservative II)",
       "icon": "🔬",
       "color": "#4ECDC4",
-      "description": "متطلبات تحضير التجاويف والحشوات على الفانتوم هيد (Phantom Head)",
+      "description": "متطلبات تحضير التجاويف المتقدمة والحشوات التجميلية على الفانتوم هيد (Phantom Head)",
       "items": [
-        { "id": "cons_cl1_molar", "name": "Class I Cavity — Molar (Amalgam)", "target": 5, "unit": "تجاويف", "notes": "عمق 1.5 - 2 ملم مع الحفاظ على الـ Marginal Ridges" },
+        { "id": "cons_cl1_molar", "name": "Class I Cavity — Molar (Amalgam/Composite)", "target": 5, "unit": "تجاويف", "notes": "عمق 1.5 - 2 ملم مع الحفاظ على الـ Marginal Ridges" },
         { "id": "cons_cl1_premolar", "name": "Class I Cavity — Premolar", "target": 4, "unit": "تجاويف", "notes": "شكل الفراشة مع تجنب الـ Transverse Ridge في Lower 4" },
         { "id": "cons_cl2_premolar", "name": "Class II MO/DO — Premolar", "target": 4, "unit": "تجاويف", "notes": "Proximal box بعمق تحت نقطة التماس وبزاوية 90 درجة" },
         { "id": "cons_cl2_molar", "name": "Class II MOD — Molar", "target": 3, "unit": "تجاويف", "notes": "تحضير مزدوج مع الحفاظ على Cusp tips" },
-        { "id": "cons_cl5", "name": "Class V Cavity", "target": 3, "unit": "تجاويف", "notes": "Kidney shape عند عنق السن للكومبوزيت أو الأملغم" },
-        { "id": "cons_amalgam_condense", "name": "Amalgam Restoration & Carving", "target": 4, "unit": "حشوات", "notes": "تكثيف ونحت الأملغم مع ضبط الـ Anatomy" },
-        { "id": "cons_composite_ant", "name": "Composite Restoration (Class III / IV)", "target": 3, "unit": "حشوات", "notes": "تخريش وحفر بيفل وبناء طبقي مع التصليد الضوئي" }
+        { "id": "cons_cl3_cl4", "name": "Class III & IV Composite Cavities", "target": 4, "unit": "تجاويف", "notes": "تخريش حمضي وشطب الحواف المينائية (Beveling) للأسنان الأمامية" },
+        { "id": "cons_cl5", "name": "Class V Cavity", "target": 3, "unit": "تجاويف", "notes": "Kidney shape عند عنق السن للكومبوزيت أو الزجاج الشاردي (GIC)" },
+        { "id": "cons_amalgam_condense", "name": "Amalgam Restoration & Carving", "target": 4, "unit": "حشوات", "notes": "تكثيف ونحت الأملغم مع إبراز المعالم التشريحية الدقيقة" },
+        { "id": "cons_composite_layering", "name": "Composite Restoration & Polishing", "target": 4, "unit": "حشوات", "notes": "بناء طبقي تدريجي (Incremental) وإنهاء التلميع بـ Discs" }
       ]
     },
     {
-      "id": "crown",
-      "name_ar": "التيجان والجسور (Crown & Bridge)",
+      "id": "endo",
+      "name_ar": "أمراض وعلاج لب الأسنان 1 (Endodontics I)",
+      "icon": "⚡",
+      "color": "#FF6B6B",
+      "description": "متطلبات فتح حجرة العصب وتوسيع وحشو القنوات في الأسنان المستخرجة (Extracted Teeth)",
+      "items": [
+        { "id": "endo_access_anterior", "name": "Access Cavity Preparation — Upper Central/Canine", "target": 4, "unit": "أسنان", "notes": "مدخل مثلث الشكل أو بيضاوي مع إزالة سقف الحجرة اللبية بالكامل (Derofing)" },
+        { "id": "endo_access_premolar", "name": "Access Cavity Preparation — Premolar (1-2 Canals)", "target": 4, "unit": "أسنان", "notes": "مدخل بيضاوي في منتصف السطح الإطباقي وكشف فوهات القنوات (Orifices)" },
+        { "id": "endo_access_molar", "name": "Access Cavity Preparation — Upper/Lower Molar", "target": 3, "unit": "أسنان", "notes": "مدخل شبه منحرف أو مثلث وتحديد 3-4 قنوات جذرية" },
+        { "id": "endo_working_length", "name": "Working Length Determination (Radiographic)", "target": 5, "unit": "أشعة", "notes": "تحديد طول العمل بفايل مقاس 15 قبل الذروة بـ 0.5-1.0 ملم" },
+        { "id": "endo_instrumentation", "name": "Canal Cleaning & Shaping (Step-Back Technique)", "target": 5, "unit": "قنوات", "notes": "توسيع الذروة إلى Master Apical File مع الإرواء المستمر بـ NaOCl" },
+        { "id": "endo_obturation", "name": "Cold Lateral Condensation Obturation", "target": 4, "unit": "حشوات جذور", "notes": "تطبيق Master cone مع أقماع المساعدة وتكثيف بالـ Spreader والسيلر" }
+      ]
+    },
+    {
+      "id": "fixed-pros",
+      "name_ar": "الاستعاضة الثابتة 2 (Fixed Prosthodontics II)",
       "icon": "👑",
       "color": "#A78BFA",
-      "description": "متطلبات تحضير الأسنان وخطوط الإنهاء لتعويضات الأسنان الثابتة",
+      "description": "متطلبات تحضير الأسنان وخطوط الإنهاء للتيجان والجسور على الفانتوم",
       "items": [
-        { "id": "cb_full_metal", "name": "Full Cast Metal Crown — Lower Molar", "target": 3, "unit": "تحضيرات", "notes": "تقليل إطباقي 1.5 ملم مع Chamfer finish line متجانس" },
-        { "id": "cb_pfm_anterior", "name": "PFM Crown — Upper Central Incisor", "target": 4, "unit": "تحضيرات", "notes": "Shoulder finish line دهليزياً و Chamfer لسانياً" },
-        { "id": "cb_pfm_posterior", "name": "PFM Crown — Upper Premolar", "target": 3, "unit": "تحضيرات", "notes": "مساحة كافية للمعدن والخزف (2 ملم إطباقياً)" },
-        { "id": "cb_temp_crown", "name": "Provisional / Temporary Crown", "target": 3, "unit": "تيجان", "notes": "صناعة تاج مؤقت بـ Acryl مع تشطيب ونعومة الأطراف" },
-        { "id": "cb_impression", "name": "Elastomeric Impression (Putty / Light Body)", "target": 2, "unit": "طبعات", "notes": "طبعة دقيقة تُظهر خط الإنهاء بدون فقاعات هواء" }
+        { "id": "fp_full_metal", "name": "Full Cast Metal Crown — Lower First Molar", "target": 3, "unit": "تحضيرات", "notes": "تقليل إطباقي 1.5 ملم مع Chamfer finish line متجانس بعرض 0.5 ملم" },
+        { "id": "fp_pfm_anterior", "name": "PFM Crown — Upper Central Incisor", "target": 4, "unit": "تحضيرات", "notes": "Shoulder finish line دهليزياً (1.2 مم) و Chamfer لسانياً (0.5 مم)" },
+        { "id": "fp_pfm_posterior", "name": "PFM Crown — Upper Premolar", "target": 3, "unit": "تحضيرات", "notes": "مساحة كافية للمعدن والخزف (1.5-2.0 ملم إطباقياً)" },
+        { "id": "fp_all_ceramic", "name": "All-Ceramic Crown Preparation", "target": 2, "unit": "تحضيرات", "notes": "Radial shoulder بزوايا مدورة وتقليل محوري منتظم 1.0-1.5 مم" },
+        { "id": "fp_temp_crown", "name": "Provisional / Temporary Crown Construction", "target": 3, "unit": "تيجان", "notes": "صناعة تاج مؤقت براتينج الأكريل مع تشطيب ونعومة الأطراف الإطباقية" },
+        { "id": "fp_impression", "name": "Elastomeric Dual-Phase Impression", "target": 3, "unit": "طبعات", "notes": "طبعة دقيقة بمطاط Putty / Light Body تُظهر خط الإنهاء دون أي فقاعات" }
       ]
     },
     {
-      "id": "prostho",
-      "name_ar": "الاستعاضة المتحركة (Prosthodontics)",
-      "icon": "🦷",
+      "id": "removable-pros",
+      "name_ar": "الاستعاضة المتحركة 2 (Removable Prosthodontics II)",
+      "icon": "🦿",
       "color": "#FFD93D",
-      "description": "خطوات تصنيع أطقم الأسنان الكاملة والجزئية في المعمل",
+      "description": "خطوات تصنيع أطقم الأسنان الكاملة والجزئية في معمل الاستعاضة",
       "items": [
-        { "id": "pros_primary_imp", "name": "Primary Casts & Study Models", "target": 2, "unit": "كاستات", "notes": "صب طبعات الألجينات بحجر الجبس والتنظيف والتسطيح" },
-        { "id": "pros_special_tray", "name": "Special Tray (Maxillary & Mandibular)", "target": 2, "unit": "طوابع", "notes": "عمل طابع خاص بأبعاد 2 ملم قبل الـ Sulcus مع Stop" },
-        { "id": "pros_bite_rims", "name": "Occlusion Rims (Wax Blocks)", "target": 2, "unit": "ارتفاعات", "notes": "أبعاد الشمع 22 ملم أمامياً و 18 ملم خلفياً للعلوي" },
-        { "id": "pros_teeth_arrange", "name": "Complete Denture Teeth Arrangement (Class I)", "target": 2, "unit": "أطقم", "notes": "رص الأسنان الأمامية والخلفية وتطبيق الـ Compensating Curves" },
-        { "id": "pros_waxup", "name": "Festooning & Final Wax-up", "target": 2, "unit": "نحت", "notes": "تشكيل اللثة الشمعية ومحاكاة الجذور قبل خطوة الطبخ" }
+        { "id": "rp_primary_casts", "name": "Primary Casts & Study Models", "target": 2, "unit": "كاستات", "notes": "صب طبعات الألجينات بجبس الحجر والتنظيف والتسطيح الهندسي" },
+        { "id": "rp_special_tray", "name": "Special Tray (Maxillary & Mandibular)", "target": 2, "unit": "طوابع خاصة", "notes": "عمل طابع خاص بأكريل التصلب الضوئي مع Stops متباعدة" },
+        { "id": "rp_border_molding", "name": "Border Molding & Secondary Impression", "target": 2, "unit": "طبعات نهائية", "notes": "تشكيل الحواف بمركب الكومباوند الأخضر وتسجيل الـ Post-dam" },
+        { "id": "rp_bite_rims", "name": "Occlusion Rims (Wax Blocks)", "target": 2, "unit": "ارتفاعات شمعية", "notes": "أبعاد الشمع 22 ملم أمامياً و 18 ملم خلفياً للفك العلوي" },
+        { "id": "rp_articulator_mount", "name": "Face-bow Transfer & Articulator Mounting", "target": 2, "unit": "تركيبات", "notes": "نقل علاقة الفك بقوس الوجه وتثبيت الكاستات بالجبس على المطبق" },
+        { "id": "rp_teeth_arrange", "name": "Complete Denture Teeth Arrangement (Class I)", "target": 2, "unit": "أطقم كاملة", "notes": "رص الأسنان الأمامية والخلفية وتطبيق منحنيات Spee & Wilson" },
+        { "id": "rp_waxup", "name": "Festooning & Final Wax-up", "target": 2, "unit": "نحت شمعي", "notes": "تشكيل اللثة الشمعية ومحاكاة الجذور بدقة قبل خطوة الطبخ والتعليب" }
       ]
     },
     {
-      "id": "labs",
-      "name_ar": "المعامل الطبية (Patho, Micro & Pharma)",
-      "icon": "🧪",
-      "color": "#FF6B6B",
-      "description": "متطلبات الحضور والشرائح المعملية والتجارب",
+      "id": "omfs",
+      "name_ar": "جراحة الفم والقلع (Preclinical OMFS)",
+      "icon": "🔪",
+      "color": "#5BA4CF",
+      "description": "مهارات التخدير الموضعي وتطبيق ملاقط وروافع القلع والخياطة الجراحية",
       "items": [
-        { "id": "lab_patho_slides", "name": "Histopathology Slide Identification", "target": 10, "unit": "شرائح", "notes": "التعرف على شرائح الالتهاب والأورام والأنسجة الحبيبية" },
-        { "id": "lab_micro_stains", "name": "Gram Stain & Bacterial Morphology", "target": 5, "unit": "تجارب", "notes": "صبغة غرام والتعرف على البكتيريا الكروية والعصوية" },
-        { "id": "lab_pharma_presc", "name": "Dental Prescription Writing", "target": 6, "unit": "وصفات", "notes": "كتابة وصفات المضادات الحيوية والمسكنات وجرعات الأطفال" }
+        { "id": "omfs_suture", "name": "Surgical Suturing Techniques (Simple & Mattress)", "target": 5, "unit": "غرز جراحية", "notes": "تطبيق الخياطة البسيطة والمتقاطعة وخياطة المرتبة على وسادة تدريب" },
+        { "id": "omfs_forceps", "name": "Dental Extraction Forceps & Elevators Selection", "target": 6, "unit": "تطبيقات", "notes": "اختيار وتطبيق ملاقط الأسنان العلوية والسفلية وروافع Coupland و Cryer" },
+        { "id": "omfs_la_techniques", "name": "Local Anesthesia Simulation (IDN Block & Infiltration)", "target": 4, "unit": "محاكاة", "notes": "تحديد المعالم التشريحية للـ Pterygomandibular raphe وحقن العصب السنخي السفلي" }
       ]
     }
   ]

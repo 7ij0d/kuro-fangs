@@ -15,29 +15,29 @@
   --kf-black-soft:    #2A2A2A;
   --kf-black-muted:   #3D3D3D;
 
-  --kf-cream:         #F5F2E8;   /* Creamy white background */
-  --kf-cream-dark:    #EDE9D8;
+  --kf-cream:         #F7F8F5;   /* Modern light background */
+  --kf-cream-dark:    #EEF0E8;
   --kf-cream-card:    #FFFFFF;
 
   --kf-blue-pale:     #A8C9E8;   /* Accent: Pale blue */
   --kf-blue-soft:     #D0E8F5;
 
   /* ─── Semantic UI Colors ───────────────────────────────── */
-  --color-bg:           var(--kf-cream);
-  --color-bg-alt:       var(--kf-cream-dark);
-  --color-surface:      var(--kf-cream-card);
-  --color-surface-2:    #F9F7EF;
-  --color-border:       rgba(26, 26, 26, 0.1);
-  --color-border-strong:rgba(26, 26, 26, 0.2);
+  --color-bg:           #F7F8F5;
+  --color-bg-alt:       #EEF0E8;
+  --color-surface:      #FFFFFF;
+  --color-surface-2:    #FAFAFA;
+  --color-border:       #E2E8F0;
+  --color-border-strong:#CBD5E1;
 
-  --color-primary:      var(--kf-lime);
-  --color-primary-light:var(--kf-lime-light);
-  --color-primary-dark: var(--kf-lime-dark);
-  --color-primary-muted:var(--kf-lime-muted);
+  --color-primary:      #2E7D32;   /* Academic Green */
+  --color-primary-light:#4CAF50;
+  --color-primary-dark: #1B5E20;
+  --color-primary-muted:rgba(46, 125, 50, 0.10);
 
-  --color-text-primary: var(--kf-black);
-  --color-text-secondary:#4A4A4A;
-  --color-text-muted:   #7A7A7A;
+  --color-text-primary: #111827;
+  --color-text-secondary:#475569;
+  --color-text-muted:   #64748B;
   --color-text-inverse: #FFFFFF;
 
   /* ─── Tag / Status Colors ──────────────────────────────── */
@@ -54,19 +54,30 @@
   --tag-success:        #52C98A;
   --tag-success-bg:     rgba(82, 201, 138, 0.12);
 
-  /* ─── Subject Colors (each subject has a unique accent) ── */
-  --subj-oral-path:     #E8A0BF;  /* dusty pink */
-  --subj-gen-surgery:   #FF8C42;  /* warm orange */
-  --subj-medicine:      #52C98A;  /* emerald */
-  --subj-cons:          #4ECDC4;  /* teal */
-  --subj-crown:         #A78BFA;  /* lavender */
-  --subj-prostho:       #FFD93D;  /* amber */
-  --subj-prevention:    #B4D455;  /* lime (main brand) */
-  --subj-perio:         #FF6B6B;  /* coral */
-  --subj-oral-surg:     #5BA4CF;  /* sky blue */
-  --subj-oral-med:      #E8845C;  /* terracotta */
-  --subj-ortho:         #82C0CC;  /* muted cyan */
-  --subj-pedo:          #F7B2BD;  /* soft rose */
+  /* ─── 12 Dental Subject Colors ── */
+  --subj-gen-med:         #52C98A;  /* General Medicine (emerald) */
+  --subj-gen-surgery:     #FF8C42;  /* General Surgery (warm orange) */
+  --subj-fixed-pros:      #A78BFA;  /* Fixed Prosthodontics II (lavender) */
+  --subj-omfs:            #5BA4CF;  /* Oral & Maxillofacial Surgery I (sky blue) */
+  --subj-oral-diseases:   #E8A0BF;  /* Oral Diseases (dusty pink) */
+  --subj-endo:            #FF6B6B;  /* Endodontics I (coral red) */
+  --subj-omdr:            #E8845C;  /* OMDR I (terracotta) */
+  --subj-preventive:      #B4D455;  /* Preventive Dentistry (lime) */
+  --subj-cons-endo:       #4ECDC4;  /* Cons & Endo II (teal) */
+  --subj-ortho:           #82C0CC;  /* Orthodontics I (muted cyan) */
+  --subj-pedo:            #F7B2BD;  /* Pediatric Dentistry I (soft rose) */
+  --subj-removable-pros:  #FFD93D;  /* Removable Prosthodontics II (amber) */
+
+  /* Aliases for legacy compatibility */
+  --subj-oral-path:       var(--subj-oral-diseases);
+  --subj-medicine:        var(--subj-gen-med);
+  --subj-cons:            var(--subj-cons-endo);
+  --subj-crown:           var(--subj-fixed-pros);
+  --subj-prostho:         var(--subj-removable-pros);
+  --subj-prevention:      var(--subj-preventive);
+  --subj-perio:           var(--subj-endo);
+  --subj-oral-surg:       var(--subj-omfs);
+  --subj-oral-med:        var(--subj-omdr);
 
   /* ─── Typography ───────────────────────────────────────── */
   --font-primary:     'Outfit', 'Segoe UI', sans-serif;

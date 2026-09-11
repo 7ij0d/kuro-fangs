@@ -1,17 +1,16 @@
 {
   "doctors": [
-    { "id": "dr-ahmed",   "name_ar": "د. أحمد الزروق",    "name_en": "Dr. Ahmed Al-Zarouq",  "title": "دكتوراه علم أمراض الفم", "subjects": ["oral-path"] },
-    { "id": "dr-fatima",  "name_ar": "د. فاطمة المصراتي", "name_en": "Dr. Fatima Al-Misrati", "title": "ماجستير أمراض الفم",    "subjects": ["oral-path"] },
-    { "id": "dr-mahmoud", "name_ar": "د. محمود التاجوري", "name_en": "Dr. Mahmoud Al-Tajouri", "title": "دكتوراه الجراحة العامة","subjects": ["gen-surgery"] },
-    { "id": "dr-sara",    "name_ar": "د. سارة الهادي",    "name_en": "Dr. Sara Al-Hadi",     "title": "ماجستير طب داخلي",      "subjects": ["medicine"] },
-    { "id": "dr-khalid",  "name_ar": "د. خالد البوسيفي",  "name_en": "Dr. Khalid Al-Busaifi", "title": "دكتوراه الأسنان التحفظية","subjects": ["cons"] },
-    { "id": "dr-nadia",   "name_ar": "د. نادية الشريف",   "name_en": "Dr. Nadia Al-Sharif",  "title": "ماجستير التعويضات",      "subjects": ["crown"] },
-    { "id": "dr-mustafa", "name_ar": "د. مصطفى الغرياني", "name_en": "Dr. Mustafa Al-Gharyani","title": "دكتوراه التعويضات",   "subjects": ["prostho"] },
-    { "id": "dr-layla",   "name_ar": "د. ليلى الورفلي",   "name_en": "Dr. Layla Al-Warfali", "title": "ماجستير صحة المجتمع",   "subjects": ["prevention"] },
-    { "id": "dr-omar",    "name_ar": "د. عمر الفيتوري",   "name_en": "Dr. Omar Al-Faitouri", "title": "دكتوراه اللثة",         "subjects": ["perio"] },
-    { "id": "dr-youssef", "name_ar": "د. يوسف الكوني",    "name_en": "Dr. Youssef Al-Kouni", "title": "دكتوراه جراحة الفم",    "subjects": ["oral-surgery"] },
-    { "id": "dr-aisha",   "name_ar": "د. عائشة الصياد",   "name_en": "Dr. Aisha Al-Sayyad",  "title": "ماجستير طب الفم",       "subjects": ["oral-med"] },
-    { "id": "dr-hana",    "name_ar": "د. هناء التركي",    "name_en": "Dr. Hana Al-Turki",    "title": "دكتوراه تقويم الأسنان", "subjects": ["ortho"] },
-    { "id": "dr-rima",    "name_ar": "د. ريما الأمين",    "name_en": "Dr. Rima Al-Amin",     "title": "ماجستير أسنان الأطفال", "subjects": ["pedo"] }
+    { "id": "dr-ahmed",   "name_ar": "د. أحمد الزروق",    "name_en": "Dr. Ahmed Al-Zarouq",  "title": "دكتوراه أمراض الفم",         "subjects": ["oral-diseases"] },
+    { "id": "dr-fatima",  "name_ar": "د. فاطمة المصراتي", "name_en": "Dr. Fatima Al-Misrati", "title": "ماجستير أمراض الفم",        "subjects": ["oral-diseases"] },
+    { "id": "dr-mahmoud", "name_ar": "د. محمود التاجوري", "name_en": "Dr. Mahmoud Al-Tajouri", "title": "دكتوراه الجراحة العامة",   "subjects": ["gen-surgery"] },
+    { "id": "dr-sara",    "name_ar": "د. سارة الهادي",    "name_en": "Dr. Sara Al-Hadi",     "title": "ماجستير الطب الباطني",       "subjects": ["gen-med"] },
+    { "id": "dr-khalid",  "name_ar": "د. خالد البوسيفي",  "name_en": "Dr. Khalid Al-Busaifi", "title": "دكتوراه علاج وجذور الأسنان", "subjects": ["cons-endo", "endo"] },
+    { "id": "dr-nadia",   "name_ar": "د. نادية الشريف",   "name_en": "Dr. Nadia Al-Sharif",  "title": "ماجستير التركيبات الثابتة",   "subjects": ["fixed-pros"] },
+    { "id": "dr-mustafa", "name_ar": "د. مصطفى الغرياني", "name_en": "Dr. Mustafa Al-Gharyani","title": "دكتوراه الاستعاضة المتحركة", "subjects": ["removable-pros"] },
+    { "id": "dr-layla",   "name_ar": "د. ليلى الورفلي",   "name_en": "Dr. Layla Al-Warfali", "title": "ماجستير طب الأسنان الوقائي", "subjects": ["preventive"] },
+    { "id": "dr-youssef", "name_ar": "د. يوسف الكوني",    "name_en": "Dr. Youssef Al-Kouni", "title": "دكتوراه جراحة الفم والفكين", "subjects": ["omfs"] },
+    { "id": "dr-aisha",   "name_ar": "د. عائشة الصياد",   "name_en": "Dr. Aisha Al-Sayyad",  "title": "ماجستير طب الفم والأشعة",    "subjects": ["omdr"] },
+    { "id": "dr-hana",    "name_ar": "د. هناء التركي",    "name_en": "Dr. Hana Al-Turki",    "title": "دكتوراه تقويم الأسنان",     "subjects": ["ortho"] },
+    { "id": "dr-rima",    "name_ar": "د. ريما الأمين",    "name_en": "Dr. Rima Al-Amin",     "title": "ماجستير طب أسنان الأطفال",   "subjects": ["pedo"] }
   ]
 }
