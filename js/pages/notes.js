@@ -90,11 +90,12 @@ const NotesPage = {
         const subjectId = document.getElementById('note-subject-select')?.value;
 
         if (!title || !content) {
-          alert('يرجى كتابة عنوان ونص الملاحظة.');
+          window.showToast(window.I18N && window.I18N.getLang() === 'ar' ? 'يرجى كتابة عنوان ونص الملاحظة.' : 'Please enter title and content for the note.', { type: 'warning' });
           return;
         }
 
         window.STORE.saveNote({ title, content, subjectId });
+        window.showToast(window.I18N && window.I18N.getLang() === 'ar' ? 'تم حفظ الملاحظة بنجاح!' : 'Note saved successfully!', { type: 'success' });
         NotesPage.render(container);
       });
     }

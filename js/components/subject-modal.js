@@ -216,7 +216,7 @@ const SubjectModal = {
               <div class="explorer-item-meta">${isAr ? 'المدة: 38 دقيقة • جودة عالية MP3' : 'Duration: 38 mins • High Quality MP3'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('Audio playing');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="window.showToast(window.I18N.getLang() === 'ar' ? 'جاري تشغيل التسجيل الصوتي...' : 'Playing audio recording...', { type: 'info' });">
             <i data-lucide="play" style="width: 14px; height: 14px;"></i>
             ${t('listenAudio')}
           </button>
@@ -229,7 +229,7 @@ const SubjectModal = {
               <div class="explorer-item-meta">${isAr ? 'المدة: 45 دقيقة • جودة عالية HD' : 'Duration: 45 mins • 1080p HD'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('Opening video');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="window.showToast(window.I18N.getLang() === 'ar' ? 'جاري فتح الفيديو السريري...' : 'Opening clinical demonstration video...', { type: 'info' });">
             <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
             ${t('watchVideo')}
           </button>
@@ -337,7 +337,7 @@ const SubjectModal = {
               <div class="explorer-item-meta">${isAr ? 'روابط مباشرة للتحميل والمطالعة' : 'Direct cloud repository'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('Opening Cloud Drive');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="window.showToast(window.I18N.getLang() === 'ar' ? 'جاري فتح مجلد المراجع والسلايدات...' : 'Opening cloud repository & slides...', { type: 'info' });">
             <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
             ${t('openDrive')}
           </button>
@@ -379,7 +379,11 @@ const SubjectModal = {
 
   downloadItem(title) {
     window.STORE.addPoints(10);
-    alert(window.I18N.t('pointsEarned') + ` [${title}]`);
+    const cleanTitle = (title && title !== 'undefined' && title !== 'null') ? String(title).trim() : '';
+    const isAr = window.I18N.getLang() === 'ar';
+    const mainMsg = isAr ? 'تم بدء التحميل بنجاح!' : 'Downloaded successfully!';
+    const fullMsg = cleanTitle ? `${mainMsg} (${cleanTitle})` : mainMsg;
+    window.showToast(fullMsg, { type: 'success', points: 10 });
   }
 };
 

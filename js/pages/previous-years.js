@@ -44,7 +44,7 @@ const PreviousYearsPage = {
               ${e.questions_count} سؤال
             </div>
             <div>
-              <button class="btn btn-soft" style="font-size: 0.775rem; padding: 4px 10px;" onclick="alert('تم فتح نموذج امتحان ${e.title} بنجاح!');">
+              <button class="btn btn-soft" style="font-size: 0.775rem; padding: 4px 10px;" onclick="window.showToast(window.I18N && window.I18N.getLang() === 'ar' ? 'تم فتح نموذج الامتحان بنجاح!' : 'Exam paper opened successfully!', { type: 'success' });">
                 <i data-lucide="download" style="width: 14px; height: 14px;"></i>
                 تحميل PDF
               </button>

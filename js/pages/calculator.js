@@ -137,8 +137,8 @@ const CalculatorPage = {
       saveBtn.addEventListener('click', () => {
         const currentData = calculate();
         window.STORE.saveCalculatorData(currentData);
-        window.STORE.addPoints(5);
-        alert('تم حفظ تقديراتك بنجاح وحصلت على +5 نقاط!');
+        const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+        window.showToast(isAr ? 'تم حفظ تقديراتك التراكمية بنجاح!' : 'Cumulative estimates saved successfully!', { type: 'success', points: 5 });
       });
     }
 

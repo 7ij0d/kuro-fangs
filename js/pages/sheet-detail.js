@@ -47,7 +47,7 @@ const SheetDetailPage = {
           <p style="max-width: 460px; margin: 0 auto 20px; font-size: 0.85rem;">
             تمت مراجعة هذا الشيت وتدقيقه وفق مفردات منهج السنة الثالثة لطب وجراحة الفم والأسنان.
           </p>
-          <button class="btn btn-primary" onclick="alert('تم بدء تحميل الملف بنجاح!');">
+          <button class="btn btn-primary" onclick="window.showToast(window.I18N ? (window.I18N.getLang() === 'ar' ? 'تم بدء تحميل الملف بنجاح!' : 'File download started!') : 'تم بدء تحميل الملف بنجاح!', { type: 'success' });">
             <i data-lucide="download" style="width: 16px; height: 16px;"></i>
             تحميل الشيت كاملاً (High Quality PDF)
           </button>
@@ -81,7 +81,7 @@ const SheetDetailPage = {
     if (downloadBtn) {
       downloadBtn.addEventListener('click', () => {
         window.STORE.addPoints(10);
-        alert('تم تحميل المحاضرة وحصلت على +10 نقاط أكاديمية!');
+        window.showToast(window.I18N ? (window.I18N.getLang() === 'ar' ? 'تم تحميل المحاضرة بنجاح!' : 'Lecture downloaded successfully!') : 'تم تحميل المحاضرة بنجاح!', { type: 'success', points: 10 });
       });
     }
   }

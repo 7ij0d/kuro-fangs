@@ -34,7 +34,7 @@ const SecondaryPages = {
             </div>
             <div style="margin-top: 16px; border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 0.775rem; color: var(--brand-primary); font-weight: 600;">PDF متوفر</span>
-              <button class="btn btn-soft" style="font-size: 0.775rem; padding: 4px 10px;" onclick="alert('تم تحميل ${s.title}');">
+              <button class="btn btn-soft" style="font-size: 0.775rem; padding: 4px 10px;" onclick="window.showToast(window.I18N && window.I18N.getLang() === 'ar' ? 'تم بدء تحميل الملخص بنجاح!' : 'Summary download started!', { type: 'success' });">
                 <i data-lucide="download" style="width: 14px; height: 14px;"></i>
                 تحميل الملخص
               </button>
