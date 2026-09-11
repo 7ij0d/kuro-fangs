@@ -114,6 +114,30 @@ class DataService {
       this.sheets = [];
     }
 
+    // Merge custom admin-uploaded sheets from localStorage if present
+    try {
+      const customSheets = JSON.parse(localStorage.getItem('kf_admin_custom_sheets') || '[]');
+      if (Array.isArray(customSheets) && customSheets.length > 0) {
+        customSheets.forEach(cs => {
+          if (!this.sheets.some(s => s.id === cs.id)) {
+            this.sheets.unshift(cs);
+          }
+        });
+      }
+    } catch (e) {}
+
+    // Merge custom admin announcements from localStorage if present
+    try {
+      const customAlerts = JSON.parse(localStorage.getItem('kf_admin_custom_alerts') || '[]');
+      if (Array.isArray(customAlerts) && customAlerts.length > 0) {
+        customAlerts.forEach(ca => {
+          if (!this.alerts.some(a => a.id === ca.id)) {
+            this.alerts.unshift(ca);
+          }
+        });
+      }
+    } catch (e) {}
+
     this.loaded = true;
   }
 

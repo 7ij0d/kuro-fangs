@@ -22,7 +22,7 @@ const NotesPage = {
             <i data-lucide="edit-3" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
             ${isAr ? 'ملاحظاتي الدراسية والسريرية' : 'Clinical & Academic Notes'}
           </h1>
-          <p>${isAr ? 'دون ملاحظاتك الخاصة وتفاصيل الحالات السريرية وتنبيهات الدكاترة' : 'Record faculty pearls, clinical case notes, and high-yield study remarks'}</p>
+          <p>${isAr ? 'ملاحظاتك الشخصية الخاصة للمذاكرة والعيادات (تُحفظ بحسابك وجهازك فقط) • النشر العام للملازم محصور بإدارة الكلية والآدمن' : 'Your private personal study & clinical notes — Global handout publishing is reserved for Faculty Admin'}</p>
         </div>
         <button id="btn-add-note" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
           <i data-lucide="plus" style="width: 16px; height: 16px;"></i>

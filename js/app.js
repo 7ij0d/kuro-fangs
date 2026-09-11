@@ -241,6 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
   router.register('/rewards', (c, q) => window.SecondaryPages.renderRewards(c, q));
   router.register('/alerts', (c, q) => window.SecondaryPages.renderAlerts(c, q));
+  router.register('/admin', (c, q) => window.AdminPage.render(c, q));
   router.register('/games', async (c, q) => {
     if (window.GamesPage && typeof window.GamesPage.render === 'function') {
       await window.GamesPage.render(c, q);

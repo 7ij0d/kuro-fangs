@@ -46,6 +46,11 @@ class Router {
         } else if (window.ExamsPage) {
           window.ExamsPage.render(container, params);
         }
+      },
+      '/admin': async (container, params) => {
+        if (window.AdminPage && typeof window.AdminPage.render === 'function') {
+          window.AdminPage.render(container, params);
+        }
       }
     };
     this.currentPath = '';
