@@ -1,286 +1,335 @@
 /**
- * KURO FANGS — Home Page
- * The command center for students — most important page
+ * KURO FANGS — Modern Redesigned Dashboard (Home Page)
+ * Clean, Academic, Fast, and Intuitive UI/UX
  */
 
 export default async function renderHome(container, params) {
-  const { default: KF_DATA } = await import('../data.js');
+  const { default: KF_DATA }  = await import('../data.js');
   const { default: KF_STORE } = await import('../store.js');
   const { default: KURONI }   = await import('../kuroni.js');
 
-  // Show loading first
-  container.innerHTML = KURONI.loadingHTML('جاري التحميل...', 'md');
+  container.innerHTML = KURONI.loadingHTML('جاري تحميل لوحة التحكم...', 'md');
 
   if (!KF_DATA.subjects) await KF_DATA.init();
 
-  const subjects  = KF_DATA.getSubjects(3);
-  const latest    = KF_DATA.getLatestSheets(6);
-  const topViewed = KF_DATA.getMostViewedSheets(4);
-  const examFocus = KF_DATA.getExamFocusSheets().slice(0, 4);
-  const alerts    = KF_DATA.getPinnedAlerts();
+  const subjects = KF_DATA.getSubjects(3);
+  const latest   = KF_DATA.getLatestSheets(8);
+  const alerts   = KF_DATA.getPinnedAlerts();
 
-  // Greeting based on time
-  const hour = new Date().getHours();
-  let greeting = 'مساء الخير';
-  if (hour < 12) greeting = 'صباح الخير';
-  else if (hour < 18) greeting = 'مرحباً';
+  // Dynamic Grade Calculation from store
+  const savedGrades = KF_STORE.getCalculatorData();
+  let totalScore = 0;
+  let gradedCount = 0;
+  subjects.forEach(s => {
+    const g = savedGrades[s.id];
+    if (g) {
+      const sum = (parseFloat(g.cw) || 0) + (parseFloat(g.prac) || 0) + (parseFloat(g.oral) || 0) + (parseFloat(g.final) || 0);
+      if (sum > 0) {
+        totalScore += sum;
+        gradedCount++;
+      }
+    }
+  });
+  const avgGrade = gradedCount > 0 ? Math.round(totalScore / gradedCount) : 85;
+  const gradeLabel = avgGrade >= 85 ? 'ممتاز' : avgGrade >= 75 ? 'جيد جداً' : avgGrade >= 65 ? 'جيد' : 'مقبول';
 
-  const typeLabels = {
-    sheet: { icon: '📄', label: 'ملزمة' },
-    summary: { icon: '📝', label: 'ملخص' },
-    recording: { icon: '🎥', label: 'تسجيل' },
-    images: { icon: '🖼️', label: 'صور' },
-    questions: { icon: '❓', label: 'أسئلة' },
-    flashcards: { icon: '🃏', label: 'بطاقات' },
-    quiz: { icon: '📋', label: 'كويز' },
-    previous: { icon: '📅', label: 'سنوات سابقة' },
+  // Type metadata for badges
+  const typeMeta = {
+    sheet:     { label: 'ملزمة', bg: '#DCFCE7', color: '#15803D', icon: '📄' },
+    summary:   { label: 'ملخص', bg: '#E0F2FE', color: '#0369A1', icon: '📝' },
+    recording: { label: 'تسجيل', bg: '#FEE2E2', color: '#B91C1C', icon: '🎥' },
+    images:    { label: 'صور', bg: '#F3E8FF', color: '#6D28D9', icon: '🖼️' },
+    questions: { label: 'أسئلة', bg: '#FFEDD5', color: '#C2410C', icon: '❓' },
+    flashcards:{ label: 'بطاقات', bg: '#FEF3C7', color: '#B45309', icon: '🃏' },
+    quiz:      { label: 'كويز', bg: '#ECFDF5', color: '#047857', icon: '📋' },
   };
 
-  function importanceBadge(lvl) {
-    const dots = [1,2,3].map(i =>
-      `<span class="importance-dot${i <= lvl ? ' filled' : ''}"></span>`
-    ).join('');
-    return `<div class="importance" data-level="${lvl}">${dots}</div>`;
-  }
-
-  function sheetTags(sheet) {
-    return sheet.tags.map(t => {
-      if (t === 'امتحان' || t === 'جداً مهم') return `<span class="tag tag-exam">${t}</span>`;
-      if (t === 'جديد') return `<span class="tag tag-new">${t}</span>`;
-      if (t === 'مهم') return `<span class="tag tag-important">${t}</span>`;
-      return `<span class="tag tag-neutral">${t}</span>`;
-    }).join('');
-  }
-
-  function sheetCard(sheet, idx = 0) {
-    const subj = KF_DATA.getSubjectById(sheet.subject_id);
-    const doc  = KF_DATA.getDoctorById(sheet.doctor_id);
-    const type = typeLabels[sheet.type] || { icon: '📄', label: sheet.type };
-    const splitBadge = sheet.is_split
-      ? `<span class="tag tag-split">جزء ${sheet.split_part}/${sheet.split_total}</span>`
-      : '';
-    return `
-      <div class="sheet-card animate-card-reveal stagger-${idx + 1} hover-lift hover-press"
-           onclick="ROUTER.navigate('/sheets/${sheet.id}')" role="button" tabindex="0">
-        <div class="sheet-type-indicator sheet-type-${sheet.type}">
-          <span>${type.icon}</span>
-        </div>
-        <div class="sheet-card-body">
-          <div class="sheet-title">${sheet.title_ar}</div>
-          <div class="sheet-meta">
-            <span class="sheet-meta-item">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              ${sheet.date}
-            </span>
-            <span class="sheet-meta-item">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              ${doc?.name_ar || 'غير محدد'}
-            </span>
-            ${subj ? `<span class="sheet-meta-item" style="color:${subj.color}">${subj.name_ar}</span>` : ''}
-          </div>
-          <div class="sheet-tags">
-            ${sheetTags(sheet)}
-            ${splitBadge}
-            ${sheet.is_exam_focus ? '<span class="tag tag-exam">🎯 امتحان</span>' : ''}
-          </div>
-        </div>
-        <div class="sheet-card-actions">
-          ${importanceBadge(sheet.importance)}
-          <button class="fav-btn ${KF_STORE.isFavorite(sheet.id) ? 'active' : ''}"
-                  onclick="event.stopPropagation(); toggleFav('${sheet.id}', this)" title="المفضلة">♥</button>
-        </div>
-      </div>`;
-  }
-
-  function subjectQuickCard(subj) {
-    return `
-      <div class="quick-access-card hover-press" style="--subject-color:${subj.color}"
-           onclick="ROUTER.navigate('/subjects/${subj.id}')" role="button">
-        <div class="qac-icon-wrap" style="background: ${subj.color}22; font-size: 22px;">${subj.icon}</div>
-        <span class="qac-label">${subj.name_ar}</span>
-      </div>`;
-  }
-
-  function alertBanner(alert) {
-    const sevClass = alert.severity === 'exam' ? 'alert-banner-exam'
-                   : alert.severity === 'warning' ? 'alert-banner-warning'
-                   : 'alert-banner-info';
-    const icon = alert.severity === 'exam' ? '🎯' : alert.severity === 'warning' ? '⚠️' : 'ℹ️';
-    return `
-      <div class="alert-banner ${sevClass} alert-enter">
-        <span class="alert-icon">${icon}</span>
-        <div class="alert-body">
-          <div class="alert-title">${alert.title_ar}</div>
-          <div class="alert-message">${alert.message_ar}</div>
-          <div class="alert-meta">${alert.date}</div>
-        </div>
-      </div>`;
-  }
-
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('ar-LY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
   container.innerHTML = `
+    <div class="page-header">
+      <h1 class="page-title">الرئيسية</h1>
+      <p class="page-subtitle">نظرة عامة على مقررات الفصل، الامتحانات القادمة، وأحدث الملازم الدراسية</p>
+    </div>
+
     <div class="page-content animate-page-enter">
 
-      <!-- Greeting Strip -->
-      <div class="greeting-strip" style="margin-top: var(--space-2);">
-        <div class="greeting-kuroni kuroni-state-floating">
-          ${KURONI.getSVG('calm')}
-        </div>
-        <div class="greeting-text">
-          <div class="greeting-hello">${greeting}، <span class="lime">طالب كورو</span> 🐱</div>
-          <div class="greeting-sub">أهلاً بك في منصة Kuro Fangs — كلية طب الأسنان، طرابلس</div>
-          <div class="greeting-date en">${dateStr}</div>
-        </div>
-        <div class="points-chip">
-          ⭐ ${KF_STORE.getPoints()} نقطة
-        </div>
-      </div>
-
-      <!-- Pinned Alerts -->
-      ${alerts.length > 0 ? `
-        <div class="section">
-          <div class="section-header">
-            <h2 class="section-title"><span class="title-dot"></span> تنبيهات الأطباء</h2>
-            <a class="section-action" href="#/alerts">عرض الكل</a>
-          </div>
-          ${alerts.map(alertBanner).join('')}
-        </div>` : ''}
-
-      <!-- Search Bar -->
+      <!-- 1. Search Bar -->
       <div class="section" style="margin-bottom: var(--space-6);">
         <div class="input-wrapper">
-          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input class="search-bar" id="home-search" type="text"
-                 placeholder="ابحث عن ملزمة، مادة، دكتور، موضوع..."
+                 placeholder="ابحث عن ملزمة، مقرر، دكتور، موضوع سريري..."
                  oninput="handleHomeSearch(this.value)"/>
         </div>
       </div>
 
-      <!-- Quick Access Row -->
-      <div class="section">
-        <div class="section-header">
-          <h2 class="section-title"><span class="title-dot"></span> وصول سريع</h2>
+      <!-- 2. 4 Stat Cards Grid -->
+      <div class="stat-cards-grid">
+        <!-- Stat 1: Active Subjects -->
+        <div class="stat-card" onclick="ROUTER.navigate('/subjects')" style="cursor:pointer;" title="عرض المقررات">
+          <div class="stat-icon-wrap" style="background:#F0FDF4; color:#16A34A;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10"/><path d="M6 10h10"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">${subjects.length} مقرر</div>
+            <div class="stat-label">المواد الدراسية النشطة</div>
+          </div>
         </div>
-        <div class="scroll-row">
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/requirements')" style="border-right:3px solid var(--color-primary-dark);">
-            <div class="qac-icon-wrap" style="background:rgba(180, 212, 85, 0.2);">🦷</div>
-            <span class="qac-label">متطلبات المعمل</span>
+
+        <!-- Stat 2: Upcoming Exams -->
+        <div class="stat-card" onclick="ROUTER.navigate('/quizzes')" style="cursor:pointer;" title="عرض الامتحانات">
+          <div class="stat-icon-wrap" style="background:#FEF2F2; color:#EF4444;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
           </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/calculator')" style="border-right:3px solid #4ECDC4;">
-            <div class="qac-icon-wrap" style="background:rgba(78, 205, 196, 0.2);">🧮</div>
-            <span class="qac-label">حاسبة الدرجات</span>
+          <div class="stat-content">
+            <div class="stat-value">2 امتحان</div>
+            <div class="stat-label">الامتحانات القادمة (نصفي وعملي)</div>
           </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/quizzes')" style="border-right:3px solid #FF8C42;">
-            <div class="qac-icon-wrap" style="background:rgba(255, 140, 66, 0.2);">📋</div>
-            <span class="qac-label">الكويز التفاعلي</span>
+        </div>
+
+        <!-- Stat 3: Average Grade -->
+        <div class="stat-card" onclick="ROUTER.navigate('/calculator')" style="cursor:pointer;" title="افتح حاسبة الدرجات">
+          <div class="stat-icon-wrap" style="background:#EFF6FF; color:#3B82F6;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>
+            </svg>
           </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/previous-years')">
-            <div class="qac-icon-wrap">📅</div>
-            <span class="qac-label">سنوات سابقة</span>
+          <div class="stat-content">
+            <div class="stat-value">${avgGrade}% <span style="font-size:13px; font-weight:600; color:#16A34A;">(${gradeLabel})</span></div>
+            <div class="stat-label">المعدل العام التقديري</div>
           </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/sheets')">
-            <div class="qac-icon-wrap">📄</div>
-            <span class="qac-label">الملازم</span>
+        </div>
+
+        <!-- Stat 4: Days Remaining -->
+        <div class="stat-card" onclick="ROUTER.navigate('/alerts')" style="cursor:pointer;" title="عرض جدول الامتحانات">
+          <div class="stat-icon-wrap" style="background:#FFFBEB; color:#F59E0B;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
           </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/flashcards')">
-            <div class="qac-icon-wrap">🃏</div>
-            <span class="qac-label">البطاقات</span>
-          </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/summaries')">
-            <div class="qac-icon-wrap">📝</div>
-            <span class="qac-label">الملخصات</span>
-          </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/previous-years')">
-            <div class="qac-icon-wrap">📅</div>
-            <span class="qac-label">سنوات سابقة</span>
-          </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/videos')">
-            <div class="qac-icon-wrap">🎥</div>
-            <span class="qac-label">التسجيلات</span>
-          </div>
-          <div class="quick-access-card hover-press" onclick="ROUTER.navigate('/exams')">
-            <div class="qac-icon-wrap">🎯</div>
-            <span class="qac-label">الامتحانات</span>
+          <div class="stat-content">
+            <div class="stat-value">18 يوم</div>
+            <div class="stat-label">لأقرب امتحان (أمراض الفم)</div>
           </div>
         </div>
       </div>
 
-      <!-- Latest Uploads -->
-      <div class="section">
-        <div class="section-header">
-          <h2 class="section-title"><span class="title-dot"></span> أحدث الإضافات</h2>
-          <a class="section-action" onclick="ROUTER.navigate('/sheets')">عرض الكل</a>
-        </div>
-        <div class="grid-auto">
-          ${latest.map((s, i) => sheetCard(s, i)).join('')}
-        </div>
-      </div>
-
-      <!-- Exam Focus -->
-      ${examFocus.length > 0 ? `
+      <!-- 3. Important Alerts Section (Compact Horizontal Notification Cards) -->
+      ${alerts.length > 0 ? `
         <div class="section">
           <div class="section-header">
-            <h2 class="section-title"><span class="title-dot" style="background:var(--tag-exam)"></span> تركيز الامتحان 🎯</h2>
-            <a class="section-action" onclick="ROUTER.navigate('/exams')">عرض الكل</a>
+            <h2 class="section-title"><span class="title-dot"></span> التنبيهات المهمة</h2>
+            <a class="section-action" onclick="ROUTER.navigate('/alerts')">عرض كل التنبيهات (${alerts.length})</a>
           </div>
-          <div class="grid-auto">
-            ${examFocus.map((s, i) => sheetCard(s, i)).join('')}
+          <div class="compact-alerts-list">
+            ${alerts.map(a => {
+              const subj = KF_DATA.getSubjectById(a.subject_id);
+              const isExam = a.severity === 'exam';
+              const isWarn = a.severity === 'warning';
+              const borderClass = isExam ? 'alert-exam' : isWarn ? 'alert-warning' : 'alert-info';
+              const iconEmoji = isExam ? '🎯' : isWarn ? '⚠️' : 'ℹ️';
+              const iconBg = isExam ? '#FEE2E2' : isWarn ? '#FEF3C7' : '#E0F2FE';
+              return `
+                <div class="compact-alert-card ${borderClass}" onclick="ROUTER.navigate('/alerts')" role="button" tabindex="0">
+                  <div class="compact-alert-main">
+                    <div class="compact-alert-icon" style="background:${iconBg};">
+                      ${iconEmoji}
+                    </div>
+                    <div class="compact-alert-text">
+                      <div class="compact-alert-title">${a.title_ar} ${subj ? `<span style="font-size:11px; font-weight:normal; color:${subj.color}; margin-right:6px;">[${subj.name_ar}]</span>` : ''}</div>
+                      <div class="compact-alert-msg">${a.message_ar}</div>
+                    </div>
+                  </div>
+                  <div class="compact-alert-meta">
+                    <span class="compact-alert-date">${a.date}</span>
+                    <span class="tag ${isExam ? 'tag-exam' : 'tag-warning'}">${isExam ? 'امتحان' : 'هام'}</span>
+                  </div>
+                </div>`;
+            }).join('')}
           </div>
         </div>` : ''}
 
-      <!-- Subjects Grid -->
+      <!-- 4. Quick Access 6-Grid Section -->
       <div class="section">
         <div class="section-header">
-          <h2 class="section-title"><span class="title-dot"></span> المواد الدراسية — السنة الثالثة</h2>
-          <a class="section-action" onclick="ROUTER.navigate('/subjects')">عرض الكل</a>
+          <h2 class="section-title"><span class="title-dot"></span> الوصول السريع</h2>
         </div>
-        <div class="grid-auto" style="--card-min-width: 180px;">
-          ${subjects.map(subjectQuickCard).join('')}
+        <div class="quick-grid-6">
+          <!-- 1. المواد الدراسية -->
+          <div class="quick-nav-card" onclick="ROUTER.navigate('/subjects')">
+            <div class="quick-nav-left">
+              <div class="quick-nav-icon" style="background:#F0FDF4; color:#16A34A;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/>
+                </svg>
+              </div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">المواد الدراسية</div>
+                <div class="quick-nav-desc">12 مادة تخصصية وشيتاتها</div>
+              </div>
+            </div>
+            <div class="quick-nav-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            </div>
+          </div>
+
+          <!-- 2. الامتحانات -->
+          <div class="quick-nav-card" onclick="ROUTER.navigate('/quizzes')">
+            <div class="quick-nav-left">
+              <div class="quick-nav-icon" style="background:#FEF2F2; color:#EF4444;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+              </div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">الامتحانات</div>
+                <div class="quick-nav-desc">كويزات واختبارات تفاعلية فورية</div>
+              </div>
+            </div>
+            <div class="quick-nav-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            </div>
+          </div>
+
+          <!-- 3. حاسبة الدرجات -->
+          <div class="quick-nav-card" onclick="ROUTER.navigate('/calculator')">
+            <div class="quick-nav-left">
+              <div class="quick-nav-icon" style="background:#EFF6FF; color:#2563EB;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>
+                </svg>
+              </div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">حاسبة الدرجات</div>
+                <div class="quick-nav-desc">حساب المعدل ومحاكي الفاينل</div>
+              </div>
+            </div>
+            <div class="quick-nav-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            </div>
+          </div>
+
+          <!-- 4. التسجيلات -->
+          <div class="quick-nav-card" onclick="ROUTER.navigate('/videos')">
+            <div class="quick-nav-left">
+              <div class="quick-nav-icon" style="background:#FAF5FF; color:#9333EA;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2"/>
+                </svg>
+              </div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">التسجيلات</div>
+                <div class="quick-nav-desc">تسجيلات المحاضرات والشروحات</div>
+              </div>
+            </div>
+            <div class="quick-nav-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            </div>
+          </div>
+
+          <!-- 5. الملخصات -->
+          <div class="quick-nav-card" onclick="ROUTER.navigate('/summaries')">
+            <div class="quick-nav-left">
+              <div class="quick-nav-icon" style="background:#F0FDF4; color:#059669;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/><path d="M12 11h4"/><path d="M12 16h4"/>
+                </svg>
+              </div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">الملخصات</div>
+                <div class="quick-nav-desc">كبسولات ومراجعات مكثفة</div>
+              </div>
+            </div>
+            <div class="quick-nav-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            </div>
+          </div>
+
+          <!-- 6. بنك الأسئلة -->
+          <div class="quick-nav-card" onclick="ROUTER.navigate('/questions')">
+            <div class="quick-nav-left">
+              <div class="quick-nav-icon" style="background:#FFF7ED; color:#EA580C;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>
+                </svg>
+              </div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">بنك الأسئلة</div>
+                <div class="quick-nav-desc">تجميعات MCQs والسنوات السابقة</div>
+              </div>
+            </div>
+            <div class="quick-nav-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Most Viewed -->
+      <!-- 5. Recent Additions (Modern List View) -->
       <div class="section">
         <div class="section-header">
-          <h2 class="section-title"><span class="title-dot"></span> الأكثر مشاهدةً</h2>
+          <h2 class="section-title"><span class="title-dot"></span> أحدث الإضافات والملازم</h2>
+          <a class="section-action" onclick="ROUTER.navigate('/sheets')">عرض كل الملازم</a>
         </div>
-        <div class="grid-2">
-          ${topViewed.map((s, i) => sheetCard(s, i)).join('')}
+        <div class="recent-list-view">
+          ${latest.map(s => {
+            const subj = KF_DATA.getSubjectById(s.subject_id);
+            const doc  = KF_DATA.getDoctorById(s.doctor_id);
+            const tm   = typeMeta[s.type] || typeMeta.sheet;
+            return `
+              <div class="recent-list-row" onclick="ROUTER.navigate('/sheets/${s.id}')" role="button" tabindex="0">
+                <div class="recent-icon-wrap" style="background:${tm.bg};">
+                  ${tm.icon}
+                </div>
+                <span class="recent-type-badge" style="background:${tm.bg}; color:${tm.color};">
+                  ${tm.label}
+                </span>
+                <div class="recent-title" title="${s.title_ar}">
+                  ${s.title_ar} ${subj ? `<span style="font-weight:normal; font-size:12px; color:${subj.color}; margin-right:6px;">(${subj.name_ar})</span>` : ''}
+                </div>
+                <div class="recent-doctor" title="${doc?.name_ar || ''}">
+                  👤 ${doc?.name_ar || 'غير محدد'}
+                </div>
+                <div class="recent-date">
+                  ${s.date}
+                </div>
+                <div class="recent-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+                  </svg>
+                </div>
+              </div>`;
+          }).join('')}
         </div>
       </div>
 
-      <!-- Kuroni footer strip -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:var(--space-3);padding:var(--space-8) 0;opacity:0.3;">
-        <div class="kuroni-container kuroni-sm">
-          ${KURONI.getSVG('calm')}
+      <!-- Preclinical Requirements Quick Banner -->
+      <div class="card" onclick="ROUTER.navigate('/requirements')" style="padding:18px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:var(--space-8); cursor:pointer;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="font-size:28px;">🦷</div>
+          <div>
+            <div style="font-weight:700; font-size:15px; color:#111827;">سجل متطلبات المعمل والفانتوم هيد (Lab Requirements)</div>
+            <div style="font-size:12.5px; color:#64748B; margin-top:2px;">تابع تقدمك في متطلبات علاج العصب (Endo)، التحفظي، والاستعاضة الثابتة والمتحركة أولاً بأول</div>
+          </div>
         </div>
-        <span style="font-size:var(--fs-xs);color:var(--color-text-muted);">Kuro Fangs — كلية طب الأسنان، جامعة طرابلس</span>
+        <div class="quick-nav-arrow" style="background:#16A34A; color:#FFFFFF;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </div>
       </div>
 
-    </div>`;
+      <!-- Footer Branding -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:var(--space-3);padding:var(--space-6) 0;opacity:0.45;">
+        <span style="font-size:var(--fs-xs);color:var(--color-text-muted);">Kuro Fangs — كلية طب وجراحة الفم والأسنان، جامعة طرابلس</span>
+      </div>
 
-  // Activate stagger animations with IntersectionObserver
-  const revealCards = container.querySelectorAll('.animate-card-reveal');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  revealCards.forEach(el => io.observe(el));
-
-  // Global functions for this page
-  window.toggleFav = (id, btn) => {
-    const isNow = KF_STORE.toggleFavorite(id);
-    btn.classList.toggle('active', isNow);
-    showToast(isNow ? '❤️ أُضيف للمفضلة' : '🤍 أُزيل من المفضلة');
-  };
+    </div>
+  `;
 
   window.handleHomeSearch = (val) => {
     if (val.length > 1) {
