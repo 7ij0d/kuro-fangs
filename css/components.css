@@ -172,21 +172,23 @@
   z-index: 1;
 }
 
-/* Academia Code Badge */
+/* Academia Glassmorphism Code Badge */
 .subject-code-badge {
   position: absolute;
   top: 12px;
-  font-size: 0.725rem;
-  font-weight: 800;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #FFFFFF;
-  background: rgba(24, 28, 50, 0.82);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
   z-index: 2;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.03em;
+  line-height: 1.2;
 }
 
 html[dir="ltr"] .subject-code-badge {
@@ -196,28 +198,9 @@ html[dir="rtl"] .subject-code-badge {
   right: 14px;
 }
 
-/* Popular Tag */
+/* Popular Tag — Hidden */
 .subject-popular-tag {
-  position: absolute;
-  top: 12px;
-  font-size: 0.675rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  background: #E11D48;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  z-index: 2;
-  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.35);
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-html[dir="ltr"] .subject-popular-tag {
-  right: 14px;
-}
-html[dir="rtl"] .subject-popular-tag {
-  left: 14px;
+  display: none !important;
 }
 
 /* Card Body — Hover background or gradients apply ONLY to the lower body */
@@ -311,7 +294,7 @@ html[dir="rtl"] .subject-popular-tag {
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Content Breakdown Badges */
+/* Content Breakdown Badges — Calming Light Gray Zero Counters */
 .card-stats-badges {
   display: flex;
   flex-wrap: wrap;
@@ -322,39 +305,78 @@ html[dir="rtl"] .subject-popular-tag {
 .card-stat-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-size: 0.725rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background-color: var(--bg-app);
-  border: 1px solid var(--border-subtle);
-  padding: 3px 8px;
+  font-weight: 500;
+  color: #64748B;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  padding: 3px 9px;
   border-radius: 6px;
+  transition: all var(--transition-fast);
 }
 
-/* Quick Action Button ("تصفح المحتوى ⬅️") */
+.card-stat-pill i,
+.card-stat-pill svg {
+  width: 12px;
+  height: 12px;
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .card-stat-pill {
+  background-color: #212134;
+  border-color: #2F2F45;
+  color: #9899AC;
+}
+
+[data-theme="dark"] .card-stat-pill i,
+[data-theme="dark"] .card-stat-pill svg {
+  color: #6B6C80;
+}
+
+/* Quick Action Button ("تصفح المحتوى ⬅️") — Unified Royal Academic Style */
 .btn-explore-subject {
   width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 9px 14px;
+  padding: 10px 16px;
   border-radius: 8px;
-  background-color: var(--brand-burgundy-light);
-  color: var(--brand-burgundy);
-  border: 1px solid var(--brand-burgundy-border);
+  background-color: #F8FAFC;
+  color: #881337;
+  border: 1px solid #E2E8F0;
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .btn-explore-subject:hover {
-  background-color: var(--brand-burgundy);
+  background-color: #881337;
   color: #FFFFFF;
-  border-color: var(--brand-burgundy);
-  box-shadow: 0 4px 14px rgba(136, 19, 55, 0.25);
+  border-color: #881337;
+  box-shadow: 0 4px 14px rgba(136, 19, 55, 0.22);
+  transform: translateY(-1px);
+}
+
+.btn-explore-subject:active {
+  transform: translateY(0);
+}
+
+[data-theme="dark"] .btn-explore-subject {
+  background-color: #252538;
+  color: #FDA4AF;
+  border-color: #35354E;
+}
+
+[data-theme="dark"] .btn-explore-subject:hover {
+  background-color: #BE123C;
+  color: #FFFFFF;
+  border-color: #BE123C;
+  box-shadow: 0 4px 14px rgba(190, 18, 60, 0.35);
 }
 
 /* ==========================================================================

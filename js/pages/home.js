@@ -124,7 +124,6 @@ const HomePage = {
             <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" loading="lazy" decoding="async" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp'; this.classList.add('loaded');" />
             <div class="subject-cover-gradient"></div>
             <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
-            ${subj.is_popular ? `<span class="subject-popular-tag">🔥 ${isAr ? 'شائع' : 'Popular'}</span>` : ''}
           </div>
 
           <!-- Subject Content Details -->
@@ -155,15 +154,15 @@ const HomePage = {
               <!-- Content Breakdown Badges (Dynamic from real data: 0 lectures • 0 summaries • 0 exams) -->
               <div class="card-stats-badges">
                 <span class="card-stat-pill">
-                  <i data-lucide="file-text" style="width: 13px; height: 13px;"></i>
+                  <i data-lucide="file-text"></i>
                   ${lecturesCount} ${t('lectures')}
                 </span>
                 <span class="card-stat-pill">
-                  <i data-lucide="book-marked" style="width: 13px; height: 13px;"></i>
+                  <i data-lucide="book-marked"></i>
                   ${summariesCount} ${t('summaries')}
                 </span>
                 <span class="card-stat-pill">
-                  <i data-lucide="archive" style="width: 13px; height: 13px;"></i>
+                  <i data-lucide="archive"></i>
                   ${examsCount} ${t('exams')}
                 </span>
               </div>
