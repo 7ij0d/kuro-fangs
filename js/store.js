@@ -36,22 +36,6 @@ const FOX_SKINS = [
     desc_ar: 'جاهز للعمليات الجراحية في العيادات ومعامل الفانتوم بدقة متناهية. يحول واجهة الموقع لثيم أزرق سريري وأخضر جراحي منعش.'
   },
   {
-    id: 'fox_skin_3',
-    theme: 'ninja',
-    name_en: 'Study Ninja Fox',
-    name_ar: 'ثعلب النينجا للمذاكرة',
-    cost: 45,
-    isFree: false,
-    image: 'assets/fox_skins/fox_skin_3.jpg',
-    tag_en: 'Nocturnal Study',
-    tag_ar: 'ثيم ليلي متوهج فائق التركيز',
-    theme_name_ar: 'ثيم النينجا الليلي المتوهج',
-    theme_name_en: 'Nocturnal Cyber Violet Theme',
-    theme_colors: ['#8B5CF6', '#06B6D4', '#0B0F19'],
-    desc_en: 'Stealth speed and razor-sharp focus for all-night cram sessions. Activates a focused nocturnal dark theme with electric violet & cyan glow.',
-    desc_ar: 'سرعة خاطفة في إنجاز الشيتات وسحق ليلة الامتحان بتركيز نينجا لا يهدأ. يفعّل ثيماً مظلماً هادئاً للمذاكرة الليلية بإضاءات بنفسجية ونيون.'
-  },
-  {
     id: 'fox_skin_4',
     theme: 'scholar',
     name_en: 'Academic Scholar',
@@ -66,6 +50,22 @@ const FOX_SKINS = [
     theme_colors: ['#D97706', '#E11D48', '#FFFBF7'],
     desc_en: 'Armed with dental textbooks, high-yield notes, and top GPA power. Unlocks an elegant warm academia theme in soft rose and amber-gold.',
     desc_ar: 'حامل مذكرات الأسنان والمراجع العلمية وصاحب المعدلات التراكمية العليا. يفعّل ثيماً أكاديمياً دافئاً وراقياً بلمسات وردية وكهرمانية مريحة للعين.'
+  },
+  {
+    id: 'fox_skin_5',
+    theme: 'cyber',
+    name_en: 'Special Cyber Neon Fox',
+    name_ar: 'الثعلب السايبر المتوهج',
+    cost: 55,
+    isFree: false,
+    image: 'assets/fox_skins/fox_skin_5.jpg',
+    tag_en: 'Special Cyber Neon Glow',
+    tag_ar: 'ثيم سايبر نيون ليلي متوهج',
+    theme_name_ar: 'ثيم السايبر والنيون المتوهج',
+    theme_name_en: 'Special Cyber Neon Glow Theme',
+    theme_colors: ['#8B5CF6', '#06B6D4', '#0B0F19'],
+    desc_en: 'Equipped with futuristic cybernetic energy and neon focus for midnight study sessions. Transforms the platform into an electric dark cyber realm.',
+    desc_ar: 'مزوّد بطاقة السايبر المتطورة والنيون الليلي للمذاكرة الفائقة ليلة الامتحان. يحوّل واجهة المنصة لثيم ليلي مظلم مشع بالبنفسجي والسيان.'
   }
 ];
 
@@ -87,8 +87,8 @@ class AppStore {
   }
 
   initDefaults() {
-    // 1. Fox Mascot Skins Hub (Sanitize to 4 Core Skins)
-    const validSkinIds = ['fox_skin_1', 'fox_skin_2', 'fox_skin_3', 'fox_skin_4'];
+    // 1. Fox Mascot Skins Hub (Strictly 4 Active Skins)
+    const validSkinIds = FOX_SKINS.map(s => s.id);
     let owned = ['fox_skin_1'];
     try {
       const storedOwned = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.OWNED_SKINS));
@@ -172,7 +172,7 @@ class AppStore {
   }
 
   setTheme(theme) {
-    const validThemes = ['classic', 'surgeon', 'ninja', 'scholar', 'light', 'dark'];
+    const validThemes = ['classic', 'surgeon', 'scholar', 'cyber', 'ninja', 'light', 'dark'];
     if (!validThemes.includes(theme)) theme = 'classic';
     localStorage.setItem(this.STORAGE_KEYS.THEME, theme);
     document.documentElement.setAttribute('data-theme', theme);
@@ -182,7 +182,7 @@ class AppStore {
 
   toggleTheme() {
     const current = this.getTheme();
-    const next = (current === 'ninja' || current === 'dark') ? 'classic' : 'ninja';
+    const next = (current === 'cyber' || current === 'ninja' || current === 'dark') ? 'classic' : 'cyber';
     return this.setTheme(next);
   }
 

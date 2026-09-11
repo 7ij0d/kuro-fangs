@@ -1315,7 +1315,7 @@ window.GamesPage = (function () {
       titleAr = '🩺 طبيب امتياز طموح (Rising Dental Star)';
       titleEn = '🩺 Rising Dental Star';
       badgeIcon = '✨';
-      skinImg = 'assets/fox_skins/fox_skin_3.jpg';
+      skinImg = 'assets/fox_skins/fox_skin_5.jpg';
     } else {
       titleAr = '🦊 ثعلب قيد التدريب بالمعمل (Phantom Apprentice)';
       titleEn = '🦊 Phantom Lab Apprentice';
@@ -1640,9 +1640,10 @@ window.GamesPage = (function () {
   };
 })();
 
-export default function renderGames(container, params) {
+window.renderGames = function (container, params) {
   if (window.GamesPage && typeof window.GamesPage.render === 'function') {
     return window.GamesPage.render(container, params);
   }
-}
+};
+
 

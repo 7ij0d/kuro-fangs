@@ -203,9 +203,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/games', async (c, q) => {
     if (window.GamesPage && typeof window.GamesPage.render === 'function') {
       await window.GamesPage.render(c, q);
+    } else if (typeof window.renderGames === 'function') {
+      await window.renderGames(c, q);
     } else {
-      const { default: renderGames } = await import('./pages/games.js');
-      await renderGames(c, q);
+      try {
+        const mod = await import('./pages/games.js');
+        const renderGames = mod?.default || window.GamesPage?.render || window.renderGames;
+        if (renderGames) await renderGames(c, q);
+      } catch (e) {
+        if (window.GamesPage && typeof window.GamesPage.render === 'function') {
+          await window.GamesPage.render(c, q);
+        }
+      }
     }
   });
 

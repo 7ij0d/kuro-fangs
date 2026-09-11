@@ -7,8 +7,23 @@ class Router {
   constructor() {
     this.routes = {
       '/games': async (container, params) => {
-        const { default: renderGames } = await import('./pages/games.js');
-        await renderGames(container, params);
+        if (window.GamesPage && typeof window.GamesPage.render === 'function') {
+          await window.GamesPage.render(container, params);
+          return;
+        }
+        if (typeof window.renderGames === 'function') {
+          await window.renderGames(container, params);
+          return;
+        }
+        try {
+          const mod = await import('./pages/games.js');
+          const renderGames = mod?.default || window.GamesPage?.render || window.renderGames;
+          if (renderGames) await renderGames(container, params);
+        } catch (e) {
+          if (window.GamesPage && typeof window.GamesPage.render === 'function') {
+            await window.GamesPage.render(container, params);
+          }
+        }
       }
     };
     this.currentPath = '';

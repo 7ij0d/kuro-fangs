@@ -183,6 +183,7 @@
    THEME 3: NINJA STUDY FOX (data-theme="ninja" / data-theme="dark")
    Glowing Nocturnal Dark Theme with Electric Violet & Cyber Cyan
    ========================================================================== */
+[data-theme="cyber"],
 [data-theme="ninja"],
 [data-theme="dark"] {
   --bg-sidebar: #090D16;
