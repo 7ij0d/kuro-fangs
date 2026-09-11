@@ -112,7 +112,7 @@ const SubjectModal = {
       }
     ];
 
-    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || `assets/covers/${subject.id}.jpg`;
+    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || `assets/covers/${subject.id}.webp`;
     const arrowIcon = isAr ? 'arrow-left' : 'arrow-right';
 
     modalBox.innerHTML = `
@@ -120,7 +120,7 @@ const SubjectModal = {
       <div class="modal-header">
         <div class="modal-header-meta">
           <div class="modal-subject-banner-thumb">
-            <img src="${coverImg}" alt="${primaryTitle}" onerror="this.onerror=null; this.src='assets/covers/gen-med.jpg';" />
+            <img src="${coverImg}" alt="${primaryTitle}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
           </div>
           <div class="modal-title-wrap">
             <h2>${primaryTitle}</h2>
@@ -206,7 +206,7 @@ const SubjectModal = {
 
     const primaryTitle = isAr ? subject.name_ar : subject.name_en;
     const subTitle = isAr ? `${subject.name_en} • ${subject.code}` : `${subject.name_ar} • ${subject.code}`;
-    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || `assets/covers/${subject.id}.jpg`;
+    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || `assets/covers/${subject.id}.webp`;
     const backArrow = isAr ? 'arrow-right' : 'arrow-left';
 
     // Get files for this category
@@ -224,7 +224,7 @@ const SubjectModal = {
       <div class="modal-header">
         <div class="modal-header-meta">
           <div class="modal-subject-banner-thumb">
-            <img src="${coverImg}" alt="${primaryTitle}" onerror="this.onerror=null; this.src='assets/covers/gen-med.jpg';" />
+            <img src="${coverImg}" alt="${primaryTitle}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
           </div>
           <div class="modal-title-wrap">
             <h2>${primaryTitle}</h2>

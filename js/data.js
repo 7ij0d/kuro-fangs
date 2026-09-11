@@ -15,21 +15,21 @@ class DataService {
     this.requirements = [];
     this.loaded = false;
 
-    // High quality tailored cover banners stored locally in assets/covers/
+    // Ultra-lightweight WebP cover banners (under ~25KB each, 600x337 at 75% quality)
     this.subjectCovers = {
-      'gen-med': 'assets/covers/gen-med.jpg',
-      'gen-surgery': 'assets/covers/gen-surgery.jpg',
-      'fixed-pros': 'assets/covers/fixed-pros.jpg',
-      'omfs': 'assets/covers/omfs.jpg',
-      'oral-diseases': 'assets/covers/oral-diseases.jpg',
-      'endo': 'assets/covers/endo.jpg',
-      'omdr': 'assets/covers/omdr.jpg',
-      'preventive': 'assets/covers/preventive.jpg',
-      'cons-endo': 'assets/covers/cons-endo.jpg',
-      'ortho': 'assets/covers/ortho.jpg',
-      'pedo': 'assets/covers/pedo.jpg',
-      'pediatric': 'assets/covers/pediatric.jpg',
-      'removable-pros': 'assets/covers/removable-pros.jpg'
+      'gen-med': 'assets/covers/gen-med.webp',
+      'gen-surgery': 'assets/covers/gen-surgery.webp',
+      'fixed-pros': 'assets/covers/fixed-pros.webp',
+      'omfs': 'assets/covers/omfs.webp',
+      'oral-diseases': 'assets/covers/oral-diseases.webp',
+      'endo': 'assets/covers/endo.webp',
+      'omdr': 'assets/covers/omdr.webp',
+      'preventive': 'assets/covers/preventive.webp',
+      'cons-endo': 'assets/covers/cons-endo.webp',
+      'ortho': 'assets/covers/ortho.webp',
+      'pedo': 'assets/covers/pedo.webp',
+      'pediatric': 'assets/covers/pediatric.webp',
+      'removable-pros': 'assets/covers/removable-pros.webp'
     };
   }
 
@@ -105,7 +105,7 @@ class DataService {
 
     // Attach high-res cover images to each subject
     this.subjects.forEach(s => {
-      s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.jpg`;
+      s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.webp`;
     });
 
     if (!this.alerts || this.alerts.length === 0) {

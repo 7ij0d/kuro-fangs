@@ -127,7 +127,7 @@ const HomePage = {
       const primaryTitle = isAr ? subj.name_ar : subj.name_en;
       const subTitle = isAr ? subj.name_en : subj.name_ar;
       const doctorName = isAr ? (subj.doctor_name_ar || 'هيئة التدريس') : (subj.doctor_name_en || 'Faculty Board');
-      const coverImg = subj.cover_image || window.DATA?.subjectCovers?.[subj.id] || `assets/covers/${subj.id}.jpg`;
+      const coverImg = subj.cover_image || window.DATA?.subjectCovers?.[subj.id] || `assets/covers/${subj.id}.webp`;
       const progressVal = subj.progress || 75;
       const lecturesCount = subj.lectures_count || subj.sheet_count || 14;
       const summariesCount = subj.summaries_count || 4;
@@ -137,7 +137,7 @@ const HomePage = {
         <div class="subject-card" onclick="window.SubjectModal.open('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
           <!-- 130px Subject Cover Header -->
           <div class="subject-cover-wrap card-banner">
-            <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" loading="eager" onerror="this.onerror=null; this.src='assets/covers/gen-med.jpg';" />
+            <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" loading="lazy" decoding="async" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp'; this.classList.add('loaded');" />
             <div class="subject-cover-gradient"></div>
             <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
             ${subj.is_popular ? `<span class="subject-popular-tag">🔥 ${isAr ? 'شائع' : 'Popular'}</span>` : ''}
@@ -191,6 +191,11 @@ const HomePage = {
         </div>
       `;
     }).join('');
+
+    // Ensure already cached images trigger smooth display immediately
+    grid.querySelectorAll('.subject-cover-img').forEach(img => {
+      if (img.complete) img.classList.add('loaded');
+    });
 
     if (window.lucide) window.lucide.createIcons();
   },

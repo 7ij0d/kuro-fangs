@@ -19,7 +19,7 @@
         "dr-sara"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/gen-med.jpg"
+      "cover_image": "assets/covers/gen-med.webp"
     },
     {
       "id": "gen-surgery",
@@ -40,7 +40,7 @@
         "dr-mahmoud"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/gen-surgery.jpg"
+      "cover_image": "assets/covers/gen-surgery.webp"
     },
     {
       "id": "fixed-pros",
@@ -62,7 +62,7 @@
         "dr-nadia"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/fixed-pros.jpg"
+      "cover_image": "assets/covers/fixed-pros.webp"
     },
     {
       "id": "omfs",
@@ -84,7 +84,7 @@
         "dr-youssef"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/omfs.jpg"
+      "cover_image": "assets/covers/omfs.webp"
     },
     {
       "id": "oral-diseases",
@@ -106,7 +106,7 @@
         "dr-fatima"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/oral-diseases.jpg"
+      "cover_image": "assets/covers/oral-diseases.webp"
     },
     {
       "id": "endo",
@@ -128,7 +128,7 @@
         "dr-khalid"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/endo.jpg"
+      "cover_image": "assets/covers/endo.webp"
     },
     {
       "id": "omdr",
@@ -149,7 +149,7 @@
         "dr-aisha"
       ],
       "is_exam_heavy": false,
-      "cover_image": "assets/covers/omdr.jpg"
+      "cover_image": "assets/covers/omdr.webp"
     },
     {
       "id": "preventive",
@@ -170,7 +170,7 @@
         "dr-layla"
       ],
       "is_exam_heavy": false,
-      "cover_image": "assets/covers/preventive.jpg"
+      "cover_image": "assets/covers/preventive.webp"
     },
     {
       "id": "cons-endo",
@@ -192,7 +192,7 @@
         "dr-khalid"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/cons-endo.jpg"
+      "cover_image": "assets/covers/cons-endo.webp"
     },
     {
       "id": "ortho",
@@ -213,7 +213,7 @@
         "dr-hana"
       ],
       "is_exam_heavy": false,
-      "cover_image": "assets/covers/ortho.jpg"
+      "cover_image": "assets/covers/ortho.webp"
     },
     {
       "id": "pedo",
@@ -234,7 +234,7 @@
         "dr-rima"
       ],
       "is_exam_heavy": false,
-      "cover_image": "assets/covers/pedo.jpg"
+      "cover_image": "assets/covers/pedo.webp"
     },
     {
       "id": "removable-pros",
@@ -256,7 +256,7 @@
         "dr-mustafa"
       ],
       "is_exam_heavy": true,
-      "cover_image": "assets/covers/removable-pros.jpg"
+      "cover_image": "assets/covers/removable-pros.webp"
     }
   ]
 }
