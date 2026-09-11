@@ -20,6 +20,19 @@ class I18nManager {
         navNotes: 'Notes',
         pointsSuffix: 'pts',
 
+        // Faculty News & Next Exam
+        facultyNewsTitle: 'Official Faculty News & Announcements',
+        facultyNewsSubtitle: 'Official notices, lab guidelines, and academic schedule updates',
+        nextExamTitle: 'Next Official Exam',
+        nextExamBadge: 'Urgent Alert',
+        examDateLabel: 'Exam Date',
+        examTimeLabel: 'Time',
+        countdownDays: 'Days',
+        countdownHours: 'Hours',
+        countdownMins: 'Mins',
+        countdownSecs: 'Secs',
+        viewFullSchedule: 'View Full Schedule ➔',
+
         // Hero
         heroTitle: 'Academic Subjects — Year 3 (12)',
         heroSubtitle: '',
@@ -96,6 +109,19 @@ class I18nManager {
         navBookmarks: 'المفضلة',
         navNotes: 'ملاحظاتي',
         pointsSuffix: 'نقطة',
+
+        // Faculty News & Next Exam
+        facultyNewsTitle: 'أخبار وإعلانات الكلية الرسمية | Faculty News',
+        facultyNewsSubtitle: 'التنبيهات الرسمية، ضوابط المعامل السريرية، وتحديثات التقويم الأكاديمي',
+        nextExamTitle: 'الامتحان القادم',
+        nextExamBadge: 'تنبيه عاجل',
+        examDateLabel: 'تاريخ الامتحان',
+        examTimeLabel: 'التوقيت',
+        countdownDays: 'أيام',
+        countdownHours: 'ساعات',
+        countdownMins: 'دقائق',
+        countdownSecs: 'ثواني',
+        viewFullSchedule: 'عرض جدول الامتحانات الكامل ➔',
 
         // Hero
         heroTitle: 'المواد الدراسية — السنة الثالثة (12)',
