@@ -2995,3 +2995,273 @@ html[dir="rtl"] .fox-skin-cost-badge {
   color: #6EE7B7;
   border-color: rgba(16, 185, 129, 0.3);
 }
+
+/* ==========================================================================
+   CLINICAL & PRACTICAL SCHEDULE (10 GROUPS: A1 - E2)
+   ========================================================================== */
+.clinical-group-selector-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 18px 22px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.group-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.group-selector-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.active-group-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.775rem;
+  font-weight: 800;
+}
+
+[data-theme="dark"] .active-group-tag {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.clinical-group-chips-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-group-chip {
+  flex: 1 1 calc(10% - 8px);
+  min-width: 58px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border-card);
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all var(--transition-fast);
+}
+
+.btn-group-chip:hover {
+  border-color: var(--brand-primary);
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+}
+
+.btn-group-chip.active {
+  background: var(--brand-primary);
+  color: #FFFFFF;
+  border-color: var(--brand-primary);
+  box-shadow: 0 4px 14px rgba(136, 19, 55, 0.35);
+  transform: translateY(-2px);
+}
+
+.clinical-table-card .table-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.official-source-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.official-source-pill:hover {
+  background: rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.clinical-grid-table td {
+  vertical-align: top;
+  padding: 8px 10px;
+}
+
+.clinical-day-header-cell {
+  background: var(--bg-surface-subtle) !important;
+  font-weight: 800;
+  text-align: center;
+  vertical-align: middle !important;
+  width: 130px;
+}
+
+.day-header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.day-name-main {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.day-name-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.clinical-slot-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 100px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.clinical-slot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.clinical-slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.clinical-code-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.clinical-time-tag {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+[data-theme="dark"] .clinical-time-tag {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+.clinical-course-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #0F172A;
+}
+
+[data-theme="dark"] .clinical-course-title {
+  color: #F8FAFC;
+}
+
+.clinical-course-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.clinical-place-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+/* Day by Day Cards View */
+.clinical-days-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.clinical-day-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 18px 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.clinical-day-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.day-badge-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.day-theory-hint {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  background: var(--bg-surface-subtle);
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+}
+
+.day-sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+

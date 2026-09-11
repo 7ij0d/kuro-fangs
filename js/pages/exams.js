@@ -5,8 +5,19 @@
  */
 
 const ExamsPage = {
-  currentTab: 'midterm', // 'midterm' | 'final' | 'practical'
+  currentTab: localStorage.getItem('kf_schedule_active_tab') || 'practical',
   viewMode: 'table',     // 'table' | 'timeline'
+
+  getSelectedGroup() {
+    return localStorage.getItem('kf_selected_group') || 'A1';
+  },
+
+  setSelectedGroup(group) {
+    const valid = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2', 'E1', 'E2'];
+    const sanitized = valid.includes(group) ? group : 'A1';
+    localStorage.setItem('kf_selected_group', sanitized);
+    return sanitized;
+  },
 
   // Official Midterm Theory Schedule Data (2026-2027)
   midtermData: [
@@ -50,6 +61,9 @@ const ExamsPage = {
     if (queryParams?.get('tab')) {
       ExamsPage.currentTab = queryParams.get('tab');
     }
+    if (queryParams?.get('group')) {
+      ExamsPage.setSelectedGroup(queryParams.get('group'));
+    }
 
     container.innerHTML = `
       <!-- Page Header -->
@@ -57,9 +71,9 @@ const ExamsPage = {
         <div class="page-title-group">
           <h1>
             <i data-lucide="calendar" style="color: var(--brand-burgundy); width: 28px; height: 28px;"></i>
-            ${isAr ? 'جدول الامتحانات الرسمية' : 'Official Examination Schedule'}
+            ${isAr ? 'الجداول الأكاديمية والامتحانات' : 'Academic & Exam Schedules'}
           </h1>
-          <p>${isAr ? 'المواعيد المعتمدة للامتحانات النصفية والنهائية — كلية طب وجراحة الفم والأسنان (السنة الثالثة 2026 - 2027)' : 'Approved official examination dates — Faculty of Dentistry (Year 3 • 2026 - 2027)'}</p>
+          <p>${isAr ? 'جدول العيادات والمعامل العملي/السريري (10 مجموعات) وجداول الامتحانات الرسمية — السنة الثالثة (2026 - 2027)' : 'Clinical & practical lab schedules (10 subgroups) and official examination timetables — Year 3 (2026 - 2027)'}</p>
         </div>
 
         <div class="exams-header-actions no-print">
@@ -85,6 +99,12 @@ const ExamsPage = {
 
       <!-- Schedule Tabs Bar -->
       <div class="schedule-tabs-bar no-print">
+        <button class="schedule-tab-btn ${ExamsPage.currentTab === 'practical' ? 'active' : ''}" data-tab="practical">
+          <i data-lucide="microscope"></i>
+          <span>${isAr ? 'جدول المعامل والعيادات العملي/السريري' : 'Clinical & Lab Schedule'}</span>
+          <span class="tab-count-pill" style="background: #10B981; color: #FFFFFF; font-weight: 800;">A1–E2</span>
+        </button>
+
         <button class="schedule-tab-btn ${ExamsPage.currentTab === 'midterm' ? 'active' : ''}" data-tab="midterm">
           <i data-lucide="file-text"></i>
           <span>${isAr ? 'جدول النظري النصفي' : 'Midterm Theory'}</span>
@@ -95,12 +115,6 @@ const ExamsPage = {
           <i data-lucide="award"></i>
           <span>${isAr ? 'جدول النظري النهائي (الفاينل)' : 'Final Theory Exams'}</span>
           <span class="tab-count-pill">3</span>
-        </button>
-
-        <button class="schedule-tab-btn ${ExamsPage.currentTab === 'practical' ? 'active' : ''}" data-tab="practical">
-          <i data-lucide="microscope"></i>
-          <span>${isAr ? 'جدول امتحانات العملي' : 'Practical Clinical Exams'}</span>
-          <span class="badge-coming-soon">${isAr ? 'قريباً' : 'Soon'}</span>
         </button>
       </div>
 
@@ -118,12 +132,13 @@ const ExamsPage = {
     const contentArea = document.getElementById('exams-content-area');
     if (!contentArea) return;
 
-    if (ExamsPage.currentTab === 'midterm') {
+    if (ExamsPage.currentTab === 'practical') {
+      contentArea.innerHTML = ExamsPage.renderPracticalView(isAr);
+      ExamsPage.setupPracticalListeners(isAr);
+    } else if (ExamsPage.currentTab === 'midterm') {
       contentArea.innerHTML = ExamsPage.renderMidtermView(isAr);
     } else if (ExamsPage.currentTab === 'final') {
       contentArea.innerHTML = ExamsPage.renderFinalView(isAr);
-    } else if (ExamsPage.currentTab === 'practical') {
-      contentArea.innerHTML = ExamsPage.renderPracticalView(isAr);
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -319,27 +334,210 @@ const ExamsPage = {
   },
 
   renderPracticalView(isAr) {
+    const selectedGroup = ExamsPage.getSelectedGroup();
+    const allGroups = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2', 'E1', 'E2'];
+    const clinicalData = window.CLINICAL_SCHEDULE_DATA || {};
+    const groupSessions = clinicalData[selectedGroup] || [];
+
+    const weekdays = [
+      { ar: 'الأحد', en: 'Sunday' },
+      { ar: 'الإثنين', en: 'Monday' },
+      { ar: 'الثلاثاء', en: 'Tuesday' },
+      { ar: 'الأربعاء', en: 'Wednesday' },
+      { ar: 'الخميس', en: 'Thursday' }
+    ];
+
+    // Group sessions by weekday
+    const dayMap = {};
+    weekdays.forEach(w => { dayMap[w.ar] = []; });
+    groupSessions.forEach(s => {
+      if (dayMap[s.day_ar]) {
+        dayMap[s.day_ar].push(s);
+      }
+    });
+
+    const isTableView = ExamsPage.viewMode !== 'timeline';
+
     return `
-      <div class="card practical-coming-soon-card">
-        <div class="coming-soon-icon-wrap">
-          <i data-lucide="microscope" style="width: 48px; height: 48px; color: var(--brand-burgundy);"></i>
+      <!-- Quick Subgroup Selector Bar -->
+      <div class="clinical-group-selector-box">
+        <div class="group-selector-header">
+          <div class="group-selector-title">
+            <i data-lucide="users" style="width: 22px; height: 22px; color: var(--brand-primary);"></i>
+            <span>${isAr ? 'شريط الاختيار السريع لمجموعتك (اختر من A1 إلى E2):' : 'Quick Subgroup Selector (Choose from A1 to E2):'}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div class="active-group-tag">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+              <span>${isAr ? `المجموعة المحفوظة: ${selectedGroup}` : `Saved Subgroup: ${selectedGroup}`}</span>
+            </div>
+            <a href="https://tables.dentaluot.com/print.php?year=3&section=A&mode=combined&pdf=1&student=1" target="_blank" rel="noopener" class="official-source-pill" style="background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border-subtle);" title="${isAr ? 'عرض الجدول في موقع الكلية الرسمي' : 'Open official timetable portal'}">
+              <span>${isAr ? '🔗 المصدر الرسمي بالكلية' : '🔗 Official Faculty Portal'}</span>
+              <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
+            </a>
+          </div>
         </div>
-        <h2>${isAr ? 'جدول امتحانات العملي والسريري' : 'Clinical & Practical Examinations Schedule'}</h2>
-        <p class="coming-soon-desc">
+
+        <!-- 10 Groups Interactive Chips Bar -->
+        <div class="clinical-group-chips-wrap no-print">
+          ${allGroups.map(g => `
+            <button class="btn-group-chip ${g === selectedGroup ? 'active' : ''}" data-group="${g}" type="button" aria-label="Group ${g}">
+              <span>${g}</span>
+              ${g === selectedGroup ? '<i data-lucide="check" style="width: 14px; height: 14px;"></i>' : ''}
+            </button>
+          `).join('')}
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 12px 0 0; line-height: 1.5;">
           ${isAr 
-            ? 'يجري حالياً مراجعة وتنسيق جدول مواعيد معامل الأسنان والمستشفى التعليمي مع رؤساء الأقسام. سيتم نشر التوزيع الرسمي فور اعتماده رسمياً.' 
-            : 'Clinical and laboratory exam schedules are currently being coordinated with academic department heads. The official roster will be posted immediately upon verification.'}
+            ? `⚡ تم حفظ اختيارك تلقائياً في المتصفح. يعرض الجدول أدناه مواعيد وعيادات مجموعتك (<b>${selectedGroup}</b>) فقط من الأحد إلى الخميس، بواقع جلستين يومياً.`
+            : `⚡ Selection is saved automatically. The schedule below displays only your group's (<b>${selectedGroup}</b>) clinics and practical labs from Sunday to Thursday.`}
         </p>
-        <div class="coming-soon-badges">
-          <span class="badge badge-warning">${isAr ? 'قيد التنسيق النهائي' : 'Under Final Coordination'}</span>
-          <span class="badge badge-primary">${isAr ? 'معامل الأسنان والعيادات' : 'Dental Labs & Clinics'}</span>
+      </div>
+
+      <!-- Schedule Table or Cards View -->
+      ${isTableView ? `
+        <div class="exams-table-card card clinical-table-card">
+          <div class="table-card-header">
+            <div>
+              <h2>${isAr ? `جدول عيادات ومعامل المجموعة (${selectedGroup}) — السنة الثالثة` : `Clinical & Lab Schedule — Group (${selectedGroup}) • Year 3`}</h2>
+              <p>${isAr ? 'جامعة طرابلس • كلية طب وجراحة الفم والأسنان • العام الجامعي 2026 - 2027' : 'University of Tripoli • Faculty of Dentistry • Academic Year 2026 - 2027'}</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge badge-primary" style="font-size: 0.8rem; padding: 4px 12px;">${isAr ? `المجموعة: ${selectedGroup}` : `Group: ${selectedGroup}`}</span>
+              <div class="print-watermark" style="font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.9);">
+                KURO FANGS • CLINICAL
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="academia-exam-table clinical-grid-table">
+              <thead>
+                <tr>
+                  <th style="width: 140px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
+                  <th style="width: 43%;">${isAr ? 'الفترة الأولى (12:00 م – 1:00 م)' : 'First Slot (12:00 PM – 1:00 PM)'}</th>
+                  <th style="width: 43%;">${isAr ? 'الفترة الثانية (1:00 م – 2:00 م)' : 'Second Slot (1:00 PM – 2:00 PM)'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${weekdays.map(w => {
+                  const daySessions = dayMap[w.ar] || [];
+                  const s1 = daySessions.find(s => s.time_ar && s.time_ar.includes('12:00')) || daySessions[0];
+                  const s2 = daySessions.find(s => s.time_ar && s.time_ar.includes('1:00') && s !== s1) || daySessions[1];
+
+                  const renderSlot = (s) => {
+                    if (!s) return `<div style="color: var(--text-muted); font-size: 0.8rem; padding: 12px; text-align: center;">${isAr ? 'فترة راحة' : 'Free Slot'}</div>`;
+                    return `
+                      <div class="clinical-slot-card" style="border-left: 4px solid ${s.color}; background: ${s.bg};">
+                        <div class="clinical-slot-header">
+                          <span class="clinical-code-badge" style="background: ${s.color}; color: #FFFFFF;">${s.code}</span>
+                          <span class="clinical-time-tag">${isAr ? s.time_ar : s.time_en}</span>
+                        </div>
+                        <div class="clinical-course-title">
+                          ${isAr ? s.course_ar : s.course_en}
+                        </div>
+                        <div class="clinical-course-sub">
+                          ${isAr ? s.course_en : s.course_ar}
+                        </div>
+                        <div class="clinical-place-tag">
+                          <i data-lucide="map-pin" style="width: 13px; height: 13px; color: ${s.color};"></i>
+                          <span>${isAr ? s.place_ar : s.place_en}</span>
+                        </div>
+                      </div>
+                    `;
+                  };
+
+                  return `
+                    <tr>
+                      <td class="clinical-day-header-cell">
+                        <div class="day-header-content">
+                          <span class="day-name-main">${isAr ? w.ar : w.en}</span>
+                          <span class="day-name-sub">${isAr ? w.en : w.ar}</span>
+                        </div>
+                      </td>
+                      <td>${renderSlot(s1)}</td>
+                      <td>${renderSlot(s2)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <button class="btn btn-soft" style="margin-top: 20px;" onclick="window.showToast('${isAr ? 'سيتم إشعارك فور اعتماد جدول العملي!' : 'You will be notified once practical dates are announced!'}', { type: 'info' });">
-          <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
-          ${isAr ? 'تفعيل تنبيهات موعد العملي' : 'Notify Me When Available'}
-        </button>
+      ` : `
+        <!-- Timeline / Day-by-Day Cards View -->
+        <div class="clinical-days-stack">
+          ${weekdays.map(w => {
+            const daySessions = dayMap[w.ar] || [];
+            return `
+              <div class="clinical-day-card">
+                <div class="clinical-day-card-header">
+                  <div class="day-badge-title">
+                    <i data-lucide="calendar" style="width: 20px; height: 20px; color: var(--brand-primary);"></i>
+                    <span>${isAr ? w.ar : w.en}</span>
+                    <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">(${isAr ? w.en : w.ar})</span>
+                  </div>
+                  <div class="day-theory-hint">
+                    ${isAr ? 'المحاضرات النظرية: 8:00 ص – 12:00 م (مدرج 2)' : 'Theory Lectures: 8:00 AM – 12:00 PM (Auditorium 2)'}
+                  </div>
+                </div>
+
+                <div class="day-sessions-grid">
+                  ${daySessions.map(s => `
+                    <div class="clinical-slot-card" style="border-left: 4px solid ${s.color}; background: ${s.bg};">
+                      <div class="clinical-slot-header">
+                        <span class="clinical-code-badge" style="background: ${s.color}; color: #FFFFFF;">${s.code}</span>
+                        <span class="clinical-time-tag">${isAr ? s.time_ar : s.time_en}</span>
+                      </div>
+                      <div class="clinical-course-title">
+                        ${isAr ? s.course_ar : s.course_en}
+                      </div>
+                      <div class="clinical-course-sub">
+                        ${isAr ? s.course_en : s.course_ar}
+                      </div>
+                      <div class="clinical-place-tag">
+                        <i data-lucide="map-pin" style="width: 13px; height: 13px; color: ${s.color};"></i>
+                        <span>${isAr ? s.place_ar : s.place_en}</span>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+
+      <!-- Bottom Academic Notice -->
+      <div class="card" style="padding: 16px 20px; border-radius: 12px; margin-top: 18px; background: var(--bg-hover); border: 1px dashed var(--border-card); display: flex; align-items: flex-start; gap: 12px;">
+        <i data-lucide="info" style="color: var(--brand-primary); width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;"></i>
+        <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
+          <b>${isAr ? 'تنبيه أكاديمي موحد:' : 'Academic Schedule Guidelines:'}</b>
+          ${isAr 
+            ? 'المحاضرات النظرية الموحدة لجميع المجموعات تُعقد صباحاً في مدرج 2 من السبت إلى الخميس (8:00 ص – 12:00 م). تبدأ المعامل والعيادات العملية الخاصة بمجموعتك فوراً في تمام الساعة 12:00 ظهراً.' 
+            : 'Unified theoretical lectures for all groups take place in Auditorium 2 Saturday to Thursday (8:00 AM – 12:00 PM). Clinical and lab sessions for your assigned group begin promptly at 12:00 PM.'}
+        </div>
       </div>
     `;
+  },
+
+  setupPracticalListeners(isAr) {
+    const contentArea = document.getElementById('exams-content-area');
+    if (!contentArea) return;
+
+    contentArea.querySelectorAll('.btn-group-chip').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const group = btn.getAttribute('data-group');
+        ExamsPage.setSelectedGroup(group);
+        ExamsPage.renderContent(isAr);
+        const msg = isAr 
+          ? `تم اختيار وعرض جدول المجموعة (${group}) وحفظه بنجاح! 🏥` 
+          : `Group (${group}) selected and saved! 🏥`;
+        window.showToast(msg, { type: 'success' });
+      });
+    });
   },
 
   renderTimelineCard(item, isAr, examType) {
@@ -385,6 +583,7 @@ const ExamsPage = {
       btn.addEventListener('click', () => {
         const tab = btn.getAttribute('data-tab');
         ExamsPage.currentTab = tab;
+        localStorage.setItem('kf_schedule_active_tab', tab);
         container.querySelectorAll('.schedule-tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         ExamsPage.renderContent(isAr);
