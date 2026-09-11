@@ -24,6 +24,27 @@ class Router {
             await window.GamesPage.render(container, params);
           }
         }
+      },
+      '/lecture-schedule': async (container, params) => {
+        if (window.ExamsPage && typeof window.ExamsPage.renderLectureSchedule === 'function') {
+          window.ExamsPage.renderLectureSchedule(container, params);
+        } else if (window.ExamsPage) {
+          window.ExamsPage.render(container, params);
+        }
+      },
+      '/practical-schedule': async (container, params) => {
+        if (window.ExamsPage && typeof window.ExamsPage.renderPracticalSchedule === 'function') {
+          window.ExamsPage.renderPracticalSchedule(container, params);
+        } else if (window.ExamsPage) {
+          window.ExamsPage.render(container, params);
+        }
+      },
+      '/exams': async (container, params) => {
+        if (window.ExamsPage && typeof window.ExamsPage.renderExamsSchedule === 'function') {
+          window.ExamsPage.renderExamsSchedule(container, params);
+        } else if (window.ExamsPage) {
+          window.ExamsPage.render(container, params);
+        }
       }
     };
     this.currentPath = '';

@@ -97,8 +97,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideNotes = document.getElementById('side-nav-notes');
     if (sideNotes) sideNotes.textContent = t('sideNavNotes');
 
-    const sideCalc = document.getElementById('side-nav-exams-schedule') || document.getElementById('side-nav-calc');
-    if (sideCalc) sideCalc.textContent = t('sideNavExamsSchedule');
+    const sideLectureSchedule = document.getElementById('side-nav-lecture-schedule');
+    if (sideLectureSchedule) sideLectureSchedule.textContent = t('sideNavLectureSchedule');
+
+    const sidePracticalSchedule = document.getElementById('side-nav-practical-schedule');
+    if (sidePracticalSchedule) sidePracticalSchedule.textContent = t('sideNavPracticalSchedule');
+
+    const sideExamsSchedule = document.getElementById('side-nav-exams-schedule') || document.getElementById('side-nav-calc');
+    if (sideExamsSchedule) sideExamsSchedule.textContent = t('sideNavExamsSchedule');
 
     const sideSaved = document.getElementById('side-nav-saved');
     if (sideSaved) sideSaved.textContent = t('sideNavSaved');
@@ -190,10 +196,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/sheet/:id', (c, id, q) => window.SheetDetailPage.render(c, id, q));
   router.register('/videos', (c, q) => window.SecondaryPages.renderVideos(c, q));
   router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
-  router.register('/lecture-schedule', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'theory'; window.ExamsPage.render(c, q); });
-  router.register('/practical-schedule', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'practical'; window.ExamsPage.render(c, q); });
-  router.register('/exams', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'midterm'; window.ExamsPage.render(c, q); });
-  router.register('/calculator', (c, q) => { if (window.ExamsPage) window.ExamsPage.currentTab = 'midterm'; window.ExamsPage.render(c, q); });
+  router.register('/lecture-schedule', (c, q) => {
+    if (window.ExamsPage && typeof window.ExamsPage.renderLectureSchedule === 'function') {
+      window.ExamsPage.renderLectureSchedule(c, q);
+    } else if (window.ExamsPage) {
+      window.ExamsPage.currentTab = 'theory';
+      window.ExamsPage.render(c, q);
+    }
+  });
+  router.register('/practical-schedule', (c, q) => {
+    if (window.ExamsPage && typeof window.ExamsPage.renderPracticalSchedule === 'function') {
+      window.ExamsPage.renderPracticalSchedule(c, q);
+    } else if (window.ExamsPage) {
+      window.ExamsPage.currentTab = 'practical';
+      window.ExamsPage.render(c, q);
+    }
+  });
+  router.register('/exams', (c, q) => {
+    if (window.ExamsPage && typeof window.ExamsPage.renderExamsSchedule === 'function') {
+      window.ExamsPage.renderExamsSchedule(c, q);
+    } else if (window.ExamsPage) {
+      window.ExamsPage.currentTab = 'midterm';
+      window.ExamsPage.render(c, q);
+    }
+  });
+  router.register('/calculator', (c, q) => {
+    if (window.ExamsPage && typeof window.ExamsPage.renderExamsSchedule === 'function') {
+      window.ExamsPage.renderExamsSchedule(c, q);
+    } else if (window.ExamsPage) {
+      window.ExamsPage.currentTab = 'midterm';
+      window.ExamsPage.render(c, q);
+    }
+  });
   router.register('/quizzes', (c, q) => window.QuizzesPage.render(c, q));
   router.register('/questions', (c, q) => window.QuestionsPage.render(c, q));
   router.register('/flashcards', (c, q) => window.FlashcardsPage.render(c, q));
