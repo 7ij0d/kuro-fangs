@@ -21,8 +21,8 @@ class I18nManager {
         pointsSuffix: 'pts',
 
         // Hero
-        heroTitle: 'Academic Subjects — Year 3',
-        heroSubtitle: 'Select any subject to explore sheets, recordings, past exams, and AI questions directly in an interactive modal',
+        heroTitle: 'Academic Subjects — Year 3 (12)',
+        heroSubtitle: '',
         filterAll: 'All Subjects (12)',
         filterSem1: 'Semester 1',
         filterSem2: 'Semester 2',
@@ -98,8 +98,8 @@ class I18nManager {
         pointsSuffix: 'نقطة',
 
         // Hero
-        heroTitle: 'المواد الدراسية — السنة الثالثة',
-        heroSubtitle: 'اختر أي مادة لاستعراض الشيتات، التسجيلات، أسئلة السنوات السابقة، والـ AI مباشرة في نافذة تفاعلية',
+        heroTitle: 'المواد الدراسية — السنة الثالثة (12)',
+        heroSubtitle: '',
         filterAll: 'جميع المواد (12)',
         filterSem1: 'الفصل الأول',
         filterSem2: 'الفصل الثاني',

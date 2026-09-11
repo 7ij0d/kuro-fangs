@@ -4,7 +4,6 @@
  */
 
 const HomePage = {
-  currentFilter: 'all',
   searchQuery: '',
   loadingTimeout: null,
 
@@ -13,30 +12,14 @@ const HomePage = {
     const subjects = window.DATA.getSubjects();
 
     container.innerHTML = `
-      <!-- Hero Title Bar & Quick Tabs Bar -->
+      <!-- Hero Title Bar (Simple, Clean Header) -->
       <div class="subjects-hero-bar">
         <div class="hero-text-wrap">
           <h1 id="hero-title">${t('heroTitle')}</h1>
-          <p id="hero-subtitle">${t('heroSubtitle')}</p>
-        </div>
-
-        <div class="hero-filter-tabs">
-          <button class="filter-tab-btn ${HomePage.currentFilter === 'all' ? 'active' : ''}" data-filter="all">
-            ${t('filterAll')}
-          </button>
-          <button class="filter-tab-btn ${HomePage.currentFilter === 'sem1' ? 'active' : ''}" data-filter="sem1">
-            ${t('filterSem1')}
-          </button>
-          <button class="filter-tab-btn ${HomePage.currentFilter === 'sem2' ? 'active' : ''}" data-filter="sem2">
-            ${t('filterSem2')}
-          </button>
-          <button class="filter-tab-btn ${HomePage.currentFilter === 'popular' ? 'active' : ''}" data-filter="popular">
-            🔥 ${t('filterPopular')}
-          </button>
         </div>
       </div>
 
-      <!-- The 12 Subjects Showcase Grid -->
+      <!-- The 12 Subjects Showcase Grid (Unified 12 Subjects) -->
       <div class="subjects-showcase-grid" id="subjects-container"></div>
     `;
 
@@ -85,19 +68,8 @@ const HomePage = {
     const isAr = window.I18N.getLang() === 'ar';
     const t = (k) => window.I18N.t(k);
 
+    // All 12 subjects displayed unified together in one place
     let filtered = [...allSubjects];
-
-    // Filter logic
-    if (HomePage.currentFilter === 'sem1') {
-      filtered = allSubjects.slice(0, 6);
-    } else if (HomePage.currentFilter === 'sem2') {
-      filtered = allSubjects.slice(6, 12);
-    } else if (HomePage.currentFilter === 'popular') {
-      filtered = allSubjects.filter(s => s.is_popular);
-      if (filtered.length === 0) {
-        filtered = allSubjects.slice(0, 6);
-      }
-    }
 
     // Search filtering
     if (HomePage.searchQuery) {
@@ -215,21 +187,12 @@ const HomePage = {
   },
 
   setupListeners() {
-    document.querySelectorAll('.filter-tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        HomePage.currentFilter = btn.getAttribute('data-filter');
-        HomePage.renderSubjectsList(window.DATA.getSubjects(), true);
-      });
-    });
-
     const searchInput = document.getElementById('header-search-input');
     if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
+      searchInput.oninput = (e) => {
         HomePage.searchQuery = e.target.value.trim();
         HomePage.renderSubjectsList(window.DATA.getSubjects(), false);
-      });
+      };
     }
   }
 };
