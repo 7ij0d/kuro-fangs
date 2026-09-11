@@ -197,18 +197,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/videos', (c, q) => window.SecondaryPages.renderVideos(c, q));
   router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
   router.register('/lecture-schedule', (c, q) => {
-    if (window.ExamsPage && typeof window.ExamsPage.renderLectureSchedule === 'function') {
-      window.ExamsPage.renderLectureSchedule(c, q);
+    if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+      window.ExamsPage.renderAcademicSchedules(c, q);
     } else if (window.ExamsPage) {
-      window.ExamsPage.currentTab = 'theory';
       window.ExamsPage.render(c, q);
     }
   });
   router.register('/practical-schedule', (c, q) => {
-    if (window.ExamsPage && typeof window.ExamsPage.renderPracticalSchedule === 'function') {
-      window.ExamsPage.renderPracticalSchedule(c, q);
+    if (q) q.set('tab', 'practical');
+    if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+      window.ExamsPage.renderAcademicSchedules(c, q);
     } else if (window.ExamsPage) {
-      window.ExamsPage.currentTab = 'practical';
+      window.ExamsPage.render(c, q);
+    }
+  });
+  router.register('/schedules', (c, q) => {
+    if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+      window.ExamsPage.renderAcademicSchedules(c, q);
+    } else if (window.ExamsPage) {
       window.ExamsPage.render(c, q);
     }
   });
@@ -216,7 +222,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.ExamsPage && typeof window.ExamsPage.renderExamsSchedule === 'function') {
       window.ExamsPage.renderExamsSchedule(c, q);
     } else if (window.ExamsPage) {
-      window.ExamsPage.currentTab = 'midterm';
       window.ExamsPage.render(c, q);
     }
   });
@@ -224,7 +229,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.ExamsPage && typeof window.ExamsPage.renderExamsSchedule === 'function') {
       window.ExamsPage.renderExamsSchedule(c, q);
     } else if (window.ExamsPage) {
-      window.ExamsPage.currentTab = 'midterm';
       window.ExamsPage.render(c, q);
     }
   });

@@ -26,15 +26,16 @@ class Router {
         }
       },
       '/lecture-schedule': async (container, params) => {
-        if (window.ExamsPage && typeof window.ExamsPage.renderLectureSchedule === 'function') {
-          window.ExamsPage.renderLectureSchedule(container, params);
+        if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+          window.ExamsPage.renderAcademicSchedules(container, params);
         } else if (window.ExamsPage) {
           window.ExamsPage.render(container, params);
         }
       },
       '/practical-schedule': async (container, params) => {
-        if (window.ExamsPage && typeof window.ExamsPage.renderPracticalSchedule === 'function') {
-          window.ExamsPage.renderPracticalSchedule(container, params);
+        if (params) params.set('tab', 'practical');
+        if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+          window.ExamsPage.renderAcademicSchedules(container, params);
         } else if (window.ExamsPage) {
           window.ExamsPage.render(container, params);
         }

@@ -1,15 +1,19 @@
 /**
- * KURO FANGS — SEPARATE DEDICATED SCHEDULE PAGES
- * 1. #/lecture-schedule   -> Dedicated Weekly Theoretical Lectures Timetable (Sunday–Thursday)
- * 2. #/practical-schedule -> Dedicated Practical & Clinical Phantom Lab Schedule (Subgroups A1 to E2)
- * 3. #/exams              -> Dedicated Official Midterm & Final Exams Timetable with Countdown Timers
+ * KURO FANGS — ACADEMIC SCHEDULES & EXAM TIMETABLES
+ * 
+ * Section 1: Weekly Academic Schedules (#/lecture-schedule)
+ *   - Theoretical Tab: Official 6-day lecture matrix (Saturday–Thursday in Auditorium 2)
+ *   - Practical Tab: Practical/clinical lab schedules with group selector (A1 to E2)
+ * 
+ * Section 2: Official Exam Schedules (#/exams)
+ *   - Midterm (12 subjects) & Final (3 subjects) Timetables with countdown timers & PDF export
  */
 
 const ExamsPage = {
-  examTab: localStorage.getItem('kf_exam_active_tab') || 'midterm',     // 'midterm' | 'final'
-  viewMode: 'table',                                                   // 'table' | 'timeline'
-  lectureViewMode: 'table',                                            // 'table' | 'timeline'
-  practicalViewMode: 'table',                                          // 'table' | 'timeline'
+  academicTab: localStorage.getItem('kf_academic_active_tab') || 'theory', // 'theory' | 'practical'
+  examTab: localStorage.getItem('kf_exam_active_tab') || 'midterm',         // 'midterm' | 'final'
+  viewMode: 'table',                                                       // 'table' | 'timeline'
+  practicalViewMode: 'table',                                              // 'table' | 'timeline'
 
   getSelectedGroup() {
     return localStorage.getItem('kf_selected_group') || 'A1';
@@ -105,10 +109,20 @@ const ExamsPage = {
   },
 
   // =========================================================================
-  // 1. DEDICATED ROUTE: #/lecture-schedule (Weekly Theoretical Lectures Timetable)
+  // SECTION 1: WEEKLY ACADEMIC SCHEDULES (Theory + Practical with Group Selector)
   // =========================================================================
-  renderLectureSchedule(container, queryParams) {
+  renderAcademicSchedules(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+
+    if (queryParams?.get('tab')) {
+      const t = queryParams.get('tab');
+      if (['theory', 'practical'].includes(t)) {
+        ExamsPage.academicTab = t;
+      }
+    }
+    if (queryParams?.get('group')) {
+      ExamsPage.setSelectedGroup(queryParams.get('group'));
+    }
 
     container.innerHTML = `
       <!-- Page Header -->
@@ -116,20 +130,16 @@ const ExamsPage = {
         <div class="page-title-group">
           <h1>
             <i data-lucide="book-open" style="color: var(--brand-burgundy); width: 28px; height: 28px;"></i>
-            ${isAr ? 'جدول المحاضرات النظري الأسبوعي' : 'Weekly Theoretical Lectures Timetable'}
+            ${isAr ? 'الجداول الدراسية (نظري وعملي)' : 'Weekly Academic Schedules (Theory & Practical)'}
           </h1>
-          <p>${isAr ? 'جدول المواعيد الأسبوعية الثابتة للمحاضرات النظرية بقاعات ومدرجات الكلية الرئيسية (من الأحد إلى الخميس) — السنة الثالثة (2026 - 2027)' : 'Official weekly timetable for theoretical lectures across main faculty auditoriums (Sunday–Thursday) — Year 3 (2026 - 2027)'}</p>
+          <p>${isAr ? 'جدول المحاضرات النظرية بمدرج 2 بالكلية وجدول المعامل والعيادات العملي والسريري للمجموعات الفرعية الـ 10 (A1 إلى E2)' : 'Auditorium 2 theoretical lecture matrix and practical/clinical lab schedule for the 10 student subgroups (A1 to E2)'}</p>
         </div>
 
         <div class="exams-header-actions no-print">
-          <!-- Direct Links to Other Dedicated Schedules -->
-          <a href="#/practical-schedule" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
-            <i data-lucide="microscope" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'جدول المعامل والعملي (A1-E2)' : 'Clinical & Labs (A1-E2)'}</span>
-          </a>
+          <!-- Link to Section 2: Official Exams Schedule -->
           <a href="#/exams" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
             <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'جدول الامتحانات الرسمية' : 'Official Exams'}</span>
+            <span>${isAr ? 'جداول الامتحانات الرسمية' : 'Official Exam Schedules'}</span>
           </a>
 
           <!-- Print / Save as PDF Button -->
@@ -140,30 +150,74 @@ const ExamsPage = {
         </div>
       </div>
 
-      <!-- Active Content Container -->
-      <div id="lecture-content-area" class="exams-content-area">
-        ${ExamsPage.renderTheoryTableView(isAr)}
+      <!-- Section 1 Academic Tabs Bar -->
+      <div class="schedule-tabs-bar no-print">
+        <button class="schedule-tab-btn ${ExamsPage.academicTab === 'theory' ? 'active' : ''}" data-academic-tab="theory">
+          <i data-lucide="book-open"></i>
+          <span>${isAr ? 'جدول المحاضرات النظري الأسبوعي' : 'Theoretical Lectures Matrix'}</span>
+          <span class="tab-count-pill" style="background: var(--brand-burgundy); color: #fff;">${isAr ? 'مدرج 2 • السبت-الخميس' : 'Auditorium 2 • Sat-Thu'}</span>
+        </button>
+
+        <button class="schedule-tab-btn ${ExamsPage.academicTab === 'practical' ? 'active' : ''}" data-academic-tab="practical">
+          <i data-lucide="microscope"></i>
+          <span>${isAr ? 'جدول المعامل والعيادات العملي/السريري' : 'Clinical & Lab Schedule'}</span>
+          <span class="tab-count-pill" style="background: #10B981; color: #FFFFFF; font-weight: 800;">A1–E2</span>
+        </button>
       </div>
 
-      <!-- Guidelines Notice Card -->
-      <div class="card no-print" style="padding: 16px 20px; border-radius: 12px; margin-top: 18px; background: var(--bg-hover); border: 1px dashed var(--border-card); display: flex; align-items: flex-start; gap: 12px;">
-        <i data-lucide="info" style="color: var(--brand-burgundy); width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;"></i>
-        <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
-          <b>${isAr ? 'تنبيه أكاديمي موحد بخصوص المحاضرات:' : 'Academic Lecture Guidelines:'}</b>
-          ${isAr 
-            ? 'الحضور إلزامي بنسبة لا تقل عن 75% لدخول الامتحانات النهائية. تبدأ المحاضرات في أوقاتها المحددة دون تأخير، ويُرجى الالتزام بالهدوء داخل المدرجات والقاعات الأكاديمية.' 
-            : 'Attendance of at least 75% is required for exam eligibility. Lectures start strictly on schedule; students are kindly requested to maintain academic discipline in halls.'}
-        </div>
-      </div>
+      <!-- Active Content Container -->
+      <div id="academic-content-area" class="exams-content-area"></div>
     `;
 
+    ExamsPage.renderAcademicTabContent(isAr);
+    ExamsPage.setupAcademicTabListeners(container, isAr);
     ExamsPage.attachPrintHandler(container);
+
     if (window.lucide) window.lucide.createIcons();
   },
 
+  renderAcademicTabContent(isAr) {
+    const contentArea = document.getElementById('academic-content-area');
+    if (!contentArea) return;
+
+    if (ExamsPage.academicTab === 'practical') {
+      contentArea.innerHTML = ExamsPage.renderPracticalView(isAr);
+      ExamsPage.setupPracticalListeners(isAr);
+    } else {
+      contentArea.innerHTML = `
+        ${ExamsPage.renderTheoryTableView(isAr)}
+        <!-- Attendance & Auditorium Notice -->
+        <div class="card no-print" style="padding: 16px 20px; border-radius: 12px; margin-top: 18px; background: var(--bg-hover); border: 1px dashed var(--border-card); display: flex; align-items: flex-start; gap: 12px;">
+          <i data-lucide="info" style="color: var(--brand-burgundy); width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;"></i>
+          <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
+            <b>${isAr ? 'تنبيه أكاديمي موحد بالمحاضرات النظرية:' : 'Academic Lecture Guidelines:'}</b>
+            ${isAr 
+              ? 'تُعقد كافة المحاضرات النظرية الموحدة في <b>مدرج 2</b> من السبت إلى الخميس (8:00 ص – 12:00 م). الحضور إلزامي بنسبة لا تقل عن 75% لدخول الامتحانات النهائية.' 
+              : 'All unified theoretical lectures take place in <b>Auditorium 2</b> Saturday through Thursday (8:00 AM – 12:00 PM). Minimum 75% attendance is required for exam entry.'}
+          </div>
+        </div>
+      `;
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  setupAcademicTabListeners(container, isAr) {
+    container.querySelectorAll('[data-academic-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-academic-tab');
+        ExamsPage.academicTab = tab;
+        localStorage.setItem('kf_academic_active_tab', tab);
+        container.querySelectorAll('[data-academic-tab]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ExamsPage.renderAcademicTabContent(isAr);
+      });
+    });
+  },
+
   renderTheoryTableView(isAr) {
-    const title = isAr ? 'جدول المحاضرات النظري الأسبوعي — السنة الثالثة 2026 / 2027' : 'Weekly Theory Lectures Timetable — Year 3 (2026 / 2027)';
-    const subtitle = isAr ? 'المواعيد الأسبوعية المعتمدة للمحاضرات النظرية بقاعات ومدرجات كلية طب وجراحة الفم والأسنان' : 'Official weekly timetable for theoretical lectures across main faculty auditoriums';
+    const title = isAr ? 'جدول المحاضرات النظري الأسبوعي — مدرج 2 (2026 / 2027)' : 'Weekly Theory Lectures Timetable — Auditorium 2 (2026 / 2027)';
+    const subtitle = isAr ? 'المواعيد الأسبوعية المعتمدة للمحاضرات النظرية بمدرج 2 بكلية طب وجراحة الفم والأسنان' : 'Official weekly timetable for theoretical lectures in Auditorium 2';
     const scheduleDays = ExamsPage.theoryScheduleDays;
 
     return `
@@ -227,92 +281,6 @@ const ExamsPage = {
     `;
   },
 
-  // =========================================================================
-  // 2. DEDICATED ROUTE: #/practical-schedule (Practical & Clinical Subgroups A1–E2)
-  // =========================================================================
-  renderPracticalSchedule(container, queryParams) {
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-
-    if (queryParams?.get('group')) {
-      ExamsPage.setSelectedGroup(queryParams.get('group'));
-    }
-
-    container.innerHTML = `
-      <!-- Page Header -->
-      <div class="exams-page-header">
-        <div class="page-title-group">
-          <h1>
-            <i data-lucide="microscope" style="color: #10B981; width: 28px; height: 28px;"></i>
-            ${isAr ? 'جدول المعامل والعيادات العملي والسريري' : 'Clinical & Practical Phantom Lab Schedule'}
-          </h1>
-          <p>${isAr ? 'مواعيد معامل الفانتوم والعيادات السريرية للمجموعات الفرعية الـ 10 (A1 إلى E2) — كلية طب وجراحة الفم والأسنان' : 'Phantom lab and clinical appointments for the 10 student subgroups (A1 to E2) — Faculty of Dentistry'}</p>
-        </div>
-
-        <div class="exams-header-actions no-print">
-          <!-- Direct Links to Other Schedules -->
-          <a href="#/lecture-schedule" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
-            <i data-lucide="book-open" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'جدول المحاضرات النظري' : 'Theory Lectures'}</span>
-          </a>
-          <a href="#/exams" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
-            <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'جدول الامتحانات الرسمية' : 'Official Exams'}</span>
-          </a>
-
-          <!-- View Toggle -->
-          <div class="exams-view-toggle">
-            <button id="btn-practical-table" class="view-toggle-btn ${ExamsPage.practicalViewMode === 'table' ? 'active' : ''}" title="${isAr ? 'عرض جدول أسبوعي' : 'Table View'}">
-              <i data-lucide="table"></i>
-              <span>${isAr ? 'جدول' : 'Table'}</span>
-            </button>
-            <button id="btn-practical-timeline" class="view-toggle-btn ${ExamsPage.practicalViewMode === 'timeline' ? 'active' : ''}" title="${isAr ? 'عرض بطاقات يومية' : 'Cards View'}">
-              <i data-lucide="clock"></i>
-              <span>${isAr ? 'بطاقات' : 'Cards'}</span>
-            </button>
-          </div>
-
-          <!-- Print / Save as PDF Button -->
-          <button id="btn-print-schedule" class="btn btn-primary btn-print-schedule">
-            <i data-lucide="printer"></i>
-            <span>${isAr ? 'طباعة / حفظ PDF' : 'Print / Save PDF'}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Active Content Container -->
-      <div id="practical-content-area" class="exams-content-area">
-        ${ExamsPage.renderPracticalView(isAr)}
-      </div>
-    `;
-
-    ExamsPage.setupPracticalListeners(isAr);
-    ExamsPage.attachPrintHandler(container);
-
-    // Practical view toggle listeners
-    const tableBtn = document.getElementById('btn-practical-table');
-    const timelineBtn = document.getElementById('btn-practical-timeline');
-    if (tableBtn && timelineBtn) {
-      tableBtn.addEventListener('click', () => {
-        ExamsPage.practicalViewMode = 'table';
-        tableBtn.classList.add('active');
-        timelineBtn.classList.remove('active');
-        const area = document.getElementById('practical-content-area');
-        if (area) area.innerHTML = ExamsPage.renderPracticalView(isAr);
-        ExamsPage.setupPracticalListeners(isAr);
-      });
-      timelineBtn.addEventListener('click', () => {
-        ExamsPage.practicalViewMode = 'timeline';
-        timelineBtn.classList.add('active');
-        tableBtn.classList.remove('active');
-        const area = document.getElementById('practical-content-area');
-        if (area) area.innerHTML = ExamsPage.renderPracticalView(isAr);
-        ExamsPage.setupPracticalListeners(isAr);
-      });
-    }
-
-    if (window.lucide) window.lucide.createIcons();
-  },
-
   renderPracticalView(isAr) {
     const selectedGroup = ExamsPage.getSelectedGroup();
     const allGroups = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2', 'E1', 'E2'];
@@ -374,96 +342,39 @@ const ExamsPage = {
         </p>
       </div>
 
-      <!-- Schedule Table or Cards View -->
-      ${isTableView ? `
-        <div class="exams-table-card card clinical-table-card">
-          <div class="table-card-header">
-            <div>
-              <h2>${isAr ? `جدول عيادات ومعامل المجموعة (${selectedGroup}) — السنة الثالثة` : `Clinical & Lab Schedule — Group (${selectedGroup}) • Year 3`}</h2>
-              <p>${isAr ? 'جامعة طرابلس • كلية طب وجراحة الفم والأسنان • العام الجامعي 2026 - 2027' : 'University of Tripoli • Faculty of Dentistry • Academic Year 2026 - 2027'}</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="badge badge-primary" style="font-size: 0.8rem; padding: 4px 12px;">${isAr ? `المجموعة: ${selectedGroup}` : `Group: ${selectedGroup}`}</span>
-              <div class="print-watermark" style="font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.9);">
-                KURO FANGS • CLINICAL
-              </div>
-            </div>
+      <!-- Schedule Table View -->
+      <div class="exams-table-card card clinical-table-card">
+        <div class="table-card-header">
+          <div>
+            <h2>${isAr ? `جدول عيادات ومعامل المجموعة (${selectedGroup}) — السنة الثالثة` : `Clinical & Lab Schedule — Group (${selectedGroup}) • Year 3`}</h2>
+            <p>${isAr ? 'جامعة طرابلس • كلية طب وجراحة الفم والأسنان • العام الجامعي 2026 - 2027' : 'University of Tripoli • Faculty of Dentistry • Academic Year 2026 - 2027'}</p>
           </div>
-
-          <div class="table-responsive">
-            <table class="academia-exam-table clinical-grid-table">
-              <thead>
-                <tr>
-                  <th style="width: 140px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
-                  <th style="width: 43%;">${isAr ? 'الفترة الأولى (12:00 م – 1:00 م)' : 'First Slot (12:00 PM – 1:00 PM)'}</th>
-                  <th style="width: 43%;">${isAr ? 'الفترة الثانية (1:00 م – 2:00 م)' : 'Second Slot (1:00 PM – 2:00 PM)'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${weekdays.map(w => {
-                  const daySessions = dayMap[w.ar] || [];
-                  const s1 = daySessions.find(s => s.time_ar && s.time_ar.includes('12:00')) || daySessions[0];
-                  const s2 = daySessions.find(s => s.time_ar && s.time_ar.includes('1:00') && s !== s1) || daySessions[1];
-
-                  const renderSlot = (s) => {
-                    if (!s) return `<div style="color: var(--text-muted); font-size: 0.8rem; padding: 12px; text-align: center;">${isAr ? 'فترة راحة' : 'Free Slot'}</div>`;
-                    return `
-                      <div class="clinical-slot-card" style="border-left: 4px solid ${s.color}; background: ${s.bg};">
-                        <div class="clinical-slot-header">
-                          <span class="clinical-code-badge" style="background: ${s.color}; color: #FFFFFF;">${s.code}</span>
-                          <span class="clinical-time-tag">${isAr ? s.time_ar : s.time_en}</span>
-                        </div>
-                        <div class="clinical-course-title">
-                          ${isAr ? s.course_ar : s.course_en}
-                        </div>
-                        <div class="clinical-course-sub">
-                          ${isAr ? s.course_en : s.course_ar}
-                        </div>
-                        <div class="clinical-place-tag">
-                          <i data-lucide="map-pin" style="width: 13px; height: 13px; color: ${s.color};"></i>
-                          <span>${isAr ? s.place_ar : s.place_en}</span>
-                        </div>
-                      </div>
-                    `;
-                  };
-
-                  return `
-                    <tr>
-                      <td class="clinical-day-header-cell">
-                        <div class="day-header-content">
-                          <span class="day-name-main">${isAr ? w.ar : w.en}</span>
-                          <span class="day-name-sub">${isAr ? w.en : w.ar}</span>
-                        </div>
-                      </td>
-                      <td>${renderSlot(s1)}</td>
-                      <td>${renderSlot(s2)}</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="badge badge-primary" style="font-size: 0.8rem; padding: 4px 12px;">${isAr ? `المجموعة: ${selectedGroup}` : `Group: ${selectedGroup}`}</span>
+            <div class="print-watermark" style="font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.9);">
+              KURO FANGS • CLINICAL
+            </div>
           </div>
         </div>
-      ` : `
-        <!-- Timeline / Day-by-Day Cards View -->
-        <div class="clinical-days-stack">
-          ${weekdays.map(w => {
-            const daySessions = dayMap[w.ar] || [];
-            return `
-              <div class="clinical-day-card">
-                <div class="clinical-day-card-header">
-                  <div class="day-badge-title">
-                    <i data-lucide="calendar" style="width: 20px; height: 20px; color: var(--brand-primary);"></i>
-                    <span>${isAr ? w.ar : w.en}</span>
-                    <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">(${isAr ? w.en : w.ar})</span>
-                  </div>
-                  <div class="day-theory-hint">
-                    ${isAr ? 'المحاضرات النظرية: 8:00 ص – 12:00 م (مدرجات الكلية)' : 'Theory Lectures: 8:00 AM – 12:00 PM (Faculty Halls)'}
-                  </div>
-                </div>
 
-                <div class="day-sessions-grid">
-                  ${daySessions.map(s => `
+        <div class="table-responsive">
+          <table class="academia-exam-table clinical-grid-table">
+            <thead>
+              <tr>
+                <th style="width: 140px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
+                <th style="width: 43%;">${isAr ? 'الفترة الأولى (12:00 م – 1:00 م)' : 'First Slot (12:00 PM – 1:00 PM)'}</th>
+                <th style="width: 43%;">${isAr ? 'الفترة الثانية (1:00 م – 2:00 م)' : 'Second Slot (1:00 PM – 2:00 PM)'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${weekdays.map(w => {
+                const daySessions = dayMap[w.ar] || [];
+                const s1 = daySessions.find(s => s.time_ar && s.time_ar.includes('12:00')) || daySessions[0];
+                const s2 = daySessions.find(s => s.time_ar && s.time_ar.includes('1:00') && s !== s1) || daySessions[1];
+
+                const renderSlot = (s) => {
+                  if (!s) return `<div style="color: var(--text-muted); font-size: 0.8rem; padding: 12px; text-align: center;">${isAr ? 'فترة راحة' : 'Free Slot'}</div>`;
+                  return `
                     <div class="clinical-slot-card" style="border-left: 4px solid ${s.color}; background: ${s.bg};">
                       <div class="clinical-slot-header">
                         <span class="clinical-code-badge" style="background: ${s.color}; color: #FFFFFF;">${s.code}</span>
@@ -480,13 +391,26 @@ const ExamsPage = {
                         <span>${isAr ? s.place_ar : s.place_en}</span>
                       </div>
                     </div>
-                  `).join('')}
-                </div>
-              </div>
-            `;
-          }).join('')}
+                  `;
+                };
+
+                return `
+                  <tr>
+                    <td class="clinical-day-header-cell">
+                      <div class="day-header-content">
+                        <span class="day-name-main">${isAr ? w.ar : w.en}</span>
+                        <span class="day-name-sub">${isAr ? w.en : w.ar}</span>
+                      </div>
+                    </td>
+                    <td>${renderSlot(s1)}</td>
+                    <td>${renderSlot(s2)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
         </div>
-      `}
+      </div>
 
       <!-- Bottom Academic Notice -->
       <div class="card no-print" style="padding: 16px 20px; border-radius: 12px; margin-top: 18px; background: var(--bg-hover); border: 1px dashed var(--border-card); display: flex; align-items: flex-start; gap: 12px;">
@@ -494,15 +418,15 @@ const ExamsPage = {
         <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
           <b>${isAr ? 'تنبيه أكاديمي موحد:' : 'Academic Schedule Guidelines:'}</b>
           ${isAr 
-            ? 'المحاضرات النظرية الموحدة لجميع المجموعات تُعقد صباحاً في مدرجات الكلية (8:00 ص – 12:00 م). تبدأ المعامل والعيادات العملية الخاصة بمجموعتك فوراً في تمام الساعة 12:00 ظهراً.' 
-            : 'Unified theoretical lectures for all groups take place in faculty auditoriums (8:00 AM – 12:00 PM). Clinical and lab sessions for your assigned group begin promptly at 12:00 PM.'}
+            ? 'تبدأ المعامل والعيادات العملية الخاصة بمجموعتك فوراً في تمام الساعة 12:00 ظهراً بعد انتهاء المحاضرات النظرية الصباحية بمدرج 2.' 
+            : 'Clinical and lab sessions for your assigned group begin promptly at 12:00 PM following the morning theoretical lectures in Auditorium 2.'}
         </div>
       </div>
     `;
   },
 
   setupPracticalListeners(isAr) {
-    const contentArea = document.getElementById('practical-content-area');
+    const contentArea = document.getElementById('academic-content-area');
     if (!contentArea) return;
 
     contentArea.querySelectorAll('.btn-group-chip').forEach(btn => {
@@ -526,7 +450,7 @@ const ExamsPage = {
   },
 
   // =========================================================================
-  // 3. DEDICATED ROUTE: #/exams (Official Midterm & Final Exams with Countdown)
+  // SECTION 2: OFFICIAL EXAM SCHEDULES (Midterm & Final)
   // =========================================================================
   renderExamsSchedule(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
@@ -544,20 +468,16 @@ const ExamsPage = {
         <div class="page-title-group">
           <h1>
             <i data-lucide="calendar" style="color: var(--brand-burgundy); width: 28px; height: 28px;"></i>
-            ${isAr ? 'جدول الامتحانات الرسمية (النصفي والنهائي)' : 'Official Examination Timetables'}
+            ${isAr ? 'جداول الامتحانات الرسمية' : 'Official Examination Timetables'}
           </h1>
-          <p>${isAr ? 'مواعيد امتحانات النظري النصفي والنهائي مع عداد الأيام التنازلي — السنة الثالثة (2026 - 2027)' : 'Official Midterm and Final theory examination timetables with live days countdown — Year 3 (2026 - 2027)'}</p>
+          <p>${isAr ? 'مواعيد امتحانات النظري النصفي (12 مادة) والنهائي (3 مواد) مع عداد الأيام التنازلي وتصدير PDF — السنة الثالثة' : 'Official Midterm (12 subjects) & Final (3 subjects) theory examination timetables with live days countdown & PDF export'}</p>
         </div>
 
         <div class="exams-header-actions no-print">
-          <!-- Direct Links to Other Schedules -->
+          <!-- Link to Section 1: Academic Schedules -->
           <a href="#/lecture-schedule" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
             <i data-lucide="book-open" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'جدول المحاضرات النظري' : 'Theory Lectures'}</span>
-          </a>
-          <a href="#/practical-schedule" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
-            <i data-lucide="microscope" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'جدول المعامل والعملي (A1-E2)' : 'Clinical & Labs (A1-E2)'}</span>
+            <span>${isAr ? 'الجداول الدراسية (نظري وعملي)' : 'Academic Schedules'}</span>
           </a>
 
           <!-- View Toggle -->
@@ -580,7 +500,7 @@ const ExamsPage = {
         </div>
       </div>
 
-      <!-- Exam Dedicated Tabs Bar -->
+      <!-- Exam Sub-Tabs Bar -->
       <div class="schedule-tabs-bar no-print">
         <button class="schedule-tab-btn ${ExamsPage.examTab === 'midterm' ? 'active' : ''}" data-exam-tab="midterm">
           <i data-lucide="file-text"></i>
@@ -900,16 +820,26 @@ const ExamsPage = {
     }
   },
 
+  // Aliases for compatibility
+  renderLectureSchedule(container, queryParams) {
+    return ExamsPage.renderAcademicSchedules(container, queryParams);
+  },
+
+  renderPracticalSchedule(container, queryParams) {
+    ExamsPage.academicTab = 'practical';
+    return ExamsPage.renderAcademicSchedules(container, queryParams);
+  },
+
   // Fallback general render function
   render(container, queryParams) {
     const hash = window.location.hash || '';
-    if (hash.includes('/lecture-schedule')) {
-      return ExamsPage.renderLectureSchedule(container, queryParams);
+    if (hash.includes('/exams') || hash.includes('/calculator')) {
+      return ExamsPage.renderExamsSchedule(container, queryParams);
     }
     if (hash.includes('/practical-schedule')) {
-      return ExamsPage.renderPracticalSchedule(container, queryParams);
+      ExamsPage.academicTab = 'practical';
     }
-    return ExamsPage.renderExamsSchedule(container, queryParams);
+    return ExamsPage.renderAcademicSchedules(container, queryParams);
   }
 };
 
