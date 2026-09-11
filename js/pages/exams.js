@@ -415,9 +415,20 @@ const ExamsPage = {
     const printBtn = document.getElementById('btn-print-schedule');
     if (printBtn) {
       printBtn.addEventListener('click', () => {
-        window.showToast(isAr ? 'جاري تجهيز وثيقة الجدول للطباعة والحفظ...' : 'Preparing schedule document for print/PDF...', { type: 'info' });
+        // Dismiss all active toasts and hide container immediately to avoid appearing in preview
+        if (typeof window.clearToasts === 'function') {
+          window.clearToasts();
+        }
+        const container = document.getElementById('toast-container');
+        if (container) {
+          container.style.display = 'none';
+        }
         setTimeout(() => {
           window.print();
+          // Restore toast container display after print dialog
+          setTimeout(() => {
+            if (container) container.style.display = '';
+          }, 500);
         }, 300);
       });
     }

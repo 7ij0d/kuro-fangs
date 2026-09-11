@@ -92,9 +92,18 @@
     }, 300);
   }
 
+  function dismissAll() {
+    if (toastContainer) {
+      toastContainer.innerHTML = '';
+    }
+  }
+
+  window.clearToasts = dismissAll;
   window.showToast = showToast;
   window.Toast = {
     show: showToast,
+    dismissAll: dismissAll,
+    clear: dismissAll,
     success: (msg, pts) => showToast(msg, { type: 'success', points: pts }),
     info: (msg) => showToast(msg, { type: 'info' }),
     warning: (msg) => showToast(msg, { type: 'warning' }),

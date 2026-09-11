@@ -1968,33 +1968,46 @@ html[dir="ltr"] .academia-exam-table {
    PRINT MEDIA RULES (One-Click Clean Print & PDF Export)
    ========================================================================== */
 @media print {
+  /* إخفاء الإشعارات العائمة نهائياً في الطباعة والـ PDF */
+  .toast,
+  .toast-container,
+  #toast-container,
+  .notification-toast,
+  .alert,
+  .sidebar,
+  .app-sidebar,
+  .topbar,
+  .site-header,
+  .app-header,
+  .bottom-nav,
+  .btn-print,
+  .btn-print-schedule,
+  .exams-header-actions,
+  .schedule-tabs-bar,
+  .no-print,
+  button {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* التأكد من عرض الجدول كاملاً بنقاء وبدون عوائق */
   body {
     background: #FFFFFF !important;
     color: #000000 !important;
   }
 
-  .app-sidebar,
-  .site-header,
-  .no-print,
-  .header-actions,
-  .exams-header-actions,
-  .schedule-tabs-bar {
-    display: none !important;
-  }
-
-  .app-main-wrapper {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
+  .app-main-wrapper,
   .main-content {
+    margin: 0 !important;
     padding: 0 !important;
     max-width: 100% !important;
   }
 
   .exams-table-card {
     box-shadow: none !important;
-    border: 1px solid #000000 !important;
+    border: 1px solid #CCCCCC !important;
+    background: #FFFFFF !important;
   }
 
   .table-card-header {
@@ -2002,6 +2015,11 @@ html[dir="ltr"] .academia-exam-table {
     color: #FFFFFF !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  .academia-exam-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
   }
 
   .academia-exam-table thead tr {
@@ -2015,8 +2033,16 @@ html[dir="ltr"] .academia-exam-table {
   .academia-exam-table th {
     border: 1px solid #CCCCCC !important;
     padding: 10px !important;
+    color: #000000 !important;
+    background: #FFFFFF !important;
+  }
+
+  .academia-exam-table th {
+    background: #0B3B36 !important;
+    color: #FFFFFF !important;
   }
 }
+
 
 /* ==========================================================================
    MODERN 16PX SHEET CARDS & DUAL ACTION BUTTONS
