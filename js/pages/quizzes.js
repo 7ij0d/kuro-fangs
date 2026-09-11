@@ -4,60 +4,34 @@
 
 const QuizzesPage = {
   render(container) {
-    const questions = [
-      {
-        id: 'q-1',
-        subject: 'جراحة الفم والفكين 1',
-        question: 'ما هو التخدير الموضعي الأنسب لمريض يعاني من اضطراب خفقان القلب؟',
-        options: [
-          'Lidocaine 2% with Epinephrine 1:80,000',
-          'Mepivacaine 3% plain (بدون مقبض وعائي)',
-          'Articaine 4% with Epinephrine 1:100,000',
-          'Bupivacaine 0.5% with Epinephrine 1:200,000'
-        ],
-        correct: 1,
-        explanation: 'في مرضى عدم انتظام ضربات القلب وارتفاع الضغط غير المستقر، يفضل تجنب الإبينفرين واستخدام Mepivacaine 3% plain.'
-      },
-      {
-        id: 'q-2',
-        subject: 'الاستعاضة السنية الثابتة 2',
-        question: 'ما هو نوع خط الإنهاء (Finish Line) الموصى به لتحضير التيجان الخزفية الكاملة (All-Ceramic Crown)؟',
-        options: [
-          'Knife edge',
-          'Feather edge',
-          'Deep Chamfer or Rounded Shoulder',
-          'Bevel shoulder'
-        ],
-        correct: 2,
-        explanation: 'الخزف الكامل يحتاج إلى دعم حواف كافٍ وتوزيع إجهادات متساوٍ، لذلك يتطلب Deep Chamfer أو Rounded Shoulder 90 درجة مع زوايا دائرية.'
-      },
-      {
-        id: 'q-3',
-        subject: 'علاج لب الأسنان 1',
-        question: 'أي من المحاليل التالية هو المعيار الذهبي (Gold Standard) لإرواء وتطهير القنوات الجذرية؟',
-        options: [
-          'Sodium Hypochlorite (NaOCl 2.5% - 5.25%)',
-          'Normal Saline 0.9%',
-          'Hydrogen Peroxide 3%',
-          'EDTA 17% فقط'
-        ],
-        correct: 0,
-        explanation: 'محلول هيبوكلوريت الصوديوم هو المحلول الوحيد القادر على إذابة الأنسجة اللبية العضوية والتعقيم الفعال ضد البكتيريا داخل القنوات.'
-      },
-      {
-        id: 'q-4',
-        subject: 'علم أمراض الفم',
-        question: 'أي من الآفات التالية تتميز بصورة شعاعية تشبه "فقاعات الصابون" (Soap Bubble appearance)؟',
-        options: [
-          'Radicular cyst',
-          'Ameloblastoma',
-          'Dentigerous cyst',
-          'Periapical granuloma'
-        ],
-        correct: 1,
-        explanation: 'الورم الأرومي المينائي (Ameloblastoma) متعدد الحجيرات يظهر كـ Multilocular radiolucency ذات مظهر Soap bubble أو Honeycomb.'
-      }
-    ];
+    const questions = window.DATA?.questions || [];
+
+    if (questions.length === 0) {
+      container.innerHTML = `
+        <div class="page-title-bar">
+          <div class="page-title-group">
+            <h1>
+              <i data-lucide="file-check-2" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
+              الامتحانات والكويزات التفاعلية
+            </h1>
+            <p>اختبر معلوماتك في مقررات طب الأسنان وتدرب على أسئلة الامتحانات النصفية والنهائية</p>
+          </div>
+        </div>
+        ${window.renderEmptyState
+          ? window.renderEmptyState()
+          : `
+            <div class="empty-state-card">
+              <div class="empty-state-icon-wrap">
+                <i data-lucide="folder-open"></i>
+              </div>
+              <h3 class="empty-state-title">لا توجد محتويات مضافة حالياً</h3>
+              <p class="empty-state-subtitle">جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً</p>
+            </div>
+          `}
+      `;
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
 
     let userAnswers = {};
     let submitted = false;

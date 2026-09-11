@@ -11,20 +11,7 @@ const SecondaryPages = {
     const targetSubject = queryParams?.get('subject') || 'all';
     let currentFilter = targetSubject;
 
-    const baseSummaries = [
-      { id: 'sum-1', subject_id: 'omfs', title_ar: 'ملخص شامل في أدوية التخدير الموضعي وحساب الجرعات القصوى', title_en: 'Comprehensive Local Anesthesia & Maximum Dosage Calculations', subject_ar: 'جراحة الفم والفكين', subject_en: 'Oral Surgery', author: 'Dr. Youssef', pages: 8 },
-      { id: 'sum-2', subject_id: 'fixed-pros', title_ar: 'مذكرة مبادئ تحضير الأسنان وخطوط الإنهاء Chamfer & Shoulder', title_en: 'Tooth Preparation Principles & Finish Lines Guide', subject_ar: 'التركيبات الثابتة', subject_en: 'Fixed Pros', author: 'Dr. Nadia', pages: 12 },
-      { id: 'sum-3', subject_id: 'endo', title_ar: 'مخطط شجري لتشخيص وعلاج أمراض اللب الحادة والمزمنة', title_en: 'Diagnostic Decision Tree: Acute & Chronic Pulpal Pathologies', subject_ar: 'علاج العصب', subject_en: 'Endodontics', author: 'Dr. Khaled', pages: 6 },
-      { id: 'sum-4', subject_id: 'oral-diseases', title_ar: 'جدول المقارنة الشامل للأورام السنية الحميدة والخبيثة', title_en: 'High-Yield Odontogenic Tumors & Cysts Comparison Table', subject_ar: 'علم أمراض الفم', subject_en: 'Oral Pathology', author: 'Faculty Board', pages: 15 },
-      { id: 'sum-5', subject_id: 'gen-med', title_ar: 'دليل أمراض الغدد الصماء والقلب وتدابيرها في عيادة الأسنان', title_en: 'Endocrine & Cardiovascular Management in Dental Clinic', subject_ar: 'الطب العام', subject_en: 'General Medicine', author: 'Dr. Tarek', pages: 10 },
-      { id: 'sum-6', subject_id: 'gen-surgery', title_ar: 'ملخص بروتوكولات التعقيم وتدبير الصدمات والنزيف الجراحي', title_en: 'Surgical Asepsis, Hemostasis & Shock Management Protocol', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery', author: 'Dr. Mahmoud', pages: 9 },
-      { id: 'sum-7', subject_id: 'omdr', title_ar: 'مذكرة قراءة صور البانوراما وتحديد الآفات العظمية الفكية', title_en: 'Panoramic Radiograph Interpretation & Jaw Lesions', subject_ar: 'أشعة وتشخيص الفم', subject_en: 'OMDR', author: 'Dr. Omar', pages: 14 },
-      { id: 'sum-8', subject_id: 'preventive', title_ar: 'مراجعة آليات تأثير الفلورايد وتطبيق المواد السادة للشقوق', title_en: 'Fluoride Mechanisms, Pit & Fissure Sealants Review', subject_ar: 'طب الأسنان الوقائي', subject_en: 'Preventive Dentistry', author: 'Faculty Board', pages: 7 },
-      { id: 'sum-9', subject_id: 'cons-endo', title_ar: 'دليل اختيار أنظمة الترابط العاجي وحشوات الكومبوزيت الخلفية', title_en: 'Dentin Bonding Systems & Posterior Composites Guide', subject_ar: 'العلاج التحفظي', subject_en: 'Cons & Endo', author: 'Dr. Sara', pages: 11 },
-      { id: 'sum-10', subject_id: 'ortho', title_ar: 'ملخص تصنيف إنجل لسوء الإطباق وتحليل قياسات الرأس السيفالومترية', title_en: 'Angle Malocclusion Classification & Cephalometrics Summary', subject_ar: 'تقويم الأسنان', subject_en: 'Orthodontics', author: 'Dr. Amira', pages: 8 },
-      { id: 'sum-11', subject_id: 'pediatric', title_ar: 'بروتوكول بتر لب الأسنان اللبنية والتعامل السلوكي مع الأطفال', title_en: 'Pediatric Pulpotomy Protocols & Behavior Management', subject_ar: 'طب أسنان الأطفال', subject_en: 'Pediatric Dentistry', author: 'Dr. Laila', pages: 9 },
-      { id: 'sum-12', subject_id: 'removable-pros', title_ar: 'أساسيات تصميم هياكل الكروم كوبالت ومحددات المسار الإدخالي', title_en: 'Cobalt-Chromium RPD Framework Design & Surveying Principles', subject_ar: 'الاستعاضة المتحركة', subject_en: 'Removable Pros', author: 'Dr. Nader', pages: 13 }
-    ];
+    const baseSummaries = window.DATA?.summaries || [];
 
     const renderList = () => {
       const filtered = currentFilter === 'all'
@@ -36,9 +23,18 @@ const SecondaryPages = {
 
       if (filtered.length === 0) {
         gridEl.innerHTML = `
-          <div class="card" style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-muted);">
-            <i data-lucide="file-text" style="width: 36px; height: 36px; margin-bottom: 10px; opacity: 0.5;"></i>
-            <p>${isAr ? 'لا توجد ملخصات حالياً لهذه المادة.' : 'No summaries found for this subject.'}</p>
+          <div style="grid-column: 1 / -1;">
+            ${window.renderEmptyState
+              ? window.renderEmptyState()
+              : `
+                <div class="empty-state-card">
+                  <div class="empty-state-icon-wrap">
+                    <i data-lucide="folder-open"></i>
+                  </div>
+                  <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+                  <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
+                </div>
+              `}
           </div>
         `;
         if (window.lucide) window.lucide.createIcons();
@@ -120,16 +116,7 @@ const SecondaryPages = {
     const targetSubject = queryParams?.get('subject') || 'all';
     let currentFilter = targetSubject;
 
-    const baseVideos = [
-      { id: 'vid-1', subject_id: 'omfs', title_ar: 'شرح عملي: خطوات التخدير الحنكي والإحصار السنخي السفلي (IDB)', title_en: 'Clinical Demo: Inferior Alveolar Nerve Block & Palatal Infiltration', doctor: 'د. يوسف التاجوري', duration: '42 min', subject_ar: 'جراحة الفم والفكين', subject_en: 'Oral Surgery' },
-      { id: 'vid-2', subject_id: 'fixed-pros', title_ar: 'تطبيق عملي: تحضير تاج كامل من الخزف المعدني (PFM Preparation)', title_en: 'Hands-on: Full Porcelain-Fused-to-Metal Crown Preparation', doctor: 'د. نادية عبدالحميد', duration: '35 min', subject_ar: 'التركيبات الثابتة', subject_en: 'Fixed Pros' },
-      { id: 'vid-3', subject_id: 'endo', title_ar: 'تحديد الطول العامل واستخدام محدد الذروة (Apex Locator Guide)', title_en: 'Electronic Apex Locator Protocols & Working Length Determination', doctor: 'د. خالد الصالح', duration: '28 min', subject_ar: 'علاج العصب', subject_en: 'Endodontics' },
-      { id: 'vid-4', subject_id: 'omdr', title_ar: 'قراءة وتحليل صور الأشعة البانورامية وCBCT في عيادة الأسنان', title_en: 'Interpreting Panoramic & CBCT Imaging in Dental Practice', doctor: 'د. عمر القاضي', duration: '50 min', subject_ar: 'أشعة وتشخيص الفم', subject_en: 'OMDR' },
-      { id: 'vid-5', subject_id: 'oral-diseases', title_ar: 'الفحص السريري لآفات الفم المخاطية والتشخيص التفريقي', title_en: 'Clinical Examination of Oral Mucosa & Differential Diagnosis', doctor: 'د. أحمد سمير', duration: '38 min', subject_ar: 'علم أمراض الفم', subject_en: 'Oral Pathology' },
-      { id: 'vid-6', subject_id: 'gen-surgery', title_ar: 'مبادئ خياطة الجروح الجراحية واستخدام أدوات الشق والإمساك', title_en: 'Suturing Techniques & Surgical Flap Management', doctor: 'د. محمود حسن', duration: '30 min', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery' },
-      { id: 'vid-7', subject_id: 'cons-endo', title_ar: 'عزل الأسنان بواسطة الحاجز المطاطي (Rubber Dam Application)', title_en: 'Rubber Dam Isolation Techniques & Clamp Placement', doctor: 'د. سارة المنفي', duration: '25 min', subject_ar: 'العلاج التحفظي', subject_en: 'Cons & Endo' },
-      { id: 'vid-8', subject_id: 'pediatric', title_ar: 'خطوات تخدير الأطفال السطحي وتقنيات الإلهاء السلوكي', title_en: 'Pediatric Behavior Management & Local Anesthesia', doctor: 'د. ليلى فوزي', duration: '32 min', subject_ar: 'طب أسنان الأطفال', subject_en: 'Pediatric Dentistry' }
-    ];
+    const baseVideos = window.DATA?.videos || [];
 
     const renderList = () => {
       const filtered = currentFilter === 'all'
@@ -141,9 +128,18 @@ const SecondaryPages = {
 
       if (filtered.length === 0) {
         gridEl.innerHTML = `
-          <div class="card" style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-muted);">
-            <i data-lucide="video" style="width: 36px; height: 36px; margin-bottom: 10px; opacity: 0.5;"></i>
-            <p>${isAr ? 'لا توجد تسجيلات فيديو حالياً لهذه المادة.' : 'No clinical videos available for this subject.'}</p>
+          <div style="grid-column: 1 / -1;">
+            ${window.renderEmptyState
+              ? window.renderEmptyState()
+              : `
+                <div class="empty-state-card">
+                  <div class="empty-state-icon-wrap">
+                    <i data-lucide="folder-open"></i>
+                  </div>
+                  <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+                  <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
+                </div>
+              `}
           </div>
         `;
         if (window.lucide) window.lucide.createIcons();
@@ -403,7 +399,19 @@ const SecondaryPages = {
       </div>
 
       <div class="compact-alerts-list">
-        ${alerts.map(a => `
+        ${alerts.length === 0 ? (
+          window.renderEmptyState
+            ? window.renderEmptyState()
+            : `
+              <div class="empty-state-card">
+                <div class="empty-state-icon-wrap">
+                  <i data-lucide="folder-open"></i>
+                </div>
+                <h3 class="empty-state-title">لا توجد محتويات مضافة حالياً</h3>
+                <p class="empty-state-subtitle">جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً</p>
+              </div>
+            `
+        ) : alerts.map(a => `
           <div class="compact-alert-card ${a.type === 'urgent' ? 'alert-urgent' : 'alert-warning'}">
             <div class="alert-left-content">
               <div class="alert-icon-pill ${a.type === 'urgent' ? 'badge-danger' : 'badge-warning'}">
@@ -421,6 +429,8 @@ const SecondaryPages = {
         `).join('')}
       </div>
     `;
+
+    if (window.lucide) window.lucide.createIcons();
   },
 
   // Search

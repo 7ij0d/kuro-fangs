@@ -13,6 +13,9 @@ class DataService {
     this.flashcards = [];
     this.previousExams = [];
     this.requirements = [];
+    this.summaries = [];
+    this.videos = [];
+    this.notes = [];
     this.loaded = false;
 
     // Ultra-lightweight WebP cover banners (under ~25KB each, 600x337 at 75% quality)
@@ -108,11 +111,11 @@ class DataService {
       s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.webp`;
     });
 
-    if (!this.alerts || this.alerts.length === 0) {
-      this.alerts = this.getDefaultAlerts();
+    if (!this.alerts) {
+      this.alerts = [];
     }
-    if (!this.sheets || this.sheets.length === 0) {
-      this.sheets = this.getDefaultSheets();
+    if (!this.sheets) {
+      this.sheets = [];
     }
 
     this.loaded = true;
@@ -127,90 +130,17 @@ class DataService {
   }
 
   getSheetsBySubject(subjectId) {
-    return this.sheets.filter(s => s.subject_id === subjectId);
+    if (!subjectId) return this.sheets || [];
+    return (this.sheets || []).filter(s => s.subject_id === subjectId);
   }
 
   getSheetsForSubject(subjectId) {
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-    const subj = this.getSubjectById(subjectId) || this.subjects[0];
-    const existing = (this.sheets || []).filter(s => s.subject_id === subjectId);
-
-    const defaultLectures = [
-      {
-        num: 1,
-        title_ar: `محاضرة 1: مقدمة وأساسيات التشخيص في ${subj ? subj.name_ar : 'المقرر'}`,
-        title_en: `Lecture 1: Principles & Fundamentals of ${subj ? subj.name_en : 'Course'}`,
-        pages: 18,
-        size: '3.2 MB',
-        date: '2026-09-12',
-        doctor_ar: subj?.doctor_name_ar || 'د. طارق الزاوي',
-        doctor_en: subj?.doctor_name_en || 'Dr. Tarek Alzawi'
-      },
-      {
-        num: 2,
-        title_ar: `محاضرة 2: المعايير السريرية والتدبير العلاجي المتقدم`,
-        title_en: `Lecture 2: Advanced Clinical Criteria & Management`,
-        pages: 22,
-        size: '4.1 MB',
-        date: '2026-09-16',
-        doctor_ar: subj?.doctor_name_ar || 'د. طارق الزاوي',
-        doctor_en: subj?.doctor_name_en || 'Dr. Tarek Alzawi'
-      },
-      {
-        num: 3,
-        title_ar: `محاضرة 3: الأدوات الجراحية والتطبيقات المعملية المعتمدة`,
-        title_en: `Lecture 3: Armamentarium, Techniques & Clinical Protocols`,
-        pages: 16,
-        size: '2.8 MB',
-        date: '2026-09-20',
-        doctor_ar: subj?.doctor_name_ar || 'د. طارق الزاوي',
-        doctor_en: subj?.doctor_name_en || 'Dr. Tarek Alzawi'
-      },
-      {
-        num: 4,
-        title_ar: `محاضرة 4: الحالات السريرية المعقدة والاختلاطات الشائعة`,
-        title_en: `Lecture 4: Clinical Case Studies & Complication Management`,
-        pages: 20,
-        size: '3.6 MB',
-        date: '2026-09-25',
-        doctor_ar: subj?.doctor_name_ar || 'د. طارق الزاوي',
-        doctor_en: subj?.doctor_name_en || 'Dr. Tarek Alzawi'
-      }
-    ];
-
-    if (existing.length >= 3) {
-      return existing.map((item, idx) => ({
-        id: item.id || `sh-${subjectId}-${idx + 1}`,
-        subject_id: subjectId,
-        subject_name: isAr ? subj?.name_ar : subj?.name_en,
-        title: isAr ? (item.title_ar || item.title) : (item.title_en || item.title_ar || item.title),
-        title_ar: item.title_ar || item.title,
-        title_en: item.title_en || item.title,
-        doctor_name: isAr ? (subj?.doctor_name_ar || 'د. طارق الزاوي') : (subj?.doctor_name_en || 'Dr. Tarek Alzawi'),
-        date: item.date || `2026-09-${12 + idx * 4}`,
-        pages: item.pages || (16 + idx * 2),
-        size: item.size || `${(2.8 + idx * 0.6).toFixed(1)} MB`,
-        type: 'PDF Sheet'
-      }));
-    }
-
-    return defaultLectures.map(l => ({
-      id: `sheet-${subjectId}-${l.num}`,
-      subject_id: subjectId,
-      subject_name: isAr ? subj?.name_ar : subj?.name_en,
-      title: isAr ? l.title_ar : l.title_en,
-      title_ar: l.title_ar,
-      title_en: l.title_en,
-      doctor_name: isAr ? l.doctor_ar : l.doctor_en,
-      date: l.date,
-      pages: l.pages,
-      size: l.size,
-      type: 'PDF Sheet'
-    }));
+    if (!subjectId) return this.sheets || [];
+    return (this.sheets || []).filter(s => s.subject_id === subjectId);
   }
 
   getRecentSheets(limit = 6) {
-    return [...this.sheets].slice(0, limit);
+    return [...(this.sheets || [])].slice(0, limit);
   }
 
   getAlerts() {
@@ -426,22 +356,33 @@ class DataService {
   }
 
   getDefaultAlerts() {
-    return [
-      {
-        id: 'alt-1',
-        title: 'Midterm Exam Schedule: OMFS I',
-        message: 'Exam scheduled on Sunday Oct 25 at 10:00 AM in Main Lecture Hall.',
-        type: 'urgent',
-        created_at: '2 days ago'
-      }
-    ];
+    return [];
   }
 
   getDefaultSheets() {
-    return [
-      { id: 'sh-1', title: 'Local Anesthesia Techniques & Landmarks', subject_id: 'omfs', subject_name: 'Oral Surgery I', doctor_name: 'Dr. Youssef', date: '2026-09-09', type: 'Lecture Sheet', file_type: 'PDF' }
-    ];
+    return [];
   }
 }
 
 window.DATA = new DataService();
+
+/**
+ * Modern Empty State UI Helper
+ * Renders consistent empty state card across platform
+ */
+window.renderEmptyState = function(customTitle, customSubtitle, icon = 'folder-open') {
+  const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+  const title = customTitle || (isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet');
+  const subtitle = customSubtitle || (isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.');
+
+  return `
+    <div class="empty-state-card">
+      <div class="empty-state-icon-wrap">
+        <i data-lucide="${icon}"></i>
+      </div>
+      <h3 class="empty-state-title">${title}</h3>
+      <p class="empty-state-subtitle">${subtitle}</p>
+    </div>
+  `;
+};
+

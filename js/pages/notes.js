@@ -71,9 +71,18 @@ const NotesPage = {
       <!-- Notes Grid -->
       <div id="notes-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px;">
         ${filteredNotes.length === 0 ? `
-          <div class="card" style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-muted);">
-            <i data-lucide="edit-3" style="width: 36px; height: 36px; margin-bottom: 10px; opacity: 0.5;"></i>
-            <p>${isAr ? 'لا توجد ملاحظات مدونة لهذا الفلتر حالياً.' : 'No notes found for this category. Click "Add New Note" to write one.'}</p>
+          <div style="grid-column: 1 / -1;">
+            ${window.renderEmptyState
+              ? window.renderEmptyState()
+              : `
+                <div class="empty-state-card">
+                  <div class="empty-state-icon-wrap">
+                    <i data-lucide="folder-open"></i>
+                  </div>
+                  <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+                  <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
+                </div>
+              `}
           </div>
         ` : filteredNotes.map(n => {
           const sObj = subjects.find(s => s.id === n.subjectId);

@@ -1966,4 +1966,72 @@ html[dir="ltr"] .academia-exam-table {
   display: block;
 }
 
+/* ==========================================================================
+   MODERN EMPTY STATE COMPONENT (ACADEMIA SYSTEM)
+   ========================================================================== */
+.empty-state-card {
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-subtle, #E4E6EF);
+  border-radius: var(--radius-lg, 16px);
+  padding: 56px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 680px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  transition: all var(--transition-normal, 250ms ease);
+}
+
+.empty-state-card:hover {
+  border-color: rgba(139, 21, 56, 0.25);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
+}
+
+.empty-state-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(139, 21, 56, 0.06);
+  border: 1px solid rgba(139, 21, 56, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--brand-burgundy, #8B1538);
+  transition: transform var(--transition-normal, 250ms ease), background var(--transition-normal, 250ms ease);
+}
+
+.empty-state-card:hover .empty-state-icon-wrap {
+  transform: scale(1.08);
+  background: rgba(139, 21, 56, 0.1);
+}
+
+.empty-state-icon-wrap i,
+.empty-state-icon-wrap svg {
+  width: 32px;
+  height: 32px;
+  stroke-width: 1.75px;
+}
+
+.empty-state-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #181C32);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.empty-state-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted, #7E8299);
+  max-width: 440px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+
 

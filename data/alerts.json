@@ -1,46 +1,5 @@
 {
-  "alerts": [
-    {
-      "id": "a001",
-      "subject_id": "oral-diseases",
-      "doctor_id": "dr-ahmed",
-      "title_ar": "تنبيه هام — امتحان أمراض الفم",
-      "message_ar": "الامتحان النصفي سيشمل المحاضرات من 1 إلى 5. يرجى التركيز على مواضيع الالتهاب والتشخيص التفريقي للأورام.",
-      "severity": "exam",
-      "date": "2026-10-01",
-      "is_pinned": true
-    },
-    {
-      "id": "a002",
-      "subject_id": "gen-surgery",
-      "doctor_id": "dr-mahmoud",
-      "title_ar": "تغيير موعد محاضرة الجراحة العامة",
-      "message_ar": "تم تغيير موعد محاضرة الأسبوع القادم إلى الساعة 1:00 مساءً بدلاً من 11:00 صباحاً في المدرج الرئيسي.",
-      "severity": "warning",
-      "date": "2026-09-25",
-      "is_pinned": false
-    },
-    {
-      "id": "a003",
-      "subject_id": "gen-med",
-      "doctor_id": "dr-sara",
-      "title_ar": "ملاحظة هامة لمادة الطب العام",
-      "message_ar": "يجب على الطلاب مراجعة جميع الجداول والأدوية وحالات القلب ومرضى السكري قبل الامتحان، والتركيز على مضاعفات التخدير.",
-      "severity": "warning",
-      "date": "2026-09-20",
-      "is_pinned": true
-    },
-    {
-      "id": "a004",
-      "subject_id": "endo",
-      "doctor_id": "dr-khalid",
-      "title_ar": "معمل علاج العصب (Phantom Lab)",
-      "message_ar": "يرجى من جميع الطلبة إحضار الأسنان المقلوعة المستخرجة حديثاً والمحفوظة في الفورمالين لمعمل فتح حجرة العصب القادم.",
-      "severity": "info",
-      "date": "2026-09-22",
-      "is_pinned": true
-    }
-  ],
+  "alerts": [],
   "badges": [
     { "id": "b001", "emoji": "🔥", "name_ar": "مبدع",         "desc_ar": "حضرت 10 محاضرات متتالية",     "points": 100 },
     { "id": "b002", "emoji": "📚", "name_ar": "قارئ نهم",     "desc_ar": "فتحت 50 ملزمة",               "points": 50  },

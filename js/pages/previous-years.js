@@ -10,20 +10,7 @@ const PreviousYearsPage = {
     const targetSubject = queryParams?.get('subject') || 'all';
     let currentFilter = targetSubject;
 
-    const baseExams = [
-      { id: 'pe-1', subject_id: 'omfs', title_ar: 'امتحان جراحة الفم والفكين 1 — الدور الأول 2025', title_en: 'Oral Surgery I — Midterm Exam 2025', subject_ar: 'جراحة الفم والفكين', subject_en: 'Oral Surgery', type: 'midterm', year: '2024-2025', questions_count: 50 },
-      { id: 'pe-2', subject_id: 'fixed-pros', title_ar: 'امتحان الاستعاضة السنية الثابتة 2 — الدور النهائي 2025', title_en: 'Fixed Prosthodontics II — Final Exam 2025', subject_ar: 'التركيبات الثابتة', subject_en: 'Fixed Pros', type: 'final', year: '2024-2025', questions_count: 70 },
-      { id: 'pe-3', subject_id: 'endo', title_ar: 'امتحان علاج العصب 1 — الدور الأول 2024', title_en: 'Endodontics I — First Round 2024', subject_ar: 'علاج العصب', subject_en: 'Endodontics', type: 'midterm', year: '2023-2024', questions_count: 45 },
-      { id: 'pe-4', subject_id: 'oral-diseases', title_ar: 'امتحان علم أمراض الفم — الدور النهائي 2024', title_en: 'Oral Diseases / Pathology — Final Exam 2024', subject_ar: 'علم أمراض الفم', subject_en: 'Oral Pathology', type: 'final', year: '2023-2024', questions_count: 60 },
-      { id: 'pe-5', subject_id: 'gen-med', title_ar: 'امتحان الطب العام الباطني — الدور الأول 2024', title_en: 'General Medicine — Midterm Exam 2024', subject_ar: 'الطب العام', subject_en: 'General Medicine', type: 'midterm', year: '2023-2024', questions_count: 50 },
-      { id: 'pe-6', subject_id: 'gen-surgery', title_ar: 'امتحان الجراحة العامة — الدور النهائي 2024', title_en: 'General Surgery — Final Exam 2024', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery', type: 'final', year: '2023-2024', questions_count: 55 },
-      { id: 'pe-7', subject_id: 'omdr', title_ar: 'امتحان طب الفم والتشخيص والأشعة 1 — الدور الأول 2025', title_en: 'OMDR I — Midterm Exam 2025', subject_ar: 'تشخيص وأشعة الفم', subject_en: 'OMDR', type: 'midterm', year: '2024-2025', questions_count: 50 },
-      { id: 'pe-8', subject_id: 'preventive', title_ar: 'امتحان طب الأسنان الوقائي — الدور النهائي 2024', title_en: 'Preventive Dentistry — Final Exam 2024', subject_ar: 'طب الأسنان الوقائي', subject_en: 'Preventive Dentistry', type: 'final', year: '2023-2024', questions_count: 40 },
-      { id: 'pe-9', subject_id: 'cons-endo', title_ar: 'امتحان العلاج التحفظي 2 — الدور النهائي 2025', title_en: 'Cons & Endo II — Final Exam 2025', subject_ar: 'العلاج التحفظي', subject_en: 'Cons & Endo', type: 'final', year: '2024-2025', questions_count: 65 },
-      { id: 'pe-10', subject_id: 'ortho', title_ar: 'امتحان تقويم الأسنان 1 — الدور الأول 2025', title_en: 'Orthodontics I — Midterm Exam 2025', subject_ar: 'تقويم الأسنان', subject_en: 'Orthodontics', type: 'midterm', year: '2024-2025', questions_count: 45 },
-      { id: 'pe-11', subject_id: 'pediatric', title_ar: 'امتحان طب أسنان الأطفال 1 — الدور النهائي 2024', title_en: 'Pediatric Dentistry I — Final Exam 2024', subject_ar: 'طب أسنان الأطفال', subject_en: 'Pediatric Dentistry', type: 'final', year: '2023-2024', questions_count: 50 },
-      { id: 'pe-12', subject_id: 'removable-pros', title_ar: 'امتحان الاستعاضة السنية المتحركة 2 — الدور النهائي 2025', title_en: 'Removable Prosthodontics II — Final Exam 2025', subject_ar: 'الاستعاضة المتحركة', subject_en: 'Removable Pros', type: 'final', year: '2024-2025', questions_count: 60 }
-    ];
+    const baseExams = window.DATA?.previousExams || [];
 
     const renderList = () => {
       const filtered = currentFilter === 'all'
@@ -34,12 +21,17 @@ const PreviousYearsPage = {
       if (!listContainer) return;
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = `
-          <div class="card" style="padding: 40px; text-align: center; color: var(--text-muted);">
-            <i data-lucide="archive" style="width: 36px; height: 36px; margin-bottom: 10px; opacity: 0.5;"></i>
-            <p>${isAr ? 'لا توجد نماذج امتحانات حالياً لهذه المادة.' : 'No exam archives found for this subject.'}</p>
-          </div>
-        `;
+        listContainer.innerHTML = window.renderEmptyState
+          ? window.renderEmptyState()
+          : `
+            <div class="empty-state-card">
+              <div class="empty-state-icon-wrap">
+                <i data-lucide="folder-open"></i>
+              </div>
+              <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+              <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
+            </div>
+          `;
         if (window.lucide) window.lucide.createIcons();
         return;
       }

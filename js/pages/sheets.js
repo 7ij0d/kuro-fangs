@@ -12,44 +12,10 @@ const SheetsPage = {
     const subjectParam = queryParams?.get('subject') || 'all';
     let currentFilter = subjectParam;
 
-    // Realistic dental lecture generator if mock data is limited
-    const getSubjectSheets = (subjId) => {
-      const existing = (window.DATA.sheets || []).filter(s => s.subject_id === subjId);
-      if (existing.length >= 3) return existing;
-
-      const subj = subjects.find(s => s.id === subjId) || subjects[0];
-      const titles = isAr ? [
-        `محاضرة 1: مقدمة وأساسيات ${subj ? subj.name_ar : ''}`,
-        `محاضرة 2: المبادئ التشخيصية والسريرية المتقدمة`,
-        `محاضرة 3: البروتوكولات العلاجية والأدوات الجراحية`,
-        `محاضرة 4: الحالات السريرية والمضاعفات وكيفية تدبيرها`
-      ] : [
-        `Lecture 1: Introduction & Fundamentals of ${subj ? subj.name_en : 'Subject'}`,
-        `Lecture 2: Core Diagnostic & Clinical Criteria`,
-        `Lecture 3: Clinical Protocols, Instruments & Techniques`,
-        `Lecture 4: Case Studies, Complications & Management`
-      ];
-
-      return titles.map((title, idx) => ({
-        id: `gen-${subjId}-${idx + 1}`,
-        subject_id: subjId,
-        subject_name: isAr ? (subj?.name_ar || 'طب الأسنان') : (subj?.name_en || 'Dentistry'),
-        title: title,
-        title_ar: title,
-        title_en: title,
-        doctor_name: isAr ? 'هيئة التدريس الجامعية' : 'Faculty Academic Board',
-        date: `2026-09-${10 + idx}`,
-        type: isAr ? 'شيت معتمد' : 'Official Handout',
-        pages: 14 + idx * 4,
-        size: `${(2.4 + idx * 0.8).toFixed(1)} MB`
-      }));
-    };
-
-    // Combine all sheets across subjects
+    // Get all sheets from DATA service
     const getAllSheets = () => {
       let list = [...(window.DATA.sheets || [])];
-      // Normalize existing
-      list = list.map(item => ({
+      return list.map(item => ({
         id: item.id,
         subject_id: item.subject_id,
         subject_name: isAr 
@@ -62,16 +28,6 @@ const SheetsPage = {
         pages: item.pages || 18,
         size: item.size || '3.2 MB'
       }));
-
-      // If list is small, supplement with subject sheets
-      if (list.length < 15) {
-        subjects.forEach(s => {
-          if (!list.some(item => item.subject_id === s.id)) {
-            list.push(...getSubjectSheets(s.id));
-          }
-        });
-      }
-      return list;
     };
 
     const allSheets = getAllSheets();
@@ -108,12 +64,17 @@ const SheetsPage = {
       }
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = `
-          <div class="card" style="padding: 40px; text-align: center; color: var(--text-muted);">
-            <i data-lucide="folder-open" style="width: 38px; height: 38px; margin-bottom: 12px; opacity: 0.5;"></i>
-            <p>${isAr ? 'لا توجد شيتات حالياً لهذه المادة.' : 'No study sheets currently available for this subject.'}</p>
-          </div>
-        `;
+        listContainer.innerHTML = window.renderEmptyState
+          ? window.renderEmptyState()
+          : `
+            <div class="empty-state-card">
+              <div class="empty-state-icon-wrap">
+                <i data-lucide="folder-open"></i>
+              </div>
+              <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+              <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
+            </div>
+          `;
         if (window.lucide) window.lucide.createIcons();
         return;
       }

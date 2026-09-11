@@ -60,34 +60,44 @@ const SubjectDetailPage = {
 
         <!-- Tab 1: Sheets -->
         <div id="tab-sheets" class="tab-pane active">
-          <div class="recent-list-view">
-            ${(sheets.length > 0 ? sheets : [
-              { id: 'sample-1', title: 'المحاضرة 1: مقدمة في المقرر والمفاهيم الأساسية', doctor_name: 'أستاذ المادة', date: '2026-09-01', type: 'شيت رسمي' },
-              { id: 'sample-2', title: 'المحاضرة 2: التشخيص السريري وطرق العلاج الحديثة', doctor_name: 'أستاذ المادة', date: '2026-09-04', type: 'شيت رسمي' },
-              { id: 'sample-3', title: 'المحاضرة 3: المعايير السريرية وبروتوكولات العمل', doctor_name: 'أستاذ المادة', date: '2026-09-08', type: 'شيت رسمي' }
-            ]).map(s => `
-              <div class="recent-list-row">
-                <div class="recent-col-icon">
-                  <i data-lucide="file-text"></i>
+          ${sheets.length === 0 ? (
+            window.renderEmptyState
+              ? window.renderEmptyState()
+              : `
+                <div class="empty-state-card">
+                  <div class="empty-state-icon-wrap">
+                    <i data-lucide="folder-open"></i>
+                  </div>
+                  <h3 class="empty-state-title">لا توجد محتويات مضافة حالياً</h3>
+                  <p class="empty-state-subtitle">جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً</p>
                 </div>
-                <div class="recent-col-type">
-                  <span class="badge badge-primary">${s.type || 'شيت'}</span>
+              `
+          ) : `
+            <div class="recent-list-view">
+              ${sheets.map(s => `
+                <div class="recent-list-row">
+                  <div class="recent-col-icon">
+                    <i data-lucide="file-text"></i>
+                  </div>
+                  <div class="recent-col-type">
+                    <span class="badge badge-primary">${s.type || 'شيت'}</span>
+                  </div>
+                  <div class="recent-col-title" title="${s.title}">
+                    ${s.title}
+                  </div>
+                  <div class="recent-col-doctor">
+                    ${s.doctor_name || 'هيئة التدريس'}
+                  </div>
+                  <div class="recent-col-date">
+                    ${s.date || '2026-09-05'}
+                  </div>
+                  <a href="#/sheet/${s.id}" class="recent-col-arrow" title="عرض الشيت">
+                    <i data-lucide="arrow-left"></i>
+                  </a>
                 </div>
-                <div class="recent-col-title" title="${s.title}">
-                  ${s.title}
-                </div>
-                <div class="recent-col-doctor">
-                  ${s.doctor_name || 'هيئة التدريس'}
-                </div>
-                <div class="recent-col-date">
-                  ${s.date || '2026-09-05'}
-                </div>
-                <a href="#/sheet/${s.id}" class="recent-col-arrow" title="عرض الشيت">
-                  <i data-lucide="arrow-left"></i>
-                </a>
-              </div>
-            `).join('')}
-          </div>
+              `).join('')}
+            </div>
+          `}
         </div>
 
         <!-- Tab 2: Questions -->

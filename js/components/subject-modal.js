@@ -251,9 +251,21 @@ const SubjectModal = {
           </button>
         </div>
 
-        <!-- Modern 16px Cards List -->
+        <!-- Modern 16px Cards List or Empty State -->
         <div class="modal-files-cards-list">
-          ${files.map(item => `
+          ${files.length === 0 ? (
+            window.renderEmptyState
+              ? window.renderEmptyState()
+              : `
+                <div class="empty-state-card">
+                  <div class="empty-state-icon-wrap">
+                    <i data-lucide="folder-open"></i>
+                  </div>
+                  <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+                  <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
+                </div>
+              `
+          ) : files.map(item => `
             <div class="modal-file-card">
               <!-- Top: Type Badge + Lecture Title -->
               <div class="modal-file-top">
