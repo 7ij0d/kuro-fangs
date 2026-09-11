@@ -337,7 +337,45 @@ class DataService {
   }
 
   getDefaultSheets() {
-    return [];
+    return [
+      {
+        id: 'sh-fixed-provisional',
+        subject_id: 'fixed-pros',
+        title_ar: 'Provisional Restoration & Temporization (التركيبات المؤقتة وطرق إعدادها)',
+        title_en: 'Provisional Restoration & Temporization',
+        doctor_name: 'د. هالة الحويج (Dr. Hala Alhawij)',
+        university: 'University of Tripoli - School of Dentistry',
+        year: '2025-2026',
+        pages: 17,
+        size: '2.8 MB',
+        date: '2026-09-11',
+        type: 'PDF Sheet (قابل للتعديل والإنوتيشين)'
+      },
+      {
+        id: 'sh-omfs-anesthesia',
+        subject_id: 'omfs',
+        title_ar: 'تقنيات التخدير الموضعي ومعالم الفك السفلي (Local Anesthesia Landmarks)',
+        title_en: 'Local Anesthesia Techniques & Mandibular Landmarks',
+        doctor_name: 'د. طارق الزاوي (Dr. Tarek Alzawi)',
+        university: 'University of Tripoli - School of Dentistry',
+        pages: 22,
+        size: '3.8 MB',
+        date: '2026-09-10',
+        type: 'PDF Sheet'
+      },
+      {
+        id: 'sh-endo-working-length',
+        subject_id: 'endo',
+        title_ar: 'تحديد الطول العامل وأجهزة Apex Locator',
+        title_en: 'Working Length Determination & Apex Locators',
+        doctor_name: 'د. منيرة الفيتوري (Dr. Munira El-Fituri)',
+        university: 'University of Tripoli - School of Dentistry',
+        pages: 26,
+        size: '4.5 MB',
+        date: '2026-09-08',
+        type: 'PDF Sheet'
+      }
+    ];
   }
 
   getDefaultAlerts() {

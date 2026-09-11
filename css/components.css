@@ -2540,6 +2540,66 @@ html[dir="ltr"] .academia-exam-table {
   color: var(--text-muted);
 }
 
+.doc-viewer-annotation-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface-subtle, rgba(255, 255, 255, 0.08));
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+}
+
+.btn-annotation-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary, #94A3B8);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.btn-annotation-tool:hover {
+  background: var(--bg-surface, rgba(255, 255, 255, 0.12));
+  color: var(--text-primary, #F8FAFC);
+}
+
+.btn-annotation-tool.active {
+  background: var(--brand-primary, #0284C7) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+}
+
+.btn-annotation-tool.save-tool {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.btn-annotation-tool.save-tool:hover {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.btn-annotation-tool.clear-tool {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.btn-annotation-tool.clear-tool:hover {
+  background: #EF4444;
+  color: #FFFFFF;
+}
+
 .doc-viewer-actions {
   display: flex;
   align-items: center;
