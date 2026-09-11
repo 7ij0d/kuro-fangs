@@ -1,12 +1,12 @@
 /* ==========================================================================
-   KURO FANGS — DESIGN TOKENS (ROYAL BURGUNDY THEME)
-   Dental College Platform — Year 3
-   Luxury Academic Aesthetic: Burgundy (#881337) on Crisp Modern Canvas
+   KURO FANGS — DESIGN TOKENS (LIGHT & DARK THEMES)
+   Default: Clean Light (#F8F9FA / #FFFFFF) with Royal Burgundy (#881337)
+   Dark Mode: Deep Slate (#0D1117 / #161B22) with Glowing Burgundy (#BE123C)
    ========================================================================== */
 
 :root {
-  /* Surfaces & Backgrounds */
-  --bg-app: #F8FAFC;
+  /* Clean Light Theme (Default) */
+  --bg-app: #F8F9FA;
   --bg-surface: #FFFFFF;
   --bg-surface-subtle: #F1F5F9;
   --bg-card: #FFFFFF;
@@ -14,49 +14,34 @@
   --bg-hover: #F8FAFC;
   --bg-input: #FFFFFF;
 
-  /* Royal Burgundy Primary (#881337 / #800020) */
+  /* Royal Burgundy Primary (Light Mode) */
   --brand-burgundy: #881337;
   --brand-burgundy-hover: #4C0519;
-  --brand-burgundy-deep: #4C0519;
   --brand-burgundy-light: #FFF1F2;
   --brand-burgundy-surface: #FDF2F4;
   --brand-burgundy-border: #FDA4AF;
-  --brand-burgundy-glow: 0 4px 20px rgba(136, 19, 55, 0.18);
+  --brand-burgundy-glow: 0 4px 18px rgba(136, 19, 55, 0.16);
   --brand-burgundy-gradient: linear-gradient(135deg, #9F1239 0%, #881337 50%, #4C0519 100%);
 
-  /* Neutrals & Text */
+  /* Neutrals & Text (Light Mode) */
   --text-primary: #0F172A;
   --text-secondary: #475569;
   --text-muted: #94A3B8;
   --text-inverted: #FFFFFF;
 
-  /* Borders & Dividers */
+  /* Borders & Dividers (Light Mode) */
   --border-subtle: #E2E8F0;
   --border-card: #E2E8F0;
   --border-card-hover: #FDA4AF;
   --border-focus: #881337;
 
-  /* Status Accents (Carefully balanced) */
-  --color-success: #059669;
-  --color-success-bg: #ECFDF5;
-  --color-success-border: #A7F3D0;
+  /* Modal Backdrop */
+  --backdrop-color: rgba(15, 23, 42, 0.6);
 
-  --color-warning: #D97706;
-  --color-warning-bg: #FFFBEB;
-  --color-warning-border: #FDE68A;
-
-  --color-info: #0284C7;
-  --color-info-bg: #F0F9FF;
-  --color-info-border: #BAE6FD;
-
-  --color-purple: #7C3AED;
-  --color-purple-bg: #F5F3FF;
-  --color-purple-border: #DDD6FE;
-
-  /* Elevation & Shadows */
+  /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 3px 12px rgba(15, 23, 42, 0.05);
-  --shadow-card-hover: 0 10px 28px rgba(136, 19, 55, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0 10px 25px rgba(136, 19, 55, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
   --shadow-modal: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
 
   /* Radius */
@@ -67,10 +52,6 @@
   --radius-modal: 24px;
   --radius-pill: 9999px;
 
-  /* Typography */
-  --font-arabic: 'Tajawal', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
   /* Layout Spacing */
   --header-height: 70px;
   --container-max: 1280px;
@@ -79,4 +60,48 @@
   --transition-fast: 0.15s ease;
   --transition-base: 0.25s ease-in-out;
   --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   DARK MODE SPECIFICATIONS (data-theme="dark")
+   Background: #0D1117 | Cards: #161B22 | Text: #F0F6FC
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-app: #0D1117;
+  --bg-surface: #161B22;
+  --bg-surface-subtle: #21262D;
+  --bg-card: #161B22;
+  --bg-card-hover: #1C2128;
+  --bg-hover: #21262D;
+  --bg-input: #0D1117;
+
+  /* Burgundy Adjusted for Dark Mode (Vibrant & Glowing) */
+  --brand-burgundy: #BE123C;
+  --brand-burgundy-hover: #E11D48;
+  --brand-burgundy-light: rgba(190, 18, 60, 0.16);
+  --brand-burgundy-surface: rgba(190, 18, 60, 0.1);
+  --brand-burgundy-border: rgba(190, 18, 60, 0.4);
+  --brand-burgundy-glow: 0 4px 22px rgba(190, 18, 60, 0.3);
+  --brand-burgundy-gradient: linear-gradient(135deg, #BE123C 0%, #9F1239 100%);
+
+  /* Neutrals & Text (Dark Mode) */
+  --text-primary: #F0F6FC;
+  --text-secondary: #8B949E;
+  --text-muted: #6E7681;
+  --text-inverted: #0D1117;
+
+  /* Borders (Dark Mode) */
+  --border-subtle: #30363D;
+  --border-card: #30363D;
+  --border-card-hover: rgba(190, 18, 60, 0.6);
+  --border-focus: #BE123C;
+
+  /* Modal Backdrop (Dark Mode) */
+  --backdrop-color: rgba(0, 0, 0, 0.75);
+
+  /* Shadows (Dark Mode) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.6), 0 0 15px rgba(190, 18, 60, 0.25);
+  --shadow-modal: 0 25px 60px -10px rgba(0, 0, 0, 0.85);
 }

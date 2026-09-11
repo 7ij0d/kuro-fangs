@@ -1,6 +1,6 @@
 /**
- * KURO FANGS — APPLICATION ENTRY POINT (BURGUNDY EDITION)
- * Coordinates Data, Store, Routing, and the Floating Subject Modal
+ * KURO FANGS — APPLICATION ENTRY POINT (WITH LANG & THEME TOGGLES)
+ * Default Language: English (en) | Default Theme: Clean Light (light)
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -12,7 +12,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.SubjectModal.init();
   }
 
-  // 3. Register Routes
+  // 3. Setup Initial Language & Direction
+  const applyLanguage = (lang) => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+    const t = (k) => window.I18N.t(k);
+
+    // Update Header Text Elements
+    const brandSub = document.getElementById('header-brand-sub');
+    if (brandSub) brandSub.textContent = t('brandSub');
+
+    const searchInput = document.getElementById('header-search-input');
+    if (searchInput) searchInput.placeholder = t('searchPlaceholder');
+
+    const navSubjectsText = document.getElementById('nav-subjects-text');
+    if (navSubjectsText) navSubjectsText.textContent = t('navSubjects');
+
+    const navCalcText = document.getElementById('nav-calc-text');
+    if (navCalcText) navCalcText.textContent = t('navCalculator');
+
+    const navBookmarksText = document.getElementById('nav-bookmarks-text');
+    if (navBookmarksText) navBookmarksText.textContent = t('navBookmarks');
+
+    // Language button text shows alternate language target
+    const langBtnText = document.getElementById('lang-btn-text');
+    if (langBtnText) {
+      langBtnText.textContent = lang === 'en' ? 'AR' : 'EN';
+    }
+
+    // Update points pill
+    const pointsEl = document.getElementById('header-points-text');
+    if (pointsEl) {
+      pointsEl.textContent = `${window.STORE.getPoints()} ${t('pointsSuffix')}`;
+    }
+  };
+
+  const initialLang = window.I18N.getLang();
+  applyLanguage(initialLang);
+
+  // 4. Setup Initial Theme (Light by Default)
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) {
+      themeIcon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+      if (window.lucide) window.lucide.createIcons();
+    }
+  };
+
+  const initialTheme = window.STORE.getTheme();
+  applyTheme(initialTheme);
+
+  // 5. Setup Language Toggle Event Listener
+  const langToggleBtn = document.getElementById('lang-toggle-btn');
+  if (langToggleBtn) {
+    langToggleBtn.addEventListener('click', () => {
+      const newLang = window.I18N.toggleLang();
+      applyLanguage(newLang);
+      // Re-render current page
+      window.ROUTER.handleRoute();
+      if (window.lucide) window.lucide.createIcons();
+    });
+  }
+
+  // 6. Setup Theme Toggle Event Listener
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const newTheme = window.STORE.toggleTheme();
+      applyTheme(newTheme);
+    });
+  }
+
+  // 7. Register Routes
   const router = window.ROUTER;
 
   router.register('/', (c) => window.HomePage.render(c));
@@ -25,18 +98,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/favorites', (c) => window.SecondaryPages.renderFavorites(c));
   router.register('/profile', (c) => window.SecondaryPages.renderProfile(c));
 
-  // 4. Setup Header Points & Active Navigation Sync
-  const updateUIElements = () => {
-    const pointsEl = document.getElementById('header-points-text');
-    if (pointsEl) {
-      pointsEl.textContent = `${window.STORE.getPoints()} نقطة`;
+  // 8. Synchronize Points
+  window.STORE.subscribe((event) => {
+    if (event === 'points_changed') {
+      const pointsEl = document.getElementById('header-points-text');
+      if (pointsEl) {
+        pointsEl.textContent = `${window.STORE.getPoints()} ${window.I18N.t('pointsSuffix')}`;
+      }
     }
-  };
+  });
 
-  updateUIElements();
-  window.STORE.subscribe(() => updateUIElements());
-
-  // 5. Update Active Nav Link
+  // 9. Update Active Nav Link on route change
   const updateActiveHeaderNav = (path) => {
     document.querySelectorAll('.header-nav-btn').forEach(btn => {
       const target = btn.getAttribute('href')?.replace('#', '');
@@ -53,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateActiveHeaderNav(p);
   });
 
-  // 6. Handle Initial Route
+  // 10. Handle Initial Route
   router.handleRoute();
   updateActiveHeaderNav(window.location.hash.slice(1).split('?')[0] || '/');
 });

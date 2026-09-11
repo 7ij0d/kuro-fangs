@@ -1,6 +1,7 @@
 /* ==========================================================================
-   KURO FANGS — LAYOUT & TOP NAVIGATION (ROYAL BURGUNDY)
-   Clean, Direct, Subjects-First Architecture
+   KURO FANGS — LAYOUT & TOP NAVIGATION
+   Supports LTR (Default English) & RTL (Arabic)
+   Light & Dark Theme Styling
    ========================================================================== */
 
 /* Main App Wrapper */
@@ -12,34 +13,32 @@
 }
 
 /* ==========================================================================
-   TOP HEADER (Minimal, Regal & Functional)
+   TOP HEADER
    ========================================================================== */
 .site-header {
   position: sticky;
   top: 0;
   height: var(--header-height);
-  background-color: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 28px;
   z-index: 100;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: background-color var(--transition-base), border-color var(--transition-base);
 }
 
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   text-decoration: none;
 }
 
 .brand-emblem {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-sm);
   background: var(--brand-burgundy-gradient);
   display: flex;
@@ -65,59 +64,73 @@
 }
 
 .brand-sub-text {
-  font-size: 0.775rem;
+  font-size: 0.75rem;
   color: var(--brand-burgundy);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Header Live Search */
 .header-search-box {
   position: relative;
   width: 100%;
-  max-width: 380px;
+  max-width: 360px;
+}
+
+/* LTR Search input */
+html[dir="ltr"] .header-search-box input {
+  padding: 8px 16px 8px 38px;
+}
+html[dir="ltr"] .header-search-box .search-icon {
+  left: 12px;
+}
+
+/* RTL Search input */
+html[dir="rtl"] .header-search-box input {
+  padding: 8px 38px 8px 16px;
+}
+html[dir="rtl"] .header-search-box .search-icon {
+  right: 12px;
 }
 
 .header-search-box input {
   width: 100%;
-  padding: 9px 40px 9px 16px;
   background-color: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   transition: all var(--transition-fast);
 }
 
 .header-search-box input:focus {
-  background-color: #FFFFFF;
+  background-color: var(--bg-card);
   border-color: var(--brand-burgundy);
   box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.12);
 }
 
 .header-search-box .search-icon {
   position: absolute;
-  right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   color: var(--text-muted);
   pointer-events: none;
 }
 
-/* Header Nav Links */
+/* Header Action Controls */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .header-nav-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
+  padding: 7px 13px;
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   font-weight: 600;
   color: var(--text-secondary);
   border: 1px solid transparent;
@@ -136,10 +149,40 @@
 }
 
 .header-nav-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
+/* Quick Toggles: Language & Theme */
+.header-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.header-toggle-btn:hover {
+  border-color: var(--brand-burgundy-border);
+  background-color: var(--brand-burgundy-light);
+  color: var(--brand-burgundy);
+}
+
+.header-toggle-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Points Pill */
 .points-pill {
   display: inline-flex;
   align-items: center;
@@ -148,8 +191,8 @@
   background-color: var(--brand-burgundy-light);
   border: 1px solid var(--brand-burgundy-border);
   border-radius: var(--radius-pill);
-  font-size: 0.825rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 800;
   color: var(--brand-burgundy);
 }
 
@@ -161,7 +204,7 @@
 /* Main Content Area */
 .main-content {
   flex: 1;
-  padding: 32px 32px 64px;
+  padding: 32px 28px 64px;
   max-width: var(--container-max);
   width: 100%;
   margin: 0 auto;
@@ -170,10 +213,7 @@
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
-@media (max-width: 900px) {
-  .site-header {
-    padding: 0 18px;
-  }
+@media (max-width: 992px) {
   .header-search-box {
     max-width: 220px;
   }
@@ -182,7 +222,10 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .site-header {
+    padding: 0 16px;
+  }
   .header-search-box {
     display: none;
   }
@@ -191,5 +234,8 @@
   }
   .brand-sub-text {
     display: none;
+  }
+  .points-pill {
+    padding: 5px 10px;
   }
 }

@@ -1,6 +1,7 @@
 /* ==========================================================================
-   KURO FANGS — COMPONENTS (ROYAL BURGUNDY)
+   KURO FANGS — COMPONENTS (BURGUNDY THEME)
    The 12 Subjects Grid & The Floating Interactive Subject Modal
+   Light & Dark Mode + LTR / RTL Support
    ========================================================================== */
 
 /* Hero Banner Bar */
@@ -31,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--bg-surface);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   padding: 4px;
   border-radius: var(--radius-pill);
@@ -132,7 +133,7 @@
   border-radius: var(--radius-pill);
 }
 
-.subject-title-ar {
+.subject-title-primary {
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-primary);
@@ -140,7 +141,7 @@
   line-height: 1.35;
 }
 
-.subject-title-en {
+.subject-title-sub {
   font-size: 0.8rem;
   color: var(--text-muted);
   font-family: var(--font-mono);
@@ -185,8 +186,11 @@
   transition: transform var(--transition-fast);
 }
 
-.subject-card:hover .subject-cta-btn {
+html[dir="rtl"] .subject-card:hover .subject-cta-btn {
   transform: translateX(-4px);
+}
+html[dir="ltr"] .subject-card:hover .subject-cta-btn {
+  transform: translateX(4px);
 }
 
 /* ==========================================================================
@@ -195,7 +199,7 @@
 .subject-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.65);
+  background: var(--backdrop-color);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 1000;
@@ -214,7 +218,7 @@
 }
 
 .subject-modal-box {
-  background: #FFFFFF;
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-modal);
   box-shadow: var(--shadow-modal);
@@ -239,7 +243,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(180deg, #FFFDFD 0%, #FFFFFF 100%);
+  background-color: var(--bg-surface);
 }
 
 .modal-header-meta {
@@ -318,7 +322,7 @@
 }
 
 .modal-category-card {
-  background: #FFFFFF;
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 16px 18px;
@@ -371,21 +375,20 @@
   transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
-.modal-category-card:hover .category-arrow-icon {
+html[dir="rtl"] .modal-category-card:hover .category-arrow-icon {
   color: var(--brand-burgundy);
   transform: translateX(-4px);
+}
+html[dir="ltr"] .modal-category-card:hover .category-arrow-icon {
+  color: var(--brand-burgundy);
+  transform: translateX(4px);
 }
 
 /* ==========================================================================
    3. IN-MODAL EXPLORER (Sub-View for selected Category)
    ========================================================================== */
 .modal-explorer-view {
-  display: none;
   animation: fadeIn 0.25s ease;
-}
-
-.modal-explorer-view.active {
-  display: block;
 }
 
 @keyframes fadeIn {
@@ -410,13 +413,13 @@
   font-weight: 700;
   color: var(--brand-burgundy);
   cursor: pointer;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
   background: var(--brand-burgundy-light);
 }
 
 .btn-back-categories:hover {
-  background: #FFE4E6;
+  background: rgba(136, 19, 55, 0.22);
 }
 
 .explorer-items-list {
@@ -426,7 +429,7 @@
 }
 
 .explorer-item-row {
-  background: #FFFFFF;
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 14px 18px;

@@ -1,5 +1,5 @@
 /**
- * KURO FANGS — FLOATING INTERACTIVE SUBJECT MODAL
+ * KURO FANGS — FLOATING INTERACTIVE SUBJECT MODAL (i18n SUPPORTED)
  * Centered modal containing the 8 academic content hubs
  */
 
@@ -8,7 +8,6 @@ const SubjectModal = {
   activeCategory: null,
 
   init() {
-    // Backdrop click to close
     const backdrop = document.getElementById('subject-modal-backdrop');
     if (backdrop) {
       backdrop.addEventListener('click', (e) => {
@@ -18,7 +17,6 @@ const SubjectModal = {
       });
     }
 
-    // Escape key listener
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         SubjectModal.close();
@@ -52,70 +50,69 @@ const SubjectModal = {
     }
   },
 
-  // 1. Render the 8 Category Tiles
   renderCategoriesView() {
     const subject = SubjectModal.currentSubject;
     const modalBox = document.getElementById('subject-modal-box');
     if (!modalBox || !subject) return;
 
+    const isAr = window.I18N.getLang() === 'ar';
+    const t = (k) => window.I18N.t(k);
+
+    const primaryTitle = isAr ? subject.name_ar : subject.name_en;
+    const subTitle = isAr ? `${subject.name_en} • ${subject.code}` : `${subject.name_ar} • ${subject.code}`;
+
     const categories = [
       {
         id: 'sheets',
-        title: 'شيتات ومحاضرات المادة',
-        desc: 'المحاضرات الرسمية والتفريغات المعتمدة (PDF)',
-        icon: '📄',
-        badge: `${subject.sheet_count || 18} شيت`
+        title: t('catSheets'),
+        desc: t('catSheetsDesc'),
+        icon: '📄'
       },
       {
         id: 'recordings',
-        title: 'تسجيلات وشروحات المادة',
-        desc: 'الشروحات الصوتية والفيديوهات السريرية والمعملية',
-        icon: '🎙️',
-        badge: 'تسجيلات متوفرة'
+        title: t('catRecordings'),
+        desc: t('catRecordingsDesc'),
+        icon: '🎙️'
       },
       {
         id: 'past-exams',
-        title: 'أسئلة سنوات سابقة',
-        desc: 'نماذج الامتحانات النصفية والنهائية السابقة والحلول',
-        icon: '🏛️',
-        badge: 'محدث 2025'
+        title: t('catPastExams'),
+        desc: t('catPastExamsDesc'),
+        icon: '🏛️'
       },
       {
         id: 'ai-questions',
-        title: 'أسئلة مولدة بالـ AI',
-        desc: 'كويزات ذكية تفاعلية وتدريب بنك الأسئلة مع تصحيح فوري',
-        icon: '🤖',
-        badge: 'تدريب تفاعلي'
+        title: t('catAiQuestions'),
+        desc: t('catAiQuestionsDesc'),
+        icon: '🤖'
       },
       {
         id: 'doctor-notes',
-        title: 'ملاحظات وتفريغات الدكاترة',
-        desc: 'التنبيهات السريرية وأهم النقاط المركزة من هيئة التدريس',
-        icon: '👨‍⚕️',
-        badge: 'تفريغات حصرية'
+        title: t('catDoctorNotes'),
+        desc: t('catDoctorNotesDesc'),
+        icon: '👨‍⚕️'
       },
       {
         id: 'summaries',
-        title: 'ملخصات المادة المركزة',
-        desc: 'مذكرات المراجعة السريعة ومخططات ليلة الامتحان',
-        icon: '📑',
-        badge: 'مراجعات نهائية'
+        title: t('catSummaries'),
+        desc: t('catSummariesDesc'),
+        icon: '📑'
       },
       {
         id: 'flashcards-atlas',
-        title: 'البطاقات التفاعلية والأطلس',
-        desc: 'بطاقات التذكر السريع وصور الأشعة والحالات السريرية',
-        icon: '🗂️',
-        badge: 'حفظ بصري'
+        title: t('catFlashcards'),
+        desc: t('catFlashcardsDesc'),
+        icon: '🗂️'
       },
       {
         id: 'files-slides',
-        title: 'ملفات ومصادر إضافية',
-        desc: 'عروض السلايدات والمراجع العلمية الموصى بها',
-        icon: '📁',
-        badge: 'روابط مباشرة'
+        title: t('catFiles'),
+        desc: t('catFilesDesc'),
+        icon: '📁'
       }
     ];
+
+    const arrowIcon = isAr ? 'arrow-left' : 'arrow-right';
 
     modalBox.innerHTML = `
       <!-- Header -->
@@ -125,11 +122,11 @@ const SubjectModal = {
             ${subject.icon || '🦷'}
           </div>
           <div class="modal-title-wrap">
-            <h2>${subject.name_ar}</h2>
-            <p>${subject.name_en} • ${subject.code}</p>
+            <h2>${primaryTitle}</h2>
+            <p>${subTitle}</p>
           </div>
         </div>
-        <button class="modal-close-btn" onclick="SubjectModal.close();" aria-label="إغلاق">
+        <button class="modal-close-btn" onclick="SubjectModal.close();" aria-label="${t('closeBtn')}">
           ✕
         </button>
       </div>
@@ -138,7 +135,7 @@ const SubjectModal = {
       <div class="modal-body">
         <div class="modal-prompt-title">
           <i data-lucide="sparkles" style="color: var(--brand-burgundy); width: 18px; height: 18px;"></i>
-          اختر القسم الأكاديمي الذي تريد فتحه:
+          ${t('modalPrompt')}
         </div>
 
         <div class="modal-categories-grid">
@@ -154,7 +151,7 @@ const SubjectModal = {
                 </div>
               </div>
               <div class="category-arrow-icon">
-                <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                <i data-lucide="${arrowIcon}" style="width: 17px; height: 17px;"></i>
               </div>
             </div>
           `).join('')}
@@ -165,25 +162,28 @@ const SubjectModal = {
     if (window.lucide) window.lucide.createIcons();
   },
 
-  // 2. Open Specific Category Inside Modal
   openCategory(categoryId) {
     SubjectModal.activeCategory = categoryId;
     const subject = SubjectModal.currentSubject;
     const modalBox = document.getElementById('subject-modal-box');
     if (!modalBox || !subject) return;
 
+    const isAr = window.I18N.getLang() === 'ar';
+    const t = (k) => window.I18N.t(k);
+    const subjectName = isAr ? subject.name_ar : subject.name_en;
+
     let categoryTitle = '';
     let categoryIcon = '';
     let itemsHTML = '';
 
     if (categoryId === 'sheets') {
-      categoryTitle = 'شيتات ومحاضرات المادة';
+      categoryTitle = t('catSheets');
       categoryIcon = '📄';
       const sheets = window.DATA.getSheetsBySubject(subject.id);
       const displaySheets = sheets.length > 0 ? sheets : [
-        { id: 's1', title: `المحاضرة 1: مدخل ومفاهيم أساسية في ${subject.name_ar}`, doctor: 'أستاذ المادة', date: '2026-09-02' },
-        { id: 's2', title: `المحاضرة 2: التشخيص والبروتوكولات السريرية المعتمدة`, doctor: 'أستاذ المادة', date: '2026-09-06' },
-        { id: 's3', title: `المحاضرة 3: الإجراءات العلاجية ومناقشة الحالات`, doctor: 'أستاذ المادة', date: '2026-09-10' }
+        { id: 's1', title: isAr ? `المحاضرة 1: مدخل ومفاهيم أساسية في ${subjectName}` : `Lecture 1: Introduction & Fundamentals in ${subjectName}`, doctor: isAr ? 'هيئة التدريس' : 'Course Faculty', date: '2026-09-02' },
+        { id: 's2', title: isAr ? `المحاضرة 2: التشخيص والبروتوكولات السريرية` : `Lecture 2: Clinical Protocols & Diagnosis`, doctor: isAr ? 'هيئة التدريس' : 'Course Faculty', date: '2026-09-06' },
+        { id: 's3', title: isAr ? `المحاضرة 3: الإجراءات العلاجية ومناقشة الحالات` : `Lecture 3: Treatment Protocols & Case Discussions`, doctor: isAr ? 'هيئة التدريس' : 'Course Faculty', date: '2026-09-10' }
       ];
 
       itemsHTML = displaySheets.map(s => `
@@ -192,170 +192,159 @@ const SubjectModal = {
             <div class="explorer-item-icon"><i data-lucide="file-text"></i></div>
             <div>
               <div class="explorer-item-title">${s.title}</div>
-              <div class="explorer-item-meta">${s.doctor || 'هيئة التدريس'} • ${s.date || '2026-09-08'}</div>
+              <div class="explorer-item-meta">${s.doctor || 'Faculty'} • ${s.date || '2026-09-08'}</div>
             </div>
           </div>
           <div class="explorer-item-action">
             <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('${s.title}');">
               <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-              تحميل PDF
+              ${t('downloadPdf')}
             </button>
           </div>
         </div>
       `).join('');
     } else if (categoryId === 'recordings') {
-      categoryTitle = 'تسجيلات وشروحات المادة';
+      categoryTitle = t('catRecordings');
       categoryIcon = '🎙️';
       itemsHTML = `
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="play-circle"></i></div>
             <div>
-              <div class="explorer-item-title">تسجيل صوتي: شرح تفصيلي للمحاضرة الأولى مع الحالات</div>
-              <div class="explorer-item-meta">المدة: 38 دقيقة • جودة نقية MP3</div>
+              <div class="explorer-item-title">${isAr ? 'تسجيل صوتي: شرح تفصيلي مع مناقشة الحالات' : 'Audio Lecture: Detailed Clinical Case Discussion'}</div>
+              <div class="explorer-item-meta">${isAr ? 'المدة: 38 دقيقة • جودة عالية MP3' : 'Duration: 38 mins • High Quality MP3'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('تم بدء تشغيل التسجيل الصوتي');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('Audio playing');">
             <i data-lucide="play" style="width: 14px; height: 14px;"></i>
-            استماع
+            ${t('listenAudio')}
           </button>
         </div>
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="video"></i></div>
             <div>
-              <div class="explorer-item-title">فيديو معملي: تطبيق سريري مباشر في عيادات الكلية</div>
-              <div class="explorer-item-meta">المدة: 45 دقيقة • جودة عالية HD</div>
+              <div class="explorer-item-title">${isAr ? 'فيديو سريري: تطبيق عملي في عيادات الكلية' : 'Clinical Video: Practical Demonstration in Dental Clinics'}</div>
+              <div class="explorer-item-meta">${isAr ? 'المدة: 45 دقيقة • جودة عالية HD' : 'Duration: 45 mins • 1080p HD'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('تم فتح شاشة الفيديو');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('Opening video');">
             <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-            مشاهدة
+            ${t('watchVideo')}
           </button>
         </div>
       `;
     } else if (categoryId === 'past-exams') {
-      categoryTitle = 'أسئلة سنوات سابقة';
+      categoryTitle = t('catPastExams');
       categoryIcon = '🏛️';
       itemsHTML = `
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="file-check"></i></div>
             <div>
-              <div class="explorer-item-title">امتحان نصفي 2024-2025 مع مفتاح الحل النموذجي</div>
-              <div class="explorer-item-meta">50 سؤال اختيار من متعدد وتفسيرات الأسئلة</div>
+              <div class="explorer-item-title">${isAr ? 'امتحان نصفي 2024-2025 مع مفتاح الحل النموذجي' : 'Midterm Exam 2024-2025 with Solved Answer Key'}</div>
+              <div class="explorer-item-meta">${isAr ? '50 سؤال اختيار من متعدد مع التعليلات' : '50 MCQs with Detailed Clinical Rationales'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('امتحان نصفي 2025');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('Midterm Exam 2025');">
             <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-            تحميل النموذج
-          </button>
-        </div>
-        <div class="explorer-item-row">
-          <div class="explorer-item-info">
-            <div class="explorer-item-icon"><i data-lucide="file-check"></i></div>
-            <div>
-              <div class="explorer-item-title">امتحان الدور النهائي 2024 مع الحلول والتعليلات</div>
-              <div class="explorer-item-meta">70 سؤال شامل لكامل مفردات المنهج</div>
-            </div>
-          </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('امتحان نهائي 2024');">
-            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-            تحميل النموذج
+            ${t('downloadExam')}
           </button>
         </div>
       `;
     } else if (categoryId === 'ai-questions') {
-      categoryTitle = 'أسئلة مولدة بالـ AI';
+      categoryTitle = t('catAiQuestions');
       categoryIcon = '🤖';
       itemsHTML = `
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="sparkles"></i></div>
             <div>
-              <div class="explorer-item-title">كويز تفاعلي ذكي: أهم التركات الصعبة والتشخيص التفريقي</div>
-              <div class="explorer-item-meta">10 أسئلة تقييمية مع تصحيح ذكي فوري</div>
+              <div class="explorer-item-title">${isAr ? 'كويز تفاعلي ذكي: أهم التركات والتشخيص التفريقي' : 'AI Diagnostic Quiz: Differential Diagnosis & High-Yield MCQs'}</div>
+              <div class="explorer-item-meta">${isAr ? '10 أسئلة ذكية مع التقييم الفوري' : '10 AI-curated questions with instant feedback'}</div>
             </div>
           </div>
           <a href="#/quizzes" class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.close();">
             <i data-lucide="play" style="width: 14px; height: 14px;"></i>
-            بدء الاختبار الآن
+            ${t('startQuiz')}
           </a>
         </div>
       `;
     } else if (categoryId === 'doctor-notes') {
-      categoryTitle = 'ملاحظات وتفريغات الدكاترة';
+      categoryTitle = t('catDoctorNotes');
       categoryIcon = '👨‍⚕️';
       itemsHTML = `
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="edit-3"></i></div>
             <div>
-              <div class="explorer-item-title">تفريغات الأساتذة: النقاط المؤكدة للامتحانات النصفية</div>
-              <div class="explorer-item-meta">ملاحظات سريرية من داخل قاعات المحاضرات</div>
+              <div class="explorer-item-title">${isAr ? 'تفريغات الأساتذة: النقاط المؤكدة للامتحانات' : 'Faculty Pearls: High-Yield Exam Takeaways & Tips'}</div>
+              <div class="explorer-item-meta">${isAr ? 'ملاحظات سريرية مركزة' : 'Clinical tips from lecture halls'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('تفريغات الدكاترة');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('Doctor Notes');">
             <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-            تحميل الملاحظات
+            ${t('downloadPdf')}
           </button>
         </div>
       `;
     } else if (categoryId === 'summaries') {
-      categoryTitle = 'ملخصات المادة المركزة';
+      categoryTitle = t('catSummaries');
       categoryIcon = '📑';
       itemsHTML = `
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="file-text"></i></div>
             <div>
-              <div class="explorer-item-title">ملخص ليلة الامتحان: جداول المقارنة والأدوية الأساسية</div>
-              <div class="explorer-item-meta">12 صفحة مدمجة ومكثفة</div>
+              <div class="explorer-item-title">${isAr ? 'ملخص ليلة الامتحان: جداول المقارنة والأدوية' : 'Night-Before-Exam Summary: Key Tables & Drug Charts'}</div>
+              <div class="explorer-item-meta">${isAr ? '12 صفحة مدمجة ومكثفة' : '12 condensed high-yield pages'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('ملخص ليلة الامتحان');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.downloadItem('Exam Summary');">
             <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-            تحميل الملخص
+            ${t('downloadPdf')}
           </button>
         </div>
       `;
     } else if (categoryId === 'flashcards-atlas') {
-      categoryTitle = 'البطاقات التفاعلية والأطلس';
+      categoryTitle = t('catFlashcards');
       categoryIcon = '🗂️';
       itemsHTML = `
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="layers"></i></div>
             <div>
-              <div class="explorer-item-title">مجموعة البطاقات التعليمية الذكية (Flashcards)</div>
-              <div class="explorer-item-meta">مراجعة سريعة للمصطلحات والتشخيصات</div>
+              <div class="explorer-item-title">${isAr ? 'مجموعة البطاقات التعليمية الذكية (Flashcards)' : 'Interactive Dental Flashcards Deck'}</div>
+              <div class="explorer-item-meta">${isAr ? 'مراجعة سريعة للمصطلحات والتشخيصات' : 'Spaced repetition flashcards'}</div>
             </div>
           </div>
           <a href="#/flashcards" class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="SubjectModal.close();">
             <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
-            فتح البطاقات
+            ${t('openFlashcards')}
           </a>
         </div>
       `;
     } else {
-      categoryTitle = 'ملفات ومصادر إضافية';
+      categoryTitle = t('catFiles');
       categoryIcon = '📁';
       itemsHTML = `
         <div class="explorer-item-row">
           <div class="explorer-item-info">
             <div class="explorer-item-icon"><i data-lucide="folder"></i></div>
             <div>
-              <div class="explorer-item-title">المجلد السحابي الكامل: سلايدات وكتب المرجع المعتمدة</div>
-              <div class="explorer-item-meta">رابط مباشر للتحميل والمطالعة</div>
+              <div class="explorer-item-title">${isAr ? 'المجلد السحابي الكامل: سلايدات وكتب المرجع' : 'Cloud Drive: Official Slides & Reference Textbooks'}</div>
+              <div class="explorer-item-meta">${isAr ? 'روابط مباشرة للتحميل والمطالعة' : 'Direct cloud repository'}</div>
             </div>
           </div>
-          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('تم فتح المجلد السحابي للمادة');">
+          <button class="btn btn-burgundy" style="padding: 6px 14px; font-size: 0.8rem;" onclick="alert('Opening Cloud Drive');">
             <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-            فتح المصادر
+            ${t('openDrive')}
           </button>
         </div>
       `;
     }
+
+    const backArrow = isAr ? 'arrow-right' : 'arrow-left';
 
     modalBox.innerHTML = `
       <div class="modal-header">
@@ -363,19 +352,19 @@ const SubjectModal = {
           <div class="modal-subject-icon">${categoryIcon}</div>
           <div class="modal-title-wrap">
             <h2>${categoryTitle}</h2>
-            <p>${subject.name_ar} • ${subject.code}</p>
+            <p>${subjectName} • ${subject.code}</p>
           </div>
         </div>
-        <button class="modal-close-btn" onclick="SubjectModal.close();" aria-label="إغلاق">✕</button>
+        <button class="modal-close-btn" onclick="SubjectModal.close();" aria-label="${t('closeBtn')}">✕</button>
       </div>
 
       <div class="modal-body">
         <div class="explorer-top-nav">
           <button class="btn-back-categories" onclick="SubjectModal.renderCategoriesView();">
-            <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-            العودة لكافة أقسام المادة
+            <i data-lucide="${backArrow}" style="width: 16px; height: 16px;"></i>
+            ${t('backToSections')}
           </button>
-          <span style="font-size: 0.8rem; color: var(--text-muted);">محتوى متاح ومباشر</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">${t('directAvailable')}</span>
         </div>
 
         <div class="explorer-items-list">
@@ -389,7 +378,7 @@ const SubjectModal = {
 
   downloadItem(title) {
     window.STORE.addPoints(10);
-    alert(`تم بدء تحميل "${title}" بنجاح! (+10 نقاط أكاديمية)`);
+    alert(window.I18N.t('pointsEarned') + ` [${title}]`);
   }
 };
 

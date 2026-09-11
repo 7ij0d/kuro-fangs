@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="منظومة Kuro Fangs الأكاديمية — كلية طب وجراحة الفم والأسنان السنة الثالثة" />
+  <meta name="description" content="Kuro Fangs Dental Platform — Year 3 Dentistry Academic System" />
   <meta name="theme-color" content="#881337" />
-  <title>Kuro Fangs • كلية طب وجراحة الفم والأسنان</title>
+  <title>Kuro Fangs • Year 3 Dental Platform</title>
 
   <!-- Google Fonts: Tajawal & IBM Plex Sans Arabic -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15,7 +15,7 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Royal Burgundy Design System Stylesheets -->
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -31,50 +31,57 @@
 
   <div class="app-wrapper">
     <!-- ==========================================================================
-         TOP HEADER (Regal Burgundy Brand & Quick Navigation)
+         TOP HEADER (Brand, Search, Nav, Lang & Theme Toggles)
          ========================================================================== -->
     <header class="site-header">
-      <!-- Right: Platform Brand -->
+      <!-- Brand -->
       <a href="#/" class="header-brand">
         <div class="brand-emblem">🦷</div>
         <div class="brand-meta">
-          <span class="brand-name-text">Kuro Fangs</span>
-          <span class="brand-sub-text">كلية طب وجراحة الفم والأسنان — السنة الثالثة</span>
+          <span class="brand-name-text" id="header-brand-name">Kuro Fangs</span>
+          <span class="brand-sub-text" id="header-brand-sub">Faculty of Dentistry — Year 3</span>
         </div>
       </a>
 
       <!-- Center: Live Search Filter -->
       <div class="header-search-box">
         <i data-lucide="search" class="search-icon"></i>
-        <input type="text" id="header-search-input" placeholder="ابحث عن أي مادة أو شيت أو موضوع..." />
+        <input type="text" id="header-search-input" placeholder="Search subjects, lectures, or topics..." />
       </div>
 
-      <!-- Left: Header Navigation Actions -->
+      <!-- Right/Left Actions -->
       <div class="header-actions">
-        <a href="#/" class="header-nav-btn active" title="المواد الدراسية الـ 12">
+        <!-- Navigation Links -->
+        <a href="#/" class="header-nav-btn active" title="Subjects" id="nav-subjects-link">
           <i data-lucide="book-open"></i>
-          <span>المواد (12)</span>
+          <span id="nav-subjects-text">Subjects</span>
         </a>
 
-        <a href="#/calculator" class="header-nav-btn" title="حاسبة المعدل التراكمي">
+        <a href="#/calculator" class="header-nav-btn" title="GPA Calculator" id="nav-calc-link">
           <i data-lucide="calculator"></i>
-          <span>حاسبة المعدل</span>
+          <span id="nav-calc-text">GPA Calc</span>
         </a>
 
-        <a href="#/favorites" class="header-nav-btn" title="المفضلة والمحفوظات">
+        <a href="#/favorites" class="header-nav-btn" title="Bookmarks" id="nav-bookmarks-link">
           <i data-lucide="bookmark"></i>
-          <span>المفضلة</span>
+          <span id="nav-bookmarks-text">Saved</span>
         </a>
 
-        <a href="#/notes" class="header-nav-btn" title="الملاحظات السريرية">
-          <i data-lucide="edit-3"></i>
-          <span>ملاحظاتي</span>
-        </a>
+        <!-- 1. Language Toggle Button (EN / AR) -->
+        <button id="lang-toggle-btn" class="header-toggle-btn" title="Switch Language (English / العربية)">
+          <i data-lucide="globe"></i>
+          <span id="lang-btn-text">AR</span>
+        </button>
+
+        <!-- 2. Dark / Light Mode Toggle Button -->
+        <button id="theme-toggle-btn" class="header-toggle-btn" title="Toggle Dark / Light Theme">
+          <i data-lucide="moon" id="theme-icon"></i>
+        </button>
 
         <!-- Points Pill -->
-        <div class="points-pill" title="الرصيد الأكاديمي التفاعلي">
+        <div class="points-pill" title="Academic Points">
           <i data-lucide="sparkles"></i>
-          <span id="header-points-text">25 نقطة</span>
+          <span id="header-points-text">25 pts</span>
         </div>
       </div>
     </header>
@@ -86,6 +93,7 @@
   </div>
 
   <!-- JavaScript Modules -->
+  <script src="js/i18n.js"></script>
   <script src="js/store.js"></script>
   <script src="js/data.js"></script>
   <script src="js/components/subject-modal.js"></script>

@@ -1,15 +1,13 @@
 /**
- * KURO FANGS — STORE (LOCK-IN EDITION)
- * Manages State, Streaks, Points, Favorites, Notes & Lock-in Sessions
+ * KURO FANGS — STORE (State, LocalStorage, Lang & Theme Manager)
  */
 
 class AppStore {
   constructor() {
     this.STORAGE_KEYS = {
       POINTS: 'kf_user_points',
-      STREAK: 'kf_user_streak',
-      LAST_STREAK_DATE: 'kf_last_streak_date',
-      LAST_SHEET: 'kf_last_sheet',
+      LANG: 'kf_lang',
+      THEME: 'kf_theme',
       FAVORITES: 'kf_user_favorites',
       NOTES: 'kf_user_notes',
       USER_INFO: 'kf_user_info'
@@ -20,43 +18,48 @@ class AppStore {
   }
 
   initDefaults() {
+    // 1. Theme (Default: Clean Light)
+    if (!localStorage.getItem(this.STORAGE_KEYS.THEME)) {
+      localStorage.setItem(this.STORAGE_KEYS.THEME, 'light');
+    }
+
+    // 2. Language (Default: English)
+    if (!localStorage.getItem(this.STORAGE_KEYS.LANG)) {
+      localStorage.setItem(this.STORAGE_KEYS.LANG, 'en');
+    }
+
+    // 3. Points
     if (localStorage.getItem(this.STORAGE_KEYS.POINTS) === null) {
       localStorage.setItem(this.STORAGE_KEYS.POINTS, '25');
     }
-    if (localStorage.getItem(this.STORAGE_KEYS.STREAK) === null) {
-      localStorage.setItem(this.STORAGE_KEYS.STREAK, '1'); // 1 day streak
-    }
-    if (!localStorage.getItem(this.STORAGE_KEYS.LAST_SHEET)) {
-      localStorage.setItem(this.STORAGE_KEYS.LAST_SHEET, JSON.stringify({
-        id: 'sh-1',
-        title: 'Local Anesthesia Techniques & Landmarks',
-        subject_name: 'جراحة الفم والوجه والفكين 1',
-        doctor_name: 'د. يوسف التاجوري',
-        progress: 65
-      }));
-    }
+
+    // 4. Favorites
     if (!localStorage.getItem(this.STORAGE_KEYS.FAVORITES)) {
       localStorage.setItem(this.STORAGE_KEYS.FAVORITES, JSON.stringify([
-        { id: 'sh-1', title: 'Local Anesthesia Techniques & Landmarks', type: 'sheet', subject_name: 'جراحة الفم 1' },
-        { id: 'sh-2', title: 'Preparation of Full Veneer Crown', type: 'sheet', subject_name: 'التركيبات الثابتة 2' }
+        { id: 'sh-1', title: 'Local Anesthesia Techniques & Landmarks', type: 'sheet', subject_name: 'OMFS I' },
+        { id: 'sh-2', title: 'Preparation of Full Veneer Crown', type: 'sheet', subject_name: 'Fixed Pros II' }
       ]));
     }
+
+    // 5. Notes
     if (!localStorage.getItem(this.STORAGE_KEYS.NOTES)) {
       localStorage.setItem(this.STORAGE_KEYS.NOTES, JSON.stringify([
         {
           id: 'note-1',
-          title: 'ملاحظات هامة في التخدير الموضعي',
-          content: 'التركيز على جرعات الليدوكايين مع الأدرينالين 1:80,000 وتجنب الحقن الوريدي المباشر.',
+          title: 'Local Anesthesia Dosages',
+          content: 'Lidocaine 2% max 4.4 mg/kg with epinephrine 1:80,000. Avoid intravascular injection.',
           subjectId: 'omfs',
           date: '2026-09-08'
         }
       ]));
     }
+
+    // 6. User Info
     if (!localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) {
       localStorage.setItem(this.STORAGE_KEYS.USER_INFO, JSON.stringify({
-        name: 'طالب كورو',
-        title: 'السنة الثالثة — طب وجراحة الفم والأسنان',
-        avatarText: 'ك'
+        name: 'Kuro Student',
+        title: 'Year 3 Dental Student',
+        avatarText: 'K'
       }));
     }
   }
@@ -72,6 +75,25 @@ class AppStore {
     });
   }
 
+  // Theme (Light / Dark)
+  getTheme() {
+    return localStorage.getItem(this.STORAGE_KEYS.THEME) || 'light';
+  }
+
+  setTheme(theme) {
+    if (theme !== 'light' && theme !== 'dark') theme = 'light';
+    localStorage.setItem(this.STORAGE_KEYS.THEME, theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    this.notify('theme_changed', theme);
+    return theme;
+  }
+
+  toggleTheme() {
+    const current = this.getTheme();
+    const next = current === 'dark' ? 'light' : 'dark';
+    return this.setTheme(next);
+  }
+
   // Points
   getPoints() {
     return parseInt(localStorage.getItem(this.STORAGE_KEYS.POINTS) || '25', 10);
@@ -83,52 +105,6 @@ class AppStore {
     localStorage.setItem(this.STORAGE_KEYS.POINTS, updated.toString());
     this.notify('points_changed', updated);
     return updated;
-  }
-
-  // Study Streak (From Lock-in sidebar footer)
-  getStreak() {
-    return parseInt(localStorage.getItem(this.STORAGE_KEYS.STREAK) || '1', 10);
-  }
-
-  recordStreak() {
-    const today = new Date().toISOString().split('T')[0];
-    const lastDate = localStorage.getItem(this.STORAGE_KEYS.LAST_STREAK_DATE);
-    if (lastDate !== today) {
-      const streak = this.getStreak() + 1;
-      localStorage.setItem(this.STORAGE_KEYS.STREAK, streak.toString());
-      localStorage.setItem(this.STORAGE_KEYS.LAST_STREAK_DATE, today);
-      this.addPoints(15);
-      this.notify('streak_updated', streak);
-      return streak;
-    }
-    return this.getStreak();
-  }
-
-  // Last opened sheet for "CONTINUE STUDYING" card
-  getLastSheet() {
-    try {
-      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.LAST_SHEET));
-    } catch {
-      return null;
-    }
-  }
-
-  setLastSheet(sheet) {
-    localStorage.setItem(this.STORAGE_KEYS.LAST_SHEET, JSON.stringify(sheet));
-    this.notify('last_sheet_changed', sheet);
-  }
-
-  // User Info
-  getUserInfo() {
-    try {
-      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) || {
-        name: 'طالب كورو',
-        title: 'السنة الثالثة — طب الأسنان',
-        avatarText: 'ك'
-      };
-    } catch {
-      return { name: 'طالب كورو', title: 'السنة الثالثة — طب الأسنان', avatarText: 'ك' };
-    }
   }
 
   // Favorites
@@ -190,6 +166,18 @@ class AppStore {
     notes = notes.filter(n => n.id !== id);
     localStorage.setItem(this.STORAGE_KEYS.NOTES, JSON.stringify(notes));
     this.notify('notes_changed', notes);
+  }
+
+  getUserInfo() {
+    try {
+      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) || {
+        name: 'Kuro Student',
+        title: 'Year 3 Dental Student',
+        avatarText: 'K'
+      };
+    } catch {
+      return { name: 'Kuro Student', title: 'Year 3 Dental Student', avatarText: 'K' };
+    }
   }
 
   getCalculatorData() {
