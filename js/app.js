@@ -38,6 +38,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       pointsEl.textContent = `${window.STORE.getPoints()} ${t('pointsSuffix')}`;
     }
 
+    // Update Guest Banner texts
+    const bannerStrong = document.getElementById('guest-banner-strong');
+    const bannerSub = document.getElementById('guest-banner-sub');
+    const bannerBtnText = document.getElementById('guest-banner-btn-text');
+    if (bannerStrong) {
+      bannerStrong.textContent = lang === 'ar'
+        ? 'أنشئ حسابك الاختياري لحفظ نقاطك وتقدمك وسكناتك في السحابة'
+        : 'Create your optional account to sync points, progress & skins to the cloud';
+    }
+    if (bannerSub) {
+      bannerSub.textContent = lang === 'ar'
+        ? 'التسجيل اختياري 100% ولا يمنعك من تصفح كافة محتويات وألعاب المنصة كزائر.'
+        : '100% optional. You can explore all academic content & arcade games freely as a guest.';
+    }
+    if (bannerBtnText) {
+      bannerBtnText.textContent = lang === 'ar'
+        ? 'إنشاء حساب / تسجيل ☁️'
+        : 'Sign In / Register ☁️';
+    }
+
+    // Update Auth header state
+    if (window.SupabaseAuth && typeof window.SupabaseAuth.updateUI === 'function') {
+      window.SupabaseAuth.updateUI(window.SupabaseAuth.getUser());
+    }
+
     // Update Dark Sidebar Elements
     const sideSub = document.getElementById('sidebar-brand-sub');
     if (sideSub) sideSub.textContent = t('brandSub');

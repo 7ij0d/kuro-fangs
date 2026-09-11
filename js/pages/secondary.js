@@ -348,11 +348,55 @@ const SecondaryPages = {
             <div style="width: 88px; height: 88px; border-radius: 50%; overflow: hidden; margin: 0 auto 16px; border: 4px solid #BE123C; box-shadow: 0 6px 18px rgba(190, 18, 60, 0.35); position: relative;">
               <img src="${equippedSkin.image}" alt="${isAr ? equippedSkin.name_ar : equippedSkin.name_en}" style="width: 100%; height: 100%; object-fit: cover; display: block;" class="current-mascot-img" />
             </div>
-            <h2 style="font-size: 1.25rem; margin-bottom: 4px;">${userInfo.name}</h2>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">${userInfo.title}</p>
-            <span class="badge badge-primary" style="margin-bottom: 18px; font-size: 0.75rem;">
-              🦊 ${isAr ? equippedSkin.name_ar : equippedSkin.name_en}
-            </span>
+            <h2 style="font-size: 1.25rem; margin-bottom: 4px;">
+              ${window.SupabaseAuth?.getUser() ? (window.SupabaseAuth.getUser().user_metadata?.full_name || window.SupabaseAuth.getUser().email.split('@')[0]) : (isAr ? 'طالب زائر (Guest)' : 'Guest Student')}
+            </h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+              ${window.SupabaseAuth?.getUser() ? window.SupabaseAuth.getUser().email : (isAr ? 'حساب محلي غير مقترن بالسحابة' : 'Local Unsynced Account')}
+            </p>
+
+            <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+              <span class="badge badge-primary" style="font-size: 0.75rem;">
+                🦊 ${isAr ? equippedSkin.name_ar : equippedSkin.name_en}
+              </span>
+              ${window.SupabaseAuth?.isLoggedIn() ? `
+                <span class="badge" style="background: rgba(2, 132, 199, 0.12); color: #0284C7; border: 1px solid rgba(2, 132, 199, 0.3); font-size: 0.75rem;">
+                  ☁️ ${isAr ? 'موثق بالسحابة' : 'Cloud Synced'}
+                </span>
+              ` : `
+                <span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #64748B; border: 1px solid rgba(148, 163, 184, 0.3); font-size: 0.75rem;">
+                  👤 ${isAr ? 'زائر (اختياري)' : 'Guest Mode'}
+                </span>
+              `}
+            </div>
+
+            <!-- Cloud Sync & Auth Actions inside Profile -->
+            ${window.SupabaseAuth?.isLoggedIn() ? `
+              <div style="margin-bottom: 16px; padding: 12px; border-radius: 10px; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">
+                  ☁️ ${isAr ? 'المزامنة السحابية' : 'Cloud Backup'}:
+                </span>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-sm btn-soft" onclick="window.SupabaseAuth.syncNow().then(ok => window.Toast?.success(isAr ? 'تمت مزامنة بياناتك وسكناتك مع السحابة ☁️' : 'Profile synced to cloud! ☁️'))" style="font-size: 0.75rem; padding: 4px 10px;">
+                    ${isAr ? 'مزامنة الآن 🔄' : 'Sync Now 🔄'}
+                  </button>
+                  <button class="btn btn-sm btn-outline" onclick="window.SupabaseAuth.signOut().then(() => renderView())" style="font-size: 0.75rem; padding: 4px 10px; color: #EF4444;">
+                    ${isAr ? 'خروج' : 'Logout'}
+                  </button>
+                </div>
+              </div>
+            ` : `
+              <div style="margin-bottom: 18px; padding: 14px; border-radius: 12px; background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(136, 19, 55, 0.05)); border: 1.5px dashed var(--brand-burgundy-border); text-align: center;">
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.5;">
+                  ${isAr
+                    ? '💡 أنشئ حسابك الاختياري الآن لحفظ نقاطك وسكناتك في السحابة مجاناً ومزامنتها بين أجهزتك.'
+                    : '💡 Connect an optional free cloud account to backup points and skins across devices.'}
+                </p>
+                <button class="btn btn-sm btn-primary" onclick="window.AuthModal.open('signup')" style="font-size: 0.8rem; padding: 6px 14px; width: 100%;">
+                  <span>☁️ ${isAr ? 'إنشاء حساب / تسجيل الدخول' : 'Sign In / Create Account'}</span>
+                </button>
+              </div>
+            `}
 
             <div style="background: var(--brand-primary-light); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--brand-primary-border); margin-bottom: 20px;">
               <div style="font-size: 0.8rem; color: var(--brand-primary); font-weight: 600;">${isAr ? 'الرصيد الأكاديمي الحالي' : 'Current Academic Points'}</div>

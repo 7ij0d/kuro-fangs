@@ -15,6 +15,9 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Supabase Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/tokens.css?v=4.6" />
   <link rel="stylesheet" href="css/base.css?v=4.6" />
@@ -154,6 +157,9 @@
 
         <!-- Header Actions: Language, Theme, Points & Mascot Profile -->
         <div class="header-actions">
+          <!-- Optional Supabase Auth / User Badge -->
+          <div id="header-auth-action-box" class="header-auth-action-box"></div>
+
           <!-- Language Toggle Button (EN / AR) -->
           <button id="lang-toggle-btn" class="header-toggle-btn" title="Switch Language (English / العربية)">
             <i data-lucide="globe"></i>
@@ -179,6 +185,23 @@
         </div>
       </header>
 
+      <!-- Optional Cloud Sync Guest Encouragement Banner -->
+      <div id="guest-encourage-banner" class="guest-encourage-banner" style="display: none;">
+        <div class="guest-banner-left">
+          <span class="guest-banner-icon">☁️</span>
+          <div class="guest-banner-text">
+            <strong id="guest-banner-strong">أنشئ حسابك الاختياري لحفظ نقاطك وتقدمك وسكناتك في السحابة</strong>
+            <span id="guest-banner-sub">التسجيل اختياري 100% ولا يمنعك من تصفح كافة محتويات وألعاب المنصة كزائر.</span>
+          </div>
+        </div>
+        <div class="guest-banner-actions">
+          <button class="btn btn-sm btn-primary guest-banner-btn" onclick="window.AuthModal.open('signup')">
+            <span id="guest-banner-btn-text">إنشاء حساب / تسجيل ☁️</span>
+          </button>
+          <button class="guest-banner-dismiss" onclick="sessionStorage.setItem('kf_guest_banner_dismissed','true'); document.getElementById('guest-encourage-banner').style.display='none';" aria-label="Dismiss">✕</button>
+        </div>
+      </div>
+
       <!-- MAIN ROUTED CONTENT CONTAINER -->
       <main class="main-content" id="app" role="main"></main>
     </div>
@@ -187,7 +210,9 @@
   <!-- JavaScript Modules -->
   <script src="js/i18n.js?v=4.7"></script>
   <script src="js/store.js?v=4.7"></script>
+  <script src="js/supabase.js?v=4.8"></script>
   <script src="js/components/toast.js?v=4.7"></script>
+  <script src="js/components/auth-modal.js?v=4.8"></script>
   <script src="js/components/document-viewer.js?v=4.7"></script>
   <script src="js/data.js?v=4.7"></script>
   <script src="js/data-clinical.js?v=4.7"></script>
