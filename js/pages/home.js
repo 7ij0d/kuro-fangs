@@ -19,7 +19,7 @@ const HomePage = {
       badge_ar: 'هام جداً • تأجيل وتسجيل',
       badge_en: 'Urgent • Registration & Schedule',
       badge_type: 'official',
-      cover: 'assets/covers/gen-med.webp',
+      cover: 'assets/icons/faculty_logo.png',
       summary_ar: 'الموافقة على دخول جميع الطلبة وتأجيل الدور الثاني لـ 21 سبتمبر وتجديد القيد للطلبة التكميلي.',
       summary_en: 'Approval for all students to sit exams, 2nd round postponed to Sept 21, and registration renewal dates.',
       details_ar: '1. تمت الموافقة على دخول جميع الطلبة (دفعة 33 أو تكميلي) للامتحانات دون استثناء (مقرر واحد أو أكثر).\n2. تأجيل بداية امتحانات الدور الثاني إلى يوم الاثنين 21/09/2026.\n3. تجديد القيد للطلبة التكميلي خلال أيام: الأحد 13/09، الاثنين 14/09، الثلاثاء 15/09/2026 وتجديد الاسم بمكتب الدراسة والامتحانات.\nتنبيه: لن يُسمح بدخول الامتحان لأي طالب تكميلي ما لم يجدد قيده ويسجل اسمه.',
@@ -35,7 +35,7 @@ const HomePage = {
       badge_ar: 'امتحانات • السنة الرابعة',
       badge_en: 'Exams • Year 4',
       badge_type: 'exam',
-      cover: 'assets/covers/cons-endo.webp',
+      cover: 'assets/icons/faculty_logo.png',
       summary_ar: 'مواعيد الامتحانات النهائية للدور الثاني من الساعة 09:00 صباحاً إلى 12:00 ظهراً تحت المسرح.',
       summary_en: 'Final exams for Year 4 from 09:00 AM to 12:00 PM under the theater.',
       details_ar: 'تعلن الكلية عن مواعيد الامتحانات النهائية للدور الثاني لطلبة السنة الرابعة.\n• موعد الامتحان: من الساعة 09:00 صباحاً إلى 12:00 ظهراً.\n• المكان: تحت المسرح.\nيرجى الالتزام بالحضور قبل بداية الامتحان بوقت كافٍ.',
@@ -51,7 +51,7 @@ const HomePage = {
       badge_ar: 'موقع رسمي • بوابة الطلبة',
       badge_en: 'Official Portal • Students',
       badge_type: 'alert',
-      cover: 'assets/covers/omdr.webp',
+      cover: 'assets/icons/faculty_logo.png',
       summary_ar: 'إطلاق الصفحة الرسمية للاطلاع على الجداول والخطة والنتائج وجداول الامتحانات.',
       summary_en: 'Official web portal launched for schedules, study plans, results, and examinations.',
       details_ar: 'تم إطلاق الصفحة الإلكترونية الرسمية للاطلاع على الجداول الدراسية، الخطة الدراسية، النتائج، وجداول الامتحانات.\n🔗 رابط الدخول المباشر: http://tables.dentaluot.com\nيرجى اعتماد الصفحة كمصدر رسمي للمعلومات الأكاديمية.',
@@ -68,7 +68,7 @@ const HomePage = {
       badge_ar: 'الخطة الدراسية • 2026 / 2027',
       badge_en: 'Academic Plan • 2026 / 2027',
       badge_type: 'official',
-      cover: 'assets/covers/omfs.webp',
+      cover: 'assets/icons/faculty_logo.png',
       summary_ar: 'مواعيد الدراسة والامتحانات والمراجعة الموضوعية وإعلان النتائج للعام 2026 / 2027.',
       summary_en: 'Timelines for classes, exams, objective review, and results release for 2026/2027.',
       details_ar: 'تنشر الكلية الخطة الدراسية المتضمنة مواعيد الدراسة والامتحانات والمراجعة الموضوعية وإعلان النتائج للعام 2026 / 2027.\nملاحظة: المواعيد المرتبطة بالمناسبات الهجرية تخضع لما يصدر عن الجهات الرسمية.',
@@ -124,7 +124,7 @@ const HomePage = {
           badge_ar: item.badge_ar || 'إعلان رسمي',
           badge_en: item.badge_en || 'Official Notice',
           badge_type: item.type === 'urgent' ? 'official' : (item.type === 'exam' ? 'exam' : 'alert'),
-          cover: item.url ? 'assets/covers/omdr.webp' : (item.type === 'exam' ? 'assets/covers/cons-endo.webp' : 'assets/covers/gen-med.webp'),
+          cover: item.cover || 'assets/icons/faculty_logo.png',
           summary_ar: item.content_ar ? item.content_ar.split('\n')[0] : '',
           summary_en: item.content_en || item.content_ar,
           details_ar: item.content_ar,
@@ -144,7 +144,7 @@ const HomePage = {
       return `
         <article class="faculty-news-card" onclick="window.HomePage.openNewsModal('${item.id}')" role="button" tabindex="0" aria-label="${title}">
           <div class="news-card-media">
-            <img src="${item.cover}" alt="${title}" class="news-card-img" loading="lazy" decoding="async" onerror="this.src='assets/covers/gen-med.webp'" />
+            <img src="${item.cover || 'assets/icons/faculty_logo.png'}" alt="${title}" class="news-card-img" style="object-fit: contain; padding: 6px; background: var(--bg-card);" onerror="this.src='assets/icons/faculty_logo.png'" />
           </div>
           <div class="news-card-content">
             <div class="news-meta-row">
