@@ -1639,3 +1639,10 @@ window.GamesPage = (function () {
     }
   };
 })();
+
+export default function renderGames(container, params) {
+  if (window.GamesPage && typeof window.GamesPage.render === 'function') {
+    return window.GamesPage.render(container, params);
+  }
+}
+

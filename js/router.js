@@ -5,7 +5,12 @@
 
 class Router {
   constructor() {
-    this.routes = {};
+    this.routes = {
+      '/games': async (container, params) => {
+        const { default: renderGames } = await import('./pages/games.js');
+        await renderGames(container, params);
+      }
+    };
     this.currentPath = '';
     window.addEventListener('hashchange', () => this.handleRoute());
   }
@@ -77,7 +82,7 @@ class Router {
   }
 
   updateActiveNav(currentPath) {
-    document.querySelectorAll('.nav-item').forEach(link => {
+    document.querySelectorAll('.nav-item, .sidebar-menu-item').forEach(link => {
       const target = link.getAttribute('data-route') || link.getAttribute('href')?.replace('#', '');
       if (!target) return;
 
@@ -91,3 +96,10 @@ class Router {
 }
 
 window.ROUTER = new Router();
+window.navigate = function (path) {
+  if (window.ROUTER) {
+    window.ROUTER.navigate(path);
+  } else {
+    window.location.hash = path.startsWith('/') ? path : '/' + path;
+  }
+};
