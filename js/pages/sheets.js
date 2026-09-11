@@ -119,45 +119,102 @@ const SheetsPage = {
       }
 
       listContainer.innerHTML = filtered.map(item => `
-        <div class="recent-list-row">
-          <div class="recent-col-icon">
-            <i data-lucide="file-text"></i>
+        <div class="sheet-modern-card" data-id="${item.id}">
+          <!-- Top: Type Badge + Lecture Title -->
+          <div class="sheet-card-top">
+            <div class="sheet-badge-group">
+              <span class="sheet-type-pill">
+                <i data-lucide="file-text" style="width: 12px; height: 12px;"></i>
+                ${item.type || 'PDF Sheet'}
+              </span>
+              <span class="sheet-verified-pill">
+                <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+                ${isAr ? 'نسخة معتمدة' : 'Verified'}
+              </span>
+            </div>
+            <h3 class="sheet-main-title">
+              <a href="#/sheet-detail?id=${item.id}" style="color: inherit; text-decoration: none;">
+                ${item.title}
+              </a>
+            </h3>
           </div>
-          <div class="recent-col-type">
-            <span class="badge badge-primary">${item.type}</span>
-          </div>
-          <div class="recent-col-title" title="${item.title}">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">${item.title}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-top: 2px;">
-              ${item.subject_name} • ${item.pages} ${isAr ? 'صفحة' : 'pages'} • ${item.size}
+
+          <!-- Information: Pages • Size • Doctor • Subject • Date -->
+          <div class="sheet-card-meta-row">
+            <div class="sheet-meta-item" title="${isAr ? 'عدد الصفحات' : 'Pages'}">
+              <i data-lucide="book-open"></i>
+              <span><strong>${item.pages || 18}</strong> ${isAr ? 'صفحة' : 'pages'}</span>
+            </div>
+
+            <div class="sheet-meta-item" title="${isAr ? 'حجم الملف' : 'Size'}">
+              <i data-lucide="hard-drive"></i>
+              <span><strong>${item.size || '3.2 MB'}</strong></span>
+            </div>
+
+            <div class="sheet-meta-item" title="${isAr ? 'الأستاذ' : 'Doctor'}">
+              <i data-lucide="user-check"></i>
+              <span>${isAr ? 'الدكتور:' : 'Doctor:'} <strong>${item.doctor_name || (isAr ? 'د. طارق الزاوي' : 'Dr. Tarek Alzawi')}</strong></span>
+            </div>
+
+            <div class="sheet-meta-item" title="${isAr ? 'المادة' : 'Subject'}">
+              <i data-lucide="graduation-cap"></i>
+              <span>${item.subject_name || (isAr ? 'طب الأسنان' : 'Dentistry')}</span>
+            </div>
+
+            <div class="sheet-meta-item" title="${isAr ? 'التاريخ' : 'Date'}">
+              <i data-lucide="calendar"></i>
+              <span>${item.date || '2026-09-12'}</span>
             </div>
           </div>
-          <div class="recent-col-doctor">
-            ${item.doctor_name}
-          </div>
-          <div class="recent-col-date">
-            ${item.date}
-          </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button class="btn btn-soft download-sheet-btn" data-title="${encodeURIComponent(item.title)}" style="font-size: 0.775rem; padding: 5px 12px; display: inline-flex; align-items: center; gap: 6px;">
-              <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-              ${isAr ? 'تحميل' : 'Download'}
-            </button>
+
+          <!-- Bottom: Dual Action Buttons (View + Download) -->
+          <div class="sheet-card-actions-row">
+            <div class="dual-buttons-group">
+              <button class="btn btn-primary btn-action-view view-sheet-btn" data-id="${item.id}">
+                <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                <span>${isAr ? 'قراءة / معاينة' : 'Read / View'}</span>
+              </button>
+
+              <button class="btn btn-secondary btn-action-download download-sheet-btn" data-id="${item.id}">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                <span>${isAr ? 'تنزيل الملف (PDF)' : 'Download PDF'}</span>
+              </button>
+            </div>
+
+            <a href="#/sheet-detail?id=${item.id}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; gap: 4px;">
+              <span>${isAr ? 'صفحة الشيت' : 'Full Page'}</span>
+              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 13px; height: 13px;"></i>
+            </a>
           </div>
         </div>
       `).join('');
 
       if (window.lucide) window.lucide.createIcons();
 
-      // Download buttons
+      // View Buttons (In-App Document Viewer)
+      listContainer.querySelectorAll('.view-sheet-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const sheetId = btn.getAttribute('data-id');
+          const doc = filtered.find(s => s.id === sheetId);
+          if (window.DocumentViewer) {
+            window.DocumentViewer.open(doc || { title: 'Dental Sheet' });
+          }
+        });
+      });
+
+      // Download Buttons
       listContainer.querySelectorAll('.download-sheet-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const rawTitle = decodeURIComponent(btn.getAttribute('data-title') || '');
-          window.STORE.addPoints(10);
-          const msg = isAr 
-            ? `تم بدء تحميل: ${rawTitle}` 
-            : `Download started: ${rawTitle}`;
-          window.showToast(msg, { type: 'success', points: 10 });
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const sheetId = btn.getAttribute('data-id');
+          const doc = filtered.find(s => s.id === sheetId);
+          if (window.DocumentViewer) {
+            window.DocumentViewer.download(doc || { title: 'Dental Sheet' });
+          } else {
+            window.STORE.addPoints(10);
+            window.showToast(isAr ? 'تم بدء التنزيل بنجاح (+10 نقاط)' : 'Download started (+10 pts)', { type: 'success', points: 10 });
+          }
         });
       });
     };

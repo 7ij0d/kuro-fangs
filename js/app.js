@@ -7,9 +7,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 1. Initialize Curriculum Data
   await window.DATA.init();
 
-  // 2. Initialize Subject Modal Listeners
+  // 2. Initialize Subject Modal & In-App Document Viewer
   if (window.SubjectModal) {
     window.SubjectModal.init();
+  }
+  if (window.DocumentViewer) {
+    window.DocumentViewer.init();
   }
 
   // 3. Setup Language & Direction Handler
@@ -151,6 +154,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   router.register('/', (c, q) => window.HomePage.render(c, q));
   router.register('/sheets', (c, q) => window.SheetsPage.render(c, q));
+  router.register('/sheet-detail', (c, q) => window.SheetDetailPage.render(c, q));
+  router.register('/sheet/:id', (c, id, q) => window.SheetDetailPage.render(c, id, q));
   router.register('/videos', (c, q) => window.SecondaryPages.renderVideos(c, q));
   router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
   router.register('/exams', (c, q) => window.ExamsPage.render(c, q));
