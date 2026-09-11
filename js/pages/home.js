@@ -10,52 +10,69 @@ const HomePage = {
 
   facultyNews: [
     {
-      id: 'news-1',
-      title_ar: 'مواعيد التسجيل وبدء الدراسة للعام الجامعي 2026 - 2027',
-      title_en: 'Registration Schedule & Academic Year 2026 - 2027 Commencement',
-      dept_ar: 'إدارة الكلية والشؤون الأكاديمية',
-      dept_en: 'Faculty Administration & Academic Affairs',
-      date: '2026/09/10',
-      badge_ar: 'إعلان رسمي',
-      badge_en: 'Official Notice',
+      id: 'alt_2026_01',
+      title_ar: 'إعلان هام لطلبة الدفعة 33 والطلبة التكميلي (تأجيل الامتحانات وتجديد القيد)',
+      title_en: 'Important Notice for Batch 33 & Complementary Students',
+      dept_ar: 'قسم الدراسة والامتحانات – كلية طب وجراحة الفم والأسنان، جامعة طرابلس',
+      dept_en: 'Study & Exams Department — Faculty of Dentistry, University of Tripoli',
+      date: '2026/09/11',
+      badge_ar: 'هام جداً • تأجيل وتسجيل',
+      badge_en: 'Urgent • Registration & Schedule',
       badge_type: 'official',
       cover: 'assets/covers/gen-med.webp',
-      summary_ar: 'اعتماد التقويم الأكاديمي الرسمي وانطلاق المحاضرات النظرية بالقاعات الرئيسية، مع التأكيد على ضرورة تثبيت الجداول والالتزام بالمواعيد المحددة.',
-      summary_en: 'Official academic calendar approved and theoretical lectures commenced in main auditoriums. All students are advised to confirm schedules.',
-      details_ar: 'تعلن إدارة كلية طب وجراحة الفم والأسنان عن انطلاق العام الجامعي الجديد 2026 - 2027 لطلبة السنة الثالثة وفق التقويم المعتمد. يرجى من جميع الطلبة الحضور للقاعات والمدرجات المخصصة واستلام خطة المقررات الدراسية الـ 12 من ممثلي الأقسام الأكاديمية.',
-      details_en: 'The Faculty of Dentistry announces the official commencement of the 2026-2027 academic year for Year 3 dental surgery students in accordance with the university calendar.'
+      summary_ar: 'الموافقة على دخول جميع الطلبة وتأجيل الدور الثاني لـ 21 سبتمبر وتجديد القيد للطلبة التكميلي.',
+      summary_en: 'Approval for all students to sit exams, 2nd round postponed to Sept 21, and registration renewal dates.',
+      details_ar: '1. تمت الموافقة على دخول جميع الطلبة (دفعة 33 أو تكميلي) للامتحانات دون استثناء (مقرر واحد أو أكثر).\n2. تأجيل بداية امتحانات الدور الثاني إلى يوم الاثنين 21/09/2026.\n3. تجديد القيد للطلبة التكميلي خلال أيام: الأحد 13/09، الاثنين 14/09، الثلاثاء 15/09/2026 وتجديد الاسم بمكتب الدراسة والامتحانات.\nتنبيه: لن يُسمح بدخول الامتحان لأي طالب تكميلي ما لم يجدد قيده ويسجل اسمه.',
+      details_en: '1. Entry approved for all students in 2nd round exams regardless of failed courses.\n2. 2nd round exams postponed to Monday 21/09/2026.\n3. Complementary student registration renewal on Sept 13, 14, and 15, 2026 at the Study & Exams office.'
     },
     {
-      id: 'news-2',
-      title_ar: 'تنبيهات وضوابط معامل الفانتوم والتدريب السريري',
-      title_en: 'Phantom Simulation Lab Regulations & Clinical Training Protocol',
-      dept_ar: 'قسم العلاج التحفظي والاستعاضة السنية',
-      dept_en: 'Dept. of Conservative Dentistry & Prosthodontics',
-      date: '2026/09/08',
-      badge_ar: 'تنبيه سريري',
-      badge_en: 'Clinical Alert',
-      badge_type: 'alert',
-      cover: 'assets/covers/cons-endo.webp',
-      summary_ar: 'ضرورة الالتزام الصارم بالزي الطبي الكامل وإجراءات مكافحة العدوى والتعقيم المعتمدة داخل معامل المحاكاة السنية قبل بدء التطبيقات العملية.',
-      summary_en: 'Mandatory clinical attire, infection control protocols, and sterilization guidelines strictly enforced in all phantom simulation labs.',
-      details_ar: 'تهيب رئاسة أقسام العلاج التحفظي والاستعاضة بطلبة السنة الثالثة الالتزام باللائحة الداخلية لمعامل الفانتوم: ارتداء اللاب كوت والقفازات وواقي العينين، والحفاظ على نظافة رؤوس المحاكاة وتجهيز أدوات الحفر والترميم المعتمدة قبل موعد الجلسة بـ 10 دقائق.',
-      details_en: 'Students are required to wear complete protective clinical attire, bring approved dental instruments, and maintain sterilization standards across all phantom head simulation sessions.'
-    },
-    {
-      id: 'news-3',
-      title_ar: 'تحديثات وتعليمات جدول الامتحانات النصفية الرسمية',
-      title_en: 'Midterm Examination Schedule Updates & Seating Guidelines',
-      dept_ar: 'لجنة الامتحانات والمراقبة المركزية',
-      dept_en: 'Central Examination Board',
-      date: '2026/09/05',
-      badge_ar: 'جداول الامتحانات',
-      badge_en: 'Exam Schedule',
+      id: 'alt_2026_02',
+      title_ar: 'جدول الامتحانات النهائية للدور الثاني لطلبة السنة الرابعة (2025 / 2026)',
+      title_en: 'Final Exams Schedule - 2nd Round (Year 4, 2025/2026)',
+      dept_ar: 'قسم الدراسة والامتحانات – كلية طب وجراحة الفم والأسنان، جامعة طرابلس',
+      dept_en: 'Study & Exams Department — Faculty of Dentistry, University of Tripoli',
+      date: '2026/09/11',
+      badge_ar: 'امتحانات • السنة الرابعة',
+      badge_en: 'Exams • Year 4',
       badge_type: 'exam',
+      cover: 'assets/covers/cons-endo.webp',
+      summary_ar: 'مواعيد الامتحانات النهائية للدور الثاني من الساعة 09:00 صباحاً إلى 12:00 ظهراً تحت المسرح.',
+      summary_en: 'Final exams for Year 4 from 09:00 AM to 12:00 PM under the theater.',
+      details_ar: 'تعلن الكلية عن مواعيد الامتحانات النهائية للدور الثاني لطلبة السنة الرابعة.\n• موعد الامتحان: من الساعة 09:00 صباحاً إلى 12:00 ظهراً.\n• المكان: تحت المسرح.\nيرجى الالتزام بالحضور قبل بداية الامتحان بوقت كافٍ.',
+      details_en: 'Final exams for Year 4 (2nd Round). Time: 09:00 AM – 12:00 PM. Location: Under the Theater.'
+    },
+    {
+      id: 'alt_2026_03',
+      title_ar: 'إطلاق الصفحة الإلكترونية الرسمية للطلبة (tables.dentaluot.com)',
+      title_en: 'Launch of Official Student Web Portal (tables.dentaluot.com)',
+      dept_ar: 'د. زياد محمد نصر (رئيس قسم الدراسة والامتحانات)',
+      dept_en: 'Dr. Ziad Mohamed Nasr — Head of Study & Exams Dept',
+      date: '2026/09/11',
+      badge_ar: 'موقع رسمي • بوابة الطلبة',
+      badge_en: 'Official Portal • Students',
+      badge_type: 'alert',
+      cover: 'assets/covers/omdr.webp',
+      summary_ar: 'إطلاق الصفحة الرسمية للاطلاع على الجداول والخطة والنتائج وجداول الامتحانات.',
+      summary_en: 'Official web portal launched for schedules, study plans, results, and examinations.',
+      details_ar: 'تم إطلاق الصفحة الإلكترونية الرسمية للاطلاع على الجداول الدراسية، الخطة الدراسية، النتائج، وجداول الامتحانات.\n🔗 رابط الدخول المباشر: http://tables.dentaluot.com\nيرجى اعتماد الصفحة كمصدر رسمي للمعلومات الأكاديمية.',
+      details_en: 'Official student portal launched at http://tables.dentaluot.com for schedules and results.',
+      url: 'http://tables.dentaluot.com'
+    },
+    {
+      id: 'alt_2026_04',
+      title_ar: 'الخطة الدراسية الرسمية للعام الجامعي 2026 / 2027',
+      title_en: 'Official Academic Plan for Year 2026 / 2027',
+      dept_ar: 'قسم الدراسة والامتحانات – كلية طب وجراحة الفم والأسنان، جامعة طرابلس',
+      dept_en: 'Study & Exams Department — Faculty of Dentistry, University of Tripoli',
+      date: '2026/09/11',
+      badge_ar: 'الخطة الدراسية • 2026 / 2027',
+      badge_en: 'Academic Plan • 2026 / 2027',
+      badge_type: 'official',
       cover: 'assets/covers/omfs.webp',
-      summary_ar: 'نشر الجداول الزمنية المعتمدة للامتحانات النصفية للمواد الـ 12 مع تحديد القاعات والمدرجات وضوابط الدخول والبطاقة الجامعية.',
-      summary_en: 'Official timetable published for all 12 midterm subjects with assigned examination auditoriums and university ID entry requirements.',
-      details_ar: 'تم اعتماد الجدول الزمني الرسمي للامتحانات النصفية النظري لجميع المقررات الـ 12. تبدأ الامتحانات اعتباراً من يوم الأحد 03 يناير 2027 بمقرر الباطنة العامة (MS 310). يرجى التواجد قبل موعد الامتحان بـ 15 دقيقة مع إبراز البطاقة التعريفية الجامعية.',
-      details_en: 'Midterm theory examinations officially commence on Sunday, January 3, 2027 with General Medicine (MS 310). Students are requested to bring student IDs.'
+      summary_ar: 'مواعيد الدراسة والامتحانات والمراجعة الموضوعية وإعلان النتائج للعام 2026 / 2027.',
+      summary_en: 'Timelines for classes, exams, objective review, and results release for 2026/2027.',
+      details_ar: 'تنشر الكلية الخطة الدراسية المتضمنة مواعيد الدراسة والامتحانات والمراجعة الموضوعية وإعلان النتائج للعام 2026 / 2027.\nملاحظة: المواعيد المرتبطة بالمناسبات الهجرية تخضع لما يصدر عن الجهات الرسمية.',
+      details_en: 'Academic schedule and exam plan published for the 2026/2027 academic year.'
     }
   ],
 
@@ -95,7 +112,30 @@ const HomePage = {
     const nextExam = HomePage.getNextExam(isAr);
     const countdown = HomePage.calculateCountdown(nextExam.dateStr);
 
-    const newsCardsHTML = HomePage.facultyNews.map(item => {
+    const rawAlerts = window.DATA ? window.DATA.getAlerts() : [];
+    const activeNews = (rawAlerts && rawAlerts.length > 0)
+      ? rawAlerts.map(item => ({
+          id: item.id,
+          title_ar: item.title_ar,
+          title_en: item.title_en || item.title_ar,
+          dept_ar: item.publisher_ar || 'قسم الدراسة والامتحانات – كلية طب وجراحة الفم والأسنان',
+          dept_en: item.publisher_en || 'Study & Exams Dept — Faculty of Dentistry',
+          date: item.date || '2026/09/11',
+          badge_ar: item.badge_ar || 'إعلان رسمي',
+          badge_en: item.badge_en || 'Official Notice',
+          badge_type: item.type === 'urgent' ? 'official' : (item.type === 'exam' ? 'exam' : 'alert'),
+          cover: item.url ? 'assets/covers/omdr.webp' : (item.type === 'exam' ? 'assets/covers/cons-endo.webp' : 'assets/covers/gen-med.webp'),
+          summary_ar: item.content_ar ? item.content_ar.split('\n')[0] : '',
+          summary_en: item.content_en || item.content_ar,
+          details_ar: item.content_ar,
+          details_en: item.content_en || item.content_ar,
+          url: item.url || null
+        }))
+      : HomePage.facultyNews;
+
+    HomePage.currentActiveNews = activeNews;
+
+    const newsCardsHTML = activeNews.map(item => {
       const title = isAr ? item.title_ar : item.title_en;
       const dept = isAr ? item.dept_ar : item.dept_en;
       const badge = isAr ? item.badge_ar : item.badge_en;
@@ -213,10 +253,11 @@ const HomePage = {
   },
 
   openNewsModal(newsId) {
-    const item = HomePage.facultyNews.find(n => n.id === newsId);
+    const pool = (HomePage.currentActiveNews && HomePage.currentActiveNews.length > 0) ? HomePage.currentActiveNews : HomePage.facultyNews;
+    const item = pool.find(n => n.id === newsId) || HomePage.facultyNews.find(n => n.id === newsId);
     if (!item) return;
 
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
     const title = isAr ? item.title_ar : item.title_en;
     const dept = isAr ? item.dept_ar : item.dept_en;
     const badge = isAr ? item.badge_ar : item.badge_en;
@@ -247,11 +288,17 @@ const HomePage = {
         <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4;">${title}</h2>
         <div style="font-size: 0.825rem; font-weight: 600; color: var(--brand-burgundy); margin-bottom: 16px;">${dept}</div>
 
-        <div style="background: var(--bg-surface-subtle); border-radius: 8px; padding: 16px; font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px;">
+        <div style="background: var(--bg-surface-subtle); border-radius: 8px; padding: 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; white-space: pre-line;">
           ${details}
         </div>
 
-        <div style="display: flex; justify-content: flex-end;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+          ${item.url ? `
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+              <span>${isAr ? 'فتح البوابة الرسمية' : 'Open Portal'}</span>
+            </a>
+          ` : '<span></span>'}
           <button class="btn btn-secondary" onclick="window.HomePage.closeNewsModal()" style="padding: 8px 18px; font-size: 0.85rem;">
             ${isAr ? 'إغلاق' : 'Close'}
           </button>
