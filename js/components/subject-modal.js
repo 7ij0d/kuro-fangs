@@ -112,7 +112,7 @@ const SubjectModal = {
       }
     ];
 
-    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80';
+    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || `assets/covers/${subject.id}.jpg`;
     const arrowIcon = isAr ? 'arrow-left' : 'arrow-right';
 
     modalBox.innerHTML = `
@@ -120,7 +120,7 @@ const SubjectModal = {
       <div class="modal-header">
         <div class="modal-header-meta">
           <div class="modal-subject-banner-thumb">
-            <img src="${coverImg}" alt="${primaryTitle}" />
+            <img src="${coverImg}" alt="${primaryTitle}" onerror="this.onerror=null; this.src='assets/covers/gen-med.jpg';" />
           </div>
           <div class="modal-title-wrap">
             <h2>${primaryTitle}</h2>

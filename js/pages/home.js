@@ -82,13 +82,13 @@ const HomePage = {
       const primaryTitle = isAr ? subj.name_ar : subj.name_en;
       const subTitle = isAr ? subj.name_en : subj.name_ar;
       const desc = isAr ? (subj.description_ar || '') : (subj.description_en || subj.description_ar || '');
-      const coverImg = subj.cover_image || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80';
+      const coverImg = subj.cover_image || window.DATA?.subjectCovers?.[subj.id] || `assets/covers/${subj.id}.jpg`;
 
       return `
         <div class="subject-card" onclick="window.SubjectModal.open('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
           <!-- 120px Subject Cover Banner with Smooth Gradient Overlay -->
           <div class="subject-cover-wrap">
-            <img src="${coverImg}" alt="${primaryTitle}" class="subject-cover-img" loading="lazy" />
+            <img src="${coverImg}" alt="${primaryTitle}" class="subject-cover-img" loading="eager" onerror="this.onerror=null; this.src='assets/covers/gen-med.jpg';" />
             <div class="subject-cover-gradient"></div>
             <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
           </div>

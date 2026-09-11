@@ -7,13 +7,19 @@
       "code": "MED-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي"
+      ],
       "color": "#52C98A",
       "icon": "💊",
       "description_ar": "أمراض الباطنة والقلب والغدد الصماء وعلاقتها بصحة الفم وممارسة طب الأسنان",
       "sheet_count": 20,
-      "doctor_ids": ["dr-sara"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-sara"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/gen-med.jpg"
     },
     {
       "id": "gen-surgery",
@@ -22,13 +28,19 @@
       "code": "GS-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي"
+      ],
       "color": "#FF8C42",
       "icon": "⚕️",
       "description_ar": "أساسيات الجراحة العامة، التعقيم، التئام الجروح، النزيف، الصدمة، والحروق",
       "sheet_count": 22,
-      "doctor_ids": ["dr-mahmoud"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-mahmoud"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/gen-surgery.jpg"
     },
     {
       "id": "fixed-pros",
@@ -37,13 +49,20 @@
       "code": "FP-302",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي", "عملي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي",
+        "عملي"
+      ],
       "color": "#A78BFA",
       "icon": "👑",
       "description_ar": "تحضير التيجان والجسور، خطوط الإنهاء، الطبعات المطاطية، والتركيبات الثابتة",
       "sheet_count": 18,
-      "doctor_ids": ["dr-nadia"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-nadia"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/fixed-pros.jpg"
     },
     {
       "id": "omfs",
@@ -52,13 +71,20 @@
       "code": "OMS-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي", "عملي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي",
+        "عملي"
+      ],
       "color": "#5BA4CF",
       "icon": "🔪",
       "description_ar": "التخدير الموضعي، تقنيات قلع الأسنان، مضاعفات القلع، والعدوى السنية والوجهية",
       "sheet_count": 16,
-      "doctor_ids": ["dr-youssef"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-youssef"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/omfs.jpg"
     },
     {
       "id": "oral-diseases",
@@ -67,13 +93,20 @@
       "code": "OD-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي"
+      ],
       "color": "#E8A0BF",
       "icon": "🔬",
       "description_ar": "دراسة الأمراض والآفات التي تصيب الأنسجة الفموية، الأورام، والآفات المخاطية والعظمية",
       "sheet_count": 24,
-      "doctor_ids": ["dr-ahmed", "dr-fatima"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-ahmed",
+        "dr-fatima"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/oral-diseases.jpg"
     },
     {
       "id": "endo",
@@ -82,13 +115,20 @@
       "code": "END-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي", "عملي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي",
+        "عملي"
+      ],
       "color": "#FF6B6B",
       "icon": "⚡",
       "description_ar": "تشخيص أمراض اللب والذروة، فتح الحجرة اللبية، تنظيف وتوسيع القنوات، وحشو الجذور",
       "sheet_count": 16,
-      "doctor_ids": ["dr-khalid"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-khalid"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/endo.jpg"
     },
     {
       "id": "omdr",
@@ -97,13 +137,19 @@
       "code": "OMDR-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي"
+      ],
       "color": "#E8845C",
       "icon": "📋",
       "description_ar": "الفحص الإكلينيكي وتشخيص الآفات الفموية، تقنيات وقراءة أشعة الأسنان والفكين",
       "sheet_count": 15,
-      "doctor_ids": ["dr-aisha"],
-      "is_exam_heavy": false
+      "doctor_ids": [
+        "dr-aisha"
+      ],
+      "is_exam_heavy": false,
+      "cover_image": "assets/covers/omdr.jpg"
     },
     {
       "id": "preventive",
@@ -112,13 +158,19 @@
       "code": "PREV-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي"
+      ],
       "color": "#B4D455",
       "icon": "🌿",
       "description_ar": "طرق الوقاية من النخر وأمراض اللثة، الفلورايد، المواد السادة للشقوق، وصحة المجتمع",
       "sheet_count": 12,
-      "doctor_ids": ["dr-layla"],
-      "is_exam_heavy": false
+      "doctor_ids": [
+        "dr-layla"
+      ],
+      "is_exam_heavy": false,
+      "cover_image": "assets/covers/preventive.jpg"
     },
     {
       "id": "cons-endo",
@@ -127,13 +179,20 @@
       "code": "CONS-302",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي", "عملي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي",
+        "عملي"
+      ],
       "color": "#4ECDC4",
       "icon": "🦷",
       "description_ar": "تحضير التجاويف المركبة، الحشوات الضوئية التجميلية، حماية اللب، والعملي على الفانتوم",
       "sheet_count": 20,
-      "doctor_ids": ["dr-khalid"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-khalid"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/cons-endo.jpg"
     },
     {
       "id": "ortho",
@@ -142,13 +201,19 @@
       "code": "ORT-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي"
+      ],
       "color": "#82C0CC",
       "icon": "📐",
       "description_ar": "مبادئ نمو وتطور الوجه والفكين، تصنيف حالات سوء الإطباق، وتصميم الأجهزة التقويمية",
       "sheet_count": 12,
-      "doctor_ids": ["dr-hana"],
-      "is_exam_heavy": false
+      "doctor_ids": [
+        "dr-hana"
+      ],
+      "is_exam_heavy": false,
+      "cover_image": "assets/covers/ortho.jpg"
     },
     {
       "id": "pedo",
@@ -157,13 +222,19 @@
       "code": "PED-301",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي"
+      ],
       "color": "#F7B2BD",
       "icon": "🧒",
       "description_ar": "العناية بالأسنان اللبنية والمختلطة، تعديل سلوك الطفل، وحافظات المسافة في الفك",
       "sheet_count": 11,
-      "doctor_ids": ["dr-rima"],
-      "is_exam_heavy": false
+      "doctor_ids": [
+        "dr-rima"
+      ],
+      "is_exam_heavy": false,
+      "cover_image": "assets/covers/pedo.jpg"
     },
     {
       "id": "removable-pros",
@@ -172,13 +243,20 @@
       "code": "RP-302",
       "year": 3,
       "semester": "both",
-      "exam_schedule": ["نصفي", "نهائي", "عملي"],
+      "exam_schedule": [
+        "نصفي",
+        "نهائي",
+        "عملي"
+      ],
       "color": "#FFD93D",
       "icon": "🦿",
       "description_ar": "خطوات تصنيع وتركيب الأطقم الكاملة والجزئية، قياسات الإطباق، والتسجيل الفكي",
       "sheet_count": 18,
-      "doctor_ids": ["dr-mustafa"],
-      "is_exam_heavy": true
+      "doctor_ids": [
+        "dr-mustafa"
+      ],
+      "is_exam_heavy": true,
+      "cover_image": "assets/covers/removable-pros.jpg"
     }
   ]
 }

@@ -15,20 +15,21 @@ class DataService {
     this.requirements = [];
     this.loaded = false;
 
-    // High quality tailored cover banners for each of the 12 dental subjects
+    // High quality tailored cover banners stored locally in assets/covers/
     this.subjectCovers = {
-      'gen-med': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80',
-      'gen-surgery': 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&auto=format&fit=crop&q=80',
-      'fixed-pros': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80',
-      'omfs': 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&auto=format&fit=crop&q=80',
-      'oral-diseases': 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&auto=format&fit=crop&q=80',
-      'endo': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&auto=format&fit=crop&q=80',
-      'omdr': 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&auto=format&fit=crop&q=80',
-      'preventive': 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format&fit=crop&q=80',
-      'cons-endo': 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=600&auto=format&fit=crop&q=80',
-      'ortho': 'https://images.unsplash.com/photo-1593054942475-b82772549a17?w=600&auto=format&fit=crop&q=80',
-      'pediatric': 'https://images.unsplash.com/photo-1588776814546-daab30f310ce?w=600&auto=format&fit=crop&q=80',
-      'removable-pros': 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=600&auto=format&fit=crop&q=80'
+      'gen-med': 'assets/covers/gen-med.jpg',
+      'gen-surgery': 'assets/covers/gen-surgery.jpg',
+      'fixed-pros': 'assets/covers/fixed-pros.jpg',
+      'omfs': 'assets/covers/omfs.jpg',
+      'oral-diseases': 'assets/covers/oral-diseases.jpg',
+      'endo': 'assets/covers/endo.jpg',
+      'omdr': 'assets/covers/omdr.jpg',
+      'preventive': 'assets/covers/preventive.jpg',
+      'cons-endo': 'assets/covers/cons-endo.jpg',
+      'ortho': 'assets/covers/ortho.jpg',
+      'pedo': 'assets/covers/pedo.jpg',
+      'pediatric': 'assets/covers/pediatric.jpg',
+      'removable-pros': 'assets/covers/removable-pros.jpg'
     };
   }
 
@@ -90,7 +91,7 @@ class DataService {
 
     // Attach high-res cover images to each subject
     this.subjects.forEach(s => {
-      s.cover_image = this.subjectCovers[s.id] || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80';
+      s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.jpg`;
     });
 
     if (!this.alerts || this.alerts.length === 0) {
