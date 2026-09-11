@@ -276,6 +276,7 @@ const HomePage = {
     const t = (k) => window.I18N.t(k);
     const isAr = window.I18N.getLang() === 'ar';
     const subjects = window.DATA.getSubjects();
+    const equippedSkin = window.STORE ? window.STORE.getEquippedSkinData() : { image: 'assets/fox_skins/fox_skin_1.jpg', name_ar: 'الثعلب الكلاسيكي', name_en: 'Classic Kuro Fox' };
 
     container.innerHTML = `
       <!-- 1. Faculty Official News & Next Exam Countdown Section -->
@@ -286,6 +287,17 @@ const HomePage = {
         <div class="hero-text-wrap">
           <h1 id="hero-title">${t('heroTitle')}</h1>
         </div>
+
+        <!-- In-Flow Compact Hero Mascot Widget (<= 180px, no absolute/fixed) -->
+        <a href="#/rewards" class="hero-mascot-compact-card" title="${isAr ? 'متجر سكنات الثعلب' : 'Fox Mascot Hub'}">
+          <div class="hero-mascot-avatar-wrap">
+            <img src="${equippedSkin.image}" alt="${isAr ? equippedSkin.name_ar : equippedSkin.name_en}" class="current-mascot-img hero-mascot-img" />
+          </div>
+          <div class="hero-mascot-meta">
+            <span class="hero-mascot-badge">🦊 ${isAr ? 'الكائن المدرس' : 'Study Mascot'}</span>
+            <span class="hero-mascot-name">${isAr ? equippedSkin.name_ar : equippedSkin.name_en}</span>
+          </div>
+        </a>
       </div>
 
       <!-- The 12 Subjects Showcase Grid (Unified 12 Subjects) -->
