@@ -266,7 +266,7 @@ const SubjectModal = {
                 </div>
               `
           ) : files.map(item => `
-            <div class="modal-file-card">
+            <div class="modal-file-card" onclick="SubjectModal.previewDoc('${item.id}');" style="cursor: pointer;">
               <!-- Top: Type Badge + Lecture Title -->
               <div class="modal-file-top">
                 <span class="sheet-type-pill">
@@ -303,12 +303,12 @@ const SubjectModal = {
 
               <!-- Bottom: Dual Action Buttons -->
               <div class="modal-file-actions-row">
-                <button class="btn btn-primary btn-sm btn-action-view" onclick="SubjectModal.previewDoc('${item.id}');">
+                <button class="btn btn-primary btn-sm btn-action-view" onclick="event.stopPropagation(); SubjectModal.previewDoc('${item.id}');">
                   <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
                   <span>${isAr ? 'قراءة / معاينة' : 'Read / View'}</span>
                 </button>
 
-                <button class="btn btn-secondary btn-sm btn-action-download" onclick="SubjectModal.downloadDoc('${item.id}');">
+                <button class="btn btn-secondary btn-sm btn-action-download" onclick="event.stopPropagation(); SubjectModal.downloadDoc('${item.id}');">
                   <i data-lucide="download" style="width: 14px; height: 14px;"></i>
                   <span>${isAr ? 'تنزيل PDF' : 'Download'}</span>
                 </button>

@@ -152,12 +152,21 @@ const SheetsPage = {
 
       if (window.lucide) window.lucide.createIcons();
 
-      // View Buttons (Navigate to Dedicated Full Page Sheet Route)
+      // Direct Dedicated Sheet Navigation (Cards & View Buttons)
+      listContainer.querySelectorAll('.sheet-modern-card').forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.download-sheet-btn')) return;
+          const sheetId = card.getAttribute('data-id');
+          if (sheetId) window.location.hash = '#/sheet-detail?id=' + sheetId;
+        });
+      });
+
       listContainer.querySelectorAll('.view-sheet-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const sheetId = btn.getAttribute('data-id');
-          window.location.hash = '#/sheet-detail?id=' + sheetId;
+          if (sheetId) window.location.hash = '#/sheet-detail?id=' + sheetId;
         });
       });
 
