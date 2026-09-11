@@ -1,17 +1,17 @@
 /**
- * KURO FANGS — STORE (State & LocalStorage Manager)
- * Year 3 Dental SaaS Platform
+ * KURO FANGS — STORE (LOCK-IN EDITION)
+ * Manages State, Streaks, Points, Favorites, Notes & Lock-in Sessions
  */
 
 class AppStore {
   constructor() {
     this.STORAGE_KEYS = {
       POINTS: 'kf_user_points',
+      STREAK: 'kf_user_streak',
+      LAST_STREAK_DATE: 'kf_last_streak_date',
+      LAST_SHEET: 'kf_last_sheet',
       FAVORITES: 'kf_user_favorites',
       NOTES: 'kf_user_notes',
-      QUIZ_SCORES: 'kf_quiz_scores',
-      CALC_DATA: 'kf_calc_data',
-      NOTIF_READ: 'kf_notif_read',
       USER_INFO: 'kf_user_info'
     };
 
@@ -21,10 +21,25 @@ class AppStore {
 
   initDefaults() {
     if (localStorage.getItem(this.STORAGE_KEYS.POINTS) === null) {
-      localStorage.setItem(this.STORAGE_KEYS.POINTS, '25'); // Default 25 points as specified
+      localStorage.setItem(this.STORAGE_KEYS.POINTS, '25');
+    }
+    if (localStorage.getItem(this.STORAGE_KEYS.STREAK) === null) {
+      localStorage.setItem(this.STORAGE_KEYS.STREAK, '1'); // 1 day streak
+    }
+    if (!localStorage.getItem(this.STORAGE_KEYS.LAST_SHEET)) {
+      localStorage.setItem(this.STORAGE_KEYS.LAST_SHEET, JSON.stringify({
+        id: 'sh-1',
+        title: 'Local Anesthesia Techniques & Landmarks',
+        subject_name: 'جراحة الفم والوجه والفكين 1',
+        doctor_name: 'د. يوسف التاجوري',
+        progress: 65
+      }));
     }
     if (!localStorage.getItem(this.STORAGE_KEYS.FAVORITES)) {
-      localStorage.setItem(this.STORAGE_KEYS.FAVORITES, JSON.stringify([]));
+      localStorage.setItem(this.STORAGE_KEYS.FAVORITES, JSON.stringify([
+        { id: 'sh-1', title: 'Local Anesthesia Techniques & Landmarks', type: 'sheet', subject_name: 'جراحة الفم 1' },
+        { id: 'sh-2', title: 'Preparation of Full Veneer Crown', type: 'sheet', subject_name: 'التركيبات الثابتة 2' }
+      ]));
     }
     if (!localStorage.getItem(this.STORAGE_KEYS.NOTES)) {
       localStorage.setItem(this.STORAGE_KEYS.NOTES, JSON.stringify([
@@ -40,13 +55,12 @@ class AppStore {
     if (!localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) {
       localStorage.setItem(this.STORAGE_KEYS.USER_INFO, JSON.stringify({
         name: 'طالب كورو',
-        title: 'السنة الثالثة — طب الأسنان',
+        title: 'السنة الثالثة — طب وجراحة الفم والأسنان',
         avatarText: 'ك'
       }));
     }
   }
 
-  // Subscribe to changes
   subscribe(callback) {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
@@ -71,7 +85,40 @@ class AppStore {
     return updated;
   }
 
-  // User info
+  // Study Streak (From Lock-in sidebar footer)
+  getStreak() {
+    return parseInt(localStorage.getItem(this.STORAGE_KEYS.STREAK) || '1', 10);
+  }
+
+  recordStreak() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastDate = localStorage.getItem(this.STORAGE_KEYS.LAST_STREAK_DATE);
+    if (lastDate !== today) {
+      const streak = this.getStreak() + 1;
+      localStorage.setItem(this.STORAGE_KEYS.STREAK, streak.toString());
+      localStorage.setItem(this.STORAGE_KEYS.LAST_STREAK_DATE, today);
+      this.addPoints(15);
+      this.notify('streak_updated', streak);
+      return streak;
+    }
+    return this.getStreak();
+  }
+
+  // Last opened sheet for "CONTINUE STUDYING" card
+  getLastSheet() {
+    try {
+      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.LAST_SHEET));
+    } catch {
+      return null;
+    }
+  }
+
+  setLastSheet(sheet) {
+    localStorage.setItem(this.STORAGE_KEYS.LAST_SHEET, JSON.stringify(sheet));
+    this.notify('last_sheet_changed', sheet);
+  }
+
+  // User Info
   getUserInfo() {
     try {
       return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) || {
@@ -105,7 +152,7 @@ class AppStore {
       favs.splice(idx, 1);
     } else {
       favs.push({ ...item, addedAt: new Date().toISOString() });
-      this.addPoints(2); // reward for bookmarking
+      this.addPoints(2);
     }
     localStorage.setItem(this.STORAGE_KEYS.FAVORITES, JSON.stringify(favs));
     this.notify('favorites_changed', favs);
@@ -145,20 +192,18 @@ class AppStore {
     this.notify('notes_changed', notes);
   }
 
-  // GPA Calculator data
   getCalculatorData() {
     try {
-      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.CALC_DATA)) || {};
+      return JSON.parse(localStorage.getItem('kf_calc_data')) || {};
     } catch {
       return {};
     }
   }
 
   saveCalculatorData(data) {
-    localStorage.setItem(this.STORAGE_KEYS.CALC_DATA, JSON.stringify(data));
+    localStorage.setItem('kf_calc_data', JSON.stringify(data));
     this.notify('calc_saved', data);
   }
 }
 
-// Global Store Instance
 window.STORE = new AppStore();

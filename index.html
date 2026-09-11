@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="منصة Kuro Fangs الأكاديمية لطلاب كلية طب وجراحة الفم والأسنان — السنة الثالثة" />
-  <meta name="theme-color" content="#2E7D32" />
-  <title>Kuro Fangs — كلية طب وجراحة الفم والأسنان</title>
+  <meta name="description" content="منصة Kuro Fangs (Lock-in) — المنظومة الطبية الذكية لطلاب كلية طب وجراحة الفم والأسنان السنة الثالثة" />
+  <meta name="theme-color" content="#080C14" />
+  <title>Kuro Fangs • Lock-in Dental SaaS</title>
 
   <!-- Google Fonts: IBM Plex Sans Arabic & Tajawal -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15,7 +15,7 @@
   <!-- Lucide Icons Library -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Kuro Fangs Design System Stylesheets -->
+  <!-- Lock-in Dark Luxury Stylesheets -->
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -27,149 +27,173 @@
 
   <div class="app-container">
     <!-- ==========================================================================
-         SIDEBAR (240px Fixed, Clean Grouped Navigation)
+         SIDEBAR (240px Fixed, Lock-in Dark Aesthetic)
          ========================================================================== -->
-    <aside id="sidebar" class="sidebar" aria-label="القائمة الجانبية الرئيسية">
+    <aside id="sidebar" class="sidebar" aria-label="القائمة الجانبية">
       <div class="sidebar-header">
-        <div class="brand-logo">🦷</div>
-        <div class="brand-info">
-          <span class="brand-name">Kuro Fangs</span>
-          <span class="brand-sub">طب الأسنان — سنة ثالثة</span>
+        <div class="brand-badge-box">Li</div>
+        <div class="brand-info-wrap">
+          <span class="brand-title">lock-in</span>
+          <span class="brand-tagline">Kuro Fangs • Dental</span>
         </div>
       </div>
 
       <nav class="sidebar-nav">
-        <!-- 1. الرئيسية -->
-        <div class="nav-group">
-          <span class="nav-group-title">الرئيسية</span>
+        <!-- 1. STUDY GROUP -->
+        <div class="nav-section">
+          <span class="nav-section-title">STUDY</span>
           <a href="#/" class="nav-item active" data-route="/">
-            <i data-lucide="layout-dashboard"></i>
-            <span>الرئيسية</span>
+            <i data-lucide="home"></i>
+            <span>Dashboard (الرئيسية)</span>
           </a>
-        </div>
-
-        <!-- 2. الدراسة -->
-        <div class="nav-group">
-          <span class="nav-group-title">الدراسة</span>
+          <a href="#/previous-years" class="nav-item" data-route="/previous-years">
+            <i data-lucide="calendar"></i>
+            <span>Study Plan (الخطة)</span>
+          </a>
           <a href="#/subjects" class="nav-item" data-route="/subjects">
             <i data-lucide="book-open"></i>
-            <span>المواد الدراسية (12)</span>
-          </a>
-          <a href="#/sheets" class="nav-item" data-route="/sheets">
-            <i data-lucide="file-text"></i>
-            <span>المحاضرات والملازم</span>
-          </a>
-          <a href="#/summaries" class="nav-item" data-route="/summaries">
-            <i data-lucide="file-check"></i>
-            <span>الملخصات المركزة</span>
-          </a>
-          <a href="#/notes" class="nav-item" data-route="/notes">
-            <i data-lucide="edit-3"></i>
-            <span>ملاحظاتي</span>
-          </a>
-        </div>
-
-        <!-- 3. التقييم -->
-        <div class="nav-group">
-          <span class="nav-group-title">التقييم</span>
-          <a href="#/exams" class="nav-item" data-route="/exams">
-            <i data-lucide="calendar-clock"></i>
-            <span>الامتحانات</span>
-          </a>
-          <a href="#/calculator" class="nav-item" data-route="/calculator">
-            <i data-lucide="calculator"></i>
-            <span>حاسبة الدرجات (GPA)</span>
+            <span>Materials (المواد 12)</span>
           </a>
           <a href="#/questions" class="nav-item" data-route="/questions">
             <i data-lucide="help-circle"></i>
-            <span>بنك الأسئلة</span>
+            <span>Questions (الأسئلة)</span>
           </a>
+        </div>
+
+        <!-- 2. REVIEW GROUP -->
+        <div class="nav-section">
+          <span class="nav-section-title">REVIEW</span>
           <a href="#/quizzes" class="nav-item" data-route="/quizzes">
             <i data-lucide="check-square"></i>
-            <span>الكويز التفاعلي</span>
-          </a>
-        </div>
-
-        <!-- 4. المحتوى -->
-        <div class="nav-group">
-          <span class="nav-group-title">المحتوى</span>
-          <a href="#/videos" class="nav-item" data-route="/videos">
-            <i data-lucide="video"></i>
-            <span>التسجيلات والشروحات</span>
-          </a>
-          <a href="#/images" class="nav-item" data-route="/images">
-            <i data-lucide="image"></i>
-            <span>أطلس الصور والأشعة</span>
-          </a>
-          <a href="#/flashcards" class="nav-item" data-route="/flashcards">
-            <i data-lucide="layers"></i>
-            <span>البطاقات التعليمية</span>
-          </a>
-        </div>
-
-        <!-- 5. الأرشيف -->
-        <div class="nav-group">
-          <span class="nav-group-title">الأرشيف</span>
-          <a href="#/previous-years" class="nav-item" data-route="/previous-years">
-            <i data-lucide="archive"></i>
-            <span>سنوات سابقة</span>
+            <span>Review (الكويزات)</span>
           </a>
           <a href="#/favorites" class="nav-item" data-route="/favorites">
             <i data-lucide="bookmark"></i>
-            <span>المفضلة</span>
+            <span>Bookmarks (المفضلة)</span>
+          </a>
+        </div>
+
+        <!-- 3. PROGRESS GROUP -->
+        <div class="nav-section">
+          <span class="nav-section-title">SIGNAL / PROGRESS</span>
+          <a href="#/calculator" class="nav-item" data-route="/calculator">
+            <i data-lucide="calculator"></i>
+            <span>GPA Calculator</span>
+          </a>
+          <a href="#/profile" class="nav-item" data-route="/profile">
+            <i data-lucide="award"></i>
+            <span>Progress & Badges</span>
+          </a>
+          <a href="#/notes" class="nav-item" data-route="/notes">
+            <i data-lucide="edit-3"></i>
+            <span>Clinical Notes</span>
+          </a>
+        </div>
+
+        <!-- 4. CONTENT GROUP -->
+        <div class="nav-section">
+          <span class="nav-section-title">CONTENT</span>
+          <a href="#/sheets" class="nav-item" data-route="/sheets">
+            <i data-lucide="file-text"></i>
+            <span>Sheets & Lectures</span>
+          </a>
+          <a href="#/flashcards" class="nav-item" data-route="/flashcards">
+            <i data-lucide="layers"></i>
+            <span>Flashcards (بطاقات)</span>
+          </a>
+          <a href="#/videos" class="nav-item" data-route="/videos">
+            <i data-lucide="video"></i>
+            <span>Videos & Atlas</span>
           </a>
         </div>
       </nav>
 
-      <!-- Sidebar Footer -->
+      <!-- Sidebar Footer: Study Streak Widget -->
       <div class="sidebar-footer">
-        <a href="#/profile" class="nav-item" data-route="/profile">
-          <i data-lucide="user-cog"></i>
-          <span>الإعدادات والبروفايل</span>
-        </a>
+        <div class="study-streak-card">
+          <div class="streak-info">
+            <span class="streak-flame">🔥</span>
+            <span class="streak-text">Study streak</span>
+          </div>
+          <span id="sidebar-streak-count" class="streak-count">1 day</span>
+        </div>
       </div>
     </aside>
 
     <!-- ==========================================================================
-         MAIN WRAPPER (Header + View Container)
+         MAIN WRAPPER (Header + Page Views)
          ========================================================================== -->
     <div class="main-wrapper">
-      <!-- Sticky Compact Header (64px) -->
+      <!-- Sticky Header -->
       <header class="app-header">
         <div class="header-right">
           <button id="menu-toggle" class="menu-toggle-btn" aria-label="فتح القائمة">
             <i data-lucide="menu" style="width: 20px; height: 20px;"></i>
           </button>
-          <div class="user-greeting-wrap">
-            <span class="user-greeting">مرحبًا، طالب كورو 👋</span>
-            <span class="user-academic-badge">السنة الثالثة — طب وجراحة الفم والأسنان</span>
+          <div class="header-greeting-wrap">
+            <span class="greeting-text" id="header-greeting-text">Good evening</span>
+            <span class="greeting-sub">السنة الثالثة — طب وجراحة الفم والأسنان</span>
           </div>
         </div>
 
-        <div class="header-left">
-          <!-- Notifications Button with Badge -->
-          <button id="header-notif-btn" class="notif-btn" aria-label="الإشعارات والتنبيهات" title="التنبيهات">
-            <i data-lucide="bell"></i>
-            <span class="notif-badge-dot"></span>
-          </button>
+        <!-- Center Search Bar (Lock-in Style) -->
+        <div class="header-search">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="top-search-input" placeholder="Search Kuro Fangs (press /)..." />
+          <kbd class="search-kbd">/</kbd>
+        </div>
 
-          <!-- Points Chip ("25 نقطة") -->
-          <div class="points-chip" title="رصيد النقاط الأكاديمية">
+        <!-- Header Left Icons -->
+        <div class="header-left">
+          <!-- Notification Bell with Alert Dot -->
+          <a href="#/alerts" class="header-icon-btn" title="التنبيهات والإعلانات">
+            <i data-lucide="bell"></i>
+            <span class="notif-dot"></span>
+          </a>
+
+          <!-- Points Chip -->
+          <div class="points-chip" title="الرصيد الأكاديمي">
             <i data-lucide="sparkles"></i>
-            <span id="header-points-text">25 نقطة</span>
+            <span id="header-points-text">25 pts</span>
           </div>
 
           <!-- User Avatar -->
-          <a href="#/profile" class="user-avatar-btn" title="الملف الشخصي">
-            <div id="header-avatar" class="user-avatar-img">ك</div>
+          <a href="#/profile" class="user-avatar-link" title="الملف الشخصي">
+            <div id="header-avatar" class="user-avatar">ك</div>
           </a>
         </div>
       </header>
 
-      <!-- View Injection Container -->
+      <!-- Main Content View Container -->
       <main class="page-container" id="app" role="main"></main>
     </div>
   </div>
+
+  <!-- ==========================================================================
+       MOBILE BOTTOM NAVIGATION BAR (From the Phone screen in reference image)
+       ========================================================================== -->
+  <nav class="mobile-bottom-nav" aria-label="التنقل السريع للجوال">
+    <a href="#/" class="mobile-nav-tab active" data-route="/">
+      <i data-lucide="home"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="#/subjects" class="mobile-nav-tab" data-route="/subjects">
+      <i data-lucide="book-open"></i>
+      <span>Materials</span>
+    </a>
+    <a href="#/questions" class="mobile-nav-tab" data-route="/questions">
+      <i data-lucide="help-circle"></i>
+      <span>Questions</span>
+    </a>
+    <a href="#/quizzes" class="mobile-nav-tab" data-route="/quizzes">
+      <i data-lucide="check-square"></i>
+      <span>Review</span>
+    </a>
+    <a href="#/profile" class="mobile-nav-tab" data-route="/profile">
+      <i data-lucide="user"></i>
+      <span>Profile</span>
+    </a>
+  </nav>
 
   <!-- JavaScript Modules -->
   <script src="js/store.js"></script>

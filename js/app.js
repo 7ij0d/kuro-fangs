@@ -1,6 +1,6 @@
 /**
- * KURO FANGS — APPLICATION ENTRY POINT
- * Initializes App, Store, Router & Event Listeners
+ * KURO FANGS — APPLICATION ENTRY POINT (LOCK-IN EDITION)
+ * Coordinates Data, Store, Routing, Focus Keyboard Shortcuts & Streaks
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -30,24 +30,57 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/alerts', (c) => window.SecondaryPages.renderAlerts(c));
   router.register('/search', (c, p) => window.SecondaryPages.renderSearch(c, p));
 
-  // 3. Setup Header Sync
-  const updateHeader = () => {
+  // 3. Setup Header & Streak Synchronization
+  const updateUIElements = () => {
+    // Points
     const pointsEl = document.getElementById('header-points-text');
     if (pointsEl) {
-      pointsEl.textContent = `${window.STORE.getPoints()} نقطة`;
+      pointsEl.textContent = `${window.STORE.getPoints()} pts`;
     }
 
+    // Avatar
     const userInfo = window.STORE.getUserInfo();
     const avatarEl = document.getElementById('header-avatar');
     if (avatarEl && userInfo.avatarText) {
       avatarEl.textContent = userInfo.avatarText;
     }
+
+    // Streak
+    const streakEl = document.getElementById('sidebar-streak-count');
+    if (streakEl) {
+      streakEl.textContent = `${window.STORE.getStreak()} day`;
+    }
+
+    // Time-based greeting (Good evening / Good morning)
+    const greetingEl = document.getElementById('header-greeting-text');
+    if (greetingEl) {
+      const hour = new Date().getHours();
+      const isEvening = hour >= 16 || hour < 5;
+      greetingEl.textContent = isEvening ? 'Good evening 👋' : 'Good morning 👋';
+    }
   };
 
-  updateHeader();
-  window.STORE.subscribe(() => updateHeader());
+  updateUIElements();
+  window.STORE.subscribe(() => updateUIElements());
 
-  // 4. Setup Mobile Drawer Toggle
+  // 4. Keyboard Shortcut: Press '/' to search
+  const searchInput = document.getElementById('top-search-input');
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput?.focus();
+    }
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && searchInput.value.trim()) {
+        window.ROUTER.navigate(`/search?q=${encodeURIComponent(searchInput.value.trim())}`);
+      }
+    });
+  }
+
+  // 5. Mobile Drawer Toggle
   const menuToggleBtn = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('sidebar');
   const backdrop = document.getElementById('sidebar-backdrop');
@@ -64,14 +97,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 5. Notifications Button Handler
-  const notifBtn = document.getElementById('header-notif-btn');
-  if (notifBtn) {
-    notifBtn.addEventListener('click', () => {
-      window.ROUTER.navigate('/alerts');
+  // 6. Mobile Bottom Nav Sync
+  const updateMobileNav = (currentPath) => {
+    document.querySelectorAll('.mobile-nav-tab').forEach(tab => {
+      const target = tab.getAttribute('data-route');
+      if (!target) return;
+      if (target === currentPath || (target !== '/' && currentPath.startsWith(target))) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
     });
-  }
+  };
 
-  // 6. Handle Initial URL Route
+  window.addEventListener('hashchange', () => {
+    const p = window.location.hash.slice(1).split('?')[0] || '/';
+    updateMobileNav(p);
+  });
+
+  // 7. Initial Route
   router.handleRoute();
+  updateMobileNav(window.location.hash.slice(1).split('?')[0] || '/');
 });

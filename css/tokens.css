@@ -1,95 +1,88 @@
 /* ==========================================================================
-   KURO FANGS — DESIGN TOKENS & SYSTEM
-   Dental College Platform — Year 3
-   Theme: Medical SaaS / Academic Green (#2E7D32)
+   KURO FANGS — LOCK-IN DESIGN TOKENS
+   Theme: Midnight Obsidian & Warm Amber/Gold (#F59E0B)
+   Inspired by Lock-in SaaS aesthetic
    ========================================================================== */
 
 :root {
-  /* Surface & Backgrounds */
-  --bg-app: #F7F8F5;
-  --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #F1F5F9;
-  --bg-card: #FFFFFF;
-  --bg-hover: #F8FAFC;
-  --bg-active: #E8F5E9;
+  /* Surface & Backgrounds (Deep Midnight Slate) */
+  --bg-app: #080C14;
+  --bg-surface: #0E1424;
+  --bg-surface-subtle: #141C30;
+  --bg-card: #12192B;
+  --bg-card-subtle: #172036;
+  --bg-hover: #1C263E;
+  --bg-active: rgba(245, 158, 11, 0.12);
+  --bg-input: #0B101D;
   
-  /* Brand Academic Green */
-  --brand-primary: #2E7D32;
-  --brand-primary-hover: #1B5E20;
-  --brand-primary-light: #E8F5E9;
-  --brand-primary-surface: #DCFCE7;
-  --brand-primary-border: #A5D6A7;
-  --brand-gradient: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
-  --brand-soft-glow: 0 4px 14px rgba(46, 125, 50, 0.18);
+  /* Amber & Gold Accents (Lock-in Theme) */
+  --brand-primary: #F59E0B;
+  --brand-primary-hover: #D97706;
+  --brand-gold: #FBBF24;
+  --brand-amber: #D97706;
+  --brand-primary-light: rgba(245, 158, 11, 0.14);
+  --brand-primary-border: rgba(245, 158, 11, 0.35);
+  --brand-glow: 0 4px 20px rgba(245, 158, 11, 0.22);
+  --brand-glow-lg: 0 8px 30px rgba(245, 158, 11, 0.3);
+
+  /* Academic Green Accent (Legacy Kuro Fangs element) */
+  --academic-green: #10B981;
+  --academic-green-light: rgba(16, 185, 129, 0.15);
 
   /* Neutrals & Typography */
-  --text-primary: #111827;
-  --text-secondary: #64748B;
-  --text-muted: #94A3B8;
-  --text-inverted: #FFFFFF;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverted: #080C14;
   
-  /* Borders & Dividers */
-  --border-subtle: #E2E8F0;
-  --border-card: #E2E8F0;
-  --border-focus: #2E7D32;
+  /* Glassmorphic Borders & Dividers */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.09);
+  --border-card-hover: rgba(245, 158, 11, 0.4);
+  --border-focus: #F59E0B;
 
-  /* Status Accents (Strictly for alerts, exams & warnings) */
-  --color-danger: #EF4444;
-  --color-danger-bg: #FEF2F2;
-  --color-danger-border: #FECACA;
+  /* Metric Badges (Exact match to Lock-in screenshot) */
+  --badge-done-bg: rgba(16, 185, 129, 0.16);
+  --badge-done-text: #34D399;
+  --badge-done-border: rgba(16, 185, 129, 0.3);
 
-  --color-warning: #F59E0B;
-  --color-warning-bg: #FFFBEB;
-  --color-warning-border: #FDE68A;
+  --badge-saved-bg: rgba(139, 92, 246, 0.16);
+  --badge-saved-text: #A78BFA;
+  --badge-saved-border: rgba(139, 92, 246, 0.3);
 
-  --color-info: #0284C7;
-  --color-info-bg: #F0F9FF;
-  --color-info-border: #BAE6FD;
+  --badge-due-bg: rgba(245, 158, 11, 0.16);
+  --badge-due-text: #FBBF24;
+  --badge-due-border: rgba(245, 158, 11, 0.3);
 
-  --color-success: #16A34A;
-  --color-success-bg: #F0FDF4;
-  --color-success-border: #BBF7D0;
+  --badge-live-bg: rgba(34, 197, 94, 0.16);
+  --badge-live-text: #4ADE80;
+  --badge-live-border: rgba(34, 197, 94, 0.3);
 
   /* Elevation & Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.07);
-  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --shadow-modal: 0 20px 30px -10px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.6);
+  --shadow-glow-amber: 0 0 25px rgba(245, 158, 11, 0.15);
 
   /* Radius */
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-card: 16px;
-  --radius-xl: 20px;
+  --radius-card: 18px;
+  --radius-xl: 24px;
   --radius-pill: 9999px;
 
   /* Typography */
-  --font-arabic: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Layout Spacing */
   --sidebar-width: 240px;
   --header-height: 64px;
-  --container-max: 1320px;
+  --container-max: 1340px;
   
   /* Transitions */
   --transition-fast: 0.15s ease;
-  --transition-base: 0.2s ease-in-out;
-  --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  
-  /* Subject Color Accents (12 Dental Subjects) */
-  --subj-gen-med: #0284C7;
-  --subj-gen-surgery: #EA580C;
-  --subj-fixed-pros: #7C3AED;
-  --subj-omfs: #2563EB;
-  --subj-oral-diseases: #DB2777;
-  --subj-endo: #DC2626;
-  --subj-omdr: #0D9488;
-  --subj-preventive: #059669;
-  --subj-cons-endo: #D97706;
-  --subj-ortho: #4F46E5;
-  --subj-pediatric: #EC4899;
-  --subj-removable-pros: #0891B2;
+  --transition-base: 0.25s ease-in-out;
+  --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
