@@ -288,10 +288,12 @@ const SubjectModal = {
                   <span><strong>${item.size || '3.2 MB'}</strong></span>
                 </div>
 
+                ${item.doctor_name ? `
                 <div class="modal-meta-item" title="${isAr ? 'الأستاذ' : 'Doctor'}">
                   <i data-lucide="user-check"></i>
-                  <span>${item.doctor_name || (isAr ? 'د. طارق الزاوي' : 'Dr. Tarek Alzawi')}</span>
+                  <span>${item.doctor_name}</span>
                 </div>
+                ` : ''}
 
                 <div class="modal-meta-item" title="${isAr ? 'التاريخ' : 'Date'}">
                   <i data-lucide="calendar"></i>
@@ -322,14 +324,15 @@ const SubjectModal = {
 
   previewDoc(docId) {
     const subject = SubjectModal.currentSubject;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
     const files = window.DATA.getSheetsForSubject 
       ? window.DATA.getSheetsForSubject(subject ? subject.id : '')
       : [];
     const doc = files.find(f => f.id === docId) || {
       id: docId,
-      title: 'محاضرة طبية معتمدة',
-      subject_name: subject ? subject.name_ar : 'طب الأسنان',
-      doctor_name: 'د. طارق الزاوي',
+      title: subject ? (isAr ? subject.name_ar : subject.name_en) : (isAr ? 'ملزمة دراسية' : 'Study Handout'),
+      subject_name: subject ? (isAr ? subject.name_ar : subject.name_en) : (isAr ? 'طب الأسنان' : 'Dentistry'),
+      doctor_name: isAr ? (subject?.doctor_name_ar || '') : (subject?.doctor_name_en || ''),
       pages: 18,
       size: '3.2 MB',
       date: '2026-09-12'

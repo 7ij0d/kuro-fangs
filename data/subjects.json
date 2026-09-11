@@ -14,10 +14,7 @@
       "color": "#52C98A",
       "icon": "💊",
       "description_ar": "أمراض الباطنة والقلب والغدد الصماء وعلاقتها بصحة الفم وممارسة طب الأسنان",
-      "sheet_count": 20,
-      "doctor_ids": [
-        "dr-sara"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/gen-med.webp"
     },
@@ -35,10 +32,7 @@
       "color": "#FF8C42",
       "icon": "⚕️",
       "description_ar": "أساسيات الجراحة العامة، التعقيم، التئام الجروح، النزيف، الصدمة، والحروق",
-      "sheet_count": 22,
-      "doctor_ids": [
-        "dr-mahmoud"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/gen-surgery.webp"
     },
@@ -57,10 +51,7 @@
       "color": "#A78BFA",
       "icon": "👑",
       "description_ar": "تحضير التيجان والجسور، خطوط الإنهاء، الطبعات المطاطية، والتركيبات الثابتة",
-      "sheet_count": 18,
-      "doctor_ids": [
-        "dr-nadia"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/fixed-pros.webp"
     },
@@ -79,10 +70,7 @@
       "color": "#5BA4CF",
       "icon": "🔪",
       "description_ar": "التخدير الموضعي، تقنيات قلع الأسنان، مضاعفات القلع، والعدوى السنية والوجهية",
-      "sheet_count": 16,
-      "doctor_ids": [
-        "dr-youssef"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/omfs.webp"
     },
@@ -100,11 +88,7 @@
       "color": "#E8A0BF",
       "icon": "🔬",
       "description_ar": "دراسة الأمراض والآفات التي تصيب الأنسجة الفموية، الأورام، والآفات المخاطية والعظمية",
-      "sheet_count": 24,
-      "doctor_ids": [
-        "dr-ahmed",
-        "dr-fatima"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/oral-diseases.webp"
     },
@@ -123,10 +107,7 @@
       "color": "#FF6B6B",
       "icon": "⚡",
       "description_ar": "تشخيص أمراض اللب والذروة، فتح الحجرة اللبية، تنظيف وتوسيع القنوات، وحشو الجذور",
-      "sheet_count": 16,
-      "doctor_ids": [
-        "dr-khalid"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/endo.webp"
     },
@@ -144,10 +125,7 @@
       "color": "#E8845C",
       "icon": "📋",
       "description_ar": "الفحص الإكلينيكي وتشخيص الآفات الفموية، تقنيات وقراءة أشعة الأسنان والفكين",
-      "sheet_count": 15,
-      "doctor_ids": [
-        "dr-aisha"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": false,
       "cover_image": "assets/covers/omdr.webp"
     },
@@ -165,10 +143,7 @@
       "color": "#B4D455",
       "icon": "🌿",
       "description_ar": "طرق الوقاية من النخر وأمراض اللثة، الفلورايد، المواد السادة للشقوق، وصحة المجتمع",
-      "sheet_count": 12,
-      "doctor_ids": [
-        "dr-layla"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": false,
       "cover_image": "assets/covers/preventive.webp"
     },
@@ -187,10 +162,7 @@
       "color": "#4ECDC4",
       "icon": "🦷",
       "description_ar": "تحضير التجاويف المركبة، الحشوات الضوئية التجميلية، حماية اللب، والعملي على الفانتوم",
-      "sheet_count": 20,
-      "doctor_ids": [
-        "dr-khalid"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/cons-endo.webp"
     },
@@ -208,10 +180,7 @@
       "color": "#82C0CC",
       "icon": "📐",
       "description_ar": "مبادئ نمو وتطور الوجه والفكين، تصنيف حالات سوء الإطباق، وتصميم الأجهزة التقويمية",
-      "sheet_count": 12,
-      "doctor_ids": [
-        "dr-hana"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": false,
       "cover_image": "assets/covers/ortho.webp"
     },
@@ -229,10 +198,7 @@
       "color": "#F7B2BD",
       "icon": "🧒",
       "description_ar": "العناية بالأسنان اللبنية والمختلطة، تعديل سلوك الطفل، وحافظات المسافة في الفك",
-      "sheet_count": 11,
-      "doctor_ids": [
-        "dr-rima"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": false,
       "cover_image": "assets/covers/pedo.webp"
     },
@@ -251,10 +217,7 @@
       "color": "#FFD93D",
       "icon": "🦿",
       "description_ar": "خطوات تصنيع وتركيب الأطقم الكاملة والجزئية، قياسات الإطباق، والتسجيل الفكي",
-      "sheet_count": 18,
-      "doctor_ids": [
-        "dr-mustafa"
-      ],
+      "doctor_ids": [],
       "is_exam_heavy": true,
       "cover_image": "assets/covers/removable-pros.webp"
     }

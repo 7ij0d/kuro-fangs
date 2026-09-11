@@ -112,9 +112,9 @@ const DocumentViewer = {
     DocumentViewer.init();
 
     DocumentViewer.currentDoc = doc || {
-      title: 'محاضرة طبية معتمدة',
-      subject_name: 'طب وجراحة الفم والأسنان',
-      doctor_name: 'هيئة التدريس',
+      title: isAr ? 'محاضرة طبية معتمدة' : 'Official Handout',
+      subject_name: isAr ? 'طب وجراحة الفم والأسنان' : 'Dentistry & Oral Surgery',
+      doctor_name: '',
       pages: 18,
       size: '3.2 MB',
       date: '2026-09-12'
@@ -132,12 +132,12 @@ const DocumentViewer = {
 
     const docTitle = doc.title || (isAr ? doc.title_ar : doc.title_en) || (isAr ? 'محاضرة معتمدة' : 'Lecture Sheet');
     const docSubject = doc.subject_name || (isAr ? 'طب الأسنان — السنة الثالثة' : 'Dentistry — Year 3');
-    const docDoctor = doc.doctor_name || (isAr ? 'د. طارق الزاوي' : 'Dr. Tarek Alzawi');
+    const docDoctor = doc.doctor_name || '';
     const docPages = doc.pages || 18;
     const docSize = doc.size || '3.2 MB';
 
     if (titleEl) titleEl.textContent = docTitle;
-    if (subEl) subEl.textContent = `${docSubject} • ${docDoctor} • ${docSize}`;
+    if (subEl) subEl.textContent = docDoctor ? `${docSubject} • ${docDoctor} • ${docSize}` : `${docSubject} • ${docSize}`;
     if (pagesTextEl) pagesTextEl.textContent = `${docPages} ${isAr ? 'صفحة' : 'Pages'}`;
     if (downloadText) downloadText.textContent = isAr ? 'تنزيل PDF' : 'Download PDF';
 
@@ -189,7 +189,7 @@ const DocumentViewer = {
   generateDocHTML(doc, isAr) {
     const title = doc.title || (isAr ? doc.title_ar : doc.title_en) || 'Lecture Sheet';
     const subject = doc.subject_name || (isAr ? 'طب وجراحة الفم والأسنان' : 'Oral & Dental Surgery');
-    const doctor = doc.doctor_name || (isAr ? 'د. طارق الزاوي' : 'Dr. Tarek Alzawi');
+    const doctor = doc.doctor_name || '';
     const pages = doc.pages || 18;
     const date = doc.date || '2026-09-12';
     const dir = isAr ? 'rtl' : 'ltr';
@@ -389,7 +389,7 @@ const DocumentViewer = {
         <h1 class="doc-main-title">${title}</h1>
         <div class="doc-info-strip">
           <span>${isAr ? 'المقرر:' : 'Course:'} <strong>${subject}</strong></span>
-          <span>${isAr ? 'الأستاذ:' : 'Instructor:'} <strong>${doctor}</strong></span>
+          ${doctor ? `<span>${isAr ? 'الأستاذ:' : 'Instructor:'} <strong>${doctor}</strong></span>` : ''}
           <span>${isAr ? 'التاريخ:' : 'Date:'} <strong>${date}</strong></span>
           <span>${isAr ? 'عدد الصفحات:' : 'Pages:'} <strong>${pages}</strong></span>
         </div>

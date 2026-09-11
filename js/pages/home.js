@@ -94,9 +94,8 @@ const HomePage = {
       filtered = allSubjects.slice(6, 12);
     } else if (HomePage.currentFilter === 'popular') {
       filtered = allSubjects.filter(s => s.is_popular);
-      // If popular list is small, sort by highest progress
-      if (filtered.length < 4) {
-        filtered = [...allSubjects].sort((a, b) => (b.progress || 0) - (a.progress || 0)).slice(0, 6);
+      if (filtered.length === 0) {
+        filtered = allSubjects.slice(0, 6);
       }
     }
 
@@ -126,12 +125,25 @@ const HomePage = {
     grid.innerHTML = filtered.map(subj => {
       const primaryTitle = isAr ? subj.name_ar : subj.name_en;
       const subTitle = isAr ? subj.name_en : subj.name_ar;
-      const doctorName = isAr ? (subj.doctor_name_ar || 'هيئة التدريس') : (subj.doctor_name_en || 'Faculty Board');
       const coverImg = subj.cover_image || window.DATA?.subjectCovers?.[subj.id] || `assets/covers/${subj.id}.webp`;
-      const progressVal = subj.progress || 75;
-      const lecturesCount = subj.lectures_count || subj.sheet_count || 14;
-      const summariesCount = subj.summaries_count || 4;
-      const examsCount = subj.exams_count || 2;
+
+      // Real dynamic stats calculation from actual DATA arrays
+      const stats = window.DATA && window.DATA.getSubjectStats
+        ? window.DATA.getSubjectStats(subj.id)
+        : {
+            lecturesCount: (window.DATA?.sheets || []).filter(s => s.subject_id === subj.id).length,
+            summariesCount: (window.DATA?.summaries || []).filter(s => s.subject_id === subj.id).length,
+            examsCount: (window.DATA?.previousExams || []).filter(e => e.subject_id === subj.id).length,
+            progress: 0
+          };
+
+      const progressVal = stats.progress || 0;
+      const lecturesCount = stats.lecturesCount || 0;
+      const summariesCount = stats.summariesCount || 0;
+      const examsCount = stats.examsCount || 0;
+
+      // Doctor badge: only displayed if real doctor name is specifically set (no dummy fallbacks)
+      const doctorName = isAr ? (subj.doctor_name_ar || '') : (subj.doctor_name_en || '');
 
       return `
         <div class="subject-card" onclick="window.SubjectModal.open('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
@@ -149,13 +161,15 @@ const HomePage = {
               <h3 class="subject-title-primary">${primaryTitle}</h3>
               <div class="subject-title-sub">${subTitle}</div>
 
-              <!-- Doctor Badge with Icon -->
-              <div class="card-doctor-badge" title="${isAr ? 'أستاذ المادة' : 'Subject Faculty Head'}">
-                <i data-lucide="user-check"></i>
-                <span>${doctorName}</span>
-              </div>
+              <!-- Doctor Badge with Icon (Only displayed when real doctor is assigned) -->
+              ${doctorName ? `
+                <div class="card-doctor-badge" title="${isAr ? 'أستاذ المادة' : 'Subject Faculty Head'}">
+                  <i data-lucide="user-check"></i>
+                  <span>${doctorName}</span>
+                </div>
+              ` : ''}
 
-              <!-- Study Progress Bar -->
+              <!-- Study Progress Bar (Dynamic: 0% when no handouts/lectures added) -->
               <div class="card-progress-wrap">
                 <div class="card-progress-meta">
                   <span>${t('studyProgress')}</span>
@@ -166,7 +180,7 @@ const HomePage = {
                 </div>
               </div>
 
-              <!-- Content Breakdown Badges -->
+              <!-- Content Breakdown Badges (Dynamic from real data: 0 lectures • 0 summaries • 0 exams) -->
               <div class="card-stats-badges">
                 <span class="card-stat-pill">
                   <i data-lucide="file-text" style="width: 13px; height: 13px;"></i>
