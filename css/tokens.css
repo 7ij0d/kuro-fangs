@@ -1,107 +1,135 @@
 /* ==========================================================================
-   KURO FANGS — DESIGN TOKENS (LIGHT & DARK THEMES)
-   Default: Clean Light (#F8F9FA / #FFFFFF) with Royal Burgundy (#881337)
-   Dark Mode: Deep Slate (#0D1117 / #161B22) with Glowing Burgundy (#BE123C)
+   KURO FANGS — DESIGN TOKENS (ACADEMIA DESIGN SYSTEM)
+   Sidebar: Academia Dark (#1E1E2D) with Vertical Accent Indicator
+   Content Background: Soft Comfort (#F5F8FA) | Cards: Crisp White (#FFFFFF, 12px, #E4E6EF)
+   Typography: Inter (EN) & IBM Plex Sans Arabic (AR)
    ========================================================================== */
 
 :root {
-  /* Clean Light Theme (Default) */
-  --bg-app: #F8F9FA;
+  /* Academia Dark Sidebar (Persistent in Light & Dark Mode) */
+  --bg-sidebar: #1E1E2D;
+  --bg-sidebar-hover: #252538;
+  --bg-sidebar-active: #2B2B40;
+  --sidebar-text: #9899AC;
+  --sidebar-text-muted: #6B6C80;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-border: #2B2B40;
+  --sidebar-indicator: #BE123C; /* Radiant Burgundy vertical line */
+  --sidebar-indicator-glow: 0 0 10px rgba(190, 18, 60, 0.7);
+  --sidebar-width: 265px;
+
+  /* Academia App Background & Surfaces (Default Light) */
+  --bg-app: #F5F8FA;
   --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #F1F5F9;
+  --bg-surface-subtle: #EEF3F7;
   --bg-card: #FFFFFF;
   --bg-card-hover: #FFFFFF;
-  --bg-hover: #F8FAFC;
+  --bg-hover: #F1F4F8;
   --bg-input: #FFFFFF;
 
-  /* Royal Burgundy Primary (Light Mode) */
+  /* Royal Burgundy Primary */
   --brand-burgundy: #881337;
-  --brand-burgundy-hover: #4C0519;
+  --brand-burgundy-hover: #5D0C25;
   --brand-burgundy-light: #FFF1F2;
   --brand-burgundy-surface: #FDF2F4;
   --brand-burgundy-border: #FDA4AF;
   --brand-burgundy-glow: 0 4px 18px rgba(136, 19, 55, 0.16);
-  --brand-burgundy-gradient: linear-gradient(135deg, #9F1239 0%, #881337 50%, #4C0519 100%);
+  --brand-burgundy-gradient: linear-gradient(135deg, #A2143D 0%, #881337 50%, #5B0C24 100%);
+  --brand-accent: #BE123C;
 
   /* Neutrals & Text (Light Mode) */
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
+  --text-primary: #181C32; /* Academia high-contrast navy-black */
+  --text-secondary: #5E6278; /* Academia muted slate */
+  --text-muted: #A1A5B7;
   --text-inverted: #FFFFFF;
 
   /* Borders & Dividers (Light Mode) */
-  --border-subtle: #E2E8F0;
-  --border-card: #E2E8F0;
-  --border-card-hover: #FDA4AF;
+  --border-subtle: #E4E6EF; /* Academia crisp border */
+  --border-card: #E4E6EF;
+  --border-card-hover: #D1D5E4;
   --border-focus: #881337;
 
-  /* Modal Backdrop */
-  --backdrop-color: rgba(15, 23, 42, 0.6);
+  /* Modal Backdrop & Blur */
+  --backdrop-color: rgba(24, 28, 50, 0.55);
+  --backdrop-blur: blur(6px);
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.04);
-  --shadow-card-hover: 0 10px 25px rgba(136, 19, 55, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
-  --shadow-modal: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-card: 0 3px 12px rgba(24, 28, 50, 0.04);
+  --shadow-card-hover: 0 8px 24px rgba(24, 28, 50, 0.08), 0 2px 6px rgba(136, 19, 55, 0.06);
+  --shadow-modal: 0 25px 50px -12px rgba(24, 28, 50, 0.35);
 
-  /* Radius */
+  /* Radius (Academia 12px Standard) */
   --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-card: 20px;
-  --radius-modal: 24px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-card: 12px;
+  --radius-modal: 16px;
   --radius-pill: 9999px;
 
   /* Layout Spacing */
   --header-height: 70px;
-  --container-max: 1280px;
+  --container-max: 1380px;
+
+  /* Progress Bar */
+  --progress-track: #E4E6EF;
+  --progress-fill: #10B981; /* Green completion indicator */
+  --progress-fill-accent: #881337;
 
   /* Transitions */
   --transition-fast: 0.15s ease;
-  --transition-base: 0.25s ease-in-out;
-  --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 0.22s ease-in-out;
+  --transition-smooth: 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ==========================================================================
    DARK MODE SPECIFICATIONS (data-theme="dark")
-   Background: #0D1117 | Cards: #161B22 | Text: #F0F6FC
+   Background: #151521 | Cards: #1E1E2D | Borders: #2B2B40 | Text: #FFFFFF
    ========================================================================== */
 [data-theme="dark"] {
-  --bg-app: #0D1117;
-  --bg-surface: #161B22;
-  --bg-surface-subtle: #21262D;
-  --bg-card: #161B22;
-  --bg-card-hover: #1C2128;
-  --bg-hover: #21262D;
-  --bg-input: #0D1117;
+  --bg-sidebar: #11111B;
+  --bg-sidebar-hover: #1A1A28;
+  --bg-sidebar-active: #222234;
+  --sidebar-border: #1F1F30;
 
-  /* Burgundy Adjusted for Dark Mode (Vibrant & Glowing) */
+  --bg-app: #151521;
+  --bg-surface: #1E1E2D;
+  --bg-surface-subtle: #232336;
+  --bg-card: #1E1E2D;
+  --bg-card-hover: #252538;
+  --bg-hover: #26263A;
+  --bg-input: #151521;
+
+  /* Burgundy Adjusted for Dark Mode */
   --brand-burgundy: #BE123C;
   --brand-burgundy-hover: #E11D48;
-  --brand-burgundy-light: rgba(190, 18, 60, 0.16);
-  --brand-burgundy-surface: rgba(190, 18, 60, 0.1);
-  --brand-burgundy-border: rgba(190, 18, 60, 0.4);
-  --brand-burgundy-glow: 0 4px 22px rgba(190, 18, 60, 0.3);
+  --brand-burgundy-light: rgba(190, 18, 60, 0.18);
+  --brand-burgundy-surface: rgba(190, 18, 60, 0.12);
+  --brand-burgundy-border: rgba(190, 18, 60, 0.45);
+  --brand-burgundy-glow: 0 4px 22px rgba(190, 18, 60, 0.35);
   --brand-burgundy-gradient: linear-gradient(135deg, #BE123C 0%, #9F1239 100%);
 
   /* Neutrals & Text (Dark Mode) */
-  --text-primary: #F0F6FC;
-  --text-secondary: #8B949E;
-  --text-muted: #6E7681;
-  --text-inverted: #0D1117;
+  --text-primary: #FFFFFF;
+  --text-secondary: #92929F;
+  --text-muted: #6D6D80;
+  --text-inverted: #151521;
 
   /* Borders (Dark Mode) */
-  --border-subtle: #30363D;
-  --border-card: #30363D;
+  --border-subtle: #2B2B40;
+  --border-card: #2B2B40;
   --border-card-hover: rgba(190, 18, 60, 0.6);
   --border-focus: #BE123C;
 
+  /* Progress Bar (Dark Mode) */
+  --progress-track: #2B2B40;
+
   /* Modal Backdrop (Dark Mode) */
-  --backdrop-color: rgba(0, 0, 0, 0.75);
+  --backdrop-color: rgba(10, 10, 18, 0.82);
 
   /* Shadows (Dark Mode) */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.6), 0 0 15px rgba(190, 18, 60, 0.25);
-  --shadow-modal: 0 25px 60px -10px rgba(0, 0, 0, 0.85);
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.35);
+  --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.55), 0 0 15px rgba(190, 18, 60, 0.25);
+  --shadow-modal: 0 25px 60px -10px rgba(0, 0, 0, 0.9);
 }

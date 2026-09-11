@@ -1,15 +1,15 @@
 /* ==========================================================================
-   KURO FANGS — COMPONENTS (BURGUNDY THEME)
-   The 12 Subjects Grid with 120px High-Quality Cover Banners
-   The Floating Interactive Subject Modal
+   KURO FANGS — COMPONENTS (ACADEMIA DESIGN SYSTEM)
+   Academia Subject Cards with Progress Bars, Doctor Badges & Content Metrics
+   Shimmer Skeleton Loaders & Multi-Option Filter Tabs Bar
    ========================================================================== */
 
 /* Hero Banner Bar */
 .subjects-hero-bar {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 16px;
   padding-bottom: 20px;
@@ -17,34 +17,46 @@
 }
 
 .hero-text-wrap h1 {
-  font-size: 1.85rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 4px;
+  letter-spacing: -0.02em;
 }
 
 .hero-text-wrap p {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
 }
 
+/* Academia Quick Tabs Bar */
 .hero-filter-tabs {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: var(--bg-card);
+  gap: 4px;
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   padding: 4px;
   border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
 }
 
 .filter-tab-btn {
-  padding: 6px 16px;
+  padding: 7px 16px;
   border-radius: var(--radius-pill);
   font-size: 0.825rem;
   font-weight: 700;
   color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.filter-tab-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-subtle);
 }
 
 .filter-tab-btn.active {
@@ -54,7 +66,7 @@
 }
 
 /* ==========================================================================
-   1. THE 12 SUBJECTS SHOWCASE GRID (With 120px Cover Banners)
+   1. ACADEMIA 12-SUBJECT SHOWCASE GRID
    ========================================================================== */
 .subjects-showcase-grid {
   display: grid;
@@ -62,11 +74,24 @@
   gap: 22px;
 }
 
+@media (max-width: 1200px) {
+  .subjects-showcase-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .subjects-showcase-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Academia Subject Card */
 .subject-card {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  padding: 0; /* Edge to edge for cover banner */
+  padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -79,15 +104,15 @@
 
 .subject-card:hover {
   transform: translateY(-4px);
-  border-color: var(--border-card-hover);
+  border-color: var(--brand-burgundy);
   box-shadow: var(--shadow-card-hover);
 }
 
-/* 120px Subject Cover Banner */
+/* 135px Subject Cover Header */
 .subject-cover-wrap {
   position: relative;
   width: 100%;
-  height: 120px;
+  height: 135px;
   overflow: hidden;
   background-color: var(--bg-surface-subtle);
 }
@@ -101,33 +126,31 @@
 }
 
 .subject-card:hover .subject-cover-img {
-  transform: scale(1.08);
+  transform: scale(1.06);
 }
 
-/* Gradient Overlay to seamlessly blend with card background */
 .subject-cover-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.05) 45%, var(--bg-card) 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.05) 50%, var(--bg-card) 100%);
   pointer-events: none;
 }
 
-/* Floating Glassmorphic Subject Code Badge */
+/* Academia Code Badge */
 .subject-code-badge {
   position: absolute;
   top: 12px;
   font-size: 0.725rem;
   font-weight: 800;
-  font-family: var(--font-mono);
   color: #FFFFFF;
-  background: rgba(136, 19, 55, 0.85);
+  background: rgba(24, 28, 50, 0.82);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   padding: 4px 10px;
   border-radius: var(--radius-pill);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 html[dir="ltr"] .subject-code-badge {
@@ -137,9 +160,33 @@ html[dir="rtl"] .subject-code-badge {
   right: 14px;
 }
 
+/* Popular Tag */
+.subject-popular-tag {
+  position: absolute;
+  top: 12px;
+  font-size: 0.675rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: #E11D48;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+html[dir="ltr"] .subject-popular-tag {
+  right: 14px;
+}
+html[dir="rtl"] .subject-popular-tag {
+  left: 14px;
+}
+
 /* Card Body */
 .subject-card-body {
-  padding: 16px 20px 20px;
+  padding: 16px 20px 18px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -147,7 +194,7 @@ html[dir="rtl"] .subject-code-badge {
 }
 
 .subject-title-primary {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 3px;
@@ -157,54 +204,195 @@ html[dir="rtl"] .subject-code-badge {
 .subject-title-sub {
   font-size: 0.775rem;
   color: var(--brand-burgundy);
-  font-weight: 700;
-  font-family: var(--font-mono);
+  font-weight: 600;
   margin-bottom: 10px;
 }
 
-.subject-description {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 18px;
-}
-
-.subject-card-footer {
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.subject-pill-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.775rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.subject-cta-btn {
+/* Doctor Badge with Icon */
+.card-doctor-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.825rem;
-  font-weight: 700;
-  color: var(--brand-burgundy);
-  transition: transform var(--transition-fast);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  width: fit-content;
 }
 
-html[dir="rtl"] .subject-card:hover .subject-cta-btn {
-  transform: translateX(-4px);
+.card-doctor-badge i,
+.card-doctor-badge svg {
+  width: 14px;
+  height: 14px;
+  color: var(--brand-burgundy);
 }
-html[dir="ltr"] .subject-card:hover .subject-cta-btn {
-  transform: translateX(4px);
+
+/* Academia Progress Bar */
+.card-progress-wrap {
+  margin-bottom: 12px;
+}
+
+.card-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.card-progress-percent {
+  color: #10B981;
+  font-weight: 700;
+  font-size: 0.775rem;
+}
+
+.card-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--progress-track);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.card-progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #10B981 0%, #059669 100%);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Content Breakdown Badges */
+.card-stats-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.card-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* Quick Action Button ("تصفح المحتوى ⬅️") */
+.btn-explore-subject {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  background-color: var(--brand-burgundy-light);
+  color: var(--brand-burgundy);
+  border: 1px solid var(--brand-burgundy-border);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-explore-subject:hover {
+  background-color: var(--brand-burgundy);
+  color: #FFFFFF;
+  border-color: var(--brand-burgundy);
+  box-shadow: 0 4px 14px rgba(136, 19, 55, 0.25);
+}
+
+/* ==========================================================================
+   ACADEMIA SKELETON LOADERS (Zero Layout Shift)
+   ========================================================================== */
+.skeleton-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+}
+
+.skeleton-banner {
+  height: 135px;
+  width: 100%;
+}
+
+.skeleton-body {
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+}
+
+.skeleton-line.title {
+  height: 20px;
+  width: 70%;
+}
+
+.skeleton-line.sub {
+  width: 45%;
+  height: 12px;
+}
+
+.skeleton-line.badge {
+  width: 40%;
+  height: 24px;
+  border-radius: var(--radius-pill);
+}
+
+.skeleton-line.progress {
+  height: 6px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.skeleton-line.stats {
+  height: 22px;
+  width: 80%;
+  border-radius: 6px;
+}
+
+.skeleton-line.btn {
+  height: 38px;
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(228, 230, 239, 0.7) 25%, rgba(245, 248, 250, 0.95) 50%, rgba(228, 230, 239, 0.7) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(43, 43, 64, 0.7) 25%, rgba(30, 30, 45, 0.95) 50%, rgba(43, 43, 64, 0.7) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* ==========================================================================

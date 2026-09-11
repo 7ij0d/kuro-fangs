@@ -3,111 +3,185 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Kuro Fangs Dental Platform — Year 3 Dentistry Academic System" />
-  <meta name="theme-color" content="#881337" />
-  <title>Kuro Fangs • Year 3 Dental Platform</title>
+  <meta name="description" content="Kuro Fangs Dental Platform — Year 3 Dentistry Academic System (Academia Edition)" />
+  <meta name="theme-color" content="#1E1E2D" />
+  <title>Kuro Fangs • Academia Dental Platform</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans (English) & Readex Pro (Arabic) -->
+  <!-- Google Fonts: Inter (English & Numbers) & IBM Plex Sans Arabic (Arabic) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=3.3" />
-  <link rel="stylesheet" href="css/base.css?v=3.3" />
-  <link rel="stylesheet" href="css/layout.css?v=3.3" />
-  <link rel="stylesheet" href="css/components.css?v=3.3" />
+  <link rel="stylesheet" href="css/tokens.css?v=4.0" />
+  <link rel="stylesheet" href="css/base.css?v=4.0" />
+  <link rel="stylesheet" href="css/layout.css?v=4.0" />
+  <link rel="stylesheet" href="css/components.css?v=4.0" />
 </head>
-<body>
+<body id="app-body" data-layout="dark-sidebar">
   <!-- ==========================================================================
-       THE FLOATING INTERACTIVE SUBJECT MODAL (Backdrop & Container)
+       THE FLOATING INTERACTIVE SUBJECT MODAL (Backdrop & Container with Blur)
        ========================================================================== -->
   <div id="subject-modal-backdrop" class="subject-modal-backdrop" aria-hidden="true">
     <div id="subject-modal-box" class="subject-modal-box" role="dialog" aria-modal="true"></div>
   </div>
 
-  <div class="app-wrapper">
-    <!-- ==========================================================================
-         TOP HEADER (Brand, Search, Nav, Lang & Theme Toggles)
-         ========================================================================== -->
-    <header class="site-header">
-      <!-- Brand -->
-      <a href="#/" class="header-brand">
-        <div class="brand-emblem">🦷</div>
-        <div class="brand-meta">
-          <span class="brand-name-text" id="header-brand-name">Kuro Fangs</span>
-          <span class="brand-sub-text" id="header-brand-sub">Faculty of Dentistry — Year 3</span>
-        </div>
-      </a>
+  <!-- Mobile Sidebar Backdrop (Blur) -->
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
-      <!-- Center: Live Search Filter -->
-      <div class="header-search-box">
-        <i data-lucide="search" class="search-icon"></i>
-        <input type="text" id="header-search-input" placeholder="Search subjects, lectures, or topics..." />
+  <!-- ==========================================================================
+       APP MASTER LAYOUT (Academia Dark Sidebar + Content Wrapper)
+       ========================================================================== -->
+  <div class="app-layout">
+    <!-- 1. ACADEMIA DARK SIDEBAR (#1E1E2D) -->
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Main Navigation">
+      <!-- Sidebar Brand Header -->
+      <div class="sidebar-header">
+        <a href="#/" class="sidebar-brand">
+          <div class="sidebar-brand-emblem">🦷</div>
+          <div class="sidebar-brand-meta">
+            <span class="sidebar-brand-title">Kuro Fangs</span>
+            <span class="sidebar-brand-sub" id="sidebar-brand-sub">Dentistry • Year 3</span>
+          </div>
+        </a>
+        <button id="sidebar-close-btn" class="sidebar-close-btn" aria-label="Close sidebar">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
       </div>
 
-      <!-- Right/Left Actions -->
-      <div class="header-actions">
-        <!-- Navigation Links -->
-        <a href="#/" class="header-nav-btn active" title="Subjects" id="nav-subjects-link">
-          <i data-lucide="book-open"></i>
-          <span id="nav-subjects-text">Subjects</span>
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <!-- Academic Hubs Section -->
+        <div class="sidebar-section-title" id="side-sec-academic">ACADEMIC HUBS</div>
+
+        <a href="#/" class="sidebar-menu-item active" data-route="/">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="layout-grid"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-subjects">Subjects (12)</span>
         </a>
 
-        <a href="#/calculator" class="header-nav-btn" title="GPA Calculator" id="nav-calc-link">
-          <i data-lucide="calculator"></i>
-          <span id="nav-calc-text">GPA Calc</span>
+        <a href="#/sheets" class="sidebar-menu-item" data-route="/sheets">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="file-text"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-sheets">Sheets & Lectures</span>
         </a>
 
-        <a href="#/favorites" class="header-nav-btn" title="Bookmarks" id="nav-bookmarks-link">
-          <i data-lucide="bookmark"></i>
-          <span id="nav-bookmarks-text">Saved</span>
+        <a href="#/videos" class="sidebar-menu-item" data-route="/videos">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="video"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-videos">Recordings & Videos</span>
         </a>
 
-        <!-- 1. Language Toggle Button (EN / AR) -->
-        <button id="lang-toggle-btn" class="header-toggle-btn" title="Switch Language (English / العربية)">
-          <i data-lucide="globe"></i>
-          <span id="lang-btn-text">AR</span>
-        </button>
+        <a href="#/previous-years" class="sidebar-menu-item" data-route="/previous-years">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="archive"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-exams">Past Exams Archive</span>
+        </a>
 
-        <!-- 2. Dark / Light Mode Toggle Button -->
-        <button id="theme-toggle-btn" class="header-toggle-btn" title="Toggle Dark / Light Theme">
-          <i data-lucide="moon" id="theme-icon"></i>
-        </button>
+        <a href="#/summaries" class="sidebar-menu-item" data-route="/summaries">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="book-marked"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-summaries">High-Yield Summaries</span>
+        </a>
 
-        <!-- Points Pill -->
-        <div class="points-pill" title="Academic Points">
-          <i data-lucide="sparkles"></i>
-          <span id="header-points-text">25 pts</span>
+        <a href="#/questions" class="sidebar-menu-item" data-route="/questions">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="help-circle"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-questions">Question Bank</span>
+        </a>
+
+        <a href="#/flashcards" class="sidebar-menu-item" data-route="/flashcards">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="layers"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-flashcards">3D Flashcards</span>
+        </a>
+
+        <!-- Tools Section -->
+        <div class="sidebar-section-title" id="side-sec-tools">STUDENT TOOLS</div>
+
+        <a href="#/notes" class="sidebar-menu-item" data-route="/notes">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="edit-3"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-notes">Clinical Notes</span>
+        </a>
+
+        <a href="#/calculator" class="sidebar-menu-item" data-route="/calculator">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="calculator"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-calc">GPA Calculator</span>
+        </a>
+
+        <a href="#/favorites" class="sidebar-menu-item" data-route="/favorites">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="bookmark"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-saved">Saved Bookmarks</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer (Student Profile Info) -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="sidebar-user-avatar">KF</div>
+          <div class="sidebar-user-meta">
+            <span class="sidebar-user-name">Dental Student</span>
+            <span class="sidebar-user-sub" id="sidebar-user-sub">Year 3 Dentistry</span>
+          </div>
         </div>
       </div>
-    </header>
+    </aside>
 
-    <!-- ==========================================================================
-         MAIN CONTENT AREA (Subjects-First Direct View)
-         ========================================================================== -->
-    <main class="main-content" id="app" role="main"></main>
+    <!-- 2. MAIN APPLICATION CONTENT WRAPPER -->
+    <div class="app-main-wrapper">
+      <!-- TOP HEADER (Clean White with Sticky Header) -->
+      <header class="site-header">
+        <div class="header-left">
+          <!-- Mobile Menu Toggle Button -->
+          <button id="sidebar-toggle-btn" class="header-icon-btn mobile-toggle-btn" aria-label="Toggle Sidebar Menu">
+            <i data-lucide="menu"></i>
+          </button>
+
+          <!-- Search Box -->
+          <div class="header-search-box">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="header-search-input" placeholder="Search subjects, lectures, or topics..." />
+          </div>
+        </div>
+
+        <!-- Header Actions: Language, Theme & Points -->
+        <div class="header-actions">
+          <!-- Language Toggle Button (EN / AR) -->
+          <button id="lang-toggle-btn" class="header-toggle-btn" title="Switch Language (English / العربية)">
+            <i data-lucide="globe"></i>
+            <span id="lang-btn-text">AR</span>
+          </button>
+
+          <!-- Theme Toggle Button (Dark / Light) -->
+          <button id="theme-toggle-btn" class="header-toggle-btn" title="Toggle Dark / Light Theme">
+            <i data-lucide="moon" id="theme-icon"></i>
+          </button>
+
+          <!-- Academic Points Pill -->
+          <div class="points-pill" title="Academic Points">
+            <i data-lucide="sparkles"></i>
+            <span id="header-points-text">25 pts</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN ROUTED CONTENT CONTAINER -->
+      <main class="main-content" id="app" role="main"></main>
+    </div>
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=3.3"></script>
-  <script src="js/store.js?v=3.3"></script>
-  <script src="js/components/toast.js?v=3.3"></script>
-  <script src="js/data.js?v=3.3"></script>
-  <script src="js/components/subject-modal.js?v=3.3"></script>
-  <script src="js/router.js?v=3.3"></script>
-  <script src="js/pages/home.js?v=3.3"></script>
-  <script src="js/pages/sheets.js?v=3.3"></script>
-  <script src="js/pages/calculator.js?v=3.3"></script>
-  <script src="js/pages/quizzes.js?v=3.3"></script>
-  <script src="js/pages/questions.js?v=3.3"></script>
-  <script src="js/pages/flashcards.js?v=3.3"></script>
-  <script src="js/pages/notes.js?v=3.3"></script>
-  <script src="js/pages/previous-years.js?v=3.3"></script>
-  <script src="js/pages/secondary.js?v=3.3"></script>
-  <script src="js/app.js?v=3.3"></script>
+  <script src="js/i18n.js?v=4.0"></script>
+  <script src="js/store.js?v=4.0"></script>
+  <script src="js/components/toast.js?v=4.0"></script>
+  <script src="js/data.js?v=4.0"></script>
+  <script src="js/components/subject-modal.js?v=4.0"></script>
+  <script src="js/router.js?v=4.0"></script>
+  <script src="js/pages/home.js?v=4.0"></script>
+  <script src="js/pages/sheets.js?v=4.0"></script>
+  <script src="js/pages/calculator.js?v=4.0"></script>
+  <script src="js/pages/quizzes.js?v=4.0"></script>
+  <script src="js/pages/questions.js?v=4.0"></script>
+  <script src="js/pages/flashcards.js?v=4.0"></script>
+  <script src="js/pages/notes.js?v=4.0"></script>
+  <script src="js/pages/previous-years.js?v=4.0"></script>
+  <script src="js/pages/secondary.js?v=4.0"></script>
+  <script src="js/app.js?v=4.0"></script>
 </body>
 </html>

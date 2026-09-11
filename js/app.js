@@ -1,6 +1,6 @@
 /**
- * KURO FANGS — APPLICATION ENTRY POINT (WITH LANG & THEME TOGGLES)
- * Default Language: English (en) | Default Theme: Clean Light (light)
+ * KURO FANGS — APPLICATION ENTRY POINT (ACADEMIA DESIGN SYSTEM)
+ * Dark Sidebar (#1E1E2D), Multi-Language (EN/AR), Light/Dark Theme & Routing
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.SubjectModal.init();
   }
 
-  // 3. Setup Initial Language & Direction
+  // 3. Setup Language & Direction Handler
   const applyLanguage = (lang) => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -20,20 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const t = (k) => window.I18N.t(k);
 
     // Update Header Text Elements
-    const brandSub = document.getElementById('header-brand-sub');
-    if (brandSub) brandSub.textContent = t('brandSub');
-
     const searchInput = document.getElementById('header-search-input');
     if (searchInput) searchInput.placeholder = t('searchPlaceholder');
-
-    const navSubjectsText = document.getElementById('nav-subjects-text');
-    if (navSubjectsText) navSubjectsText.textContent = t('navSubjects');
-
-    const navCalcText = document.getElementById('nav-calc-text');
-    if (navCalcText) navCalcText.textContent = t('navCalculator');
-
-    const navBookmarksText = document.getElementById('nav-bookmarks-text');
-    if (navBookmarksText) navBookmarksText.textContent = t('navBookmarks');
 
     // Language button text shows alternate language target
     const langBtnText = document.getElementById('lang-btn-text');
@@ -46,6 +34,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (pointsEl) {
       pointsEl.textContent = `${window.STORE.getPoints()} ${t('pointsSuffix')}`;
     }
+
+    // Update Dark Sidebar Elements
+    const sideSub = document.getElementById('sidebar-brand-sub');
+    if (sideSub) sideSub.textContent = t('brandSub');
+
+    const secAcad = document.getElementById('side-sec-academic');
+    if (secAcad) secAcad.textContent = t('academicHubs');
+
+    const secTools = document.getElementById('side-sec-tools');
+    if (secTools) secTools.textContent = t('studentTools');
+
+    const sideSubjects = document.getElementById('side-nav-subjects');
+    if (sideSubjects) sideSubjects.textContent = t('navSubjects');
+
+    const sideSheets = document.getElementById('side-nav-sheets');
+    if (sideSheets) sideSheets.textContent = t('sideNavSheets');
+
+    const sideVideos = document.getElementById('side-nav-videos');
+    if (sideVideos) sideVideos.textContent = t('sideNavVideos');
+
+    const sideExams = document.getElementById('side-nav-exams');
+    if (sideExams) sideExams.textContent = t('sideNavExams');
+
+    const sideSummaries = document.getElementById('side-nav-summaries');
+    if (sideSummaries) sideSummaries.textContent = t('sideNavSummaries');
+
+    const sideQuestions = document.getElementById('side-nav-questions');
+    if (sideQuestions) sideQuestions.textContent = t('sideNavQuestions');
+
+    const sideFlashcards = document.getElementById('side-nav-flashcards');
+    if (sideFlashcards) sideFlashcards.textContent = t('sideNavFlashcards');
+
+    const sideNotes = document.getElementById('side-nav-notes');
+    if (sideNotes) sideNotes.textContent = t('sideNavNotes');
+
+    const sideCalc = document.getElementById('side-nav-calc');
+    if (sideCalc) sideCalc.textContent = t('sideNavCalc');
+
+    const sideSaved = document.getElementById('side-nav-saved');
+    if (sideSaved) sideSaved.textContent = t('sideNavSaved');
+
+    const sideUserSub = document.getElementById('sidebar-user-sub');
+    if (sideUserSub) sideUserSub.textContent = t('academicYear');
   };
 
   const initialLang = window.I18N.getLang();
@@ -85,7 +116,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 7. Register Routes
+  // 7. Setup Mobile Sidebar Drawer Controls
+  const sidebarEl = document.getElementById('app-sidebar');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+  const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+
+  const openMobileSidebar = () => {
+    if (sidebarEl) sidebarEl.classList.add('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeMobileSidebar = () => {
+    if (sidebarEl) sidebarEl.classList.remove('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', openMobileSidebar);
+  }
+
+  if (sidebarCloseBtn) {
+    sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
+  }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+  }
+
+  // 8. Register Routes
   const router = window.ROUTER;
 
   router.register('/', (c, q) => window.HomePage.render(c, q));
@@ -101,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/favorites', (c, q) => window.SecondaryPages.renderFavorites(c, q));
   router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
 
-  // 8. Synchronize Points
+  // 9. Synchronize Points
   window.STORE.subscribe((event) => {
     if (event === 'points_changed') {
       const pointsEl = document.getElementById('header-points-text');
@@ -111,24 +172,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 9. Update Active Nav Link on route change
-  const updateActiveHeaderNav = (path) => {
-    document.querySelectorAll('.header-nav-btn').forEach(btn => {
-      const target = btn.getAttribute('href')?.replace('#', '');
+  // 10. Update Active Sidebar Link on route change (Activates Radiant Vertical Light Line)
+  const updateActiveSidebarNav = (path) => {
+    document.querySelectorAll('.sidebar-menu-item').forEach(btn => {
+      const target = btn.getAttribute('data-route') || btn.getAttribute('href')?.replace('#', '');
       if (target === path) {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
       }
     });
+    // Also close mobile drawer on navigation
+    closeMobileSidebar();
   };
 
   window.addEventListener('hashchange', () => {
     const p = window.location.hash.slice(1).split('?')[0] || '/';
-    updateActiveHeaderNav(p);
+    updateActiveSidebarNav(p);
   });
 
-  // 10. Handle Initial Route
+  // 11. Handle Initial Route
   router.handleRoute();
-  updateActiveHeaderNav(window.location.hash.slice(1).split('?')[0] || '/');
+  updateActiveSidebarNav(window.location.hash.slice(1).split('?')[0] || '/');
 });
