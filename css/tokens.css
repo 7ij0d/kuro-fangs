@@ -1,0 +1,95 @@
+/* ==========================================================================
+   KURO FANGS — DESIGN TOKENS & SYSTEM
+   Dental College Platform — Year 3
+   Theme: Medical SaaS / Academic Green (#2E7D32)
+   ========================================================================== */
+
+:root {
+  /* Surface & Backgrounds */
+  --bg-app: #F7F8F5;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-hover: #F8FAFC;
+  --bg-active: #E8F5E9;
+  
+  /* Brand Academic Green */
+  --brand-primary: #2E7D32;
+  --brand-primary-hover: #1B5E20;
+  --brand-primary-light: #E8F5E9;
+  --brand-primary-surface: #DCFCE7;
+  --brand-primary-border: #A5D6A7;
+  --brand-gradient: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  --brand-soft-glow: 0 4px 14px rgba(46, 125, 50, 0.18);
+
+  /* Neutrals & Typography */
+  --text-primary: #111827;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --text-inverted: #FFFFFF;
+  
+  /* Borders & Dividers */
+  --border-subtle: #E2E8F0;
+  --border-card: #E2E8F0;
+  --border-focus: #2E7D32;
+
+  /* Status Accents (Strictly for alerts, exams & warnings) */
+  --color-danger: #EF4444;
+  --color-danger-bg: #FEF2F2;
+  --color-danger-border: #FECACA;
+
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-border: #FDE68A;
+
+  --color-info: #0284C7;
+  --color-info-bg: #F0F9FF;
+  --color-info-border: #BAE6FD;
+
+  --color-success: #16A34A;
+  --color-success-bg: #F0FDF4;
+  --color-success-border: #BBF7D0;
+
+  /* Elevation & Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.07);
+  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 20px 30px -10px rgba(0, 0, 0, 0.12);
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-card: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Typography */
+  --font-arabic: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Layout Spacing */
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --container-max: 1320px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease-in-out;
+  --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* Subject Color Accents (12 Dental Subjects) */
+  --subj-gen-med: #0284C7;
+  --subj-gen-surgery: #EA580C;
+  --subj-fixed-pros: #7C3AED;
+  --subj-omfs: #2563EB;
+  --subj-oral-diseases: #DB2777;
+  --subj-endo: #DC2626;
+  --subj-omdr: #0D9488;
+  --subj-preventive: #059669;
+  --subj-cons-endo: #D97706;
+  --subj-ortho: #4F46E5;
+  --subj-pediatric: #EC4899;
+  --subj-removable-pros: #0891B2;
+}

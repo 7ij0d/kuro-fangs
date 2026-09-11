@@ -1,0 +1,683 @@
+/* ==========================================================================
+   KURO FANGS — COMPONENTS SYSTEM
+   Theme: Medical SaaS / Academic Dental (#2E7D32)
+   Cards: #FFFFFF, Border: #E2E8F0, Radius: 16px, Shadow: 0 2px 8px rgba(0,0,0,0.04)
+   ========================================================================== */
+
+/* Base Card */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Page Header Title */
+.page-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title-group h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-title-group p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Global Search Bar Component */
+.search-bar-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+}
+
+.search-bar-wrap input {
+  width: 100%;
+  padding: 10px 42px 10px 16px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-bar-wrap .search-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   1. STAT CARDS GRID (4 Cards)
+   ========================================================================== */
+.stat-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-wrap svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
+.stat-icon-green {
+  background-color: var(--brand-primary-light);
+  color: var(--brand-primary);
+}
+
+.stat-icon-orange {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.stat-icon-blue {
+  background-color: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.stat-icon-purple {
+  background-color: #F3E8FF;
+  color: #7E22CE;
+}
+
+.stat-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.stat-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   2. IMPORTANT ALERTS (Compact Notification Cards)
+   ========================================================================== */
+.alerts-section {
+  margin-bottom: 28px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compact-alert-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-right: 4px solid var(--brand-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all var(--transition-fast);
+}
+
+.compact-alert-card.alert-urgent {
+  border-right-color: var(--color-danger);
+  background-color: #FFFDFD;
+}
+
+.compact-alert-card.alert-warning {
+  border-right-color: var(--color-warning);
+}
+
+.alert-left-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.alert-icon-pill {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alert-icon-pill svg {
+  width: 16px;
+  height: 16px;
+}
+
+.alert-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-headline {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.alert-description {
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+}
+
+.alert-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.alert-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   3. QUICK ACCESS GRID (6 Main Cards)
+   ========================================================================== */
+.quick-access-section {
+  margin-bottom: 32px;
+}
+
+.quick-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.quick-nav-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.quick-nav-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-primary-border);
+  box-shadow: var(--shadow-hover);
+}
+
+.quick-nav-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quick-nav-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.quick-nav-text h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.quick-nav-text p {
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+}
+
+.quick-nav-arrow {
+  color: var(--text-muted);
+  transition: transform var(--transition-fast), color var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.quick-nav-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.quick-nav-card:hover .quick-nav-arrow {
+  color: var(--brand-primary);
+  transform: translateX(-4px); /* Moves left towards reading direction in RTL */
+}
+
+/* ==========================================================================
+   4. RECENT ADDITIONS (Modern List View)
+   ========================================================================== */
+.recent-section {
+  margin-bottom: 32px;
+}
+
+.recent-list-view {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.recent-list-row {
+  display: grid;
+  grid-template-columns: 44px 110px 1fr 140px 110px 36px;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color var(--transition-fast);
+  text-decoration: none;
+}
+
+.recent-list-row:last-child {
+  border-bottom: none;
+}
+
+.recent-list-row:hover {
+  background-color: var(--bg-hover);
+}
+
+.recent-col-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background-color: var(--brand-primary-light);
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recent-col-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.recent-col-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.recent-col-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 12px;
+}
+
+.recent-col-doctor {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.recent-col-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.recent-col-arrow {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.recent-col-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.recent-list-row:hover .recent-col-arrow {
+  color: var(--brand-primary);
+  transform: translateX(-3px);
+}
+
+/* ==========================================================================
+   5. SUBJECTS GRID & SUBJECT CARDS (12 Dental Subjects)
+   ========================================================================== */
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.subject-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.subject-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--brand-primary-border);
+}
+
+.subject-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.subject-badge-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.subject-code-tag {
+  font-size: 0.725rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+}
+
+.subject-title-ar {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.subject-title-en {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 10px;
+}
+
+.subject-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.subject-card-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+}
+
+.subject-sheets-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   6. CALCULATOR & QUIZ & NOTES WIDGETS
+   ========================================================================== */
+.calc-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.calc-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.calc-subject-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.calc-result-box {
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  color: #FFFFFF;
+  border-radius: var(--radius-card);
+  padding: 28px;
+  text-align: center;
+}
+
+.calc-gpa-number {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 12px 0 4px;
+}
+
+/* Tab Navigation */
+.tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--brand-primary);
+  border-bottom-color: var(--brand-primary);
+}
+
+/* Flashcards 3D Container */
+.flashcard-stage {
+  perspective: 1000px;
+  max-width: 600px;
+  margin: 20px auto;
+  height: 320px;
+  cursor: pointer;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.flashcard-stage.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+  background: #FAFCF8;
+  border-color: var(--brand-primary-border);
+}
+
+/* ==========================================================================
+   RESPONSIVE COMPONENTS
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .quick-grid-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .subjects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .calc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stat-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .quick-grid-6 {
+    grid-template-columns: 1fr;
+  }
+  .subjects-grid {
+    grid-template-columns: 1fr;
+  }
+  .recent-list-row {
+    grid-template-columns: 36px 1fr 30px;
+    gap: 10px;
+  }
+  .recent-col-type, .recent-col-doctor, .recent-col-date {
+    display: none;
+  }
+}
