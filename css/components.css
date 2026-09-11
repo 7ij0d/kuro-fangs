@@ -897,3 +897,549 @@ html[dir="rtl"] .toast-close-btn {
   transform: translateY(12px) scale(0.95);
 }
 
+/* ==========================================================================
+   5. OFFICIAL EXAM SCHEDULE SYSTEM (ACADEMIA STYLE)
+   ========================================================================== */
+.exams-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.exams-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exams-view-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 3px;
+  border-radius: var(--radius-pill);
+}
+
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-toggle-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.view-toggle-btn.active {
+  background: var(--brand-burgundy);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(136, 19, 55, 0.2);
+}
+
+.btn-print-schedule {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.825rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+}
+
+.btn-print-schedule svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Schedule Tabs Bar */
+.schedule-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.schedule-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.schedule-tab-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.schedule-tab-btn:hover {
+  border-color: var(--brand-burgundy-border);
+  color: var(--text-primary);
+  background: var(--bg-surface-subtle);
+}
+
+.schedule-tab-btn.active {
+  background: var(--brand-burgundy);
+  color: #FFFFFF;
+  border-color: var(--brand-burgundy);
+  box-shadow: 0 4px 12px rgba(136, 19, 55, 0.25);
+}
+
+.tab-count-pill {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.08);
+  font-weight: 800;
+}
+
+.schedule-tab-btn.active .tab-count-pill {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+.badge-coming-soon {
+  font-size: 0.675rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: #FEF3C7;
+  color: #92400E;
+  font-weight: 800;
+  border: 1px solid #FCD34D;
+}
+
+/* Exams Table Card */
+.exams-table-card {
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-card);
+}
+
+.table-card-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #072B27 0%, #0B3B36 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.final-header {
+  background: linear-gradient(135deg, #3B0818 0%, #540B22 100%);
+}
+
+.table-card-header h2 {
+  color: #FFFFFF;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.table-card-header p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+}
+
+.print-watermark {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+}
+
+/* Academia Exam Table */
+.academia-exam-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 0.875rem;
+}
+
+html[dir="ltr"] .academia-exam-table {
+  text-align: left;
+}
+
+.academia-exam-table thead tr {
+  background: #0B3B36;
+  color: #FFFFFF;
+}
+
+.academia-exam-table.final-table thead tr {
+  background: #540B22;
+}
+
+.academia-exam-table th {
+  padding: 13px 18px;
+  font-weight: 800;
+  font-size: 0.825rem;
+  letter-spacing: 0.01em;
+  border: none;
+}
+
+.academia-exam-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color var(--transition-fast);
+}
+
+.academia-exam-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.academia-exam-table tbody tr:hover {
+  background-color: rgba(11, 59, 54, 0.03);
+}
+
+.academia-exam-table tbody td {
+  padding: 14px 18px;
+  vertical-align: middle;
+}
+
+/* Badges inside Exam Table */
+.exam-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  font-size: 0.825rem;
+  color: #065F46;
+  background: #ECFDF5;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #A7F3D0;
+}
+
+.exam-date-badge.final-badge {
+  color: #881337;
+  background: #FFF1F2;
+  border-color: #FECDD3;
+}
+
+.exam-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-surface-subtle);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.course-code-pill {
+  display: inline-block;
+  font-weight: 800;
+  font-size: 0.775rem;
+  color: #1E293B;
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+[data-theme="dark"] .course-code-pill {
+  background: #202030;
+  color: #E2E8F0;
+  border-color: #33334D;
+}
+
+.final-code {
+  color: #9F1239;
+  background: #FFE4E6;
+  border-color: #FDA4AF;
+}
+
+.subject-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.subject-primary-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.subject-sub-name {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Countdown Pill */
+.countdown-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+}
+
+.countdown-pill.urgent {
+  background: #FEF3C7;
+  color: #B45309;
+  border-color: #FDE68A;
+  animation: pulseUrgent 2s infinite;
+}
+
+.countdown-pill.today {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border-color: #FCA5A5;
+}
+
+@keyframes pulseUrgent {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+/* Timeline Cards View */
+.exams-schedule-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #072B27 0%, #0B3B36 100%);
+  color: #FFFFFF;
+  padding: 18px 24px;
+  border-radius: var(--radius-card);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.exams-schedule-banner.final-banner {
+  background: linear-gradient(135deg, #3B0818 0%, #540B22 100%);
+}
+
+.banner-meta h2 {
+  color: #FFFFFF;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.banner-meta p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+}
+
+.exams-timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 18px;
+}
+
+.exam-timeline-card {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+  transition: all var(--transition-fast);
+}
+
+.exam-timeline-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--brand-burgundy);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card-timeline-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.timeline-day-date {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-day {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.timeline-date {
+  font-size: 0.775rem;
+  font-family: var(--font-mono, monospace);
+  color: var(--brand-burgundy);
+  font-weight: 700;
+}
+
+.card-timeline-body {
+  margin-bottom: 14px;
+}
+
+.timeline-subject-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 6px 0 3px;
+  line-height: 1.35;
+}
+
+.timeline-subject-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.card-timeline-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+}
+
+.timeline-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.timeline-hall {
+  color: var(--text-muted);
+}
+
+/* Practical Coming Soon Card */
+.practical-coming-soon-card {
+  padding: 50px 30px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.coming-soon-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--brand-burgundy-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.practical-coming-soon-card h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.coming-soon-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 480px;
+  margin-bottom: 16px;
+}
+
+.coming-soon-badges {
+  display: flex;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   PRINT MEDIA RULES (One-Click Clean Print & PDF Export)
+   ========================================================================== */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  .app-sidebar,
+  .site-header,
+  .no-print,
+  .header-actions,
+  .exams-header-actions,
+  .schedule-tabs-bar {
+    display: none !important;
+  }
+
+  .app-main-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .main-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .exams-table-card {
+    box-shadow: none !important;
+    border: 1px solid #000000 !important;
+  }
+
+  .table-card-header {
+    background: #0B3B36 !important;
+    color: #FFFFFF !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .academia-exam-table thead tr {
+    background: #0B3B36 !important;
+    color: #FFFFFF !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .academia-exam-table td,
+  .academia-exam-table th {
+    border: 1px solid #CCCCCC !important;
+    padding: 10px !important;
+  }
+}
+
+

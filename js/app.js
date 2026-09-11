@@ -69,8 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideNotes = document.getElementById('side-nav-notes');
     if (sideNotes) sideNotes.textContent = t('sideNavNotes');
 
-    const sideCalc = document.getElementById('side-nav-calc');
-    if (sideCalc) sideCalc.textContent = t('sideNavCalc');
+    const sideCalc = document.getElementById('side-nav-exams-schedule') || document.getElementById('side-nav-calc');
+    if (sideCalc) sideCalc.textContent = t('sideNavExamsSchedule');
 
     const sideSaved = document.getElementById('side-nav-saved');
     if (sideSaved) sideSaved.textContent = t('sideNavSaved');
@@ -153,7 +153,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/sheets', (c, q) => window.SheetsPage.render(c, q));
   router.register('/videos', (c, q) => window.SecondaryPages.renderVideos(c, q));
   router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
-  router.register('/calculator', (c, q) => window.CalculatorPage.render(c, q));
+  router.register('/exams', (c, q) => window.ExamsPage.render(c, q));
+  router.register('/calculator', (c, q) => window.ExamsPage.render(c, q));
   router.register('/quizzes', (c, q) => window.QuizzesPage.render(c, q));
   router.register('/questions', (c, q) => window.QuestionsPage.render(c, q));
   router.register('/flashcards', (c, q) => window.FlashcardsPage.render(c, q));
