@@ -49,6 +49,14 @@ const DocumentViewer = {
                 📝 <span>ملاحظة</span>
               </button>
 
+              <!-- Undo / Redo Controls -->
+              <button id="doc-undo-btn" class="btn-annotation-tool" title="تراجع (Undo - Ctrl+Z)">
+                ↩️ <span>تراجع</span>
+              </button>
+              <button id="doc-redo-btn" class="btn-annotation-tool" title="إعادة (Redo - Ctrl+Y)">
+                ↪️ <span>إعادة</span>
+              </button>
+
               <!-- Color Swatches Palette (Yellow, Mint, Pink, Cyan, Red, Dark Ink) -->
               <div class="jnotes-color-swatches" id="doc-color-swatches">
                 <button class="swatch-dot active" data-color="#FEF08A" style="background: #FEF08A;" title="أصفر فسفوري"></button>
@@ -204,6 +212,28 @@ const DocumentViewer = {
       });
     }
 
+    // Undo / Redo Buttons
+    const undoBtn = document.getElementById('doc-undo-btn');
+    const redoBtn = document.getElementById('doc-redo-btn');
+
+    if (undoBtn) {
+      undoBtn.addEventListener('click', () => {
+        const iframe = document.getElementById('doc-viewer-iframe');
+        if (iframe && iframe.contentWindow && typeof iframe.contentWindow.undo === 'function') {
+          iframe.contentWindow.undo();
+        }
+      });
+    }
+
+    if (redoBtn) {
+      redoBtn.addEventListener('click', () => {
+        const iframe = document.getElementById('doc-viewer-iframe');
+        if (iframe && iframe.contentWindow && typeof iframe.contentWindow.redo === 'function') {
+          iframe.contentWindow.redo();
+        }
+      });
+    }
+
     // Clear Annotations Button
     if (clearAnnBtn) {
       clearAnnBtn.addEventListener('click', () => {
@@ -240,9 +270,51 @@ const DocumentViewer = {
       if (e.key === 'Escape' && DocumentViewer.isOpen) {
         DocumentViewer.close();
       }
+      if ((e.ctrlKey || e.metaKey) && DocumentViewer.isOpen) {
+        const iframe = document.getElementById('doc-viewer-iframe');
+        if (iframe && iframe.contentWindow) {
+          if (e.key.toLowerCase() === 'z') {
+            e.preventDefault();
+            if (e.shiftKey && typeof iframe.contentWindow.redo === 'function') {
+              iframe.contentWindow.redo();
+            } else if (typeof iframe.contentWindow.undo === 'function') {
+              iframe.contentWindow.undo();
+            }
+          } else if (e.key.toLowerCase() === 'y' && typeof iframe.contentWindow.redo === 'function') {
+            e.preventDefault();
+            iframe.contentWindow.redo();
+          }
+        }
+      }
     });
 
     if (window.lucide) window.lucide.createIcons();
+  },
+
+  syncFromPreset(tool, color, width) {
+    DocumentViewer.activeTool = tool;
+    DocumentViewer.activeColor = color;
+    DocumentViewer.activeStroke = width;
+
+    // Update tool buttons
+    const toolBtns = document.querySelectorAll('.doc-viewer-annotation-bar .btn-annotation-tool[data-tool]');
+    toolBtns.forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-tool') === tool);
+    });
+
+    // Update swatches
+    const swatchBtns = document.querySelectorAll('.jnotes-color-swatches .swatch-dot');
+    swatchBtns.forEach(dot => {
+      const c = dot.getAttribute('data-color') || '';
+      dot.classList.toggle('active', c.toLowerCase() === color.toLowerCase());
+    });
+
+    // Update stroke buttons
+    const strokeBtns = document.querySelectorAll('.jnotes-stroke-selector .stroke-btn');
+    strokeBtns.forEach(btn => {
+      const w = parseInt(btn.getAttribute('data-width'), 10) || 4;
+      btn.classList.toggle('active', w === width);
+    });
   },
 
   open(doc) {
@@ -550,12 +622,109 @@ const DocumentViewer = {
       background: rgba(16, 185, 129, 0.2);
       color: #34D399;
       border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 5px 10px;
+      padding: 5px 12px;
       border-radius: 20px;
       font-size: 0.725rem;
       font-weight: 700;
       backdrop-filter: blur(8px);
-      transition: opacity 0.3s ease;
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0.7;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Right-Side Vertical Floating Pen Dock */
+    .jnotes-vertical-dock {
+      position: fixed;
+      top: 50%;
+      right: 18px;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(24, 25, 38, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 36px;
+      padding: 12px 8px;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
+      z-index: 1000;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dock-preset-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      color: #F8FAFC;
+      outline: none;
+      padding: 0;
+      position: relative;
+    }
+
+    .dock-preset-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: scale(1.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .dock-preset-btn.active {
+      border-color: #38BDF8;
+      background: rgba(56, 189, 248, 0.22);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+      transform: scale(1.14);
+    }
+
+    .preset-tip {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: block;
+      transition: transform 0.15s ease;
+    }
+
+    .dock-preset-btn:hover .preset-tip {
+      transform: scale(1.15);
+    }
+
+    .preset-val {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      color: #E2E8F0;
+      line-height: 1;
+      font-family: 'Inter', sans-serif;
+    }
+
+    @media (max-width: 640px) {
+      .jnotes-vertical-dock {
+        right: 8px;
+        padding: 8px 6px;
+        gap: 8px;
+      }
+      .dock-preset-btn {
+        width: 38px;
+        height: 38px;
+      }
+      .preset-tip {
+        width: 11px;
+        height: 11px;
+      }
+      .preset-val {
+        font-size: 0.58rem;
+      }
     }
 
     .doc-page {
@@ -803,8 +972,32 @@ const DocumentViewer = {
         <span>صفحة 1 / 17</span>
       </div>
       <span class="auto-save-pill" id="auto-save-badge">
-        <span>✅ تم الحفظ</span>
+        <span>✓ تم الحفظ تلقائياً</span>
       </span>
+    </div>
+
+    <!-- Right-Side Vertical Floating Pen Dock (Quick Presets) -->
+    <div class="jnotes-vertical-dock" id="jnotes-vertical-dock" aria-label="JNotes Quick Presets">
+      <button type="button" class="dock-preset-btn active" data-tool="highlighter" data-color="#FEF08A" data-width="2" title="0.5 Yellow Highlighter (قلم تظليل أصفر 0.5)">
+        <span class="preset-tip" style="background: #FEF08A; box-shadow: 0 0 8px rgba(254, 240, 138, 0.9);"></span>
+        <span class="preset-val">0.5</span>
+      </button>
+      <button type="button" class="dock-preset-btn" data-tool="highlighter" data-color="#C084FC" data-width="2" title="0.5 Purple Highlighter (قلم تظليل بنفسجي 0.5)">
+        <span class="preset-tip" style="background: #C084FC; box-shadow: 0 0 8px rgba(192, 132, 252, 0.9);"></span>
+        <span class="preset-val">0.5</span>
+      </button>
+      <button type="button" class="dock-preset-btn" data-tool="pen" data-color="#78350F" data-width="4" title="0.8 Brown Pen (قلم حبر بني 0.8)">
+        <span class="preset-tip" style="background: #78350F; box-shadow: 0 0 8px rgba(120, 53, 15, 0.9);"></span>
+        <span class="preset-val">0.8</span>
+      </button>
+      <button type="button" class="dock-preset-btn" data-tool="pen" data-color="#2563EB" data-width="3" title="0.7 Blue Pen (قلم حبر أزرق 0.7)">
+        <span class="preset-tip" style="background: #2563EB; box-shadow: 0 0 8px rgba(37, 99, 235, 0.9);"></span>
+        <span class="preset-val">0.7</span>
+      </button>
+      <button type="button" class="dock-preset-btn" data-tool="pen" data-color="#10B981" data-width="4" title="0.8 Green Pen (قلم حبر أخضر 0.8)">
+        <span class="preset-tip" style="background: #10B981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.9);"></span>
+        <span class="preset-val">0.8</span>
+      </button>
     </div>
 
     <!-- Collapsible Left Thumbnail Sidebar (17 Slides) -->
@@ -1352,11 +1545,14 @@ const DocumentViewer = {
     const docId = "${docId}";
     let currentTool = 'highlighter'; // 'highlighter', 'pen', 'eraser', 'note'
     let currentColor = '#FEF08A';
-    let currentStroke = 4;
+    let currentStroke = 2; // preset default
     let isDrawing = false;
     let strokes = {}; // pageNum -> array of strokes
     let notes = [];
     let noteIdCounter = 1;
+    let undoStack = [];
+    let redoStack = [];
+    let strokeBeforeDraw = null;
 
     // 1. Sidebar Toggle & Smooth Scrolling
     window.toggleSidebar = function() {
@@ -1397,56 +1593,189 @@ const DocumentViewer = {
       });
     }
 
-    // 2. Studio Bridge Tools (Called by Parent Toolbar)
+    // 2. Studio Bridge Tools (Called by Parent Toolbar & Vertical Dock)
     window.setStudioTool = function(tool) {
       currentTool = tool;
       document.querySelectorAll('.canvas-overlay').forEach(c => {
         c.classList.toggle('pen-active', tool === 'pen' || tool === 'highlighter' || tool === 'eraser');
       });
+      syncActivePresetUI();
     };
 
     window.setStudioColor = function(color) {
       currentColor = color;
       document.documentElement.style.setProperty('--highlight-color', color);
+      syncActivePresetUI();
     };
 
     window.setStudioWidth = function(width) {
       currentStroke = parseInt(width, 10) || 4;
+      syncActivePresetUI();
     };
 
-    // 3. Canvas Touch & Mouse Drawing Engine
+    // Quick presets dock selection & bidirectional synchronization
+    window.selectPreset = function(tool, color, width) {
+      currentTool = tool;
+      currentColor = color;
+      currentStroke = width;
+      document.documentElement.style.setProperty('--highlight-color', color);
+      document.querySelectorAll('.canvas-overlay').forEach(c => {
+        c.classList.toggle('pen-active', tool === 'pen' || tool === 'highlighter' || tool === 'eraser');
+      });
+      syncActivePresetUI();
+
+      try {
+        if (window.parent && window.parent.DocumentViewer && typeof window.parent.DocumentViewer.syncFromPreset === 'function') {
+          window.parent.DocumentViewer.syncFromPreset(tool, color, width);
+        }
+      } catch (e) {}
+    };
+
+    function syncActivePresetUI() {
+      document.querySelectorAll('.dock-preset-btn').forEach(btn => {
+        const t = btn.getAttribute('data-tool');
+        const c = (btn.getAttribute('data-color') || '').toLowerCase();
+        const isMatch = (t === currentTool && c === currentColor.toLowerCase());
+        btn.classList.toggle('active', isMatch);
+      });
+    }
+
+    document.querySelectorAll('.dock-preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tool = btn.getAttribute('data-tool');
+        const color = btn.getAttribute('data-color');
+        const width = parseInt(btn.getAttribute('data-width'), 10) || 2;
+        window.selectPreset(tool, color, width);
+      });
+    });
+
+    // 3. Undo & Redo System
+    window.undo = function() {
+      if (!undoStack || undoStack.length === 0) return;
+      const action = undoStack.pop();
+      redoStack.push(action);
+
+      if (action.type === 'stroke') {
+        strokes[action.pageNum] = JSON.parse(JSON.stringify(action.prev || []));
+        redrawCanvas(action.pageNum);
+      } else if (action.type === 'text_highlight') {
+        if (action.el) {
+          action.el.classList.toggle('highlighted', action.wasHighlighted);
+        }
+      } else if (action.type === 'note_add') {
+        const noteEl = document.getElementById(action.noteId);
+        if (noteEl) noteEl.remove();
+        notes = notes.filter(n => n.id !== action.noteId);
+      }
+      triggerAutoSave();
+    };
+
+    window.redo = function() {
+      if (!redoStack || redoStack.length === 0) return;
+      const action = redoStack.pop();
+      undoStack.push(action);
+
+      if (action.type === 'stroke') {
+        strokes[action.pageNum] = JSON.parse(JSON.stringify(action.next || []));
+        redrawCanvas(action.pageNum);
+      } else if (action.type === 'text_highlight') {
+        if (action.el) {
+          action.el.classList.toggle('highlighted', !action.wasHighlighted);
+        }
+      } else if (action.type === 'note_add') {
+        const pageEl = document.getElementById(action.noteData.pageId);
+        if (pageEl) {
+          createStickyNote(pageEl, action.noteData.left, action.noteData.top, action.noteData.text, action.noteData.id);
+        }
+      }
+      triggerAutoSave();
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if (e.shiftKey) {
+          e.preventDefault();
+          window.redo();
+        } else {
+          e.preventDefault();
+          window.undo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        window.redo();
+      }
+    });
+
+    // 4. Smooth Touch & Mouse Drawing Engine
+    function getCanvasPoint(e, canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / (rect.width || 1);
+      const scaleY = canvas.height / (rect.height || 1);
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
+
     function initCanvases() {
       document.querySelectorAll('.doc-page').forEach(page => {
         const pageNum = page.getAttribute('data-page');
         const canvas = document.getElementById('canvas-' + pageNum);
         if (!canvas) return;
 
-        canvas.width = page.offsetWidth;
-        canvas.height = page.offsetHeight;
+        const pWidth = page.offsetWidth;
+        const pHeight = page.offsetHeight;
+        if (canvas.width !== pWidth || canvas.height !== pHeight) {
+          canvas.width = pWidth;
+          canvas.height = pHeight;
+          redrawCanvas(pageNum);
+        }
 
-        const ctx = canvas.getContext('2d');
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        if (canvas._boundListeners) return;
+        canvas._boundListeners = true;
 
-        canvas.onmousedown = (e) => startDraw(e, canvas, pageNum);
-        canvas.onmousemove = (e) => draw(e, canvas, pageNum);
-        canvas.onmouseup = () => stopDraw(pageNum);
-        canvas.onmouseleave = () => stopDraw(pageNum);
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => {
+          if (e.button !== 0) return;
+          startDraw(e, canvas, pageNum);
+        });
 
+        canvas.addEventListener('mousemove', (e) => {
+          draw(e, canvas, pageNum);
+        });
+
+        canvas.addEventListener('mouseup', () => stopDraw(pageNum));
+        canvas.addEventListener('mouseleave', () => stopDraw(pageNum));
+
+        // Enhanced mobile touch events (passive: false and preventDefault to eliminate scroll glitches)
         canvas.addEventListener('touchstart', (e) => {
-          if (currentTool === 'note') return;
-          e.preventDefault();
-          startDraw(e.touches[0], canvas, pageNum);
+          if (currentTool !== 'pen' && currentTool !== 'highlighter' && currentTool !== 'eraser') return;
+          if (e.cancelable) e.preventDefault();
+          e.stopPropagation();
+          if (e.touches && e.touches.length > 0) {
+            startDraw(e.touches[0], canvas, pageNum);
+          }
         }, { passive: false });
 
         canvas.addEventListener('touchmove', (e) => {
-          if (currentTool === 'note') return;
-          e.preventDefault();
-          draw(e.touches[0], canvas, pageNum);
+          if (currentTool !== 'pen' && currentTool !== 'highlighter' && currentTool !== 'eraser') return;
+          if (e.cancelable) e.preventDefault();
+          e.stopPropagation();
+          if (e.touches && e.touches.length > 0) {
+            draw(e.touches[0], canvas, pageNum);
+          }
         }, { passive: false });
 
-        canvas.addEventListener('touchend', () => {
-          if (currentTool === 'note') return;
+        canvas.addEventListener('touchend', (e) => {
+          if (currentTool !== 'pen' && currentTool !== 'highlighter' && currentTool !== 'eraser') return;
+          if (e.cancelable) e.preventDefault();
+          e.stopPropagation();
+          stopDraw(pageNum);
+        }, { passive: false });
+
+        canvas.addEventListener('touchcancel', (e) => {
+          if (currentTool !== 'pen' && currentTool !== 'highlighter' && currentTool !== 'eraser') return;
           stopDraw(pageNum);
         });
       });
@@ -1455,37 +1784,39 @@ const DocumentViewer = {
     function startDraw(e, canvas, pageNum) {
       if (currentTool !== 'pen' && currentTool !== 'highlighter' && currentTool !== 'eraser') return;
       isDrawing = true;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const pt = getCanvasPoint(e, canvas);
 
       if (!strokes[pageNum]) strokes[pageNum] = [];
+      strokeBeforeDraw = JSON.parse(JSON.stringify(strokes[pageNum]));
 
       if (currentTool === 'eraser') {
-        eraseAt(pageNum, x, y);
+        eraseAt(pageNum, pt.x, pt.y);
       } else {
         strokes[pageNum].push({
           tool: currentTool,
           color: currentColor,
           strokeWidth: currentTool === 'highlighter' ? currentStroke * 3.5 : currentStroke,
-          points: [{ x, y }]
+          points: [pt]
         });
+        redrawCanvas(pageNum);
       }
     }
 
     function draw(e, canvas, pageNum) {
       if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const pt = getCanvasPoint(e, canvas);
 
       if (currentTool === 'eraser') {
-        eraseAt(pageNum, x, y);
+        eraseAt(pageNum, pt.x, pt.y);
       } else {
         const currStrokes = strokes[pageNum];
         if (currStrokes && currStrokes.length > 0) {
-          currStrokes[currStrokes.length - 1].points.push({ x, y });
-          redrawCanvas(pageNum);
+          const lastStroke = currStrokes[currStrokes.length - 1];
+          const lastPt = lastStroke.points[lastStroke.points.length - 1];
+          if (!lastPt || Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) >= 2) {
+            lastStroke.points.push(pt);
+            redrawCanvas(pageNum);
+          }
         }
       }
     }
@@ -1493,17 +1824,41 @@ const DocumentViewer = {
     function stopDraw(pageNum) {
       if (isDrawing) {
         isDrawing = false;
+        if (strokeBeforeDraw !== null) {
+          undoStack.push({
+            type: 'stroke',
+            pageNum: pageNum,
+            prev: strokeBeforeDraw,
+            next: JSON.parse(JSON.stringify(strokes[pageNum] || []))
+          });
+          redoStack = [];
+          strokeBeforeDraw = null;
+        }
         triggerAutoSave();
       }
     }
 
     function eraseAt(pageNum, x, y) {
-      if (!strokes[pageNum]) return;
+      if (!strokes[pageNum] || strokes[pageNum].length === 0) return;
       const radius = 25;
+      const prev = JSON.parse(JSON.stringify(strokes[pageNum]));
+      const initialCount = strokes[pageNum].length;
+
       strokes[pageNum] = strokes[pageNum].filter(st => {
         return !st.points.some(p => Math.hypot(p.x - x, p.y - y) < radius);
       });
-      redrawCanvas(pageNum);
+
+      if (strokes[pageNum].length !== initialCount) {
+        redrawCanvas(pageNum);
+        undoStack.push({
+          type: 'stroke',
+          pageNum: pageNum,
+          prev: prev,
+          next: JSON.parse(JSON.stringify(strokes[pageNum]))
+        });
+        redoStack = [];
+        triggerAutoSave();
+      }
     }
 
     function redrawCanvas(pageNum) {
@@ -1514,23 +1869,32 @@ const DocumentViewer = {
 
       const pageStrokes = strokes[pageNum] || [];
       pageStrokes.forEach(st => {
-        if (st.points.length < 2) return;
+        if (!st.points || st.points.length === 0) return;
         ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(st.points[0].x, st.points[0].y);
-
-        for (let i = 1; i < st.points.length; i++) {
-          ctx.lineTo(st.points[i].x, st.points[i].y);
-        }
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
         if (st.tool === 'highlighter') {
           ctx.globalCompositeOperation = 'multiply';
+          ctx.globalAlpha = 0.55;
           ctx.strokeStyle = st.color;
           ctx.lineWidth = st.strokeWidth;
         } else {
           ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = 1.0;
           ctx.strokeStyle = st.color;
           ctx.lineWidth = st.strokeWidth;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(st.points[0].x, st.points[0].y);
+
+        if (st.points.length === 1) {
+          ctx.lineTo(st.points[0].x + 0.1, st.points[0].y + 0.1);
+        } else {
+          for (let i = 1; i < st.points.length; i++) {
+            ctx.lineTo(st.points[i].x, st.points[i].y);
+          }
         }
 
         ctx.stroke();
@@ -1538,21 +1902,36 @@ const DocumentViewer = {
       });
     }
 
-    // 4. Text Highlighting on Click & Selection
+    // 5. Text Highlighting on Click & Selection
     document.querySelectorAll('.doc-page p, .doc-page li, .doc-page h3').forEach((el, idx) => {
       el.setAttribute('data-idx', idx);
       el.addEventListener('click', () => {
         if (currentTool === 'highlighter') {
+          const wasH = el.classList.contains('highlighted');
           el.classList.toggle('highlighted');
+          undoStack.push({
+            type: 'text_highlight',
+            el: el,
+            wasHighlighted: wasH
+          });
+          redoStack = [];
           triggerAutoSave();
         } else if (currentTool === 'eraser') {
-          el.classList.remove('highlighted');
-          triggerAutoSave();
+          if (el.classList.contains('highlighted')) {
+            el.classList.remove('highlighted');
+            undoStack.push({
+              type: 'text_highlight',
+              el: el,
+              wasHighlighted: true
+            });
+            redoStack = [];
+            triggerAutoSave();
+          }
         }
       });
     });
 
-    // 5. Sticky Notes Logic
+    // 6. Sticky Notes Logic
     function createStickyNote(pageEl, x, y, initialText, id) {
       const noteId = id || 'sn_' + Date.now() + '_' + (noteIdCounter++);
       const noteBox = document.createElement('div');
@@ -1630,13 +2009,20 @@ const DocumentViewer = {
 
       const existing = notes.find(n => n.id === noteId);
       if (!existing) {
-        notes.push({
+        const noteData = {
           id: noteId,
           pageId: pageEl.id,
           left: parseInt(noteBox.style.left, 10),
           top: parseInt(noteBox.style.top, 10),
           text: initialText || ''
+        };
+        notes.push(noteData);
+        undoStack.push({
+          type: 'note_add',
+          noteId: noteId,
+          noteData: noteData
         });
+        redoStack = [];
         triggerAutoSave();
       }
     }
@@ -1653,7 +2039,7 @@ const DocumentViewer = {
       });
     });
 
-    // 6. Auto-Save & LocalStorage Sync
+    // 7. Instant Silent Auto-Save & LocalStorage Sync
     function triggerAutoSave() {
       const highlights = [];
       document.querySelectorAll('.highlighted').forEach(el => {
@@ -1674,8 +2060,18 @@ const DocumentViewer = {
 
       const badge = document.getElementById('auto-save-badge');
       if (badge) {
+        badge.innerHTML = '<span>✓ تم الحفظ تلقائياً</span>';
         badge.style.opacity = '1';
-        setTimeout(() => { badge.style.opacity = '0.7'; }, 1500);
+        badge.style.transform = 'scale(1.06)';
+        badge.style.borderColor = 'rgba(52, 211, 153, 0.7)';
+        badge.style.boxShadow = '0 0 12px rgba(52, 211, 153, 0.4)';
+        clearTimeout(badge._saveTimer);
+        badge._saveTimer = setTimeout(() => {
+          badge.style.transform = 'scale(1)';
+          badge.style.opacity = '0.7';
+          badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+          badge.style.boxShadow = 'none';
+        }, 1800);
       }
     }
 
@@ -1693,10 +2089,12 @@ const DocumentViewer = {
       document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));
       document.querySelectorAll('.sticky-note-box').forEach(n => n.remove());
       notes = [];
+      undoStack = [];
+      redoStack = [];
       try { localStorage.removeItem('kf_doc_annotations_' + docId); } catch(e){}
     };
 
-    // 7. Load Saved Annotations
+    // 8. Load Saved Annotations
     function loadSavedAnnotations() {
       try {
         const saved = localStorage.getItem('kf_doc_annotations_' + docId);
