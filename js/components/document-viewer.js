@@ -850,8 +850,9 @@ const DocumentViewer = {
     const docId = "${docId}";
     let currentTool = 'pan'; // pan, pen, highlighter, eraser, note
     let currentColor = 'rgba(254, 240, 138, 0.65)';
-    let currentStroke = 3;
+    let currentStroke = 4;
     let straightLineMode = false;
+    let isStraightLine = false;
     let bottomDisplayMode = true;
 
     let isDrawing = false;
@@ -876,7 +877,7 @@ const DocumentViewer = {
     };
 
     window.updateLineWeight = function(val) {
-      currentStroke = parseFloat(val) * 3.5;
+      currentStroke = parseFloat(val) * 5; // 0.1mm (0.5px) to 3.0mm (15px)
       const text = document.getElementById('slider-val-text');
       const labelBtn = document.getElementById('stroke-label-btn');
       if (text) text.textContent = val + 'mm';
@@ -885,6 +886,7 @@ const DocumentViewer = {
 
     window.toggleStraightLineSetting = function() {
       straightLineMode = !straightLineMode;
+      isStraightLine = straightLineMode;
       const sw = document.getElementById('toggle-straight-line');
       if (sw) sw.classList.toggle('on', straightLineMode);
     };
@@ -901,7 +903,7 @@ const DocumentViewer = {
 
       const newBtn = document.createElement('div');
       newBtn.className = 'dock-preset-btn';
-      const mmVal = (currentStroke / 3.5).toFixed(1);
+      const mmVal = (currentStroke / 5).toFixed(1);
       newBtn.title = mmVal + 'mm قلم مخصص';
       newBtn.onclick = () => window.applyPreset(currentColor, currentStroke, currentTool);
       newBtn.innerHTML = \`
@@ -1002,10 +1004,11 @@ const DocumentViewer = {
           draw(e.touches[0], canvas, pageNum);
         }, { passive: false });
 
-        canvas.addEventListener('touchend', () => {
+        canvas.addEventListener('touchend', (e) => {
           if (currentTool === 'pan') return;
+          e.preventDefault();
           stopDraw(pageNum);
-        });
+        }, { passive: false });
       });
     }
 
@@ -1025,7 +1028,8 @@ const DocumentViewer = {
           tool: currentTool,
           color: currentColor,
           strokeWidth: currentTool === 'highlighter' ? currentStroke * 2.5 : currentStroke,
-          isStraight: straightLineMode,
+          isStraight: straightLineMode || isStraightLine,
+          isStraightLine: straightLineMode || isStraightLine,
           bottomDisplay: bottomDisplayMode,
           points: [{ x: startX, y: startY }]
         });
@@ -1044,11 +1048,18 @@ const DocumentViewer = {
         const currStrokes = strokes[pageNum];
         if (currStrokes && currStrokes.length > 0) {
           const st = currStrokes[currStrokes.length - 1];
-          if (st.isStraight) {
-            // Straight line drawing mode (horizontal snap)
+          if (st.isStraight || st.isStraightLine) {
+            // Straight line drawing mode (horizontal and vertical snap)
+            const dx = Math.abs(x - startX);
             const dy = Math.abs(y - startY);
-            const targetY = dy < 15 ? startY : y;
-            st.points = [{ x: startX, y: startY }, { x: x, y: targetY }];
+            let targetX = x;
+            let targetY = y;
+            if (dy < 20 || dy <= dx * 0.25) {
+              targetY = startY; // Perfect horizontal snap for highlighting lines of text
+            } else if (dx < 20 || dx <= dy * 0.25) {
+              targetX = startX; // Vertical snap
+            }
+            st.points = [{ x: startX, y: startY }, { x: targetX, y: targetY }];
           } else {
             st.points.push({ x, y });
           }
