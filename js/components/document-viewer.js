@@ -1047,7 +1047,7 @@ const DocumentViewer = {
     }
 
     .canvas-overlay.cursor-eraser {
-      cursor: cell !important;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='rgba(239,68,68,0.25)' stroke='%23ef4444' stroke-width='2'/%3E%3Cpath d='M12 9v6M9 12h6' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, cell, crosshair !important;
     }
 
     /* Translucent Highlighted Elements */
@@ -2563,7 +2563,19 @@ const DocumentViewer = {
       const y = (e.clientY - rect.top) * scaleY;
 
       if (currentTool === 'eraser') {
-        eraseAt(pageNum, x, y);
+        const dx = x - startX;
+        const dy = y - startY;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 15) {
+          const steps = Math.min(8, Math.ceil(dist / 12));
+          for (let s = 1; s <= steps; s++) {
+            eraseAt(pageNum, startX + (dx * s) / steps, startY + (dy * s) / steps);
+          }
+        } else {
+          eraseAt(pageNum, x, y);
+        }
+        startX = x;
+        startY = y;
       } else {
         const currStrokes = strokes[pageNum];
         if (currStrokes && currStrokes.length > 0) {
@@ -2591,11 +2603,13 @@ const DocumentViewer = {
     function stopDraw(pageNum) {
       if (isDrawing) {
         isDrawing = false;
-        const pageStrokes = strokes[pageNum];
-        if (pageStrokes && pageStrokes.length > 0) {
-          const lastSt = pageStrokes[pageStrokes.length - 1];
-          actionHistory.push({ type: 'stroke', pageNum: pageNum, stroke: lastSt });
-          redoStack = [];
+        if (currentTool !== 'eraser') {
+          const pageStrokes = strokes[pageNum];
+          if (pageStrokes && pageStrokes.length > 0) {
+            const lastSt = pageStrokes[pageStrokes.length - 1];
+            actionHistory.push({ type: 'stroke', pageNum: pageNum, stroke: lastSt });
+            redoStack = [];
+          }
         }
         triggerAutoSave();
       }
