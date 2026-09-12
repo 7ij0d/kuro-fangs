@@ -565,6 +565,231 @@ const DocumentViewer = {
       border-color: #0284C7;
     }
 
+    /* 2-Panel Note Studio UI Overhaul Styles */
+    .jnotes-active-tool-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #F8FAFC;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: 0.775rem;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .jnotes-active-tool-pill:hover, .jnotes-active-tool-pill.active {
+      background: rgba(2, 132, 199, 0.2);
+      border-color: #0284C7;
+      color: #38BDF8;
+    }
+
+    .jnotes-active-tool-pill .tool-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.5);
+      flex-shrink: 0;
+    }
+
+    /* Collapsible Floating Side Tool Panel */
+    #jnotes-tools-panel {
+      position: fixed;
+      left: 16px;
+      top: 68px;
+      width: 320px;
+      max-width: calc(100vw - 32px);
+      max-height: calc(100dvh - 84px);
+      overflow-y: auto;
+      z-index: 99995;
+      background: #1E2030;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 16px;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6);
+      padding: 16px;
+      color: #F8FAFC;
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      direction: rtl;
+      scrollbar-width: thin;
+      pointer-events: auto !important;
+    }
+
+    #jnotes-tools-panel.open {
+      display: flex;
+      animation: panelPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes panelPop {
+      from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .panel-section-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #94A3B8;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .panel-tool-btn {
+      background: #25283D;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #CBD5E1;
+      border-radius: 10px;
+      padding: 8px 4px;
+      font-size: 0.775rem;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .panel-tool-btn:hover {
+      background: #2D304A;
+      color: #FFF;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .panel-tool-btn.active {
+      background: #0284C7 !important;
+      border-color: #38BDF8 !important;
+      color: #FFF !important;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+    }
+
+    .panel-chips-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .thickness-chip {
+      flex: 1;
+      background: #25283D;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94A3B8;
+      border-radius: 6px;
+      padding: 5px 0;
+      font-size: 0.725rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      transition: all 0.15s ease;
+    }
+
+    .thickness-chip:hover {
+      background: #2D304A;
+      color: #FFF;
+    }
+
+    .thickness-chip.active {
+      background: rgba(2, 132, 199, 0.3) !important;
+      border-color: #0284C7 !important;
+      color: #38BDF8 !important;
+      font-weight: 800;
+    }
+
+    .panel-palette-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      direction: ltr;
+    }
+
+    .paper-theme-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .paper-theme-btn {
+      flex: 1;
+      background: #25283D;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #CBD5E1;
+      border-radius: 8px;
+      padding: 7px 2px;
+      font-size: 0.725rem;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .paper-theme-btn:hover {
+      background: #2D304A;
+      color: #FFF;
+    }
+
+    .paper-theme-btn.active {
+      background: rgba(2, 132, 199, 0.25) !important;
+      border-color: #0284C7 !important;
+      color: #38BDF8 !important;
+    }
+
+    .panel-actions-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .panel-action-btn {
+      flex: 1;
+      background: #25283D;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #CBD5E1;
+      border-radius: 8px;
+      padding: 7px 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .panel-action-btn:hover {
+      background: #2D304A;
+      color: #FFF;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .panel-action-btn-danger {
+      color: #F87171;
+      border-color: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .panel-action-btn-danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #EF4444;
+      color: #FFF;
+    }
+
     /* Swatches Color Dots */
     .jnotes-color-dots {
       display: flex;
@@ -1051,87 +1276,9 @@ const DocumentViewer = {
       </div>
     </div>
 
-    <!-- CENTER: Segmented Professional Tools with Crisp Vector Icons -->
+    <!-- CENTER: Clean 2-Panel Center Navigation & Active Tool Indicator Badge -->
     <div class="jnotes-center-section">
-      <div class="jnotes-tool-segmented">
-        <!-- Read (Pan) -->
-        <button class="jtool-btn active" id="tool-pan" onclick="setTool('pan')" title="وضع القراءة والتحديد">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
-          <span>قراءة</span>
-        </button>
-
-        <!-- Pen -->
-        <button class="jtool-btn" id="tool-pen" onclick="setTool('pen')" title="قلم الملاحظات والتدوين">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-          <span>قلم</span>
-        </button>
-
-        <!-- Highlighter (Mark Pen) -->
-        <button class="jtool-btn" id="tool-highlighter" onclick="toggleMarkPenMenu(event)" title="تظليل نصوص وملاحظات">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h3l6-6"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>
-          <span>تظليل</span>
-        </button>
-
-        <!-- Eraser -->
-        <button class="jtool-btn" id="tool-eraser" onclick="setTool('eraser')" title="ممحاة التظليلات والرسومات">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-          <span>ممحاة</span>
-        </button>
-
-        <!-- Text Box Note Tool (NEW) -->
-        <button class="jtool-btn" id="tool-text" onclick="setTool('text')" title="إضافة ملاحظة نصية بالكيبورد">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-          <span>نص</span>
-        </button>
-
-        <!-- Straight Line Toggle -->
-        <button class="jtool-btn" id="tool-straight-toggle" onclick="toggleStraightLineSetting()" title="الرسم بخط مستقيم">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>
-          <span>مستقيم</span>
-        </button>
-
-        <!-- Line Weight Thickness Slider Trigger -->
-        <button class="jtool-btn" id="tool-thickness" onclick="toggleThicknessMenu(event)" title="تغيير سمك الخط (0.1mm - 3.0mm)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="8"/></svg>
-          <span id="stroke-label-btn">0.8mm</span>
-        </button>
-
-        <!-- Color Palette Picker / Swatches -->
-        <div class="jnotes-color-dots" id="color-dots-container">
-          <div class="color-dot active" data-color="#0F172A" style="background: #0F172A;" onclick="setColor('#0F172A')" title="أسود"></div>
-          <div class="color-dot" data-color="#0284C7" style="background: #0284C7;" onclick="setColor('#0284C7')" title="أزرق"></div>
-          <div class="color-dot" data-color="#EF4444" style="background: #EF4444;" onclick="setColor('#EF4444')" title="أحمر"></div>
-          <div class="color-dot" data-color="#16A34A" style="background: #16A34A;" onclick="setColor('#16A34A')" title="أخضر"></div>
-          <div class="color-dot" data-color="#FEF08A" style="background: #FEF08A;" onclick="setColor('#FEF08A')" title="أصفر"></div>
-          <div class="color-dot" data-color="#A855F7" style="background: #A855F7;" onclick="setColor('#A855F7')" title="أرجواني"></div>
-        </div>
-
-        <!-- Expanded Color Palette Trigger -->
-        <button class="jtool-icon-btn" id="btn-toggle-colors" onclick="toggleColorPaletteMenu(event)" title="لوحة الألوان الموسعة (24 لون + مخصص)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
-        </button>
-
-        <div class="jnotes-divider"></div>
-
-        <!-- Undo / Redo Handlers -->
-        <button class="jtool-icon-btn" id="btn-undo" onclick="undoAction()" title="تراجع (Undo)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-        </button>
-        <button class="jtool-icon-btn" id="btn-redo" onclick="redoAction()" title="إعادة (Redo)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- RIGHT: Page Navigation, Zoom, Paper Theme, Clear, Index, Discussion, Fullscreen, Download -->
-    <div class="jnotes-right-section">
-      <!-- Auto Save Badge -->
-      <span class="auto-save-pill" id="auto-save-badge">
-        <span class="auto-save-dot"></span>
-        <span>تم الحفظ تلقائياً</span>
-      </span>
-
-      <!-- Page Nav Pill -->
+      <!-- Page Navigation Pill -->
       <div class="jnotes-page-nav-pill">
         <button class="page-nav-arrow" onclick="prevPage()" title="الصفحة السابقة">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
@@ -1142,29 +1289,26 @@ const DocumentViewer = {
         </button>
       </div>
 
-      <!-- Zoom Controls -->
-      <div class="jnotes-zoom-group">
-        <button class="jtool-icon-btn" onclick="zoomIn()" title="تكبير المحاضرة (Zoom In)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-        <button class="jtool-btn" onclick="resetZoom()" title="إعادة الحجم الأصلي 100%">
-          <span id="zoom-val-text">100%</span>
-        </button>
-        <button class="jtool-icon-btn" onclick="zoomOut()" title="تصغير المحاضرة (Zoom Out)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-      </div>
-
-      <!-- Paper Theme Cycle -->
-      <button class="jtool-btn" id="btn-paper-theme" onclick="cyclePaperTheme()" title="تغيير نمط الورق (أبيض / دافئ / ليلي)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-        <span id="paper-theme-label">ورق أبيض</span>
+      <!-- Active Tool Indicator Badge (Clicks to open floating side tools panel) -->
+      <button class="jnotes-active-tool-pill" id="active-tool-pill" onclick="toggleSideToolsPanel(event)" title="انقر لفتح صندوق الأدوات والأقلام">
+        <span class="tool-dot" id="active-tool-dot" style="background: #0F172A;"></span>
+        <span id="active-tool-label">قراءة</span>
+        <span style="font-size: 0.725rem; opacity: 0.85;">⚙️</span>
       </button>
+    </div>
 
-      <!-- Clear Current Page Drawings -->
-      <button class="jtool-btn" id="btn-clear-page" onclick="clearCurrentPageStrokes()" title="مسح كافة الرسومات على الصفحة الحالية">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-        <span>مسح الصفحة</span>
+    <!-- RIGHT: Sleek 2-Panel Action Controls -->
+    <div class="jnotes-right-section">
+      <!-- Auto Save Badge -->
+      <span class="auto-save-pill" id="auto-save-badge">
+        <span class="auto-save-dot"></span>
+        <span>تم الحفظ تلقائياً</span>
+      </span>
+
+      <!-- Tools Drawer Toggle Button -->
+      <button class="jtool-btn" id="btn-toggle-tools-panel" onclick="toggleSideToolsPanel(event)" title="الأقلام والأدوات">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>الأقلام والأدوات</span>
       </button>
 
       <!-- Page Index Drawer Button -->
@@ -1191,59 +1335,129 @@ const DocumentViewer = {
         <span>تنزيل PDF</span>
       </button>
     </div>
+  </div>
 
-    <!-- POPUP 1: JNotes Line Weight Slider -->
-    <div class="jnotes-popup-card" id="popup-thickness">
-      <div class="popup-title">Line weight</div>
-      <div style="margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
-          <span>Thickness setting</span>
-          <strong id="slider-val-text" style="color: #0284C7;">0.8mm</strong>
-        </div>
-        <input type="range" id="line-weight-slider" min="0.1" max="3.0" step="0.1" value="0.8" style="width: 100%; accent-color: #0284C7; cursor: pointer;" oninput="updateLineWeight(this.value)" />
+  <!-- Collapsible Floating Side Tool Panel (Matching Spec) -->
+  <div id="jnotes-tools-panel">
+    <!-- Panel Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.1rem;">🛠️</span>
+        <h3 style="font-size: 0.875rem; font-weight: 800; margin: 0; color: #F8FAFC;">صندوق الأقلام والأدوات</h3>
+      </div>
+      <button onclick="toggleSideToolsPanel(event)" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #F8FAFC; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="إغلاق اللوحة">✕</button>
+    </div>
+
+    <!-- SECTION 1: أنماط الرسم والأدوات (Drawing Modes) -->
+    <div>
+      <div class="panel-section-title">
+        <span>نمط الأداة</span>
+        <span id="active-tool-mode-badge" style="color: #38BDF8; font-size: 0.725rem;">قراءة</span>
+      </div>
+      <div class="panel-tool-grid">
+        <button class="panel-tool-btn active" id="ptool-pan" onclick="setTool('pan')" title="وضع القراءة والتنقل">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+          <span>قراءة</span>
+        </button>
+        <button class="panel-tool-btn" id="ptool-pen" onclick="setTool('pen')" title="قلم الملاحظات والتدوين">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          <span>قلم</span>
+        </button>
+        <button class="panel-tool-btn" id="ptool-highlighter" onclick="setTool('highlighter')" title="تظليل نصوص وملاحظات">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h3l6-6"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>
+          <span>تظليل</span>
+        </button>
+        <button class="panel-tool-btn" id="ptool-eraser" onclick="setTool('eraser')" title="ممحاة التظليلات والرسومات">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+          <span>ممحاة</span>
+        </button>
+        <button class="panel-tool-btn" id="ptool-text" onclick="setTool('text')" title="إضافة ملاحظة نصية بالكيبورد">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <span>نص</span>
+        </button>
+        <button class="panel-tool-btn" id="ptool-straight" onclick="toggleStraightLineSetting()" title="الرسم بخط مستقيم">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>
+          <span>مسطرة</span>
+        </button>
       </div>
     </div>
 
-    <!-- POPUP 2: JNotes Mark Pen Settings -->
-    <div class="jnotes-popup-card" id="popup-markpen">
-      <div class="popup-title">Mark pen</div>
-      <div class="popup-row">
-        <span>Straight line drawing</span>
-        <div class="popup-toggle-switch" id="toggle-straight-line" onclick="toggleStraightLineSetting()"></div>
+    <!-- SECTION 2: سمك الخط (Line Weight & Quick Chips) -->
+    <div>
+      <div class="panel-section-title">
+        <span>سمك الخط</span>
+        <strong id="slider-val-text" style="color: #38BDF8;">0.8mm</strong>
       </div>
-      <div class="popup-row">
-        <span>Bottom display</span>
-        <div class="popup-toggle-switch on" id="toggle-bottom-display" onclick="toggleBottomDisplaySetting()"></div>
+      <input type="range" id="line-weight-slider" min="0.1" max="3.0" step="0.1" value="0.8" style="width: 100%; accent-color: #0284C7; cursor: pointer;" oninput="updateLineWeight(this.value)" />
+      <div class="panel-chips-row">
+        <div class="thickness-chip" onclick="updateLineWeight('0.3')">0.3mm</div>
+        <div class="thickness-chip" onclick="updateLineWeight('0.5')">0.5mm</div>
+        <div class="thickness-chip active" id="chip-0.8" onclick="updateLineWeight('0.8')">0.8mm</div>
+        <div class="thickness-chip" onclick="updateLineWeight('1.2')">1.2mm</div>
+        <div class="thickness-chip" onclick="updateLineWeight('2.0')">2.0mm</div>
       </div>
-      <button class="btn-add-penbox" onclick="addToPenBox()">
-        <span>➕ Add to pen-box</span>
-      </button>
     </div>
 
-    <!-- POPUP 3: JNotes Expanded 24-Color Palette & HTML5 Custom Picker -->
-    <div class="jnotes-popup-card" id="popup-colors" style="width: 320px;">
-      <div class="popup-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span style="font-weight: 800; font-size: 0.85rem;">لوحة الألوان الأكاديمية (24 لون)</span>
-        <span id="current-color-preview-pill" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CBD5E1; background: #0F172A; display: inline-block;"></span>
+    <!-- SECTION 3: لوحة الألوان الأكاديمية (24 Color Swatches + Custom Picker) -->
+    <div>
+      <div class="panel-section-title">
+        <span>لوحة الألوان (24 لون)</span>
+        <span id="current-color-preview-pill" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #CBD5E1; background: #0F172A; display: inline-block;"></span>
       </div>
-
-      <!-- 24-Color Grid -->
-      <div class="palette-grid-24" id="palette-grid-24" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 14px; direction: ltr;">
-      </div>
-
-      <!-- Divider -->
-      <div style="height: 1px; background: #E2E8F0; margin: 12px 0;"></div>
-
-      <!-- Section 2: HTML5 Custom Color Picker & Hex Input -->
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-        <label for="jnotes-color-input" style="font-size: 0.775rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+      <div class="panel-palette-grid" id="palette-grid-24"></div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+        <label for="jnotes-color-input" style="font-size: 0.775rem; font-weight: 700; color: #94A3B8; display: flex; align-items: center; gap: 6px; cursor: pointer;">
           <span>لون مخصص:</span>
-          <input type="color" id="jnotes-color-input" value="#0F172A" style="width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; background: transparent; padding: 0;" oninput="setCustomColor(this.value)" />
+          <input type="color" id="jnotes-color-input" value="#0F172A" style="width: 28px; height: 28px; border: none; border-radius: 6px; cursor: pointer; background: transparent; padding: 0;" oninput="setCustomColor(this.value)" />
         </label>
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <input type="text" id="jnotes-hex-input" maxlength="7" value="#0F172A" style="width: 85px; font-family: monospace; font-size: 0.75rem; padding: 5px 8px; border: 1px solid #CBD5E1; border-radius: 6px; text-transform: uppercase; text-align: center; color: #0F172A; font-weight: 700;" onchange="setCustomColor(this.value)" />
-        </div>
+        <input type="text" id="jnotes-hex-input" maxlength="7" value="#0F172A" style="width: 80px; font-family: monospace; font-size: 0.75rem; padding: 4px 6px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; text-transform: uppercase; text-align: center; color: #F8FAFC; background: #232536; font-weight: 700;" onchange="setCustomColor(this.value)" />
       </div>
+    </div>
+
+    <!-- SECTION 4: نمط الورق (Paper Theme Modes) -->
+    <div>
+      <div class="panel-section-title">
+        <span>نمط الورق</span>
+        <span id="paper-theme-label" style="color: #38BDF8; font-size: 0.725rem;">ورق أبيض</span>
+      </div>
+      <div class="paper-theme-row">
+        <button class="paper-theme-btn active" id="ptheme-white" onclick="applyPaperTheme('white')">⚪ أبيض</button>
+        <button class="paper-theme-btn" id="ptheme-sepia" onclick="applyPaperTheme('sepia')">📜 دافئ</button>
+        <button class="paper-theme-btn" id="ptheme-dark" onclick="applyPaperTheme('dark')">🌙 ليلي</button>
+      </div>
+    </div>
+
+    <!-- SECTION 5: إجراءات الملاحظات (Actions & Options) -->
+    <div>
+      <div class="panel-section-title">
+        <span>الإجراءات السريعة</span>
+      </div>
+      <div class="panel-actions-row" style="margin-bottom: 6px;">
+        <button class="panel-action-btn" id="btn-panel-undo" onclick="undoAction()" title="تراجع">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+          <span>تراجع</span>
+        </button>
+        <button class="panel-action-btn" id="btn-panel-redo" onclick="redoAction()" title="إعادة">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+          <span>إعادة</span>
+        </button>
+      </div>
+      <div class="panel-actions-row" style="margin-bottom: 6px;">
+        <button class="panel-action-btn" onclick="zoomIn()" title="تكبير">➕ تكبير</button>
+        <button class="panel-action-btn" onclick="resetZoom()" title="الحجم الأصلي"><span id="zoom-val-text">100%</span></button>
+        <button class="panel-action-btn" onclick="zoomOut()" title="تصغير">➖ تصغير</button>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; background: #25283D; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 10px; margin-bottom: 6px; font-size: 0.775rem;">
+        <span>إبراز النص فوق التظليل (Multiply)</span>
+        <div class="popup-toggle-switch on" id="toggle-bottom-display" onclick="toggleBottomDisplaySetting()" style="width: 32px; height: 18px;"></div>
+      </div>
+      <button class="panel-action-btn panel-action-btn-danger" style="width: 100%; margin-bottom: 6px;" onclick="clearCurrentPageStrokes()" title="مسح كافة الرسومات على الصفحة الحالية">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        <span>مسح رسومات الصفحة الحالية</span>
+      </button>
+      <button class="panel-action-btn" style="width: 100%; color: #38BDF8; border-color: rgba(56, 189, 248, 0.25); background: rgba(2, 132, 199, 0.12);" onclick="addToPenBox()">
+        <span>➕ حفظ القلم الحالي في القائمة السريعة</span>
+      </button>
     </div>
   </div>
 
@@ -1392,10 +1606,11 @@ const DocumentViewer = {
 
   <!-- JNotes Interactive Canvas Engine, Popups, Straight Line Snap & Auto-Save Script -->
   <script>
+    (function() {
     const docId = "${docId}";
     let currentTool = 'pan'; // pan, pen, highlighter, eraser, note
     let currentColor = '#0F172A';
-    let currentStroke = 2.5; // 0.5mm
+    let currentStroke = 4.0; // 0.8mm
     let straightLineMode = false;
     let isStraightLine = false;
     let bottomDisplayMode = true;
@@ -1656,7 +1871,11 @@ const DocumentViewer = {
 
     // Standalone Navigation & Exit Bar
     window.exitStudio = function() {
-      if (window.parent) {
+      if (window.Router && typeof window.Router.navigate === 'function') {
+        window.Router.navigate('/sheets');
+      } else if (window.parent && window.parent.Router && typeof window.parent.Router.navigate === 'function') {
+        window.parent.Router.navigate('/sheets');
+      } else if (window.parent) {
         window.parent.location.hash = '#/sheets';
       } else {
         window.location.hash = '#/sheets';
@@ -1664,19 +1883,26 @@ const DocumentViewer = {
     };
 
     window.downloadDoc = function() {
-      if (window.parent && window.parent.DocumentViewer) {
-        window.parent.DocumentViewer.download({
-          id: docId,
-          title: "${title}"
-        });
+      const docObj = (window.DocumentViewer && window.DocumentViewer.currentDoc) || { id: docId, title: "${title}" };
+      if (window.DocumentViewer && typeof window.DocumentViewer.download === 'function') {
+        window.DocumentViewer.download(docObj);
+      } else if (window.parent && window.parent.DocumentViewer) {
+        window.parent.DocumentViewer.download(docObj);
       } else {
         alert('جاري تنزيل ملف PDF...');
       }
     };
 
     window.toggleDiscussionDrawer = function() {
-      if (window.parent) {
+      if (window.SheetDetailPage && typeof window.SheetDetailPage.openDiscussion === 'function') {
+        window.SheetDetailPage.openDiscussion();
+      } else if (window.parent && window.parent.SheetDetailPage && typeof window.parent.SheetDetailPage.openDiscussion === 'function') {
+        window.parent.SheetDetailPage.openDiscussion();
+      } else if (window.parent) {
         window.parent.postMessage({ type: 'TOGGLE_DISCUSSION' }, '*');
+      } else {
+        const btn = document.getElementById('btn-toggle-discussion');
+        if (btn) btn.click();
       }
     };
 
@@ -1866,42 +2092,59 @@ const DocumentViewer = {
       document.getElementById('popup-markpen')?.classList.remove('open');
     };
 
-    // Popups Controls
-    window.toggleThicknessMenu = function(e) {
+    // Collapsible Floating Side Tool Panel Controls (2-Panel UI)
+    window.toggleSideToolsPanel = function(e) {
       if (e) e.stopPropagation();
-      const p = document.getElementById('popup-thickness');
-      const pm = document.getElementById('popup-markpen');
-      const pc = document.getElementById('popup-colors');
-      if (pm) pm.classList.remove('open');
-      if (pc) pc.classList.remove('open');
-      if (p) {
-        const isOpen = p.classList.toggle('open');
+      const panel = document.getElementById('jnotes-tools-panel');
+      const btn = document.getElementById('btn-toggle-tools-panel');
+      const pill = document.getElementById('active-tool-pill');
+      if (panel) {
+        const isOpen = panel.classList.toggle('open');
+        if (btn) btn.classList.toggle('active', isOpen);
+        if (pill) pill.classList.toggle('active', isOpen);
         if (isOpen) {
-          const btn = document.getElementById('tool-thickness');
-          if (btn) {
-            const r = btn.getBoundingClientRect();
-            p.style.left = Math.max(10, r.left - 50) + 'px';
-          }
+          window.closeSidebar();
         }
       }
     };
 
-    window.toggleMarkPenMenu = function(e) {
-      if (e) e.stopPropagation();
-      window.setTool('highlighter');
-      const pm = document.getElementById('popup-markpen');
-      const pt = document.getElementById('popup-thickness');
-      const pc = document.getElementById('popup-colors');
-      if (pt) pt.classList.remove('open');
-      if (pc) pc.classList.remove('open');
-      if (pm) {
-        const isOpen = pm.classList.toggle('open');
-        if (isOpen) {
-          const btn = document.getElementById('tool-highlighter');
-          if (btn) {
-            const r = btn.getBoundingClientRect();
-            pm.style.left = Math.max(10, r.left - 50) + 'px';
-          }
+    window.closeSideToolsPanel = function() {
+      const panel = document.getElementById('jnotes-tools-panel');
+      const btn = document.getElementById('btn-toggle-tools-panel');
+      const pill = document.getElementById('active-tool-pill');
+      if (panel) panel.classList.remove('open');
+      if (btn) btn.classList.remove('active');
+      if (pill) pill.classList.remove('active');
+    };
+
+    window.updateActiveToolBadge = function() {
+      const labelEl = document.getElementById('active-tool-label');
+      const dotEl = document.getElementById('active-tool-dot');
+      const modeBadge = document.getElementById('active-tool-mode-badge');
+      const mmVal = (currentStroke / 5).toFixed(1);
+
+      const toolNames = {
+        pan: 'قراءة',
+        pen: 'قلم ' + mmVal + 'mm',
+        highlighter: 'تظليل ' + mmVal + 'mm',
+        eraser: 'ممحاة',
+        text: 'نص'
+      };
+
+      const name = toolNames[currentTool] || 'قراءة';
+      if (labelEl) labelEl.textContent = name;
+      if (modeBadge) modeBadge.textContent = name;
+
+      if (dotEl) {
+        if (currentTool === 'pen' || currentTool === 'highlighter' || currentTool === 'text') {
+          dotEl.style.display = 'inline-block';
+          dotEl.style.background = currentColor;
+        } else if (currentTool === 'eraser') {
+          dotEl.style.display = 'inline-block';
+          dotEl.style.background = '#EF4444';
+        } else {
+          dotEl.style.display = 'inline-block';
+          dotEl.style.background = '#94A3B8';
         }
       }
     };
@@ -1909,17 +2152,23 @@ const DocumentViewer = {
     window.updateLineWeight = function(val) {
       currentStroke = parseFloat(val) * 5; // 0.1mm (0.5px) to 3.0mm (15px)
       const text = document.getElementById('slider-val-text');
-      const labelBtn = document.getElementById('stroke-label-btn');
       const slider = document.getElementById('line-weight-slider');
       if (text) text.textContent = val + 'mm';
-      if (labelBtn) labelBtn.textContent = val + 'mm';
       if (slider) slider.value = val;
+
+      document.querySelectorAll('.thickness-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.textContent.trim() === val + 'mm');
+      });
+
+      if (typeof window.updateActiveToolBadge === 'function') {
+        window.updateActiveToolBadge();
+      }
     };
 
     window.toggleStraightLineSetting = function() {
       straightLineMode = !straightLineMode;
       isStraightLine = straightLineMode;
-      const btn = document.getElementById('tool-straight-toggle');
+      const btn = document.getElementById('ptool-straight') || document.getElementById('tool-straight-toggle');
       if (btn) btn.classList.toggle('active', straightLineMode);
       const sw = document.getElementById('toggle-straight-line');
       if (sw) sw.classList.toggle('on', straightLineMode);
@@ -1931,16 +2180,10 @@ const DocumentViewer = {
       if (sw) sw.classList.toggle('on', bottomDisplayMode);
     };
 
-    // Close popups on click outside
+    // Close floating side tools panel on click outside
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('#popup-thickness') && !e.target.closest('#tool-thickness')) {
-        document.getElementById('popup-thickness')?.classList.remove('open');
-      }
-      if (!e.target.closest('#popup-markpen') && !e.target.closest('#tool-highlighter')) {
-        document.getElementById('popup-markpen')?.classList.remove('open');
-      }
-      if (!e.target.closest('#popup-colors') && !e.target.closest('#btn-toggle-colors')) {
-        document.getElementById('popup-colors')?.classList.remove('open');
+      if (!e.target.closest('#jnotes-tools-panel') && !e.target.closest('#btn-toggle-tools-panel') && !e.target.closest('#active-tool-pill')) {
+        window.closeSideToolsPanel();
       }
     });
 
@@ -2085,13 +2328,13 @@ const DocumentViewer = {
         // Pen MUST default to freehand smooth drawing without ruler snap!
         isStraightLine = false;
         straightLineMode = false;
-        const btnStraight = document.getElementById('tool-straight-toggle');
+        const btnStraight = document.getElementById('ptool-straight') || document.getElementById('tool-straight-toggle');
         if (btnStraight) btnStraight.classList.remove('active');
         const sw = document.getElementById('toggle-straight-line');
         if (sw) sw.classList.remove('on');
 
         if (currentStroke > 6) {
-          window.updateLineWeight('0.5'); // 2.5px
+          window.updateLineWeight('0.8'); // 4px
         }
       } else if (tool === 'highlighter') {
         if (currentStroke < 8) {
@@ -2099,9 +2342,16 @@ const DocumentViewer = {
         }
       }
 
+      document.querySelectorAll('.panel-tool-btn').forEach(b => {
+        if (b.id === 'ptool-' + tool) b.classList.add('active');
+        else if (b.id && b.id !== 'ptool-straight') {
+          b.classList.remove('active');
+        }
+      });
+
       document.querySelectorAll('.jtool-btn').forEach(b => {
         if (b.id === 'tool-' + tool) b.classList.add('active');
-        else if (b.id && b.id.startsWith('tool-') && b.id !== 'tool-straight-toggle' && b.id !== 'btn-toggle-fullscreen' && b.id !== 'btn-toggle-colors' && b.id !== 'btn-paper-theme' && b.id !== 'btn-clear-page') {
+        else if (b.id && b.id.startsWith('tool-') && b.id !== 'tool-straight-toggle' && b.id !== 'btn-toggle-fullscreen' && b.id !== 'btn-toggle-colors' && b.id !== 'btn-paper-theme' && b.id !== 'btn-clear-page' && b.id !== 'btn-toggle-tools-panel') {
           b.classList.remove('active');
         }
       });
@@ -2111,6 +2361,10 @@ const DocumentViewer = {
         c.classList.toggle('pen-active', isActive);
         c.classList.toggle('cursor-text', tool === 'text');
       });
+
+      if (typeof window.updateActiveToolBadge === 'function') {
+        window.updateActiveToolBadge();
+      }
     };
 
     window.setColor = function(color) {
@@ -2128,6 +2382,10 @@ const DocumentViewer = {
       if (hexInput && color.startsWith('#')) hexInput.value = color.toUpperCase();
       const colorPicker = document.getElementById('jnotes-color-input');
       if (colorPicker && color.startsWith('#')) colorPicker.value = color;
+
+      if (typeof window.updateActiveToolBadge === 'function') {
+        window.updateActiveToolBadge();
+      }
     };
 
     window.applyPreset = function(color, strokeWidth, tool) {
@@ -2435,9 +2693,48 @@ const DocumentViewer = {
       initPaperTheme();
       loadSavedAnnotations();
     }, 200);
+    })();
   </script>
 </body>
 </html>`;
+  },
+
+  renderStudio(container, doc, isAr) {
+    if (!container) return;
+    this.currentDoc = doc || this.currentDoc || {};
+    const fullHTML = this.generateDocHTML(this.currentDoc, isAr);
+
+    // Ensure dedicated JNotes styles are injected once in head
+    if (!document.getElementById('jnotes-studio-styles')) {
+      const styleMatch = fullHTML.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      if (styleMatch) {
+        const styleEl = document.createElement('style');
+        styleEl.id = 'jnotes-studio-styles';
+        styleEl.textContent = styleMatch[1];
+        document.head.appendChild(styleEl);
+      }
+    }
+
+    // Extract body HTML (excluding <script>)
+    const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const bodyContent = bodyMatch ? bodyMatch[1] : fullHTML;
+    const scriptMatch = bodyContent.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+    const markupOnly = bodyContent.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+
+    // Render directly into container DOM (Eliminates sandboxed iframe!)
+    container.innerHTML = markupOnly;
+
+    // Execute script logic directly in primary document window context
+    if (scriptMatch && scriptMatch[1]) {
+      const scriptEl = document.createElement('script');
+      scriptEl.textContent = scriptMatch[1];
+      document.body.appendChild(scriptEl);
+      scriptEl.remove();
+    }
+  },
+
+  render(container, doc, isAr) {
+    return this.renderStudio(container, doc, isAr);
   }
 };
 

@@ -81,14 +81,9 @@ const SheetDetailPage = {
       }
     }
 
-    // Generate HTML for the JNotes reader
-    const srcDocHTML = window.DocumentViewer 
-      ? window.DocumentViewer.generateDocHTML(sheet, isAr)
-      : '';
-
     container.innerHTML = `
-      <div class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; max-height: 100dvh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 99999; margin: 0; padding: 0; overflow: hidden;">
-        <iframe id="page-dedicated-iframe" style="width: 100%; height: 100%; border: none; display: block;" title="${title}" sandbox="allow-scripts allow-same-origin allow-popups allow-modals allow-downloads" allow="fullscreen"></iframe>
+      <div id="sheet-studio-fullscreen-root" class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; max-height: 100dvh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 99990; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div id="sheet-studio-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;"></div>
       </div>
 
       <!-- Floating Discussion Trigger Button -->
@@ -134,10 +129,10 @@ const SheetDetailPage = {
       <div id="discussion-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 100001; display: none; opacity: 0; pointer-events: none !important; transition: opacity 0.25s ease;"></div>
     `;
 
-    // Load iframe content
-    const iframeEl = document.getElementById('page-dedicated-iframe');
-    if (iframeEl && srcDocHTML) {
-      iframeEl.srcdoc = srcDocHTML;
+    // Direct DOM Rendering: Render Note Studio directly into primary DOM (eliminates sandboxed iframe!)
+    const studioContainer = document.getElementById('sheet-studio-container');
+    if (studioContainer && window.DocumentViewer) {
+      window.DocumentViewer.renderStudio(studioContainer, sheet, isAr);
     }
 
     // Discussion Board Logic & Persistence
@@ -270,6 +265,9 @@ const SheetDetailPage = {
         openDrawer();
       }
     });
+
+    // Expose openDiscussion for direct DOM studio calls
+    SheetDetailPage.openDiscussion = openDrawer;
 
     renderCommentsList();
   }
