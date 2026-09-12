@@ -80,9 +80,9 @@ window.AdminPage = (function () {
 
   function getRegisteredStudents() {
     try {
-      let list = JSON.parse(localStorage.getItem('kf_registered_students') || '[]');
-      if (!Array.isArray(list) || list.length === 0) {
-        list = [
+      const raw = localStorage.getItem('kf_registered_students');
+      if (raw === null) {
+        const initialList = [
           {
             id: 'st_101',
             name: 'هدى فتحي العريبي',
@@ -124,9 +124,11 @@ window.AdminPage = (function () {
             date: '2026-09-01'
           }
         ];
-        localStorage.setItem('kf_registered_students', JSON.stringify(list));
+        localStorage.setItem('kf_registered_students', JSON.stringify(initialList));
+        return initialList;
       }
-      return list;
+      const list = JSON.parse(raw);
+      return Array.isArray(list) ? list : [];
     } catch (e) {
       return [];
     }
@@ -454,7 +456,13 @@ window.AdminPage = (function () {
                 </tr>
               </thead>
               <tbody>
-                ${sheets.map(s => `
+                ${sheets.length === 0 ? `
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 28px; color: var(--text-muted); font-size: 0.9rem;">
+                      ${isAr ? 'لا توجد شيتات أو ملازم منشورة حالياً' : 'No sheets published'}
+                    </td>
+                  </tr>
+                ` : sheets.map(s => `
                   <tr style="border-bottom: 1px solid var(--border-subtle);">
                     <td style="padding: 12px 10px; font-weight: 700; color: var(--text-primary);">
                       ${s.title_ar || s.title_en || s.title}
@@ -533,7 +541,11 @@ window.AdminPage = (function () {
         <div class="card" style="padding: 24px; border-radius: 16px;">
           <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px;">${isAr ? 'الإعلانات المنشورة حالياً (إمكانية الحذف مع تأكيد الحذف)' : 'Active Faculty Announcements'}</h3>
           <div style="display: flex; flex-direction: column; gap: 12px;">
-            ${alerts.map(a => `
+            ${alerts.length === 0 ? `
+              <div style="text-align: center; padding: 28px; color: var(--text-muted); font-size: 0.9rem;">
+                ${isAr ? 'لا توجد إعلانات أو تنبيهات منشورة حالياً' : 'No announcements published'}
+              </div>
+            ` : alerts.map(a => `
               <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 12px; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 10px;">
                 <div style="flex: 1; min-width: 260px;">
                   <span class="badge badge-primary" style="font-size: 0.7rem; margin-inline-end: 6px;">${a.badge_ar || a.badge_en || 'إعلان'}</span>
@@ -622,7 +634,13 @@ window.AdminPage = (function () {
                 </tr>
               </thead>
               <tbody>
-                ${students.map((st, idx) => `
+                ${students.length === 0 ? `
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 28px; color: var(--text-muted); font-size: 0.9rem;">
+                      ${isAr ? 'لا توجد حسابات طلبة مسجلة حالياً' : 'No registered students found'}
+                    </td>
+                  </tr>
+                ` : students.map((st, idx) => `
                   <tr style="border-bottom: 1px solid var(--border-subtle);">
                     <td style="padding: 12px 10px; font-weight: 800; color: var(--text-primary);">
                       ${st.name}

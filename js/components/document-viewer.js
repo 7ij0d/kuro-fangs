@@ -898,6 +898,12 @@ const DocumentViewer = {
         <span>فهرس الصفحات</span>
       </button>
 
+      <!-- Discussion Trigger Button -->
+      <button id="btn-toggle-discussion-studio" class="jtool-btn" onclick="toggleDiscussionDrawer()" title="المناقشات والأسئلة">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        <span>مناقشة</span>
+      </button>
+
       <!-- Download Button -->
       <button class="jtool-btn jtool-download-btn" onclick="downloadDoc()" title="تنزيل نسخة PDF إلى جهازك">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1130,6 +1136,12 @@ const DocumentViewer = {
         });
       } else {
         alert('جاري تنزيل ملف PDF...');
+      }
+    };
+
+    window.toggleDiscussionDrawer = function() {
+      if (window.parent) {
+        window.parent.postMessage({ type: 'TOGGLE_DISCUSSION' }, '*');
       }
     };
 
