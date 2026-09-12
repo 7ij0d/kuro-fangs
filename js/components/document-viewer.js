@@ -696,7 +696,7 @@ const DocumentViewer = {
     }
 
     .canvas-overlay.pen-active {
-      pointer-events: auto;
+      pointer-events: auto !important;
     }
 
     /* Translucent Highlighted Elements */
@@ -1910,6 +1910,12 @@ const DocumentViewer = {
       const counterEl = document.getElementById('page-counter-num');
       if (counterEl) counterEl.textContent = pageNum + ' / ' + totalPages;
     }
+
+    // Immediate initialization for srcdoc iframe environments
+    initCanvases();
+    initColorPalette();
+    renderVerticalDock();
+    loadSavedAnnotations();
 
     window.addEventListener('DOMContentLoaded', () => {
       initCanvases();
