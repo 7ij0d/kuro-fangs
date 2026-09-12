@@ -1046,6 +1046,10 @@ const DocumentViewer = {
       cursor: text !important;
     }
 
+    .canvas-overlay.cursor-eraser {
+      cursor: cell !important;
+    }
+
     /* Translucent Highlighted Elements */
     p.highlighted, li.highlighted, h3.highlighted {
       background-color: var(--highlight-color) !important;
@@ -2365,6 +2369,7 @@ const DocumentViewer = {
         const isActive = tool === 'pen' || tool === 'highlighter' || tool === 'eraser' || tool === 'text';
         c.classList.toggle('pen-active', isActive);
         c.classList.toggle('cursor-text', tool === 'text');
+        c.classList.toggle('cursor-eraser', tool === 'eraser');
       });
 
       if (typeof window.updateActiveToolBadge === 'function') {
@@ -2532,13 +2537,53 @@ const DocumentViewer = {
       }
     }
 
+    function distToSegmentSq(px, py, x1, y1, x2, y2) {
+      const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+      if (l2 === 0) return (px - x1) * (px - x1) + (py - y1) * (py - y1);
+      let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+      t = Math.max(0, Math.min(1, t));
+      const projX = x1 + t * (x2 - x1);
+      const projY = y1 + t * (y2 - y1);
+      return (px - projX) * (px - projX) + (py - projY) * (py - projY);
+    }
+
     function eraseAt(pageNum, x, y) {
-      if (!strokes[pageNum]) return;
-      const radius = 25;
-      strokes[pageNum] = strokes[pageNum].filter(st => {
-        return !st.points.some(p => Math.hypot(p.x - x, p.y - y) < radius);
+      const pageStrokes = strokes[pageNum];
+      if (!pageStrokes || pageStrokes.length === 0) return;
+
+      const baseRadius = 32;
+      let erasedAny = false;
+
+      strokes[pageNum] = pageStrokes.filter(st => {
+        if (!st.points || st.points.length === 0) return false;
+
+        const effectiveRadius = baseRadius + ((st.strokeWidth || 4) / 2);
+        const effRadiusSq = effectiveRadius * effectiveRadius;
+
+        if (st.points.length === 1) {
+          const p = st.points[0];
+          const dSq = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
+          if (dSq <= effRadiusSq) {
+            erasedAny = true;
+            return false;
+          }
+          return true;
+        }
+
+        for (let i = 0; i < st.points.length - 1; i++) {
+          const p1 = st.points[i];
+          const p2 = st.points[i + 1];
+          if (distToSegmentSq(x, y, p1.x, p1.y, p2.x, p2.y) <= effRadiusSq) {
+            erasedAny = true;
+            return false;
+          }
+        }
+        return true;
       });
-      redrawCanvas(pageNum);
+
+      if (erasedAny) {
+        redrawCanvas(pageNum);
+      }
     }
 
     function redrawCanvas(pageNum) {
