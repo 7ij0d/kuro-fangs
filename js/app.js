@@ -115,6 +115,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideGames = document.getElementById('side-nav-games');
     if (sideGames) sideGames.textContent = t('sideNavGames');
 
+    const sideAdmin = document.getElementById('side-nav-admin');
+    if (sideAdmin) sideAdmin.textContent = t('sideNavAdmin');
+
     const sideUserSub = document.getElementById('sidebar-user-sub');
     if (sideUserSub) sideUserSub.textContent = t('academicYear');
   };

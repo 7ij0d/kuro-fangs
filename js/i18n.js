@@ -67,6 +67,7 @@ class I18nManager {
         sideNavSaved: 'Bookmarks',
         sideNavRewards: 'Fox Mascot Hub',
         sideNavGames: 'Arcade & Games',
+        sideNavAdmin: 'Faculty Admin Portal',
         studentRole: 'Dental Surgery Student',
         academicYear: 'Year 3 — Faculty of Dentistry',
 
@@ -175,6 +176,7 @@ class I18nManager {
         sideNavSaved: 'المحفوظات',
         sideNavRewards: 'متجر سكنات الثعلب',
         sideNavGames: 'مركز الألعاب والترفيه',
+        sideNavAdmin: 'بوابة الإدارة الأكاديمية',
         studentRole: 'طالب طب وجراحة الأسنان',
         academicYear: 'السنة الثالثة — كلية طب الأسنان',
 
