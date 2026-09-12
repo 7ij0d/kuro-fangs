@@ -81,6 +81,12 @@ const DocumentViewer = {
       z-index: 9500;
       flex-shrink: 0;
       user-select: none;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .jnotes-top-bar::-webkit-scrollbar {
+      display: none;
     }
 
     /* Left Section: Exit & Title */
@@ -669,8 +675,58 @@ const DocumentViewer = {
       -webkit-overflow-scrolling: touch;
     }
 
+    /* Paper Theme Modes (Default White, Warm Sepia, Dark Night) */
+    body.paper-theme-white {
+      --paper-bg: #FFFFFF;
+      --paper-text: #0F172A;
+      --paper-sub: #475569;
+      --paper-border: rgba(0, 0, 0, 0.08);
+      --paper-callout-bg: #EFF6FF;
+      --paper-callout-border: #93C5FD;
+    }
+    body.paper-theme-sepia {
+      --paper-bg: #FBF0D9;
+      --paper-text: #451A03;
+      --paper-sub: #78350F;
+      --paper-border: rgba(120, 53, 15, 0.2);
+      --paper-callout-bg: #FEF3C7;
+      --paper-callout-border: #FCD34D;
+    }
+    body.paper-theme-dark {
+      --paper-bg: #1E1E2D;
+      --paper-text: #F8FAFC;
+      --paper-sub: #94A3B8;
+      --paper-border: rgba(255, 255, 255, 0.12);
+      --paper-callout-bg: #27283D;
+      --paper-callout-border: #38BDF8;
+    }
+
+    /* Pages Wrapper for Smooth Zoom Scaling */
+    .jnotes-pages-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      transform-origin: top center;
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%;
+    }
+
+    /* Zoom Controls Segment in Toolbar */
+    .jnotes-zoom-group {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 2px 4px;
+      gap: 2px;
+    }
+
     .doc-page {
-      background: var(--paper-bg);
+      background: var(--paper-bg, #FFFFFF);
+      color: var(--paper-text, #0F172A);
+      border: 1px solid var(--paper-border, rgba(0, 0, 0, 0.08));
       width: 100%;
       max-width: 840px;
       min-height: 1100px;
@@ -681,6 +737,59 @@ const DocumentViewer = {
       user-select: text;
       direction: ltr;
       text-align: left;
+      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    }
+
+    /* Dark Paper Theme Overrides */
+    body.paper-theme-dark .doc-page h1,
+    body.paper-theme-dark .doc-page h2,
+    body.paper-theme-dark .doc-page h3,
+    body.paper-theme-dark .doc-page h4,
+    body.paper-theme-dark .title-main,
+    body.paper-theme-dark .title-sub,
+    body.paper-theme-dark .section-title {
+      color: #F8FAFC !important;
+    }
+
+    body.paper-theme-dark .doc-page p,
+    body.paper-theme-dark .doc-page li,
+    body.paper-theme-dark .page-header span,
+    body.paper-theme-dark .page-footer span,
+    body.paper-theme-dark .meta-center p {
+      color: #CBD5E1 !important;
+    }
+
+    body.paper-theme-dark .agenda-box,
+    body.paper-theme-dark .clinical-callout {
+      background: var(--paper-callout-bg) !important;
+      border-color: var(--paper-callout-border) !important;
+      color: #F8FAFC !important;
+    }
+
+    /* Sepia Paper Theme Overrides */
+    body.paper-theme-sepia .doc-page h1,
+    body.paper-theme-sepia .doc-page h2,
+    body.paper-theme-sepia .doc-page h3,
+    body.paper-theme-sepia .doc-page h4,
+    body.paper-theme-sepia .title-main,
+    body.paper-theme-sepia .title-sub,
+    body.paper-theme-sepia .section-title {
+      color: #451A03 !important;
+    }
+
+    body.paper-theme-sepia .doc-page p,
+    body.paper-theme-sepia .doc-page li,
+    body.paper-theme-sepia .page-header span,
+    body.paper-theme-sepia .page-footer span,
+    body.paper-theme-sepia .meta-center p {
+      color: #78350F !important;
+    }
+
+    body.paper-theme-sepia .agenda-box,
+    body.paper-theme-sepia .clinical-callout {
+      background: var(--paper-callout-bg) !important;
+      border-color: var(--paper-callout-border) !important;
+      color: #451A03 !important;
     }
 
     /* Touch Canvas Overlay */
@@ -699,6 +808,10 @@ const DocumentViewer = {
       pointer-events: auto !important;
     }
 
+    .canvas-overlay.cursor-text {
+      cursor: text !important;
+    }
+
     /* Translucent Highlighted Elements */
     p.highlighted, li.highlighted, h3.highlighted {
       background-color: var(--highlight-color) !important;
@@ -706,51 +819,82 @@ const DocumentViewer = {
       padding: 2px 4px;
     }
 
-    /* Floating Drag-&-Drop Sticky Notes */
-    .sticky-note-box {
+    /* Floating Text Box Notes (JNotes Text Tool) */
+    .jnotes-text-note {
       position: absolute;
-      background: #FEF9C3;
-      border: 1px solid #F59E0B;
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 0.825rem;
-      color: #78350F;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-      z-index: 20;
-      min-width: 180px;
-      direction: rtl;
-      text-align: right;
-    }
-
-    .sticky-note-header {
+      min-width: 170px;
+      max-width: 320px;
+      background: rgba(255, 255, 255, 0.97);
+      border: 1.5px solid #0284C7;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      z-index: 25;
+      padding: 6px 8px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 4px;
+      animation: notePop 0.15s ease-out;
+      pointer-events: auto;
+      text-align: right;
+      direction: rtl;
+    }
+
+    @keyframes notePop {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    body.paper-theme-dark .jnotes-text-note {
+      background: rgba(30, 30, 45, 0.96);
+      color: #F8FAFC;
+      border-color: #38BDF8;
+    }
+
+    body.paper-theme-sepia .jnotes-text-note {
+      background: rgba(254, 246, 235, 0.98);
+      color: #451A03;
+      border-color: #B45309;
+    }
+
+    .jnotes-text-note-header {
+      display: flex;
       align-items: center;
-      margin-bottom: 4px;
-      border-bottom: 1px dashed rgba(245, 158, 11, 0.4);
-      padding-bottom: 4px;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #64748B;
+      user-select: none;
       cursor: move;
+      padding-bottom: 3px;
+      border-bottom: 1px dashed rgba(100, 116, 139, 0.25);
     }
 
-    .sticky-note-close {
-      background: none;
-      border: none;
-      color: #B45309;
-      font-size: 0.9rem;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .sticky-note-box textarea {
+    .jnotes-text-note textarea {
       width: 100%;
-      height: 65px;
-      background: transparent;
+      min-height: 44px;
+      max-height: 220px;
       border: none;
-      resize: both;
+      outline: none;
+      background: transparent;
       font-family: inherit;
       font-size: 0.825rem;
-      color: #78350F;
-      outline: none;
+      line-height: 1.45;
+      color: inherit;
+      resize: both;
+    }
+
+    .jnotes-text-note-del {
+      cursor: pointer;
+      color: #EF4444;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 0 4px;
+      border-radius: 4px;
+      transition: background 0.15s ease;
+    }
+
+    .jnotes-text-note-del:hover {
+      background: rgba(239, 68, 68, 0.15);
     }
 
     /* Page Typography */
@@ -901,16 +1045,6 @@ const DocumentViewer = {
     <!-- CENTER: Segmented Professional Tools with Crisp Vector Icons -->
     <div class="jnotes-center-section">
       <div class="jnotes-tool-segmented">
-        <!-- Undo / Redo -->
-        <button class="jtool-icon-btn" id="btn-undo" onclick="undoAction()" title="تراجع (Undo)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-        </button>
-        <button class="jtool-icon-btn" id="btn-redo" onclick="redoAction()" title="إعادة (Redo)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
-        </button>
-
-        <div class="jnotes-divider"></div>
-
         <!-- Read (Pan) -->
         <button class="jtool-btn active" id="tool-pan" onclick="setTool('pan')" title="وضع القراءة والتحديد">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
@@ -933,6 +1067,12 @@ const DocumentViewer = {
         <button class="jtool-btn" id="tool-eraser" onclick="setTool('eraser')" title="ممحاة التظليلات والرسومات">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
           <span>ممحاة</span>
+        </button>
+
+        <!-- Text Box Note Tool (NEW) -->
+        <button class="jtool-btn" id="tool-text" onclick="setTool('text')" title="إضافة ملاحظة نصية بالكيبورد">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <span>نص</span>
         </button>
 
         <!-- Straight Line Toggle -->
@@ -961,10 +1101,20 @@ const DocumentViewer = {
         <button class="jtool-icon-btn" id="btn-toggle-colors" onclick="toggleColorPaletteMenu(event)" title="لوحة الألوان الموسعة (24 لون + مخصص)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
         </button>
+
+        <div class="jnotes-divider"></div>
+
+        <!-- Undo / Redo Handlers -->
+        <button class="jtool-icon-btn" id="btn-undo" onclick="undoAction()" title="تراجع (Undo)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+        </button>
+        <button class="jtool-icon-btn" id="btn-redo" onclick="redoAction()" title="إعادة (Redo)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+        </button>
       </div>
     </div>
 
-    <!-- RIGHT: Page Navigation, Index Drawer Toggle, Auto-Save Badge, Download, Fullscreen -->
+    <!-- RIGHT: Page Navigation, Zoom, Paper Theme, Clear, Index, Discussion, Fullscreen, Download -->
     <div class="jnotes-right-section">
       <!-- Auto Save Badge -->
       <span class="auto-save-pill" id="auto-save-badge">
@@ -982,6 +1132,31 @@ const DocumentViewer = {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
       </div>
+
+      <!-- Zoom Controls -->
+      <div class="jnotes-zoom-group">
+        <button class="jtool-icon-btn" onclick="zoomIn()" title="تكبير المحاضرة (Zoom In)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="jtool-btn" onclick="resetZoom()" title="إعادة الحجم الأصلي 100%">
+          <span id="zoom-val-text">100%</span>
+        </button>
+        <button class="jtool-icon-btn" onclick="zoomOut()" title="تصغير المحاضرة (Zoom Out)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+
+      <!-- Paper Theme Cycle -->
+      <button class="jtool-btn" id="btn-paper-theme" onclick="cyclePaperTheme()" title="تغيير نمط الورق (أبيض / دافئ / ليلي)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span id="paper-theme-label">ورق أبيض</span>
+      </button>
+
+      <!-- Clear Current Page Drawings -->
+      <button class="jtool-btn" id="btn-clear-page" onclick="clearCurrentPageStrokes()" title="مسح كافة الرسومات على الصفحة الحالية">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        <span>مسح الصفحة</span>
+      </button>
 
       <!-- Page Index Drawer Button -->
       <button id="btn-toggle-index" class="jtool-btn" onclick="toggleSidebar()" title="عرض فهرس الصفحات المصغرة">
@@ -1096,6 +1271,7 @@ const DocumentViewer = {
 
     <!-- Main Scrollable Paper Viewport -->
     <div class="jnotes-viewport" id="jnotes-viewport">
+      <div class="jnotes-pages-wrapper" id="jnotes-pages-wrapper">
 
       <!-- PAGE 1 -->
       <div class="doc-page" id="page-1" data-page="1">
@@ -1201,7 +1377,7 @@ const DocumentViewer = {
           </div>
         `;
       }).join('')}
-
+      </div> <!-- /#jnotes-pages-wrapper -->
     </div>
   </div>
 
@@ -1219,6 +1395,255 @@ const DocumentViewer = {
     let startX = 0;
     let startY = 0;
     let strokes = {}; // pageNum -> array of stroke paths
+    let zoomLevel = 1.0;
+    let currentPaperTheme = 'white';
+    let textNotes = {}; // pageNum -> array of { id, x, y, text, color }
+    let actionHistory = []; // Enhanced Undo/Redo history
+    let redoStack = [];
+
+    // Zoom Controls (0.6x to 2.5x)
+    window.zoomIn = function() {
+      window.setZoom(Math.min(2.5, Math.round((zoomLevel + 0.15) * 100) / 100));
+    };
+
+    window.zoomOut = function() {
+      window.setZoom(Math.max(0.6, Math.round((zoomLevel - 0.15) * 100) / 100));
+    };
+
+    window.resetZoom = function() {
+      window.setZoom(1.0);
+    };
+
+    window.setZoom = function(val) {
+      zoomLevel = Math.max(0.6, Math.min(2.5, Math.round(val * 100) / 100));
+      const wrapper = document.getElementById('jnotes-pages-wrapper');
+      if (wrapper) {
+        wrapper.style.transform = 'scale(' + zoomLevel + ')';
+        if (zoomLevel > 1) {
+          const extraH = wrapper.offsetHeight * (zoomLevel - 1);
+          wrapper.style.marginBottom = extraH + 'px';
+        } else {
+          wrapper.style.marginBottom = '0px';
+        }
+      }
+      const txt = document.getElementById('zoom-val-text');
+      if (txt) txt.textContent = Math.round(zoomLevel * 100) + '%';
+    };
+
+    // Paper Theme Toggle (White / Sepia / Dark)
+    const paperThemeConfigs = {
+      white: { label: 'ورق أبيض', cls: 'paper-theme-white' },
+      sepia: { label: 'ورق دافئ', cls: 'paper-theme-sepia' },
+      dark: { label: 'ورق ليلي', cls: 'paper-theme-dark' }
+    };
+
+    window.cyclePaperTheme = function() {
+      if (currentPaperTheme === 'white') {
+        window.applyPaperTheme('sepia');
+      } else if (currentPaperTheme === 'sepia') {
+        window.applyPaperTheme('dark');
+      } else {
+        window.applyPaperTheme('white');
+      }
+    };
+
+    window.applyPaperTheme = function(theme) {
+      if (!paperThemeConfigs[theme]) theme = 'white';
+      currentPaperTheme = theme;
+
+      document.body.classList.remove('paper-theme-white', 'paper-theme-sepia', 'paper-theme-dark');
+      document.body.classList.add(paperThemeConfigs[theme].cls);
+
+      const lbl = document.getElementById('paper-theme-label');
+      if (lbl) lbl.textContent = paperThemeConfigs[theme].label;
+
+      try {
+        localStorage.setItem('kf_jnotes_paper_theme', theme);
+      } catch(e) {}
+    };
+
+    function initPaperTheme() {
+      try {
+        const saved = localStorage.getItem('kf_jnotes_paper_theme') || 'white';
+        window.applyPaperTheme(saved);
+      } catch(e) {
+        window.applyPaperTheme('white');
+      }
+    }
+
+    // Clear Current Page Drawings
+    window.clearCurrentPageStrokes = function() {
+      const pNum = currentPage;
+      const prevStrokes = strokes[pNum] ? [...strokes[pNum]] : [];
+      const prevNotes = textNotes[pNum] ? [...textNotes[pNum]] : [];
+
+      if (prevStrokes.length === 0 && prevNotes.length === 0) {
+        if (window.parent && window.parent.showToast) {
+          window.parent.showToast('الصفحة ' + pNum + ' لا تحتوي على رسومات للمسح ℹ️', { type: 'info' });
+        }
+        return;
+      }
+
+      actionHistory.push({
+        type: 'clear_page',
+        pageNum: pNum,
+        strokes: prevStrokes,
+        textNotes: prevNotes
+      });
+      redoStack = [];
+
+      strokes[pNum] = [];
+      textNotes[pNum] = [];
+
+      const pageEl = document.getElementById('page-' + pNum);
+      if (pageEl) {
+        pageEl.querySelectorAll('.jnotes-text-note').forEach(n => n.remove());
+        pageEl.querySelectorAll('.highlighted').forEach(h => h.classList.remove('highlighted'));
+      }
+
+      redrawCanvas(pNum);
+      triggerAutoSave();
+
+      if (window.parent && window.parent.showToast) {
+        window.parent.showToast('تم مسح كافة الرسومات والملاحظات من الصفحة ' + pNum + ' 🗑️', { type: 'success' });
+      }
+    };
+
+    // Text Box Note Tool (Floating Note Cards)
+    function handleCanvasClick(e, canvas, pageNum) {
+      if (currentTool !== 'text') return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = Math.max(10, Math.min(canvas.width - 220, (e.clientX - rect.left) * scaleX));
+      const y = Math.max(10, Math.min(canvas.height - 120, (e.clientY - rect.top) * scaleY));
+      createTextNote(pageNum, x, y);
+    }
+
+    function createTextNote(pageNum, x, y, initialText = '', noteId = null) {
+      const id = noteId || ('note_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
+      if (!textNotes[pageNum]) textNotes[pageNum] = [];
+
+      let noteObj = textNotes[pageNum].find(n => n.id === id);
+      if (!noteObj) {
+        noteObj = {
+          id: id,
+          x: Math.round(x),
+          y: Math.round(y),
+          text: initialText,
+          color: currentColor || '#0284C7'
+        };
+        textNotes[pageNum].push(noteObj);
+        actionHistory.push({ type: 'add_text_note', pageNum: pageNum, noteId: id, note: noteObj });
+        redoStack = [];
+      }
+
+      renderTextNoteDOM(pageNum, noteObj, true);
+      triggerAutoSave();
+    }
+
+    function renderTextNoteDOM(pageNum, noteObj, shouldFocus = false) {
+      const pageEl = document.getElementById('page-' + pageNum);
+      if (!pageEl) return;
+
+      let el = document.getElementById('dom-' + noteObj.id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'dom-' + noteObj.id;
+        el.className = 'jnotes-text-note';
+        el.style.left = noteObj.x + 'px';
+        el.style.top = noteObj.y + 'px';
+        el.style.borderColor = noteObj.color || '#0284C7';
+
+        el.innerHTML = '<div class="jnotes-text-note-header">'
+          + '<span style="display:flex;align-items:center;gap:5px;">'
+          + '<span style="width:8px;height:8px;border-radius:50%;background:' + (noteObj.color || '#0284C7') + ';display:inline-block;"></span>'
+          + '<span>ملاحظة</span>'
+          + '</span>'
+          + '<span class="jnotes-text-note-del" title="حذف الملاحظة" onclick="deleteTextNote(\'' + pageNum + '\', \'' + noteObj.id + '\')">✕</span>'
+          + '</div>'
+          + '<textarea placeholder="اكتب ملاحظتك هنا...">' + (noteObj.text || '') + '</textarea>';
+
+        pageEl.appendChild(el);
+
+        const ta = el.querySelector('textarea');
+        ta.addEventListener('input', () => {
+          noteObj.text = ta.value;
+          triggerAutoSave();
+        });
+
+        ta.addEventListener('blur', () => {
+          if (!noteObj.text || noteObj.text.trim() === '') {
+            deleteTextNote(pageNum, noteObj.id);
+          }
+        });
+
+        const header = el.querySelector('.jnotes-text-note-header');
+        header.addEventListener('mousedown', (e) => startDragNote(e, el, pageNum, noteObj));
+      } else {
+        el.style.left = noteObj.x + 'px';
+        el.style.top = noteObj.y + 'px';
+        const ta = el.querySelector('textarea');
+        if (ta && ta.value !== noteObj.text) ta.value = noteObj.text || '';
+      }
+
+      if (shouldFocus) {
+        const ta = el.querySelector('textarea');
+        if (ta) setTimeout(() => ta.focus(), 50);
+      }
+    }
+
+    window.deleteTextNote = function(pageNum, id) {
+      if (textNotes[pageNum]) {
+        const idx = textNotes[pageNum].findIndex(n => n.id === id);
+        if (idx !== -1) {
+          const removed = textNotes[pageNum].splice(idx, 1)[0];
+          actionHistory.push({ type: 'del_text_note', pageNum: pageNum, note: removed });
+          redoStack = [];
+        }
+      }
+      const domEl = document.getElementById('dom-' + id);
+      if (domEl) domEl.remove();
+      triggerAutoSave();
+    };
+
+    function renderAllTextNotes() {
+      document.querySelectorAll('.jnotes-text-note').forEach(el => el.remove());
+      Object.keys(textNotes).forEach(pageNum => {
+        const list = textNotes[pageNum] || [];
+        list.forEach(note => renderTextNoteDOM(pageNum, note, false));
+      });
+    }
+
+    function startDragNote(e, el, pageNum, noteObj) {
+      if (e.target.classList.contains('jnotes-text-note-del')) return;
+      e.preventDefault();
+      const page = document.getElementById('page-' + pageNum);
+      if (!page) return;
+      const startMouseX = e.clientX;
+      const startMouseY = e.clientY;
+      const origX = noteObj.x;
+      const origY = noteObj.y;
+
+      function onMouseMove(moveEv) {
+        const scale = zoomLevel || 1.0;
+        const dx = (moveEv.clientX - startMouseX) / scale;
+        const dy = (moveEv.clientY - startMouseY) / scale;
+        noteObj.x = Math.max(0, Math.min(page.offsetWidth - 170, origX + dx));
+        noteObj.y = Math.max(0, Math.min(page.offsetHeight - 50, origY + dy));
+        el.style.left = noteObj.x + 'px';
+        el.style.top = noteObj.y + 'px';
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        triggerAutoSave();
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
 
     // Standalone Navigation & Exit Bar
     window.exitStudio = function() {
@@ -1510,28 +1935,77 @@ const DocumentViewer = {
       }
     });
 
-    // Undo / Redo Stacks
-    let redoStack = [];
-
+    // Enhanced Single-Action Undo / Redo Engine
     window.undoAction = function() {
-      let changed = false;
-      Object.keys(strokes).forEach(pNum => {
-        if (strokes[pNum] && strokes[pNum].length > 0) {
-          const popped = strokes[pNum].pop();
-          redoStack.push({ pageNum: pNum, stroke: popped });
-          redrawCanvas(pNum);
-          changed = true;
+      if (actionHistory.length > 0) {
+        const action = actionHistory.pop();
+        redoStack.push(action);
+
+        if (action.type === 'stroke') {
+          const pageStrokes = strokes[action.pageNum] || [];
+          const idx = pageStrokes.lastIndexOf(action.stroke);
+          if (idx !== -1) {
+            pageStrokes.splice(idx, 1);
+          } else {
+            pageStrokes.pop();
+          }
+          redrawCanvas(action.pageNum);
+        } else if (action.type === 'clear_page') {
+          strokes[action.pageNum] = action.strokes ? [...action.strokes] : [];
+          textNotes[action.pageNum] = action.textNotes ? [...action.textNotes] : [];
+          redrawCanvas(action.pageNum);
+          renderAllTextNotes();
+        } else if (action.type === 'add_text_note') {
+          if (textNotes[action.pageNum]) {
+            textNotes[action.pageNum] = textNotes[action.pageNum].filter(n => n.id !== action.noteId);
+          }
+          document.getElementById('dom-' + action.noteId)?.remove();
+        } else if (action.type === 'del_text_note') {
+          if (!textNotes[action.pageNum]) textNotes[action.pageNum] = [];
+          textNotes[action.pageNum].push(action.note);
+          renderTextNoteDOM(action.pageNum, action.note, false);
         }
-      });
-      if (changed) triggerAutoSave();
+
+        triggerAutoSave();
+      } else {
+        // Fallback: pop last stroke from current page
+        if (strokes[currentPage] && strokes[currentPage].length > 0) {
+          const popped = strokes[currentPage].pop();
+          redoStack.push({ type: 'stroke', pageNum: currentPage, stroke: popped });
+          redrawCanvas(currentPage);
+          triggerAutoSave();
+        }
+      }
     };
 
     window.redoAction = function() {
       if (redoStack.length > 0) {
-        const item = redoStack.pop();
-        if (!strokes[item.pageNum]) strokes[item.pageNum] = [];
-        strokes[item.pageNum].push(item.stroke);
-        redrawCanvas(item.pageNum);
+        const action = redoStack.pop();
+        actionHistory.push(action);
+
+        if (action.type === 'stroke') {
+          if (!strokes[action.pageNum]) strokes[action.pageNum] = [];
+          strokes[action.pageNum].push(action.stroke);
+          redrawCanvas(action.pageNum);
+        } else if (action.type === 'clear_page') {
+          strokes[action.pageNum] = [];
+          textNotes[action.pageNum] = [];
+          const pageEl = document.getElementById('page-' + action.pageNum);
+          if (pageEl) {
+            pageEl.querySelectorAll('.jnotes-text-note').forEach(n => n.remove());
+          }
+          redrawCanvas(action.pageNum);
+        } else if (action.type === 'add_text_note') {
+          if (!textNotes[action.pageNum]) textNotes[action.pageNum] = [];
+          textNotes[action.pageNum].push(action.note);
+          renderTextNoteDOM(action.pageNum, action.note, false);
+        } else if (action.type === 'del_text_note') {
+          if (textNotes[action.pageNum]) {
+            textNotes[action.pageNum] = textNotes[action.pageNum].filter(n => n.id !== action.note.id);
+          }
+          document.getElementById('dom-' + action.note.id)?.remove();
+        }
+
         triggerAutoSave();
       }
     };
@@ -1618,13 +2092,15 @@ const DocumentViewer = {
 
       document.querySelectorAll('.jtool-btn').forEach(b => {
         if (b.id === 'tool-' + tool) b.classList.add('active');
-        else if (b.id && b.id.startsWith('tool-') && b.id !== 'tool-straight-toggle' && b.id !== 'btn-toggle-fullscreen' && b.id !== 'btn-toggle-colors') {
+        else if (b.id && b.id.startsWith('tool-') && b.id !== 'tool-straight-toggle' && b.id !== 'btn-toggle-fullscreen' && b.id !== 'btn-toggle-colors' && b.id !== 'btn-paper-theme' && b.id !== 'btn-clear-page') {
           b.classList.remove('active');
         }
       });
 
       document.querySelectorAll('.canvas-overlay').forEach(c => {
-        c.classList.toggle('pen-active', tool === 'pen' || tool === 'highlighter' || tool === 'eraser');
+        const isActive = tool === 'pen' || tool === 'highlighter' || tool === 'eraser' || tool === 'text';
+        c.classList.toggle('pen-active', isActive);
+        c.classList.toggle('cursor-text', tool === 'text');
       });
     };
 
@@ -1682,6 +2158,7 @@ const DocumentViewer = {
         canvas.onmousemove = (e) => draw(e, canvas, pageNum);
         canvas.onmouseup = () => stopDraw(pageNum);
         canvas.onmouseleave = () => stopDraw(pageNum);
+        canvas.onclick = (e) => handleCanvasClick(e, canvas, pageNum);
 
         // Flawless Mobile Touch Events (prevent touch scroll when drawing!)
         canvas.addEventListener('touchstart', (e) => {
@@ -1709,8 +2186,10 @@ const DocumentViewer = {
       if (page) ensureCanvasSize(canvas, page);
       isDrawing = true;
       const rect = canvas.getBoundingClientRect();
-      startX = e.clientX - rect.left;
-      startY = e.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      startX = (e.clientX - rect.left) * scaleX;
+      startY = (e.clientY - rect.top) * scaleY;
 
       if (!strokes[pageNum]) strokes[pageNum] = [];
 
@@ -1737,8 +2216,10 @@ const DocumentViewer = {
     function draw(e, canvas, pageNum) {
       if (!isDrawing) return;
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
 
       if (currentTool === 'eraser') {
         eraseAt(pageNum, x, y);
@@ -1769,6 +2250,12 @@ const DocumentViewer = {
     function stopDraw(pageNum) {
       if (isDrawing) {
         isDrawing = false;
+        const pageStrokes = strokes[pageNum];
+        if (pageStrokes && pageStrokes.length > 0) {
+          const lastSt = pageStrokes[pageStrokes.length - 1];
+          actionHistory.push({ type: 'stroke', pageNum: pageNum, stroke: lastSt });
+          redoStack = [];
+        }
         triggerAutoSave();
       }
     }
@@ -1853,6 +2340,7 @@ const DocumentViewer = {
         docId: docId,
         highlights: highlights,
         strokes: strokes,
+        textNotes: textNotes,
         updatedAt: new Date().toISOString()
       };
 
@@ -1885,6 +2373,11 @@ const DocumentViewer = {
           strokes = data.strokes;
           Object.keys(strokes).forEach(pNum => redrawCanvas(pNum));
         }
+
+        if (data.textNotes) {
+          textNotes = data.textNotes;
+          renderAllTextNotes();
+        }
       } catch (e) {}
     }
 
@@ -1915,12 +2408,14 @@ const DocumentViewer = {
     initCanvases();
     initColorPalette();
     renderVerticalDock();
+    initPaperTheme();
     loadSavedAnnotations();
 
     window.addEventListener('DOMContentLoaded', () => {
       initCanvases();
       initColorPalette();
       renderVerticalDock();
+      initPaperTheme();
       loadSavedAnnotations();
     });
     window.addEventListener('resize', initCanvases);
@@ -1928,6 +2423,7 @@ const DocumentViewer = {
       initCanvases();
       initColorPalette();
       renderVerticalDock();
+      initPaperTheme();
       loadSavedAnnotations();
     }, 200);
   </script>
