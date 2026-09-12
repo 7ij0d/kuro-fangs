@@ -280,6 +280,10 @@ const DocumentViewer = {
       align-items: center;
       justify-content: center;
       transition: all 0.15s ease;
+      font-weight: 700;
+      font-size: 0.95rem;
+      line-height: 1;
+      pointer-events: auto !important;
     }
 
     .page-nav-arrow:hover {
@@ -899,6 +903,7 @@ const DocumentViewer = {
       height: 100%;
       max-height: 100%;
       overflow-y: auto;
+      overflow-x: auto;
       padding: 24px 14px 80px;
       display: flex;
       flex-direction: column;
@@ -2449,21 +2454,42 @@ const DocumentViewer = {
 
         // Flawless Mobile Touch Events (prevent touch scroll when drawing, allow 2-finger pinch!)
         canvas.addEventListener('touchstart', (e) => {
-          if (e.touches && e.touches.length > 1) return;
+          if (e.touches && e.touches.length > 1) {
+            if (isDrawing) {
+              isDrawing = false;
+              if (strokes[pageNum] && strokes[pageNum].length > 0) {
+                strokes[pageNum].pop();
+                redrawCanvas(pageNum);
+              }
+            }
+            return;
+          }
           if (currentTool === 'pan') return;
           e.preventDefault();
           startDraw(e.touches[0], canvas, pageNum, page);
         }, { passive: false });
 
         canvas.addEventListener('touchmove', (e) => {
-          if (e.touches && e.touches.length > 1) return;
+          if (e.touches && e.touches.length > 1) {
+            if (isDrawing) {
+              isDrawing = false;
+              if (strokes[pageNum] && strokes[pageNum].length > 0) {
+                strokes[pageNum].pop();
+                redrawCanvas(pageNum);
+              }
+            }
+            return;
+          }
           if (currentTool === 'pan') return;
           e.preventDefault();
           draw(e.touches[0], canvas, pageNum);
         }, { passive: false });
 
         canvas.addEventListener('touchend', (e) => {
-          if (e.touches && e.touches.length > 1) return;
+          if (e.touches && e.touches.length > 1) {
+            isDrawing = false;
+            return;
+          }
           if (currentTool === 'pan') return;
           e.preventDefault();
           stopDraw(pageNum);
@@ -2513,13 +2539,18 @@ const DocumentViewer = {
         }
       }, { passive: true });
 
-      viewport.addEventListener('wheel', (e) => {
+      const handleWheelZoom = (e) => {
         if (e.ctrlKey || e.metaKey) {
+          const vp = document.getElementById('jnotes-viewport');
+          if (!vp) return;
           e.preventDefault();
           const delta = -e.deltaY * 0.003;
           window.setZoom(zoomLevel + delta);
         }
-      }, { passive: false });
+      };
+
+      viewport.addEventListener('wheel', handleWheelZoom, { passive: false });
+      window.addEventListener('wheel', handleWheelZoom, { passive: false });
     }
 
     function startDraw(e, canvas, pageNum, page) {
