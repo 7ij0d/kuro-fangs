@@ -1784,11 +1784,16 @@ const DocumentViewer = {
           + '<span style="width:8px;height:8px;border-radius:50%;background:' + (noteObj.color || '#0284C7') + ';display:inline-block;"></span>'
           + '<span>ملاحظة</span>'
           + '</span>'
-          + '<span class="jnotes-text-note-del" title="حذف الملاحظة" onclick="deleteTextNote(\'' + pageNum + '\', \'' + noteObj.id + '\')">✕</span>'
+          + '<span class="jnotes-text-note-del" title="حذف الملاحظة">✕</span>'
           + '</div>'
           + '<textarea placeholder="اكتب ملاحظتك هنا...">' + (noteObj.text || '') + '</textarea>';
 
         pageEl.appendChild(el);
+
+        const delBtn = el.querySelector('.jnotes-text-note-del');
+        if (delBtn) {
+          delBtn.addEventListener('click', () => deleteTextNote(pageNum, noteObj.id));
+        }
 
         const ta = el.querySelector('textarea');
         ta.addEventListener('input', () => {
@@ -1953,7 +1958,7 @@ const DocumentViewer = {
       if (!grid) return;
       grid.innerHTML = ACADEMIC_COLORS.map(function(c) {
         const activeCls = c.toLowerCase() === currentColor.toLowerCase() ? 'active' : '';
-        return '<div class="palette-swatch-btn ' + activeCls + '" data-color="' + c + '" style="background: ' + c + ';" onclick="setCustomColor(\'' + c + '\')" title="' + c + '"></div>';
+        return '<div class="palette-swatch-btn ' + activeCls + '" data-color="' + c + '" style="background: ' + c + ';" onclick="setCustomColor(this.dataset.color)" title="' + c + '"></div>';
       }).join('');
     }
 
@@ -2052,8 +2057,8 @@ const DocumentViewer = {
       let html = presets.map(function(p, idx) {
         const activeCls = idx === 0 ? 'active' : '';
         const titleText = p.name || (p.label + 'mm ' + p.tool);
-        return '<div class="dock-preset-btn ' + activeCls + '" id="dock-btn-' + p.id + '" onclick="applyDockPreset(\'' + p.id + '\')" title="' + titleText + '">'
-          + '<span class="dock-delete-btn" onclick="deleteDockPreset(event, \'' + p.id + '\')" title="حذف القلم">✕</span>'
+        return '<div class="dock-preset-btn ' + activeCls + '" id="dock-btn-' + p.id + '" data-preset-id="' + p.id + '" onclick="applyDockPreset(this.dataset.presetId)" title="' + titleText + '">'
+          + '<span class="dock-delete-btn" data-preset-id="' + p.id + '" onclick="deleteDockPreset(event, this.dataset.presetId)" title="حذف القلم">✕</span>'
           + '<span>' + p.label + '</span>'
           + '<div class="dock-preset-dot" style="background: ' + p.color + ';"></div>'
           + '</div>';
