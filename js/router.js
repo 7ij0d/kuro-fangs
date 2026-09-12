@@ -82,6 +82,14 @@ class Router {
       backdrop?.classList.remove('open');
     }
 
+    // Toggle studio fullscreen mode for sheet-detail routes
+    const isStudioRoute = path === '/sheet-detail' || path.startsWith('/sheet-detail') || path.startsWith('/sheet/');
+    if (isStudioRoute) {
+      document.body.classList.add('studio-fullscreen-active');
+    } else {
+      document.body.classList.remove('studio-fullscreen-active');
+    }
+
     // Update active nav highlights
     this.updateActiveNav(path);
 

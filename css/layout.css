@@ -642,3 +642,40 @@ html[dir="rtl"] .header-search-box .search-icon {
     padding: 6px 10px;
   }
 }
+
+/* ==========================================================================
+   6. STUDIO FULLSCREEN MODE (JNotes Standalone Viewport)
+   ========================================================================== */
+body.studio-fullscreen-active .app-sidebar,
+body.studio-fullscreen-active .site-header,
+body.studio-fullscreen-active .guest-encourage-banner,
+body.studio-fullscreen-active .sidebar-backdrop {
+  display: none !important;
+}
+
+body.studio-fullscreen-active,
+body.studio-fullscreen-active .app-layout {
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  background-color: #12131F !important;
+}
+
+body.studio-fullscreen-active .app-main-wrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100vw !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+body.studio-fullscreen-active #app,
+body.studio-fullscreen-active .main-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100vw !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}

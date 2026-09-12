@@ -64,24 +64,119 @@ const DocumentViewer = {
       -webkit-touch-callout: none;
     }
 
-    /* JNotes Top Header Toolbar */
+    /* JNotes Standalone Professional Header Toolbar */
     .jnotes-top-bar {
       height: 56px;
-      background: #1B1D2C;
+      background: #181926;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 12px;
-      gap: 6px;
-      z-index: 1000;
+      padding: 0 14px;
+      gap: 10px;
+      z-index: 9500;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    /* Left Section: Exit & Title */
+    .jnotes-left-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       flex-shrink: 0;
     }
 
-    .jnotes-tool-group {
+    .jtool-exit-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #F8FAFC;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.775rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .jtool-exit-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #EF4444;
+      color: #EF4444;
+    }
+
+    .jnotes-title-pill {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
+      max-width: 280px;
+    }
+
+    .jnotes-badge {
+      background: rgba(2, 132, 199, 0.2);
+      color: #38BDF8;
+      border: 1px solid rgba(2, 132, 199, 0.4);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .jnotes-title-text {
+      color: #E2E8F0;
+      font-size: 0.825rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Center Section: Tools */
+    .jnotes-center-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .jnotes-tool-segmented {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 3px 6px;
+      gap: 3px;
+    }
+
+    .jtool-icon-btn {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .jtool-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #F8FAFC;
+    }
+
+    .jnotes-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.12);
+      margin: 0 4px;
     }
 
     .jtool-btn {
@@ -95,14 +190,14 @@ const DocumentViewer = {
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       transition: all 0.15s ease;
       user-select: none;
       position: relative;
     }
 
     .jtool-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       color: #F8FAFC;
     }
 
@@ -110,53 +205,144 @@ const DocumentViewer = {
       background: #0284C7 !important;
       color: #FFFFFF !important;
       border-color: rgba(255, 255, 255, 0.25) !important;
-      box-shadow: 0 0 10px rgba(2, 132, 199, 0.4);
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
     }
 
-    /* Floating Page counter pill top left */
-    .jnotes-page-pill {
-      background: rgba(15, 23, 42, 0.85);
-      color: #F8FAFC;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 800;
+    /* Right Section */
+    .jnotes-right-section {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
-    /* Auto Save indicator badge */
     .auto-save-pill {
-      background: rgba(16, 185, 129, 0.15);
+      background: rgba(16, 185, 129, 0.12);
       color: #34D399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 0.7rem;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.725rem;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      transition: opacity 0.3s ease;
     }
 
-    /* Right Vertical Floating Pen Box Dock (JNotes Style) */
+    .auto-save-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34D399;
+      box-shadow: 0 0 8px #34D399;
+    }
+
+    .jnotes-page-nav-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 2px 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #E2E8F0;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .page-nav-arrow {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .page-nav-arrow:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #FFF;
+    }
+
+    .jtool-download-btn {
+      background: #0284C7;
+      color: #FFFFFF;
+      border-color: #0284C7;
+    }
+
+    .jtool-download-btn:hover {
+      background: #0369A1;
+      color: #FFFFFF;
+    }
+
+    /* Page Index Sliding Overlay Drawer (Matching Spec) */
+    .jnotes-sidebar-index {
+      position: absolute;
+      right: 0;
+      top: 56px;
+      height: calc(100vh - 56px);
+      width: 280px;
+      background: #181926;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: -8px 0 35px rgba(0, 0, 0, 0.6);
+      transform: translateX(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 9000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .jnotes-sidebar-index.open {
+      transform: translateX(0);
+    }
+
+    .drawer-backdrop {
+      position: absolute;
+      inset: 0;
+      top: 56px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(3px);
+      z-index: 8990;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Right Vertical Floating Pen Dock (Matching Spec) */
     .jnotes-vertical-dock {
       position: fixed;
-      right: 14px;
-      top: 90px;
-      z-index: 10000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
+      right: 16px;
+      top: 76px;
+      z-index: 8000;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(14px);
       border-radius: 24px;
       padding: 10px 8px;
       box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
       display: flex;
       flex-direction: column;
       gap: 10px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.12);
       align-items: center;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    }
+
+    /* Automatically retract dock when drawer opens so it NEVER collides */
+    .jnotes-vertical-dock.dock-retracted {
+      transform: translateX(90px);
+      opacity: 0;
+      pointer-events: none;
     }
 
     .dock-preset-btn {
@@ -189,16 +375,16 @@ const DocumentViewer = {
       margin-top: 1px;
     }
 
-    /* JNotes Popups (Line Weight Slider & Mark Pen Settings) */
+    /* JNotes Popups */
     .jnotes-popup-card {
       position: absolute;
-      top: 52px;
+      top: 60px;
       background: #FFFFFF;
       color: #0F172A;
       border-radius: 14px;
       padding: 16px 18px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.35);
-      z-index: 2000;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.45);
+      z-index: 9600;
       width: 280px;
       border: 1px solid #E2E8F0;
       display: none;
@@ -307,51 +493,41 @@ const DocumentViewer = {
       border-color: #FFFFFF;
     }
 
-    /* JNotes Left Sidebar */
-    .jnotes-sidebar {
-      width: 230px;
-      background: #181926;
-      border-left: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 56px);
-      transition: margin-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      flex-shrink: 0;
-      z-index: 100;
-    }
-
-    .jnotes-sidebar.collapsed {
-      margin-right: -230px;
-    }
-
     .sidebar-header {
-      padding: 10px;
+      padding: 14px 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       color: #F8FAFC;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 700;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
     .sidebar-thumbnails-list {
       flex: 1;
       overflow-y: auto;
-      padding: 8px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .thumb-card {
       background: #232536;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 8px;
-      padding: 8px;
+      padding: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      transition: all 0.15s ease;
+    }
+
+    .thumb-card:hover {
+      background: #2D3045;
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .thumb-card.active {
@@ -360,22 +536,28 @@ const DocumentViewer = {
     }
 
     .thumb-num {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: #0284C7;
       color: #FFF;
-      font-size: 0.7rem;
+      font-size: 0.725rem;
       font-weight: 800;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .thumb-info h5 {
       color: #F8FAFC;
-      font-size: 0.725rem;
+      font-size: 0.75rem;
       font-weight: 700;
+    }
+
+    .thumb-info p {
+      color: #94A3B8;
+      font-size: 0.675rem;
     }
 
     /* Main Viewport Workspace */
@@ -615,54 +797,116 @@ const DocumentViewer = {
 </head>
 <body>
 
-  <!-- JNotes Top Control Header Bar -->
+  <!-- JNotes Standalone Professional Header Toolbar -->
   <div class="jnotes-top-bar">
-    <div class="jnotes-tool-group">
-      <button class="jtool-btn" id="btn-undo" title="تراجع (Undo)">↩️</button>
-      <button class="jtool-btn" id="btn-redo" title="إعادة (Redo)">↪️</button>
-
-      <button class="jtool-btn active" id="tool-pan" onclick="setTool('pan')">🖐️ <span>قراءة</span></button>
-      <button class="jtool-btn" id="tool-pen" onclick="setTool('pen')">🖋️ <span>قلم</span></button>
-      
-      <!-- Mark Pen (Highlighter) Button + Popup Trigger -->
-      <button class="jtool-btn" id="tool-highlighter" onclick="toggleMarkPenMenu()">
-        🖍️ <span>تظليل (Mark)</span>
+    <!-- LEFT: Exit Button & Title / Subject Badge -->
+    <div class="jnotes-left-section">
+      <button class="jtool-exit-btn" id="btn-exit-studio" onclick="exitStudio()" title="العودة لقائمة الشيتات بالمنصة">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <span>العودة للمنصة</span>
       </button>
 
-      <button class="jtool-btn" id="tool-eraser" onclick="setTool('eraser')">🧹 <span>ممحاة</span></button>
-
-      <!-- Line Weight Thickness Slider Popup Trigger -->
-      <button class="jtool-btn" id="tool-thickness" onclick="toggleThicknessMenu()">
-        📏 <span id="stroke-label-btn">0.8mm</span>
-      </button>
-
-      <!-- Color Swatches Palette -->
-      <div class="jnotes-color-dots">
-        <div class="color-dot active" data-color="rgba(254, 240, 138, 0.65)" style="background: #FEF08A;" onclick="setColor('rgba(254, 240, 138, 0.65)')" title="أصفر"></div>
-        <div class="color-dot" data-color="rgba(168, 85, 247, 0.65)" style="background: #A855F7;" onclick="setColor('rgba(168, 85, 247, 0.65)')" title="أرجواني"></div>
-        <div class="color-dot" data-color="#0284C7" style="background: #0284C7;" onclick="setColor('#0284C7')" title="أزرق حبر"></div>
-        <div class="color-dot" data-color="#78350F" style="background: #78350F;" onclick="setColor('#78350F')" title="بني حبر"></div>
-        <div class="color-dot" data-color="#16A34A" style="background: #16A34A;" onclick="setColor('#16A34A')" title="أخضر"></div>
-        <div class="color-dot" data-color="#0F172A" style="background: #0F172A;" onclick="setColor('#0F172A')" title="أسود"></div>
+      <div class="jnotes-title-pill">
+        <span class="jnotes-badge">${doc.subject_name || 'Fixed Prosthodontics'}</span>
+        <span class="jnotes-title-text" title="${title}">${title}</span>
       </div>
     </div>
 
-    <!-- Center: Auto Save Status Pill & Floating Page Counter Pill -->
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <!-- CENTER: Segmented Professional Tools with Crisp Vector Icons -->
+    <div class="jnotes-center-section">
+      <div class="jnotes-tool-segmented">
+        <!-- Undo / Redo -->
+        <button class="jtool-icon-btn" id="btn-undo" onclick="undoAction()" title="تراجع (Undo)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+        </button>
+        <button class="jtool-icon-btn" id="btn-redo" onclick="redoAction()" title="إعادة (Redo)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+        </button>
+
+        <div class="jnotes-divider"></div>
+
+        <!-- Read (Pan) -->
+        <button class="jtool-btn active" id="tool-pan" onclick="setTool('pan')" title="وضع القراءة والتحديد">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+          <span>قراءة</span>
+        </button>
+
+        <!-- Pen -->
+        <button class="jtool-btn" id="tool-pen" onclick="setTool('pen')" title="قلم الملاحظات والتدوين">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          <span>قلم</span>
+        </button>
+
+        <!-- Highlighter (Mark Pen) -->
+        <button class="jtool-btn" id="tool-highlighter" onclick="toggleMarkPenMenu(event)" title="تظليل نصوص وملاحظات">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h3l6-6"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>
+          <span>تظليل</span>
+        </button>
+
+        <!-- Eraser -->
+        <button class="jtool-btn" id="tool-eraser" onclick="setTool('eraser')" title="ممحاة التظليلات والرسومات">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+          <span>ممحاة</span>
+        </button>
+
+        <!-- Straight Line Toggle -->
+        <button class="jtool-btn" id="tool-straight-toggle" onclick="toggleStraightLineSetting()" title="الرسم بخط مستقيم">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>
+          <span>مستقيم</span>
+        </button>
+
+        <!-- Line Weight Thickness Slider Trigger -->
+        <button class="jtool-btn" id="tool-thickness" onclick="toggleThicknessMenu(event)" title="تغيير سمك الخط (0.1mm - 3.0mm)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="8"/></svg>
+          <span id="stroke-label-btn">0.8mm</span>
+        </button>
+
+        <!-- Color Palette Picker / Swatches -->
+        <div class="jnotes-color-dots" id="color-dots-container">
+          <div class="color-dot active" data-color="rgba(254, 240, 138, 0.65)" style="background: #FEF08A;" onclick="setColor('rgba(254, 240, 138, 0.65)')" title="أصفر"></div>
+          <div class="color-dot" data-color="rgba(168, 85, 247, 0.65)" style="background: #A855F7;" onclick="setColor('rgba(168, 85, 247, 0.65)')" title="أرجواني"></div>
+          <div class="color-dot" data-color="#0284C7" style="background: #0284C7;" onclick="setColor('#0284C7')" title="أزرق حبر"></div>
+          <div class="color-dot" data-color="#78350F" style="background: #78350F;" onclick="setColor('#78350F')" title="بني حبر"></div>
+          <div class="color-dot" data-color="#16A34A" style="background: #16A34A;" onclick="setColor('#16A34A')" title="أخضر"></div>
+          <div class="color-dot" data-color="#0F172A" style="background: #0F172A;" onclick="setColor('#0F172A')" title="أسود"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Page Navigation, Index Drawer Toggle, Auto-Save Badge, Download -->
+    <div class="jnotes-right-section">
+      <!-- Auto Save Badge -->
       <span class="auto-save-pill" id="auto-save-badge">
-        <span style="display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #34D399;"></span>
+        <span class="auto-save-dot"></span>
         <span>تم الحفظ تلقائياً</span>
       </span>
 
-      <div class="jnotes-page-pill" id="page-counter-pill">
-        <span>&lt; 1 / 16 &gt;</span>
+      <!-- Page Nav Pill -->
+      <div class="jnotes-page-nav-pill">
+        <button class="page-nav-arrow" onclick="prevPage()" title="الصفحة السابقة">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <span id="page-counter-num">1 / 16</span>
+        <button class="page-nav-arrow" onclick="nextPage()" title="الصفحة التالية">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
       </div>
 
-      <button class="jtool-btn" onclick="toggleSidebar()" title="فهرس الصفحات">🗂️ <span>الفهرس</span></button>
+      <!-- Page Index Drawer Button -->
+      <button id="btn-toggle-index" class="jtool-btn" onclick="toggleSidebar()" title="عرض فهرس الصفحات المصغرة">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M14 9h4"/><path d="M14 15h4"/></svg>
+        <span>فهرس الصفحات</span>
+      </button>
+
+      <!-- Download Button -->
+      <button class="jtool-btn jtool-download-btn" onclick="downloadDoc()" title="تنزيل نسخة PDF إلى جهازك">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>تنزيل PDF</span>
+      </button>
     </div>
 
-    <!-- POPUP 1: JNotes Line Weight Slider (Matching Screenshot 1) -->
-    <div class="jnotes-popup-card" id="popup-thickness" style="left: 200px;">
+    <!-- POPUP 1: JNotes Line Weight Slider -->
+    <div class="jnotes-popup-card" id="popup-thickness">
       <div class="popup-title">Line weight</div>
       <div style="margin-bottom: 12px;">
         <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
@@ -673,8 +917,8 @@ const DocumentViewer = {
       </div>
     </div>
 
-    <!-- POPUP 2: JNotes Mark Pen Settings (Matching Screenshot 2) -->
-    <div class="jnotes-popup-card" id="popup-markpen" style="left: 140px;">
+    <!-- POPUP 2: JNotes Mark Pen Settings -->
+    <div class="jnotes-popup-card" id="popup-markpen">
       <div class="popup-title">Mark pen</div>
       <div class="popup-row">
         <span>Straight line drawing</span>
@@ -690,7 +934,7 @@ const DocumentViewer = {
     </div>
   </div>
 
-  <!-- Right Vertical Floating Pen Dock (JNotes Style) -->
+  <!-- Right Vertical Floating Pen Dock (Matching Spec) -->
   <div class="jnotes-vertical-dock" id="jnotes-vertical-dock">
     <div class="dock-preset-btn active" onclick="applyPreset('rgba(254, 240, 138, 0.65)', 12, 'highlighter')" title="0.5 قلم تظليل أصفر">
       <span>0.5</span>
@@ -717,26 +961,31 @@ const DocumentViewer = {
     </div>
   </div>
 
+  <!-- Sliding Overlay Page Index Drawer (Matching Spec) -->
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeSidebar()"></div>
+  <div class="jnotes-sidebar-index" id="jnotes-sidebar-index">
+    <div class="sidebar-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M14 9h4"/><path d="M14 15h4"/></svg>
+        <span>فهرس الشرائح (16)</span>
+      </div>
+      <button class="jtool-icon-btn" onclick="closeSidebar()" title="إغلاق الفهرس" style="color: #94A3B8;">✕</button>
+    </div>
+    <div class="sidebar-thumbnails-list">
+      ${Array.from({length: 16}, (_, i) => `
+        <div class="thumb-card ${i === 0 ? 'active' : ''}" onclick="selectPageAndCloseDrawer(${i + 1})">
+          <div class="thumb-num">${i + 1}</div>
+          <div class="thumb-info">
+            <h5>صفحة ${i + 1}</h5>
+            <p>Dental Lecture Slide ${i + 1}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
   <!-- Workspace Container -->
   <div class="jnotes-workspace">
-
-    <!-- Collapsible Page Thumbnail Sidebar -->
-    <div class="jnotes-sidebar" id="jnotes-sidebar">
-      <div class="sidebar-header">
-        <span>🗂️ فهرس الصفحات (16)</span>
-      </div>
-      <div class="sidebar-thumbnails-list">
-        ${Array.from({length: 16}, (_, i) => `
-          <div class="thumb-card ${i === 0 ? 'active' : ''}" onclick="scrollToPage(${i + 1})">
-            <div class="thumb-num">${i + 1}</div>
-            <div class="thumb-info">
-              <h5>صفحة ${i + 1}</h5>
-              <p>Dental Lecture Slide ${i + 1}</p>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
 
     <!-- Main Scrollable Paper Viewport -->
     <div class="jnotes-viewport" id="jnotes-viewport">
@@ -864,20 +1113,60 @@ const DocumentViewer = {
     let startY = 0;
     let strokes = {}; // pageNum -> array of stroke paths
 
+    // Standalone Navigation & Exit Bar
+    window.exitStudio = function() {
+      if (window.parent) {
+        window.parent.location.hash = '#/sheets';
+      } else {
+        window.location.hash = '#/sheets';
+      }
+    };
+
+    window.downloadDoc = function() {
+      if (window.parent && window.parent.DocumentViewer) {
+        window.parent.DocumentViewer.download({
+          id: docId,
+          title: "${title}"
+        });
+      } else {
+        alert('جاري تنزيل ملف PDF...');
+      }
+    };
+
     // Popups Controls
-    window.toggleThicknessMenu = function() {
+    window.toggleThicknessMenu = function(e) {
+      if (e) e.stopPropagation();
       const p = document.getElementById('popup-thickness');
       const pm = document.getElementById('popup-markpen');
       if (pm) pm.classList.remove('open');
-      if (p) p.classList.toggle('open');
+      if (p) {
+        const isOpen = p.classList.toggle('open');
+        if (isOpen) {
+          const btn = document.getElementById('tool-thickness');
+          if (btn) {
+            const r = btn.getBoundingClientRect();
+            p.style.left = Math.max(10, r.left - 50) + 'px';
+          }
+        }
+      }
     };
 
-    window.toggleMarkPenMenu = function() {
+    window.toggleMarkPenMenu = function(e) {
+      if (e) e.stopPropagation();
       window.setTool('highlighter');
       const pm = document.getElementById('popup-markpen');
       const pt = document.getElementById('popup-thickness');
       if (pt) pt.classList.remove('open');
-      if (pm) pm.classList.toggle('open');
+      if (pm) {
+        const isOpen = pm.classList.toggle('open');
+        if (isOpen) {
+          const btn = document.getElementById('tool-highlighter');
+          if (btn) {
+            const r = btn.getBoundingClientRect();
+            pm.style.left = Math.max(10, r.left - 50) + 'px';
+          }
+        }
+      }
     };
 
     window.updateLineWeight = function(val) {
@@ -891,6 +1180,8 @@ const DocumentViewer = {
     window.toggleStraightLineSetting = function() {
       straightLineMode = !straightLineMode;
       isStraightLine = straightLineMode;
+      const btn = document.getElementById('tool-straight-toggle');
+      if (btn) btn.classList.toggle('active', straightLineMode);
       const sw = document.getElementById('toggle-straight-line');
       if (sw) sw.classList.toggle('on', straightLineMode);
     };
@@ -932,8 +1223,50 @@ const DocumentViewer = {
       }
     });
 
-    // Navigation & Tool Switchers
+    // Undo / Redo Stacks
+    let redoStack = [];
+
+    window.undoAction = function() {
+      let changed = false;
+      Object.keys(strokes).forEach(pNum => {
+        if (strokes[pNum] && strokes[pNum].length > 0) {
+          const popped = strokes[pNum].pop();
+          redoStack.push({ pageNum: pNum, stroke: popped });
+          redrawCanvas(pNum);
+          changed = true;
+        }
+      });
+      if (changed) triggerAutoSave();
+    };
+
+    window.redoAction = function() {
+      if (redoStack.length > 0) {
+        const item = redoStack.pop();
+        if (!strokes[item.pageNum]) strokes[item.pageNum] = [];
+        strokes[item.pageNum].push(item.stroke);
+        redrawCanvas(item.pageNum);
+        triggerAutoSave();
+      }
+    };
+
+    // Page Navigation & Thumbnail Drawer Controls
+    let currentPage = 1;
+    const totalPages = 16;
+
+    window.prevPage = function() {
+      if (currentPage > 1) {
+        window.scrollToPage(currentPage - 1);
+      }
+    };
+
+    window.nextPage = function() {
+      if (currentPage < totalPages) {
+        window.scrollToPage(currentPage + 1);
+      }
+    };
+
     window.scrollToPage = function(pageNum) {
+      currentPage = pageNum;
       const pageEl = document.getElementById('page-' + pageNum);
       if (pageEl) {
         pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -944,16 +1277,42 @@ const DocumentViewer = {
       }
     };
 
+    function updateCounterPill(pageNum) {
+      currentPage = pageNum;
+      const pill = document.getElementById('page-counter-num');
+      if (pill) pill.textContent = pageNum + ' / ' + totalPages;
+    }
+
     window.toggleSidebar = function() {
-      const sb = document.getElementById('jnotes-sidebar');
-      if (sb) sb.classList.toggle('collapsed');
+      const sb = document.getElementById('jnotes-sidebar-index');
+      const backdrop = document.getElementById('drawer-backdrop');
+      const dock = document.getElementById('jnotes-vertical-dock');
+      if (sb) {
+        const isOpen = sb.classList.toggle('open');
+        if (backdrop) backdrop.classList.toggle('open', isOpen);
+        if (dock) dock.classList.toggle('dock-retracted', isOpen);
+      }
+    };
+
+    window.closeSidebar = function() {
+      const sb = document.getElementById('jnotes-sidebar-index');
+      const backdrop = document.getElementById('drawer-backdrop');
+      const dock = document.getElementById('jnotes-vertical-dock');
+      if (sb) sb.classList.remove('open');
+      if (backdrop) backdrop.classList.remove('open');
+      if (dock) dock.classList.remove('dock-retracted');
+    };
+
+    window.selectPageAndCloseDrawer = function(pageNum) {
+      window.scrollToPage(pageNum);
+      window.closeSidebar();
     };
 
     window.setTool = function(tool) {
       currentTool = tool;
       document.querySelectorAll('.jtool-btn').forEach(b => {
         if (b.id === 'tool-' + tool) b.classList.add('active');
-        else if (b.id && b.id.startsWith('tool-')) b.classList.remove('active');
+        else if (b.id && b.id.startsWith('tool-') && b.id !== 'tool-straight-toggle') b.classList.remove('active');
       });
 
       document.querySelectorAll('.canvas-overlay').forEach(c => {
@@ -1134,15 +1493,12 @@ const DocumentViewer = {
       });
     });
 
-    // Undo Handler
+    // Undo / Redo Handlers
     document.getElementById('btn-undo')?.addEventListener('click', () => {
-      Object.keys(strokes).forEach(pNum => {
-        if (strokes[pNum] && strokes[pNum].length > 0) {
-          strokes[pNum].pop();
-          redrawCanvas(pNum);
-        }
-      });
-      triggerAutoSave();
+      window.undoAction();
+    });
+    document.getElementById('btn-redo')?.addEventListener('click', () => {
+      window.redoAction();
     });
 
     // Auto-Save Trigger
@@ -1200,14 +1556,18 @@ const DocumentViewer = {
           const rect = p.getBoundingClientRect();
           if (rect.top >= 0 && rect.top < window.innerHeight / 2) {
             updateCounterPill(idx + 1);
+            document.querySelectorAll('.thumb-card').forEach((c, cIdx) => {
+              c.classList.toggle('active', cIdx === idx);
+            });
           }
         });
       });
     }
 
     function updateCounterPill(pageNum) {
-      const pill = document.getElementById('page-counter-pill');
-      if (pill) pill.textContent = '< ' + pageNum + ' / 16 >';
+      currentPage = pageNum;
+      const counterEl = document.getElementById('page-counter-num');
+      if (counterEl) counterEl.textContent = pageNum + ' / ' + totalPages;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
