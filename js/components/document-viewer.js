@@ -1293,6 +1293,13 @@ const DocumentViewer = {
         </button>
       </div>
 
+      <!-- Header Zoom Control Pill (Quick zoom in fullscreen) -->
+      <div class="jnotes-page-nav-pill" style="gap: 4px;">
+        <button class="page-nav-arrow" onclick="zoomIn()" title="تكبير">+</button>
+        <span id="zoom-val-text-header" onclick="resetZoom()" style="font-size: 0.725rem; font-weight: 700; color: #F8FAFC; cursor: pointer; min-width: 38px; text-align: center;" title="إعادة الضبط 100%">100%</span>
+        <button class="page-nav-arrow" onclick="zoomOut()" title="تصغير">−</button>
+      </div>
+
       <!-- Active Tool Indicator Badge (Clicks to open floating side tools panel) -->
       <button class="jnotes-active-tool-pill" id="active-tool-pill" onclick="toggleSideToolsPanel(event)" title="انقر لفتح صندوق الأدوات والأقلام">
         <span class="tool-dot" id="active-tool-dot" style="background: #0F172A;"></span>
@@ -1654,8 +1661,11 @@ const DocumentViewer = {
           wrapper.style.marginBottom = '0px';
         }
       }
+      const pct = Math.round(zoomLevel * 100) + '%';
       const txt = document.getElementById('zoom-val-text');
-      if (txt) txt.textContent = Math.round(zoomLevel * 100) + '%';
+      if (txt) txt.textContent = pct;
+      const txtHeader = document.getElementById('zoom-val-text-header');
+      if (txtHeader) txtHeader.textContent = pct;
     };
 
     // Paper Theme Toggle (White / Sepia / Dark)
@@ -2437,25 +2447,79 @@ const DocumentViewer = {
         canvas.onmouseleave = () => stopDraw(pageNum);
         canvas.onclick = (e) => handleCanvasClick(e, canvas, pageNum);
 
-        // Flawless Mobile Touch Events (prevent touch scroll when drawing!)
+        // Flawless Mobile Touch Events (prevent touch scroll when drawing, allow 2-finger pinch!)
         canvas.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches.length > 1) return;
           if (currentTool === 'pan') return;
           e.preventDefault();
           startDraw(e.touches[0], canvas, pageNum, page);
         }, { passive: false });
 
         canvas.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches.length > 1) return;
           if (currentTool === 'pan') return;
           e.preventDefault();
           draw(e.touches[0], canvas, pageNum);
         }, { passive: false });
 
         canvas.addEventListener('touchend', (e) => {
+          if (e.touches && e.touches.length > 1) return;
           if (currentTool === 'pan') return;
           e.preventDefault();
           stopDraw(pageNum);
         }, { passive: false });
       });
+
+      initZoomGestureEngine();
+    }
+
+    // Touch Screen 2-Finger Pinch Zoom & Trackpad / Ctrl+Wheel Zoom Engine
+    let zoomEngineInitialized = false;
+    function initZoomGestureEngine() {
+      if (zoomEngineInitialized) return;
+      const viewport = document.getElementById('jnotes-viewport');
+      if (!viewport) return;
+      zoomEngineInitialized = true;
+
+      let initialPinchDist = null;
+      let startPinchZoom = 1.0;
+
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length === 2) {
+          isDrawing = false;
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          initialPinchDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+          startPinchZoom = zoomLevel;
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches.length === 2 && initialPinchDist) {
+          e.preventDefault();
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          const currDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+          if (currDist > 0) {
+            const factor = currDist / initialPinchDist;
+            window.setZoom(startPinchZoom * factor);
+          }
+        }
+      }, { passive: false });
+
+      viewport.addEventListener('touchend', (e) => {
+        if (!e.touches || e.touches.length < 2) {
+          initialPinchDist = null;
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          const delta = -e.deltaY * 0.003;
+          window.setZoom(zoomLevel + delta);
+        }
+      }, { passive: false });
     }
 
     function startDraw(e, canvas, pageNum, page) {
