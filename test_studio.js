@@ -66,7 +66,7 @@ try {
 }
 
 const handlers = [
-  'setTool', 'setColor', 'toggleSideToolsPanel', 'closeSideToolsPanel',
+  'setTool', 'setColor', 'setEraserMode', 'toggleSideToolsPanel', 'closeSideToolsPanel',
   'toggleColorPaletteMenu',
   'updateLineWeight', 'toggleStraightLineSetting', 'toggleBottomDisplaySetting',
   'undoAction', 'redoAction', 'prevPage', 'nextPage', 'scrollToPage',

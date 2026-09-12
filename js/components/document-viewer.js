@@ -1055,6 +1055,20 @@ const DocumentViewer = {
       cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='rgba(239,68,68,0.25)' stroke='%23ef4444' stroke-width='2'/%3E%3Cpath d='M12 9v6M9 12h6' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, cell, crosshair !important;
     }
 
+    #jnotes-eraser-cursor {
+      position: fixed;
+      pointer-events: none;
+      border: 2px solid #EF4444;
+      background: rgba(239, 68, 68, 0.22);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 999999;
+      display: none;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+      backdrop-filter: blur(1px);
+      transition: width 0.04s ease, height 0.04s ease;
+    }
+
     /* Translucent Highlighted Elements */
     p.highlighted, li.highlighted, h3.highlighted {
       background-color: var(--highlight-color) !important;
@@ -1396,6 +1410,24 @@ const DocumentViewer = {
           <span>مسطرة</span>
         </button>
       </div>
+
+      <!-- SECTION 1.5: خيارات الممحاة المتقدمة (Object vs Partial Eraser) -->
+      <div id="eraser-mode-section" style="margin-top: 10px; display: none; background: rgba(255, 255, 255, 0.04); padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+        <div class="panel-section-title" style="margin-bottom: 8px;">
+          <span>نمط الممحاة</span>
+          <span id="eraser-mode-badge" style="color: #38BDF8; font-size: 0.725rem; font-weight: 700;">مسح العنصر</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="panel-action-btn active" id="btn-emode-object" onclick="setEraserMode('object')" style="flex: 1; font-size: 0.75rem; padding: 6px 4px; display: flex; align-items: center; justify-content: center; gap: 4px;" title="حذف العنصر كاملًا بمجرد لمس أي جزء منه">
+            <span>🎯</span>
+            <span>مسح العنصر</span>
+          </button>
+          <button class="panel-action-btn" id="btn-emode-partial" onclick="setEraserMode('partial')" style="flex: 1; font-size: 0.75rem; padding: 6px 4px; display: flex; align-items: center; justify-content: center; gap: 4px;" title="مسح الجزء الملموس فقط وتقطيع الرسمة">
+            <span>✂️</span>
+            <span>مسح جزئي</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- SECTION 2: سمك الخط (Line Weight & Quick Chips) -->
@@ -1619,6 +1651,9 @@ const DocumentViewer = {
       </div> <!-- /#jnotes-pages-wrapper -->
     </div>
   </div>
+
+  <!-- Visible Eraser Target Circle Overlay -->
+  <div id="jnotes-eraser-cursor"></div>
 
   <!-- JNotes Interactive Canvas Engine, Popups, Straight Line Snap & Auto-Save Script -->
   <script>
@@ -2345,8 +2380,66 @@ const DocumentViewer = {
       window.closeSidebar();
     };
 
+    let eraserMode = 'object'; // 'object' (مسح العنصر كاملاً) or 'partial' (المسح الجزئي)
+
+    window.setEraserMode = function(mode) {
+      eraserMode = mode === 'partial' ? 'partial' : 'object';
+      const btnObj = document.getElementById('btn-emode-object');
+      const btnPart = document.getElementById('btn-emode-partial');
+      const badge = document.getElementById('eraser-mode-badge');
+      if (btnObj) btnObj.classList.toggle('active', eraserMode === 'object');
+      if (btnPart) btnPart.classList.toggle('active', eraserMode === 'partial');
+      if (badge) badge.textContent = eraserMode === 'partial' ? 'مسح جزئي' : 'مسح العنصر';
+      try {
+        localStorage.setItem('kf_jnotes_eraser_mode', eraserMode);
+      } catch(e) {}
+    };
+
+    function initEraserMode() {
+      try {
+        const saved = localStorage.getItem('kf_jnotes_eraser_mode') || 'object';
+        window.setEraserMode(saved);
+      } catch(e) {
+        window.setEraserMode('object');
+      }
+    }
+
+    function updateEraserCursor(e) {
+      const cursor = document.getElementById('jnotes-eraser-cursor');
+      if (!cursor) return;
+      if (currentTool !== 'eraser') {
+        cursor.style.display = 'none';
+        return;
+      }
+      const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+      if (!clientX && !clientY) return;
+
+      const baseRadius = 24;
+      const diameter = (baseRadius * 2) * (zoomLevel || 1.0);
+      cursor.style.width = diameter + 'px';
+      cursor.style.height = diameter + 'px';
+      cursor.style.left = clientX + 'px';
+      cursor.style.top = clientY + 'px';
+      cursor.style.display = 'block';
+    }
+
+    function hideEraserCursor() {
+      const cursor = document.getElementById('jnotes-eraser-cursor');
+      if (cursor) cursor.style.display = 'none';
+    }
+
     window.setTool = function(tool) {
       currentTool = tool;
+
+      const eraserSec = document.getElementById('eraser-mode-section');
+      if (eraserSec) {
+        eraserSec.style.display = tool === 'eraser' ? 'block' : 'none';
+      }
+
+      if (tool !== 'eraser') {
+        hideEraserCursor();
+      }
 
       if (tool === 'pen') {
         // Pen MUST default to freehand smooth drawing without ruler snap!
@@ -2566,6 +2659,7 @@ const DocumentViewer = {
       if (!strokes[pageNum]) strokes[pageNum] = [];
 
       if (currentTool === 'eraser') {
+        updateEraserCursor(e);
         eraseAt(pageNum, startX, startY);
       } else {
         const isHl = currentTool === 'highlighter';
@@ -2594,6 +2688,7 @@ const DocumentViewer = {
       const y = (e.clientY - rect.top) * scaleY;
 
       if (currentTool === 'eraser') {
+        updateEraserCursor(e);
         const dx = x - startX;
         const dy = y - startY;
         const dist = Math.hypot(dx, dy);
@@ -2634,6 +2729,7 @@ const DocumentViewer = {
     function stopDraw(pageNum) {
       if (isDrawing) {
         isDrawing = false;
+        hideEraserCursor();
         if (currentTool !== 'eraser') {
           const pageStrokes = strokes[pageNum];
           if (pageStrokes && pageStrokes.length > 0) {
@@ -2660,35 +2756,92 @@ const DocumentViewer = {
       const pageStrokes = strokes[pageNum];
       if (!pageStrokes || pageStrokes.length === 0) return;
 
-      const baseRadius = 32;
+      const baseRadius = 24;
       let erasedAny = false;
 
-      strokes[pageNum] = pageStrokes.filter(st => {
-        if (!st.points || st.points.length === 0) return false;
+      if (eraserMode === 'object') {
+        // Mode 1: مسح العنصر كاملاً (Object Eraser)
+        strokes[pageNum] = pageStrokes.filter(st => {
+          if (!st.points || st.points.length === 0) return false;
+          const effectiveRadius = baseRadius + ((st.strokeWidth || 4) / 2);
+          const effRadiusSq = effectiveRadius * effectiveRadius;
 
-        const effectiveRadius = baseRadius + ((st.strokeWidth || 4) / 2);
-        const effRadiusSq = effectiveRadius * effectiveRadius;
+          if (st.points.length === 1) {
+            const p = st.points[0];
+            const dSq = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
+            if (dSq <= effRadiusSq) {
+              erasedAny = true;
+              return false;
+            }
+            return true;
+          }
 
-        if (st.points.length === 1) {
-          const p = st.points[0];
-          const dSq = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
-          if (dSq <= effRadiusSq) {
-            erasedAny = true;
-            return false;
+          for (let i = 0; i < st.points.length - 1; i++) {
+            const p1 = st.points[i];
+            const p2 = st.points[i + 1];
+            if (distToSegmentSq(x, y, p1.x, p1.y, p2.x, p2.y) <= effRadiusSq) {
+              erasedAny = true;
+              return false; // Delete full stroke object
+            }
           }
           return true;
-        }
+        });
+      } else {
+        // Mode 2: المسح الجزئي (Partial Eraser - يمسح الجزء الملموس ويقطع الرسمة)
+        const nextStrokes = [];
 
-        for (let i = 0; i < st.points.length - 1; i++) {
-          const p1 = st.points[i];
-          const p2 = st.points[i + 1];
-          if (distToSegmentSq(x, y, p1.x, p1.y, p2.x, p2.y) <= effRadiusSq) {
-            erasedAny = true;
-            return false;
+        pageStrokes.forEach(st => {
+          if (!st.points || st.points.length === 0) return;
+          const effectiveRadius = baseRadius + ((st.strokeWidth || 4) / 2);
+          const effRadiusSq = effectiveRadius * effectiveRadius;
+
+          let touched = false;
+          if (st.points.length === 1) {
+            const p = st.points[0];
+            if ((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y) <= effRadiusSq) touched = true;
+          } else {
+            for (let i = 0; i < st.points.length - 1; i++) {
+              if (distToSegmentSq(x, y, st.points[i].x, st.points[i].y, st.points[i+1].x, st.points[i+1].y) <= effRadiusSq) {
+                touched = true;
+                break;
+              }
+            }
           }
-        }
-        return true;
-      });
+
+          if (!touched) {
+            nextStrokes.push(st);
+            return;
+          }
+
+          erasedAny = true;
+
+          // Split points array by excluding points within effectiveRadius
+          const subSegments = [];
+          let curSeg = [];
+
+          for (let i = 0; i < st.points.length; i++) {
+            const p = st.points[i];
+            const dSq = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
+            if (dSq > effRadiusSq) {
+              curSeg.push(p);
+            } else {
+              if (curSeg.length > 0) {
+                if (curSeg.length >= 2) {
+                  subSegments.push({ ...st, points: [...curSeg] });
+                }
+                curSeg = [];
+              }
+            }
+          }
+          if (curSeg.length >= 2) {
+            subSegments.push({ ...st, points: [...curSeg] });
+          }
+
+          nextStrokes.push(...subSegments);
+        });
+
+        strokes[pageNum] = nextStrokes;
+      }
 
       if (erasedAny) {
         redrawCanvas(pageNum);
@@ -2835,6 +2988,7 @@ const DocumentViewer = {
     initColorPalette();
     renderVerticalDock();
     initPaperTheme();
+    initEraserMode();
     loadSavedAnnotations();
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -2842,6 +2996,7 @@ const DocumentViewer = {
       initColorPalette();
       renderVerticalDock();
       initPaperTheme();
+      initEraserMode();
       loadSavedAnnotations();
     });
     window.addEventListener('resize', initCanvases);
@@ -2850,6 +3005,7 @@ const DocumentViewer = {
       initColorPalette();
       renderVerticalDock();
       initPaperTheme();
+      initEraserMode();
       loadSavedAnnotations();
     }, 200);
     })();
