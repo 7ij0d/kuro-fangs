@@ -138,7 +138,34 @@ class DataService {
       }
     } catch (e) {}
 
+    // Filter out permanently deleted items stored by admin
+    const deletedSheetIds = this.getDeletedSheetIds();
+    if (deletedSheetIds.length > 0) {
+      this.sheets = (this.sheets || []).filter(s => !deletedSheetIds.includes(s.id));
+    }
+
+    const deletedAlertIds = this.getDeletedAlertIds();
+    if (deletedAlertIds.length > 0) {
+      this.alerts = (this.alerts || []).filter(a => !deletedAlertIds.includes(a.id));
+    }
+
     this.loaded = true;
+  }
+
+  getDeletedSheetIds() {
+    try {
+      return JSON.parse(localStorage.getItem('kf_deleted_sheet_ids') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  getDeletedAlertIds() {
+    try {
+      return JSON.parse(localStorage.getItem('kf_deleted_alert_ids') || '[]');
+    } catch (e) {
+      return [];
+    }
   }
 
   getSubjects() {
@@ -150,21 +177,24 @@ class DataService {
   }
 
   getSheetsBySubject(subjectId) {
-    if (!subjectId) return this.sheets || [];
-    return (this.sheets || []).filter(s => s.subject_id === subjectId);
+    const deleted = this.getDeletedSheetIds();
+    let list = (this.sheets || []).filter(s => !deleted.includes(s.id));
+    if (!subjectId) return list;
+    return list.filter(s => s.subject_id === subjectId);
   }
 
   getSheetsForSubject(subjectId) {
-    if (!subjectId) return this.sheets || [];
-    return (this.sheets || []).filter(s => s.subject_id === subjectId);
+    return this.getSheetsBySubject(subjectId);
   }
 
   getRecentSheets(limit = 6) {
-    return [...(this.sheets || [])].slice(0, limit);
+    const deleted = this.getDeletedSheetIds();
+    return [...(this.sheets || [])].filter(s => !deleted.includes(s.id)).slice(0, limit);
   }
 
   getAlerts() {
-    return this.alerts;
+    const deleted = this.getDeletedAlertIds();
+    return (this.alerts || []).filter(a => !deleted.includes(a.id));
   }
 
   getQuestionsBySubject(subjectId) {
