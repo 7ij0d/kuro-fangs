@@ -2415,7 +2415,7 @@ const DocumentViewer = {
       const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       if (!clientX && !clientY) return;
 
-      const baseRadius = 24;
+      const baseRadius = 26;
       const diameter = (baseRadius * 2) * (zoomLevel || 1.0);
       cursor.style.width = diameter + 'px';
       cursor.style.height = diameter + 'px';
@@ -2752,15 +2752,128 @@ const DocumentViewer = {
       return (px - projX) * (px - projX) + (py - projY) * (py - projY);
     }
 
+    function clipSegmentAgainstCircle(x1, y1, x2, y2, cx, cy, r) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const a = dx * dx + dy * dy;
+      if (a === 0) {
+        const dSq = (x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy);
+        return dSq <= r * r ? [] : [[{ x: x1, y: y1 }, { x: x2, y: y2 }]];
+      }
+      const fx = x1 - cx;
+      const fy = y1 - cy;
+      const b = 2 * (fx * dx + fy * dy);
+      const c = fx * fx + fy * fy - r * r;
+      const discr = b * b - 4 * a * c;
+
+      if (discr <= 0) {
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const midDistSq = (midX - cx) * (midX - cx) + (midY - cy) * (midY - cy);
+        if (midDistSq <= r * r) return [];
+        return [[{ x: x1, y: y1 }, { x: x2, y: y2 }]];
+      }
+
+      const sqrtDiscr = Math.sqrt(discr);
+      const t1 = (-b - sqrtDiscr) / (2 * a);
+      const t2 = (-b + sqrtDiscr) / (2 * a);
+
+      const inStart = Math.max(0, Math.min(1, t1));
+      const inEnd = Math.max(0, Math.min(1, t2));
+
+      if (inStart >= 1 || inEnd <= 0 || inStart >= inEnd) {
+        return [[{ x: x1, y: y1 }, { x: x2, y: y2 }]];
+      }
+
+      const result = [];
+      if (inStart > 0.001) {
+        result.push([
+          { x: x1, y: y1 },
+          { x: x1 + inStart * dx, y: y1 + inStart * dy }
+        ]);
+      }
+      if (inEnd < 0.999) {
+        result.push([
+          { x: x1 + inEnd * dx, y: y1 + inEnd * dy },
+          { x: x2, y: y2 }
+        ]);
+      }
+      return result;
+    }
+
+    function splitStrokePartial(st, cx, cy, r) {
+      if (!st.points || st.points.length === 0) return [];
+      if (st.points.length === 1) {
+        const p = st.points[0];
+        const dSq = (p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy);
+        return dSq <= r * r ? [] : [st];
+      }
+
+      const subSegments = [];
+      let currentPoints = [];
+
+      for (let i = 0; i < st.points.length - 1; i++) {
+        const p1 = st.points[i];
+        const p2 = st.points[i + 1];
+        const pieces = clipSegmentAgainstCircle(p1.x, p1.y, p2.x, p2.y, cx, cy, r);
+
+        if (pieces.length === 0) {
+          if (currentPoints.length >= 2) {
+            subSegments.push({ ...st, points: currentPoints });
+          }
+          currentPoints = [];
+        } else if (pieces.length === 1) {
+          const seg = pieces[0];
+          if (currentPoints.length === 0) {
+            currentPoints = [seg[0], seg[1]];
+          } else {
+            const lastP = currentPoints[currentPoints.length - 1];
+            if (Math.hypot(lastP.x - seg[0].x, lastP.y - seg[0].y) < 0.5) {
+              currentPoints.push(seg[1]);
+            } else {
+              if (currentPoints.length >= 2) {
+                subSegments.push({ ...st, points: currentPoints });
+              }
+              currentPoints = [seg[0], seg[1]];
+            }
+          }
+          if (Math.hypot(seg[1].x - p2.x, seg[1].y - p2.y) > 0.5) {
+            if (currentPoints.length >= 2) {
+              subSegments.push({ ...st, points: currentPoints });
+            }
+            currentPoints = [];
+          }
+        } else if (pieces.length === 2) {
+          const segA = pieces[0];
+          const segB = pieces[1];
+          if (currentPoints.length === 0) {
+            currentPoints = [segA[0], segA[1]];
+          } else {
+            currentPoints.push(segA[1]);
+          }
+          if (currentPoints.length >= 2) {
+            subSegments.push({ ...st, points: currentPoints });
+          }
+          currentPoints = [segB[0], segB[1]];
+        }
+      }
+
+      if (currentPoints.length >= 2) {
+        subSegments.push({ ...st, points: currentPoints });
+      }
+
+      return subSegments;
+    }
+
     function eraseAt(pageNum, x, y) {
       const pageStrokes = strokes[pageNum];
       if (!pageStrokes || pageStrokes.length === 0) return;
 
-      const baseRadius = 24;
+      const baseRadius = 26;
       let erasedAny = false;
 
       if (eraserMode === 'object') {
-        // Mode 1: مسح العنصر كاملاً (Object Eraser)
+        // Mode 1: مسح العنصر كاملًا (Object Eraser)
         strokes[pageNum] = pageStrokes.filter(st => {
           if (!st.points || st.points.length === 0) return false;
           const effectiveRadius = baseRadius + ((st.strokeWidth || 4) / 2);
@@ -2787,7 +2900,7 @@ const DocumentViewer = {
           return true;
         });
       } else {
-        // Mode 2: المسح الجزئي (Partial Eraser - يمسح الجزء الملموس ويقطع الرسمة)
+        // Mode 2: المسح الجزئي الدقيق (Partial Eraser - يمسح الجزء الملموس ويقطع الرسمة)
         const nextStrokes = [];
 
         pageStrokes.forEach(st => {
@@ -2814,30 +2927,8 @@ const DocumentViewer = {
           }
 
           erasedAny = true;
-
-          // Split points array by excluding points within effectiveRadius
-          const subSegments = [];
-          let curSeg = [];
-
-          for (let i = 0; i < st.points.length; i++) {
-            const p = st.points[i];
-            const dSq = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
-            if (dSq > effRadiusSq) {
-              curSeg.push(p);
-            } else {
-              if (curSeg.length > 0) {
-                if (curSeg.length >= 2) {
-                  subSegments.push({ ...st, points: [...curSeg] });
-                }
-                curSeg = [];
-              }
-            }
-          }
-          if (curSeg.length >= 2) {
-            subSegments.push({ ...st, points: [...curSeg] });
-          }
-
-          nextStrokes.push(...subSegments);
+          const splitPieces = splitStrokePartial(st, x, y, effectiveRadius);
+          nextStrokes.push(...splitPieces);
         });
 
         strokes[pageNum] = nextStrokes;
