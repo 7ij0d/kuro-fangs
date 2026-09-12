@@ -1345,16 +1345,14 @@ const DocumentViewer = {
     function getDockPresets() {
       try {
         const raw = localStorage.getItem('kf_vertical_dock_presets');
-        if (raw === null) {
-          const def = getDefaultDockPresets();
-          localStorage.setItem('kf_vertical_dock_presets', JSON.stringify(def));
-          return def;
+        if (raw) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list) && list.length > 0) return list;
         }
-        const list = JSON.parse(raw);
-        return Array.isArray(list) ? list : [];
-      } catch(e) {
-        return [];
-      }
+      } catch(e) {}
+      const def = getDefaultDockPresets();
+      try { localStorage.setItem('kf_vertical_dock_presets', JSON.stringify(def)); } catch(e) {}
+      return def;
     }
 
     function saveDockPresets(presets) {
@@ -1653,6 +1651,19 @@ const DocumentViewer = {
       window.setTool(tool);
     };
 
+    function ensureCanvasSize(canvas, page) {
+      if (!canvas || !page) return;
+      const w = page.offsetWidth || 800;
+      const h = page.offsetHeight || 1100;
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+      }
+    }
+
     // Canvas Touch & Drawing Engine
     function initCanvases() {
       document.querySelectorAll('.doc-page').forEach(page => {
@@ -1660,15 +1671,14 @@ const DocumentViewer = {
         const canvas = document.getElementById('canvas-' + pageNum);
         if (!canvas) return;
 
-        canvas.width = page.offsetWidth;
-        canvas.height = page.offsetHeight;
+        ensureCanvasSize(canvas, page);
 
         const ctx = canvas.getContext('2d');
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
         // Mouse Events
-        canvas.onmousedown = (e) => startDraw(e, canvas, pageNum);
+        canvas.onmousedown = (e) => startDraw(e, canvas, pageNum, page);
         canvas.onmousemove = (e) => draw(e, canvas, pageNum);
         canvas.onmouseup = () => stopDraw(pageNum);
         canvas.onmouseleave = () => stopDraw(pageNum);
@@ -1677,7 +1687,7 @@ const DocumentViewer = {
         canvas.addEventListener('touchstart', (e) => {
           if (currentTool === 'pan') return;
           e.preventDefault();
-          startDraw(e.touches[0], canvas, pageNum);
+          startDraw(e.touches[0], canvas, pageNum, page);
         }, { passive: false });
 
         canvas.addEventListener('touchmove', (e) => {
@@ -1694,8 +1704,9 @@ const DocumentViewer = {
       });
     }
 
-    function startDraw(e, canvas, pageNum) {
+    function startDraw(e, canvas, pageNum, page) {
       if (currentTool !== 'pen' && currentTool !== 'highlighter' && currentTool !== 'eraser') return;
+      if (page) ensureCanvasSize(canvas, page);
       isDrawing = true;
       const rect = canvas.getBoundingClientRect();
       startX = e.clientX - rect.left;
