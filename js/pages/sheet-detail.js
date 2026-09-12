@@ -87,8 +87,8 @@ const SheetDetailPage = {
       : '';
 
     container.innerHTML = `
-      <div class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 99999; margin: 0; padding: 0; overflow: hidden;">
-        <iframe id="page-dedicated-iframe" style="width: 100%; height: 100%; border: none; display: block;" title="${title}" sandbox="allow-scripts allow-same-origin allow-popups allow-modals"></iframe>
+      <div class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; max-height: 100dvh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 99999; margin: 0; padding: 0; overflow: hidden;">
+        <iframe id="page-dedicated-iframe" style="width: 100%; height: 100%; border: none; display: block;" title="${title}" sandbox="allow-scripts allow-same-origin allow-popups allow-modals allow-downloads" allow="fullscreen"></iframe>
       </div>
 
       <!-- Floating Discussion Trigger Button -->

@@ -50,12 +50,16 @@ const DocumentViewer = {
       --highlight-color: rgba(254, 240, 138, 0.6);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
+    html, body {
       font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.6;
+      width: 100vw;
       height: 100vh;
+      height: 100dvh;
+      min-height: 100vh;
+      max-height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -322,18 +326,18 @@ const DocumentViewer = {
     /* Right Vertical Floating Pen Dock (Matching Spec) */
     .jnotes-vertical-dock {
       position: fixed;
-      right: 16px;
+      right: 14px;
       top: 76px;
       z-index: 8000;
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(24, 25, 38, 0.94);
       backdrop-filter: blur(14px);
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 10px 8px;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
       display: flex;
       flex-direction: column;
       gap: 10px;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       align-items: center;
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
     }
@@ -346,11 +350,12 @@ const DocumentViewer = {
     }
 
     .dock-preset-btn {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      border: 2.5px solid #E2E8F0;
-      background: #FFFFFF;
+      border: 2px solid rgba(255, 255, 255, 0.16);
+      background: #1F2133;
+      color: #F8FAFC;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -358,14 +363,21 @@ const DocumentViewer = {
       font-size: 0.65rem;
       font-weight: 800;
       cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.15s ease;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
       position: relative;
+      user-select: none;
     }
 
-    .dock-preset-btn:hover, .dock-preset-btn.active {
+    .dock-preset-btn:hover {
+      transform: scale(1.1);
+      border-color: #38BDF8;
+    }
+
+    .dock-preset-btn.active {
       transform: scale(1.15);
-      border-color: #0284C7;
-      box-shadow: 0 0 10px rgba(2, 132, 199, 0.4);
+      border-color: #0284C7 !important;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.6);
+      background: #25283D;
     }
 
     .dock-preset-dot {
@@ -373,6 +385,77 @@ const DocumentViewer = {
       height: 10px;
       border-radius: 50%;
       margin-top: 1px;
+    }
+
+    /* Delete X icon badge on dock preset */
+    .dock-delete-btn {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: 16px;
+      height: 16px;
+      background: #EF4444;
+      color: #FFFFFF;
+      border-radius: 50%;
+      font-size: 0.6rem;
+      font-weight: 900;
+      line-height: 16px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 5;
+    }
+
+    .dock-preset-btn:hover .dock-delete-btn {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    @media (hover: none) {
+      .dock-delete-btn {
+        opacity: 0.85;
+        transform: scale(0.85);
+      }
+    }
+
+    /* 24-Color Palette Swatches */
+    .palette-swatch-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .palette-swatch-btn:hover {
+      transform: scale(1.15);
+      z-index: 2;
+    }
+
+    .palette-swatch-btn.active {
+      transform: scale(1.18);
+      border-color: #0284C7 !important;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.6);
+    }
+
+    .palette-swatch-btn.active::after {
+      content: '✓';
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
     }
 
     /* JNotes Popups */
@@ -565,6 +648,8 @@ const DocumentViewer = {
       flex: 1;
       display: flex;
       height: calc(100vh - 56px);
+      height: calc(100dvh - 56px);
+      max-height: calc(100dvh - 56px);
       overflow: hidden;
       position: relative;
     }
@@ -572,6 +657,7 @@ const DocumentViewer = {
     .jnotes-viewport {
       flex: 1;
       height: 100%;
+      max-height: 100%;
       overflow-y: auto;
       padding: 24px 14px 80px;
       display: flex;
@@ -863,17 +949,22 @@ const DocumentViewer = {
 
         <!-- Color Palette Picker / Swatches -->
         <div class="jnotes-color-dots" id="color-dots-container">
-          <div class="color-dot active" data-color="rgba(254, 240, 138, 0.65)" style="background: #FEF08A;" onclick="setColor('rgba(254, 240, 138, 0.65)')" title="أصفر"></div>
-          <div class="color-dot" data-color="rgba(168, 85, 247, 0.65)" style="background: #A855F7;" onclick="setColor('rgba(168, 85, 247, 0.65)')" title="أرجواني"></div>
-          <div class="color-dot" data-color="#0284C7" style="background: #0284C7;" onclick="setColor('#0284C7')" title="أزرق حبر"></div>
-          <div class="color-dot" data-color="#78350F" style="background: #78350F;" onclick="setColor('#78350F')" title="بني حبر"></div>
+          <div class="color-dot active" data-color="#0F172A" style="background: #0F172A;" onclick="setColor('#0F172A')" title="أسود"></div>
+          <div class="color-dot" data-color="#0284C7" style="background: #0284C7;" onclick="setColor('#0284C7')" title="أزرق"></div>
+          <div class="color-dot" data-color="#EF4444" style="background: #EF4444;" onclick="setColor('#EF4444')" title="أحمر"></div>
           <div class="color-dot" data-color="#16A34A" style="background: #16A34A;" onclick="setColor('#16A34A')" title="أخضر"></div>
-          <div class="color-dot" data-color="#0F172A" style="background: #0F172A;" onclick="setColor('#0F172A')" title="أسود"></div>
+          <div class="color-dot" data-color="#FEF08A" style="background: #FEF08A;" onclick="setColor('#FEF08A')" title="أصفر"></div>
+          <div class="color-dot" data-color="#A855F7" style="background: #A855F7;" onclick="setColor('#A855F7')" title="أرجواني"></div>
         </div>
+
+        <!-- Expanded Color Palette Trigger -->
+        <button class="jtool-icon-btn" id="btn-toggle-colors" onclick="toggleColorPaletteMenu(event)" title="لوحة الألوان الموسعة (24 لون + مخصص)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        </button>
       </div>
     </div>
 
-    <!-- RIGHT: Page Navigation, Index Drawer Toggle, Auto-Save Badge, Download -->
+    <!-- RIGHT: Page Navigation, Index Drawer Toggle, Auto-Save Badge, Download, Fullscreen -->
     <div class="jnotes-right-section">
       <!-- Auto Save Badge -->
       <span class="auto-save-pill" id="auto-save-badge">
@@ -902,6 +993,12 @@ const DocumentViewer = {
       <button id="btn-toggle-discussion-studio" class="jtool-btn" onclick="toggleDiscussionDrawer()" title="المناقشات والأسئلة">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
         <span>مناقشة</span>
+      </button>
+
+      <!-- Fullscreen Toggle Button -->
+      <button id="btn-toggle-fullscreen" class="jtool-btn" onclick="toggleFullscreenMode()" title="وضع ملء الشاشة">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <span id="fullscreen-btn-label">شاشة كاملة</span>
       </button>
 
       <!-- Download Button -->
@@ -938,33 +1035,37 @@ const DocumentViewer = {
         <span>➕ Add to pen-box</span>
       </button>
     </div>
+
+    <!-- POPUP 3: JNotes Expanded 24-Color Palette & HTML5 Custom Picker -->
+    <div class="jnotes-popup-card" id="popup-colors" style="width: 320px;">
+      <div class="popup-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-weight: 800; font-size: 0.85rem;">لوحة الألوان الأكاديمية (24 لون)</span>
+        <span id="current-color-preview-pill" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CBD5E1; background: #0F172A; display: inline-block;"></span>
+      </div>
+
+      <!-- 24-Color Grid -->
+      <div class="palette-grid-24" id="palette-grid-24" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 14px; direction: ltr;">
+      </div>
+
+      <!-- Divider -->
+      <div style="height: 1px; background: #E2E8F0; margin: 12px 0;"></div>
+
+      <!-- Section 2: HTML5 Custom Color Picker & Hex Input -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <label for="jnotes-color-input" style="font-size: 0.775rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <span>لون مخصص:</span>
+          <input type="color" id="jnotes-color-input" value="#0F172A" style="width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; background: transparent; padding: 0;" oninput="setCustomColor(this.value)" />
+        </label>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <input type="text" id="jnotes-hex-input" maxlength="7" value="#0F172A" style="width: 85px; font-family: monospace; font-size: 0.75rem; padding: 5px 8px; border: 1px solid #CBD5E1; border-radius: 6px; text-transform: uppercase; text-align: center; color: #0F172A; font-weight: 700;" onchange="setCustomColor(this.value)" />
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Right Vertical Floating Pen Dock (Matching Spec) -->
   <div class="jnotes-vertical-dock" id="jnotes-vertical-dock">
-    <div class="dock-preset-btn active" onclick="applyPreset('rgba(254, 240, 138, 0.65)', 12, 'highlighter')" title="0.5 قلم تظليل أصفر">
-      <span>0.5</span>
-      <div class="dock-preset-dot" style="background: #FEF08A;"></div>
-    </div>
-    <div class="dock-preset-btn" onclick="applyPreset('rgba(168, 85, 247, 0.65)', 12, 'highlighter')" title="0.5 قلم تظليل أرجواني">
-      <span>0.5</span>
-      <div class="dock-preset-dot" style="background: #A855F7;"></div>
-    </div>
-    <div class="dock-preset-btn" onclick="applyPreset('#78350F', 3, 'pen')" title="0.8 قلم بني">
-      <span>0.8</span>
-      <div class="dock-preset-dot" style="background: #78350F;"></div>
-    </div>
-    <div class="dock-preset-btn" onclick="applyPreset('#0284C7', 2.5, 'pen')" title="0.7 قلم أزرق">
-      <span>0.7</span>
-      <div class="dock-preset-dot" style="background: #0284C7;"></div>
-    </div>
-    <div class="dock-preset-btn" onclick="applyPreset('#16A34A', 3, 'pen')" title="0.8 قلم أخضر">
-      <span>0.8</span>
-      <div class="dock-preset-dot" style="background: #16A34A;"></div>
-    </div>
-    <div class="dock-preset-btn" onclick="addToPenBox()" title="إضافة القلم الحالي للمفضلة">
-      <span>➕</span>
-    </div>
+    <!-- Rendered dynamically by renderVerticalDock() -->
   </div>
 
   <!-- Sliding Overlay Page Index Drawer (Matching Spec) -->
@@ -1108,8 +1209,8 @@ const DocumentViewer = {
   <script>
     const docId = "${docId}";
     let currentTool = 'pan'; // pan, pen, highlighter, eraser, note
-    let currentColor = 'rgba(254, 240, 138, 0.65)';
-    let currentStroke = 4;
+    let currentColor = '#0F172A';
+    let currentStroke = 2.5; // 0.5mm
     let straightLineMode = false;
     let isStraightLine = false;
     let bottomDisplayMode = true;
@@ -1145,12 +1246,202 @@ const DocumentViewer = {
       }
     };
 
+    // Fullscreen Viewport Mode (Web Fullscreen API)
+    window.toggleFullscreenMode = function() {
+      const doc = (window.parent && window.parent.document) ? window.parent.document : document;
+      const rootEl = doc.documentElement;
+
+      if (!doc.fullscreenElement && !document.fullscreenElement) {
+        if (rootEl.requestFullscreen) {
+          rootEl.requestFullscreen().catch(() => {
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+          });
+        } else if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      } else {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+          });
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    };
+
+    function updateFullscreenBtn() {
+      const isFs = !!(document.fullscreenElement || (window.parent && window.parent.document.fullscreenElement));
+      const lbl = document.getElementById('fullscreen-btn-label');
+      if (lbl) lbl.textContent = isFs ? 'تصغير الشاشة' : 'شاشة كاملة';
+    }
+    document.addEventListener('fullscreenchange', updateFullscreenBtn);
+    try {
+      if (window.parent) window.parent.document.addEventListener('fullscreenchange', updateFullscreenBtn);
+    } catch(e) {}
+
+    // 24 Academic Presets Color Palette
+    const ACADEMIC_COLORS = [
+      '#0F172A', '#334155', '#64748B', '#1E3A8A', '#0284C7', '#0EA5E9',
+      '#0D9488', '#14532D', '#16A34A', '#10B981', '#84CC16', '#FEF08A',
+      '#FDE047', '#F59E0B', '#F97316', '#DC2626', '#EF4444', '#E11D48',
+      '#EC4899', '#7E22CE', '#A855F7', '#C084FC', '#78350F', '#451A03'
+    ];
+
+    function initColorPalette() {
+      const grid = document.getElementById('palette-grid-24');
+      if (!grid) return;
+      grid.innerHTML = ACADEMIC_COLORS.map(function(c) {
+        const activeCls = c.toLowerCase() === currentColor.toLowerCase() ? 'active' : '';
+        return '<div class="palette-swatch-btn ' + activeCls + '" data-color="' + c + '" style="background: ' + c + ';" onclick="setCustomColor(\'' + c + '\')" title="' + c + '"></div>';
+      }).join('');
+    }
+
+    window.toggleColorPaletteMenu = function(e) {
+      if (e) e.stopPropagation();
+      const pc = document.getElementById('popup-colors');
+      const pt = document.getElementById('popup-thickness');
+      const pm = document.getElementById('popup-markpen');
+      if (pt) pt.classList.remove('open');
+      if (pm) pm.classList.remove('open');
+      if (pc) {
+        const isOpen = pc.classList.toggle('open');
+        if (isOpen) {
+          const btn = document.getElementById('btn-toggle-colors');
+          if (btn) {
+            const r = btn.getBoundingClientRect();
+            pc.style.left = Math.max(10, Math.min(window.innerWidth - 330, r.left - 120)) + 'px';
+          }
+        }
+      }
+    };
+
+    window.setCustomColor = function(val) {
+      if (!val) return;
+      if (!val.startsWith('#') && !val.startsWith('rgb')) val = '#' + val;
+      window.setColor(val);
+      const colorPicker = document.getElementById('jnotes-color-input');
+      const hexInput = document.getElementById('jnotes-hex-input');
+      const preview = document.getElementById('current-color-preview-pill');
+      if (colorPicker && val.startsWith('#')) colorPicker.value = val;
+      if (hexInput) hexInput.value = val.toUpperCase();
+      if (preview) preview.style.background = val;
+
+      document.querySelectorAll('.palette-swatch-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-color').toLowerCase() === val.toLowerCase());
+      });
+    };
+
+    // Right Vertical Pen Dock Presets Management
+    function getDefaultDockPresets() {
+      return [
+        { id: 'p_black', tool: 'pen', color: '#0F172A', strokeWidth: 2.5, label: '0.5', name: 'قلم أسود 0.5' },
+        { id: 'p_blue', tool: 'pen', color: '#0284C7', strokeWidth: 3.5, label: '0.7', name: 'قلم أزرق 0.7' },
+        { id: 'p_red', tool: 'pen', color: '#EF4444', strokeWidth: 4.0, label: '0.8', name: 'قلم أحمر 0.8' },
+        { id: 'p_yellow_hl', tool: 'highlighter', color: '#FEF08A', strokeWidth: 16, label: '0.5', name: 'تظليل أصفر 0.5' }
+      ];
+    }
+
+    function getDockPresets() {
+      try {
+        const raw = localStorage.getItem('kf_vertical_dock_presets');
+        if (raw === null) {
+          const def = getDefaultDockPresets();
+          localStorage.setItem('kf_vertical_dock_presets', JSON.stringify(def));
+          return def;
+        }
+        const list = JSON.parse(raw);
+        return Array.isArray(list) ? list : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function saveDockPresets(presets) {
+      localStorage.setItem('kf_vertical_dock_presets', JSON.stringify(presets));
+    }
+
+    window.deleteDockPreset = function(e, id) {
+      if (e) e.stopPropagation();
+      let presets = getDockPresets().filter(p => p.id !== id);
+      saveDockPresets(presets);
+      renderVerticalDock();
+      if (window.parent && window.parent.showToast) {
+        window.parent.showToast('تم حذف القلم من القائمة الرأسية 🗑️', { type: 'info' });
+      }
+    };
+
+    window.applyDockPreset = function(id) {
+      const presets = getDockPresets();
+      const p = presets.find(item => item.id === id);
+      if (!p) return;
+
+      window.setColor(p.color);
+      currentStroke = p.strokeWidth;
+      window.setTool(p.tool);
+      window.updateLineWeight(p.label);
+
+      document.querySelectorAll('.dock-preset-btn').forEach(b => {
+        b.classList.toggle('active', b.id === 'dock-btn-' + id);
+      });
+    };
+
+    function renderVerticalDock() {
+      const dock = document.getElementById('jnotes-vertical-dock');
+      if (!dock) return;
+
+      const presets = getDockPresets();
+      let html = presets.map(function(p, idx) {
+        const activeCls = idx === 0 ? 'active' : '';
+        const titleText = p.name || (p.label + 'mm ' + p.tool);
+        return '<div class="dock-preset-btn ' + activeCls + '" id="dock-btn-' + p.id + '" onclick="applyDockPreset(\'' + p.id + '\')" title="' + titleText + '">'
+          + '<span class="dock-delete-btn" onclick="deleteDockPreset(event, \'' + p.id + '\')" title="حذف القلم">✕</span>'
+          + '<span>' + p.label + '</span>'
+          + '<div class="dock-preset-dot" style="background: ' + p.color + ';"></div>'
+          + '</div>';
+      }).join('');
+
+      html += '<div class="dock-preset-btn" onclick="addToPenBox()" title="إضافة القلم الحالي للقائمة المفضلة">'
+        + '<span style="font-size: 0.85rem; color: #38BDF8;">➕</span>'
+        + '</div>';
+
+      dock.innerHTML = html;
+    }
+
+    window.addToPenBox = function() {
+      let presets = getDockPresets();
+      const mmVal = (currentStroke / 5).toFixed(1);
+      const existing = presets.find(p => p.tool === currentTool && p.color.toLowerCase() === currentColor.toLowerCase() && Math.abs(p.strokeWidth - currentStroke) < 0.5);
+      if (!existing) {
+        presets.push({
+          id: 'p_' + Date.now(),
+          tool: currentTool,
+          color: currentColor,
+          strokeWidth: currentStroke,
+          label: mmVal,
+          name: (currentTool === 'highlighter' ? 'تظليل' : 'قلم') + ' ' + mmVal
+        });
+        saveDockPresets(presets);
+        renderVerticalDock();
+        if (window.parent && window.parent.showToast) {
+          window.parent.showToast('تمت إضافة القلم لقائمة الأقلام المفضلة على اليمين! 🖊️', { type: 'success' });
+        }
+      } else {
+        if (window.parent && window.parent.showToast) {
+          window.parent.showToast('هذا القلم مضاف مسبقاً في القائمة! ✓', { type: 'info' });
+        }
+      }
+      document.getElementById('popup-markpen')?.classList.remove('open');
+    };
+
     // Popups Controls
     window.toggleThicknessMenu = function(e) {
       if (e) e.stopPropagation();
       const p = document.getElementById('popup-thickness');
       const pm = document.getElementById('popup-markpen');
+      const pc = document.getElementById('popup-colors');
       if (pm) pm.classList.remove('open');
+      if (pc) pc.classList.remove('open');
       if (p) {
         const isOpen = p.classList.toggle('open');
         if (isOpen) {
@@ -1168,7 +1459,9 @@ const DocumentViewer = {
       window.setTool('highlighter');
       const pm = document.getElementById('popup-markpen');
       const pt = document.getElementById('popup-thickness');
+      const pc = document.getElementById('popup-colors');
       if (pt) pt.classList.remove('open');
+      if (pc) pc.classList.remove('open');
       if (pm) {
         const isOpen = pm.classList.toggle('open');
         if (isOpen) {
@@ -1185,8 +1478,10 @@ const DocumentViewer = {
       currentStroke = parseFloat(val) * 5; // 0.1mm (0.5px) to 3.0mm (15px)
       const text = document.getElementById('slider-val-text');
       const labelBtn = document.getElementById('stroke-label-btn');
+      const slider = document.getElementById('line-weight-slider');
       if (text) text.textContent = val + 'mm';
       if (labelBtn) labelBtn.textContent = val + 'mm';
+      if (slider) slider.value = val;
     };
 
     window.toggleStraightLineSetting = function() {
@@ -1204,27 +1499,6 @@ const DocumentViewer = {
       if (sw) sw.classList.toggle('on', bottomDisplayMode);
     };
 
-    window.addToPenBox = function() {
-      const dock = document.getElementById('jnotes-vertical-dock');
-      if (!dock) return;
-
-      const newBtn = document.createElement('div');
-      newBtn.className = 'dock-preset-btn';
-      const mmVal = (currentStroke / 5).toFixed(1);
-      newBtn.title = mmVal + 'mm قلم مخصص';
-      newBtn.onclick = () => window.applyPreset(currentColor, currentStroke, currentTool);
-      newBtn.innerHTML = \`
-        <span>\${mmVal}</span>
-        <div class="dock-preset-dot" style="background: \${currentColor};"></div>
-      \`;
-
-      dock.insertBefore(newBtn, dock.lastElementChild);
-      document.getElementById('popup-markpen')?.classList.remove('open');
-      if (window.parent && window.parent.showToast) {
-        window.parent.showToast('تمت إضافة القلم لقائمة الأقلام المفضلة على اليمين! 🖊️', { type: 'success' });
-      }
-    };
-
     // Close popups on click outside
     document.addEventListener('click', (e) => {
       if (!e.target.closest('#popup-thickness') && !e.target.closest('#tool-thickness')) {
@@ -1232,6 +1506,9 @@ const DocumentViewer = {
       }
       if (!e.target.closest('#popup-markpen') && !e.target.closest('#tool-highlighter')) {
         document.getElementById('popup-markpen')?.classList.remove('open');
+      }
+      if (!e.target.closest('#popup-colors') && !e.target.closest('#btn-toggle-colors')) {
+        document.getElementById('popup-colors')?.classList.remove('open');
       }
     });
 
@@ -1322,9 +1599,30 @@ const DocumentViewer = {
 
     window.setTool = function(tool) {
       currentTool = tool;
+
+      if (tool === 'pen') {
+        // Pen MUST default to freehand smooth drawing without ruler snap!
+        isStraightLine = false;
+        straightLineMode = false;
+        const btnStraight = document.getElementById('tool-straight-toggle');
+        if (btnStraight) btnStraight.classList.remove('active');
+        const sw = document.getElementById('toggle-straight-line');
+        if (sw) sw.classList.remove('on');
+
+        if (currentStroke > 6) {
+          window.updateLineWeight('0.5'); // 2.5px
+        }
+      } else if (tool === 'highlighter') {
+        if (currentStroke < 8) {
+          window.updateLineWeight('1.6'); // 16px
+        }
+      }
+
       document.querySelectorAll('.jtool-btn').forEach(b => {
         if (b.id === 'tool-' + tool) b.classList.add('active');
-        else if (b.id && b.id.startsWith('tool-') && b.id !== 'tool-straight-toggle') b.classList.remove('active');
+        else if (b.id && b.id.startsWith('tool-') && b.id !== 'tool-straight-toggle' && b.id !== 'btn-toggle-fullscreen' && b.id !== 'btn-toggle-colors') {
+          b.classList.remove('active');
+        }
       });
 
       document.querySelectorAll('.canvas-overlay').forEach(c => {
@@ -1336,8 +1634,17 @@ const DocumentViewer = {
       currentColor = color;
       document.documentElement.style.setProperty('--highlight-color', color);
       document.querySelectorAll('.color-dot').forEach(d => {
-        d.classList.toggle('active', d.getAttribute('data-color') === color);
+        d.classList.toggle('active', d.getAttribute('data-color').toLowerCase() === color.toLowerCase());
       });
+      document.querySelectorAll('.palette-swatch-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-color').toLowerCase() === color.toLowerCase());
+      });
+      const preview = document.getElementById('current-color-preview-pill');
+      if (preview) preview.style.background = color;
+      const hexInput = document.getElementById('jnotes-hex-input');
+      if (hexInput && color.startsWith('#')) hexInput.value = color.toUpperCase();
+      const colorPicker = document.getElementById('jnotes-color-input');
+      if (colorPicker && color.startsWith('#')) colorPicker.value = color;
     };
 
     window.applyPreset = function(color, strokeWidth, tool) {
@@ -1399,12 +1706,17 @@ const DocumentViewer = {
       if (currentTool === 'eraser') {
         eraseAt(pageNum, startX, startY);
       } else {
+        const isHl = currentTool === 'highlighter';
+        const strokeW = isHl 
+          ? Math.max(14, currentStroke) 
+          : Math.min(6, Math.max(1.5, currentStroke));
+
         strokes[pageNum].push({
           tool: currentTool,
           color: currentColor,
-          strokeWidth: currentTool === 'highlighter' ? currentStroke * 2.5 : currentStroke,
-          isStraight: straightLineMode || isStraightLine,
-          isStraightLine: straightLineMode || isStraightLine,
+          strokeWidth: strokeW,
+          isStraight: isStraightLine,
+          isStraightLine: isStraightLine,
           bottomDisplay: bottomDisplayMode,
           points: [{ x: startX, y: startY }]
         });
@@ -1477,13 +1789,19 @@ const DocumentViewer = {
         }
 
         if (st.tool === 'highlighter') {
-          ctx.globalCompositeOperation = st.bottomDisplay ? 'multiply' : 'source-over';
+          ctx.globalCompositeOperation = st.bottomDisplay !== false ? 'multiply' : 'source-over';
+          ctx.globalAlpha = 0.55;
+          ctx.lineCap = 'square';
+          ctx.lineJoin = 'round';
           ctx.strokeStyle = st.color;
-          ctx.lineWidth = st.strokeWidth;
+          ctx.lineWidth = st.strokeWidth || 16;
         } else {
           ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = 1.0;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
           ctx.strokeStyle = st.color;
-          ctx.lineWidth = st.strokeWidth;
+          ctx.lineWidth = st.strokeWidth || 2.5;
         }
 
         ctx.stroke();
@@ -1584,11 +1902,15 @@ const DocumentViewer = {
 
     window.addEventListener('DOMContentLoaded', () => {
       initCanvases();
+      initColorPalette();
+      renderVerticalDock();
       loadSavedAnnotations();
     });
     window.addEventListener('resize', initCanvases);
     setTimeout(() => {
       initCanvases();
+      initColorPalette();
+      renderVerticalDock();
       loadSavedAnnotations();
     }, 200);
   </script>
