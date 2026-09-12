@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   await window.DATA.init();
 
   // 2. Initialize Subject Modal & In-App Document Viewer
-  if (window.SubjectModal) {
+  if (window.SubjectModal && typeof window.SubjectModal.init === 'function') {
     window.SubjectModal.init();
   }
-  if (window.DocumentViewer) {
+  if (window.DocumentViewer && typeof window.DocumentViewer.init === 'function') {
     window.DocumentViewer.init();
   }
 

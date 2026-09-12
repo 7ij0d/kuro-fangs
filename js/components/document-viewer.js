@@ -9,6 +9,10 @@ const DocumentViewer = {
   currentDoc: null,
   isOpen: false,
 
+  init() {
+    // Document viewer initialization
+  },
+
   download(doc) {
     window.STORE.addPoints(10);
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
