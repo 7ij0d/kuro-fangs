@@ -111,7 +111,7 @@ class DataService {
       this.alerts = this.getDefaultAlerts();
     }
     if (!this.sheets || this.sheets.length === 0) {
-      this.sheets = [];
+      this.sheets = this.getDefaultSheets();
     }
 
     // Merge custom admin-uploaded sheets from localStorage if present
