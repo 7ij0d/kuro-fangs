@@ -131,7 +131,7 @@ const SheetDetailPage = {
       </div>
 
       <!-- Backdrop for drawer -->
-      <div id="discussion-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 100001; display: none; opacity: 0; transition: opacity 0.25s ease;"></div>
+      <div id="discussion-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 100001; display: none; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;"></div>
     `;
 
     // Load iframe content

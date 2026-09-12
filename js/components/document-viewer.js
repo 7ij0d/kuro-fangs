@@ -78,7 +78,9 @@ const DocumentViewer = {
       justify-content: space-between;
       padding: 0 14px;
       gap: 10px;
-      z-index: 9500;
+      z-index: 99999;
+      position: relative;
+      pointer-events: auto !important;
       flex-shrink: 0;
       user-select: none;
       overflow-x: auto;
