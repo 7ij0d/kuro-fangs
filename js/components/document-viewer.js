@@ -107,7 +107,8 @@ const DocumentViewer = {
       border-radius: 8px;
       font-size: 0.775rem;
       font-weight: 700;
-      cursor: pointer;
+      cursor: pointer !important;
+      pointer-events: auto !important;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -130,7 +131,7 @@ const DocumentViewer = {
     .jnotes-badge {
       background: rgba(2, 132, 199, 0.2);
       color: #38BDF8;
-      border: 1px solid rgba(2, 132, 199, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       padding: 2px 8px;
       border-radius: 6px;
       font-size: 0.72rem;
@@ -153,6 +154,7 @@ const DocumentViewer = {
       align-items: center;
       justify-content: center;
       flex: 1;
+      pointer-events: auto !important;
     }
 
     .jnotes-tool-segmented {
@@ -163,6 +165,7 @@ const DocumentViewer = {
       border-radius: 12px;
       padding: 3px 6px;
       gap: 3px;
+      pointer-events: auto !important;
     }
 
     .jtool-icon-btn {
@@ -172,7 +175,8 @@ const DocumentViewer = {
       width: 30px;
       height: 30px;
       border-radius: 8px;
-      cursor: pointer;
+      cursor: pointer !important;
+      pointer-events: auto !important;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -199,7 +203,8 @@ const DocumentViewer = {
       border-radius: 8px;
       font-size: 0.775rem;
       font-weight: 700;
-      cursor: pointer;
+      cursor: pointer !important;
+      pointer-events: auto !important;
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -438,7 +443,8 @@ const DocumentViewer = {
       height: 34px;
       border-radius: 50%;
       border: 2px solid transparent;
-      cursor: pointer;
+      cursor: pointer !important;
+      pointer-events: auto !important;
       transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
       position: relative;
       display: flex;
@@ -575,7 +581,8 @@ const DocumentViewer = {
       height: 18px;
       border-radius: 50%;
       border: 2px solid transparent;
-      cursor: pointer;
+      cursor: pointer !important;
+      pointer-events: auto !important;
       transition: transform 0.15s ease;
     }
 

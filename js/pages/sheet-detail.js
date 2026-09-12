@@ -131,7 +131,7 @@ const SheetDetailPage = {
       </div>
 
       <!-- Backdrop for drawer -->
-      <div id="discussion-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 100001; display: none; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;"></div>
+      <div id="discussion-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 100001; display: none; opacity: 0; pointer-events: none !important; transition: opacity 0.25s ease;"></div>
     `;
 
     // Load iframe content
@@ -149,16 +149,24 @@ const SheetDetailPage = {
 
     function openDrawer() {
       if (!drawerEl || !backdropEl) return;
+      drawerEl.classList.add('open');
       drawerEl.style.transform = 'translateX(0)';
       backdropEl.style.display = 'block';
+      backdropEl.style.pointerEvents = 'auto';
       setTimeout(() => { backdropEl.style.opacity = '1'; }, 10);
     }
 
     function closeDrawer() {
       if (!drawerEl || !backdropEl) return;
+      drawerEl.classList.remove('open');
       drawerEl.style.transform = isAr ? 'translateX(-100%)' : 'translateX(100%)';
       backdropEl.style.opacity = '0';
-      setTimeout(() => { backdropEl.style.display = 'none'; }, 260);
+      backdropEl.style.pointerEvents = 'none';
+      setTimeout(() => {
+        if (!drawerEl.classList.contains('open')) {
+          backdropEl.style.display = 'none';
+        }
+      }, 260);
     }
 
     if (btnToggle) btnToggle.addEventListener('click', openDrawer);
