@@ -67,6 +67,7 @@ const DocumentViewer = {
     const doctor = doc.doctor_name || 'Dr. Hala Alhawij';
     const university = doc.university || 'University of Tripoli - School of Dentistry';
     const year = doc.year || '2025-2026';
+    const totalPages = Math.max(1, parseInt(doc.pages, 10) || 16);
 
     return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -1344,7 +1345,7 @@ const DocumentViewer = {
         <button class="page-nav-arrow" onclick="prevPage()" title="الصفحة السابقة">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
-        <span id="page-counter-num">1 / 16</span>
+        <span id="page-counter-num">1 / ${totalPages}</span>
         <button class="page-nav-arrow" onclick="nextPage()" title="الصفحة التالية">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
@@ -1558,16 +1559,16 @@ const DocumentViewer = {
     <div class="sidebar-header">
       <div style="display: flex; align-items: center; gap: 8px;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M14 9h4"/><path d="M14 15h4"/></svg>
-        <span>فهرس الشرائح (16)</span>
+        <span>${isAr ? `فهرس الشرائح (${totalPages})` : `Slide Index (${totalPages})`}</span>
       </div>
       <button class="jtool-icon-btn" onclick="closeSidebar()" title="إغلاق الفهرس" style="color: #94A3B8;">✕</button>
     </div>
     <div class="sidebar-thumbnails-list">
-      ${Array.from({length: 16}, (_, i) => `
+      ${Array.from({length: totalPages}, (_, i) => `
         <div class="thumb-card ${i === 0 ? 'active' : ''}" onclick="selectPageAndCloseDrawer(${i + 1})">
           <div class="thumb-num">${i + 1}</div>
           <div class="thumb-info">
-            <h5>صفحة ${i + 1}</h5>
+            <h5>${isAr ? `صفحة ${i + 1}` : `Page ${i + 1}`}</h5>
             <p>Dental Lecture Slide ${i + 1}</p>
           </div>
         </div>
@@ -1612,12 +1613,13 @@ const DocumentViewer = {
         </div>
 
         <div class="page-footer">
-          <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
-          <span>Page 1 of 16</span>
+          <span>${doctor || 'Dr. Hala Alhawij'} | Fixed Prosthodontics II</span>
+          <span>Page 1 of ${totalPages}</span>
         </div>
       </div>
 
-      <!-- PAGE 2: EXACT CONTENT FROM SCREENSHOTS 1 & 2 -->
+      <!-- PAGE 2 (Rendered only if totalPages >= 2) -->
+      ${totalPages >= 2 ? `
       <div class="doc-page" id="page-2" data-page="2">
         <canvas class="canvas-overlay" id="canvas-2"></canvas>
         <div class="page-header">
@@ -1650,13 +1652,14 @@ const DocumentViewer = {
         <p>Diamond instruments consist of three parts: a metal blank, the powdered diamond abrasive, and a metallic bonding material that holds the diamond powder onto the blank.</p>
 
         <div class="page-footer">
-          <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
-          <span>Page 2 of 16</span>
+          <span>${doctor || 'Dr. Hala Alhawij'} | Fixed Prosthodontics II</span>
+          <span>Page 2 of ${totalPages}</span>
         </div>
       </div>
+      ` : ''}
 
-      <!-- PAGES 3 TO 16 -->
-      ${Array.from({length: 14}, (_, idx) => {
+      <!-- PAGES 3 TO ${totalPages} (Rendered dynamically based on sheet page count) -->
+      ${totalPages >= 3 ? Array.from({length: totalPages - 2}, (_, idx) => {
         const pNum = idx + 3;
         return `
           <div class="doc-page" id="page-${pNum}" data-page="${pNum}">
@@ -1667,7 +1670,7 @@ const DocumentViewer = {
             </div>
 
             <h3 class="section-title">SECTION ${pNum - 1}: CLINICAL PROTOCOLS & CORE PRINCIPLES</h3>
-            <p style="margin-bottom: 14px;">Detailed clinical procedures, tissue protection guidelines, and restorative margin management protocols established by Dr. Hala Alhawij for Year 3 Dental Students.</p>
+            <p style="margin-bottom: 14px;">Detailed clinical procedures, tissue protection guidelines, and restorative margin management protocols established by ${doctor || 'Dr. Hala Alhawij'} for Year 3 Dental Students.</p>
 
             <ul class="bullet-list">
               <li>Pulp vitality maintenance and dentinal tubule sealing.</li>
@@ -1680,12 +1683,12 @@ const DocumentViewer = {
             </div>
 
             <div class="page-footer">
-              <span>Dr. Hala Alhawij | Fixed Prosthodontics II</span>
-              <span>Page ${pNum} of 16</span>
+              <span>${doctor || 'Dr. Hala Alhawij'} | Fixed Prosthodontics II</span>
+              <span>Page ${pNum} of ${totalPages}</span>
             </div>
           </div>
         `;
-      }).join('')}
+      }).join('') : ''}
       </div> <!-- /#jnotes-pages-wrapper -->
     </div>
   </div>
@@ -2361,7 +2364,7 @@ const DocumentViewer = {
 
     // Page Navigation & Thumbnail Drawer Controls
     let currentPage = 1;
-    const totalPages = 16;
+    const totalPages = ${totalPages};
 
     window.prevPage = function() {
       if (currentPage > 1) {
@@ -2571,6 +2574,8 @@ const DocumentViewer = {
         if (!canvas) return;
 
         ensureCanvasSize(canvas, page);
+        if (canvas._studioAttached) return;
+        canvas._studioAttached = true;
 
         const ctx = canvas.getContext('2d');
         ctx.lineCap = 'round';
@@ -3128,7 +3133,18 @@ const DocumentViewer = {
       initEraserMode();
       loadSavedAnnotations();
     });
-    window.addEventListener('resize', initCanvases);
+    if (window._studioResizeHandler) {
+      window.removeEventListener('resize', window._studioResizeHandler);
+    }
+    window._studioResizeHandler = () => {
+      document.querySelectorAll('.doc-page').forEach(page => {
+        const pageNum = page.getAttribute('data-page');
+        const canvas = document.getElementById('canvas-' + pageNum);
+        if (canvas) ensureCanvasSize(canvas, page);
+      });
+    };
+    window.addEventListener('resize', window._studioResizeHandler);
+
     setTimeout(() => {
       initCanvases();
       initColorPalette();
@@ -3146,6 +3162,18 @@ const DocumentViewer = {
   renderStudio(container, doc, isAr) {
     if (!container) return;
     this.currentDoc = doc || this.currentDoc || {};
+
+    // Clean up previous resize handler and lingering eraser cursor
+    if (window._studioResizeHandler) {
+      window.removeEventListener('resize', window._studioResizeHandler);
+      window._studioResizeHandler = null;
+    }
+    const oldCursor = document.getElementById('jnotes-eraser-cursor');
+    if (oldCursor) oldCursor.remove();
+
+    // Wipe previous container nodes completely (strictly prevents duplicated pages)
+    container.innerHTML = '';
+
     const fullHTML = this.generateDocHTML(this.currentDoc, isAr);
 
     // Ensure dedicated JNotes styles are injected once in head

@@ -3,6 +3,22 @@
  * Dark Sidebar (#1E1E2D), Multi-Language (EN/AR), Light/Dark Theme & Routing
  */
 
+// Global Lucide Icons debouncer: batches multiple rapid icon creations to one animation frame
+(function setupLucideDebouncer() {
+  if (window.lucide && typeof window.lucide.createIcons === 'function' && !window.lucide._debounced) {
+    const origCreateIcons = window.lucide.createIcons.bind(window.lucide);
+    let lucideRafId = null;
+    window.lucide.createIcons = function(options) {
+      if (lucideRafId) cancelAnimationFrame(lucideRafId);
+      lucideRafId = requestAnimationFrame(() => {
+        origCreateIcons(options);
+        lucideRafId = null;
+      });
+    };
+    window.lucide._debounced = true;
+  }
+})();
+
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. Initialize Curriculum Data
   await window.DATA.init();

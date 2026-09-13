@@ -82,6 +82,21 @@ class Router {
       backdrop?.classList.remove('open');
     }
 
+    // Clean up lingering backdrops, modals, or fixed overlays from previous views
+    const backdropsToClean = [
+      '#admin-confirm-backdrop',
+      '#admin-edit-modal-backdrop',
+      '#admin-publish-overlay',
+      '#auth-modal-backdrop',
+      '#subject-modal-backdrop',
+      '#drawer-backdrop',
+      '#jnotes-eraser-cursor'
+    ];
+    backdropsToClean.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => el.remove());
+    });
+    document.body.style.overflow = '';
+
     // Toggle studio fullscreen mode for sheet-detail routes
     const isStudioRoute = path === '/sheet-detail' || path.startsWith('/sheet-detail') || path.startsWith('/sheet/');
     if (isStudioRoute) {

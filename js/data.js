@@ -44,20 +44,12 @@ class DataService {
         subjectsRes,
         sheetsRes,
         alertsRes,
-        doctorsRes,
-        questionsRes,
-        flashcardsRes,
-        examsRes,
-        reqRes
+        doctorsRes
       ] = await Promise.allSettled([
         fetch('data/subjects.json').then(r => r.json()),
         fetch('data/sheets.json').then(r => r.json()),
         fetch('data/alerts.json').then(r => r.json()),
-        fetch('data/doctors.json').then(r => r.json()),
-        fetch('data/questions.json').then(r => r.json()),
-        fetch('data/flashcards.json').then(r => r.json()),
-        fetch('data/previous_exams.json').then(r => r.json()),
-        fetch('data/requirements.json').then(r => r.json())
+        fetch('data/doctors.json').then(r => r.json())
       ]);
 
       if (subjectsRes.status === 'fulfilled' && subjectsRes.value?.subjects) {
@@ -72,20 +64,11 @@ class DataService {
       if (doctorsRes.status === 'fulfilled' && doctorsRes.value?.doctors) {
         this.doctors = doctorsRes.value.doctors;
       }
-      if (questionsRes.status === 'fulfilled' && questionsRes.value?.questions) {
-        this.questions = questionsRes.value.questions;
-      }
-      if (flashcardsRes.status === 'fulfilled' && flashcardsRes.value?.flashcards) {
-        this.flashcards = flashcardsRes.value.flashcards;
-      }
-      if (examsRes.status === 'fulfilled' && examsRes.value?.previous_exams) {
-        this.previousExams = examsRes.value.previous_exams;
-      }
-      if (reqRes.status === 'fulfilled' && reqRes.value?.requirements) {
-        this.requirements = reqRes.value.requirements;
-      }
+
+      // Defer non-critical datasets in non-blocking background task
+      this.loadDeferredData();
     } catch (err) {
-      console.warn('Could not load all JSON files via fetch, using fallback data:', err);
+      console.warn('Could not load core JSON files via fetch, using fallback data:', err);
     }
 
     const defaultSubjects = this.getDefaultSubjects();
@@ -344,14 +327,72 @@ class DataService {
     return (this.alerts || []).filter(a => !deleted.includes(a.id));
   }
 
+  async loadDeferredData() {
+    if (this._deferredLoading || this._deferredLoaded) return;
+    this._deferredLoading = true;
+    try {
+      const [
+        questionsRes,
+        flashcardsRes,
+        examsRes,
+        reqRes
+      ] = await Promise.allSettled([
+        fetch('data/questions.json').then(r => r.json()),
+        fetch('data/flashcards.json').then(r => r.json()),
+        fetch('data/previous_exams.json').then(r => r.json()),
+        fetch('data/requirements.json').then(r => r.json())
+      ]);
+
+      if (questionsRes.status === 'fulfilled' && questionsRes.value?.questions) {
+        this.questions = questionsRes.value.questions;
+      }
+      if (flashcardsRes.status === 'fulfilled' && flashcardsRes.value?.flashcards) {
+        this.flashcards = flashcardsRes.value.flashcards;
+      }
+      if (examsRes.status === 'fulfilled' && examsRes.value?.previous_exams) {
+        this.previousExams = examsRes.value.previous_exams;
+      }
+      if (reqRes.status === 'fulfilled' && reqRes.value?.requirements) {
+        this.requirements = reqRes.value.requirements;
+      }
+      this._deferredLoaded = true;
+    } catch (err) {
+      console.warn('Deferred datasets background fetch notice:', err);
+    } finally {
+      this._deferredLoading = false;
+    }
+  }
+
   getQuestionsBySubject(subjectId) {
-    if (!subjectId) return this.questions;
-    return this.questions.filter(q => q.subject_id === subjectId);
+    if (!this._deferredLoaded && !this._deferredLoading) {
+      this.loadDeferredData();
+    }
+    if (!subjectId) return this.questions || [];
+    return (this.questions || []).filter(q => q.subject_id === subjectId);
   }
 
   getFlashcards(subjectId) {
-    if (!subjectId) return this.flashcards;
-    return this.flashcards.filter(f => f.subject_id === subjectId);
+    if (!this._deferredLoaded && !this._deferredLoading) {
+      this.loadDeferredData();
+    }
+    if (!subjectId) return this.flashcards || [];
+    return (this.flashcards || []).filter(f => f.subject_id === subjectId);
+  }
+
+  getPreviousExams(subjectId) {
+    if (!this._deferredLoaded && !this._deferredLoading) {
+      this.loadDeferredData();
+    }
+    if (!subjectId) return this.previousExams || [];
+    return (this.previousExams || []).filter(e => e.subject_id === subjectId);
+  }
+
+  getRequirements(subjectId) {
+    if (!this._deferredLoaded && !this._deferredLoading) {
+      this.loadDeferredData();
+    }
+    if (!subjectId) return this.requirements || [];
+    return (this.requirements || []).filter(r => r.subject_id === subjectId);
   }
 
   /**

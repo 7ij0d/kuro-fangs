@@ -205,6 +205,9 @@ window.AdminPage = (function () {
               : `Are you sure you want to permanently delete <strong>"${sheetTitle}"</strong>?`}
           </p>
           <div id="dc-input-container" style="display: none; margin-bottom: 16px;">
+            <p style="font-size: 0.8rem; color: #EF4444; margin-bottom: 8px; font-weight: 700;">
+              ${isAr ? 'للتأكيد النهائي، اكتب كلمة "حذف" في المربع أدناه:' : 'To permanently delete, type "delete" below:'}
+            </p>
             <input type="text" id="dc-confirm-input" class="auth-input" placeholder="${isAr ? "اكتب 'حذف' للتأكيد النهائي" : "Type 'delete' to confirm"}" style="text-align: center;" />
           </div>
           <div style="display: flex; gap: 10px; justify-content: center;">
@@ -244,16 +247,32 @@ window.AdminPage = (function () {
       }
     });
 
-    btnConfirm?.addEventListener('click', () => {
+    btnConfirm?.addEventListener('click', async () => {
       if (stage === 1) {
         stage = 2;
         inputContainer.style.display = 'block';
         btnConfirm.disabled = true;
         btnConfirm.style.opacity = '0.5';
         document.getElementById('dc-desc').style.display = 'none';
+        const btnText = document.getElementById('dc-btn-text');
+        if (btnText) btnText.textContent = isAr ? 'حذف نهائي' : 'Delete Permanently';
+        confirmInput?.focus();
       } else {
-        document.getElementById('admin-confirm-backdrop')?.remove();
-        if (typeof onFinalConfirm === 'function') onFinalConfirm();
+        btnConfirm.disabled = true;
+        if (btnCancel) btnCancel.disabled = true;
+        btnConfirm.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <div style="width: 16px; height: 16px; border: 2px solid #FFF; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <span>${isAr ? 'جاري الحذف...' : 'Deleting...'}</span>
+          </div>
+        `;
+        try {
+          if (typeof onFinalConfirm === 'function') {
+            await onFinalConfirm();
+          }
+        } finally {
+          document.getElementById('admin-confirm-backdrop')?.remove();
+        }
       }
     });
   }
@@ -499,6 +518,11 @@ window.AdminPage = (function () {
     const students = getRegisteredStudents();
 
     container.innerHTML = `
+      <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+      </style>
       <div class="admin-dashboard-wrapper" style="padding-bottom: 60px;">
         
         <!-- Header -->
@@ -784,7 +808,7 @@ window.AdminPage = (function () {
             ` : sheets.map(s => {
               const pdfIcon = s.pdf_source === 'local' ? '📄' : (s.pdf_source === 'url' ? '🔗' : (s.pdf_url ? '🔗' : '⚠️'));
               return `
-              <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; border-radius: 12px; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+              <div class="sheet-item-row" data-sheet-id="${s.id}" style="display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; border-radius: 12px; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top center;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
                   <div>
                     <div style="margin-bottom: 6px;">
@@ -1074,10 +1098,42 @@ window.AdminPage = (function () {
       e.preventDefault();
       const submitBtn = document.getElementById('btn-publish-sheet');
       const origBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+      
+      // Inline button spinner
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span>⏳ ${isAr ? 'جاري رفع الملف والمزامنة السحابية...' : 'Uploading & Syncing Cloud...'}</span>`;
+        submitBtn.innerHTML = `
+          <div style="display: inline-flex; align-items: center; gap: 8px;">
+            <div style="width: 16px; height: 16px; border: 2px solid #FFF; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <span>${isAr ? 'جاري رفع الملف والمزامنة...' : 'Uploading & Syncing...'}</span>
+          </div>
+        `;
       }
+
+      // Social-Media style frosted-glass publishing overlay
+      let pubOverlay = document.getElementById('admin-publish-overlay');
+      if (pubOverlay) pubOverlay.remove();
+
+      const overlayMarkup = `
+        <div id="admin-publish-overlay" style="position: fixed; inset: 0; z-index: 100000; background: rgba(10, 11, 18, 0.84); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; animation: fadeInOverlay 0.25s ease;">
+          <div style="background: var(--bg-card, #181926); border: 1.5px solid rgba(56, 189, 248, 0.35); box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 35px rgba(2, 132, 199, 0.25); border-radius: 22px; padding: 36px 40px; text-align: center; max-width: 440px; width: 90%; animation: docZoomIn 0.25s ease;">
+            
+            <div id="admin-publish-anim-box" style="width: 72px; height: 72px; margin: 0 auto 18px; border-radius: 50%; background: rgba(2, 132, 199, 0.12); display: flex; align-items: center; justify-content: center; position: relative;">
+              <div id="admin-publish-spinner" style="width: 44px; height: 44px; border: 3.5px solid rgba(56, 189, 248, 0.2); border-top-color: #38BDF8; border-radius: 50%; animation: spin 0.85s linear infinite;"></div>
+              <div id="admin-publish-check" style="display: none; font-size: 2.4rem; line-height: 1; animation: bounceIn 0.35s ease;">✨</div>
+            </div>
+
+            <h3 id="admin-publish-title" style="font-size: 1.15rem; font-weight: 800; color: #F8FAFC; margin-bottom: 8px;">
+              ${isAr ? 'جاري نشر الشيت ومزامنته سحابياً لجميع الطلبة... 🚀' : 'Publishing Sheet & Syncing Cloud... 🚀'}
+            </h3>
+            
+            <p id="admin-publish-desc" style="font-size: 0.825rem; color: #94A3B8; line-height: 1.5; margin: 0;">
+              ${isAr ? 'يتم رفع ملف الـ PDF وتحديث قاعدة البيانات السحابية المركزية...' : 'Uploading PDF file and updating central academic database...'}
+            </p>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', overlayMarkup);
 
       try {
         const singleTitle = document.getElementById('add-sheet-title')?.value.trim();
@@ -1089,6 +1145,7 @@ window.AdminPage = (function () {
         const file = fileInput?.files?.length > 0 ? fileInput.files[0] : null;
 
         if (file && file.size > 15 * 1024 * 1024) {
+          document.getElementById('admin-publish-overlay')?.remove();
           if (typeof window.showToast === 'function') {
             window.showToast(isAr ? 'الملف كبير جداً (الحد الأقصى 15MB)' : 'File too large (Max 15MB)', { type: 'error' });
           }
@@ -1177,13 +1234,40 @@ window.AdminPage = (function () {
           localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(cached));
         } catch (e) {}
 
+        // Social Media Success Animation State
+        const spinnerEl = document.getElementById('admin-publish-spinner');
+        const checkEl = document.getElementById('admin-publish-check');
+        const animBox = document.getElementById('admin-publish-anim-box');
+        const titleEl = document.getElementById('admin-publish-title');
+        const descEl = document.getElementById('admin-publish-desc');
+        
+        if (spinnerEl) spinnerEl.style.display = 'none';
+        if (checkEl) {
+          checkEl.style.display = 'block';
+          checkEl.textContent = '✅';
+        }
+        if (animBox) {
+          animBox.style.background = 'rgba(16, 185, 129, 0.15)';
+        }
+        if (titleEl) {
+          titleEl.textContent = isAr ? 'تم النشر والمزامنة السحابية بنجاح! 🎉' : 'Published and Synced to Cloud! 🎉';
+          titleEl.style.color = '#34D399';
+        }
+        if (descEl) {
+          descEl.textContent = isAr ? 'أصبح الشيت متاحاً للتحميل والدراسة لجميع الطلبة الآن.' : 'Sheet is now available for all students to study.';
+        }
+
         if (typeof window.showToast === 'function') {
           window.showToast(isAr ? 'تم نشر الملزمة بنجاح ومزامنتها سحابياً لجميع الأجهزة والطلبة! 🚀☁️' : 'Sheet published and synced to cloud for all students! 🚀☁️', { type: 'success' });
         }
 
+        await new Promise(r => setTimeout(r, 1200));
+        document.getElementById('admin-publish-overlay')?.remove();
+
         render(container);
       } catch (err) {
         console.error('Error publishing sheet:', err);
+        document.getElementById('admin-publish-overlay')?.remove();
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = origBtnHTML;
@@ -1228,6 +1312,24 @@ window.AdminPage = (function () {
         const title = btn.getAttribute('data-title') || 'هذا الشيت';
 
         showDoubleConfirmModal(title, async () => {
+          // Smooth collapse/fade-out animation on the card
+          const cardEl = btn.closest('.sheet-item-row');
+          if (cardEl) {
+            cardEl.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+            cardEl.style.opacity = '0';
+            cardEl.style.transform = 'scale(0.95)';
+            cardEl.style.maxHeight = cardEl.offsetHeight + 'px';
+            setTimeout(() => {
+              cardEl.style.maxHeight = '0px';
+              cardEl.style.paddingTop = '0px';
+              cardEl.style.paddingBottom = '0px';
+              cardEl.style.marginTop = '0px';
+              cardEl.style.marginBottom = '0px';
+              cardEl.style.overflow = 'hidden';
+            }, 60);
+            await new Promise(r => setTimeout(r, 360));
+          }
+
           if (window.DATA && window.DATA.pdfStore && window.DATA.pdfStore.deletePdf) {
             await window.DATA.pdfStore.deletePdf(id);
           }

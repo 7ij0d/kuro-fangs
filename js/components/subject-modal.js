@@ -120,7 +120,7 @@ const SubjectModal = {
       <div class="modal-header">
         <div class="modal-header-meta">
           <div class="modal-subject-banner-thumb">
-            <img src="${coverImg}" alt="${primaryTitle}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
+            <img src="${coverImg}" alt="${primaryTitle}" width="600" height="337" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
           </div>
           <div class="modal-title-wrap">
             <h2>${primaryTitle}</h2>
@@ -224,7 +224,7 @@ const SubjectModal = {
       <div class="modal-header">
         <div class="modal-header-meta">
           <div class="modal-subject-banner-thumb">
-            <img src="${coverImg}" alt="${primaryTitle}" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
+            <img src="${coverImg}" alt="${primaryTitle}" width="600" height="337" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
           </div>
           <div class="modal-title-wrap">
             <h2>${primaryTitle}</h2>

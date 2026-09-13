@@ -449,7 +449,7 @@ const HomePage = {
         <div class="subject-card" onclick="window.SubjectModal.open('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
           <!-- 130px Subject Cover Header -->
           <div class="subject-cover-wrap card-banner">
-            <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" loading="lazy" decoding="async" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp'; this.classList.add('loaded');" />
+            <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" width="600" height="337" loading="lazy" decoding="async" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp'; this.classList.add('loaded');" />
             <div class="subject-cover-gradient"></div>
             <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
           </div>
