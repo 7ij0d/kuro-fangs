@@ -137,6 +137,46 @@ const SubjectDetailPage = {
         if (window.lucide) window.lucide.createIcons();
       });
     });
+
+    // Background cloud sync to pull newly published sheets for this subject
+    if (window.DATA && typeof window.DATA.syncCloudSheets === 'function') {
+      window.DATA.syncCloudSheets().then((newSheets) => {
+        if (Array.isArray(newSheets) && newSheets.length > 0) {
+          const updatedSheets = window.DATA.getSheetsBySubject(subject.id);
+          const tabSheets = document.getElementById('tab-sheets');
+          if (tabSheets && updatedSheets.length > 0) {
+            tabSheets.innerHTML = `
+              <div class="recent-list-view">
+                ${updatedSheets.map(s => `
+                  <div class="recent-list-row">
+                    <div class="recent-col-icon">
+                      <i data-lucide="file-text"></i>
+                    </div>
+                    <div class="recent-col-type" style="display: flex; align-items: center; gap: 6px;">
+                      ${s.order_index ? `<span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 700; font-size: 0.72rem;">#${s.order_index}</span>` : ''}
+                      <span class="badge badge-primary">${s.type || 'شيت'}</span>
+                    </div>
+                    <div class="recent-col-title" title="${s.title_ar || s.title || ''}">
+                      ${s.title_ar || s.title || ''}
+                    </div>
+                    <div class="recent-col-doctor">
+                      ${s.doctor_name || 'هيئة التدريس'}
+                    </div>
+                    <div class="recent-col-date">
+                      ${s.date || '2026-09-05'}
+                    </div>
+                    <a href="#/sheet/${s.id}" class="recent-col-arrow" title="عرض الشيت">
+                      <i data-lucide="arrow-left"></i>
+                    </a>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }
+      }).catch(() => {});
+    }
   }
 };
 

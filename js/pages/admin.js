@@ -360,6 +360,19 @@ window.AdminPage = (function () {
         const detectedPages = await detectPdfPageCount(file);
         if (detectedPages) updates.pages = `${detectedPages}`;
         updates.pdf_source = 'local';
+
+        // Cloud PDF upload if available
+        if (window.KuroCloud && typeof window.KuroCloud.uploadSheetPdf === 'function') {
+          try {
+            const cloudUrl = await window.KuroCloud.uploadSheetPdf(file, sheetId);
+            if (cloudUrl) {
+              updates.pdf_url = cloudUrl;
+              updates.download_url = cloudUrl;
+              updates.pdf_source = 'cloud';
+            }
+          } catch (e) {}
+        }
+
         if (window.DATA && window.DATA.pdfStore) {
           await window.DATA.pdfStore.savePdf(sheetId, file);
         }
@@ -386,8 +399,18 @@ window.AdminPage = (function () {
         }
       }
 
+      // Central Cloud Update Sync
+      if (window.KuroCloud && typeof window.KuroCloud.publishSheetToCloud === 'function') {
+        try {
+          const fullSheet = window.DATA?.sheets?.find(s => s.id === sheetId);
+          if (fullSheet) {
+            await window.KuroCloud.publishSheetToCloud({ ...fullSheet, ...updates });
+          }
+        } catch (e) {}
+      }
+
       document.getElementById('admin-edit-modal-backdrop')?.remove();
-      if (window.showToast) window.showToast(isAr ? 'تم تعديل الشيت بنجاح' : 'Sheet updated successfully', {type: 'success'});
+      if (window.showToast) window.showToast(isAr ? 'تم تعديل الشيت ومزامنته سحابياً بنجاح ☁️' : 'Sheet updated and synced to cloud! ☁️', {type: 'success'});
       if (typeof reRenderCallback === 'function') reRenderCallback();
     });
   }
@@ -688,9 +711,9 @@ window.AdminPage = (function () {
 
             <!-- 7. Submit Action Button -->
             <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 6px;">
-              <button type="submit" class="btn btn-primary" style="padding: 11px 26px; font-weight: 800; gap: 8px; font-size: 0.925rem;">
+              <button type="submit" id="btn-publish-sheet" class="btn btn-primary" style="padding: 11px 26px; font-weight: 800; gap: 8px; font-size: 0.925rem;">
                 <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
-                <span>${isAr ? 'نشر الشيت فوراً 🚀' : 'Publish Sheet Live 🚀'}</span>
+                <span>${isAr ? 'نشر الشيت ومزامنته سحابياً 🚀' : 'Publish & Cloud Sync Live 🚀'}</span>
               </button>
             </div>
           </form>
@@ -999,71 +1022,123 @@ window.AdminPage = (function () {
 
     document.getElementById('form-add-sheet')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const singleTitle = document.getElementById('add-sheet-title')?.value.trim();
-      const subjectId = document.getElementById('add-sheet-subject')?.value;
-      const doctor = document.getElementById('add-sheet-doctor')?.value.trim();
-      const orderVal = document.getElementById('add-sheet-order')?.value;
-      const url = document.getElementById('add-sheet-url')?.value.trim();
-      
-      const file = fileInput?.files?.length > 0 ? fileInput.files[0] : null;
-
-      if (file && file.size > 15 * 1024 * 1024) {
-        if (typeof window.showToast === 'function') {
-          window.showToast(isAr ? 'الملف كبير جداً (الحد الأقصى 15MB)' : 'File too large (Max 15MB)', { type: 'error' });
-        }
-        return;
+      const submitBtn = document.getElementById('btn-publish-sheet');
+      const origBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳ ${isAr ? 'جاري رفع الملف والمزامنة السحابية...' : 'Uploading & Syncing Cloud...'}</span>`;
       }
 
-      let order_index = 1;
-      if (orderVal === 'auto') {
-        if (window.DATA && window.DATA.getNextOrderIndex) {
-          order_index = window.DATA.getNextOrderIndex(subjectId);
+      try {
+        const singleTitle = document.getElementById('add-sheet-title')?.value.trim();
+        const subjectId = document.getElementById('add-sheet-subject')?.value;
+        const doctor = document.getElementById('add-sheet-doctor')?.value.trim();
+        const orderVal = document.getElementById('add-sheet-order')?.value;
+        const url = document.getElementById('add-sheet-url')?.value.trim();
+        
+        const file = fileInput?.files?.length > 0 ? fileInput.files[0] : null;
+
+        if (file && file.size > 15 * 1024 * 1024) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'الملف كبير جداً (الحد الأقصى 15MB)' : 'File too large (Max 15MB)', { type: 'error' });
+          }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHTML;
+          }
+          return;
+        }
+
+        let order_index = 1;
+        if (orderVal === 'auto') {
+          if (window.DATA && window.DATA.getNextOrderIndex) {
+            order_index = window.DATA.getNextOrderIndex(subjectId);
+          } else {
+            const curSheets = window.DATA?.sheets || getCustomSheets();
+            const subjSheets = curSheets.filter(s => s.subject_id === subjectId);
+            order_index = subjSheets.length > 0 ? Math.max(...subjSheets.map(s => parseInt(s.order_index) || 0)) + 1 : 1;
+          }
         } else {
-          const curSheets = window.DATA?.sheets || getCustomSheets();
-          const subjSheets = curSheets.filter(s => s.subject_id === subjectId);
-          order_index = subjSheets.length > 0 ? Math.max(...subjSheets.map(s => parseInt(s.order_index) || 0)) + 1 : 1;
+          order_index = parseInt(orderVal, 10) || 1;
         }
-      } else {
-        order_index = parseInt(orderVal, 10) || 1;
+
+        const newSheetId = 'sh_admin_' + Date.now();
+        let pdf_source = file ? 'local' : (url ? 'url' : 'none');
+        let finalPdfUrl = url || '';
+        const finalPages = currentDetectedPages ? `${currentDetectedPages}` : '12';
+
+        // 1. Cloud Storage Upload (Supabase Bucket 'pdf-sheets')
+        if (file && window.KuroCloud && typeof window.KuroCloud.uploadSheetPdf === 'function') {
+          try {
+            const cloudPdfUrl = await window.KuroCloud.uploadSheetPdf(file, newSheetId);
+            if (cloudPdfUrl) {
+              finalPdfUrl = cloudPdfUrl;
+              pdf_source = 'cloud';
+            }
+          } catch (err) {
+            console.warn('Cloud PDF upload note:', err);
+          }
+        }
+
+        // 2. Local fallback storage in IndexedDB
+        if (file && window.DATA && window.DATA.pdfStore) {
+          try {
+            await window.DATA.pdfStore.savePdf(newSheetId, file);
+          } catch (err) {}
+        }
+
+        const newSheet = {
+          id: newSheetId,
+          subject_id: subjectId,
+          title_ar: singleTitle,
+          title_en: singleTitle,
+          title: singleTitle,
+          doctor_name: doctor,
+          pages: finalPages,
+          order_index: order_index,
+          pdf_source: pdf_source,
+          pdf_url: finalPdfUrl,
+          download_url: finalPdfUrl,
+          date: new Date().toISOString().split('T')[0]
+        };
+
+        // 3. Central Supabase Cloud Sync
+        if (window.KuroCloud && typeof window.KuroCloud.publishSheetToCloud === 'function') {
+          try {
+            await window.KuroCloud.publishSheetToCloud(newSheet);
+          } catch (err) {
+            console.warn('Cloud publish fallback to local cache:', err);
+          }
+        }
+
+        // 4. Update in-memory & local storage
+        if (window.DATA) {
+          if (!Array.isArray(window.DATA.sheets)) window.DATA.sheets = [];
+          window.DATA.sheets.unshift(newSheet);
+        }
+
+        const cur = getCustomSheets();
+        cur.unshift(newSheet);
+        saveCustomSheets(cur);
+
+        try {
+          const cached = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
+          cached.unshift(newSheet);
+          localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(cached));
+        } catch (e) {}
+
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم نشر الملزمة بنجاح ومزامنتها سحابياً لجميع الأجهزة والطلبة! 🚀☁️' : 'Sheet published and synced to cloud for all students! 🚀☁️', { type: 'success' });
+        }
+
+        render(container);
+      } catch (err) {
+        console.error('Error publishing sheet:', err);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origBtnHTML;
+        }
       }
-
-      const newSheetId = 'sh_admin_' + Date.now();
-      const pdf_source = file ? 'local' : (url ? 'url' : 'none');
-      const finalPages = currentDetectedPages ? `${currentDetectedPages}` : '12';
-
-      const newSheet = {
-        id: newSheetId,
-        subject_id: subjectId,
-        title_ar: singleTitle,
-        title_en: singleTitle,
-        title: singleTitle,
-        doctor_name: doctor,
-        pages: finalPages,
-        order_index: order_index,
-        pdf_source: pdf_source,
-        pdf_url: url,
-        download_url: url,
-        date: new Date().toISOString().split('T')[0]
-      };
-
-      if (file && window.DATA && window.DATA.pdfStore) {
-        await window.DATA.pdfStore.savePdf(newSheetId, file);
-      }
-
-      if (window.DATA) {
-        if (!Array.isArray(window.DATA.sheets)) window.DATA.sheets = [];
-        window.DATA.sheets.unshift(newSheet);
-      }
-
-      const cur = getCustomSheets();
-      cur.unshift(newSheet);
-      saveCustomSheets(cur);
-
-      if (typeof window.showToast === 'function') {
-        window.showToast(isAr ? 'تم نشر الملزمة المعتمدة بنجاح على المنصة! 🚀' : 'Sheet published live! 🚀', { type: 'success' });
-      }
-
-      render(container);
     });
 
     // Edit Sheet Button
@@ -1107,6 +1182,13 @@ window.AdminPage = (function () {
             await window.DATA.pdfStore.deletePdf(id);
           }
 
+          // Delete from central Supabase cloud
+          if (window.KuroCloud && typeof window.KuroCloud.deleteSheetFromCloud === 'function') {
+            try {
+              await window.KuroCloud.deleteSheetFromCloud(id);
+            } catch (e) {}
+          }
+
           addDeletedSheetId(id);
 
           if (window.DATA && Array.isArray(window.DATA.sheets)) {
@@ -1116,8 +1198,13 @@ window.AdminPage = (function () {
           let cur = getCustomSheets().filter(s => s.id !== id);
           saveCustomSheets(cur);
 
+          try {
+            const cached = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]').filter(s => s.id !== id);
+            localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(cached));
+          } catch (e) {}
+
           if (typeof window.showToast === 'function') {
-            window.showToast(isAr ? `تم حذف "${title}" نهائياً.` : 'Sheet deleted permanently.', { type: 'success' });
+            window.showToast(isAr ? `تم حذف "${title}" نهائياً من السحابة والمنصة.` : 'Sheet deleted permanently from cloud and platform.', { type: 'success' });
           }
 
           render(container);

@@ -37,7 +37,7 @@ const SheetsPage = {
       });
     };
 
-    const allSheets = getAllSheets();
+    let allSheets = getAllSheets();
 
     const renderList = () => {
       const filtered = currentFilter === 'all'
@@ -248,6 +248,16 @@ const SheetsPage = {
         selectFilter(btn.getAttribute('data-subject'));
       });
     });
+
+    // Background cloud sync to pull newly published sheets from Supabase
+    if (window.DATA && typeof window.DATA.syncCloudSheets === 'function') {
+      window.DATA.syncCloudSheets().then((newSheets) => {
+        if (Array.isArray(newSheets) && newSheets.length > 0) {
+          allSheets = getAllSheets();
+          renderList();
+        }
+      }).catch(() => {});
+    }
   }
 };
 

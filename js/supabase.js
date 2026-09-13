@@ -343,6 +343,129 @@
     return { success: true };
   }
 
+  // --- CLOUD SHEETS & PDF STORAGE OPERATIONS ---
+  async function uploadSheetPdf(file, sheetId) {
+    initClient();
+    if (!client) return null;
+
+    try {
+      const fileExt = file.name.split('.').pop() || 'pdf';
+      const cleanSheetId = (sheetId || 'sh_' + Date.now()).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filePath = `sheets/${cleanSheetId}_${Date.now()}.${fileExt}`;
+
+      const { data, error } = await client.storage
+        .from('pdf-sheets')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type || 'application/pdf'
+        });
+
+      if (error) {
+        console.warn('Supabase storage upload note:', error.message);
+        return null;
+      }
+
+      const { data: publicUrlData } = client.storage
+        .from('pdf-sheets')
+        .getPublicUrl(filePath);
+
+      return publicUrlData?.publicUrl || null;
+    } catch (e) {
+      console.warn('uploadSheetPdf exception:', e.message);
+      return null;
+    }
+  }
+
+  async function publishSheetToCloud(sheet) {
+    initClient();
+    if (!client) return null;
+
+    try {
+      const payload = {
+        id: sheet.id,
+        subject_id: sheet.subject_id,
+        title: sheet.title || sheet.title_ar || sheet.title_en,
+        title_ar: sheet.title_ar || sheet.title,
+        title_en: sheet.title_en || sheet.title,
+        doctor_name: sheet.doctor_name || '',
+        pages: parseInt(sheet.pages, 10) || 12,
+        order_index: parseInt(sheet.order_index, 10) || 1,
+        pdf_url: sheet.pdf_url || null,
+        download_url: sheet.download_url || sheet.pdf_url || null,
+        pdf_source: sheet.pdf_source || 'url',
+        date: sheet.date || new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString()
+      };
+
+      const { data, error } = await client
+        .from('sheets')
+        .upsert(payload, { onConflict: 'id' })
+        .select();
+
+      if (error) {
+        console.warn('Supabase publishSheet error:', error.message);
+        return null;
+      }
+
+      return data?.[0] || payload;
+    } catch (e) {
+      console.warn('publishSheetToCloud exception:', e.message);
+      return null;
+    }
+  }
+
+  async function fetchCloudSheets() {
+    initClient();
+    if (!client) return [];
+
+    try {
+      const { data, error } = await client
+        .from('sheets')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (error) {
+        console.warn('Supabase fetchCloudSheets note:', error.message);
+        return [];
+      }
+      return data || [];
+    } catch (e) {
+      console.warn('fetchCloudSheets exception:', e.message);
+      return [];
+    }
+  }
+
+  async function deleteSheetFromCloud(sheetId) {
+    initClient();
+    if (!client) return false;
+
+    try {
+      const { error } = await client
+        .from('sheets')
+        .delete()
+        .eq('id', sheetId);
+
+      if (error) {
+        console.warn('Supabase deleteSheetFromCloud error:', error.message);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn('deleteSheetFromCloud exception:', e.message);
+      return false;
+    }
+  }
+
+  // Centralized Kuro Cloud API
+  window.KuroCloud = {
+    getClient: () => { initClient(); return client; },
+    uploadSheetPdf,
+    publishSheetToCloud,
+    fetchCloudSheets,
+    deleteSheetFromCloud
+  };
+
   // Public API
   window.SupabaseAuth = {
     init: initAuth,
@@ -356,7 +479,9 @@
     signOut,
     syncNow: () => pushToCloud(currentUser),
     pullNow: () => pullFromCloud(currentUser),
-    updateUI: updateUIForAuth
+    updateUI: updateUIForAuth,
+    cloud: window.KuroCloud,
+    getClient: () => { initClient(); return client; }
   };
 
   // Auto-init when DOM is loaded

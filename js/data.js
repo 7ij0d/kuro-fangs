@@ -114,7 +114,22 @@ class DataService {
       this.sheets = this.getDefaultSheets();
     }
 
-    // Merge custom admin-uploaded sheets from localStorage if present
+    // 1. Merge cached cloud sheets from localStorage if present (for instant offline/initial load)
+    try {
+      const cachedCloudSheets = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
+      if (Array.isArray(cachedCloudSheets) && cachedCloudSheets.length > 0) {
+        cachedCloudSheets.forEach(cs => {
+          const idx = this.sheets.findIndex(s => s.id === cs.id);
+          if (idx !== -1) {
+            this.sheets[idx] = { ...this.sheets[idx], ...cs };
+          } else {
+            this.sheets.push(cs);
+          }
+        });
+      }
+    } catch (e) {}
+
+    // 2. Merge custom admin-uploaded sheets from localStorage if present
     try {
       const customSheets = JSON.parse(localStorage.getItem('kf_admin_custom_sheets') || '[]');
       if (Array.isArray(customSheets) && customSheets.length > 0) {
@@ -125,6 +140,26 @@ class DataService {
         });
       }
     } catch (e) {}
+
+    // 3. Live Central Cloud Sync from Supabase
+    try {
+      if (window.KuroCloud && typeof window.KuroCloud.fetchCloudSheets === 'function') {
+        const liveCloudSheets = await window.KuroCloud.fetchCloudSheets();
+        if (Array.isArray(liveCloudSheets) && liveCloudSheets.length > 0) {
+          liveCloudSheets.forEach(cs => {
+            const idx = this.sheets.findIndex(s => s.id === cs.id);
+            if (idx !== -1) {
+              this.sheets[idx] = { ...this.sheets[idx], ...cs };
+            } else {
+              this.sheets.push(cs);
+            }
+          });
+          localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(liveCloudSheets));
+        }
+      }
+    } catch (e) {
+      console.warn('Initial cloud sheets fetch note:', e);
+    }
 
     // Merge custom admin announcements from localStorage if present
     try {
@@ -198,6 +233,35 @@ class DataService {
   getRecentSheets(limit = 6) {
     const deleted = this.getDeletedSheetIds();
     return [...(this.sheets || [])].filter(s => !deleted.includes(s.id)).slice(0, limit);
+  }
+
+  /**
+   * Synchronize sheets live from central Supabase database
+   * Can be invoked on route changes or when refreshing data
+   */
+  async syncCloudSheets() {
+    try {
+      if (window.KuroCloud && typeof window.KuroCloud.fetchCloudSheets === 'function') {
+        const liveCloudSheets = await window.KuroCloud.fetchCloudSheets();
+        if (Array.isArray(liveCloudSheets) && liveCloudSheets.length > 0) {
+          const deleted = this.getDeletedSheetIds();
+          liveCloudSheets.forEach(cs => {
+            if (deleted.includes(cs.id)) return;
+            const idx = this.sheets.findIndex(s => s.id === cs.id);
+            if (idx !== -1) {
+              this.sheets[idx] = { ...this.sheets[idx], ...cs };
+            } else {
+              this.sheets.push(cs);
+            }
+          });
+          localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(liveCloudSheets));
+          return liveCloudSheets;
+        }
+      }
+    } catch (e) {
+      console.warn('Live syncCloudSheets note:', e);
+    }
+    return [];
   }
 
   /**
