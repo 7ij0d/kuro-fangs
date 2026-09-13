@@ -812,13 +812,13 @@ window.AdminPage = (function () {
             <!-- 1. Single Title Field (Arabic or English) -->
             <div style="grid-column: 1 / -1;">
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت / المحاضرة (عربي أو إنجليزي):' : 'Sheet / Handout Title:'}</label>
-              <input type="text" id="add-sheet-title" class="auth-input" placeholder="${isAr ? 'أدخل عنوان الشيت (مثال: Provisional Restorations)' : 'Enter sheet title in Arabic or English...'}" required style="width: 100%; font-weight: 600;" />
+              <input type="text" id="add-sheet-title" class="auth-input" placeholder="${isAr ? 'أدخل عنوان الشيت...' : 'Enter sheet title in Arabic or English...'}" required style="width: 100%; font-weight: 600;" />
             </div>
 
             <!-- 2. Single Doctor Name Field -->
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أستاذ المادة (الدكتور):' : 'Doctor Name:'}</label>
-              <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="${isAr ? 'اسم الدكتور (مثال: د. هالة الحويج)' : 'Doctor name (e.g. Dr. Hala Alhawij)'}" required />
+              <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="${isAr ? 'اسم أستاذ المادة...' : 'Doctor name...'}" required />
             </div>
 
             <!-- 3. Subject Selection -->
@@ -897,7 +897,7 @@ window.AdminPage = (function () {
                       <span style="font-size: 0.75rem; color: var(--text-muted); margin-inline-start: 8px;">(${s.pages || '—'} ${isAr ? 'صفحة' : 'pages'})</span>
                     </div>
                     <strong style="color: var(--text-primary); font-size: 1rem; display: block;">${s.title_ar || s.title_en || s.title || ''}</strong>
-                    <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">${s.subject_name || s.subject_id} • <span style="color: var(--text-muted);">${s.doctor_name || 'د. هالة الحويج'}</span></div>
+                    <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">${s.subject_name || s.subject_id}${s.doctor_name ? ` • <span style="color: var(--text-muted);">${s.doctor_name}</span>` : ''}</div>
                   </div>
                   <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                     <button class="btn-move-up-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Up">⬆️</button>

@@ -1587,33 +1587,33 @@ const DocumentViewer = {
       <div class="doc-page" id="page-1" data-page="1">
         <canvas class="canvas-overlay" id="canvas-1"></canvas>
         <div class="page-header">
-          <h4>Fixed Prosthodontics II • Lecture Handout</h4>
+          <h4>${doc.title || 'Academic Lecture Handout'}</h4>
           <span>${university}</span>
         </div>
 
-        <h1 class="title-main">ROTARY DENTAL INSTRUMENTS & PROVISIONAL RESTORATIONS</h1>
-        <h2 class="title-sub">CLINICAL PROTOCOLS & CONTEMPORARY TECHNIQUES</h2>
+        <h1 class="title-main">${(doc.title || doc.title_ar || doc.title_en || 'ACADEMIC LECTURE HANDOUT').toUpperCase()}</h1>
+        <h2 class="title-sub">${doc.subject_name || 'FACULTY OF DENTISTRY • ACADEMIC CURRICULUM'}</h2>
 
         <div class="meta-center">
-          <p><strong>${doctor}</strong></p>
-          <p>Department of Fixed Prosthodontics</p>
+          ${doctor ? `<p><strong>${doctor}</strong></p>` : ''}
+          <p>${doc.subject_name || 'Faculty of Oral & Dental Medicine'}</p>
           <p>${university} • Academic Year ${year}</p>
         </div>
 
         <div class="agenda-box">
-          <h3>LECTURE AGENDA & CORE MODULES</h3>
+          <h3>${isAr ? 'محتويات وفهرس المحاضرة' : 'LECTURE AGENDA & CORE MODULES'}</h3>
           <ul class="bullet-list">
-            <li><strong>Module 1:</strong> Rotary Cutting Instruments, Burs & Diamond Abrasives</li>
-            <li><strong>Module 2:</strong> Definition & Requirements of Provisional Restorations</li>
-            <li><strong>Module 3:</strong> Classification of Provisional Restorations & Preformed Crowns</li>
-            <li><strong>Module 4:</strong> Direct vs. Indirect Fabrication Protocols & Vacuum Shells</li>
-            <li><strong>Module 5:</strong> Comparative Analysis of Restorative Resins & Provisional Cements</li>
-            <li><strong>Module 6:</strong> Pontic Design, Clinical Troubleshooting, and Exam Review</li>
+            <li><strong>${isAr ? 'المحور 1:' : 'Module 1:'}</strong> ${isAr ? 'المفاهيم النظرية والأساسيات' : 'Fundamental Concepts & Clinical Overview'}</li>
+            <li><strong>${isAr ? 'المحور 2:' : 'Module 2:'}</strong> ${isAr ? 'بروتوكولات التشخيص والمعاينة' : 'Diagnostic Criteria & Treatment Planning'}</li>
+            <li><strong>${isAr ? 'المحور 3:' : 'Module 3:'}</strong> ${isAr ? 'المواد والأدوات المستخدمة' : 'Biomaterials & Clinical Instrumentation'}</li>
+            <li><strong>${isAr ? 'المحور 4:' : 'Module 4:'}</strong> ${isAr ? 'خطوات العمل السريري خطوة بخطوة' : 'Step-by-Step Clinical Procedure'}</li>
+            <li><strong>${isAr ? 'المحور 5:' : 'Module 5:'}</strong> ${isAr ? 'المضاعفات السريرية والحلول' : 'Complications Management & Troubleshooting'}</li>
+            <li><strong>${isAr ? 'المحور 6:' : 'Module 6:'}</strong> ${isAr ? 'نقاط الامتحانات ومراجعة الحالات' : 'Exam Highlights & Case Discussions'}</li>
           </ul>
         </div>
 
         <div class="page-footer">
-          <span>${doctor || 'Dr. Hala Alhawij'} | Fixed Prosthodontics II</span>
+          <span>${doctor ? `${doctor} | ` : ''}${doc.subject_name || 'Dental Faculty'}</span>
           <span>Page 1 of ${totalPages}</span>
         </div>
       </div>
@@ -1623,36 +1623,24 @@ const DocumentViewer = {
       <div class="doc-page" id="page-2" data-page="2">
         <canvas class="canvas-overlay" id="canvas-2"></canvas>
         <div class="page-header">
-          <h4>Module 1: Rotary Instruments</h4>
-          <span>Provisional Restoration & Temporization</span>
+          <h4>${isAr ? 'القسم 1: المفاهيم السريرية' : 'Module 1: Clinical Principles'}</h4>
+          <span>${doc.title || 'Lecture Handout'}</span>
         </div>
 
-        <h3 class="section-title">BUR CUTTING ANGLES & TAPERED FISSURE BURS</h3>
-        <p style="margin-bottom: 12px;"><strong>Rake Angle Classifications:</strong></p>
+        <h3 class="section-title">${isAr ? 'المبادئ الأساسية والمعايير السريرية' : 'CLINICAL PRINCIPLES & GUIDELINES'}</h3>
+        <p style="margin-bottom: 12px;">${isAr ? 'الملخص الأكاديمي الشامل للمفاهيم السريرية والقواعد الإرشادية المعتمدة لطلبة كلية طب الأسنان:' : 'Comprehensive academic summary of clinical concepts and treatment protocols:'}</p>
         <ul class="bullet-list">
-          <li><strong>A = Positive Rake Angle:</strong> Increases cutting efficiency in soft structures.</li>
-          <li><strong>B = Radial or Neutral Rake Angle:</strong> Standard balanced cutting mechanism.</li>
-          <li><strong>C = Negative Rake Angle:</strong> Increases blade strength for hard metal/enamel reduction.</li>
+          <li>${isAr ? 'المعايير التشخيصية وتقييم الحالة السريرية الأولية بدقة.' : 'Diagnostic assessment and initial clinical evaluation protocols.'}</li>
+          <li>${isAr ? 'اختيار الأدوات والمواد المناسبة وفق أحدث الإرشادات الأكاديمية.' : 'Selection of appropriate clinical instruments and restorative biomaterials.'}</li>
+          <li>${isAr ? 'حماية الأنسجة المحيطة ومراعاة الصحة الفموية للمريض.' : 'Soft and hard tissue preservation to maintain optimal periodontal health.'}</li>
         </ul>
 
         <div class="clinical-callout">
-          <strong>Tapered Fissure Bur:</strong> A common bur used in fixed prosthesis preparation. Used for:
-          <ul class="bullet-list" style="margin-top: 8px;">
-            <li>Adding additional retentive features in complete/partial crowns (grooves or boxes).</li>
-            <li>Finishing (smoothing) prepared axial walls.</li>
-            <li>Preparing proximal boxes, bevels, and occlusal reduction in Class II inlays.</li>
-          </ul>
+          <strong>${isAr ? 'تنبيه سريري هام:' : 'CLINICAL NOTE:'}</strong> ${isAr ? 'مراعاة الدقة في التحضير السريري وعزل منطقة العمل الجراحي لمنع التلوث وضمان أعلى معدلات النجاح.' : 'Maintain strict isolation and adhere to sterilization guidelines during clinical interventions.'}
         </div>
 
-        <h3 class="section-title">DIAMOND ABRASIVES IN FIXED PROSTHODONTICS</h3>
-        <p style="margin-bottom: 12px;">The second major category of rotary dental cutting instruments involves abrasive rather than blade cutting. The mechanism of abrasion is a grinding operation.</p>
-        <p style="margin-bottom: 14px;"><strong>Abrasion:</strong> The wearing away of a substance or structure (such as the skin or the teeth) through an unusual or abnormal mechanical process.</p>
-
-        <p><strong>Structure of Diamond Instruments:</strong></p>
-        <p>Diamond instruments consist of three parts: a metal blank, the powdered diamond abrasive, and a metallic bonding material that holds the diamond powder onto the blank.</p>
-
         <div class="page-footer">
-          <span>${doctor || 'Dr. Hala Alhawij'} | Fixed Prosthodontics II</span>
+          <span>${doctor ? `${doctor} | ` : ''}${doc.subject_name || 'Dental Faculty'}</span>
           <span>Page 2 of ${totalPages}</span>
         </div>
       </div>
@@ -1665,25 +1653,25 @@ const DocumentViewer = {
           <div class="doc-page" id="page-${pNum}" data-page="${pNum}">
             <canvas class="canvas-overlay" id="canvas-${pNum}"></canvas>
             <div class="page-header">
-              <h4>Module ${pNum - 1}: Clinical Section</h4>
-              <span>Provisional Restoration & Temporization</span>
+              <h4>${isAr ? `القسم ${pNum - 1}: المتابعة والتقييم` : `Module ${pNum - 1}: Clinical Section`}</h4>
+              <span>${doc.title || 'Lecture Handout'}</span>
             </div>
 
-            <h3 class="section-title">SECTION ${pNum - 1}: CLINICAL PROTOCOLS & CORE PRINCIPLES</h3>
-            <p style="margin-bottom: 14px;">Detailed clinical procedures, tissue protection guidelines, and restorative margin management protocols established by ${doctor || 'Dr. Hala Alhawij'} for Year 3 Dental Students.</p>
+            <h3 class="section-title">${isAr ? `الجزء ${pNum - 1}: الإرشادات والبروتوكولات السريرية` : `SECTION ${pNum - 1}: CLINICAL PROTOCOLS & CORE PRINCIPLES`}</h3>
+            <p style="margin-bottom: 14px;">${isAr ? 'ملاحظات الدراسة والتدريب السريري لطلبة طب الأسنان:' : 'Detailed clinical study notes and procedure guidelines for dental students:'}</p>
 
             <ul class="bullet-list">
-              <li>Pulp vitality maintenance and dentinal tubule sealing.</li>
-              <li>Margin emergence profile adaptation to prevent soft tissue recession.</li>
-              <li>Occlusal clearance verification and interproximal contact point stabilization.</li>
+              <li>${isAr ? 'تقييم الحيوية وحماية النسج السنية الحيوية.' : 'Pulp protection and tissue preservation procedures.'}</li>
+              <li>${isAr ? 'التكيف الحفافي الدقيق وضبط نقاط التماس الإطباقي.' : 'Precise marginal adaptation and occlusal contact point stabilization.'}</li>
+              <li>${isAr ? 'متابعة المريض بعد الإجراء السريري ومراقبة التعافي.' : 'Post-operative evaluation, hygiene instructions, and recall intervals.'}</li>
             </ul>
 
             <div class="clinical-callout">
-              <strong>EXAM HIGHLIGHT:</strong> Ensure precise cervical margin finishing before cementation to maintain healthy periodontium.
+              <strong>${isAr ? 'إرشادات الاختبار:' : 'EXAM HIGHLIGHT:'}</strong> ${isAr ? 'مراجعة المفاهيم السريرية الأساسية مع التركيز على التشخيص التفريقي.' : 'Review core concepts focusing on differential diagnosis and step-by-step clinical execution.'}
             </div>
 
             <div class="page-footer">
-              <span>${doctor || 'Dr. Hala Alhawij'} | Fixed Prosthodontics II</span>
+              <span>${doctor ? `${doctor} | ` : ''}${doc.subject_name || 'Dental Faculty'}</span>
               <span>Page ${pNum} of ${totalPages}</span>
             </div>
           </div>

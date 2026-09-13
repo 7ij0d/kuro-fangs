@@ -50,6 +50,16 @@ class DataService {
 
     // 2. Merge cached cloud sheets & local custom admin sheets instantly
     try {
+      ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets'].forEach(k => {
+        try {
+          const raw = localStorage.getItem(k);
+          if (raw && raw.includes('sh-fixed-provisional')) {
+            const parsed = JSON.parse(raw).filter(s => s && s.id !== 'sh-fixed-provisional');
+            localStorage.setItem(k, JSON.stringify(parsed));
+          }
+        } catch (err) {}
+      });
+
       const cachedCloudSheets = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
       if (Array.isArray(cachedCloudSheets) && cachedCloudSheets.length > 0) {
         cachedCloudSheets.forEach(cs => {
@@ -533,22 +543,7 @@ class DataService {
   }
 
   getDefaultSheets() {
-    return [
-      {
-        id: 'sh-fixed-provisional',
-        subject_id: 'fixed-pros',
-        title: 'Provisional Restorations & Temporization',
-        title_ar: 'الاستعاضة السنية المؤقتة (Provisional Restorations)',
-        title_en: 'Provisional Restorations & Temporization',
-        doctor_name: 'د. هالة الحويج',
-        pages: 16,
-        order_index: 1,
-        pdf_source: 'internal',
-        pdf_url: '',
-        download_url: '',
-        date: '2026-09-12'
-      }
-    ];
+    return [];
   }
 
   /**

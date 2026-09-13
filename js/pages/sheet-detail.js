@@ -56,8 +56,8 @@ const SheetDetailPage = {
 
     // Normalize metadata
     const title = sheet.title || (isAr ? sheet.title_ar : sheet.title_en);
-    const subjectName = sheet.subject_name || (isAr ? 'الاستعاضة السنية الثابتة' : 'Fixed Prosthodontics');
-    const doctorName = sheet.doctor_name || (isAr ? 'د. هالة الحويج' : 'Dr. Hala Alhawij');
+    const subjectName = sheet.subject_name || (isAr ? 'المادة الدراسية' : 'Academic Subject');
+    const doctorName = sheet.doctor_name || '';
     const pages = sheet.pages || 16;
     const size = sheet.size || '2.8 MB';
     const date = sheet.date || '2026-09-11';
