@@ -79,11 +79,12 @@ const SubjectDetailPage = {
                   <div class="recent-col-icon">
                     <i data-lucide="file-text"></i>
                   </div>
-                  <div class="recent-col-type">
+                  <div class="recent-col-type" style="display: flex; align-items: center; gap: 6px;">
+                    ${s.order_index ? `<span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 700; font-size: 0.72rem;">#${s.order_index}</span>` : ''}
                     <span class="badge badge-primary">${s.type || 'شيت'}</span>
                   </div>
-                  <div class="recent-col-title" title="${s.title}">
-                    ${s.title}
+                  <div class="recent-col-title" title="${s.title_ar || s.title || ''}">
+                    ${s.title_ar || s.title || ''}
                   </div>
                   <div class="recent-col-doctor">
                     ${s.doctor_name || 'هيئة التدريس'}

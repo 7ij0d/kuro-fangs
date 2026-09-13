@@ -13,14 +13,52 @@ const DocumentViewer = {
     // Document viewer initialization
   },
 
-  download(doc) {
-    window.STORE.addPoints(10);
+  async download(doc) {
+    if (window.STORE && typeof window.STORE.addPoints === 'function') {
+      window.STORE.addPoints(10);
+    }
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-    const title = doc?.title || doc?.title_ar || doc?.title_en || 'Provisional Restoration & Temporization';
+    const title = doc?.title || doc?.title_ar || doc?.title_en || 'Dental Sheet';
     const msg = isAr 
       ? `تم بدء تنزيل الشيت بنجاح! (+10 نقاط أكاديمية) — [${title}]`
       : `Download started! (+10 pts earned) — [${title}]`;
-    window.showToast(msg, { type: 'success', points: 10 });
+    if (window.showToast) {
+      window.showToast(msg, { type: 'success', points: 10 });
+    }
+
+    // Check if local PDF exists in IndexedDB
+    try {
+      if (doc?.id && window.DATA?.pdfStore) {
+        const blobUrl = await window.DATA.pdfStore.getPdfUrl(doc.id);
+        if (blobUrl) {
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = (title || 'sheet') + '.pdf';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+          }, 1000);
+          return;
+        }
+      }
+      // If external PDF URL exists
+      if (doc?.pdf_url || doc?.download_url) {
+        const targetUrl = doc.pdf_url || doc.download_url;
+        if (targetUrl && !targetUrl.includes('dummy.pdf')) {
+          const a = document.createElement('a');
+          a.href = targetUrl;
+          a.target = '_blank';
+          a.download = (title || 'sheet') + '.pdf';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => document.body.removeChild(a), 500);
+        }
+      }
+    } catch (e) {
+      console.warn('PDF download error:', e);
+    }
   },
 
   generateDocHTML(doc, isAr) {

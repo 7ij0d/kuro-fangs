@@ -268,12 +268,17 @@ const SubjectModal = {
           ) : files.map(item => `
             <div class="modal-file-card" onclick="SubjectModal.previewDoc('${item.id}');" style="cursor: pointer;">
               <!-- Top: Type Badge + Lecture Title -->
-              <div class="modal-file-top">
+              <div class="modal-file-top" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                ${item.order_index ? `
+                  <span class="sheet-order-pill" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px;">
+                    ${isAr ? `الشيت #${item.order_index}` : `Sheet #${item.order_index}`}
+                  </span>
+                ` : ''}
                 <span class="sheet-type-pill">
                   <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 4px;" />
                   ${item.type || 'PDF Sheet'}
                 </span>
-                <h3 class="modal-file-title">${item.title}</h3>
+                <h3 class="modal-file-title">${item.title_ar || item.title}</h3>
               </div>
 
               <!-- Information Row: Pages • Size • Doctor • Date -->

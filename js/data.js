@@ -180,7 +180,15 @@ class DataService {
     const deleted = this.getDeletedSheetIds();
     let list = (this.sheets || []).filter(s => !deleted.includes(s.id));
     if (!subjectId) return list;
-    return list.filter(s => s.subject_id === subjectId);
+    list = list.filter(s => s.subject_id === subjectId);
+    // Sort by order_index ascending, then by date descending for ties
+    list.sort((a, b) => {
+      const oa = typeof a.order_index === 'number' ? a.order_index : 9999;
+      const ob = typeof b.order_index === 'number' ? b.order_index : 9999;
+      if (oa !== ob) return oa - ob;
+      return (b.date || '').localeCompare(a.date || '');
+    });
+    return list;
   }
 
   getSheetsForSubject(subjectId) {
@@ -190,6 +198,81 @@ class DataService {
   getRecentSheets(limit = 6) {
     const deleted = this.getDeletedSheetIds();
     return [...(this.sheets || [])].filter(s => !deleted.includes(s.id)).slice(0, limit);
+  }
+
+  /**
+   * Update an existing sheet's properties
+   * @param {string} sheetId - The sheet ID to update
+   * @param {object} updates - Object with properties to merge
+   * @returns {object|null} The updated sheet or null if not found
+   */
+  updateSheet(sheetId, updates) {
+    // Update in memory
+    const sheet = (this.sheets || []).find(s => s.id === sheetId);
+    if (!sheet) return null;
+    Object.assign(sheet, updates);
+
+    // Also update in localStorage custom sheets
+    try {
+      const customSheets = JSON.parse(localStorage.getItem('kf_admin_custom_sheets') || '[]');
+      const csIdx = customSheets.findIndex(s => s.id === sheetId);
+      if (csIdx !== -1) {
+        Object.assign(customSheets[csIdx], updates);
+        localStorage.setItem('kf_admin_custom_sheets', JSON.stringify(customSheets));
+      }
+    } catch (e) {}
+
+    return sheet;
+  }
+
+  /**
+   * Reorder a sheet within its subject group
+   * @param {string} sheetId - The sheet ID to reorder
+   * @param {number} newIndex - The new 1-based order index
+   */
+  reorderSheet(sheetId, newIndex) {
+    const sheet = (this.sheets || []).find(s => s.id === sheetId);
+    if (!sheet) return;
+
+    const subjectId = sheet.subject_id;
+    const siblings = this.getSheetsBySubject(subjectId);
+
+    // Assign new index
+    sheet.order_index = newIndex;
+
+    // Re-normalize siblings to avoid gaps
+    siblings.sort((a, b) => {
+      const oa = typeof a.order_index === 'number' ? a.order_index : 9999;
+      const ob = typeof b.order_index === 'number' ? b.order_index : 9999;
+      return oa - ob;
+    });
+    siblings.forEach((s, i) => {
+      s.order_index = i + 1;
+    });
+
+    // Persist all sibling order changes
+    try {
+      const customSheets = JSON.parse(localStorage.getItem('kf_admin_custom_sheets') || '[]');
+      siblings.forEach(s => {
+        const csIdx = customSheets.findIndex(cs => cs.id === s.id);
+        if (csIdx !== -1) {
+          customSheets[csIdx].order_index = s.order_index;
+        }
+      });
+      localStorage.setItem('kf_admin_custom_sheets', JSON.stringify(customSheets));
+    } catch (e) {}
+  }
+
+  /**
+   * Get the next available order index for a subject
+   * @param {string} subjectId
+   * @returns {number}
+   */
+  getNextOrderIndex(subjectId) {
+    const siblings = this.getSheetsBySubject(subjectId);
+    if (siblings.length === 0) return 1;
+    const maxIdx = Math.max(...siblings.map(s => typeof s.order_index === 'number' ? s.order_index : 0));
+    return maxIdx + 1;
   }
 
   getAlerts() {
@@ -430,6 +513,158 @@ class DataService {
 }
 
 window.DATA = new DataService();
+
+/**
+ * IndexedDB PDF Storage Engine
+ * Stores PDF files locally as ArrayBuffers in IndexedDB for offline access.
+ * Supports up to ~50MB+ per origin (far exceeding localStorage limits).
+ */
+class PdfStore {
+  constructor() {
+    this.dbName = 'kf_pdf_store';
+    this.storeName = 'pdfs';
+    this.dbVersion = 1;
+    this._db = null;
+  }
+
+  async _getDB() {
+    if (this._db) return this._db;
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.dbVersion);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName, { keyPath: 'sheetId' });
+        }
+      };
+      request.onsuccess = (e) => {
+        this._db = e.target.result;
+        resolve(this._db);
+      };
+      request.onerror = (e) => {
+        console.warn('PdfStore: IndexedDB open error', e);
+        reject(e);
+      };
+    });
+  }
+
+  /**
+   * Save a PDF file for a sheet
+   * @param {string} sheetId
+   * @param {File} file - The PDF File object
+   * @returns {Promise<boolean>}
+   */
+  async savePdf(sheetId, file) {
+    try {
+      const db = await this._getDB();
+      const arrayBuffer = await file.arrayBuffer();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(this.storeName, 'readwrite');
+        const store = tx.objectStore(this.storeName);
+        store.put({
+          sheetId: sheetId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          data: arrayBuffer,
+          savedAt: new Date().toISOString()
+        });
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = (e) => { console.warn('PdfStore savePdf error', e); reject(e); };
+      });
+    } catch (e) {
+      console.warn('PdfStore savePdf failed:', e);
+      return false;
+    }
+  }
+
+  /**
+   * Get a Blob URL for a stored PDF
+   * @param {string} sheetId
+   * @returns {Promise<string|null>} Blob URL or null
+   */
+  async getPdfUrl(sheetId) {
+    try {
+      const db = await this._getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(this.storeName, 'readonly');
+        const store = tx.objectStore(this.storeName);
+        const request = store.get(sheetId);
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result && result.data) {
+            const blob = new Blob([result.data], { type: result.fileType || 'application/pdf' });
+            resolve(URL.createObjectURL(blob));
+          } else {
+            resolve(null);
+          }
+        };
+        request.onerror = () => resolve(null);
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Get PDF metadata (name, size) without loading the full file
+   * @param {string} sheetId
+   * @returns {Promise<object|null>}
+   */
+  async getPdfMeta(sheetId) {
+    try {
+      const db = await this._getDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.storeName, 'readonly');
+        const store = tx.objectStore(this.storeName);
+        const request = store.get(sheetId);
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result) {
+            resolve({ fileName: result.fileName, fileSize: result.fileSize, savedAt: result.savedAt });
+          } else {
+            resolve(null);
+          }
+        };
+        request.onerror = () => resolve(null);
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Check if a PDF is stored for a sheet
+   * @param {string} sheetId
+   * @returns {Promise<boolean>}
+   */
+  async hasPdf(sheetId) {
+    const meta = await this.getPdfMeta(sheetId);
+    return !!meta;
+  }
+
+  /**
+   * Delete a stored PDF
+   * @param {string} sheetId
+   * @returns {Promise<boolean>}
+   */
+  async deletePdf(sheetId) {
+    try {
+      const db = await this._getDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.storeName, 'readwrite');
+        const store = tx.objectStore(this.storeName);
+        store.delete(sheetId);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+}
+
+window.DATA.pdfStore = new PdfStore();
 
 /**
  * Modern Empty State UI Helper

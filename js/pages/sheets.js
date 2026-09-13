@@ -26,8 +26,15 @@ const SheetsPage = {
         date: item.date || '2026-09-12',
         type: item.type || (isAr ? 'شيت' : 'Sheet'),
         pages: item.pages || 18,
-        size: item.size || '3.2 MB'
-      }));
+        size: item.size || '3.2 MB',
+        order_index: typeof item.order_index === 'number' ? item.order_index : null,
+        pdf_source: item.pdf_source || 'none'
+      })).sort((a, b) => {
+        const oa = a.order_index !== null ? a.order_index : 9999;
+        const ob = b.order_index !== null ? b.order_index : 9999;
+        if (oa !== ob) return oa - ob;
+        return (b.date || '').localeCompare(a.date || '');
+      });
     };
 
     const allSheets = getAllSheets();
@@ -84,6 +91,11 @@ const SheetsPage = {
           <!-- Top: Type Badge + Lecture Title -->
           <div class="sheet-card-top">
             <div class="sheet-badge-group">
+              ${item.order_index ? `
+                <span class="sheet-order-pill" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px;">
+                  ${isAr ? `الشيت #${item.order_index}` : `Sheet #${item.order_index}`}
+                </span>
+              ` : ''}
               <span class="sheet-type-pill" style="display: inline-flex; align-items: center; gap: 6px;">
                 <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;" />
                 ${item.type || 'PDF Sheet'}

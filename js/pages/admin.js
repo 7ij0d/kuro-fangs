@@ -185,6 +185,221 @@ window.AdminPage = (function () {
     });
   }
 
+  function showDoubleConfirmModal(sheetTitle, onFinalConfirm) {
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    let confirmEl = document.getElementById('admin-confirm-backdrop');
+    if (confirmEl) confirmEl.remove();
+
+    const markup = `
+      <div id="admin-confirm-backdrop" class="doc-viewer-backdrop active" style="z-index: 100000; background: rgba(10, 11, 18, 0.88); backdrop-filter: blur(12px);">
+        <div class="card" style="max-width: 440px; width: 90%; padding: 28px 24px; border-radius: 20px; text-align: center; border: 1.5px solid #EF4444; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: docZoomIn 0.2s ease;">
+          <div style="width: 64px; height: 64px; margin: 0 auto 14px; background: rgba(239, 68, 68, 0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #EF4444;">
+            <i data-lucide="alert-triangle" style="width: 32px; height: 32px;"></i>
+          </div>
+          <h3 id="dc-title" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">
+            ${isAr ? 'تأكيد الحذف النهائي' : 'Confirm Permanent Deletion'}
+          </h3>
+          <p id="dc-desc" style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+            ${isAr 
+              ? `هل أنت متأكد من حذف هذا الشيت نهائياً؟ <strong>"${sheetTitle}"</strong>` 
+              : `Are you sure you want to permanently delete <strong>"${sheetTitle}"</strong>?`}
+          </p>
+          <div id="dc-input-container" style="display: none; margin-bottom: 16px;">
+            <input type="text" id="dc-confirm-input" class="auth-input" placeholder="${isAr ? "اكتب 'حذف' للتأكيد النهائي" : "Type 'delete' to confirm"}" style="text-align: center;" />
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="btn-cancel-delete" class="btn btn-secondary" style="flex: 1; padding: 10px; font-weight: 700;">
+              ${isAr ? 'إلغاء' : 'Cancel'}
+            </button>
+            <button id="btn-confirm-delete" class="btn btn-primary" style="flex: 1; background: #EF4444; border-color: #EF4444; padding: 10px; font-weight: 800; gap: 6px;">
+              <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+              <span id="dc-btn-text">${isAr ? 'تأكيد' : 'Confirm'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', markup);
+    if (window.lucide) window.lucide.createIcons();
+
+    let stage = 1;
+    const btnCancel = document.getElementById('btn-cancel-delete');
+    const btnConfirm = document.getElementById('btn-confirm-delete');
+    const inputContainer = document.getElementById('dc-input-container');
+    const confirmInput = document.getElementById('dc-confirm-input');
+
+    btnCancel?.addEventListener('click', () => {
+      document.getElementById('admin-confirm-backdrop')?.remove();
+    });
+
+    confirmInput?.addEventListener('input', (e) => {
+      const val = e.target.value.trim().toLowerCase();
+      if (val === 'حذف' || val === 'delete') {
+        btnConfirm.disabled = false;
+        btnConfirm.style.opacity = '1';
+      } else {
+        btnConfirm.disabled = true;
+        btnConfirm.style.opacity = '0.5';
+      }
+    });
+
+    btnConfirm?.addEventListener('click', () => {
+      if (stage === 1) {
+        stage = 2;
+        inputContainer.style.display = 'block';
+        btnConfirm.disabled = true;
+        btnConfirm.style.opacity = '0.5';
+        document.getElementById('dc-desc').style.display = 'none';
+      } else {
+        document.getElementById('admin-confirm-backdrop')?.remove();
+        if (typeof onFinalConfirm === 'function') onFinalConfirm();
+      }
+    });
+  }
+
+  function showEditSheetModal(sheetId, subjects, isAr, reRenderCallback) {
+    let sheet = null;
+    if (window.DATA && Array.isArray(window.DATA.sheets)) {
+      sheet = window.DATA.sheets.find(s => s.id === sheetId);
+    }
+    if (!sheet) {
+      const customSheets = getCustomSheets();
+      sheet = customSheets.find(s => s.id === sheetId);
+    }
+    if (!sheet) return;
+
+    let overlay = document.getElementById('admin-edit-modal-backdrop');
+    if (overlay) overlay.remove();
+
+    const pdfInfo = sheet.pdf_source === 'local' ? '📄 ملف محلي' : (sheet.pdf_source === 'url' ? '🔗 رابط خارجي' : (sheet.pdf_url ? '🔗 رابط خارجي' : '⚠️ لا يوجد ملف'));
+
+    const markup = `
+      <div id="admin-edit-modal-backdrop" class="doc-viewer-backdrop active" style="z-index: 100000; background: rgba(10, 11, 18, 0.88); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 520px; width: 90%; max-height: 90vh; overflow-y: auto; padding: 28px 24px; border-radius: 20px; border: 1px solid var(--border-subtle); box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: docZoomIn 0.2s ease;">
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="edit" style="color: var(--brand-primary); width: 22px; height: 22px;"></i>
+            <span>${isAr ? 'تعديل الشيت' : 'Edit Sheet'}</span>
+          </h3>
+          <form id="form-edit-sheet" style="display: grid; gap: 14px; text-align: start;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالعربية):' : 'Title (AR):'}</label>
+              <input type="text" id="edit-sheet-title-ar" class="auth-input" value="${sheet.title_ar || sheet.title || ''}" required />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالإنجليزية):' : 'Title (EN):'}</label>
+              <input type="text" id="edit-sheet-title-en" class="auth-input" dir="ltr" value="${sheet.title_en || ''}" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'المادة الدراسية:' : 'Subject:'}</label>
+              <select id="edit-sheet-subject" class="auth-input" required>
+                ${subjects.map(s => `<option value="${s.id}" ${s.id === sheet.subject_id ? 'selected' : ''}>${isAr ? s.name_ar : s.name_en}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أستاذ المادة (الدكتور):' : 'Doctor:'}</label>
+              <input type="text" id="edit-sheet-doctor" class="auth-input" value="${sheet.doctor_name || ''}" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عدد الصفحات:' : 'Pages:'}</label>
+              <input type="number" id="edit-sheet-pages" class="auth-input" min="1" value="${parseInt(sheet.pages) || 12}" required />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'الترتيب (Order):' : 'Order Index:'}</label>
+              <select id="edit-sheet-order" class="auth-input">
+                <option value="auto">${isAr ? 'تلقائي (آخر ترتيب)' : 'Auto'}</option>
+                ${Array.from({length: 20}, (_, i) => i + 1).map(i => `<option value="${i}" ${i === sheet.order_index ? 'selected' : ''}>${i}</option>`).join('')}
+              </select>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-size: 0.8rem; margin-bottom: 8px;">${isAr ? 'الملف الحالي:' : 'Current File:'} <span style="color: #38BDF8;">${pdfInfo}</span></div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'استبدال بملف PDF جديد:' : 'Replace with new PDF:'}</label>
+              <input type="file" id="edit-sheet-file" accept="application/pdf" style="font-size: 0.8rem;" />
+              <div style="margin-top: 8px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أو رابط PDF خارجي:' : 'Or external PDF URL:'}</label>
+                <input type="url" id="edit-sheet-url" class="auth-input" dir="ltr" value="${sheet.pdf_source === 'url' ? (sheet.pdf_url || '') : (sheet.pdf_url || '')}" placeholder="https://..." />
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button type="button" id="btn-cancel-edit" class="btn btn-secondary" style="flex: 1; padding: 10px; font-weight: 700;">
+                ${isAr ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button type="submit" class="btn btn-primary" style="flex: 1; padding: 10px; font-weight: 800;">
+                ${isAr ? 'حفظ التغييرات' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', markup);
+    if (window.lucide) window.lucide.createIcons();
+
+    document.getElementById('btn-cancel-edit')?.addEventListener('click', () => {
+      document.getElementById('admin-edit-modal-backdrop')?.remove();
+    });
+
+    document.getElementById('form-edit-sheet')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const updates = {
+        title_ar: document.getElementById('edit-sheet-title-ar').value.trim(),
+        title_en: document.getElementById('edit-sheet-title-en').value.trim(),
+        subject_id: document.getElementById('edit-sheet-subject').value,
+        doctor_name: document.getElementById('edit-sheet-doctor').value.trim(),
+        pages: document.getElementById('edit-sheet-pages').value.trim(),
+      };
+      
+      const orderVal = document.getElementById('edit-sheet-order').value;
+      if (orderVal !== 'auto') {
+        updates.order_index = parseInt(orderVal, 10);
+      }
+      
+      const fileInput = document.getElementById('edit-sheet-file');
+      const urlInput = document.getElementById('edit-sheet-url');
+      
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 15 * 1024 * 1024) {
+          if (window.showToast) window.showToast(isAr ? 'الملف كبير جداً (الحد الأقصى 15MB)' : 'File too large (Max 15MB)', {type: 'error'});
+          return;
+        }
+        if (window.DATA && window.DATA.pdfStore) {
+          await window.DATA.pdfStore.savePdf(sheetId, file);
+        }
+        updates.pdf_source = 'local';
+        updates.pdf_url = '';
+        updates.download_url = '';
+      } else if (urlInput.value.trim()) {
+        updates.pdf_source = 'url';
+        updates.pdf_url = urlInput.value.trim();
+        updates.download_url = urlInput.value.trim();
+      }
+
+      if (window.DATA && window.DATA.updateSheet) {
+        await window.DATA.updateSheet(sheetId, updates);
+      } else {
+        const customSheets = getCustomSheets();
+        const idx = customSheets.findIndex(s => s.id === sheetId);
+        if (idx !== -1) {
+          customSheets[idx] = { ...customSheets[idx], ...updates };
+          saveCustomSheets(customSheets);
+        }
+        if (window.DATA && window.DATA.sheets) {
+          const idx2 = window.DATA.sheets.findIndex(s => s.id === sheetId);
+          if (idx2 !== -1) {
+            window.DATA.sheets[idx2] = { ...window.DATA.sheets[idx2], ...updates };
+          }
+        }
+      }
+
+      document.getElementById('admin-edit-modal-backdrop')?.remove();
+      if (window.showToast) window.showToast(isAr ? 'تم تعديل الشيت بنجاح' : 'Sheet updated successfully', {type: 'success'});
+      if (typeof reRenderCallback === 'function') reRenderCallback();
+    });
+  }
+
   // --- RENDER AUTH PROMPT ---
   function renderAuthPrompt(container, isAr) {
     container.innerHTML = `
@@ -398,12 +613,12 @@ window.AdminPage = (function () {
           <form id="form-add-sheet" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالعربية):' : 'Title (AR):'}</label>
-              <input type="text" id="add-sheet-title-ar" class="auth-input" placeholder="عنوان المحاضرة بالعربية..." required />
+              <input type="text" id="add-sheet-title-ar" class="auth-input" placeholder="عنوان الشيت بالعربية" required />
             </div>
 
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالإنجليزية):' : 'Title (EN):'}</label>
-              <input type="text" id="add-sheet-title-en" class="auth-input" placeholder="Lecture Title in English..." required />
+              <input type="text" id="add-sheet-title-en" class="auth-input" placeholder="Sheet Title in English" dir="ltr" />
             </div>
 
             <div>
@@ -415,17 +630,32 @@ window.AdminPage = (function () {
 
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أستاذ المادة (الدكتور):' : 'Doctor:'}</label>
-              <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="د. هالة الحويج..." required />
+              <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="اسم الدكتور" />
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عدد الصفحات والحجم:' : 'Pages & Size:'}</label>
-              <input type="text" id="add-sheet-pages" class="auth-input" placeholder="17 صفحة • 2.8 MB" required />
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عدد الصفحات:' : 'Pages:'}</label>
+              <input type="number" id="add-sheet-pages" class="auth-input" value="12" min="1" required />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'الترتيب (Order):' : 'Order Index:'}</label>
+              <select id="add-sheet-order" class="auth-input">
+                <option value="auto">${isAr ? 'تلقائي (آخر ترتيب)' : 'Auto'}</option>
+                ${Array.from({length: 20}, (_, i) => i + 1).map(i => `<option value="${i}">${i}</option>`).join('')}
+              </select>
             </div>
 
             <div style="grid-column: 1 / -1;">
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'رابط ملف الـ PDF (URL):' : 'PDF File URL:'}</label>
-              <input type="url" id="add-sheet-url" class="auth-input" placeholder="https://..." value="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" required />
+              <div id="pdf-drop-zone" style="border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.02); margin-bottom: 8px;">
+                <input type="file" id="add-sheet-file" accept="application/pdf" style="display: none;">
+                <div id="pdf-drop-label">📄 ${isAr ? 'اسحب ملف PDF هنا أو انقر للاختيار' : 'Drag PDF here or click to select'}<br><span style="font-size: 0.75rem; opacity: 0.6;">${isAr ? 'الحد الأقصى: 15MB' : 'Max size: 15MB'}</span></div>
+                <div id="pdf-file-preview" style="display: none; color: #34D399;"></div>
+              </div>
+              <div style="margin-top: 6px;">
+                <button type="button" id="toggle-url-input" style="background: none; border: none; color: #38BDF8; font-size: 0.75rem; cursor: pointer; padding: 0;">${isAr ? 'أو أدخل رابط PDF يدوياً ▼' : 'Or enter PDF URL manually ▼'}</button>
+                <input type="url" id="add-sheet-url" class="auth-input" placeholder="https://example.com/file.pdf" dir="ltr" style="display: none; margin-top: 6px;" />
+              </div>
             </div>
 
             <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
@@ -437,55 +667,41 @@ window.AdminPage = (function () {
           </form>
         </div>
 
-        <!-- Sheets Live Table -->
+        <!-- Sheets Live Cards -->
         <div class="card" style="padding: 24px; border-radius: 16px;">
           <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
             <i data-lucide="file-text" style="color: var(--brand-primary); width: 20px; height: 20px;"></i>
             <span>${isAr ? 'قائمة الملازم والشيتات المنشورة (إمكانية التعديل والحذف مع تأكيد الحذف)' : 'Published Sheets List'}</span>
           </h3>
 
-          <div style="overflow-x: auto;">
-            <table class="table-spec" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-              <thead>
-                <tr style="background: var(--bg-surface-subtle); border-bottom: 2px solid var(--border-subtle);">
-                  <th style="padding: 10px; text-align: right;">${isAr ? 'عنوان الشيت' : 'Sheet Title'}</th>
-                  <th style="padding: 10px; text-align: right;">${isAr ? 'المادة' : 'Subject'}</th>
-                  <th style="padding: 10px; text-align: right;">${isAr ? 'الدكتور' : 'Doctor'}</th>
-                  <th style="padding: 10px; text-align: center;">${isAr ? 'الصفحات' : 'Pages'}</th>
-                  <th style="padding: 10px; text-align: center;">${isAr ? 'الإجراءات والتحكم' : 'Actions'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${sheets.length === 0 ? `
-                  <tr>
-                    <td colspan="5" style="text-align: center; padding: 28px; color: var(--text-muted); font-size: 0.9rem;">
-                      ${isAr ? 'لا توجد شيتات أو ملازم منشورة حالياً' : 'No sheets published'}
-                    </td>
-                  </tr>
-                ` : sheets.map(s => `
-                  <tr style="border-bottom: 1px solid var(--border-subtle);">
-                    <td style="padding: 12px 10px; font-weight: 700; color: var(--text-primary);">
-                      ${s.title_ar || s.title_en || s.title}
-                    </td>
-                    <td style="padding: 10px; color: var(--brand-primary); font-weight: 600;">
-                      ${s.subject_name || s.subject_id}
-                    </td>
-                    <td style="padding: 10px; color: var(--text-secondary);">
-                      ${s.doctor_name || 'د. هالة الحويج'}
-                    </td>
-                    <td style="padding: 10px; text-align: center; color: var(--text-muted);">
-                      ${s.pages || 17} صفحة
-                    </td>
-                    <td style="padding: 10px; text-align: center;">
-                      <button class="btn btn-secondary btn-sm btn-delete-sheet" data-id="${s.id}" data-title="${s.title_ar || s.title_en || s.title}" style="color: #EF4444; border-color: rgba(239,68,68,0.3); padding: 4px 10px; font-size: 0.775rem; font-weight: 700;">
-                        <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
-                        <span>${isAr ? 'حذف نهائي' : 'Delete'}</span>
-                      </button>
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            ${sheets.length === 0 ? `
+              <div style="text-align: center; padding: 28px; color: var(--text-muted); font-size: 0.9rem;">
+                ${isAr ? 'لا توجد شيتات أو ملازم منشورة حالياً' : 'No sheets published'}
+              </div>
+            ` : sheets.map(s => {
+              const pdfIcon = s.pdf_source === 'local' ? '📄' : (s.pdf_source === 'url' ? '🔗' : (s.pdf_url ? '🔗' : '⚠️'));
+              return `
+              <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; border-radius: 12px; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <div style="margin-bottom: 6px;">
+                      <span style="background: #0284C7; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800;">${isAr ? 'الشيت #' : 'Sheet #'}${s.order_index || '—'}</span>
+                      <span style="font-size: 0.8rem; margin-inline-start: 8px; color: var(--text-secondary);">${pdfIcon}</span>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 1rem; display: block;">${s.title_ar || s.title || ''}</strong>
+                    <span style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-top: 2px;" dir="ltr">${s.title_en || ''}</span>
+                    <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">${s.subject_name || s.subject_id} • <span style="color: var(--text-muted);">${s.doctor_name || 'د. هالة الحويج'}</span></div>
+                  </div>
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn-move-up-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Up">⬆️</button>
+                    <button class="btn-move-down-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Down">⬇️</button>
+                    <button class="btn-edit-sheet" data-id="${s.id}" style="background: #1E40AF; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s;">✏️ ${isAr ? 'تعديل' : 'Edit'}</button>
+                    <button class="btn-delete-sheet" data-id="${s.id}" data-title="${s.title_ar || s.title_en || s.title}" style="background: #991B1B; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s;">🗑️ ${isAr ? 'حذف' : 'Delete'}</button>
+                  </div>
+                </div>
+              </div>
+            `}).join('')}
           </div>
         </div>
       </div>
@@ -677,27 +893,119 @@ window.AdminPage = (function () {
 
   // --- ATTACH EVENT LISTENERS & CONFIRM MODAL CALLS ---
   function attachTabListeners(container, isAr) {
-    // 1. Add Sheet Form
-    document.getElementById('form-add-sheet')?.addEventListener('submit', (e) => {
+    // 1. Add Sheet Form & Drag-and-drop
+    const dropZone = document.getElementById('pdf-drop-zone');
+    const fileInput = document.getElementById('add-sheet-file');
+    const dropLabel = document.getElementById('pdf-drop-label');
+    const filePreview = document.getElementById('pdf-file-preview');
+    const toggleUrlBtn = document.getElementById('toggle-url-input');
+    const urlInput = document.getElementById('add-sheet-url');
+
+    if (dropZone && fileInput) {
+      dropZone.addEventListener('click', () => fileInput.click());
+      
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#38BDF8';
+        dropZone.style.background = 'rgba(56, 189, 248, 0.1)';
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
+        dropZone.style.background = 'rgba(255,255,255,0.02)';
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
+        dropZone.style.background = 'rgba(255,255,255,0.02)';
+        
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          updateFilePreview();
+        }
+      });
+      
+      fileInput.addEventListener('change', updateFilePreview);
+      
+      function updateFilePreview() {
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          dropLabel.style.display = 'none';
+          filePreview.style.display = 'block';
+          filePreview.textContent = `✅ ${file.name} (${(file.size / (1024*1024)).toFixed(2)} MB)`;
+        } else {
+          dropLabel.style.display = 'block';
+          filePreview.style.display = 'none';
+        }
+      }
+    }
+
+    if (toggleUrlBtn && urlInput) {
+      toggleUrlBtn.addEventListener('click', () => {
+        if (urlInput.style.display === 'none') {
+          urlInput.style.display = 'block';
+          toggleUrlBtn.textContent = isAr ? 'إخفاء رابط PDF ▲' : 'Hide PDF URL ▲';
+        } else {
+          urlInput.style.display = 'none';
+          urlInput.value = '';
+          toggleUrlBtn.textContent = isAr ? 'أو أدخل رابط PDF يدوياً ▼' : 'Or enter PDF URL manually ▼';
+        }
+      });
+    }
+
+    document.getElementById('form-add-sheet')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const titleAr = document.getElementById('add-sheet-title-ar')?.value.trim();
       const titleEn = document.getElementById('add-sheet-title-en')?.value.trim() || titleAr;
       const subjectId = document.getElementById('add-sheet-subject')?.value;
       const doctor = document.getElementById('add-sheet-doctor')?.value.trim();
       const pages = document.getElementById('add-sheet-pages')?.value.trim();
+      const orderVal = document.getElementById('add-sheet-order')?.value;
       const url = document.getElementById('add-sheet-url')?.value.trim();
+      
+      const file = fileInput?.files?.length > 0 ? fileInput.files[0] : null;
+
+      if (file && file.size > 15 * 1024 * 1024) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'الملف كبير جداً (الحد الأقصى 15MB)' : 'File too large (Max 15MB)', { type: 'error' });
+        }
+        return;
+      }
+
+      let order_index = 1;
+      if (orderVal === 'auto') {
+        if (window.DATA && window.DATA.getNextOrderIndex) {
+          order_index = window.DATA.getNextOrderIndex(subjectId);
+        } else {
+          const curSheets = window.DATA?.sheets || getCustomSheets();
+          const subjSheets = curSheets.filter(s => s.subject_id === subjectId);
+          order_index = subjSheets.length > 0 ? Math.max(...subjSheets.map(s => parseInt(s.order_index) || 0)) + 1 : 1;
+        }
+      } else {
+        order_index = parseInt(orderVal, 10) || 1;
+      }
+
+      const newSheetId = 'sh_admin_' + Date.now();
+      const pdf_source = file ? 'local' : (url ? 'url' : 'none');
 
       const newSheet = {
-        id: 'sh_admin_' + Date.now(),
+        id: newSheetId,
         subject_id: subjectId,
         title_ar: titleAr,
         title_en: titleEn,
         doctor_name: doctor,
         pages: pages,
+        order_index: order_index,
+        pdf_source: pdf_source,
         pdf_url: url,
         download_url: url,
         date: new Date().toISOString().split('T')[0]
       };
+
+      if (file && window.DATA && window.DATA.pdfStore) {
+        await window.DATA.pdfStore.savePdf(newSheetId, file);
+      }
 
       if (window.DATA) {
         if (!Array.isArray(window.DATA.sheets)) window.DATA.sheets = [];
@@ -715,17 +1023,49 @@ window.AdminPage = (function () {
       render(container);
     });
 
-    // 2. Delete Sheet WITH CONFIRMATION MODAL & PERMANENT ID PERSISTENCE
+    // Edit Sheet Button
+    container.querySelectorAll('.btn-edit-sheet').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const subjects = window.DATA ? window.DATA.getSubjects() : [];
+        showEditSheetModal(id, subjects, isAr, () => render(container));
+      });
+    });
+
+    // Reorder Buttons
+    container.querySelectorAll('.btn-move-up-sheet').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        if (window.DATA && window.DATA.reorderSheet) {
+          window.DATA.reorderSheet(id, 'up');
+          render(container);
+        }
+      });
+    });
+
+    container.querySelectorAll('.btn-move-down-sheet').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        if (window.DATA && window.DATA.reorderSheet) {
+          window.DATA.reorderSheet(id, 'down');
+          render(container);
+        }
+      });
+    });
+
+    // 2. Delete Sheet WITH DOUBLE CONFIRMATION MODAL & PDF STORE CLEANUP
     container.querySelectorAll('.btn-delete-sheet').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
         const title = btn.getAttribute('data-title') || 'هذا الشيت';
 
-        showConfirmModal(title, 'sheet', () => {
-          // Permanently mark ID as deleted in localStorage
+        showDoubleConfirmModal(title, async () => {
+          if (window.DATA && window.DATA.pdfStore && window.DATA.pdfStore.deletePdf) {
+            await window.DATA.pdfStore.deletePdf(id);
+          }
+
           addDeletedSheetId(id);
 
-          // Remove from memory
           if (window.DATA && Array.isArray(window.DATA.sheets)) {
             window.DATA.sheets = window.DATA.sheets.filter(s => s.id !== id);
           }
@@ -734,7 +1074,7 @@ window.AdminPage = (function () {
           saveCustomSheets(cur);
 
           if (typeof window.showToast === 'function') {
-            window.showToast(isAr ? `تم حذف "${title}" نهائياً ومنع ظهوره لجميع الطلبة.` : 'Sheet deleted permanently.', { type: 'success' });
+            window.showToast(isAr ? `تم حذف "${title}" نهائياً.` : 'Sheet deleted permanently.', { type: 'success' });
           }
 
           render(container);
