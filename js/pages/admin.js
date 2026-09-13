@@ -283,12 +283,8 @@ window.AdminPage = (function () {
           </h3>
           <form id="form-edit-sheet" style="display: grid; gap: 14px; text-align: start;">
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالعربية):' : 'Title (AR):'}</label>
-              <input type="text" id="edit-sheet-title-ar" class="auth-input" value="${sheet.title_ar || sheet.title || ''}" required />
-            </div>
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالإنجليزية):' : 'Title (EN):'}</label>
-              <input type="text" id="edit-sheet-title-en" class="auth-input" dir="ltr" value="${sheet.title_en || ''}" />
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (عنوان واحد):' : 'Sheet Title:'}</label>
+              <input type="text" id="edit-sheet-title" class="auth-input" value="${sheet.title_ar || sheet.title_en || sheet.title || ''}" required placeholder="${isAr ? 'عنوان الشيت' : 'Sheet title'}" />
             </div>
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'المادة الدراسية:' : 'Subject:'}</label>
@@ -298,21 +294,17 @@ window.AdminPage = (function () {
             </div>
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أستاذ المادة (الدكتور):' : 'Doctor:'}</label>
-              <input type="text" id="edit-sheet-doctor" class="auth-input" value="${sheet.doctor_name || ''}" />
-            </div>
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عدد الصفحات:' : 'Pages:'}</label>
-              <input type="number" id="edit-sheet-pages" class="auth-input" min="1" value="${parseInt(sheet.pages) || 12}" required />
+              <input type="text" id="edit-sheet-doctor" class="auth-input" value="${sheet.doctor_name || ''}" placeholder="${isAr ? 'اسم الدكتور' : 'Doctor Name'}" />
             </div>
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'الترتيب (Order):' : 'Order Index:'}</label>
               <select id="edit-sheet-order" class="auth-input">
                 <option value="auto">${isAr ? 'تلقائي (آخر ترتيب)' : 'Auto'}</option>
-                ${Array.from({length: 20}, (_, i) => i + 1).map(i => `<option value="${i}" ${i === sheet.order_index ? 'selected' : ''}>${i}</option>`).join('')}
+                ${Array.from({length: 30}, (_, i) => i + 1).map(i => `<option value="${i}" ${i === sheet.order_index ? 'selected' : ''}>${isAr ? `الشيت رقم ${i}` : `Sheet #${i}`}</option>`).join('')}
               </select>
             </div>
             <div style="background: rgba(255,255,255,0.02); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
-              <div style="font-size: 0.8rem; margin-bottom: 8px;">${isAr ? 'الملف الحالي:' : 'Current File:'} <span style="color: #38BDF8;">${pdfInfo}</span></div>
+              <div style="font-size: 0.8rem; margin-bottom: 8px;">${isAr ? 'الملف الحالي:' : 'Current File:'} <span style="color: #38BDF8;">${pdfInfo}</span> (${sheet.pages || '—'} ${isAr ? 'صفحة' : 'pages'})</div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'استبدال بملف PDF جديد:' : 'Replace with new PDF:'}</label>
               <input type="file" id="edit-sheet-file" accept="application/pdf" style="font-size: 0.8rem;" />
               <div style="margin-top: 8px;">
@@ -343,38 +335,38 @@ window.AdminPage = (function () {
     document.getElementById('form-edit-sheet')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      const singleTitle = document.getElementById('edit-sheet-title').value.trim();
       const updates = {
-        title_ar: document.getElementById('edit-sheet-title-ar').value.trim(),
-        title_en: document.getElementById('edit-sheet-title-en').value.trim(),
+        title_ar: singleTitle,
+        title_en: singleTitle,
+        title: singleTitle,
         subject_id: document.getElementById('edit-sheet-subject').value,
         doctor_name: document.getElementById('edit-sheet-doctor').value.trim(),
-        pages: document.getElementById('edit-sheet-pages').value.trim(),
       };
       
       const orderVal = document.getElementById('edit-sheet-order').value;
       if (orderVal !== 'auto') {
         updates.order_index = parseInt(orderVal, 10);
       }
-      
-      const fileInput = document.getElementById('edit-sheet-file');
-      const urlInput = document.getElementById('edit-sheet-url');
-      
-      if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
+
+      const editFileInput = document.getElementById('edit-sheet-file');
+      const editUrlInput = document.getElementById('edit-sheet-url');
+      if (editFileInput && editFileInput.files.length > 0) {
+        const file = editFileInput.files[0];
         if (file.size > 15 * 1024 * 1024) {
           if (window.showToast) window.showToast(isAr ? 'الملف كبير جداً (الحد الأقصى 15MB)' : 'File too large (Max 15MB)', {type: 'error'});
           return;
         }
+        const detectedPages = await detectPdfPageCount(file);
+        if (detectedPages) updates.pages = `${detectedPages}`;
+        updates.pdf_source = 'local';
         if (window.DATA && window.DATA.pdfStore) {
           await window.DATA.pdfStore.savePdf(sheetId, file);
         }
-        updates.pdf_source = 'local';
-        updates.pdf_url = '';
-        updates.download_url = '';
-      } else if (urlInput.value.trim()) {
+      } else if (editUrlInput && editUrlInput.value.trim()) {
+        updates.pdf_url = editUrlInput.value.trim();
+        updates.download_url = editUrlInput.value.trim();
         updates.pdf_source = 'url';
-        updates.pdf_url = urlInput.value.trim();
-        updates.download_url = urlInput.value.trim();
       }
 
       if (window.DATA && window.DATA.updateSheet) {
@@ -599,28 +591,60 @@ window.AdminPage = (function () {
     `;
   }
 
+  // --- AUTOMATIC PDF PAGE COUNTER HELPER ---
+  async function detectPdfPageCount(fileOrBlob) {
+    if (!fileOrBlob) return null;
+    try {
+      const arrayBuffer = await fileOrBlob.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const text = new TextDecoder('latin1').decode(bytes);
+
+      // Method 1: Search for /Count N in Catalog or Pages dictionaries
+      const countMatches = [...text.matchAll(/\/Count\s+(\d+)/g)];
+      if (countMatches.length > 0) {
+        const counts = countMatches.map(m => parseInt(m[1], 10)).filter(n => n > 0 && n < 5000);
+        if (counts.length > 0) {
+          return Math.max(...counts);
+        }
+      }
+
+      // Method 2: Count occurrences of /Type /Page
+      const pageMatches = text.match(/\/Type\s*\/Page\b/g);
+      if (pageMatches && pageMatches.length > 0) {
+        return pageMatches.length;
+      }
+    } catch (e) {
+      console.warn('PDF page calculation failed:', e);
+    }
+    return null;
+  }
+
   // --- SHEETS TAB ---
   function renderSheetsTab(isAr, sheets, subjects) {
     return `
       <div>
-        <!-- Add New Sheet Form -->
+        <!-- Add New Sheet Form (Simplified Single Title, Single Doctor, Auto Pages) -->
         <div class="card" style="padding: 24px; border-radius: 16px; margin-bottom: 24px; border-left: 4px solid var(--brand-burgundy);">
-          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
             <i data-lucide="plus-circle" style="color: var(--brand-burgundy); width: 22px; height: 22px;"></i>
             <span>${isAr ? 'إضافة ونشر شيت جديد للمنصة' : 'Add New Sheet / Handout'}</span>
           </h3>
 
           <form id="form-add-sheet" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالعربية):' : 'Title (AR):'}</label>
-              <input type="text" id="add-sheet-title-ar" class="auth-input" placeholder="عنوان الشيت بالعربية" required />
+            
+            <!-- 1. Single Title Field (Arabic or English) -->
+            <div style="grid-column: 1 / -1;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت / المحاضرة (عربي أو إنجليزي):' : 'Sheet / Handout Title:'}</label>
+              <input type="text" id="add-sheet-title" class="auth-input" placeholder="${isAr ? 'أدخل عنوان الشيت (مثال: Provisional Restorations)' : 'Enter sheet title in Arabic or English...'}" required style="width: 100%; font-weight: 600;" />
             </div>
 
+            <!-- 2. Single Doctor Name Field -->
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت (بالإنجليزية):' : 'Title (EN):'}</label>
-              <input type="text" id="add-sheet-title-en" class="auth-input" placeholder="Sheet Title in English" dir="ltr" />
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أستاذ المادة (الدكتور):' : 'Doctor Name:'}</label>
+              <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="${isAr ? 'اسم الدكتور (مثال: د. هالة الحويج)' : 'Doctor name (e.g. Dr. Hala Alhawij)'}" required />
             </div>
 
+            <!-- 3. Subject Selection -->
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'المادة الدراسية:' : 'Subject:'}</label>
               <select id="add-sheet-subject" class="auth-input" required>
@@ -628,39 +652,44 @@ window.AdminPage = (function () {
               </select>
             </div>
 
+            <!-- 4. Order Index Selection -->
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أستاذ المادة (الدكتور):' : 'Doctor:'}</label>
-              <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="اسم الدكتور" />
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عدد الصفحات:' : 'Pages:'}</label>
-              <input type="number" id="add-sheet-pages" class="auth-input" value="12" min="1" required />
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'الترتيب (Order):' : 'Order Index:'}</label>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'ترتيب الشيت في المادة (Order):' : 'Sheet Order Index:'}</label>
               <select id="add-sheet-order" class="auth-input">
-                <option value="auto">${isAr ? 'تلقائي (آخر ترتيب)' : 'Auto'}</option>
-                ${Array.from({length: 20}, (_, i) => i + 1).map(i => `<option value="${i}">${i}</option>`).join('')}
+                <option value="auto">${isAr ? 'تلقائي (حسب التسلسل التالي)' : 'Auto (Next Sequence)'}</option>
+                ${Array.from({length: 30}, (_, i) => i + 1).map(i => `<option value="${i}">${isAr ? `الشيت رقم ${i}` : `Sheet #${i}`}</option>`).join('')}
               </select>
             </div>
 
-            <div style="grid-column: 1 / -1;">
-              <div id="pdf-drop-zone" style="border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.02); margin-bottom: 8px;">
-                <input type="file" id="add-sheet-file" accept="application/pdf" style="display: none;">
-                <div id="pdf-drop-label">📄 ${isAr ? 'اسحب ملف PDF هنا أو انقر للاختيار' : 'Drag PDF here or click to select'}<br><span style="font-size: 0.75rem; opacity: 0.6;">${isAr ? 'الحد الأقصى: 15MB' : 'Max size: 15MB'}</span></div>
-                <div id="pdf-file-preview" style="display: none; color: #34D399;"></div>
-              </div>
-              <div style="margin-top: 6px;">
-                <button type="button" id="toggle-url-input" style="background: none; border: none; color: #38BDF8; font-size: 0.75rem; cursor: pointer; padding: 0;">${isAr ? 'أو أدخل رابط PDF يدوياً ▼' : 'Or enter PDF URL manually ▼'}</button>
-                <input type="url" id="add-sheet-url" class="auth-input" placeholder="https://example.com/file.pdf" dir="ltr" style="display: none; margin-top: 6px;" />
+            <!-- 5. Auto-Detected Page Count Status Pill -->
+            <div style="display: flex; align-items: flex-end;">
+              <div id="pdf-auto-pages-pill" style="width: 100%; background: rgba(2, 132, 199, 0.08); border: 1px dashed rgba(2, 132, 199, 0.3); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                <span>📊 ${isAr ? 'عدد الصفحات (تلقائي):' : 'Page Count (Auto):'}</span>
+                <strong id="pdf-auto-pages-val" style="color: #0284C7; font-weight: 800;">${isAr ? 'يتم التحديد عند المعاينة' : 'Auto-detected'}</strong>
               </div>
             </div>
 
-            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
-              <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-weight: 800; gap: 6px;">
-                <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+            <!-- 6. PDF File Upload Drag & Drop Zone -->
+            <div style="grid-column: 1 / -1;">
+              <div id="pdf-drop-zone" style="border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.02); margin-bottom: 8px;">
+                <input type="file" id="add-sheet-file" accept="application/pdf" style="display: none;">
+                <div id="pdf-drop-label">
+                  <i data-lucide="file-up" style="width: 28px; height: 28px; color: #38BDF8; margin-bottom: 4px; display: inline-block;"></i>
+                  <div style="font-weight: 700; font-size: 0.875rem;">${isAr ? 'اسحب ملف الـ PDF هنا أو انقر للاختيار من جهازك' : 'Drag PDF here or click to select'}</div>
+                  <span style="font-size: 0.75rem; opacity: 0.6;">${isAr ? 'يتم حساب عدد الصفحات تلقائياً (الحد الأقصى: 15MB)' : 'Page count detected automatically (Max size: 15MB)'}</span>
+                </div>
+                <div id="pdf-file-preview" style="display: none; color: #34D399; font-weight: 700;"></div>
+              </div>
+              <div style="margin-top: 6px;">
+                <button type="button" id="toggle-url-input" style="background: none; border: none; color: #38BDF8; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0;">${isAr ? '🔗 أو أدخل رابط PDF يدوياً ▼' : '🔗 Or enter PDF URL manually ▼'}</button>
+                <input type="url" id="add-sheet-url" class="auth-input" placeholder="https://example.com/lecture.pdf" dir="ltr" style="display: none; margin-top: 6px; width: 100%;" />
+              </div>
+            </div>
+
+            <!-- 7. Submit Action Button -->
+            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 6px;">
+              <button type="submit" class="btn btn-primary" style="padding: 11px 26px; font-weight: 800; gap: 8px; font-size: 0.925rem;">
+                <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
                 <span>${isAr ? 'نشر الشيت فوراً 🚀' : 'Publish Sheet Live 🚀'}</span>
               </button>
             </div>
@@ -688,15 +717,14 @@ window.AdminPage = (function () {
                     <div style="margin-bottom: 6px;">
                       <span style="background: #0284C7; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800;">${isAr ? 'الشيت #' : 'Sheet #'}${s.order_index || '—'}</span>
                       <span style="font-size: 0.8rem; margin-inline-start: 8px; color: var(--text-secondary);">${pdfIcon}</span>
+                      <span style="font-size: 0.75rem; color: var(--text-muted); margin-inline-start: 8px;">(${s.pages || '—'} ${isAr ? 'صفحة' : 'pages'})</span>
                     </div>
-                    <strong style="color: var(--text-primary); font-size: 1rem; display: block;">${s.title_ar || s.title || ''}</strong>
-                    <span style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-top: 2px;" dir="ltr">${s.title_en || ''}</span>
+                    <strong style="color: var(--text-primary); font-size: 1rem; display: block;">${s.title_ar || s.title_en || s.title || ''}</strong>
                     <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">${s.subject_name || s.subject_id} • <span style="color: var(--text-muted);">${s.doctor_name || 'د. هالة الحويج'}</span></div>
                   </div>
                   <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                     <button class="btn-move-up-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Up">⬆️</button>
                     <button class="btn-move-down-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Down">⬇️</button>
-                    <button class="btn-edit-sheet" data-id="${s.id}" style="background: #1E40AF; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s;">✏️ ${isAr ? 'تعديل' : 'Edit'}</button>
                     <button class="btn-delete-sheet" data-id="${s.id}" data-title="${s.title_ar || s.title_en || s.title}" style="background: #991B1B; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s;">🗑️ ${isAr ? 'حذف' : 'Delete'}</button>
                   </div>
                 </div>
@@ -900,6 +928,7 @@ window.AdminPage = (function () {
     const filePreview = document.getElementById('pdf-file-preview');
     const toggleUrlBtn = document.getElementById('toggle-url-input');
     const urlInput = document.getElementById('add-sheet-url');
+    let currentDetectedPages = null;
 
     if (dropZone && fileInput) {
       dropZone.addEventListener('click', () => fileInput.click());
@@ -928,15 +957,29 @@ window.AdminPage = (function () {
       
       fileInput.addEventListener('change', updateFilePreview);
       
-      function updateFilePreview() {
+      async function updateFilePreview() {
         if (fileInput.files.length > 0) {
           const file = fileInput.files[0];
           dropLabel.style.display = 'none';
           filePreview.style.display = 'block';
-          filePreview.textContent = `✅ ${file.name} (${(file.size / (1024*1024)).toFixed(2)} MB)`;
+          filePreview.textContent = `⏳ ${isAr ? 'جاري فك الملف وحساب عدد الصفحات تلقائياً...' : 'Detecting page count...'}`;
+
+          const count = await detectPdfPageCount(file);
+          currentDetectedPages = count;
+          const countLabel = count ? `${count}` : (isAr ? 'غير محدد' : '1');
+          
+          filePreview.innerHTML = `✅ <strong>${file.name}</strong> (${(file.size / (1024*1024)).toFixed(2)} MB) <span style="background: rgba(16,185,129,0.2); color: #34D399; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; margin-inline-start: 6px;">📊 ${countLabel} ${isAr ? 'صفحة' : 'pages'}</span>`;
+
+          const autoPillVal = document.getElementById('pdf-auto-pages-val');
+          if (autoPillVal) {
+            autoPillVal.textContent = count ? `${count} ${isAr ? 'صفحة' : 'pages'}` : (isAr ? 'تم الاكتشاف' : 'Detected');
+          }
         } else {
           dropLabel.style.display = 'block';
           filePreview.style.display = 'none';
+          currentDetectedPages = null;
+          const autoPillVal = document.getElementById('pdf-auto-pages-val');
+          if (autoPillVal) autoPillVal.textContent = isAr ? 'يتم التحديد عند المعاينة' : 'Auto-detected';
         }
       }
     }
@@ -949,18 +992,16 @@ window.AdminPage = (function () {
         } else {
           urlInput.style.display = 'none';
           urlInput.value = '';
-          toggleUrlBtn.textContent = isAr ? 'أو أدخل رابط PDF يدوياً ▼' : 'Or enter PDF URL manually ▼';
+          toggleUrlBtn.textContent = isAr ? '🔗 أو أدخل رابط PDF يدوياً ▼' : '🔗 Or enter PDF URL manually ▼';
         }
       });
     }
 
     document.getElementById('form-add-sheet')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const titleAr = document.getElementById('add-sheet-title-ar')?.value.trim();
-      const titleEn = document.getElementById('add-sheet-title-en')?.value.trim() || titleAr;
+      const singleTitle = document.getElementById('add-sheet-title')?.value.trim();
       const subjectId = document.getElementById('add-sheet-subject')?.value;
       const doctor = document.getElementById('add-sheet-doctor')?.value.trim();
-      const pages = document.getElementById('add-sheet-pages')?.value.trim();
       const orderVal = document.getElementById('add-sheet-order')?.value;
       const url = document.getElementById('add-sheet-url')?.value.trim();
       
@@ -988,14 +1029,16 @@ window.AdminPage = (function () {
 
       const newSheetId = 'sh_admin_' + Date.now();
       const pdf_source = file ? 'local' : (url ? 'url' : 'none');
+      const finalPages = currentDetectedPages ? `${currentDetectedPages}` : '12';
 
       const newSheet = {
         id: newSheetId,
         subject_id: subjectId,
-        title_ar: titleAr,
-        title_en: titleEn,
+        title_ar: singleTitle,
+        title_en: singleTitle,
+        title: singleTitle,
         doctor_name: doctor,
-        pages: pages,
+        pages: finalPages,
         order_index: order_index,
         pdf_source: pdf_source,
         pdf_url: url,
