@@ -68,6 +68,7 @@ const DocumentViewer = {
     const university = doc.university || 'University of Tripoli - School of Dentistry';
     const year = doc.year || '2025-2026';
     const totalPages = Math.max(1, parseInt(doc.pages, 10) || 1);
+    const pdfUrl = (doc.pdf_resolved_url || doc.pdf_url || doc.download_url || '').replace(/["'\\]/g, '');
 
     return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -1688,6 +1689,8 @@ const DocumentViewer = {
   <script>
     (function() {
     const docId = "${docId}";
+    const pdfUrl = "${pdfUrl}";
+    let totalPages = ${totalPages};
     let currentTool = 'pan'; // pan, pen, highlighter, eraser, note
     let currentColor = '#0F172A';
     let currentStroke = 4.0; // 0.8mm
@@ -2543,6 +2546,19 @@ const DocumentViewer = {
 
     function ensureCanvasSize(canvas, page) {
       if (!canvas || !page) return;
+      if (page.classList.contains('pdf-page-rendered')) {
+        const bgCanvas = page.querySelector('.pdf-render-canvas');
+        if (bgCanvas && bgCanvas.width > 0) {
+          if (canvas.width !== bgCanvas.width || canvas.height !== bgCanvas.height) {
+            canvas.width = bgCanvas.width;
+            canvas.height = bgCanvas.height;
+            const ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+          }
+          return;
+        }
+      }
       const w = page.offsetWidth || 800;
       const h = page.offsetHeight || 1100;
       if (canvas.width !== w || canvas.height !== h) {
@@ -3105,6 +3121,120 @@ const DocumentViewer = {
       if (counterEl) counterEl.textContent = pageNum + ' / ' + totalPages;
     }
 
+    // Render Real Uploaded PDF Pages via PDF.js with Annotation Overlay
+    async function loadPdfPages(url) {
+      if (!url || typeof window.pdfjsLib === 'undefined') return;
+      try {
+        const autoSaveBadge = document.getElementById('auto-save-badge');
+        if (autoSaveBadge) {
+          autoSaveBadge.innerHTML = '<span class="auto-save-dot" style="background: #38BDF8;"></span><span>جاري تحميل صفحات الـ PDF...</span>';
+          autoSaveBadge.style.opacity = '1';
+        }
+
+        const loadingTask = window.pdfjsLib.getDocument({
+          url: url,
+          cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+          cMapPacked: true
+        });
+        const pdf = await loadingTask.promise;
+        const numPages = pdf.numPages;
+        if (!numPages || numPages < 1) return;
+
+        const pagesWrapper = document.getElementById('jnotes-pages-wrapper');
+        if (!pagesWrapper) return;
+
+        pagesWrapper.innerHTML = '';
+        totalPages = numPages;
+
+        for (let p = 1; p <= numPages; p++) {
+          const pdfPage = await pdf.getPage(p);
+          const rawViewport = pdfPage.getViewport({ scale: 1.5 });
+
+          const pageDiv = document.createElement('div');
+          pageDiv.className = 'doc-page pdf-page-rendered';
+          pageDiv.id = 'page-' + p;
+          pageDiv.setAttribute('data-page', p);
+          pageDiv.style.position = 'relative';
+          pageDiv.style.width = 'min(100%, ' + rawViewport.width + 'px)';
+          pageDiv.style.maxWidth = rawViewport.width + 'px';
+          pageDiv.style.aspectRatio = rawViewport.width + ' / ' + rawViewport.height;
+          pageDiv.style.padding = '0';
+          pageDiv.style.margin = '0 auto 20px auto';
+          pageDiv.style.background = '#FFFFFF';
+          pageDiv.style.boxShadow = '0 10px 30px rgba(0,0,0,0.45)';
+          pageDiv.style.borderRadius = '6px';
+          pageDiv.style.overflow = 'hidden';
+
+          // 1. Bottom Canvas for PDF render
+          const pdfCanvas = document.createElement('canvas');
+          pdfCanvas.className = 'pdf-render-canvas';
+          pdfCanvas.width = rawViewport.width;
+          pdfCanvas.height = rawViewport.height;
+          pdfCanvas.style.width = '100%';
+          pdfCanvas.style.height = '100%';
+          pdfCanvas.style.display = 'block';
+          pdfCanvas.style.position = 'absolute';
+          pdfCanvas.style.top = '0';
+          pdfCanvas.style.left = '0';
+          pdfCanvas.style.zIndex = '1';
+          pdfCanvas.style.pointerEvents = 'none';
+
+          // 2. Overlay Canvas for Pencil, Highlighter, and Drawing
+          const overlayCanvas = document.createElement('canvas');
+          overlayCanvas.className = 'canvas-overlay';
+          overlayCanvas.id = 'canvas-' + p;
+          overlayCanvas.width = rawViewport.width;
+          overlayCanvas.height = rawViewport.height;
+          overlayCanvas.style.width = '100%';
+          overlayCanvas.style.height = '100%';
+          overlayCanvas.style.display = 'block';
+          overlayCanvas.style.position = 'absolute';
+          overlayCanvas.style.top = '0';
+          overlayCanvas.style.left = '0';
+          overlayCanvas.style.zIndex = '5';
+          overlayCanvas.style.pointerEvents = currentTool === 'pan' ? 'none' : 'auto';
+
+          pageDiv.appendChild(pdfCanvas);
+          pageDiv.appendChild(overlayCanvas);
+          pagesWrapper.appendChild(pageDiv);
+
+          await pdfPage.render({
+            canvasContext: pdfCanvas.getContext('2d'),
+            viewport: rawViewport
+          }).promise;
+        }
+
+        // Update total pages & counter
+        const counterEl = document.getElementById('page-counter-num');
+        if (counterEl) counterEl.textContent = '1 / ' + numPages;
+
+        // Update sidebar thumbnails list
+        const thumbsList = document.querySelector('.sidebar-thumbnails-list');
+        if (thumbsList) {
+          thumbsList.innerHTML = Array.from({length: numPages}, (_, i) => 
+            '<div class="thumb-card ' + (i === 0 ? 'active' : '') + '" onclick="selectPageAndCloseDrawer(' + (i + 1) + ')">' +
+            '<div class="thumb-num">' + (i + 1) + '</div>' +
+            '<div class="thumb-info">' +
+            '<h5>صفحة ' + (i + 1) + '</h5>' +
+            '<p>Dental Lecture Slide ' + (i + 1) + '</p>' +
+            '</div>' +
+            '</div>'
+          ).join('');
+        }
+
+        // Reconnect all drawing and touch events to newly rendered canvases
+        initCanvases();
+        loadSavedAnnotations();
+
+        if (autoSaveBadge) {
+          autoSaveBadge.innerHTML = '<span class="auto-save-dot"></span><span>تم تحميل الـ PDF وحفظ التأشيرات</span>';
+          setTimeout(() => { autoSaveBadge.style.opacity = '0.7'; }, 2000);
+        }
+      } catch (err) {
+        console.warn('PDF.js rendering note:', err);
+      }
+    }
+
     // Immediate initialization for srcdoc iframe environments
     initCanvases();
     initColorPalette();
@@ -3112,6 +3242,9 @@ const DocumentViewer = {
     initPaperTheme();
     initEraserMode();
     loadSavedAnnotations();
+    if (pdfUrl && pdfUrl.length > 5) {
+      loadPdfPages(pdfUrl);
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       initCanvases();
@@ -3163,34 +3296,14 @@ const DocumentViewer = {
     container.innerHTML = '';
 
     // Check if local or remote PDF file is available for true PDF rendering
-    let pdfSourceUrl = doc.pdf_url || doc.download_url;
+    let pdfSourceUrl = doc.pdf_url || doc.download_url || '';
     if (doc.id && window.DATA?.pdfStore) {
       try {
         const localBlob = await window.DATA.pdfStore.getPdfUrl(doc.id);
         if (localBlob) pdfSourceUrl = localBlob;
       } catch (e) {}
     }
-
-    if (pdfSourceUrl && pdfSourceUrl !== 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf') {
-      const title = doc.title_ar || doc.title_en || doc.title || (isAr ? 'شيت محاضرة' : 'Lecture Sheet');
-      container.innerHTML = `
-        <div style="width: 100%; height: 100vh; background: #12131F; display: flex; flex-direction: column; direction: rtl;">
-          <div style="height: 52px; background: #181926; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 10;">
-            <button onclick="window.location.hash='#/sheets'" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
-              <span>← ${isAr ? 'العودة لقائمة الشيتات' : 'Back to Sheets'}</span>
-            </button>
-            <div style="color: white; font-weight: 800; font-size: 0.9rem; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              📄 ${title}
-            </div>
-            <a href="${pdfSourceUrl}" download="${(doc.title || 'sheet')}.pdf" style="background: #0284C7; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 800; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
-              <span>📥 ${isAr ? 'تنزيل الـ PDF الأصلي' : 'Download PDF'}</span>
-            </a>
-          </div>
-          <iframe src="${pdfSourceUrl}#toolbar=1" style="width: 100%; height: calc(100vh - 52px); border: none;" title="${title}"></iframe>
-        </div>
-      `;
-      return;
-    }
+    this.currentDoc = { ...this.currentDoc, pdf_resolved_url: pdfSourceUrl };
 
     const fullHTML = this.generateDocHTML(this.currentDoc, isAr);
 

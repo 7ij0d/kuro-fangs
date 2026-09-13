@@ -38,6 +38,14 @@
   <!-- Supabase Client CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- PDF.js Engine CDN for in-browser PDF rendering & note annotation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/tokens.css?v=4.6" />
   <link rel="stylesheet" href="css/base.css?v=4.6" />
