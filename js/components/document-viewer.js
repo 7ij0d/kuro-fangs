@@ -3159,7 +3159,7 @@ const DocumentViewer = {
 </html>`;
   },
 
-  renderStudio(container, doc, isAr) {
+  async renderStudio(container, doc, isAr) {
     if (!container) return;
     this.currentDoc = doc || this.currentDoc || {};
 
@@ -3173,6 +3173,36 @@ const DocumentViewer = {
 
     // Wipe previous container nodes completely (strictly prevents duplicated pages)
     container.innerHTML = '';
+
+    // Check if local or remote PDF file is available for true PDF rendering
+    let pdfSourceUrl = doc.pdf_url || doc.download_url;
+    if (doc.id && window.DATA?.pdfStore) {
+      try {
+        const localBlob = await window.DATA.pdfStore.getPdfUrl(doc.id);
+        if (localBlob) pdfSourceUrl = localBlob;
+      } catch (e) {}
+    }
+
+    if (pdfSourceUrl && pdfSourceUrl !== 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf') {
+      const title = doc.title_ar || doc.title_en || doc.title || (isAr ? 'شيت محاضرة' : 'Lecture Sheet');
+      container.innerHTML = `
+        <div style="width: 100%; height: 100vh; background: #12131F; display: flex; flex-direction: column; direction: rtl;">
+          <div style="height: 52px; background: #181926; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 10;">
+            <button onclick="window.location.hash='#/sheets'" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+              <span>← ${isAr ? 'العودة لقائمة الشيتات' : 'Back to Sheets'}</span>
+            </button>
+            <div style="color: white; font-weight: 800; font-size: 0.9rem; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              📄 ${title}
+            </div>
+            <a href="${pdfSourceUrl}" download="${(doc.title || 'sheet')}.pdf" style="background: #0284C7; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 800; text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+              <span>📥 ${isAr ? 'تنزيل الـ PDF الأصلي' : 'Download PDF'}</span>
+            </a>
+          </div>
+          <iframe src="${pdfSourceUrl}#toolbar=1" style="width: 100%; height: calc(100vh - 52px); border: none;" title="${title}"></iframe>
+        </div>
+      `;
+      return;
+    }
 
     const fullHTML = this.generateDocHTML(this.currentDoc, isAr);
 
