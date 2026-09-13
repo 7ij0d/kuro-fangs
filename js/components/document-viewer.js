@@ -62,12 +62,12 @@ const DocumentViewer = {
   },
 
   generateDocHTML(doc, isAr) {
-    const docId = doc.id || 'sh-fixed-provisional';
-    const title = doc.title || (isAr ? doc.title_ar : doc.title_en) || 'Provisional Restoration & Temporization';
-    const doctor = doc.doctor_name || 'Dr. Hala Alhawij';
+    const docId = doc.id || ('sheet_' + Date.now());
+    const title = doc.title || (isAr ? doc.title_ar : doc.title_en) || (isAr ? 'شيت دراسي' : 'Lecture Sheet');
+    const doctor = doc.doctor_name || (isAr ? 'أستاذ المادة' : 'Lecturer');
     const university = doc.university || 'University of Tripoli - School of Dentistry';
     const year = doc.year || '2025-2026';
-    const totalPages = Math.max(1, parseInt(doc.pages, 10) || 16);
+    const totalPages = Math.max(1, parseInt(doc.pages, 10) || 1);
 
     return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">

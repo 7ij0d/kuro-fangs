@@ -23,24 +23,35 @@ const SheetDetailPage = {
 
     let sheet = sheets.find(s => s.id === targetId);
 
-    // If target is sh-fixed-provisional or not found, fallback to Dr. Hala Alhawij sheet
-    if (!sheet || targetId === 'sh-fixed-provisional') {
-      sheet = {
-        id: 'sh-fixed-provisional',
-        subject_id: 'fixed-pros',
-        title: 'Provisional Restoration & Temporization (التركيبات المؤقتة وطرق إعدادها)',
-        title_ar: 'Provisional Restoration & Temporization (التركيبات المؤقتة وطرق إعدادها)',
-        title_en: 'Provisional Restoration & Temporization',
-        subject_name: isAr ? 'الاستعاضة السنية الثابتة 2' : 'Fixed Prosthodontics II',
-        doctor_name: isAr ? 'د. هالة الحويج (Dr. Hala Alhawij)' : 'Dr. Hala Alhawij',
-        university: 'University of Tripoli - School of Dentistry',
-        year: '2025-2026',
-        pages: 16,
-        size: '2.8 MB',
-        date: '2026-09-11',
-        type: 'PDF Sheet',
-        sections_count: 16
-      };
+    // Also check custom admin sheets
+    if (!sheet) {
+      try {
+        const customSheets = JSON.parse(localStorage.getItem('kf_admin_custom_sheets') || '[]');
+        sheet = customSheets.find(s => s.id === targetId);
+      } catch (e) {}
+    }
+
+    // If still not found, check if any sheet exists
+    if (!sheet && sheets.length > 0) {
+      sheet = sheets[0];
+    }
+
+    if (!sheet) {
+      container.innerHTML = `
+        <div style="padding: 40px; text-align: center;">
+          <div style="font-size: 3rem; margin-bottom: 12px;">📁</div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">
+            ${isAr ? 'لم يتم العثور على الشيت' : 'Sheet Not Found'}
+          </h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">
+            ${isAr ? 'قد يكون تم حذف الشيت أو أن الرابط غير صحيح.' : 'This sheet may have been removed or the link is invalid.'}
+          </p>
+          <a href="#/sheets" class="btn btn-primary" style="display: inline-flex; gap: 6px;">
+            <span>${isAr ? 'العودة لقائمة الشيتات' : 'Back to Sheets'}</span>
+          </a>
+        </div>
+      `;
+      return;
     }
 
     // Normalize metadata
