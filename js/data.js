@@ -39,65 +39,16 @@ class DataService {
   async init() {
     if (this.loaded) return;
 
-    try {
-      const [
-        subjectsRes,
-        sheetsRes,
-        alertsRes,
-        doctorsRes
-      ] = await Promise.allSettled([
-        fetch('data/subjects.json').then(r => r.json()),
-        fetch('data/sheets.json').then(r => r.json()),
-        fetch('data/alerts.json').then(r => r.json()),
-        fetch('data/doctors.json').then(r => r.json())
-      ]);
-
-      if (subjectsRes.status === 'fulfilled' && subjectsRes.value?.subjects) {
-        this.subjects = subjectsRes.value.subjects;
-      }
-      if (sheetsRes.status === 'fulfilled' && sheetsRes.value?.sheets) {
-        this.sheets = sheetsRes.value.sheets;
-      }
-      if (alertsRes.status === 'fulfilled' && alertsRes.value?.alerts) {
-        this.alerts = alertsRes.value.alerts;
-      }
-      if (doctorsRes.status === 'fulfilled' && doctorsRes.value?.doctors) {
-        this.doctors = doctorsRes.value.doctors;
-      }
-
-      // Defer non-critical datasets in non-blocking background task
-      this.loadDeferredData();
-    } catch (err) {
-      console.warn('Could not load core JSON files via fetch, using fallback data:', err);
-    }
-
+    // 1. Populate default subjects, sheets, and alerts synchronously for INSTANT page render (<30ms)
     const defaultSubjects = this.getDefaultSubjects();
-    if (!this.subjects || this.subjects.length === 0) {
-      this.subjects = defaultSubjects;
-    } else {
-      this.subjects.forEach(s => {
-        const def = defaultSubjects.find(d => d.id === s.id);
-        if (def) {
-          s.doctor_name_ar = s.doctor_name_ar || null;
-          s.doctor_name_en = s.doctor_name_en || null;
-          s.is_popular = s.is_popular !== undefined ? s.is_popular : def.is_popular;
-        }
-      });
-    }
-
-    // Attach high-res cover images to each subject
+    this.subjects = defaultSubjects;
     this.subjects.forEach(s => {
       s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.webp`;
     });
+    this.alerts = this.getDefaultAlerts();
+    this.sheets = this.getDefaultSheets();
 
-    if (!this.alerts || this.alerts.length === 0) {
-      this.alerts = this.getDefaultAlerts();
-    }
-    if (!this.sheets || this.sheets.length === 0) {
-      this.sheets = this.getDefaultSheets();
-    }
-
-    // 1. Merge cached cloud sheets from localStorage if present (for instant offline/initial load)
+    // 2. Merge cached cloud sheets & local custom admin sheets instantly
     try {
       const cachedCloudSheets = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
       if (Array.isArray(cachedCloudSheets) && cachedCloudSheets.length > 0) {
@@ -110,10 +61,6 @@ class DataService {
           }
         });
       }
-    } catch (e) {}
-
-    // 2. Merge custom admin-uploaded sheets from localStorage if present
-    try {
       const customSheets = JSON.parse(localStorage.getItem('kf_admin_custom_sheets') || '[]');
       if (Array.isArray(customSheets) && customSheets.length > 0) {
         customSheets.forEach(cs => {
@@ -124,26 +71,57 @@ class DataService {
       }
     } catch (e) {}
 
-    // 3. Live Central Cloud Sync from Supabase
-    try {
-      if (window.KuroCloud && typeof window.KuroCloud.fetchCloudSheets === 'function') {
-        const liveCloudSheets = await window.KuroCloud.fetchCloudSheets();
-        if (Array.isArray(liveCloudSheets) && liveCloudSheets.length > 0) {
-          liveCloudSheets.forEach(cs => {
-            const idx = this.sheets.findIndex(s => s.id === cs.id);
-            if (idx !== -1) {
-              this.sheets[idx] = { ...this.sheets[idx], ...cs };
-            } else {
-              this.sheets.push(cs);
+    this.loaded = true;
+
+    // 3. Fire JSON & Cloud sync asynchronously in background (Non-Blocking)
+    setTimeout(async () => {
+      try {
+        const [subjectsRes, sheetsRes, alertsRes, doctorsRes] = await Promise.allSettled([
+          fetch('data/subjects.json').then(r => r.json()),
+          fetch('data/sheets.json').then(r => r.json()),
+          fetch('data/alerts.json').then(r => r.json()),
+          fetch('data/doctors.json').then(r => r.json())
+        ]);
+
+        if (subjectsRes.status === 'fulfilled' && subjectsRes.value?.subjects) {
+          this.subjects = subjectsRes.value.subjects;
+          this.subjects.forEach(s => {
+            s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.webp`;
+          });
+        }
+        if (sheetsRes.status === 'fulfilled' && Array.isArray(sheetsRes.value?.sheets) && sheetsRes.value.sheets.length > 0) {
+          sheetsRes.value.sheets.forEach(s => {
+            if (!this.sheets.some(existing => existing.id === s.id)) {
+              this.sheets.push(s);
             }
           });
-          localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(liveCloudSheets));
         }
-      }
-    } catch (e) {
-      console.warn('Initial cloud sheets fetch note:', e);
-    }
+        if (alertsRes.status === 'fulfilled' && alertsRes.value?.alerts) {
+          this.alerts = alertsRes.value.alerts;
+        }
+        if (doctorsRes.status === 'fulfilled' && doctorsRes.value?.doctors) {
+          this.doctors = doctorsRes.value.doctors;
+        }
 
+        // Live Central Cloud Sync from Supabase in background
+        if (window.KuroCloud && typeof window.KuroCloud.fetchCloudSheets === 'function') {
+          const liveCloudSheets = await window.KuroCloud.fetchCloudSheets();
+          if (Array.isArray(liveCloudSheets) && liveCloudSheets.length > 0) {
+            liveCloudSheets.forEach(cs => {
+              const idx = this.sheets.findIndex(s => s.id === cs.id);
+              if (idx !== -1) {
+                this.sheets[idx] = { ...this.sheets[idx], ...cs };
+              } else {
+                this.sheets.push(cs);
+              }
+            });
+            localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(liveCloudSheets));
+          }
+        }
+      } catch (err) {
+        console.warn('Background data sync note:', err);
+      }
+    }, 10);
     // Merge custom admin announcements from localStorage if present
     try {
       const customAlerts = JSON.parse(localStorage.getItem('kf_admin_custom_alerts') || '[]');
