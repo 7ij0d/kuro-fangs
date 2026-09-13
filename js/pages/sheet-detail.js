@@ -192,6 +192,8 @@ const SheetDetailPage = {
       const listEl = document.getElementById('comments-list-container');
       const countBadge = document.getElementById('discussion-count-badge');
       if (countBadge) countBadge.textContent = comments.length;
+      const headerBadge = document.getElementById('header-comment-badge');
+      if (headerBadge) headerBadge.textContent = comments.length;
       if (!listEl) return;
 
       if (comments.length === 0) {
