@@ -305,17 +305,46 @@
 
   async function signInWithGoogle() {
     initClient();
-    if (!client) throw new Error('Supabase client not initialized');
+    if (!client) {
+      return {
+        success: false,
+        error: 'Supabase client not initialized',
+        isConfigError: true
+      };
+    }
 
-    const { data, error } = await client.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + window.location.pathname
+    try {
+      // Determine best redirect URL (custom domain or GitHub Pages)
+      let redirectUrl = window.location.origin + window.location.pathname;
+      if (window.location.hostname === 'kurofangs.id.ly') {
+        redirectUrl = 'https://kurofangs.id.ly';
       }
-    });
 
-    if (error) throw error;
-    return { success: true, data };
+      const { data, error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl
+        }
+      });
+
+      if (error) {
+        console.warn('Google OAuth warning:', error.message);
+        return {
+          success: false,
+          error: error.message,
+          isConfigError: true
+        };
+      }
+
+      return { success: true, data };
+    } catch (err) {
+      console.warn('Google OAuth exception:', err.message);
+      return {
+        success: false,
+        error: err.message,
+        isConfigError: true
+      };
+    }
   }
 
   async function resetPassword(email) {

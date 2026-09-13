@@ -382,10 +382,70 @@ window.AuthModal = (function () {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
 
     try {
-      if (!window.SupabaseAuth) throw new Error('Supabase module not ready');
-      await window.SupabaseAuth.signInWithGoogle();
+      if (!window.SupabaseAuth) {
+        showOAuthFallbackAlert('Supabase module not ready');
+        return;
+      }
+      const res = await window.SupabaseAuth.signInWithGoogle();
+      if (!res || !res.success) {
+        showOAuthFallbackAlert(res?.error);
+      }
     } catch (err) {
-      showAlert(isAr ? `خطأ Google OAuth: ${err.message}` : `Google OAuth note: ${err.message}`);
+      showOAuthFallbackAlert(err.message);
+    }
+  }
+
+  function showOAuthFallbackAlert(errorMessage) {
+    const alertBox = document.getElementById('auth-alert-box');
+    if (!alertBox) return;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+
+    alertBox.style.display = 'block';
+    alertBox.className = 'auth-alert-box';
+    alertBox.style.background = 'rgba(245, 158, 11, 0.1)';
+    alertBox.style.border = '1.5px solid rgba(245, 158, 11, 0.35)';
+    alertBox.style.borderRadius = '14px';
+    alertBox.style.padding = '14px 16px';
+    alertBox.style.marginBottom = '16px';
+    alertBox.style.textAlign = isAr ? 'right' : 'left';
+
+    alertBox.innerHTML = `
+      <div style="display: flex; align-items: flex-start; gap: 10px;">
+        <span style="font-size: 1.25rem; line-height: 1;">⚠️</span>
+        <div style="flex: 1;">
+          <div style="font-size: 0.85rem; font-weight: 800; color: #F59E0B; margin-bottom: 4px;">
+            ${isAr ? 'تنبيه المصادقة السحابية عبر Google' : 'Google Cloud Sign-In Notice'}
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin: 0 0 10px 0;">
+            ${isAr 
+              ? 'تسجيل الدخول عبر Google يتطلب تفويض السحابة من قِبل إدارة الكلية. يمكنك الآن إنشاء حساب أكاديمي فوري باسمك أو المتابعة كطالب زائر.' 
+              : 'Google Sign-In requires faculty cloud authorization. Would you like to create an instant Academic Student Account or continue as Guest?'}
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModal.switchTab('signup')" style="font-size: 0.775rem; padding: 6px 12px; font-weight: 800;">
+              <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+              <span>${isAr ? 'إنشاء حساب أكاديمي فوري' : 'Create Academic Account'}</span>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModal.continueAsGuest()" style="font-size: 0.775rem; padding: 6px 12px; font-weight: 700;">
+              <i data-lucide="user-check" style="width: 14px; height: 14px;"></i>
+              <span>${isAr ? 'المتابعة كطالب زائر 👤' : 'Continue as Guest 👤'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function continueAsGuest() {
+    close();
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+    if (typeof window.showToast === 'function') {
+      window.showToast(
+        isAr ? 'مرحباً بك! تواصل تصفح المنصة والدراسة كطالب زائر 🦷' : 'Welcome! Continuing as a guest student 🦷',
+        { type: 'info' }
+      );
     }
   }
 
@@ -409,12 +469,22 @@ window.AuthModal = (function () {
   function switchTab(tab) {
     activeTab = tab;
     renderModalContent();
+    if (tab === 'signup') {
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
+        const nameInput = document.getElementById('auth-signup-name');
+        if (nameInput && userInfo.name && userInfo.name !== 'طالب أسنان') {
+          nameInput.value = userInfo.name;
+        }
+      } catch (e) {}
+    }
   }
 
   return {
     open,
     close,
     switchTab,
+    continueAsGuest,
     handleSubmitSignIn,
     handleSubmitSignUp,
     handleSubmitForgot,
