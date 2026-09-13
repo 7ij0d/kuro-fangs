@@ -486,13 +486,71 @@
     }
   }
 
+  async function testConnection(customUrl, customKey) {
+    const url = (customUrl || localStorage.getItem('kf_supabase_url') || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
+    const key = customKey || localStorage.getItem('kf_supabase_key') || DEFAULT_SUPABASE_ANON_KEY;
+
+    if (!url || url.includes('placeholder') || !key || key.includes('placeholder')) {
+      return { connected: false, reason: 'unconfigured', message: 'لم يتم إدخال بيانات مشروع Supabase حقيقي بعد' };
+    }
+
+    try {
+      const res = await fetch(`${url}/rest/v1/sheets?select=id&limit=1`, {
+        method: 'GET',
+        headers: {
+          'apikey': key,
+          'Authorization': `Bearer ${key}`
+        }
+      });
+
+      if (res.status === 200 || res.status === 206) {
+        return { connected: true, message: 'متصل بقاعدة بيانات Supabase وجدول الشيتات بنجاح 🟢' };
+      } else if (res.status === 404) {
+        return { connected: false, reason: 'table_missing', message: 'الاتصال نجح ولكن الجدول "sheets" غير موجود. يرجى إنشاء الجدول عبر كود SQL.' };
+      } else if (res.status === 401 || res.status === 403) {
+        return { connected: false, reason: 'auth_error', message: 'مفتاح Anon Key غير صالح أو صلاحيات الـ RLS بحاجة لتفعيل.' };
+      } else {
+        return { connected: false, reason: 'http_error', status: res.status, message: `استجاب خادم Supabase بالحالة ${res.status}` };
+      }
+    } catch (err) {
+      return { connected: false, reason: 'network_error', message: err.message || 'تعذر الوصول إلى رابط المشروع' };
+    }
+  }
+
+  function saveCredentials(url, key) {
+    if (url) localStorage.setItem('kf_supabase_url', url.trim().replace(/\/$/, ''));
+    if (key) localStorage.setItem('kf_supabase_key', key.trim());
+    initClient();
+  }
+
+  function clearCredentials() {
+    localStorage.removeItem('kf_supabase_url');
+    localStorage.removeItem('kf_supabase_key');
+    initClient();
+  }
+
+  function getCredentials() {
+    const url = localStorage.getItem('kf_supabase_url') || '';
+    const key = localStorage.getItem('kf_supabase_key') || '';
+    const isConfigured = Boolean(url && key && !url.includes('placeholder') && !key.includes('placeholder'));
+    return {
+      url,
+      key,
+      isConfigured
+    };
+  }
+
   // Centralized Kuro Cloud API
   window.KuroCloud = {
     getClient: () => { initClient(); return client; },
     uploadSheetPdf,
     publishSheetToCloud,
     fetchCloudSheets,
-    deleteSheetFromCloud
+    deleteSheetFromCloud,
+    testConnection,
+    saveCredentials,
+    clearCredentials,
+    getCredentials
   };
 
   // Public API

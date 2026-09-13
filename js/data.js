@@ -533,7 +533,32 @@ class DataService {
   }
 
   getDefaultSheets() {
-    return [];
+    return [
+      {
+        id: 'sh-fixed-provisional',
+        subject_id: 'fixed-pros',
+        title: 'Provisional Restorations & Temporization',
+        title_ar: 'الاستعاضة السنية المؤقتة (Provisional Restorations)',
+        title_en: 'Provisional Restorations & Temporization',
+        doctor_name: 'د. هالة الحويج',
+        pages: 16,
+        order_index: 1,
+        pdf_source: 'internal',
+        pdf_url: '',
+        download_url: '',
+        date: '2026-09-12'
+      }
+    ];
+  }
+
+  /**
+   * Export all currently active sheets as a formatted JSON string
+   * ready for data/sheets.json or GitHub API commit
+   */
+  exportSheetsJson() {
+    const deleted = this.getDeletedSheetIds();
+    const activeSheets = (this.sheets || []).filter(s => !deleted.includes(s.id));
+    return JSON.stringify({ sheets: activeSheets }, null, 2);
   }
 
   getDefaultAlerts() {

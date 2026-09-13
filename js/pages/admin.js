@@ -428,8 +428,16 @@ window.AdminPage = (function () {
         } catch (e) {}
       }
 
+      // GitHub Repository Auto-Commit
+      if (window.KuroGitSync && window.KuroGitSync.hasToken()) {
+        try {
+          const allSheets = window.DATA?.sheets || [];
+          window.KuroGitSync.commitSheets(allSheets, `chore(sheets): update "${singleTitle}" via Super-Admin`);
+        } catch (e) {}
+      }
+
       document.getElementById('admin-edit-modal-backdrop')?.remove();
-      if (window.showToast) window.showToast(isAr ? 'تم تعديل الشيت ومزامنته سحابياً بنجاح ☁️' : 'Sheet updated and synced to cloud! ☁️', {type: 'success'});
+      if (window.showToast) window.showToast(isAr ? 'تم تعديل الشيت ومزامنته بنجاح ☁️' : 'Sheet updated and synced! ☁️', {type: 'success'});
       if (typeof reRenderCallback === 'function') reRenderCallback();
     });
   }
@@ -517,6 +525,10 @@ window.AdminPage = (function () {
     const subjects = window.DATA ? window.DATA.getSubjects() || [] : [];
     const students = getRegisteredStudents();
 
+    const hasGitSync = Boolean(window.KuroGitSync && window.KuroGitSync.hasToken());
+    const hasCloudSync = Boolean(window.KuroCloud && window.KuroCloud.getCredentials && window.KuroCloud.getCredentials().isConfigured);
+    const isGlobalSyncActive = hasGitSync || hasCloudSync;
+
     container.innerHTML = `
       <style>
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -574,6 +586,12 @@ window.AdminPage = (function () {
             <span>${isAr ? '👥 حسابات الطلبة والرموز السرية' : 'Student Accounts & Passcodes'}</span>
             <span class="badge" style="background: rgba(255,255,255,0.2); font-size: 0.7rem;">${students.length}</span>
           </button>
+
+          <button class="btn ${activeTab === 'sync' ? 'btn-primary' : 'btn-secondary'} admin-tab-btn" data-tab="sync" style="font-weight: 800; gap: 6px; padding: 8px 16px; white-space: nowrap; ${activeTab !== 'sync' && !isGlobalSyncActive ? 'border-color: rgba(245, 158, 11, 0.4);' : ''}">
+            <i data-lucide="cloud" style="width: 16px; height: 16px;"></i>
+            <span>${isAr ? '🌐 المزامنة السحابية والمستودع' : 'Cloud & Repo Sync'}</span>
+            <span class="badge" style="background: ${isGlobalSyncActive ? 'rgba(16,185,129,0.2); color: #34D399' : 'rgba(245,158,11,0.2); color: #FBBF24'}; font-size: 0.7rem; font-weight: 800;">${isGlobalSyncActive ? (isAr ? '🟢 متصل' : '🟢 Active') : (isAr ? '⚠️ إعداد' : '⚠️ Setup')}</span>
+          </button>
         </div>
 
         <!-- TAB CONTENT CONTAINER -->
@@ -582,6 +600,7 @@ window.AdminPage = (function () {
           ${activeTab === 'sheets' ? renderSheetsTab(isAr, sheets, subjects) : ''}
           ${activeTab === 'alerts' ? renderAlertsTab(isAr, alerts) : ''}
           ${activeTab === 'students' ? renderStudentsTab(isAr, students) : ''}
+          ${activeTab === 'sync' ? renderSyncTab(isAr, sheets) : ''}
         </div>
 
       </div>
@@ -718,8 +737,69 @@ window.AdminPage = (function () {
 
   // --- SHEETS TAB ---
   function renderSheetsTab(isAr, sheets, subjects) {
+    const hasGitSync = Boolean(window.KuroGitSync && window.KuroGitSync.hasToken());
+    const hasCloudSync = Boolean(window.KuroCloud && window.KuroCloud.getCredentials && window.KuroCloud.getCredentials().isConfigured);
+    const isGlobalSyncActive = hasGitSync || hasCloudSync;
+
+    const syncBannerMarkup = isGlobalSyncActive ? `
+      <!-- Global Publishing Active Banner -->
+      <div class="card" style="padding: 16px 20px; border-radius: 14px; margin-bottom: 20px; background: rgba(16, 185, 129, 0.08); border: 1.5px solid rgba(16, 185, 129, 0.35); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.18); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            🟢
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: #34D399; display: flex; align-items: center; gap: 6px;">
+              <span>${isAr ? 'المزامنة العامة مفعلة ونشطة' : 'Global Cloud & Repo Sync Active'}</span>
+              <span class="badge" style="background: rgba(16,185,129,0.25); color: #10B981; font-size: 0.7rem;">${hasGitSync ? 'GitHub API' : 'Supabase'}</span>
+            </div>
+            <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">
+              ${isAr ? 'أي شيت تقوم بإضافته أو تعديله أو حذفه ينعكس عالمياً لجميع الطلبة على كافة أجهزتهم فوراً.' : 'All newly published, edited, or deleted sheets are synced worldwide for all students.'}
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-quick-download-json" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 700; gap: 4px;">
+            📥 <span>${isAr ? 'تنزيل sheets.json' : 'Download JSON'}</span>
+          </button>
+          <button id="btn-quick-sync-tab" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 700; gap: 4px;">
+            ⚙️ <span>${isAr ? 'إدارة المزامنة' : 'Manage Sync'}</span>
+          </button>
+        </div>
+      </div>
+    ` : `
+      <!-- Global Publishing Notice Banner (Local Storage Mode) -->
+      <div class="card" style="padding: 16px 20px; border-radius: 14px; margin-bottom: 20px; background: rgba(245, 158, 11, 0.08); border: 1.5px solid rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(245, 158, 11, 0.18); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            ⚠️
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: #FBBF24;">
+              ${isAr ? 'تنبيه النشر العام (وضع التخزين المحلي فقط)' : 'Global Publishing Notice (Local Storage Mode)'}
+            </div>
+            <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px; line-height: 1.4;">
+              ${isAr 
+                ? 'الشيتات تُحفظ حالياً في متصفحك المحلي فقط. لتظهر لجميع الطلبة على هواتفهم، قم بربط GitHub PAT من تبويب <b>المزامنة السحابية والمستودع</b> أو قم بتنزيل ملف <code>sheets.json</code>.' 
+                : 'Sheets are currently saved to your local browser only. To publish globally for all students, configure GitHub Sync or export <code>sheets.json</code>.'}
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="btn-quick-download-json" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 700; border-color: rgba(245, 158, 11, 0.4); color: #FBBF24; gap: 4px;">
+            📥 <span>${isAr ? 'تنزيل sheets.json' : 'Download JSON'}</span>
+          </button>
+          <button id="btn-quick-sync-tab" class="btn btn-primary btn-sm" style="font-size: 0.75rem; font-weight: 800; background: #D97706; border-color: #D97706; gap: 4px;">
+            ⚙️ <span>${isAr ? 'إعداد المزامنة العامة ⚡' : 'Configure Global Sync ⚡'}</span>
+          </button>
+        </div>
+      </div>
+    `;
+
     return `
       <div>
+        ${syncBannerMarkup}
+
         <!-- Add New Sheet Form (Simplified Single Title, Single Doctor, Auto Pages) -->
         <div class="card" style="padding: 24px; border-radius: 16px; margin-bottom: 24px; border-left: 4px solid var(--brand-burgundy);">
           <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
@@ -1016,6 +1096,297 @@ window.AdminPage = (function () {
     `;
   }
 
+  // --- SQL SCHEMA MODAL HELPER ---
+  function showSqlSchemaModal(isAr) {
+    let modalEl = document.getElementById('admin-sql-modal-backdrop');
+    if (modalEl) modalEl.remove();
+
+    const sqlScript = `-- 1. جدول الشيتات والملازم الدراسية
+CREATE TABLE IF NOT EXISTS public.sheets (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  title_ar TEXT,
+  title_en TEXT,
+  subject_id TEXT NOT NULL,
+  doctor_name TEXT,
+  pages TEXT,
+  order_index INTEGER DEFAULT 1,
+  pdf_url TEXT,
+  download_url TEXT,
+  pdf_source TEXT DEFAULT 'cloud',
+  date TEXT,
+  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 2. تفعيل الحماية على مستوى الصفوف (RLS)
+ALTER TABLE public.sheets ENABLE ROW LEVEL SECURITY;
+
+-- 3. سياسة القراءة العامة (لكافة الطلبة والزوار)
+CREATE POLICY "Allow public read access on sheets"
+  ON public.sheets FOR SELECT
+  USING (true);
+
+-- 4. سياسات الإضافة والتعديل والحذف للآدمن
+CREATE POLICY "Allow all insert on sheets"
+  ON public.sheets FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Allow all update on sheets"
+  ON public.sheets FOR UPDATE
+  USING (true);
+
+CREATE POLICY "Allow all delete on sheets"
+  ON public.sheets FOR DELETE
+  USING (true);
+
+-- 5. إنشاء حوض التخزين (Storage Bucket) لملفات الـ PDF:
+-- اذهب إلى Supabase Dashboard -> Storage -> New Bucket
+-- أنشئ حوض باسم "pdf-sheets" واجعله Public Bucket`;
+
+    const markup = `
+      <div id="admin-sql-modal-backdrop" class="doc-viewer-backdrop active" style="z-index: 100000; background: rgba(10, 11, 18, 0.88); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 620px; width: 92%; max-height: 90vh; overflow-y: auto; padding: 28px 24px; border-radius: 20px; border: 1.5px solid #0284C7; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: docZoomIn 0.2s ease;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="database" style="color: #0284C7; width: 22px; height: 22px;"></i>
+              <span>${isAr ? 'كود SQL لإعداد قاعدة بيانات Supabase' : 'Supabase SQL Database Setup'}</span>
+            </h3>
+            <button id="btn-close-sql-modal" class="btn btn-secondary btn-sm" style="padding: 4px 8px;">✕</button>
+          </div>
+          
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+            ${isAr 
+              ? 'انسخ كود الـ SQL التالي والصقه داخل <strong>SQL Editor</strong> في لوحة تحكم Supabase لتجهيز جدول الشيتات مع كافة الصلاحيات بنقرة واحدة:' 
+              : 'Copy the following SQL script and run it in the Supabase <strong>SQL Editor</strong> to configure the sheets table:'}
+          </p>
+
+          <div style="position: relative; margin-bottom: 16px;">
+            <pre id="admin-sql-code" style="background: #0B0F19; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; font-size: 0.775rem; color: #38BDF8; overflow-x: auto; max-height: 280px; font-family: monospace; text-align: left;" dir="ltr">${sqlScript}</pre>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button id="btn-copy-sql-script" class="btn btn-primary" style="background: #0284C7; border-color: #0284C7; font-weight: 800; gap: 6px;">
+              <i data-lucide="copy" style="width: 15px; height: 15px;"></i>
+              <span>${isAr ? 'نسخ كود SQL للحافظة 📋' : 'Copy SQL Script 📋'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', markup);
+    if (window.lucide) window.lucide.createIcons();
+
+    document.getElementById('btn-close-sql-modal')?.addEventListener('click', () => {
+      document.getElementById('admin-sql-modal-backdrop')?.remove();
+    });
+
+    document.getElementById('btn-copy-sql-script')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(sqlScript).then(() => {
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم نسخ كود SQL بنجاح!' : 'SQL script copied to clipboard!', { type: 'success' });
+        }
+      });
+    });
+  }
+
+  // --- SYNC & CLOUD TAB ---
+  function renderSyncTab(isAr, sheets) {
+    const gitToken = window.KuroGitSync ? window.KuroGitSync.getToken() : '';
+    const hasGit = Boolean(gitToken);
+    const repoInfo = window.KuroGitSync ? window.KuroGitSync.getRepoInfo() : { owner: '7ij0d', repo: 'kuro-fangs', branch: 'main', path: 'data/sheets.json' };
+    
+    const cloudCreds = window.KuroCloud && window.KuroCloud.getCredentials ? window.KuroCloud.getCredentials() : { url: '', key: '', isConfigured: false };
+
+    return `
+      <div>
+        <!-- Notice Header -->
+        <div class="card" style="padding: 22px 24px; border-radius: 16px; margin-bottom: 20px; background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(190, 18, 60, 0.08) 100%); border: 1px solid rgba(2, 132, 199, 0.3);">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(2, 132, 199, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <i data-lucide="globe" style="width: 26px; height: 26px; color: #38BDF8;"></i>
+            </div>
+            <div>
+              <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">
+                ${isAr ? 'مركز المزامنة السحابية والنشر العالمي لجميع الأجهزة والطلبة 🌐' : 'Global Cloud Sync & Multi-Device Publishing Center 🌐'}
+              </h3>
+              <p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+                ${isAr 
+                  ? 'بما أن منصة Kuro Fangs مستضافة كـ Static Site على GitHub Pages، فإن الشيتات المضافة تحتاج للمزامنة عبر <b>GitHub Direct Commit</b> (ليتم تحديث ملف <code>data/sheets.json</code> وبناء الموقع تلقائياً للجميع)، أو عبر قاعدة بيانات <b>Supabase</b> المركزية، أو تنزيل ملف <b>JSON</b> المحدث بنقرة واحدة.' 
+                  : 'Since Kuro Fangs is hosted on GitHub Pages, published sheets need either <b>Direct GitHub Auto-Commit</b> to update <code>data/sheets.json</code> on <code>main</code> branch, or a <b>Supabase</b> central database, or 1-click JSON export.'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          
+          <!-- Card 1: GitHub Repository Direct Auto-Commit -->
+          <div class="card" style="padding: 24px; border-radius: 16px; border-top: 4px solid #10B981; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="git-branch" style="color: #10B981; width: 22px; height: 22px;"></i>
+                  <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                    ${isAr ? '1. المزامنة المباشرة مع مستودع GitHub' : '1. Direct GitHub Repo Auto-Commit'}
+                  </h4>
+                </div>
+                <span class="badge" style="background: ${hasGit ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)'}; color: ${hasGit ? '#34D399' : '#FBBF24'}; font-weight: 800; font-size: 0.725rem;">
+                  ${hasGit ? (isAr ? '🟢 مفعل' : '🟢 Active') : (isAr ? '⚪ غير متصل' : '⚪ Not Set')}
+                </span>
+              </div>
+
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+                ${isAr 
+                  ? `يقوم المتصفح بالاتصال بـ GitHub API والتعديل على <code>${repoInfo.owner}/${repoInfo.repo}</code> (فرع <code>${repoInfo.branch}</code>) مباشرة عند نشر أو حذف أي شيت، فيحدث التغيير فوراً لدى كافة الطلبة عالمياً.` 
+                  : `Commits directly to <code>${repoInfo.owner}/${repoInfo.repo}</code> via GitHub REST API whenever you publish or delete a sheet.`}
+              </p>
+
+              <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'رمز الوصول الشخصي (GitHub Personal Access Token - PAT):' : 'GitHub Personal Access Token (PAT):'}
+                </label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="password" id="sync-github-token" class="auth-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxx" value="${gitToken}" style="flex: 1; font-family: monospace; font-size: 0.85rem;" />
+                  <button type="button" id="btn-toggle-github-token" class="btn btn-secondary btn-sm" style="padding: 0 10px;" title="${isAr ? 'إظهار / إخفاء' : 'Toggle Visibility'}">👁️</button>
+                </div>
+                <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+                  ${isAr 
+                    ? 'الرمز يحتاج فقط لصلاحية <code>repo</code> (Full control of private/public repositories).' 
+                    : 'Requires only <code>repo</code> scope permission in GitHub.'}
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                <button type="button" id="btn-save-github-token" class="btn btn-primary btn-sm" style="background: #10B981; border-color: #10B981; font-weight: 800; font-size: 0.775rem; gap: 4px;">
+                  💾 <span>${isAr ? 'حفظ الرمز' : 'Save Token'}</span>
+                </button>
+                <button type="button" id="btn-test-github-token" class="btn btn-secondary btn-sm" style="font-weight: 700; font-size: 0.775rem; gap: 4px;">
+                  🔍 <span>${isAr ? 'اختبار الاتصال' : 'Test Connection'}</span>
+                </button>
+                ${hasGit ? `
+                  <button type="button" id="btn-clear-github-token" class="btn btn-secondary btn-sm" style="color: #EF4444; border-color: rgba(239,68,68,0.3); font-weight: 700; font-size: 0.775rem; gap: 4px;">
+                    🗑️ <span>${isAr ? 'حذف الرمز' : 'Clear'}</span>
+                  </button>
+                ` : ''}
+              </div>
+
+              <div id="github-sync-status-box" style="display: none; padding: 10px 12px; border-radius: 8px; font-size: 0.775rem; margin-bottom: 14px; line-height: 1.4;"></div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+              <button type="button" id="btn-commit-all-sheets" class="btn btn-primary" style="width: 100%; justify-content: center; background: #059669; border-color: #059669; font-weight: 800; font-size: 0.825rem; gap: 6px;" ${!hasGit ? 'disabled style="opacity: 0.6; cursor: not-allowed;"' : ''}>
+                <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i>
+                <span>${isAr ? `مزامنة كافة الشيتات الحالية (${sheets.length}) إلى GitHub الآن 🚀` : `Commit All Sheets (${sheets.length}) to GitHub Now 🚀`}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: Supabase Real-Time Cloud Database -->
+          <div class="card" style="padding: 24px; border-radius: 16px; border-top: 4px solid #0284C7; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="database" style="color: #0284C7; width: 22px; height: 22px;"></i>
+                  <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                    ${isAr ? '2. قاعدة بيانات Supabase السحابية' : '2. Supabase Real-Time Cloud Database'}
+                  </h4>
+                </div>
+                <span class="badge" style="background: ${cloudCreds.isConfigured ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)'}; color: ${cloudCreds.isConfigured ? '#34D399' : '#FBBF24'}; font-weight: 800; font-size: 0.725rem;">
+                  ${cloudCreds.isConfigured ? (isAr ? '🟢 مفعل' : '🟢 Configured') : (isAr ? '⚪ افتراضي' : '⚪ Default')}
+                </span>
+              </div>
+
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+                ${isAr 
+                  ? 'تتيح مزامنة فورية Real-Time لجدول الشيتات ورفع ملفات الـ PDF الكبيرة إلى Cloud Storage.' 
+                  : 'Allows instant real-time synchronization of sheets table and cloud PDF storage.'}
+              </p>
+
+              <div style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 4px;">
+                  ${isAr ? 'رابط مشروع Supabase (Project URL):' : 'Project URL:'}
+                </label>
+                <input type="text" id="sync-supabase-url" class="auth-input" placeholder="https://xyzproject.supabase.co" value="${cloudCreds.url}" style="font-size: 0.825rem;" dir="ltr" />
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 4px;">
+                  ${isAr ? 'المفتاح العام (Anon Public Key):' : 'Anon Public Key:'}
+                </label>
+                <input type="password" id="sync-supabase-key" class="auth-input" placeholder="eyJhbGciOiJIUzI1NiIsIn..." value="${cloudCreds.key}" style="font-size: 0.825rem; font-family: monospace;" dir="ltr" />
+              </div>
+
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+                <button type="button" id="btn-save-supabase" class="btn btn-primary btn-sm" style="background: #0284C7; border-color: #0284C7; font-weight: 800; font-size: 0.775rem; gap: 4px;">
+                  💾 <span>${isAr ? 'حفظ الإعدادات' : 'Save Config'}</span>
+                </button>
+                <button type="button" id="btn-test-supabase" class="btn btn-secondary btn-sm" style="font-weight: 700; font-size: 0.775rem; gap: 4px;">
+                  🔍 <span>${isAr ? 'اختبار الاتصال' : 'Test DB'}</span>
+                </button>
+                <button type="button" id="btn-show-sql-schema" class="btn btn-secondary btn-sm" style="font-weight: 700; font-size: 0.775rem; gap: 4px; color: #38BDF8;">
+                  📋 <span>${isAr ? 'كود SQL' : 'SQL Schema'}</span>
+                </button>
+              </div>
+
+              <div id="supabase-sync-status-box" style="display: none; padding: 10px 12px; border-radius: 8px; font-size: 0.775rem; margin-bottom: 14px; line-height: 1.4;"></div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 12px; font-size: 0.75rem; color: var(--text-muted);">
+              ${isAr ? 'ملاحظة: يمكنك استخدام GitHub PAT بمفرده لتحديث الموقع بالكامل دون الحاجة لـ Supabase.' : 'Tip: GitHub PAT alone is sufficient to publish sheets globally.'}
+            </div>
+          </div>
+
+          <!-- Card 3: 1-Click JSON Download & Export -->
+          <div class="card" style="padding: 24px; border-radius: 16px; border-top: 4px solid #F59E0B; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="download" style="color: #F59E0B; width: 22px; height: 22px;"></i>
+                  <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                    ${isAr ? '3. تصدير وتنزيل sheets.json بنقرة واحدة' : '3. 1-Click JSON Export & Download'}
+                  </h4>
+                </div>
+                <span class="badge" style="background: rgba(245,158,11,0.2); color: #FBBF24; font-weight: 800; font-size: 0.725rem;">
+                  ${sheets.length} ${isAr ? 'شيت' : 'Sheets'}
+                </span>
+              </div>
+
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                ${isAr 
+                  ? 'إذا كنت تريد إضافة الشيتات يدوياً أو رفعها عبر Git في جهازك، يمكنك تنزيل ملف <code>sheets.json</code> المحدث كاملاً واستبداله في مجلد <code>data/sheets.json</code>.' 
+                  : 'Download the compiled <code>sheets.json</code> containing all current sheets to manually commit to your local repository.'}
+              </p>
+
+              <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 0.775rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="color: var(--text-muted);">${isAr ? 'مسار الملف في المشروع:' : 'Target path:'}</span>
+                  <code style="color: #38BDF8;">data/sheets.json</code>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">${isAr ? 'عدد الشيتات المضمنة:' : 'Included sheets:'}</span>
+                  <strong style="color: #10B981;">${sheets.length} ${isAr ? 'محاضرة وشيت' : 'sheets'}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button type="button" id="btn-tab-download-json" class="btn btn-primary" style="width: 100%; justify-content: center; background: #D97706; border-color: #D97706; font-weight: 800; font-size: 0.85rem; gap: 6px;">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                <span>${isAr ? 'تنزيل ملف data/sheets.json فوراً 📥' : 'Download sheets.json File 📥'}</span>
+              </button>
+              <button type="button" id="btn-tab-copy-json" class="btn btn-secondary" style="width: 100%; justify-content: center; font-weight: 700; font-size: 0.8rem; gap: 6px;">
+                <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
+                <span>${isAr ? 'نسخ كود JSON كاملاً للحافظة 📋' : 'Copy Full JSON to Clipboard 📋'}</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
   // --- ATTACH EVENT LISTENERS & CONFIRM MODAL CALLS ---
   function attachTabListeners(container, isAr) {
     // 1. Add Sheet Form & Drag-and-drop
@@ -1210,15 +1581,38 @@ window.AdminPage = (function () {
         };
 
         // 3. Central Supabase Cloud Sync
-        if (window.KuroCloud && typeof window.KuroCloud.publishSheetToCloud === 'function') {
+        let supabaseSuccess = false;
+        if (window.KuroCloud && typeof window.KuroCloud.publishSheetToCloud === 'function' && window.KuroCloud.getCredentials().isConfigured) {
           try {
-            await window.KuroCloud.publishSheetToCloud(newSheet);
+            const res = await window.KuroCloud.publishSheetToCloud(newSheet);
+            if (res) supabaseSuccess = true;
           } catch (err) {
             console.warn('Cloud publish fallback to local cache:', err);
           }
         }
 
-        // 4. Update in-memory & local storage
+        // 4. Direct GitHub Repository Auto-Commit (Instant persistence on GitHub Pages)
+        let gitSyncSuccess = false;
+        let gitCommitError = '';
+        if (window.KuroGitSync && window.KuroGitSync.hasToken()) {
+          try {
+            const currentList = window.DATA?.sheets || getCustomSheets();
+            const allSheetsToCommit = [newSheet, ...currentList.filter(s => s.id !== newSheet.id)];
+            const commitRes = await window.KuroGitSync.commitSheets(
+              allSheetsToCommit,
+              `feat(sheets): publish "${newSheet.title}" via Super-Admin`
+            );
+            if (commitRes.success) {
+              gitSyncSuccess = true;
+            } else {
+              gitCommitError = commitRes.error;
+            }
+          } catch (err) {
+            gitCommitError = err.message;
+          }
+        }
+
+        // 5. Update in-memory & local storage
         if (window.DATA) {
           if (!Array.isArray(window.DATA.sheets)) window.DATA.sheets = [];
           window.DATA.sheets.unshift(newSheet);
@@ -1249,19 +1643,45 @@ window.AdminPage = (function () {
         if (animBox) {
           animBox.style.background = 'rgba(16, 185, 129, 0.15)';
         }
-        if (titleEl) {
-          titleEl.textContent = isAr ? 'تم النشر والمزامنة السحابية بنجاح! 🎉' : 'Published and Synced to Cloud! 🎉';
-          titleEl.style.color = '#34D399';
-        }
-        if (descEl) {
-          descEl.textContent = isAr ? 'أصبح الشيت متاحاً للتحميل والدراسة لجميع الطلبة الآن.' : 'Sheet is now available for all students to study.';
+        
+        if (gitSyncSuccess) {
+          if (titleEl) {
+            titleEl.textContent = isAr ? 'تم النشر وتحديث مستودع GitHub بنجاح! 🚀' : 'Published & Committed to GitHub! 🚀';
+            titleEl.style.color = '#34D399';
+          }
+          if (descEl) {
+            descEl.textContent = isAr ? 'تم حفظ الشيت في المستودع الرسمي، وستظهر لجميع الطلبة فوراً.' : 'Committed to main repository and live for all students worldwide.';
+          }
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'تم نشر الملزمة وتحديث المستودع لجميع الطلبة بنجاح! 🚀' : 'Sheet published and committed to GitHub! 🚀', { type: 'success' });
+          }
+        } else if (supabaseSuccess) {
+          if (titleEl) {
+            titleEl.textContent = isAr ? 'تم النشر والمزامنة السحابية بنجاح! 🎉' : 'Published and Synced to Cloud! 🎉';
+            titleEl.style.color = '#34D399';
+          }
+          if (descEl) {
+            descEl.textContent = isAr ? 'أصبح الشيت متاحاً في قاعدة البيانات المركزية لجميع الطلبة.' : 'Sheet is live in central database for all students.';
+          }
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'تم نشر الملزمة ومزامنتها سحابياً لجميع الطلبة! ☁️' : 'Sheet published and synced to cloud! ☁️', { type: 'success' });
+          }
+        } else {
+          if (titleEl) {
+            titleEl.textContent = isAr ? 'تم حفظ الشيت محلياً بنجاح! 💾' : 'Sheet Saved Locally! 💾';
+            titleEl.style.color = '#FBBF24';
+          }
+          if (descEl) {
+            descEl.textContent = isAr 
+              ? 'تم الحفظ في متصفحك. لتظهر لجميع الطلبة على هواتفهم، قم بربط GitHub PAT من تبويب "المزامنة السحابية" أو نزّل ملف sheets.json.' 
+              : 'Saved to browser. To publish to all students, enable GitHub sync in the Sync tab or download sheets.json.';
+          }
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'تم الحفظ محلياً. استخدم تبويب المزامنة لنشرها لجميع الطلبة ⚠️' : 'Saved locally. Use Sync tab to publish globally ⚠️', { type: 'info' });
+          }
         }
 
-        if (typeof window.showToast === 'function') {
-          window.showToast(isAr ? 'تم نشر الملزمة بنجاح ومزامنتها سحابياً لجميع الأجهزة والطلبة! 🚀☁️' : 'Sheet published and synced to cloud for all students! 🚀☁️', { type: 'success' });
-        }
-
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, 1300));
         document.getElementById('admin-publish-overlay')?.remove();
 
         render(container);
@@ -1286,20 +1706,26 @@ window.AdminPage = (function () {
 
     // Reorder Buttons
     container.querySelectorAll('.btn-move-up-sheet').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
         if (window.DATA && window.DATA.reorderSheet) {
           window.DATA.reorderSheet(id, 'up');
+          if (window.KuroGitSync && window.KuroGitSync.hasToken()) {
+            window.KuroGitSync.commitSheets(window.DATA.sheets, `chore(sheets): reorder sheets via Super-Admin`).catch(() => {});
+          }
           render(container);
         }
       });
     });
 
     container.querySelectorAll('.btn-move-down-sheet').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
         if (window.DATA && window.DATA.reorderSheet) {
           window.DATA.reorderSheet(id, 'down');
+          if (window.KuroGitSync && window.KuroGitSync.hasToken()) {
+            window.KuroGitSync.commitSheets(window.DATA.sheets, `chore(sheets): reorder sheets via Super-Admin`).catch(() => {});
+          }
           render(container);
         }
       });
@@ -1339,6 +1765,16 @@ window.AdminPage = (function () {
             try {
               await window.KuroCloud.deleteSheetFromCloud(id);
             } catch (e) {}
+          }
+
+          // Delete from GitHub repository
+          if (window.KuroGitSync && window.KuroGitSync.hasToken()) {
+            try {
+              const remaining = (window.DATA?.sheets || []).filter(s => s.id !== id);
+              await window.KuroGitSync.commitSheets(remaining, `chore(sheets): remove sheet "${title}" via Super-Admin`);
+            } catch (e) {
+              console.warn('GitHub sync delete note:', e);
+            }
           }
 
           addDeletedSheetId(id);
@@ -1471,6 +1907,228 @@ window.AdminPage = (function () {
 
           render(container);
         });
+      });
+    });
+
+    // 7. Quick Navigation to Sync Tab & Quick JSON Download from Banner
+    container.querySelectorAll('#btn-quick-sync-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeTab = 'sync';
+        render(container);
+      });
+    });
+
+    container.querySelectorAll('#btn-quick-download-json').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const curSheets = window.DATA?.sheets || getCustomSheets();
+        if (window.KuroGitSync) {
+          window.KuroGitSync.downloadSheetsJson(curSheets);
+        } else if (window.DATA && window.DATA.exportSheetsJson) {
+          window.DATA.exportSheetsJson();
+        }
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم تنزيل ملف data/sheets.json المحدث بنجاح! 📥' : 'Downloaded data/sheets.json! 📥', { type: 'success' });
+        }
+      });
+    });
+
+    // 8. Sync Tab: GitHub Direct Auto-Commit Handlers
+    const toggleGitBtn = document.getElementById('btn-toggle-github-token');
+    const gitTokenInput = document.getElementById('sync-github-token');
+    if (toggleGitBtn && gitTokenInput) {
+      toggleGitBtn.addEventListener('click', () => {
+        if (gitTokenInput.type === 'password') {
+          gitTokenInput.type = 'text';
+          toggleGitBtn.textContent = '🔒';
+        } else {
+          gitTokenInput.type = 'password';
+          toggleGitBtn.textContent = '👁️';
+        }
+      });
+    }
+
+    document.getElementById('btn-save-github-token')?.addEventListener('click', () => {
+      const val = gitTokenInput ? gitTokenInput.value.trim() : '';
+      if (!val) {
+        if (typeof window.showToast === 'function') window.showToast(isAr ? 'يرجى إدخال الرمز أولاً' : 'Please enter token', { type: 'warning' });
+        return;
+      }
+      if (window.KuroGitSync) {
+        window.KuroGitSync.saveToken(val);
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم حفظ رمز GitHub بنجاح! 💾' : 'GitHub Token saved! 💾', { type: 'success' });
+        }
+        render(container);
+      }
+    });
+
+    document.getElementById('btn-test-github-token')?.addEventListener('click', async () => {
+      const val = gitTokenInput ? gitTokenInput.value.trim() : '';
+      const statusBox = document.getElementById('github-sync-status-box');
+      if (statusBox) {
+        statusBox.style.display = 'block';
+        statusBox.style.background = 'rgba(2, 132, 199, 0.1)';
+        statusBox.style.color = '#38BDF8';
+        statusBox.style.border = '1px solid rgba(2, 132, 199, 0.25)';
+        statusBox.innerHTML = `⏳ ${isAr ? 'جاري فحص الرمز وصلاحيات المستودع...' : 'Testing GitHub Token...'}`;
+      }
+
+      if (window.KuroGitSync) {
+        const res = await window.KuroGitSync.testToken(val);
+        if (res.success) {
+          if (statusBox) {
+            statusBox.style.background = 'rgba(16, 185, 129, 0.12)';
+            statusBox.style.color = '#34D399';
+            statusBox.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+            statusBox.innerHTML = `✅ ${isAr ? `الاتصال بمستودع <strong>${res.repoName}</strong> ناجح 100%! صلاحيات التعديل مفعلة.` : `Connected to <strong>${res.repoName}</strong> successfully! Write permissions active.`}`;
+          }
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'الاتصال بـ GitHub ناجح وصالح! 🟢' : 'GitHub connection valid! 🟢', { type: 'success' });
+          }
+        } else {
+          if (statusBox) {
+            statusBox.style.background = 'rgba(239, 68, 68, 0.12)';
+            statusBox.style.color = '#EF4444';
+            statusBox.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+            statusBox.innerHTML = `❌ ${res.error || (isAr ? 'فشل الاتصال' : 'Connection failed')}`;
+          }
+          if (typeof window.showToast === 'function') {
+            window.showToast(res.error || 'GitHub connection failed', { type: 'error' });
+          }
+        }
+      }
+    });
+
+    document.getElementById('btn-clear-github-token')?.addEventListener('click', () => {
+      if (window.KuroGitSync) {
+        window.KuroGitSync.clearToken();
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم مسح رمز GitHub.' : 'GitHub Token cleared.', { type: 'info' });
+        }
+        render(container);
+      }
+    });
+
+    document.getElementById('btn-commit-all-sheets')?.addEventListener('click', async () => {
+      const commitBtn = document.getElementById('btn-commit-all-sheets');
+      if (!commitBtn || !window.KuroGitSync || !window.KuroGitSync.hasToken()) return;
+
+      const origText = commitBtn.innerHTML;
+      commitBtn.disabled = true;
+      commitBtn.innerHTML = `
+        <div style="display: inline-flex; align-items: center; gap: 8px;">
+          <div style="width: 14px; height: 14px; border: 2px solid #FFF; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+          <span>${isAr ? 'جاري رفع كافة الشيتات إلى GitHub...' : 'Committing all sheets to GitHub...'}</span>
+        </div>
+      `;
+
+      const curSheets = window.DATA?.sheets || getCustomSheets();
+      const res = await window.KuroGitSync.commitSheets(
+        curSheets,
+        `chore(sheets): sync full catalog (${curSheets.length} sheets) via Super-Admin`
+      );
+
+      commitBtn.disabled = false;
+      commitBtn.innerHTML = origText;
+
+      const statusBox = document.getElementById('github-sync-status-box');
+      if (res.success) {
+        if (statusBox) {
+          statusBox.style.display = 'block';
+          statusBox.style.background = 'rgba(16, 185, 129, 0.12)';
+          statusBox.style.color = '#34D399';
+          statusBox.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+          statusBox.innerHTML = `✅ ${isAr ? `تم تحديث ملف <code>data/sheets.json</code> في المستودع بنجاح! كود الـ Commit: <code>${(res.commitSha || '').slice(0, 7)}</code>` : `Successfully committed to GitHub! SHA: ${(res.commitSha || '').slice(0, 7)}`}`;
+        }
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم تحديث ونشر كافة الشيتات في المستودع لجميع الطلبة! 🚀' : 'All sheets committed to GitHub! 🚀', { type: 'success' });
+        }
+      } else {
+        if (statusBox) {
+          statusBox.style.display = 'block';
+          statusBox.style.background = 'rgba(239, 68, 68, 0.12)';
+          statusBox.style.color = '#EF4444';
+          statusBox.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          statusBox.innerHTML = `❌ ${res.error || (isAr ? 'فشل التحديث' : 'Commit failed')}`;
+        }
+        if (typeof window.showToast === 'function') {
+          window.showToast(res.error || 'Failed to commit to GitHub', { type: 'error' });
+        }
+      }
+    });
+
+    // 9. Sync Tab: Supabase Handlers
+    document.getElementById('btn-save-supabase')?.addEventListener('click', () => {
+      const url = document.getElementById('sync-supabase-url')?.value.trim();
+      const key = document.getElementById('sync-supabase-key')?.value.trim();
+      if (window.KuroCloud) {
+        window.KuroCloud.saveCredentials(url, key);
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم حفظ إعدادات Supabase! 💾' : 'Supabase config saved! 💾', { type: 'success' });
+        }
+        render(container);
+      }
+    });
+
+    document.getElementById('btn-test-supabase')?.addEventListener('click', async () => {
+      const url = document.getElementById('sync-supabase-url')?.value.trim();
+      const key = document.getElementById('sync-supabase-key')?.value.trim();
+      const statusBox = document.getElementById('supabase-sync-status-box');
+
+      if (statusBox) {
+        statusBox.style.display = 'block';
+        statusBox.style.background = 'rgba(2, 132, 199, 0.1)';
+        statusBox.style.color = '#38BDF8';
+        statusBox.style.border = '1px solid rgba(2, 132, 199, 0.25)';
+        statusBox.innerHTML = `⏳ ${isAr ? 'جاري فحص الاتصال بجدول الشيتات...' : 'Testing Supabase table...'}`;
+      }
+
+      if (window.KuroCloud && window.KuroCloud.testConnection) {
+        const res = await window.KuroCloud.testConnection(url, key);
+        if (res.connected) {
+          if (statusBox) {
+            statusBox.style.background = 'rgba(16, 185, 129, 0.12)';
+            statusBox.style.color = '#34D399';
+            statusBox.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+            statusBox.innerHTML = `✅ ${res.message}`;
+          }
+          if (typeof window.showToast === 'function') window.showToast(res.message, { type: 'success' });
+        } else {
+          if (statusBox) {
+            statusBox.style.background = 'rgba(239, 68, 68, 0.12)';
+            statusBox.style.color = '#EF4444';
+            statusBox.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+            statusBox.innerHTML = `❌ ${res.message}`;
+          }
+          if (typeof window.showToast === 'function') window.showToast(res.message, { type: 'error' });
+        }
+      }
+    });
+
+    document.getElementById('btn-show-sql-schema')?.addEventListener('click', () => {
+      showSqlSchemaModal(isAr);
+    });
+
+    // 10. Sync Tab: 1-Click JSON Download & Copy Handlers
+    document.getElementById('btn-tab-download-json')?.addEventListener('click', () => {
+      const curSheets = window.DATA?.sheets || getCustomSheets();
+      if (window.KuroGitSync) {
+        window.KuroGitSync.downloadSheetsJson(curSheets);
+      } else if (window.DATA && window.DATA.exportSheetsJson) {
+        window.DATA.exportSheetsJson();
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast(isAr ? 'تم تنزيل ملف data/sheets.json المحدث بنجاح! 📥' : 'Downloaded data/sheets.json! 📥', { type: 'success' });
+      }
+    });
+
+    document.getElementById('btn-tab-copy-json')?.addEventListener('click', () => {
+      const curSheets = window.DATA?.sheets || getCustomSheets();
+      const jsonContent = JSON.stringify({ sheets: curSheets }, null, 2);
+      navigator.clipboard.writeText(jsonContent).then(() => {
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تم نسخ محتوى sheets.json كاملاً للحافظة! 📋' : 'Copied sheets.json to clipboard! 📋', { type: 'success' });
+        }
       });
     });
   }
