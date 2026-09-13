@@ -53,12 +53,16 @@ class DataService {
       ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets'].forEach(k => {
         try {
           const raw = localStorage.getItem(k);
-          if (raw && raw.includes('sh-fixed-provisional')) {
-            const parsed = JSON.parse(raw).filter(s => s && s.id !== 'sh-fixed-provisional');
+          if (raw && (raw.includes('sh-fixed-provisional') || raw.includes('sh_admin_1789336010378') || raw.toLowerCase().includes('provisional'))) {
+            const parsed = JSON.parse(raw).filter(s => s && s.id !== 'sh-fixed-provisional' && s.id !== 'sh_admin_1789336010378' && !(s.title || '').toLowerCase().includes('provisional'));
             localStorage.setItem(k, JSON.stringify(parsed));
           }
         } catch (err) {}
       });
+      if (this.pdfStore && typeof this.pdfStore.deletePdf === 'function') {
+        this.pdfStore.deletePdf('sh-fixed-provisional').catch(() => {});
+        this.pdfStore.deletePdf('sh_admin_1789336010378').catch(() => {});
+      }
 
       const cachedCloudSheets = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
       if (Array.isArray(cachedCloudSheets) && cachedCloudSheets.length > 0) {

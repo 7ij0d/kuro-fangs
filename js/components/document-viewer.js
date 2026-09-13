@@ -2355,7 +2355,6 @@ const DocumentViewer = {
 
     // Page Navigation & Thumbnail Drawer Controls
     let currentPage = 1;
-    const totalPages = ${totalPages};
 
     window.prevPage = function() {
       if (currentPage > 1) {
