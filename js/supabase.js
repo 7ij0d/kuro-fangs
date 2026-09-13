@@ -5,11 +5,17 @@
  */
 
 (function () {
-  // Default Supabase project configuration (can be updated or overridden in localStorage)
-  const DEFAULT_SUPABASE_URL = 'https://wuxdkhhwhsqhybdfgczp.supabase.co';
-  const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1eGRraGh3aHหมaHliZGZnY3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1MDk2MDAsImV4cCI6MjA1NDA4NTYwMH0.fake_or_placeholder_if_offline';
+  // Default Supabase project configuration (Active Live Project: vqrpodmnzubpcsvqohwj)
+  const DEFAULT_SUPABASE_URL = 'https://vqrpodmnzubpcsvqohwj.supabase.co';
+  const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1';
 
-  // Read configuration
+  // Read configuration & auto-cleanup legacy mock project credentials
+  const storedUrl = localStorage.getItem('kf_supabase_url');
+  if (storedUrl && (storedUrl.includes('wuxdkhhwhsqhybdfgczp') || storedUrl.includes('placeholder'))) {
+    localStorage.removeItem('kf_supabase_url');
+    localStorage.removeItem('kf_supabase_key');
+  }
+
   const SUPABASE_URL = localStorage.getItem('kf_supabase_url') || DEFAULT_SUPABASE_URL;
   const SUPABASE_ANON_KEY = localStorage.getItem('kf_supabase_key') || DEFAULT_SUPABASE_ANON_KEY;
 
@@ -424,7 +430,7 @@
         download_url: sheet.download_url || sheet.pdf_url || null,
         pdf_source: sheet.pdf_source || 'url',
         date: sheet.date || new Date().toISOString().split('T')[0],
-        created_at: new Date().toISOString()
+        created_at: sheet.created_at || new Date().toISOString()
       };
 
       const { data, error } = await client
@@ -470,6 +476,26 @@
     if (!client) return false;
 
     try {
+      // 1. Delete associated PDF file from Supabase Storage if uploaded
+      try {
+        const { data: sheetData } = await client
+          .from('sheets')
+          .select('pdf_url')
+          .eq('id', sheetId)
+          .single();
+        
+        if (sheetData && sheetData.pdf_url && sheetData.pdf_url.includes('/pdf-sheets/')) {
+          const parts = sheetData.pdf_url.split('/pdf-sheets/');
+          if (parts[1]) {
+            const storagePath = decodeURIComponent(parts[1].split('?')[0]);
+            await client.storage.from('pdf-sheets').remove([storagePath]);
+          }
+        }
+      } catch (storageErr) {
+        console.warn('Storage delete note:', storageErr);
+      }
+
+      // 2. Delete row from sheets table
       const { error } = await client
         .from('sheets')
         .delete()
@@ -490,7 +516,7 @@
     const url = (customUrl || localStorage.getItem('kf_supabase_url') || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
     const key = customKey || localStorage.getItem('kf_supabase_key') || DEFAULT_SUPABASE_ANON_KEY;
 
-    if (!url || url.includes('placeholder') || !key || key.includes('placeholder')) {
+    if (!url || url.includes('placeholder') || !key || key.includes('placeholder') || url.includes('wuxdkhhwhsqhybdfgczp')) {
       return { connected: false, reason: 'unconfigured', message: 'لم يتم إدخال بيانات مشروع Supabase حقيقي بعد' };
     }
 
@@ -504,9 +530,9 @@
       });
 
       if (res.status === 200 || res.status === 206) {
-        return { connected: true, message: 'متصل بقاعدة بيانات Supabase وجدول الشيتات بنجاح 🟢' };
+        return { connected: true, message: 'متصل بقاعدة بيانات Supabase ومستودع الملفات بنجاح 🟢' };
       } else if (res.status === 404) {
-        return { connected: false, reason: 'table_missing', message: 'الاتصال نجح ولكن الجدول "sheets" غير موجود. يرجى إنشاء الجدول عبر كود SQL.' };
+        return { connected: false, reason: 'table_missing', message: 'الاتصال نجح ولكن الجدول "sheets" غير موجود.' };
       } else if (res.status === 401 || res.status === 403) {
         return { connected: false, reason: 'auth_error', message: 'مفتاح Anon Key غير صالح أو صلاحيات الـ RLS بحاجة لتفعيل.' };
       } else {
@@ -530,9 +556,14 @@
   }
 
   function getCredentials() {
-    const url = localStorage.getItem('kf_supabase_url') || '';
-    const key = localStorage.getItem('kf_supabase_key') || '';
-    const isConfigured = Boolean(url && key && !url.includes('placeholder') && !key.includes('placeholder'));
+    const url = localStorage.getItem('kf_supabase_url') || DEFAULT_SUPABASE_URL;
+    const key = localStorage.getItem('kf_supabase_key') || DEFAULT_SUPABASE_ANON_KEY;
+    const isConfigured = Boolean(
+      url && key &&
+      !url.includes('placeholder') &&
+      !key.includes('placeholder') &&
+      !url.includes('wuxdkhhwhsqhybdfgczp')
+    );
     return {
       url,
       key,

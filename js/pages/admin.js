@@ -751,7 +751,7 @@ window.AdminPage = (function () {
           <div>
             <div style="font-weight: 800; font-size: 0.95rem; color: #34D399; display: flex; align-items: center; gap: 6px;">
               <span>${isAr ? 'المزامنة العامة مفعلة ونشطة' : 'Global Cloud & Repo Sync Active'}</span>
-              <span class="badge" style="background: rgba(16,185,129,0.25); color: #10B981; font-size: 0.7rem;">${hasGitSync ? 'GitHub API' : 'Supabase'}</span>
+              <span class="badge" style="background: rgba(16,185,129,0.25); color: #10B981; font-size: 0.7rem;">${hasGitSync && hasCloudSync ? 'Supabase + GitHub' : (hasCloudSync ? 'Supabase Cloud ☁️' : 'GitHub API')}</span>
             </div>
             <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">
               ${isAr ? 'أي شيت تقوم بإضافته أو تعديله أو حذفه ينعكس عالمياً لجميع الطلبة على كافة أجهزتهم فوراً.' : 'All newly published, edited, or deleted sheets are synced worldwide for all students.'}
