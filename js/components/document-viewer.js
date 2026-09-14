@@ -405,27 +405,28 @@
       overflow: hidden;
       width: 100%;
       height: 100%;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .jnotes-viewport {
       flex: 1;
-      overflow: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 14px 8px 30px 8px;
+      overflow: hidden;
       position: relative;
       background: var(--j-bg);
-      scroll-behavior: smooth;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .jnotes-pages-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
-      width: 100%;
-      max-width: 1100px;
-      transform-origin: top center;
-      transition: transform 0.12s ease-out;
+      gap: 24px;
+      transform-origin: 0 0;
+      will-change: transform;
     }
 
     /* Document Page Container */
@@ -884,9 +885,6 @@
         position: sticky;
         top: 80px;
       }
-      .jnotes-viewport {
-        padding: 10px 4px 20px 4px;
-      }
     }
   `;
 
@@ -898,6 +896,14 @@
   let currentTheme = 'white';
   let zoomLevel = 1.0;
   let isContextExpanded = false;
+
+  // 2D Matrix Camera Viewport State (Hardware-Accelerated Translation & Scale)
+  let panX = 0;
+  let panY = 15;
+  let minZoom = 0.85;
+  let maxZoom = 3.5;
+  let docNaturalWidth = 850;
+  let docNaturalHeight = 1100;
 
   // Distinct & Independent Tool States
   const penState = {
@@ -1584,46 +1590,172 @@
     window.addEventListener('touchend', onRotateEnd);
   }
 
-  // Zoom Controls
-  window.setZoom = function(val) {
-    zoomLevel = Math.max(0.85, Math.min(3.5, val));
-    const wrapper = document.getElementById('jnotes-pages-wrapper');
-    const textEl = document.getElementById('zoom-val-text');
-    if (wrapper) {
-      wrapper.style.transform = 'scale(' + zoomLevel + ')';
-      const scaledW = 1100 * zoomLevel;
-      wrapper.style.width = zoomLevel > 1.0 ? (scaledW + 'px') : '100%';
-      wrapper.style.marginBottom = zoomLevel > 1.0 ? (Math.max(0, (zoomLevel - 1) * 350) + 'px') : '0px';
-    }
-    if (textEl) textEl.textContent = Math.round(zoomLevel * 100) + '%';
-  };
-  window.zoomIn = function() { window.setZoom(zoomLevel + 0.15); };
-  window.zoomOut = function() { window.setZoom(zoomLevel - 0.15); };
-  window.resetZoom = function() { window.setZoom(1.0); };
-  window.fitWidth = function() { window.setZoom(1.25); };
-  window.fitPage = function() { window.setZoom(0.9); };
+  // ==========================================================================
+  // 2D MATRIX CAMERA VIEWPORT CONTROLLER (Hardware-Accelerated Translation & Scale)
+  // ==========================================================================
+  function getViewportDimensions() {
+    const vp = document.getElementById('jnotes-viewport');
+    if (!vp) return { width: window.innerWidth, height: window.innerHeight };
+    return { width: vp.clientWidth || window.innerWidth, height: vp.clientHeight || window.innerHeight };
+  }
 
-  // Page Stepper & Direct Jump
-  window.scrollToPage = function(pageNum) {
+  function getDocumentDimensions() {
+    const wrapper = document.getElementById('jnotes-pages-wrapper');
+    if (!wrapper) return { width: docNaturalWidth, height: docNaturalHeight };
+    const w = wrapper.offsetWidth || docNaturalWidth;
+    const h = wrapper.offsetHeight || docNaturalHeight;
+    return { width: Math.max(300, w), height: Math.max(400, h) };
+  }
+
+  function getFitWidthScale() {
+    const vp = getViewportDimensions();
+    const doc = getDocumentDimensions();
+    const targetW = vp.width - 24; // 12px margin each side
+    const scale = targetW / (doc.width || 850);
+    return Math.max(0.35, Math.min(1.5, scale));
+  }
+
+  function clampViewport() {
+    const vp = getViewportDimensions();
+    const doc = getDocumentDimensions();
+    const scaledW = doc.width * zoomLevel;
+    const scaledH = doc.height * zoomLevel;
+
+    // Horizontal boundaries:
+    if (scaledW <= vp.width) {
+      // Natural horizontal centering when sheet fits within screen
+      panX = (vp.width - scaledW) / 2;
+    } else {
+      // Clamped horizontal pan range when zoomed in
+      const minX = vp.width - scaledW - 20;
+      const maxX = 20;
+      panX = Math.max(minX, Math.min(maxX, panX));
+    }
+
+    // Vertical boundaries:
+    if (scaledH <= vp.height) {
+      // Natural vertical centering with comfortable top margin
+      panY = Math.max(15, (vp.height - scaledH) / 2);
+    } else {
+      // Can scroll from top of page 1 to bottom of last page with 40px padding
+      const minY = vp.height - scaledH - 40;
+      const maxY = 20;
+      panY = Math.max(minY, Math.min(maxY, panY));
+    }
+  }
+
+  function updateTransform(smooth) {
+    const wrapper = document.getElementById('jnotes-pages-wrapper');
+    if (!wrapper) return;
+
+    if (smooth) {
+      wrapper.style.transition = 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)';
+    } else {
+      wrapper.style.transition = 'none';
+    }
+
+    wrapper.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoomLevel})`;
+
+    const textEl = document.getElementById('zoom-val-text');
+    if (textEl) textEl.textContent = Math.round(zoomLevel * 100) + '%';
+  }
+
+  window.setZoom = function(val, focalPoint, smooth) {
+    const vp = getViewportDimensions();
+    const focalX = focalPoint ? focalPoint.x : (vp.width / 2);
+    const focalY = focalPoint ? focalPoint.y : (vp.height / 2);
+
+    const docFocalX = (focalX - panX) / zoomLevel;
+    const docFocalY = (focalY - panY) / zoomLevel;
+
+    zoomLevel = Math.max(minZoom, Math.min(maxZoom, val));
+
+    // Anchor focal point
+    panX = focalX - docFocalX * zoomLevel;
+    panY = focalY - docFocalY * zoomLevel;
+
+    clampViewport();
+    updateTransform(smooth !== false);
+  };
+
+  window.zoomIn = function() { window.setZoom(zoomLevel * 1.25); };
+  window.zoomOut = function() { window.setZoom(zoomLevel / 1.25); };
+  window.resetZoom = function() { window.fitWidth(); };
+
+  window.fitWidth = function() {
+    zoomLevel = getFitWidthScale();
+    const vp = getViewportDimensions();
+    const doc = getDocumentDimensions();
+    panX = (vp.width - doc.width * zoomLevel) / 2;
+    panY = 15;
+    clampViewport();
+    updateTransform(true);
+  };
+
+  window.fitPage = function() {
+    const vp = getViewportDimensions();
+    const doc = getDocumentDimensions();
+    const perPageH = (doc.height / totalPages) || 1100;
+    const scale = Math.min((vp.width - 24) / doc.width, (vp.height - 30) / perPageH);
+    zoomLevel = Math.max(minZoom, Math.min(maxZoom, scale));
+    panX = (vp.width - doc.width * zoomLevel) / 2;
+    panY = 15;
+    clampViewport();
+    updateTransform(true);
+  };
+
+  // Page Stepper & Smooth Viewport Navigation
+  window.scrollToPage = function(pageNum, smooth) {
     if (pageNum < 1 || pageNum > totalPages) return;
     currentPage = pageNum;
     const pageEl = document.getElementById('page-' + pageNum);
-    if (pageEl) pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (pageEl) {
+      const pageTopOffset = pageEl.offsetTop;
+      panY = -pageTopOffset * zoomLevel + 15;
+      clampViewport();
+      updateTransform(smooth !== false);
+    }
     const counter = document.getElementById('page-counter-stepper');
     if (counter) counter.textContent = currentPage + ' / ' + totalPages;
   };
+
+  function updateCurrentPageFromPan() {
+    const pages = document.querySelectorAll('.doc-page');
+    if (pages.length === 0) return;
+    const vp = getViewportDimensions();
+    const docCenterY = (vp.height / 2 - panY) / zoomLevel;
+
+    for (let i = 0; i < pages.length; i++) {
+      const pEl = pages[i];
+      const top = pEl.offsetTop;
+      const bottom = top + pEl.offsetHeight + 24;
+      if (docCenterY >= top && docCenterY <= bottom) {
+        const pNum = parseInt(pEl.getAttribute('data-page'), 10);
+        if (pNum && pNum !== currentPage) {
+          currentPage = pNum;
+          const counter = document.getElementById('page-counter-stepper');
+          if (counter) counter.textContent = currentPage + ' / ' + totalPages;
+        }
+        break;
+      }
+    }
+  }
+
   window.prevPage = function() { window.scrollToPage(currentPage - 1); };
   window.nextPage = function() { window.scrollToPage(currentPage + 1); };
+
   window.openPageJumpModal = function() {
     const m = document.getElementById('modal-page-jump');
     const inp = document.getElementById('input-page-jump');
     if (m) m.style.display = 'flex';
     if (inp) { inp.value = currentPage; inp.focus(); }
   };
+
   window.closePageJumpModal = function() {
     const m = document.getElementById('modal-page-jump');
     if (m) m.style.display = 'none';
   };
+
   window.confirmPageJump = function() {
     const inp = document.getElementById('input-page-jump');
     if (inp) {
@@ -1873,6 +2005,18 @@
   let startX = 0, startY = 0;
   let currentStroke = null;
 
+  function abortActiveDrawing() {
+    isDrawing = false;
+    currentStroke = null;
+    document.querySelectorAll('.draft-canvas').forEach(dc => {
+      const ctx = dc.getContext('2d');
+      ctx.clearRect(0, 0, dc.width, dc.height);
+    });
+    for (let p = 1; p <= totalPages; p++) {
+      if (typeof redrawCanvas === 'function') redrawCanvas(p);
+    }
+  }
+
   function initCanvases() {
     const cursor = document.getElementById('jnotes-eraser-cursor');
 
@@ -1897,6 +2041,8 @@
 
       const onStart = (e) => {
         if (currentTool === 'pan') return;
+        if (Date.now() < preventDrawUntil) return;
+        if (e.touches && e.touches.length >= 2) return;
         const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
         let pt = getCanvasPoint(e, canvas);
@@ -2020,20 +2166,11 @@
         if (cursor) cursor.style.display = 'none';
       });
 
-      // Mobile Touch Handling: Prevent page scroll while drawing or erasing
+      // Mobile Touch Handling: 1 finger draws/erases, 2 fingers abort drawing and bubble to gesture camera
       canvas.addEventListener('touchstart', (e) => {
         if (e.touches.length >= 2) {
-          // Multi-finger touch: abort any drawing immediately
-          if (isDrawing) {
-            isDrawing = false;
-            currentStroke = null;
-            if (draftCanvas) {
-              const dctx = draftCanvas.getContext('2d');
-              dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
-            }
-            redrawCanvas(pageNum);
-          }
-          return;
+          abortActiveDrawing();
+          return; // Allow event to bubble to viewport gesture engine
         }
         if (Date.now() < preventDrawUntil) {
           e.preventDefault();
@@ -2049,7 +2186,8 @@
 
       canvas.addEventListener('touchmove', (e) => {
         if (e.touches.length >= 2) {
-          return; // Let gesture engine handle pinch & pan
+          abortActiveDrawing();
+          return; // Allow event to bubble to viewport gesture engine
         }
         if (currentTool === 'pan') return;
         if (e.touches.length === 1 && isDrawing) {
@@ -2062,7 +2200,7 @@
       canvas.addEventListener('touchend', (e) => {
         if (currentTool === 'pan') return;
         if (cursor) cursor.style.display = 'none';
-        if (isDrawing) {
+        if (isDrawing && e.changedTouches && e.changedTouches.length > 0) {
           onEnd(e.changedTouches[0]);
         }
       });
@@ -2427,6 +2565,8 @@
       const totalEl = document.getElementById('sidebar-total-pages');
       if (totalEl) totalEl.textContent = totalPages;
 
+      let maxPageW = 850;
+
       for (let p = 1; p <= numPages; p++) {
         const pdfPage = await pdf.getPage(p);
 
@@ -2434,6 +2574,7 @@
         const baseScale = 2.0;
         const viewport = pdfPage.getViewport({ scale: baseScale });
         const cssViewport = pdfPage.getViewport({ scale: 1.0 });
+        if (cssViewport.width > maxPageW) maxPageW = cssViewport.width;
 
         const pageDiv = document.createElement('div');
         pageDiv.className = 'doc-page pdf-page-rendered';
@@ -2522,20 +2663,118 @@
         }
       }
 
+      docNaturalWidth = maxPageW;
+      if (pagesWrapper) {
+        pagesWrapper.style.width = docNaturalWidth + 'px';
+      }
       initCanvases();
       loadSavedAnnotations();
+      window.fitWidth();
     } catch (e) {
       console.warn('PDF.js render failed, using fallback slides:', e);
+      renderPlaceholderPages(currentDoc, totalPages);
     }
   }
 
+  // Fallback Academic Sheet Page Generator
+  function renderPlaceholderPages(doc, count) {
+    const pagesWrapper = document.getElementById('jnotes-pages-wrapper');
+    if (!pagesWrapper) return;
+    pagesWrapper.innerHTML = '';
+    const pageWidth = 850;
+    const pageHeight = 1150;
+    docNaturalWidth = pageWidth;
+    pagesWrapper.style.width = pageWidth + 'px';
+    totalPages = Math.max(1, count || 1);
+
+    const stepper = document.getElementById('page-counter-stepper');
+    if (stepper) stepper.textContent = '1 / ' + totalPages;
+    const totalEl = document.getElementById('sidebar-total-pages');
+    if (totalEl) totalEl.textContent = totalPages;
+
+    for (let p = 1; p <= totalPages; p++) {
+      const pageDiv = document.createElement('div');
+      pageDiv.className = 'doc-page pdf-page-rendered';
+      pageDiv.id = 'page-' + p;
+      pageDiv.setAttribute('data-page', p);
+      pageDiv.style.width = pageWidth + 'px';
+      pageDiv.style.height = pageHeight + 'px';
+      pageDiv.style.position = 'relative';
+
+      const bgCanvas = document.createElement('canvas');
+      bgCanvas.className = 'pdf-render-canvas';
+      bgCanvas.width = pageWidth * 2;
+      bgCanvas.height = pageHeight * 2;
+      bgCanvas.style.width = '100%';
+      bgCanvas.style.height = '100%';
+      bgCanvas.style.position = 'absolute';
+      bgCanvas.style.top = '0';
+      bgCanvas.style.left = '0';
+      bgCanvas.style.zIndex = '1';
+      const bgCtx = bgCanvas.getContext('2d');
+      bgCtx.fillStyle = '#FFFFFF';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+      bgCtx.fillStyle = '#E2E8F0';
+      // Light grid lines
+      bgCtx.strokeStyle = '#F1F5F9';
+      bgCtx.lineWidth = 1.5;
+      for (let y = 60; y < bgCanvas.height; y += 40) {
+        bgCtx.beginPath();
+        bgCtx.moveTo(40, y);
+        bgCtx.lineTo(bgCanvas.width - 40, y);
+        bgCtx.stroke();
+      }
+      bgCtx.fillStyle = '#94A3B8';
+      bgCtx.font = 'bold 32px sans-serif';
+      bgCtx.fillText('صفحة دراسية رقم ' + p, 50, 48);
+
+      const overlayCanvas = document.createElement('canvas');
+      overlayCanvas.className = 'canvas-overlay';
+      overlayCanvas.id = 'canvas-' + p;
+      overlayCanvas.width = pageWidth * 2;
+      overlayCanvas.height = pageHeight * 2;
+      overlayCanvas.style.width = '100%';
+      overlayCanvas.style.height = '100%';
+      overlayCanvas.style.position = 'absolute';
+      overlayCanvas.style.top = '0';
+      overlayCanvas.style.left = '0';
+      overlayCanvas.style.zIndex = '5';
+      overlayCanvas.style.pointerEvents = (currentTool === 'pan') ? 'none' : 'auto';
+
+      const draftCanvas = document.createElement('canvas');
+      draftCanvas.className = 'draft-canvas';
+      draftCanvas.id = 'draft-canvas-' + p;
+      draftCanvas.width = pageWidth * 2;
+      draftCanvas.height = pageHeight * 2;
+      draftCanvas.style.width = '100%';
+      draftCanvas.style.height = '100%';
+      draftCanvas.style.position = 'absolute';
+      draftCanvas.style.top = '0';
+      draftCanvas.style.left = '0';
+      draftCanvas.style.zIndex = '6';
+      draftCanvas.style.pointerEvents = 'none';
+
+      pageDiv.appendChild(bgCanvas);
+      pageDiv.appendChild(overlayCanvas);
+      pageDiv.appendChild(draftCanvas);
+      pagesWrapper.appendChild(pageDiv);
+    }
+
+    initCanvases();
+    loadSavedAnnotations();
+    window.fitWidth();
+  }
+
   // ==========================================================================
-  // TWO-FINGER PINCH-TO-ZOOM & TWO-FINGER PAN ENGINE (Focal-Point Centered)
+  // TWO-FINGER PINCH-TO-ZOOM & PAN GESTURE ENGINE (Unified 2D Camera)
   // ==========================================================================
-  let isPinching = false;
-  let pinchStartDist = 0;
-  let pinchStartZoom = 1.0;
-  let pinchDocFocal = { x: 0, y: 0 };
+  let isGesturePinching = false;
+  let isGesturePanning = false;
+  let startPinchDist = 0;
+  let startPinchZoom = 1.0;
+  let focalDocX = 0;
+  let focalDocY = 0;
+  let lastPanPoint = { x: 0, y: 0 };
   let preventDrawUntil = 0;
 
   function initGestureEngine() {
@@ -2548,74 +2787,97 @@
     }
 
     const onTouchStart = (e) => {
-      if (e.touches.length >= 2) {
-        // Two fingers detected! Cancel any active drawing on any page immediately
-        isDrawing = false;
-        currentStroke = null;
-        document.querySelectorAll('.draft-canvas').forEach(dc => {
-          const ctx = dc.getContext('2d');
-          ctx.clearRect(0, 0, dc.width, dc.height);
-        });
-        redrawCanvas(currentPage);
+      const vRect = viewport.getBoundingClientRect();
 
-        isPinching = true;
+      if (e.touches.length >= 2) {
+        // TWO FINGERS: Always pinch & pan across all modes!
+        e.preventDefault();
+        abortActiveDrawing();
+
+        isGesturePinching = true;
+        isGesturePanning = false;
+
         const t1 = e.touches[0];
         const t2 = e.touches[1];
-        pinchStartDist = getTouchDist(t1, t2);
-        pinchStartZoom = zoomLevel;
+        startPinchDist = getTouchDist(t1, t2);
+        startPinchZoom = zoomLevel;
 
-        const vRect = viewport.getBoundingClientRect();
-        const clientMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
-        const clientMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
+        const midX = (t1.clientX + t2.clientX) / 2 - vRect.left;
+        const midY = (t1.clientY + t2.clientY) / 2 - vRect.top;
 
-        // Unscaled document coordinate currently directly beneath the two fingers
-        pinchDocFocal = {
-          x: (viewport.scrollLeft + clientMidX) / pinchStartZoom,
-          y: (viewport.scrollTop + clientMidY) / pinchStartZoom
-        };
+        // Document coordinate locked under midpoint
+        focalDocX = (midX - panX) / zoomLevel;
+        focalDocY = (midY - panY) / zoomLevel;
 
-        // Disable CSS transitions & smooth scrolling during direct touch gestures for immediate 60fps response
-        const wrapper = document.getElementById('jnotes-pages-wrapper');
-        if (wrapper) wrapper.style.transition = 'none';
-        viewport.style.scrollBehavior = 'auto';
+        updateTransform(false);
 
         const cursor = document.getElementById('jnotes-eraser-cursor');
         if (cursor) cursor.style.display = 'none';
+      } else if (e.touches.length === 1 && currentTool === 'pan') {
+        // ONE FINGER IN READING MODE: Direct 1:1 pan!
+        isGesturePanning = true;
+        isGesturePinching = false;
+        lastPanPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        updateTransform(false);
       }
     };
 
     const onTouchMove = (e) => {
-      if (e.touches.length >= 2 && isPinching) {
+      const vRect = viewport.getBoundingClientRect();
+
+      if (e.touches.length >= 2 && isGesturePinching) {
         e.preventDefault();
 
         const t1 = e.touches[0];
         const t2 = e.touches[1];
-        const currentDist = getTouchDist(t1, t2);
-        let newZoom = zoomLevel;
+        const currDist = getTouchDist(t1, t2);
 
-        if (pinchStartDist > 10) {
-          const ratio = currentDist / pinchStartDist;
-          newZoom = Math.max(0.85, Math.min(3.5, pinchStartZoom * ratio));
-          setZoom(newZoom);
+        // Calculate new zoom level
+        let newZoom = zoomLevel;
+        if (startPinchDist > 10) {
+          const ratio = currDist / startPinchDist;
+          newZoom = Math.max(minZoom, Math.min(maxZoom, startPinchZoom * ratio));
+          zoomLevel = newZoom;
         }
 
-        const vRect = viewport.getBoundingClientRect();
-        const currentClientMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
-        const currentClientMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
+        // Current midpoint in viewport
+        const currMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
+        const currMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
 
-        // Keep the unscaled document point locked under the current finger midpoint
-        viewport.scrollLeft = pinchDocFocal.x * newZoom - currentClientMidX;
-        viewport.scrollTop = pinchDocFocal.y * newZoom - currentClientMidY;
+        // Keep the exact document point locked under the current finger midpoint:
+        panX = currMidX - focalDocX * newZoom;
+        panY = currMidY - focalDocY * newZoom;
+
+        clampViewport();
+        updateTransform(false);
+        updateCurrentPageFromPan();
+      } else if (e.touches.length === 1 && isGesturePanning && currentTool === 'pan') {
+        e.preventDefault();
+        const t = e.touches[0];
+        const dx = t.clientX - lastPanPoint.x;
+        const dy = t.clientY - lastPanPoint.y;
+        lastPanPoint = { x: t.clientX, y: t.clientY };
+
+        panX += dx;
+        panY += dy;
+
+        clampViewport();
+        updateTransform(false);
+        updateCurrentPageFromPan();
       }
     };
 
     const onTouchEnd = (e) => {
-      if (isPinching && e.touches.length < 2) {
-        isPinching = false;
-        preventDrawUntil = Date.now() + 350; // 350ms cooldown prevents accidental drawing on lift
-        const wrapper = document.getElementById('jnotes-pages-wrapper');
-        if (wrapper) wrapper.style.transition = 'transform 0.12s ease-out';
-        viewport.style.scrollBehavior = 'smooth';
+      if (isGesturePinching && e.touches.length < 2) {
+        isGesturePinching = false;
+        preventDrawUntil = Date.now() + 320; // 320ms cooldown prevents accidental marks on lifting fingers
+        clampViewport();
+        updateTransform(true);
+      }
+      if (isGesturePanning && e.touches.length === 0) {
+        isGesturePanning = false;
+        clampViewport();
+        updateTransform(true);
       }
     };
 
@@ -2623,6 +2885,31 @@
     viewport.addEventListener('touchmove', onTouchMove, { passive: false });
     viewport.addEventListener('touchend', onTouchEnd, { passive: false });
     viewport.addEventListener('touchcancel', onTouchEnd, { passive: false });
+
+    // Desktop Mouse Wheel & Trackpad Pinch
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const vRect = viewport.getBoundingClientRect();
+      const mouseX = e.clientX - vRect.left;
+      const mouseY = e.clientY - vRect.top;
+
+      if (e.ctrlKey || e.metaKey) {
+        const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+        const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomLevel * zoomFactor));
+        const docX = (mouseX - panX) / zoomLevel;
+        const docY = (mouseY - panY) / zoomLevel;
+        zoomLevel = newZoom;
+        panX = mouseX - docX * zoomLevel;
+        panY = mouseY - docY * zoomLevel;
+      } else {
+        panX -= e.deltaX;
+        panY -= e.deltaY;
+      }
+
+      clampViewport();
+      updateTransform(false);
+      updateCurrentPageFromPan();
+    }, { passive: false });
   }
 
   // DocumentViewer Public Module Definition
@@ -2721,9 +3008,11 @@
       initRulerInteractions();
       loadSavedAnnotations();
 
-      // Render uploaded PDF if available
+      // Render uploaded PDF if available, otherwise render clean academic sheet pages
       if (pdfSourceUrl) {
         loadPdfPages(pdfSourceUrl);
+      } else {
+        renderPlaceholderPages(currentDoc, totalPages);
       }
     },
 
