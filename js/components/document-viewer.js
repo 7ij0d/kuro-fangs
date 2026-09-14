@@ -57,13 +57,14 @@
        LAYER A: GLOBAL TOP NAVIGATION BAR (.jnotes-global-bar)
        ========================================================================== */
     .jnotes-global-bar {
-      height: 48px;
+      height: 40px;
+      min-height: 40px;
       background: var(--j-top);
       border-bottom: 1px solid var(--j-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 14px;
+      padding: 0 12px;
       gap: 10px;
       z-index: 100;
       flex-shrink: 0;
@@ -246,7 +247,7 @@
       overflow-x: auto;
       scrollbar-width: none;
       position: sticky;
-      top: 48px;
+      top: 40px;
       width: 100%;
       box-sizing: border-box;
     }
@@ -294,20 +295,20 @@
        LAYER C: DYNAMIC CONTEXTUAL PROPERTIES BAR (.jnotes-context-bar)
        ========================================================================== */
     .jnotes-context-bar {
-      min-height: 42px;
+      min-height: 40px;
       background: var(--j-ctx);
       border-bottom: 1px solid var(--j-border);
       display: flex;
       align-items: center;
-      padding: 4px 14px;
-      gap: 12px;
+      padding: 3px 12px;
+      gap: 10px;
       z-index: 98;
       flex-shrink: 0;
       overflow-x: auto;
       scrollbar-width: none;
       transition: background 0.2s;
       position: sticky;
-      top: 94px;
+      top: 84px;
       width: 100%;
       box-sizing: border-box;
     }
@@ -411,7 +412,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 80px 16px;
+      padding: 14px 8px 30px 8px;
       position: relative;
       background: var(--j-bg);
       scroll-behavior: smooth;
@@ -515,6 +516,139 @@
       display: none;
       box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
       transition: width 0.05s ease, height 0.05s ease;
+    }
+
+    /* Virtual Straightedge Ruler Overlay */
+    .jnotes-ruler-overlay {
+      position: absolute;
+      top: 140px;
+      left: 60px;
+      width: 440px;
+      height: 56px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(56, 189, 248, 0.5);
+      border-radius: 8px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65), 0 0 15px rgba(56, 189, 248, 0.2);
+      z-index: 150;
+      display: none;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      transform-origin: center center;
+    }
+    .jnotes-ruler-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ruler-top-edge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #38BDF8, #818CF8, #38BDF8);
+      box-shadow: 0 0 8px #38BDF8;
+      border-radius: 4px 4px 0 0;
+    }
+    .ruler-ticks-container {
+      position: absolute;
+      top: 3px;
+      left: 0;
+      right: 0;
+      height: 18px;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 10px;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .ruler-tick {
+      width: 1px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .ruler-tick.cm {
+      height: 14px;
+      background: rgba(56, 189, 248, 0.85);
+      width: 1.5px;
+    }
+    .ruler-tick.half {
+      height: 9px;
+      background: rgba(255, 255, 255, 0.5);
+    }
+    .ruler-tick.mm {
+      height: 5px;
+    }
+    .ruler-drag-handle {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.725rem;
+      font-weight: 700;
+      color: #94A3B8;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      padding-top: 14px;
+    }
+    .ruler-drag-handle:active {
+      cursor: grabbing;
+    }
+    .ruler-quick-angles {
+      display: flex;
+      gap: 4px;
+      padding-top: 14px;
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+    .ruler-angle-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      color: #E2E8F0;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .ruler-angle-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+      color: #38BDF8;
+      border-color: #38BDF8;
+    }
+    .ruler-rotate-handle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38BDF8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: crosshair;
+      font-size: 0.75rem;
+      margin-top: 14px;
+      margin-left: 6px;
+      margin-right: 6px;
+      touch-action: none;
+    }
+    .ruler-close-btn {
+      background: none;
+      border: none;
+      color: #94A3B8;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      margin-top: 14px;
+      transition: color 0.15s;
+    }
+    .ruler-close-btn:hover {
+      color: #EF4444;
     }
 
     /* Paper Themes */
@@ -723,15 +857,15 @@
         padding: 4px;
       }
       .j-btn {
-        padding: 5px 8px;
+        padding: 4px 8px;
         font-size: 0.72rem;
       }
       .jnotes-annotation-toolbar {
-        height: 42px;
+        height: 40px;
         padding: 0 8px;
         gap: 4px;
         position: sticky;
-        top: 44px;
+        top: 40px;
       }
       .j-tool-btn {
         height: 32px;
@@ -748,7 +882,10 @@
         padding: 3px 8px;
         gap: 8px;
         position: sticky;
-        top: 86px;
+        top: 80px;
+      }
+      .jnotes-viewport {
+        padding: 10px 4px 20px 4px;
       }
     }
   `;
@@ -781,6 +918,11 @@
     mode: 'partial', // 'partial' (segment eraser) | 'object' (stroke eraser)
     radius: 16 // px
   };
+
+  // Virtual Ruler State (Optional straightedge guide)
+  let isRulerActive = false;
+  let rulerAngle = 0; // in degrees
+  let rulerPos = { x: 80, y: 140 }; // px relative to workspace
 
   // Annotation Data Structures
   let pageStrokes = {}; // { [pageNum]: Array<Stroke> }
@@ -826,72 +968,19 @@
       <!-- Eraser Circle Cursor Indicator -->
       <div class="jnotes-eraser-cursor" id="jnotes-eraser-cursor"></div>
 
-      <!-- LAYER A: GLOBAL TOP NAVIGATION BAR -->
+      <!-- LAYER A: MINIMAL GLOBAL TOP BAR (Back, Sheet Name, Page Indicator) -->
       <header class="jnotes-global-bar">
-        <div class="j-bar-section">
-          <button class="j-btn" onclick="exitStudio()" title="العودة للمنصة">
+        <div class="j-bar-section" style="flex: 1; min-width: 0; overflow: hidden; gap: 10px;">
+          <button class="j-btn" onclick="exitStudio()" title="العودة">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
             <span>العودة</span>
           </button>
-          <div class="j-title-pill">
-            <span class="j-badge-subject">${subjectName}</span>
-            <span class="j-title-text" title="${title}">${title}</span>
-          </div>
-          <div class="j-autosave-badge" id="auto-save-badge">
-            <span class="j-autosave-dot" id="auto-save-dot"></span>
-            <span id="auto-save-text">تم الحفظ تلقائياً</span>
-          </div>
+          <span class="j-title-text" style="font-size: 0.825rem; font-weight: 700; color: #F8FAFC; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${title}">${title}</span>
         </div>
-
-        <div class="j-bar-section">
-          <div class="j-nav-cluster">
-            <button class="j-nav-btn" onclick="prevPage()" title="الصفحة السابقة">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-            <span class="j-page-stepper-text" id="page-counter-stepper" onclick="openPageJumpModal()" title="انتقال مباشر لرقم الصفحة">
-              1 / ${numPages}
-            </span>
-            <button class="j-nav-btn" onclick="nextPage()" title="الصفحة التالية">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-          </div>
-
-          <div class="j-zoom-cluster">
-            <button class="j-nav-btn" onclick="zoomOut()" title="تصغير">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-            <span class="j-zoom-val" id="zoom-val-text" onclick="resetZoom()" title="إعادة الضبط 100%">100%</span>
-            <button class="j-nav-btn" onclick="zoomIn()" title="تكبير">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-            <button class="j-nav-btn" onclick="fitWidth()" title="ملاءمة العرض" style="font-size: 0.65rem; font-weight: 800;">عرض</button>
-            <button class="j-nav-btn" onclick="fitPage()" title="ملاءمة الصفحة" style="font-size: 0.65rem; font-weight: 800;">صفحة</button>
-          </div>
-        </div>
-
-        <div class="j-bar-section">
-          <button class="j-btn j-btn-icon" onclick="openSidebarTab('search')" title="البحث في الشيت">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </button>
-          <button class="j-btn j-btn-icon" id="btn-theme-trigger" onclick="togglePopover('menu-eye-comfort')" title="راحة العين ونمط الورق">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-          </button>
-          <button class="j-btn j-btn-icon" onclick="toggleFullscreenMode()" title="ملء الشاشة">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-          </button>
-          <button class="j-btn" onclick="toggleDiscussionDrawer()" title="المناقشات والأسئلة">
-            <span>💬</span>
-            <span>مناقشة</span>
-            <span id="header-comment-badge" style="background: rgba(2,132,199,0.3); color: #38BDF8; padding: 1px 6px; border-radius: 10px; font-size: 0.7rem;">0</span>
-          </button>
-          <button class="j-btn" onclick="toggleMultiSidebar()" title="فتح لوحة الفهرس">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M14 9h4"/><path d="M14 15h4"/></svg>
-            <span>الفهرس</span>
-          </button>
-          <button class="j-btn j-btn-primary" onclick="togglePopover('menu-export')" title="تصدير وتنزيل">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>تصدير</span>
-          </button>
+        <div class="j-bar-section" style="flex-shrink: 0;">
+          <span class="j-page-stepper-text" id="page-counter-stepper" onclick="openPageJumpModal()" style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--j-border); border-radius: 14px; padding: 3px 12px; font-size: 0.75rem; font-weight: 700; color: var(--j-accent); cursor: pointer;" title="انتقال مباشر لرقم الصفحة">
+            1 / ${numPages}
+          </span>
         </div>
       </header>
 
@@ -950,6 +1039,22 @@
 
       <!-- WORKSPACE & MAIN VIEWPORT -->
       <div class="jnotes-workspace" id="jnotes-workspace">
+        <!-- VIRTUAL RULER OVERLAY -->
+        <div class="jnotes-ruler-overlay" id="jnotes-ruler-overlay">
+          <div class="ruler-top-edge"></div>
+          <div class="ruler-ticks-container" id="ruler-ticks"></div>
+          <div class="ruler-drag-handle" id="ruler-drag-handle" title="اسحب المسطرة لتحريكها">
+            <span>📐 مسطرة التسطير</span>
+          </div>
+          <div class="ruler-quick-angles">
+            <button type="button" class="ruler-angle-btn" onclick="snapRulerAngle(0)" title="أفقي تماماً">0°</button>
+            <button type="button" class="ruler-angle-btn" onclick="snapRulerAngle(45)" title="بزاوية 45">45°</button>
+            <button type="button" class="ruler-angle-btn" onclick="snapRulerAngle(90)" title="عمودي تماماً">90°</button>
+          </div>
+          <div class="ruler-rotate-handle" id="ruler-rotate-handle" title="اسحب لتدوير المسطرة بدقة">🔄</div>
+          <button type="button" class="ruler-close-btn" onclick="toggleRuler()" title="إغلاق المسطرة">✕</button>
+        </div>
+
         <main class="jnotes-viewport" id="jnotes-viewport">
           <div class="jnotes-pages-wrapper" id="jnotes-pages-wrapper">
             <!-- RENDERED DYNAMICALLY WITH HIGH-DPI & REAL TEXT LAYER -->
@@ -1089,6 +1194,13 @@
             <span>خط مستقيم: ${penState.isStraight ? 'مفعل' : 'معطل'}</span>
           </button>
         </div>
+        <div class="j-divider"></div>
+        <div class="j-ctx-group">
+          <button class="j-btn ${isRulerActive ? 'j-btn-primary' : ''}" onclick="toggleRuler()" title="إظهار / إخفاء مسطرة التسطير">
+            <span>📐</span>
+            <span>مسطرة: ${isRulerActive ? 'مفعلة' : 'معطلة'}</span>
+          </button>
+        </div>
       `;
     } else if (currentTool === 'highlighter') {
       const presets = getHighlighterPresets();
@@ -1130,6 +1242,13 @@
           <button class="j-btn ${highlighterState.isStraight ? 'j-btn-primary' : ''}" onclick="toggleHighlighterStraight()">
             <span>📏</span>
             <span>تظليل مستقيم: ${highlighterState.isStraight ? 'مفعل' : 'معطل'}</span>
+          </button>
+        </div>
+        <div class="j-divider"></div>
+        <div class="j-ctx-group">
+          <button class="j-btn ${isRulerActive ? 'j-btn-primary' : ''}" onclick="toggleRuler()" title="إظهار / إخفاء مسطرة التسطير">
+            <span>📐</span>
+            <span>مسطرة: ${isRulerActive ? 'مفعلة' : 'معطلة'}</span>
           </button>
         </div>
       `;
@@ -1290,16 +1409,191 @@
     renderContextBar();
   };
 
+  // Virtual Ruler Engine & Straightedge Guide
+  window.toggleRuler = function() {
+    isRulerActive = !isRulerActive;
+    const rulerEl = document.getElementById('jnotes-ruler-overlay');
+    if (rulerEl) {
+      if (isRulerActive) {
+        rulerEl.classList.add('active');
+        updateRulerTransform();
+        generateRulerTicks();
+      } else {
+        rulerEl.classList.remove('active');
+      }
+    }
+    renderContextBar();
+  };
+
+  window.snapRulerAngle = function(deg) {
+    rulerAngle = deg;
+    updateRulerTransform();
+  };
+
+  function updateRulerTransform() {
+    const rulerEl = document.getElementById('jnotes-ruler-overlay');
+    if (!rulerEl) return;
+    rulerEl.style.left = rulerPos.x + 'px';
+    rulerEl.style.top = rulerPos.y + 'px';
+    rulerEl.style.transform = `rotate(${rulerAngle}deg)`;
+  }
+
+  function generateRulerTicks() {
+    const container = document.getElementById('ruler-ticks');
+    if (!container || container.children.length > 0) return;
+    let ticksHtml = '';
+    for (let i = 0; i <= 40; i++) {
+      let cls = 'mm';
+      if (i % 10 === 0) cls = 'cm';
+      else if (i % 5 === 0) cls = 'half';
+      ticksHtml += `<div class="ruler-tick ${cls}"></div>`;
+    }
+    container.innerHTML = ticksHtml;
+  }
+
+  function snapPointToRuler(pt, canvas, clientX, clientY) {
+    if (!isRulerActive) return pt;
+    const rulerEl = document.getElementById('jnotes-ruler-overlay');
+    if (!rulerEl) return pt;
+
+    const rRect = rulerEl.getBoundingClientRect();
+    const cx = rRect.left + rRect.width / 2;
+    const cy = rRect.top + rRect.height / 2;
+    const rad = (rulerAngle * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+
+    // Top edge center in client coordinates
+    const edgeCx = cx + 28 * sin;
+    const edgeCy = cy - 28 * cos;
+
+    const vx = clientX - edgeCx;
+    const vy = clientY - edgeCy;
+
+    // Normal distance to ruler edge line
+    const distNormal = Math.abs(vx * sin - vy * cos);
+
+    // Tangential offset along the ruler edge
+    const distTangent = vx * cos + vy * sin;
+
+    // Snapping threshold: within 50px normal distance, and within ruler length +/- 30px
+    const halfWidth = 220; // 440px / 2
+    if (distNormal <= 50 && distTangent >= -halfWidth - 30 && distTangent <= halfWidth + 30) {
+      const clampedTangent = Math.max(-halfWidth, Math.min(halfWidth, distTangent));
+      const snappedClientX = edgeCx + clampedTangent * cos;
+      const snappedClientY = edgeCy + clampedTangent * sin;
+
+      const cRect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / cRect.width;
+      const scaleY = canvas.height / cRect.height;
+
+      return {
+        x: (snappedClientX - cRect.left) * scaleX,
+        y: (snappedClientY - cRect.top) * scaleY
+      };
+    }
+
+    return pt;
+  }
+
+  function initRulerInteractions() {
+    const rulerEl = document.getElementById('jnotes-ruler-overlay');
+    const dragHandle = document.getElementById('ruler-drag-handle');
+    const rotateHandle = document.getElementById('ruler-rotate-handle');
+    if (!rulerEl || !dragHandle || !rotateHandle) return;
+
+    if (rulerEl._rulerBound) return;
+    rulerEl._rulerBound = true;
+
+    // Dragging
+    let isDraggingRuler = false;
+    let dragStart = { x: 0, y: 0 };
+    let posStart = { x: 0, y: 0 };
+
+    const onDragStart = (e) => {
+      e.stopPropagation();
+      isDraggingRuler = true;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      dragStart = { x: clientX, y: clientY };
+      posStart = { x: rulerPos.x, y: rulerPos.y };
+    };
+
+    const onDragMove = (e) => {
+      if (!isDraggingRuler) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      rulerPos.x = posStart.x + (clientX - dragStart.x);
+      rulerPos.y = posStart.y + (clientY - dragStart.y);
+      updateRulerTransform();
+    };
+
+    const onDragEnd = () => {
+      isDraggingRuler = false;
+    };
+
+    dragHandle.addEventListener('mousedown', onDragStart);
+    dragHandle.addEventListener('touchstart', onDragStart, { passive: false });
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('touchmove', onDragMove, { passive: false });
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchend', onDragEnd);
+
+    // Rotating
+    let isRotatingRuler = false;
+
+    const onRotateStart = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      isRotatingRuler = true;
+    };
+
+    const onRotateMove = (e) => {
+      if (!isRotatingRuler) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const rRect = rulerEl.getBoundingClientRect();
+      const cx = rRect.left + rRect.width / 2;
+      const cy = rRect.top + rRect.height / 2;
+      const rad = Math.atan2(clientY - cy, clientX - cx);
+      let deg = Math.round((rad * 180) / Math.PI);
+      const standardAngles = [-180, -135, -90, -45, 0, 45, 90, 135, 180];
+      for (const sa of standardAngles) {
+        if (Math.abs(deg - sa) <= 4) {
+          deg = sa;
+          break;
+        }
+      }
+      rulerAngle = deg;
+      updateRulerTransform();
+    };
+
+    const onRotateEnd = () => {
+      isRotatingRuler = false;
+    };
+
+    rotateHandle.addEventListener('mousedown', onRotateStart);
+    rotateHandle.addEventListener('touchstart', onRotateStart, { passive: false });
+    window.addEventListener('mousemove', onRotateMove);
+    window.addEventListener('touchmove', onRotateMove, { passive: false });
+    window.addEventListener('mouseup', onRotateEnd);
+    window.addEventListener('touchend', onRotateEnd);
+  }
+
   // Zoom Controls
   window.setZoom = function(val) {
-    zoomLevel = Math.max(0.4, Math.min(3.5, val));
+    zoomLevel = Math.max(0.85, Math.min(3.5, val));
     const wrapper = document.getElementById('jnotes-pages-wrapper');
     const textEl = document.getElementById('zoom-val-text');
     if (wrapper) {
       wrapper.style.transform = 'scale(' + zoomLevel + ')';
       const scaledW = 1100 * zoomLevel;
       wrapper.style.width = zoomLevel > 1.0 ? (scaledW + 'px') : '100%';
-      wrapper.style.marginBottom = Math.max(0, (zoomLevel - 1) * 600) + 'px';
+      wrapper.style.marginBottom = zoomLevel > 1.0 ? (Math.max(0, (zoomLevel - 1) * 350) + 'px') : '0px';
     }
     if (textEl) textEl.textContent = Math.round(zoomLevel * 100) + '%';
   };
@@ -1603,7 +1897,12 @@
 
       const onStart = (e) => {
         if (currentTool === 'pan') return;
-        const pt = getCanvasPoint(e, canvas);
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        let pt = getCanvasPoint(e, canvas);
+        if (isRulerActive && (currentTool === 'pen' || currentTool === 'highlighter')) {
+          pt = snapPointToRuler(pt, canvas, clientX, clientY);
+        }
         isDrawing = true;
         startX = pt.x;
         startY = pt.y;
@@ -1641,7 +1940,12 @@
       const onMove = (e) => {
         updateCursorPos(e);
         if (!isDrawing) return;
-        const pt = getCanvasPoint(e, canvas);
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        let pt = getCanvasPoint(e, canvas);
+        if (isRulerActive && (currentTool === 'pen' || currentTool === 'highlighter')) {
+          pt = snapPointToRuler(pt, canvas, clientX, clientY);
+        }
 
         if (currentTool === 'eraser') {
           eraseAt(pageNum, pt.x, pt.y);
@@ -1675,13 +1979,19 @@
         isDrawing = false;
 
         if (currentStroke) {
+          const clientX = e.clientX !== undefined ? e.clientX : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : 0);
+          const clientY = e.clientY !== undefined ? e.clientY : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0);
+          let pt = getCanvasPoint(e, canvas);
+          if (isRulerActive && (currentTool === 'pen' || currentTool === 'highlighter')) {
+            pt = snapPointToRuler(pt, canvas, clientX, clientY);
+          }
+
           if (currentStroke.isStraight) {
             // Finish straight line: clear draft canvas and commit clean 2-point line
             if (draftCanvas) {
               const dctx = draftCanvas.getContext('2d');
               dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
             }
-            const pt = getCanvasPoint(e, canvas);
             currentStroke.points = [{ x: startX, y: startY }, { x: pt.x, y: pt.y }];
             pageStrokes[pageNum].push(currentStroke);
             drawPermanentStroke(canvas, currentStroke);
@@ -2220,13 +2530,12 @@
   }
 
   // ==========================================================================
-  // TWO-FINGER PINCH-TO-ZOOM & TWO-FINGER PAN ENGINE
+  // TWO-FINGER PINCH-TO-ZOOM & TWO-FINGER PAN ENGINE (Focal-Point Centered)
   // ==========================================================================
   let isPinching = false;
   let pinchStartDist = 0;
   let pinchStartZoom = 1.0;
-  let pinchStartCenter = { x: 0, y: 0 };
-  let pinchStartScroll = { left: 0, top: 0 };
+  let pinchDocFocal = { x: 0, y: 0 };
   let preventDrawUntil = 0;
 
   function initGestureEngine() {
@@ -2236,13 +2545,6 @@
 
     function getTouchDist(t1, t2) {
       return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-    }
-
-    function getTouchCenter(t1, t2) {
-      return {
-        x: (t1.clientX + t2.clientX) / 2,
-        y: (t1.clientY + t2.clientY) / 2
-      };
     }
 
     const onTouchStart = (e) => {
@@ -2257,10 +2559,25 @@
         redrawCanvas(currentPage);
 
         isPinching = true;
-        pinchStartDist = getTouchDist(e.touches[0], e.touches[1]);
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        pinchStartDist = getTouchDist(t1, t2);
         pinchStartZoom = zoomLevel;
-        pinchStartCenter = getTouchCenter(e.touches[0], e.touches[1]);
-        pinchStartScroll = { left: viewport.scrollLeft, top: viewport.scrollTop };
+
+        const vRect = viewport.getBoundingClientRect();
+        const clientMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
+        const clientMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
+
+        // Unscaled document coordinate currently directly beneath the two fingers
+        pinchDocFocal = {
+          x: (viewport.scrollLeft + clientMidX) / pinchStartZoom,
+          y: (viewport.scrollTop + clientMidY) / pinchStartZoom
+        };
+
+        // Disable CSS transitions & smooth scrolling during direct touch gestures for immediate 60fps response
+        const wrapper = document.getElementById('jnotes-pages-wrapper');
+        if (wrapper) wrapper.style.transition = 'none';
+        viewport.style.scrollBehavior = 'auto';
 
         const cursor = document.getElementById('jnotes-eraser-cursor');
         if (cursor) cursor.style.display = 'none';
@@ -2271,25 +2588,34 @@
       if (e.touches.length >= 2 && isPinching) {
         e.preventDefault();
 
-        const currentDist = getTouchDist(e.touches[0], e.touches[1]);
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const currentDist = getTouchDist(t1, t2);
+        let newZoom = zoomLevel;
+
         if (pinchStartDist > 10) {
           const ratio = currentDist / pinchStartDist;
-          const newZoom = Math.max(0.4, Math.min(3.5, pinchStartZoom * ratio));
+          newZoom = Math.max(0.85, Math.min(3.5, pinchStartZoom * ratio));
           setZoom(newZoom);
         }
 
-        const currentCenter = getTouchCenter(e.touches[0], e.touches[1]);
-        const dx = currentCenter.x - pinchStartCenter.x;
-        const dy = currentCenter.y - pinchStartCenter.y;
-        viewport.scrollLeft = pinchStartScroll.left - dx;
-        viewport.scrollTop = pinchStartScroll.top - dy;
+        const vRect = viewport.getBoundingClientRect();
+        const currentClientMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
+        const currentClientMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
+
+        // Keep the unscaled document point locked under the current finger midpoint
+        viewport.scrollLeft = pinchDocFocal.x * newZoom - currentClientMidX;
+        viewport.scrollTop = pinchDocFocal.y * newZoom - currentClientMidY;
       }
     };
 
     const onTouchEnd = (e) => {
       if (isPinching && e.touches.length < 2) {
         isPinching = false;
-        preventDrawUntil = Date.now() + 350; // 350ms cooldown
+        preventDrawUntil = Date.now() + 350; // 350ms cooldown prevents accidental drawing on lift
+        const wrapper = document.getElementById('jnotes-pages-wrapper');
+        if (wrapper) wrapper.style.transition = 'transform 0.12s ease-out';
+        viewport.style.scrollBehavior = 'smooth';
       }
     };
 
@@ -2388,10 +2714,11 @@
       document.body.style.overflow = 'hidden';
       window.scrollTo(0, 0);
 
-      // Initialize Tools, Canvases & Gestures
+      // Initialize Tools, Canvases, Gestures & Ruler
       renderContextBar();
       initCanvases();
       initGestureEngine();
+      initRulerInteractions();
       loadSavedAnnotations();
 
       // Render uploaded PDF if available
