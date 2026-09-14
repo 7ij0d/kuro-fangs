@@ -41,22 +41,36 @@
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      z-index: 99990 !important;
+      touch-action: none;
     }
 
     /* ==========================================================================
        LAYER A: GLOBAL TOP NAVIGATION BAR (.jnotes-global-bar)
        ========================================================================== */
     .jnotes-global-bar {
-      height: 50px;
+      height: 48px;
       background: var(--j-top);
       border-bottom: 1px solid var(--j-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 14px;
-      gap: 12px;
+      gap: 10px;
       z-index: 100;
       flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
     .j-bar-section {
       display: flex;
@@ -231,6 +245,10 @@
       flex-shrink: 0;
       overflow-x: auto;
       scrollbar-width: none;
+      position: sticky;
+      top: 48px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .jnotes-annotation-toolbar::-webkit-scrollbar { display: none; }
 
@@ -288,6 +306,10 @@
       overflow-x: auto;
       scrollbar-width: none;
       transition: background 0.2s;
+      position: sticky;
+      top: 94px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .jnotes-context-bar::-webkit-scrollbar { display: none; }
 
@@ -671,6 +693,64 @@
       background: rgba(255, 255, 255, 0.08);
       color: var(--j-accent);
     }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 768px) {
+      .jnotes-global-bar {
+        height: 44px;
+        padding: 0 8px;
+        gap: 6px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .jnotes-global-bar::-webkit-scrollbar { display: none; }
+      .j-title-pill {
+        max-width: 130px;
+        padding: 3px 6px;
+      }
+      .j-title-text {
+        font-size: 0.7rem;
+      }
+      .j-badge-subject {
+        display: none;
+      }
+      .j-autosave-badge span#auto-save-text {
+        display: none;
+      }
+      .j-autosave-badge {
+        padding: 4px;
+      }
+      .j-btn {
+        padding: 5px 8px;
+        font-size: 0.72rem;
+      }
+      .jnotes-annotation-toolbar {
+        height: 42px;
+        padding: 0 8px;
+        gap: 4px;
+        position: sticky;
+        top: 44px;
+      }
+      .j-tool-btn {
+        height: 32px;
+        padding: 0 8px;
+        font-size: 0.725rem;
+        gap: 4px;
+      }
+      .j-tool-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+      .jnotes-context-bar {
+        min-height: 38px;
+        padding: 3px 8px;
+        gap: 8px;
+        position: sticky;
+        top: 86px;
+      }
+    }
   `;
 
   // Global Workspace State
@@ -691,9 +771,9 @@
   };
 
   const highlighterState = {
-    color: '#FACC15',
-    width: 5.0, // mm (wide highlighter)
-    opacity: 0.45,
+    color: '#FFE600',
+    width: 6.0, // mm (wide highlighter)
+    opacity: 0.38,
     isStraight: false
   };
 
@@ -723,14 +803,16 @@
 
   function getHighlighterPresets() {
     try {
-      const raw = localStorage.getItem('kf_highlighter_presets');
+      const raw = localStorage.getItem('kf_highlighter_presets_v2');
       if (raw) return JSON.parse(raw);
     } catch (e) {}
     return [
-      { id: 'h1', name: 'تظليل أصفر', color: '#FACC15', width: 5.0, opacity: 0.45 },
-      { id: 'h2', name: 'تظليل أخضر', color: '#4ADE80', width: 5.0, opacity: 0.45 },
-      { id: 'h3', name: 'تظليل وردي', color: '#F472B6', width: 5.0, opacity: 0.45 },
-      { id: 'h4', name: 'تظليل بنفسجي', color: '#C084FC', width: 5.0, opacity: 0.45 }
+      { id: 'h1', name: 'تظليل أصفر', color: '#FFE600', width: 6.0, opacity: 0.38 },
+      { id: 'h2', name: 'تظليل أخضر', color: '#6EE7B7', width: 6.0, opacity: 0.38 },
+      { id: 'h3', name: 'تظليل وردي', color: '#F472B6', width: 6.0, opacity: 0.38 },
+      { id: 'h4', name: 'تظليل أزرق', color: '#7DD3FC', width: 6.0, opacity: 0.38 },
+      { id: 'h5', name: 'تظليل بنفسجي', color: '#C084FC', width: 6.0, opacity: 0.38 },
+      { id: 'h6', name: 'تظليل برتقالي', color: '#FDBA74', width: 6.0, opacity: 0.38 }
     ];
   }
 
@@ -1020,7 +1102,7 @@
         `;
       }).join('');
 
-      const swatches = ['#FACC15', '#4ADE80', '#F472B6', '#38BDF8', '#C084FC'].map(c => {
+      const swatches = ['#FFE600', '#6EE7B7', '#F472B6', '#7DD3FC', '#C084FC', '#FDBA74'].map(c => {
         const isActive = c.toLowerCase() === highlighterState.color.toLowerCase();
         return `<div class="j-swatch ${isActive ? 'active' : ''}" style="background: ${c};" onclick="setHighlighterColor('${c}')"></div>`;
       }).join('');
@@ -1210,10 +1292,15 @@
 
   // Zoom Controls
   window.setZoom = function(val) {
-    zoomLevel = Math.max(0.5, Math.min(3.0, val));
+    zoomLevel = Math.max(0.4, Math.min(3.5, val));
     const wrapper = document.getElementById('jnotes-pages-wrapper');
     const textEl = document.getElementById('zoom-val-text');
-    if (wrapper) wrapper.style.transform = 'scale(' + zoomLevel + ')';
+    if (wrapper) {
+      wrapper.style.transform = 'scale(' + zoomLevel + ')';
+      const scaledW = 1100 * zoomLevel;
+      wrapper.style.width = zoomLevel > 1.0 ? (scaledW + 'px') : '100%';
+      wrapper.style.marginBottom = Math.max(0, (zoomLevel - 1) * 600) + 'px';
+    }
     if (textEl) textEl.textContent = Math.round(zoomLevel * 100) + '%';
   };
   window.zoomIn = function() { window.setZoom(zoomLevel + 0.15); };
@@ -1542,8 +1629,8 @@
             id: 'hl_' + Date.now(),
             tool: 'highlighter',
             color: highlighterState.color,
-            strokeWidth: highlighterState.width * 5, // wide highlighter
-            opacity: highlighterState.opacity,
+            strokeWidth: highlighterState.width * 4.5, // wide highlighter
+            opacity: highlighterState.opacity || 0.38,
             isStraight: highlighterState.isStraight,
             points: [{ x: pt.x, y: pt.y }]
           };
@@ -1561,11 +1648,19 @@
         } else if (currentStroke) {
           if (currentStroke.isStraight) {
             // GLITCH-FREE STRAIGHT LINE DRAFTING:
-            // Render cleanly on the transient draftCanvas (zero radiating spiderwebs!)
             if (draftCanvas) {
               const dctx = draftCanvas.getContext('2d');
               dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
               drawSingleSegment(dctx, startX, startY, pt.x, pt.y, currentStroke);
+            }
+          } else if (currentStroke.tool === 'highlighter') {
+            // REAL TRANSLUCENT HIGHLIGHTER:
+            // ALWAYS render on draftCanvas as a single continuous path so it NEVER self-multiplies or creates dark blotches!
+            currentStroke.points.push({ x: pt.x, y: pt.y });
+            if (draftCanvas) {
+              const dctx = draftCanvas.getContext('2d');
+              dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
+              drawPermanentStroke(draftCanvas, currentStroke);
             }
           } else {
             // Smooth freehand drawing on canvas-overlay
@@ -1590,6 +1685,16 @@
             currentStroke.points = [{ x: startX, y: startY }, { x: pt.x, y: pt.y }];
             pageStrokes[pageNum].push(currentStroke);
             drawPermanentStroke(canvas, currentStroke);
+          } else if (currentStroke.tool === 'highlighter') {
+            // Commit clean single-path highlighter stroke to canvas-overlay
+            if (draftCanvas) {
+              const dctx = draftCanvas.getContext('2d');
+              dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
+            }
+            if (currentStroke.points.length >= 2) {
+              pageStrokes[pageNum].push(currentStroke);
+              drawPermanentStroke(canvas, currentStroke);
+            }
           } else if (currentStroke.points.length > 0) {
             pageStrokes[pageNum].push(currentStroke);
           }
@@ -1607,6 +1712,23 @@
 
       // Mobile Touch Handling: Prevent page scroll while drawing or erasing
       canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length >= 2) {
+          // Multi-finger touch: abort any drawing immediately
+          if (isDrawing) {
+            isDrawing = false;
+            currentStroke = null;
+            if (draftCanvas) {
+              const dctx = draftCanvas.getContext('2d');
+              dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
+            }
+            redrawCanvas(pageNum);
+          }
+          return;
+        }
+        if (Date.now() < preventDrawUntil) {
+          e.preventDefault();
+          return;
+        }
         if (currentTool === 'pan') return;
         if (e.touches.length === 1) {
           e.preventDefault();
@@ -1616,8 +1738,11 @@
       }, { passive: false });
 
       canvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length >= 2) {
+          return; // Let gesture engine handle pinch & pan
+        }
         if (currentTool === 'pan') return;
-        if (e.touches.length === 1) {
+        if (e.touches.length === 1 && isDrawing) {
           e.preventDefault();
           updateCursorPos(e.touches[0]);
           onMove(e.touches[0]);
@@ -1627,7 +1752,9 @@
       canvas.addEventListener('touchend', (e) => {
         if (currentTool === 'pan') return;
         if (cursor) cursor.style.display = 'none';
-        onEnd(e.changedTouches[0]);
+        if (isDrawing) {
+          onEnd(e.changedTouches[0]);
+        }
       });
     });
   }
@@ -1647,8 +1774,8 @@
     ctx.save();
     ctx.strokeStyle = st.color;
     ctx.lineWidth = st.strokeWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = (st.tool === 'highlighter') ? 'square' : 'round';
+    ctx.lineJoin = (st.tool === 'highlighter') ? 'bevel' : 'round';
     ctx.globalAlpha = st.opacity || 1.0;
 
     if (st.tool === 'highlighter') {
@@ -1672,8 +1799,8 @@
     ctx.save();
     ctx.strokeStyle = st.color;
     ctx.lineWidth = st.strokeWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = (st.tool === 'highlighter') ? 'square' : 'round';
+    ctx.lineJoin = (st.tool === 'highlighter') ? 'bevel' : 'round';
     ctx.globalAlpha = st.opacity || 1.0;
 
     if (st.tool === 'highlighter') {
@@ -1703,13 +1830,13 @@
   function drawPermanentStroke(canvas, st) {
     const ctx = canvas.getContext('2d');
     const pts = st.points;
-    if (pts.length < 2) return;
+    if (!pts || pts.length < 2) return;
 
     ctx.save();
     ctx.strokeStyle = st.color;
     ctx.lineWidth = st.strokeWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = (st.tool === 'highlighter') ? 'square' : 'round';
+    ctx.lineJoin = (st.tool === 'highlighter') ? 'bevel' : 'round';
     ctx.globalAlpha = st.opacity || 1.0;
 
     if (st.tool === 'highlighter') {
@@ -1720,6 +1847,11 @@
     if (st.isStraight || pts.length === 2) {
       ctx.moveTo(pts[0].x, pts[0].y);
       ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+    } else if (st.isSegmentSplitted || st.tool === 'highlighter') {
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
     } else {
       ctx.moveTo(pts[0].x, pts[0].y);
       for (let i = 1; i < pts.length; i++) {
@@ -1752,6 +1884,15 @@
     return dx * dx + dy * dy;
   }
 
+  function distToSegmentSquared(p, a, b) {
+    const l2 = distSq(a, b);
+    if (l2 === 0) return distSq(p, a);
+    let t = ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    const proj = { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
+    return distSq(p, proj);
+  }
+
   function eraseAt(pageNum, cx, cy) {
     const strokes = pageStrokes[pageNum] || [];
     const radius = eraserState.radius * 2; // radius in high-dpi canvas units
@@ -1759,44 +1900,91 @@
     let modified = false;
 
     if (eraserState.mode === 'object') {
-      // OBJECT ERASER: Delete entire stroke if any point is within radius
+      // OBJECT ERASER: Delete entire stroke if any segment is within radius
       const initialCount = strokes.length;
       pageStrokes[pageNum] = strokes.filter(st => {
-        return !st.points.some(pt => distSq(pt, { x: cx, y: cy }) <= radiusSq);
+        const pts = st.points;
+        if (!pts || pts.length === 0) return false;
+        if (pts.length === 1) return distSq(pts[0], { x: cx, y: cy }) > radiusSq;
+        for (let i = 0; i < pts.length - 1; i++) {
+          if (distToSegmentSquared({ x: cx, y: cy }, pts[i], pts[i + 1]) <= radiusSq) {
+            return false; // touched! delete stroke
+          }
+        }
+        return true; // keep
       });
       if (pageStrokes[pageNum].length !== initialCount) {
         modified = true;
       }
     } else {
-      // PARTIAL / SEGMENT ERASER: Cut only the touched points and split the stroke!
+      // PARTIAL / SEGMENT ERASER: Densely subdivide segments & clean cut without warping
       const nextStrokes = [];
       strokes.forEach(st => {
         const pts = st.points;
-        let subPoints = [];
+        if (!pts || pts.length === 0) return;
 
-        for (let i = 0; i < pts.length; i++) {
-          const pt = pts[i];
+        // Check if stroke touches eraser circle
+        let touched = false;
+        if (pts.length === 1) {
+          touched = (distSq(pts[0], { x: cx, y: cy }) <= radiusSq);
+        } else {
+          for (let i = 0; i < pts.length - 1; i++) {
+            if (distToSegmentSquared({ x: cx, y: cy }, pts[i], pts[i + 1]) <= radiusSq) {
+              touched = true;
+              break;
+            }
+          }
+        }
+
+        if (!touched) {
+          nextStrokes.push(st);
+          return;
+        }
+
+        modified = true;
+
+        // Densely interpolate points (every 3px)
+        const densePoints = [];
+        for (let i = 0; i < pts.length - 1; i++) {
+          const p1 = pts[i];
+          const p2 = pts[i + 1];
+          const d = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          const steps = Math.max(1, Math.ceil(d / 3));
+          for (let s = 0; s < steps; s++) {
+            const frac = s / steps;
+            densePoints.push({
+              x: p1.x + frac * (p2.x - p1.x),
+              y: p1.y + frac * (p2.y - p1.y)
+            });
+          }
+        }
+        densePoints.push(pts[pts.length - 1]);
+
+        // Split into runs of points strictly outside the eraser circle
+        let currentRun = [];
+        densePoints.forEach(pt => {
           if (distSq(pt, { x: cx, y: cy }) > radiusSq) {
-            // Point is outside eraser circle: keep it in current sub-stroke
-            subPoints.push(pt);
+            currentRun.push(pt);
           } else {
-            // Point is inside: finish current sub-stroke if it has points
-            modified = true;
-            if (subPoints.length >= 2) {
+            if (currentRun.length >= 2) {
               nextStrokes.push({
                 ...st,
                 id: 'st_split_' + Date.now() + '_' + Math.random(),
-                points: subPoints
+                isStraight: false,
+                isSegmentSplitted: true,
+                points: currentRun
               });
             }
-            subPoints = [];
+            currentRun = [];
           }
-        }
-        if (subPoints.length >= 2) {
+        });
+        if (currentRun.length >= 2) {
           nextStrokes.push({
             ...st,
             id: 'st_split_' + Date.now() + '_' + Math.random(),
-            points: subPoints
+            isStraight: false,
+            isSegmentSplitted: true,
+            points: currentRun
           });
         }
       });
@@ -2031,6 +2219,86 @@
     }
   }
 
+  // ==========================================================================
+  // TWO-FINGER PINCH-TO-ZOOM & TWO-FINGER PAN ENGINE
+  // ==========================================================================
+  let isPinching = false;
+  let pinchStartDist = 0;
+  let pinchStartZoom = 1.0;
+  let pinchStartCenter = { x: 0, y: 0 };
+  let pinchStartScroll = { left: 0, top: 0 };
+  let preventDrawUntil = 0;
+
+  function initGestureEngine() {
+    const viewport = document.getElementById('jnotes-viewport');
+    if (!viewport || viewport._gestureAttached) return;
+    viewport._gestureAttached = true;
+
+    function getTouchDist(t1, t2) {
+      return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    }
+
+    function getTouchCenter(t1, t2) {
+      return {
+        x: (t1.clientX + t2.clientX) / 2,
+        y: (t1.clientY + t2.clientY) / 2
+      };
+    }
+
+    const onTouchStart = (e) => {
+      if (e.touches.length >= 2) {
+        // Two fingers detected! Cancel any active drawing on any page immediately
+        isDrawing = false;
+        currentStroke = null;
+        document.querySelectorAll('.draft-canvas').forEach(dc => {
+          const ctx = dc.getContext('2d');
+          ctx.clearRect(0, 0, dc.width, dc.height);
+        });
+        redrawCanvas(currentPage);
+
+        isPinching = true;
+        pinchStartDist = getTouchDist(e.touches[0], e.touches[1]);
+        pinchStartZoom = zoomLevel;
+        pinchStartCenter = getTouchCenter(e.touches[0], e.touches[1]);
+        pinchStartScroll = { left: viewport.scrollLeft, top: viewport.scrollTop };
+
+        const cursor = document.getElementById('jnotes-eraser-cursor');
+        if (cursor) cursor.style.display = 'none';
+      }
+    };
+
+    const onTouchMove = (e) => {
+      if (e.touches.length >= 2 && isPinching) {
+        e.preventDefault();
+
+        const currentDist = getTouchDist(e.touches[0], e.touches[1]);
+        if (pinchStartDist > 10) {
+          const ratio = currentDist / pinchStartDist;
+          const newZoom = Math.max(0.4, Math.min(3.5, pinchStartZoom * ratio));
+          setZoom(newZoom);
+        }
+
+        const currentCenter = getTouchCenter(e.touches[0], e.touches[1]);
+        const dx = currentCenter.x - pinchStartCenter.x;
+        const dy = currentCenter.y - pinchStartCenter.y;
+        viewport.scrollLeft = pinchStartScroll.left - dx;
+        viewport.scrollTop = pinchStartScroll.top - dy;
+      }
+    };
+
+    const onTouchEnd = (e) => {
+      if (isPinching && e.touches.length < 2) {
+        isPinching = false;
+        preventDrawUntil = Date.now() + 350; // 350ms cooldown
+      }
+    };
+
+    viewport.addEventListener('touchstart', onTouchStart, { passive: false });
+    viewport.addEventListener('touchmove', onTouchMove, { passive: false });
+    viewport.addEventListener('touchend', onTouchEnd, { passive: false });
+    viewport.addEventListener('touchcancel', onTouchEnd, { passive: false });
+  }
+
   // DocumentViewer Public Module Definition
   const DocumentViewer = {
     currentDoc: null,
@@ -2116,9 +2384,14 @@
       // Render Markup directly into container
       container.innerHTML = getStudioMarkup(currentDoc, isAr);
 
-      // Initialize Tools & Canvases
+      // Lock body scrolling and scroll window to top
+      document.body.style.overflow = 'hidden';
+      window.scrollTo(0, 0);
+
+      // Initialize Tools, Canvases & Gestures
       renderContextBar();
       initCanvases();
+      initGestureEngine();
       loadSavedAnnotations();
 
       // Render uploaded PDF if available
