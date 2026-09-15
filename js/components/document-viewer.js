@@ -954,6 +954,110 @@
       color: var(--j-accent);
     }
 
+    /* ======================================================================
+       JNOTES-INSPIRED SURFACE
+       A paper workspace with a red app bar and a white, icon-first tool row.
+       ====================================================================== */
+    .sheet-studio-fullscreen {
+      --j-bg: #f3f3f3;
+      --j-top: #bc2628;
+      --j-tool: #ffffff;
+      --j-ctx: #ffffff;
+      --j-card: #ffffff;
+      --j-brand: #bc2628;
+      --j-brand-dark: #971a1c;
+      --j-accent: #bc2628;
+      --j-border: rgba(28, 31, 38, .13);
+      --j-text: #24262c;
+      --j-text-muted: #7f838c;
+      background: #f3f3f3;
+      color: #24262c;
+    }
+    .jnotes-global-bar {
+      height: 62px;
+      min-height: 62px;
+      padding: 0 24px;
+      background: #bc2628;
+      border: 0;
+      box-shadow: 0 2px 6px rgba(73, 17, 17, .22);
+    }
+    .jnotes-global-bar .j-btn, .jnotes-global-bar .j-master-mode-btn {
+      background: transparent;
+      border: 0;
+      color: #fff;
+      box-shadow: none;
+    }
+    .jnotes-global-bar .j-btn:hover, .jnotes-global-bar .j-master-mode-btn:hover { background: rgba(255,255,255,.14); }
+    .jnotes-global-bar .j-title-text { color: #fff !important; font-size: .9rem !important; }
+    .jnotes-global-bar .j-page-stepper-text { color: #fff !important; background: rgba(108, 13, 15, .26) !important; border-color: rgba(255,255,255,.22) !important; }
+    .jnotes-global-bar .j-master-mode-btn.editing { background: rgba(121, 17, 19, .38); border: 1px solid rgba(255,255,255,.25); box-shadow: none; }
+    .jnotes-annotation-toolbar {
+      height: 58px;
+      min-height: 58px;
+      padding: 7px 24px;
+      gap: 4px;
+      background: #fff;
+      border-bottom: 1px solid #e1e1e1;
+      box-shadow: 0 2px 8px rgba(20,20,20,.04);
+      color: #303238;
+    }
+    .jnotes-annotation-toolbar .j-divider { background: #e4e4e4; margin: 0 9px; height: 30px; }
+    .j-tool-btn {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      justify-content: center;
+      color: #3f4248;
+      border-radius: 11px;
+      border: 1px solid transparent;
+      background: transparent;
+    }
+    .j-tool-btn span { display: none; }
+    .j-tool-btn:hover { color: #bc2628; background: #fff2f2; }
+    .j-tool-btn.active { color: #bc2628; border-color: #f0c7c8; background: #fff0f0; box-shadow: none; }
+    .j-tool-btn.active svg { stroke: #bc2628; }
+    .jnotes-context-bar {
+      min-height: 42px;
+      padding: 4px 24px;
+      background: #fff;
+      border-bottom: 1px solid #ececec;
+      color: #3b3e44;
+      box-shadow: 0 2px 5px rgba(20,20,20,.025);
+    }
+    .jnotes-context-bar .j-ctx-label { color: #777b84; }
+    .jnotes-context-bar .j-preset-chip, .jnotes-context-bar .j-thickness-chip {
+      color: #4a4c53; background: #f7f7f8; border-color: #e3e3e5;
+    }
+    .jnotes-context-bar .j-preset-chip.active, .jnotes-context-bar .j-thickness-chip.active {
+      background: #fff0f0; color: #a51d20; border-color: #e6a7a8;
+    }
+    .jnotes-workspace { background: #f3f3f3; }
+    .jnotes-viewport { background: #f3f3f3; }
+    .doc-page { margin: 0 28px; border-radius: 1px; box-shadow: 0 3px 13px rgba(0,0,0,.18); }
+    .doc-page.active-page-viewport { box-shadow: 0 3px 13px rgba(0,0,0,.22); outline: 0; }
+    .jnotes-pen-case {
+      position: fixed;
+      z-index: 190;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%) translateX(130px);
+      width: 62px;
+      padding: 8px 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      background: rgba(255,255,255,.97);
+      border: 1px solid #dedede;
+      border-radius: 22px;
+      box-shadow: 0 7px 22px rgba(0,0,0,.16);
+      transition: transform .22s ease;
+    }
+    .jnotes-pen-case.visible { transform: translateY(-50%) translateX(0); }
+    .jnotes-case-item { width: 46px; height: 56px; border-radius: 14px; background: #fafafa; border: 0; display: grid; place-items: center; }
+    .jnotes-case-item span { display: block; width: 8px; height: 31px; border-radius: 8px; transform: rotate(42deg); box-shadow: inset 0 0 0 2px rgba(0,0,0,.16); }
+    .jnotes-case-item.yellow span { background: #f7e96d; } .jnotes-case-item.pink span { background: #f0a5c8; }
+    .jnotes-case-item.mint span { background: #9be2bf; } .jnotes-case-item.blue span { background: #8bc7ed; }
+
     /* Mobile Responsive Optimizations */
     @media (max-width: 768px) {
       .sheet-studio-fullscreen {
@@ -966,7 +1070,7 @@
         padding: 0 12px;
         gap: 6px;
         overflow: hidden;
-        background: #171a29;
+        background: #bc2628;
       }
       .jnotes-global-bar .j-bar-section:first-child { gap: 8px !important; }
       .jnotes-global-bar .j-title-text { font-size: .78rem !important; }
@@ -999,9 +1103,9 @@
         min-height: 64px;
         padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
         gap: 6px;
-        border-top: 1px solid rgba(255,255,255,.09);
+        border-top: 1px solid #e4e4e4;
         border-bottom: 0;
-        background: #171a29;
+        background: #fff;
         overflow-x: auto;
         overflow-y: hidden;
         scroll-snap-type: x proximity;
@@ -1011,7 +1115,7 @@
       }
       .jnotes-annotation-toolbar::before {
         content: 'اسحب للأدوات';
-        color: #71809a;
+        color: #8d9097;
         font-size: .62rem;
         white-space: nowrap;
         padding: 0 4px;
@@ -1029,23 +1133,26 @@
       }
       .j-tool-btn span:not(.tool-badge) { display: none; }
       .j-tool-btn svg { width: 20px !important; height: 20px !important; }
-      .j-tool-btn.active { box-shadow: inset 0 0 0 1px rgba(56,189,248,.2), 0 4px 14px rgba(2,132,199,.22); }
+      .j-tool-btn.active { box-shadow: inset 0 0 0 1px #f0c7c8, 0 3px 10px rgba(188,38,40,.12); }
       .jnotes-context-bar {
         order: 3;
         min-height: 44px;
         padding: 4px 12px;
-        background: #20243a;
-        border-top: 1px solid rgba(255,255,255,.06);
+        background: #fff;
+        border-top: 1px solid #ececec;
         border-bottom: 0;
         position: relative;
         top: auto;
       }
       .jnotes-workspace { min-height: 0; }
-      .jnotes-viewport { background: #0d0f18; }
+      .jnotes-viewport { background: #f3f3f3; }
       .doc-page { margin: 0 10px; border-radius: 3px; }
-      .doc-page.active-page-viewport { box-shadow: 0 6px 26px rgba(0,0,0,.58), 0 0 0 1px rgba(56,189,248,.65); }
+      .doc-page.active-page-viewport { box-shadow: 0 5px 20px rgba(0,0,0,.19); }
       .jnotes-page-sidebar { display: none !important; }
       .jnotes-floating-actions { bottom: 118px !important; }
+      .jnotes-pen-case { right: 10px; width: 54px; padding: 6px 4px; border-radius: 18px; }
+      .jnotes-case-item { width: 44px; height: 45px; border-radius: 11px; }
+      .jnotes-case-item span { height: 25px; }
     }
 
     @media (max-width: 390px) {
@@ -1344,6 +1451,15 @@
           </span>
         </div>
       </header>
+
+      <!-- Jnotes-like quick pen case: the long settings bar is replaced by
+           tangible presets alongside the sheet while drawing. -->
+      <aside id="jnotes-pen-case" class="jnotes-pen-case" aria-label="أقلام وخطاطات سريعة">
+        <button class="jnotes-case-item yellow" onclick="applyHighlighterPreset('h1')" title="تظليل أصفر"><span></span></button>
+        <button class="jnotes-case-item pink" onclick="applyHighlighterPreset('h3')" title="تظليل وردي"><span></span></button>
+        <button class="jnotes-case-item mint" onclick="applyHighlighterPreset('h2')" title="تظليل أخضر"><span></span></button>
+        <button class="jnotes-case-item blue" onclick="applyPenPreset('p1')" title="قلم أزرق"><span></span></button>
+      </aside>
 
       <!-- LAYER B: STREAMLINED ANNOTATION TOOLBAR -->
       <nav class="jnotes-annotation-toolbar">
@@ -1853,6 +1969,8 @@
   function renderContextBar() {
     const bar = document.getElementById('jnotes-context-bar');
     if (!bar) return;
+    const penCase = document.getElementById('jnotes-pen-case');
+    if (penCase) penCase.classList.toggle('visible', currentTool === 'pen' || currentTool === 'highlighter');
 
     let html = '';
 
@@ -2917,6 +3035,11 @@
   let isDrawing = false;
   let startX = 0, startY = 0;
   let currentStroke = null;
+  // A mouse can be released outside the canvas. Keep ownership of the active
+  // canvas so the final annotation is committed instead of being left only in
+  // the temporary preview layer.
+  let activeDrawingCanvas = null;
+  let activeDrawingPage = null;
 
   // ==========================================================================
   // VIEWPORT-LEVEL HIGH-DPI NEON LASER POINTER ENGINE (680ms Ephemeral Ribbon)
@@ -3078,6 +3201,8 @@
   function abortActiveDrawing() {
     isDrawing = false;
     currentStroke = null;
+    activeDrawingCanvas = null;
+    activeDrawingPage = null;
     clearLaserCanvas();
     document.querySelectorAll('.draft-canvas').forEach(dc => {
       const ctx = dc.getContext('2d');
@@ -3149,6 +3274,8 @@
         }
 
         isDrawing = true;
+        activeDrawingCanvas = canvas;
+        activeDrawingPage = pageNum;
         const pressure = (e.pressure !== undefined && e.pressure > 0) ? e.pressure : 0.6;
         if (currentTool === 'pen') {
           currentStroke = {
@@ -3253,6 +3380,7 @@
 
       const onEnd = (e) => {
         if (!isEditingMode || currentTool === 'pan') return;
+        if (activeDrawingCanvas && activeDrawingCanvas !== canvas) return;
         if (currentTool === 'select' && isMarqueeSelecting) {
           isMarqueeSelecting = false;
           if (draftCanvas) {
@@ -3266,6 +3394,8 @@
 
         if (currentTool === 'eraser' && isDrawing) {
           isDrawing = false;
+          activeDrawingCanvas = null;
+          activeDrawingPage = null;
           if (eraseSnapshot) {
             const currStrokes = pageStrokes[pageNum] || [];
             if (currStrokes.length !== eraseSnapshot.length || JSON.stringify(currStrokes) !== JSON.stringify(eraseSnapshot)) {
@@ -3280,6 +3410,8 @@
         isDrawing = false;
 
         if (currentTool === 'laser') {
+          activeDrawingCanvas = null;
+          activeDrawingPage = null;
           return;
         }
 
@@ -3311,6 +3443,8 @@
           }
           currentStroke = null;
         }
+        activeDrawingCanvas = null;
+        activeDrawingPage = null;
       };
 
       canvas.addEventListener('mousedown', (e) => {
@@ -3328,6 +3462,15 @@
       canvas.addEventListener('mouseleave', () => {
         if (cursor) cursor.style.display = 'none';
         if (currentTool === 'laser') clearLaserHover();
+      });
+
+      // `mouseup` is deliberately attached to window. Canvas-only mouseup was
+      // the reason a highlighter preview vanished whenever the pointer left a
+      // page before the user released it.
+      window.addEventListener('mouseup', (e) => {
+        if (isDrawing && activeDrawingCanvas === canvas && activeDrawingPage === pageNum) {
+          onEnd(e);
+        }
       });
 
       // Mobile Touch Handling: 1 finger draws/erases, 2 fingers abort drawing and bubble to gesture camera
