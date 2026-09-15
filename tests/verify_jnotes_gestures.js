@@ -35,7 +35,8 @@ const tests = [
   },
   {
     name: 'Strict Canvas Guard on touchstart and touchmove (letting touches bubble for slide swiping)',
-    test: content.includes("if (!isEditingMode || currentTool === 'pan') {\n          return; // Let touch bubble cleanly to viewport for slide navigation!")
+    // Accept either LF or CRLF so this behavioural check works on Windows too.
+    test: /if \(!isEditingMode \|\| currentTool === 'pan'\) \{\r?\n\s*return; \/\/ Let touch bubble cleanly to viewport for slide navigation!/.test(content)
   },
   {
     name: 'Horizontal Slide Wrapper Layout (.jnotes-pages-wrapper flex-direction: row; width: max-content)',

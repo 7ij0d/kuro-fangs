@@ -956,65 +956,108 @@
 
     /* Mobile Responsive Optimizations */
     @media (max-width: 768px) {
+      .sheet-studio-fullscreen {
+        /* 100dvh avoids the browser chrome cropping the final tool row on phones. */
+        height: 100dvh !important;
+      }
       .jnotes-global-bar {
-        height: 44px;
-        padding: 0 8px;
+        height: 52px;
+        min-height: 52px;
+        padding: 0 12px;
         gap: 6px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
+        overflow: hidden;
+        background: #171a29;
       }
-      .jnotes-global-bar::-webkit-scrollbar { display: none; }
-      .j-title-pill {
-        max-width: 130px;
-        padding: 3px 6px;
+      .jnotes-global-bar .j-bar-section:first-child { gap: 8px !important; }
+      .jnotes-global-bar .j-title-text { font-size: .78rem !important; }
+      .jnotes-global-bar .j-btn:first-child {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 11px;
       }
-      .j-title-text {
-        font-size: 0.7rem;
-      }
-      .j-badge-subject {
-        display: none;
-      }
-      .j-autosave-badge span#auto-save-text {
-        display: none;
-      }
-      .j-autosave-badge {
-        padding: 4px;
-      }
-      .j-btn {
-        padding: 4px 8px;
-        font-size: 0.72rem;
-      }
+      .jnotes-global-bar .j-btn:first-child span { display: none; }
+      .jnotes-global-bar .j-btn:first-child svg { width: 18px; height: 18px; }
       .j-master-mode-btn {
-        padding: 4px 8px;
-        font-size: 0.72rem;
-        gap: 4px;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 11px;
+      }
+      .j-master-mode-btn #master-mode-label { display: none; }
+      .j-page-stepper-text {
+        min-width: 52px;
+        padding: 7px 8px !important;
+        font-size: .7rem !important;
+        border-radius: 10px !important;
       }
       .jnotes-annotation-toolbar {
-        height: 40px;
-        padding: 0 8px;
-        gap: 4px;
-        position: sticky;
-        top: 40px;
+        order: 4;
+        height: 64px;
+        min-height: 64px;
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+        gap: 6px;
+        border-top: 1px solid rgba(255,255,255,.09);
+        border-bottom: 0;
+        background: #171a29;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        top: auto;
       }
+      .jnotes-annotation-toolbar::before {
+        content: 'اسحب للأدوات';
+        color: #71809a;
+        font-size: .62rem;
+        white-space: nowrap;
+        padding: 0 4px;
+      }
+      .jnotes-annotation-toolbar .j-divider { display: none; }
       .j-tool-btn {
-        height: 32px;
-        padding: 0 8px;
-        font-size: 0.725rem;
-        gap: 4px;
+        min-width: 45px;
+        height: 46px;
+        padding: 0 11px;
+        justify-content: center;
+        border-radius: 13px;
+        gap: 0;
+        flex: 0 0 auto;
+        scroll-snap-align: center;
       }
-      .j-tool-btn svg {
-        width: 14px;
-        height: 14px;
-      }
+      .j-tool-btn span:not(.tool-badge) { display: none; }
+      .j-tool-btn svg { width: 20px !important; height: 20px !important; }
+      .j-tool-btn.active { box-shadow: inset 0 0 0 1px rgba(56,189,248,.2), 0 4px 14px rgba(2,132,199,.22); }
       .jnotes-context-bar {
-        min-height: 38px;
-        padding: 3px 8px;
-        gap: 8px;
-        position: sticky;
-        top: 80px;
+        order: 3;
+        min-height: 44px;
+        padding: 4px 12px;
+        background: #20243a;
+        border-top: 1px solid rgba(255,255,255,.06);
+        border-bottom: 0;
+        position: relative;
+        top: auto;
       }
+      .jnotes-workspace { min-height: 0; }
+      .jnotes-viewport { background: #0d0f18; }
+      .doc-page { margin: 0 10px; border-radius: 3px; }
+      .doc-page.active-page-viewport { box-shadow: 0 6px 26px rgba(0,0,0,.58), 0 0 0 1px rgba(56,189,248,.65); }
+      .jnotes-page-sidebar { display: none !important; }
+      .jnotes-floating-actions { bottom: 118px !important; }
+    }
+
+    @media (max-width: 390px) {
+      .jnotes-global-bar { padding: 0 8px; }
+      .jnotes-global-bar .j-title-text { max-width: 106px; }
+      .jnotes-annotation-toolbar::before { display: none; }
+      .j-tool-btn { min-width: 44px; padding: 0 10px; }
+    }
+
+    @media (pointer: coarse) {
+      .j-tool-btn, .j-btn, .j-nav-btn { -webkit-tap-highlight-color: transparent; }
+      .j-tool-btn:active, .j-btn:active { transform: scale(.96); }
     }
   `;
 
@@ -4398,6 +4441,38 @@
     }, { passive: false });
   }
 
+  // Mobile browsers change the usable viewport when rotating or when their
+  // address bar opens. Re-centre the sheet after that change instead of leaving
+  // it half off-screen with the previous phone dimensions.
+  let viewportResizeTimer = null;
+  function initResponsiveViewport() {
+    if (window._kfStudioViewportListener) return;
+    window._kfStudioViewportListener = true;
+
+    window.addEventListener('resize', () => {
+      clearTimeout(viewportResizeTimer);
+      viewportResizeTimer = setTimeout(() => {
+        if (!document.getElementById('jnotes-viewport')) return;
+        const wasFitted = zoomLevel <= getFitWidthScale() + 0.04;
+        if (wasFitted) {
+          window.fitWidth();
+        } else {
+          clampViewport(false);
+          updateTransform(false);
+        }
+      }, 100);
+    }, { passive: true });
+
+    window.addEventListener('orientationchange', () => {
+      clearTimeout(viewportResizeTimer);
+      viewportResizeTimer = setTimeout(() => window.fitWidth(), 220);
+    }, { passive: true });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => window.dispatchEvent(new Event('resize')), { passive: true });
+    }
+  }
+
   // DocumentViewer Public Module Definition
   const DocumentViewer = {
     currentDoc: null,
@@ -4491,6 +4566,7 @@
       renderContextBar();
       initCanvases();
       initGestureEngine();
+      initResponsiveViewport();
       initRulerInteractions();
       loadSavedAnnotations();
 
