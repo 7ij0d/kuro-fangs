@@ -4317,6 +4317,10 @@
     let panStartY = 0;
     let touchStartTime = 0;
     let isHorizontalSwiping = false;
+    // Editing tools own only the actual sheet canvas. The surrounding
+    // workspace remains a navigation zone, exactly like paper apps on tablets.
+    let workspaceGestureActive = false;
+    const startedOnSheet = (target) => !!(target && target.closest && target.closest('.doc-page'));
 
     const onTouchStart = (e) => {
       stopMomentum();
@@ -4351,10 +4355,14 @@
       }
 
       if (e.touches.length === 1) {
-        // In editing mode with an active drawing tool, touches are handled by canvas
-        if (isEditingMode && currentTool !== 'pan') {
+        const touchIsOnSheet = startedOnSheet(e.target);
+        // A pen/highlighter consumes touches on the page itself. A swipe from
+        // the empty workspace must always keep page navigation available.
+        if (isEditingMode && currentTool !== 'pan' && touchIsOnSheet) {
+          workspaceGestureActive = false;
           return;
         }
+        workspaceGestureActive = true;
 
         // Reading mode or Pan tool:
         touchStartX = e.touches[0].clientX;
@@ -4412,9 +4420,7 @@
       }
 
       if (e.touches.length === 1) {
-        if (isEditingMode && currentTool !== 'pan') {
-          return; // Handled by canvas overlay
-        }
+        if (!workspaceGestureActive) return; // Canvas owns this gesture.
 
         const t = e.touches[0];
         const dx = t.clientX - touchStartX;
@@ -4448,12 +4454,14 @@
 
       if (isGesturePanning && e.touches.length === 0) {
         isGesturePanning = false;
+        workspaceGestureActive = false;
         settleViewport();
         return;
       }
 
       if (isHorizontalSwiping && e.touches.length === 0) {
         isHorizontalSwiping = false;
+        workspaceGestureActive = false;
         const totalDx = panX - panStartX;
         const dt = Math.max(1, performance.now() - touchStartTime);
         const vx = totalDx / dt;
@@ -4467,6 +4475,7 @@
           window.scrollToPage(currentPage, true);
         }
       }
+      if (e.touches.length === 0) workspaceGestureActive = false;
     };
 
     viewport.addEventListener('touchstart', onTouchStart, { passive: false });
