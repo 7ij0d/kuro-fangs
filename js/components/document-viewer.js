@@ -666,26 +666,38 @@
       filter: invert(0.92) hue-rotate(180deg) contrast(1.05);
     }
 
-    /* Text Box Overlays */
+    /* Pure Borderless Typography Text */
     .jnotes-text-box {
       position: absolute;
       z-index: 9;
-      min-width: 80px;
-      min-height: 32px;
-      padding: 6px 10px;
-      border-radius: 6px;
-      outline: none;
-      cursor: move;
+      min-width: 16px;
+      min-height: 22px;
+      padding: 0 !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
       font-family: inherit;
-      line-height: 1.4;
-      border: 1.5px dashed rgba(2, 132, 199, 0.6);
-      background: rgba(255, 255, 255, 0.95);
-      color: #0F172A;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-size: 1.05rem;
+      line-height: 1.35;
+      cursor: text;
+      caret-color: var(--j-accent, #38BDF8);
+      white-space: pre-wrap;
+      word-break: break-word;
+      user-select: text;
+      -webkit-user-select: text;
     }
-    .jnotes-text-box:focus-within {
-      border: 1.5px solid #0284C7;
-      box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35);
+    .jnotes-text-box:focus-within,
+    .jnotes-text-box:focus {
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+    .jnotes-text-box[data-placeholder]:empty:before {
+      content: attr(data-placeholder);
+      color: rgba(148, 163, 184, 0.45);
+      pointer-events: none;
     }
 
     /* Multi-Tab Sidebar */
@@ -1034,7 +1046,7 @@
         </button>
 
         <!-- 6. Laser Pointer -->
-        <button class="j-tool-btn" id="tbtn-laser" onclick="handleToolClick('laser')" title="مؤشر ليزر للعرض والتوضيح">
+        <button class="j-tool-btn ptool-laser" id="tbtn-laser" data-tool="laser" onclick="handleToolClick('laser')" title="مؤشر ليزر للعرض والتوضيح">
           <span style="color: #EF4444; font-size: 0.95rem;">📍</span>
           <span>ليزر</span>
         </button>
@@ -1314,7 +1326,7 @@
 
     // Update active states on main toolbar buttons
     document.querySelectorAll('.j-tool-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.getElementById('tbtn-' + tool);
+    const activeBtn = document.getElementById('tbtn-' + tool) || document.getElementById('ptool-' + tool) || document.querySelector('.ptool-' + tool);
     if (activeBtn) activeBtn.classList.add('active');
 
     // Manage pointer events:
@@ -1322,7 +1334,17 @@
     const isPan = (tool === 'pan');
     document.querySelectorAll('.canvas-overlay').forEach(c => {
       c.style.pointerEvents = isPan ? 'none' : 'auto';
-      c.style.cursor = (tool === 'eraser') ? 'none' : (isPan ? 'default' : 'crosshair');
+      if (tool === 'eraser') {
+        c.style.cursor = 'none';
+      } else if (tool === 'text') {
+        c.style.cursor = 'text';
+      } else if (tool === 'laser') {
+        c.style.cursor = 'crosshair';
+      } else if (isPan) {
+        c.style.cursor = 'grab';
+      } else {
+        c.style.cursor = 'crosshair';
+      }
     });
 
     // Hide eraser circle if not eraser
@@ -1615,32 +1637,76 @@
     return Math.max(0.35, Math.min(1.5, scale));
   }
 
-  function clampViewport() {
+  function clampViewport(forceCenter = false) {
     const vp = getViewportDimensions();
     const doc = getDocumentDimensions();
     const scaledW = doc.width * zoomLevel;
     const scaledH = doc.height * zoomLevel;
 
-    // Horizontal boundaries:
+    if (forceCenter) {
+      if (scaledW <= vp.width) {
+        panX = (vp.width - scaledW) / 2;
+      }
+      if (scaledH <= vp.height) {
+        panY = Math.max(15, (vp.height - scaledH) / 2);
+      }
+      return;
+    }
+
+    // Horizontal boundaries: preserve focal point during zoom/pan with soft margins
+    const padX = Math.min(vp.width * 0.45, 200);
     if (scaledW <= vp.width) {
-      // Natural horizontal centering when sheet fits within screen
-      panX = (vp.width - scaledW) / 2;
+      const minX = -padX;
+      const maxX = vp.width - scaledW + padX;
+      panX = Math.max(minX, Math.min(maxX, panX));
     } else {
-      // Clamped horizontal pan range when zoomed in
-      const minX = vp.width - scaledW - 20;
-      const maxX = 20;
+      const minX = vp.width - scaledW - padX;
+      const maxX = padX;
       panX = Math.max(minX, Math.min(maxX, panX));
     }
 
     // Vertical boundaries:
+    const padY = Math.min(vp.height * 0.45, 200);
     if (scaledH <= vp.height) {
-      // Natural vertical centering with comfortable top margin
-      panY = Math.max(15, (vp.height - scaledH) / 2);
-    } else {
-      // Can scroll from top of page 1 to bottom of last page with 40px padding
-      const minY = vp.height - scaledH - 40;
-      const maxY = 20;
+      const minY = -padY;
+      const maxY = vp.height - scaledH + padY;
       panY = Math.max(minY, Math.min(maxY, panY));
+    } else {
+      const minY = vp.height - scaledH - padY;
+      const maxY = padY;
+      panY = Math.max(minY, Math.min(maxY, panY));
+    }
+  }
+
+  function settleViewport() {
+    const vp = getViewportDimensions();
+    const doc = getDocumentDimensions();
+    const scaledW = doc.width * zoomLevel;
+    const scaledH = doc.height * zoomLevel;
+    let changed = false;
+
+    if (scaledW <= vp.width) {
+      panX = (vp.width - scaledW) / 2;
+      changed = true;
+    } else {
+      const minX = vp.width - scaledW - 15;
+      const maxX = 15;
+      if (panX < minX) { panX = minX; changed = true; }
+      if (panX > maxX) { panX = maxX; changed = true; }
+    }
+
+    if (scaledH <= vp.height) {
+      panY = Math.max(15, (vp.height - scaledH) / 2);
+      changed = true;
+    } else {
+      const minY = vp.height - scaledH - 30;
+      const maxY = 15;
+      if (panY < minY) { panY = minY; changed = true; }
+      if (panY > maxY) { panY = maxY; changed = true; }
+    }
+
+    if (changed) {
+      updateTransform(true);
     }
   }
 
@@ -1660,26 +1726,53 @@
     if (textEl) textEl.textContent = Math.round(zoomLevel * 100) + '%';
   }
 
+  // GitHub Panzoom & Leaflet Focal-Point Invariant Zoom Engine
+  function zoomAtPoint(targetZoom, clientX, clientY, smooth = false) {
+    const viewportEl = document.getElementById('jnotes-viewport');
+    if (!viewportEl) return;
+    const rect = viewportEl.getBoundingClientRect();
+    const focalX = clientX - rect.left;
+    const focalY = clientY - rect.top;
+
+    // 1. Calculate the point on the unscaled plane under the cursor:
+    const planeX = (focalX - panX) / zoomLevel;
+    const planeY = (focalY - panY) / zoomLevel;
+
+    // 2. Clamp target zoom:
+    const newZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom));
+
+    // 3. Re-anchor pan so planeX and planeY remain precisely at focalX and focalY:
+    panX = focalX - planeX * newZoom;
+    panY = focalY - planeY * newZoom;
+    zoomLevel = newZoom;
+
+    clampViewport(false);
+    updateTransform(smooth);
+    updateCurrentPageFromPan();
+  }
+
+  window.zoomAtPoint = zoomAtPoint;
+
   window.setZoom = function(val, focalPoint, smooth) {
-    const vp = getViewportDimensions();
-    const focalX = focalPoint ? focalPoint.x : (vp.width / 2);
-    const focalY = focalPoint ? focalPoint.y : (vp.height / 2);
-
-    const docFocalX = (focalX - panX) / zoomLevel;
-    const docFocalY = (focalY - panY) / zoomLevel;
-
-    zoomLevel = Math.max(minZoom, Math.min(maxZoom, val));
-
-    // Anchor focal point
-    panX = focalX - docFocalX * zoomLevel;
-    panY = focalY - docFocalY * zoomLevel;
-
-    clampViewport();
-    updateTransform(smooth !== false);
+    const vp = document.getElementById('jnotes-viewport');
+    const rect = vp ? vp.getBoundingClientRect() : { left: 0, top: 0, width: 800, height: 600 };
+    const clientX = focalPoint ? focalPoint.x : (rect.left + rect.width / 2);
+    const clientY = focalPoint ? focalPoint.y : (rect.top + rect.height / 2);
+    zoomAtPoint(val, clientX, clientY, smooth !== false);
   };
 
-  window.zoomIn = function() { window.setZoom(zoomLevel * 1.25); };
-  window.zoomOut = function() { window.setZoom(zoomLevel / 1.25); };
+  window.zoomIn = function() {
+    const vp = document.getElementById('jnotes-viewport');
+    const rect = vp ? vp.getBoundingClientRect() : { left: 0, top: 0, width: 800, height: 600 };
+    zoomAtPoint(zoomLevel * 1.25, rect.left + rect.width / 2, rect.top + rect.height / 2, true);
+  };
+
+  window.zoomOut = function() {
+    const vp = document.getElementById('jnotes-viewport');
+    const rect = vp ? vp.getBoundingClientRect() : { left: 0, top: 0, width: 800, height: 600 };
+    zoomAtPoint(zoomLevel / 1.25, rect.left + rect.width / 2, rect.top + rect.height / 2, true);
+  };
+
   window.resetZoom = function() { window.fitWidth(); };
 
   window.fitWidth = function() {
@@ -1688,7 +1781,7 @@
     const doc = getDocumentDimensions();
     panX = (vp.width - doc.width * zoomLevel) / 2;
     panY = 15;
-    clampViewport();
+    clampViewport(true);
     updateTransform(true);
   };
 
@@ -1700,7 +1793,7 @@
     zoomLevel = Math.max(minZoom, Math.min(maxZoom, scale));
     panX = (vp.width - doc.width * zoomLevel) / 2;
     panY = 15;
-    clampViewport();
+    clampViewport(true);
     updateTransform(true);
   };
 
@@ -2005,9 +2098,136 @@
   let startX = 0, startY = 0;
   let currentStroke = null;
 
+  // Laser Pointer Engine (Ephemeral Neon Glowing Comet-Trail with 650ms Decay)
+  let laserPoints = []; // Array of { pageNum, x, y, timestamp }
+  let laserRafId = null;
+
+  function startLaserAnimation() {
+    if (laserRafId) return;
+    renderLaserFrame();
+  }
+
+  function renderLaserFrame() {
+    const now = Date.now();
+    // Decay points older than 650ms
+    laserPoints = laserPoints.filter(p => (now - p.timestamp) <= 650);
+
+    const pointsByPage = {};
+    for (let i = 0; i < laserPoints.length; i++) {
+      const p = laserPoints[i];
+      if (!pointsByPage[p.pageNum]) pointsByPage[p.pageNum] = [];
+      pointsByPage[p.pageNum].push(p);
+    }
+
+    document.querySelectorAll('.draft-canvas').forEach(dc => {
+      const pNum = parseInt(dc.id.replace('draft-canvas-', ''), 10);
+      const dctx = dc.getContext('2d');
+      if (pointsByPage[pNum] && pointsByPage[pNum].length > 0) {
+        dctx.clearRect(0, 0, dc.width, dc.height);
+        drawLaserCometTrail(dctx, pointsByPage[pNum], now);
+      } else {
+        if (!currentStroke || (!currentStroke.isStraight && currentStroke.tool !== 'highlighter')) {
+          dctx.clearRect(0, 0, dc.width, dc.height);
+        }
+      }
+    });
+
+    if (laserPoints.length > 0) {
+      laserRafId = requestAnimationFrame(renderLaserFrame);
+    } else {
+      laserRafId = null;
+    }
+  }
+
+  function drawLaserCometTrail(ctx, points, now) {
+    if (!points || points.length === 0) return;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (points.length === 1) {
+      const pt = points[0];
+      const age = now - pt.timestamp;
+      const alpha = Math.max(0, 1 - age / 650);
+      ctx.globalAlpha = alpha;
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = '#EF4444';
+      ctx.fillStyle = '#F43F5E';
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    for (let i = 1; i < points.length; i++) {
+      const p0 = points[i - 1];
+      const p1 = points[i];
+      const age = now - p1.timestamp;
+      const progress = Math.max(0, 1 - age / 650);
+
+      ctx.save();
+      ctx.globalAlpha = progress;
+
+      // Outer glow and stroke
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = '#EF4444';
+      ctx.strokeStyle = '#F43F5E';
+      ctx.lineWidth = Math.max(2, 6 * progress);
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+
+      // Inner white core
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = Math.max(1, 2.5 * progress);
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Glowing head dot at latest point
+    const head = points[points.length - 1];
+    const headAge = now - head.timestamp;
+    const headAlpha = Math.max(0, 1 - headAge / 650);
+    ctx.save();
+    ctx.globalAlpha = headAlpha;
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = '#EF4444';
+    ctx.fillStyle = '#F43F5E';
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.restore();
+  }
+
   function abortActiveDrawing() {
     isDrawing = false;
     currentStroke = null;
+    laserPoints = [];
+    if (laserRafId) {
+      cancelAnimationFrame(laserRafId);
+      laserRafId = null;
+    }
     document.querySelectorAll('.draft-canvas').forEach(dc => {
       const ctx = dc.getContext('2d');
       ctx.clearRect(0, 0, dc.width, dc.height);
@@ -2057,7 +2277,10 @@
           eraseAt(pageNum, pt.x, pt.y);
         } else if (currentTool === 'text') {
           isDrawing = false;
-          createNewTextBox(pageNum, pt.x, pt.y);
+          createNewTextBox(pageNum, clientX, clientY);
+        } else if (currentTool === 'laser') {
+          laserPoints.push({ pageNum, x: pt.x, y: pt.y, timestamp: Date.now() });
+          startLaserAnimation();
         } else if (currentTool === 'pen') {
           currentStroke = {
             id: 'st_' + Date.now(),
@@ -2095,6 +2318,9 @@
 
         if (currentTool === 'eraser') {
           eraseAt(pageNum, pt.x, pt.y);
+        } else if (currentTool === 'laser') {
+          laserPoints.push({ pageNum, x: pt.x, y: pt.y, timestamp: Date.now() });
+          startLaserAnimation();
         } else if (currentStroke) {
           if (currentStroke.isStraight) {
             // GLITCH-FREE STRAIGHT LINE DRAFTING:
@@ -2105,7 +2331,6 @@
             }
           } else if (currentStroke.tool === 'highlighter') {
             // REAL TRANSLUCENT HIGHLIGHTER:
-            // ALWAYS render on draftCanvas as a single continuous path so it NEVER self-multiplies or creates dark blotches!
             currentStroke.points.push({ x: pt.x, y: pt.y });
             if (draftCanvas) {
               const dctx = draftCanvas.getContext('2d');
@@ -2123,6 +2348,11 @@
       const onEnd = (e) => {
         if (!isDrawing) return;
         isDrawing = false;
+
+        if (currentTool === 'laser') {
+          // Ephemeral trail decays automatically via rAF, never saved to localStorage
+          return;
+        }
 
         if (currentStroke) {
           const clientX = e.clientX !== undefined ? e.clientX : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : 0);
@@ -2475,26 +2705,46 @@
     }
   };
 
-  // Text Box Creation
-  function createNewTextBox(pageNum, x, y) {
+  // Text Box Creation (Pure Typographic Borderless Freehand Text)
+  function createNewTextBox(pageNum, clientX, clientY) {
     const pageEl = document.getElementById('page-' + pageNum);
     if (!pageEl) return;
 
+    // Zero Page Shift: Map directly to unscaled document coordinates on pageEl
+    const pageRect = pageEl.getBoundingClientRect();
+    const unscaledLeft = (clientX - pageRect.left) / zoomLevel;
+    const unscaledTop = (clientY - pageRect.top) / zoomLevel;
+
     const box = document.createElement('div');
     box.className = 'jnotes-text-box';
-    box.contentEditable = true;
-    box.style.left = (x / (window.devicePixelRatio || 1)) + 'px';
-    box.style.top = (y / (window.devicePixelRatio || 1)) + 'px';
-    box.style.color = penState.color;
-    box.innerHTML = 'اكتب ملاحظتك هنا...';
+    box.contentEditable = 'true';
+    box.spellcheck = false;
+    box.style.left = unscaledLeft + 'px';
+    box.style.top = unscaledTop + 'px';
+    box.style.color = penState.color || '#F8FAFC';
+    box.setAttribute('data-placeholder', 'اكتب هنا...');
 
     box.addEventListener('blur', function() {
-      if (!box.textContent.trim()) box.remove();
+      if (!box.textContent.trim()) {
+        box.remove();
+      }
       saveAnnotations();
     });
 
+    box.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        box.blur();
+      }
+    });
+
     pageEl.appendChild(box);
-    box.focus();
+
+    // CRITICAL UX FIX: Always call preventScroll: true to eliminate violent page shifts
+    try {
+      box.focus({ preventScroll: true });
+    } catch (err) {
+      box.focus();
+    }
   }
 
   // Persistence & Auto-Save
@@ -2506,10 +2756,30 @@
     if (text) text.textContent = 'جاري الحفظ...';
 
     const docId = currentDoc?.id || 'sheet_doc';
+
+    // Collect all text boxes
+    const texts = [];
+    document.querySelectorAll('.doc-page').forEach(page => {
+      const pNum = parseInt(page.getAttribute('data-page'), 10);
+      page.querySelectorAll('.jnotes-text-box').forEach(tb => {
+        const str = tb.textContent.trim();
+        if (str) {
+          texts.push({
+            page: pNum,
+            left: tb.style.left,
+            top: tb.style.top,
+            color: tb.style.color,
+            html: tb.innerHTML
+          });
+        }
+      });
+    });
+
     const payload = {
       version: 2,
       docId: docId,
       strokes: pageStrokes,
+      texts: texts,
       bookmarks: pageBookmarks,
       savedAt: Date.now()
     };
@@ -2535,6 +2805,30 @@
         if (data.bookmarks) pageBookmarks = data.bookmarks;
         for (let p in pageStrokes) {
           redrawCanvas(p);
+        }
+        if (data.texts && Array.isArray(data.texts)) {
+          document.querySelectorAll('.jnotes-text-box').forEach(b => b.remove());
+          data.texts.forEach(t => {
+            const pageEl = document.getElementById('page-' + t.page);
+            if (!pageEl) return;
+            const box = document.createElement('div');
+            box.className = 'jnotes-text-box';
+            box.contentEditable = 'true';
+            box.spellcheck = false;
+            box.style.left = t.left;
+            box.style.top = t.top;
+            box.style.color = t.color || '#F8FAFC';
+            box.setAttribute('data-placeholder', 'اكتب هنا...');
+            box.innerHTML = t.html || '';
+            box.addEventListener('blur', function() {
+              if (!box.textContent.trim()) box.remove();
+              saveAnnotations();
+            });
+            box.addEventListener('keydown', function(e) {
+              if (e.key === 'Escape') box.blur();
+            });
+            pageEl.appendChild(box);
+          });
         }
       }
     } catch (e) {}
@@ -2766,7 +3060,7 @@
   }
 
   // ==========================================================================
-  // TWO-FINGER PINCH-TO-ZOOM & PAN GESTURE ENGINE (Unified 2D Camera)
+  // TWO-FINGER PINCH-TO-ZOOM & PAN GESTURE ENGINE (Unified 2D Camera & Physics)
   // ==========================================================================
   let isGesturePinching = false;
   let isGesturePanning = false;
@@ -2776,6 +3070,47 @@
   let focalDocY = 0;
   let lastPanPoint = { x: 0, y: 0 };
   let preventDrawUntil = 0;
+
+  // Smooth Inertial Momentum Physics State
+  let lastTouchTime = 0;
+  let lastTouchX = 0;
+  let lastTouchY = 0;
+  let velocityX = 0;
+  let velocityY = 0;
+  let momentumRafId = null;
+
+  function stopMomentum() {
+    if (momentumRafId) {
+      cancelAnimationFrame(momentumRafId);
+      momentumRafId = null;
+    }
+  }
+
+  function startMomentum(vx, vy) {
+    stopMomentum();
+    let currentVx = vx;
+    let currentVy = vy;
+
+    function step() {
+      currentVx *= 0.92;
+      currentVy *= 0.92;
+
+      panX += currentVx;
+      panY += currentVy;
+
+      clampViewport(false);
+      updateTransform(false);
+      updateCurrentPageFromPan();
+
+      if (Math.abs(currentVx) > 0.35 || Math.abs(currentVy) > 0.35) {
+        momentumRafId = requestAnimationFrame(step);
+      } else {
+        momentumRafId = null;
+        settleViewport();
+      }
+    }
+    momentumRafId = requestAnimationFrame(step);
+  }
 
   function initGestureEngine() {
     const viewport = document.getElementById('jnotes-viewport');
@@ -2787,6 +3122,7 @@
     }
 
     const onTouchStart = (e) => {
+      stopMomentum();
       const vRect = viewport.getBoundingClientRect();
 
       if (e.touches.length >= 2) {
@@ -2814,10 +3150,15 @@
         const cursor = document.getElementById('jnotes-eraser-cursor');
         if (cursor) cursor.style.display = 'none';
       } else if (e.touches.length === 1 && currentTool === 'pan') {
-        // ONE FINGER IN READING MODE: Direct 1:1 pan!
+        // ONE FINGER IN READING MODE: Direct 1:1 pan with velocity tracking!
         isGesturePanning = true;
         isGesturePinching = false;
         lastPanPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        lastTouchTime = performance.now();
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+        velocityX = 0;
+        velocityY = 0;
         updateTransform(false);
       }
     };
@@ -2848,7 +3189,7 @@
         panX = currMidX - focalDocX * newZoom;
         panY = currMidY - focalDocY * newZoom;
 
-        clampViewport();
+        clampViewport(false);
         updateTransform(false);
         updateCurrentPageFromPan();
       } else if (e.touches.length === 1 && isGesturePanning && currentTool === 'pan') {
@@ -2858,10 +3199,22 @@
         const dy = t.clientY - lastPanPoint.y;
         lastPanPoint = { x: t.clientX, y: t.clientY };
 
+        const now = performance.now();
+        const dt = now - lastTouchTime;
+        if (dt > 8) {
+          const vx = (t.clientX - lastTouchX) / dt;
+          const vy = (t.clientY - lastTouchY) / dt;
+          velocityX = velocityX * 0.4 + vx * 0.6;
+          velocityY = velocityY * 0.4 + vy * 0.6;
+          lastTouchX = t.clientX;
+          lastTouchY = t.clientY;
+          lastTouchTime = now;
+        }
+
         panX += dx;
         panY += dy;
 
-        clampViewport();
+        clampViewport(false);
         updateTransform(false);
         updateCurrentPageFromPan();
       }
@@ -2871,13 +3224,15 @@
       if (isGesturePinching && e.touches.length < 2) {
         isGesturePinching = false;
         preventDrawUntil = Date.now() + 320; // 320ms cooldown prevents accidental marks on lifting fingers
-        clampViewport();
-        updateTransform(true);
+        settleViewport();
       }
       if (isGesturePanning && e.touches.length === 0) {
         isGesturePanning = false;
-        clampViewport();
-        updateTransform(true);
+        if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
+          startMomentum(velocityX * 16, velocityY * 16);
+        } else {
+          settleViewport();
+        }
       }
     };
 
@@ -2889,26 +3244,18 @@
     // Desktop Mouse Wheel & Trackpad Pinch
     viewport.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const vRect = viewport.getBoundingClientRect();
-      const mouseX = e.clientX - vRect.left;
-      const mouseY = e.clientY - vRect.top;
+      stopMomentum();
 
       if (e.ctrlKey || e.metaKey) {
         const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
-        const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomLevel * zoomFactor));
-        const docX = (mouseX - panX) / zoomLevel;
-        const docY = (mouseY - panY) / zoomLevel;
-        zoomLevel = newZoom;
-        panX = mouseX - docX * zoomLevel;
-        panY = mouseY - docY * zoomLevel;
+        zoomAtPoint(zoomLevel * zoomFactor, e.clientX, e.clientY, false);
       } else {
         panX -= e.deltaX;
         panY -= e.deltaY;
+        clampViewport(false);
+        updateTransform(false);
+        updateCurrentPageFromPan();
       }
-
-      clampViewport();
-      updateTransform(false);
-      updateCurrentPageFromPan();
     }, { passive: false });
   }
 
