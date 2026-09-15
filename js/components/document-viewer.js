@@ -483,6 +483,17 @@
     }
 
     /* Canvas Overlays */
+    .highlighter-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 3;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+    }
     .canvas-overlay {
       position: absolute;
       top: 0;
@@ -513,6 +524,55 @@
       pointer-events: none;
       z-index: 50;
       display: block;
+    }
+
+    /* Selection Box & Transform Controls */
+    .jnotes-selection-box {
+      position: absolute;
+      border: 2px dashed #38BDF8;
+      background: rgba(56, 189, 248, 0.08);
+      pointer-events: auto;
+      z-index: 25;
+      cursor: move;
+      box-sizing: border-box;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+    .jnotes-selection-toolbar {
+      position: absolute;
+      top: -38px;
+      left: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #1E1E2D;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      z-index: 30;
+      pointer-events: auto;
+    }
+    .jnotes-sel-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #F8FAFC;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: inherit;
+    }
+    .jnotes-sel-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+    .jnotes-sel-btn.danger {
+      color: #EF4444;
+    }
+    .jnotes-sel-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.2);
     }
 
     /* Dynamic Circle Eraser Cursor */
@@ -947,6 +1007,9 @@
     radius: 16 // px
   };
 
+  // Straight Line Mode State (خيار التسطير المستقيم بجانب الليزر)
+  let isStraightMode = false;
+
   // Virtual Ruler State (Optional straightedge guide)
   let isRulerActive = false;
   let rulerAngle = 0; // in degrees
@@ -954,9 +1017,182 @@
 
   // Annotation Data Structures
   let pageStrokes = {}; // { [pageNum]: Array<Stroke> }
-  let undoStack = {};
-  let redoStack = {};
   let pageBookmarks = [];
+
+  // Active Selection State
+  let activeSelection = null; // { pageNum, strokes: [], texts: [], bounds: { minX, minY, maxX, maxY } }
+
+  // Command Pattern History Stack Engine
+  class HistoryManager {
+    constructor() {
+      this.undoStack = [];
+      this.redoStack = [];
+    }
+    execute(cmd) {
+      if (!cmd) return;
+      if (typeof cmd.execute === 'function') {
+        cmd.execute();
+      }
+      this.undoStack.push(cmd);
+      this.redoStack = [];
+      this.updateUI();
+      if (typeof saveAnnotations === 'function') saveAnnotations();
+    }
+    undo() {
+      if (this.undoStack.length === 0) return;
+      const cmd = this.undoStack.pop();
+      if (typeof cmd.undo === 'function') {
+        cmd.undo();
+      }
+      this.redoStack.push(cmd);
+      this.updateUI();
+      if (typeof saveAnnotations === 'function') saveAnnotations();
+    }
+    redo() {
+      if (this.redoStack.length === 0) return;
+      const cmd = this.redoStack.pop();
+      if (typeof cmd.execute === 'function') {
+        cmd.execute();
+      }
+      this.undoStack.push(cmd);
+      this.updateUI();
+      if (typeof saveAnnotations === 'function') saveAnnotations();
+    }
+    updateUI() {
+      const undoBtn = document.getElementById('btn-undo');
+      const redoBtn = document.getElementById('btn-redo');
+      if (undoBtn) undoBtn.style.opacity = (this.undoStack.length > 0) ? '1' : '0.4';
+      if (redoBtn) redoBtn.style.opacity = (this.redoStack.length > 0) ? '1' : '0.4';
+    }
+    clear() {
+      this.undoStack = [];
+      this.redoStack = [];
+      this.updateUI();
+    }
+  }
+  const historyMgr = new HistoryManager();
+
+  class AddStrokeCommand {
+    constructor(pageNum, stroke) {
+      this.pageNum = pageNum;
+      this.stroke = stroke;
+    }
+    execute() {
+      if (!pageStrokes[this.pageNum]) pageStrokes[this.pageNum] = [];
+      if (!pageStrokes[this.pageNum].some(s => s.id === this.stroke.id)) {
+        pageStrokes[this.pageNum].push(this.stroke);
+      }
+      if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+    }
+    undo() {
+      if (pageStrokes[this.pageNum]) {
+        pageStrokes[this.pageNum] = pageStrokes[this.pageNum].filter(s => s.id !== this.stroke.id);
+        if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+      }
+    }
+  }
+
+  class EraseStrokesCommand {
+    constructor(pageNum, prevStrokes, newStrokes) {
+      this.pageNum = pageNum;
+      this.prevStrokes = [...prevStrokes];
+      this.newStrokes = [...newStrokes];
+    }
+    execute() {
+      pageStrokes[this.pageNum] = [...this.newStrokes];
+      if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+    }
+    undo() {
+      pageStrokes[this.pageNum] = [...this.prevStrokes];
+      if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+    }
+  }
+
+  class MoveStrokesCommand {
+    constructor(pageNum, strokeIds, dx, dy, textMoves) {
+      this.pageNum = pageNum;
+      this.strokeIds = strokeIds;
+      this.dx = dx;
+      this.dy = dy;
+      this.textMoves = textMoves || [];
+    }
+    execute() {
+      const strokes = pageStrokes[this.pageNum] || [];
+      strokes.forEach(st => {
+        if (this.strokeIds.includes(st.id) && st.points) {
+          st.points.forEach(pt => {
+            pt.x += this.dx;
+            pt.y += this.dy;
+          });
+        }
+      });
+      this.textMoves.forEach(m => {
+        if (m.el) {
+          m.el.style.left = m.newLeft;
+          m.el.style.top = m.newTop;
+        }
+      });
+      if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+    }
+    undo() {
+      const strokes = pageStrokes[this.pageNum] || [];
+      strokes.forEach(st => {
+        if (this.strokeIds.includes(st.id) && st.points) {
+          st.points.forEach(pt => {
+            pt.x -= this.dx;
+            pt.y -= this.dy;
+          });
+        }
+      });
+      this.textMoves.forEach(m => {
+        if (m.el) {
+          m.el.style.left = m.origLeft;
+          m.el.style.top = m.origTop;
+        }
+      });
+      if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+    }
+  }
+
+  class DeleteSelectionCommand {
+    constructor(pageNum, deletedStrokes, deletedTexts) {
+      this.pageNum = pageNum;
+      this.deletedStrokes = deletedStrokes; // [{ stroke, index }]
+      this.deletedTexts = deletedTexts; // [{ left, top, color, html }]
+    }
+    execute() {
+      const strokeIds = new Set(this.deletedStrokes.map(d => d.stroke.id));
+      if (pageStrokes[this.pageNum]) {
+        pageStrokes[this.pageNum] = pageStrokes[this.pageNum].filter(s => !strokeIds.has(s.id));
+      }
+      this.deletedTexts.forEach(t => {
+        if (t.el && t.el.parentNode) t.el.remove();
+      });
+      if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+    }
+    undo() {
+      if (!pageStrokes[this.pageNum]) pageStrokes[this.pageNum] = [];
+      this.deletedStrokes.forEach(d => {
+        pageStrokes[this.pageNum].splice(d.index, 0, d.stroke);
+      });
+      this.deletedTexts.forEach(t => {
+        const pageEl = document.getElementById('page-' + this.pageNum);
+        if (pageEl) {
+          const box = document.createElement('div');
+          box.className = 'jnotes-text-box';
+          box.contentEditable = 'true';
+          box.spellcheck = false;
+          box.style.left = t.left;
+          box.style.top = t.top;
+          box.style.color = t.color;
+          box.innerHTML = t.html;
+          pageEl.appendChild(box);
+          t.el = box;
+        }
+      });
+      if (typeof redrawCanvas === 'function') redrawCanvas(this.pageNum);
+    }
+  }
 
   // Presets Storage
   function getPenPresets() {
@@ -1050,21 +1286,29 @@
         </button>
 
         <!-- 5. Text Box -->
-        <button class="j-tool-btn" id="tbtn-text" onclick="handleToolClick('text')" title="إضافة نص">
+        <button class="j-tool-btn" id="tbtn-text" onclick="handleToolClick('text')" title="إضافة نص حر">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
           <span>نص</span>
         </button>
 
-        <!-- 6. Laser Pointer -->
+        <!-- 6. Selection Tool -->
+        <button class="j-tool-btn" id="tbtn-select" onclick="handleToolClick('select')" title="أداة التحديد والتحريك">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+          <span>تحديد</span>
+        </button>
+
+        <div class="j-divider"></div>
+
+        <!-- 7. Laser Pointer -->
         <button class="j-tool-btn ptool-laser" id="tbtn-laser" data-tool="laser" onclick="handleToolClick('laser')" title="مؤشر ليزر للعرض والتوضيح">
           <span style="color: #EF4444; font-size: 0.95rem;">📍</span>
           <span>ليزر</span>
         </button>
 
-        <!-- 7. Virtual Straightedge Ruler -->
-        <button class="j-tool-btn" id="tbtn-ruler" data-tool="ruler" onclick="toggleRuler()" title="مسطرة التسطير الهندسي">
-          <span style="font-size: 1rem;">📐</span>
-          <span>مسطرة</span>
+        <!-- 8. Straight Line Toggle Mode (خيار التسطير المستقيم بجانب الليزر) -->
+        <button class="j-tool-btn" id="tbtn-straight" data-tool="straight" onclick="toggleStraightMode()" title="وضع التسطير المستقيم (للقلم والخطاط)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="20" x2="20" y2="4"/></svg>
+          <span>مستقيم</span>
         </button>
       </nav>
 
@@ -1168,6 +1412,283 @@
     `;
   }
 
+  // Toggle Straight Line Drafting Mode (خيار التسطير المستقيم بجانب الليزر)
+  window.toggleStraightMode = function() {
+    isStraightMode = !isStraightMode;
+    const btn = document.getElementById('tbtn-straight');
+    if (btn) {
+      if (isStraightMode) {
+        btn.classList.add('active');
+        showToast('تم تفعيل وضع التسطير المستقيم 📏');
+      } else {
+        btn.classList.remove('active');
+        showToast('تم إلغاء التسطير المستقيم (رسم حر)');
+      }
+    }
+    penState.isStraight = isStraightMode;
+    highlighterState.isStraight = isStraightMode;
+    renderContextBar();
+  };
+
+  // Selection Tool Management Helpers
+  function clearActiveSelection() {
+    activeSelection = null;
+    document.querySelectorAll('.jnotes-selection-box').forEach(el => el.remove());
+    document.querySelectorAll('.draft-canvas').forEach(dc => {
+      const ctx = dc.getContext('2d');
+      ctx.clearRect(0, 0, dc.width, dc.height);
+    });
+  }
+
+  window.clearActiveSelection = clearActiveSelection;
+
+  window.deleteActiveSelection = function(e) {
+    if (e) e.stopPropagation();
+    if (!activeSelection) return;
+    const { pageNum, strokes, texts } = activeSelection;
+    const strokeList = pageStrokes[pageNum] || [];
+    const deletedStrokes = [];
+    strokes.forEach(st => {
+      const idx = strokeList.findIndex(s => s.id === st.id);
+      if (idx !== -1) {
+        deletedStrokes.push({ stroke: st, index: idx });
+      }
+    });
+
+    const deletedTexts = (texts || []).map(tb => ({
+      el: tb,
+      left: tb.style.left,
+      top: tb.style.top,
+      color: tb.style.color,
+      html: tb.innerHTML
+    }));
+
+    historyMgr.execute(new DeleteSelectionCommand(pageNum, deletedStrokes, deletedTexts));
+    clearActiveSelection();
+    showToast('تم حذف العناصر المحددة 🗑️');
+  };
+
+  window.duplicateActiveSelection = function(e) {
+    if (e) e.stopPropagation();
+    if (!activeSelection) return;
+    const { pageNum, strokes, texts } = activeSelection;
+    const canvas = document.getElementById('canvas-' + pageNum);
+    const scale = canvas ? (canvas.clientWidth / canvas.width) : 1;
+    const canvasOffset = 25 / (scale || 1);
+
+    const newStrokes = strokes.map(st => ({
+      ...st,
+      id: 'st_dup_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      points: st.points.map(pt => ({ ...pt, x: pt.x + canvasOffset, y: pt.y + canvasOffset }))
+    }));
+
+    newStrokes.forEach(ns => {
+      historyMgr.execute(new AddStrokeCommand(pageNum, ns));
+    });
+
+    clearActiveSelection();
+    showToast('تم نسخ العناصر المحددة 📋');
+  };
+
+  function renderSelectionBox(pageNum, bounds, selectedStrokes, selectedTexts) {
+    clearActiveSelection();
+    activeSelection = {
+      pageNum,
+      bounds: { ...bounds },
+      strokes: selectedStrokes,
+      texts: selectedTexts
+    };
+
+    const pageEl = document.getElementById('page-' + pageNum);
+    if (!pageEl) return;
+
+    const canvas = pageEl.querySelector('.canvas-overlay');
+    const scale = canvas ? (canvas.clientWidth / canvas.width) : 1;
+
+    const box = document.createElement('div');
+    box.className = 'jnotes-selection-box';
+    box.id = 'jnotes-active-selection-box';
+    const pad = 8;
+    const cssLeft = Math.max(0, bounds.minX * scale - pad);
+    const cssTop = Math.max(0, bounds.minY * scale - pad);
+    const cssW = Math.max(50, (bounds.maxX - bounds.minX) * scale + pad * 2);
+    const cssH = Math.max(40, (bounds.maxY - bounds.minY) * scale + pad * 2);
+
+    box.style.left = cssLeft + 'px';
+    box.style.top = cssTop + 'px';
+    box.style.width = cssW + 'px';
+    box.style.height = cssH + 'px';
+
+    const tb = document.createElement('div');
+    tb.className = 'jnotes-selection-toolbar';
+    tb.innerHTML = `
+      <button type="button" class="jnotes-sel-btn danger" onclick="deleteActiveSelection(event)" title="حذف العناصر المحددة">
+        <span>🗑️</span><span>حذف</span>
+      </button>
+      <button type="button" class="jnotes-sel-btn" onclick="duplicateActiveSelection(event)" title="تكرار العناصر المحددة">
+        <span>📋</span><span>نسخ</span>
+      </button>
+      <button type="button" class="jnotes-sel-btn" onclick="clearActiveSelection()" title="إلغاء التحديد">
+        <span>✕</span>
+      </button>
+    `;
+
+    box.appendChild(tb);
+    pageEl.appendChild(box);
+
+    setupSelectionBoxDrag(box, pageNum, scale);
+  }
+
+  function setupSelectionBoxDrag(box, pageNum, scale) {
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+    let isDragging = false;
+
+    const onBoxDown = (e) => {
+      if (e.target.closest('.jnotes-selection-toolbar')) return;
+      e.stopPropagation();
+      e.preventDefault();
+      isDragging = true;
+      startX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      startY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+      initialLeft = parseFloat(box.style.left) || 0;
+      initialTop = parseFloat(box.style.top) || 0;
+
+      const onBoxMove = (ev) => {
+        if (!isDragging) return;
+        ev.preventDefault();
+        const currX = ev.clientX !== undefined ? ev.clientX : (ev.touches && ev.touches[0] ? ev.touches[0].clientX : 0);
+        const currY = ev.clientY !== undefined ? ev.clientY : (ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0);
+        const dx = (currX - startX) / zoomLevel;
+        const dy = (currY - startY) / zoomLevel;
+        box.style.left = (initialLeft + dx) + 'px';
+        box.style.top = (initialTop + dy) + 'px';
+      };
+
+      const onBoxUp = (ev) => {
+        if (!isDragging) return;
+        isDragging = false;
+        window.removeEventListener('mousemove', onBoxMove);
+        window.removeEventListener('mouseup', onBoxUp);
+        window.removeEventListener('touchmove', onBoxMove);
+        window.removeEventListener('touchend', onBoxUp);
+
+        const finalLeft = parseFloat(box.style.left) || 0;
+        const finalTop = parseFloat(box.style.top) || 0;
+        const cssDeltaX = finalLeft - initialLeft;
+        const cssDeltaY = finalTop - initialTop;
+
+        if (Math.abs(cssDeltaX) > 1 || Math.abs(cssDeltaY) > 1) {
+          const canvasDeltaX = cssDeltaX / (scale || 1);
+          const canvasDeltaY = cssDeltaY / (scale || 1);
+
+          if (activeSelection) {
+            const strokeIds = activeSelection.strokes.map(s => s.id);
+            const textMoves = (activeSelection.texts || []).map(tb => {
+              const prevL = tb.style.left;
+              const prevT = tb.style.top;
+              const newL = (parseFloat(prevL) + cssDeltaX) + 'px';
+              const newT = (parseFloat(prevT) + cssDeltaY) + 'px';
+              tb.style.left = newL;
+              tb.style.top = newT;
+              return { el: tb, origLeft: prevL, origTop: prevT, newLeft: newL, newTop: newT };
+            });
+
+            historyMgr.execute(new MoveStrokesCommand(pageNum, strokeIds, canvasDeltaX, canvasDeltaY, textMoves));
+            activeSelection.bounds.minX += canvasDeltaX;
+            activeSelection.bounds.maxX += canvasDeltaX;
+            activeSelection.bounds.minY += canvasDeltaY;
+            activeSelection.bounds.maxY += canvasDeltaY;
+          }
+        }
+      };
+
+      window.addEventListener('mousemove', onBoxMove);
+      window.addEventListener('mouseup', onBoxUp);
+      window.addEventListener('touchmove', onBoxMove, { passive: false });
+      window.addEventListener('touchend', onBoxUp);
+    };
+
+    box.addEventListener('mousedown', onBoxDown);
+    box.addEventListener('touchstart', onBoxDown, { passive: false });
+  }
+
+  function handleMarqueeEnd(pageNum, startPt, endPt, canvas) {
+    const scale = canvas ? (canvas.clientWidth / canvas.width) : 1;
+    const minX = Math.min(startPt.x, endPt.x);
+    const maxX = Math.max(startPt.x, endPt.x);
+    const minY = Math.min(startPt.y, endPt.y);
+    const maxY = Math.max(startPt.y, endPt.y);
+    const span = Math.hypot(maxX - minX, maxY - minY);
+
+    if (span < 8) {
+      // Single click selection
+      const hitRadiusSq = (20 / scale) * (20 / scale);
+      const strokes = pageStrokes[pageNum] || [];
+      const hit = strokes.slice().reverse().find(st => {
+        if (!st.points) return false;
+        return st.points.some(p => distSq(p, endPt) <= hitRadiusSq);
+      });
+      if (hit) {
+        let bMinX = Infinity, bMinY = Infinity, bMaxX = -Infinity, bMaxY = -Infinity;
+        hit.points.forEach(p => {
+          if (p.x < bMinX) bMinX = p.x;
+          if (p.x > bMaxX) bMaxX = p.x;
+          if (p.y < bMinY) bMinY = p.y;
+          if (p.y > bMaxY) bMaxY = p.y;
+        });
+        renderSelectionBox(pageNum, { minX: bMinX, minY: bMinY, maxX: bMaxX, maxY: bMaxY }, [hit], []);
+      } else {
+        clearActiveSelection();
+      }
+      return;
+    }
+
+    // Marquee box selection
+    const strokes = pageStrokes[pageNum] || [];
+    const matchedStrokes = strokes.filter(st => {
+      if (!st.points || st.points.length === 0) return false;
+      return st.points.some(p => p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY);
+    });
+
+    const pageEl = document.getElementById('page-' + pageNum);
+    const matchedTexts = [];
+    if (pageEl) {
+      pageEl.querySelectorAll('.jnotes-text-box').forEach(tb => {
+        const tbLeft = (parseFloat(tb.style.left) || 0) / scale;
+        const tbTop = (parseFloat(tb.style.top) || 0) / scale;
+        if (tbLeft >= minX && tbLeft <= maxX && tbTop >= minY && tbTop <= maxY) {
+          matchedTexts.push(tb);
+        }
+      });
+    }
+
+    if (matchedStrokes.length > 0 || matchedTexts.length > 0) {
+      let bMinX = Infinity, bMinY = Infinity, bMaxX = -Infinity, bMaxY = -Infinity;
+      matchedStrokes.forEach(st => {
+        st.points.forEach(p => {
+          if (p.x < bMinX) bMinX = p.x;
+          if (p.x > bMaxX) bMaxX = p.x;
+          if (p.y < bMinY) bMinY = p.y;
+          if (p.y > bMaxY) bMaxY = p.y;
+        });
+      });
+      matchedTexts.forEach(tb => {
+        const tbLeft = (parseFloat(tb.style.left) || 0) / scale;
+        const tbTop = (parseFloat(tb.style.top) || 0) / scale;
+        const tbW = (tb.offsetWidth || 100) / scale;
+        const tbH = (tb.offsetHeight || 30) / scale;
+        if (tbLeft < bMinX) bMinX = tbLeft;
+        if (tbLeft + tbW > bMaxX) bMaxX = tbLeft + tbW;
+        if (tbTop < bMinY) bMinY = tbTop;
+        if (tbTop + tbH > bMaxY) bMaxY = tbTop + tbH;
+      });
+      renderSelectionBox(pageNum, { minX: bMinX, minY: bMinY, maxX: bMaxX, maxY: bMaxY }, matchedStrokes, matchedTexts);
+    } else {
+      clearActiveSelection();
+    }
+  }
+
   // Dynamic Contextual Bar Renderer with First/Second Click Expansion
   function renderContextBar() {
     const bar = document.getElementById('jnotes-context-bar');
@@ -1224,16 +1745,9 @@
         </div>
         <div class="j-divider"></div>
         <div class="j-ctx-group">
-          <button class="j-btn ${penState.isStraight ? 'j-btn-primary' : ''}" onclick="togglePenStraight()">
+          <button class="j-btn ${isStraightMode ? 'j-btn-primary' : ''}" onclick="toggleStraightMode()">
             <span>📏</span>
-            <span>خط مستقيم: ${penState.isStraight ? 'مفعل' : 'معطل'}</span>
-          </button>
-        </div>
-        <div class="j-divider"></div>
-        <div class="j-ctx-group">
-          <button class="j-btn ${isRulerActive ? 'j-btn-primary' : ''}" onclick="toggleRuler()" title="إظهار / إخفاء مسطرة التسطير">
-            <span>📐</span>
-            <span>مسطرة: ${isRulerActive ? 'مفعلة' : 'معطلة'}</span>
+            <span>تسطير مستقيم: ${isStraightMode ? 'مفعل' : 'معطل'}</span>
           </button>
         </div>
       `;
@@ -1274,16 +1788,9 @@
         </div>
         <div class="j-divider"></div>
         <div class="j-ctx-group">
-          <button class="j-btn ${highlighterState.isStraight ? 'j-btn-primary' : ''}" onclick="toggleHighlighterStraight()">
+          <button class="j-btn ${isStraightMode ? 'j-btn-primary' : ''}" onclick="toggleStraightMode()">
             <span>📏</span>
-            <span>تظليل مستقيم: ${highlighterState.isStraight ? 'مفعل' : 'معطل'}</span>
-          </button>
-        </div>
-        <div class="j-divider"></div>
-        <div class="j-ctx-group">
-          <button class="j-btn ${isRulerActive ? 'j-btn-primary' : ''}" onclick="toggleRuler()" title="إظهار / إخفاء مسطرة التسطير">
-            <span>📐</span>
-            <span>مسطرة: ${isRulerActive ? 'مفعلة' : 'معطلة'}</span>
+            <span>تسطير مستقيم: ${isStraightMode ? 'مفعل' : 'معطل'}</span>
           </button>
         </div>
       `;
@@ -1310,7 +1817,14 @@
       html = `
         <div class="j-ctx-group">
           <span class="j-ctx-label">أداة النص:</span>
-          <span style="font-size: 0.75rem; color: #94A3B8;">انقر في أي مكان داخل الشريحة لإضافة ملاحظة نصية ✍️</span>
+          <span style="font-size: 0.75rem; color: #94A3B8;">انقر في أي مكان داخل الشريحة لإضافة ملاحظة نصية حرة ✍️</span>
+        </div>
+      `;
+    } else if (currentTool === 'select') {
+      html = `
+        <div class="j-ctx-group">
+          <span class="j-ctx-label">أداة التحديد والتحريك 🎯:</span>
+          <span style="font-size: 0.75rem; color: #38BDF8;">اسحب لرسم مربع تحديد حول الملاحظات، أو انقر على أي رسم أو نص لنقله، تكراره، أو حذفه</span>
         </div>
       `;
     } else if (currentTool === 'laser') {
@@ -1340,20 +1854,25 @@
 
   window.setTool = function(tool) {
     currentTool = tool;
+    if (tool !== 'select') {
+      clearActiveSelection();
+    }
 
-    // Update active states on main toolbar buttons (excluding overlay toggles like ruler)
+    // Update active states on main toolbar buttons (excluding persistent toggles)
     document.querySelectorAll('.j-tool-btn').forEach(b => {
-      if (b.id !== 'tbtn-ruler') b.classList.remove('active');
+      if (b.id !== 'tbtn-ruler' && b.id !== 'tbtn-straight') b.classList.remove('active');
     });
     const activeBtn = document.getElementById('tbtn-' + tool) || document.getElementById('ptool-' + tool) || document.querySelector('.ptool-' + tool);
     if (activeBtn) activeBtn.classList.add('active');
 
-    // Maintain ruler toggle active state
+    // Maintain ruler & straight mode toggle active states
     const rulerBtn = document.getElementById('tbtn-ruler');
     if (rulerBtn && isRulerActive) rulerBtn.classList.add('active');
 
+    const straightBtn = document.getElementById('tbtn-straight');
+    if (straightBtn && isStraightMode) straightBtn.classList.add('active');
+
     // Manage pointer events:
-    // When in 'pan' mode, overlayCanvas has pointer-events: none so textLayer is fully selectable and touch scroll is fluid!
     const isPan = (tool === 'pan');
     document.querySelectorAll('.canvas-overlay').forEach(c => {
       c.style.pointerEvents = isPan ? 'none' : 'auto';
@@ -1361,6 +1880,8 @@
         c.style.cursor = 'none';
       } else if (tool === 'text') {
         c.style.cursor = 'text';
+      } else if (tool === 'select') {
+        c.style.cursor = 'default';
       } else if (tool === 'laser') {
         c.style.cursor = 'crosshair';
       } else if (isPan) {
@@ -2049,6 +2570,7 @@
     if (!pageEl) return;
     const canvas = pageEl.querySelector('.canvas-overlay');
     const bgCanvas = pageEl.querySelector('.pdf-render-canvas');
+    const hlCanvas = pageEl.querySelector('.highlighter-canvas');
 
     const exportC = document.createElement('canvas');
     exportC.width = canvas ? canvas.width : 800;
@@ -2059,7 +2581,27 @@
     ctx.fillRect(0, 0, exportC.width, exportC.height);
 
     if (bgCanvas) ctx.drawImage(bgCanvas, 0, 0);
+    if (hlCanvas) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.drawImage(hlCanvas, 0, 0);
+      ctx.restore();
+    }
     if (canvas) ctx.drawImage(canvas, 0, 0);
+
+    const scale = canvas ? (canvas.width / canvas.clientWidth) : 1;
+    pageEl.querySelectorAll('.jnotes-text-box').forEach(tb => {
+      const text = tb.textContent.trim();
+      if (!text) return;
+      const left = (parseFloat(tb.style.left) || 0) * scale;
+      const top = (parseFloat(tb.style.top) || 0) * scale;
+      ctx.save();
+      ctx.fillStyle = tb.style.color || '#0F172A';
+      ctx.font = `${Math.round(16 * scale)}px sans-serif`;
+      ctx.textBaseline = 'top';
+      ctx.fillText(text, left, top);
+      ctx.restore();
+    });
 
     const a = document.createElement('a');
     a.href = exportC.toDataURL('image/png');
@@ -2068,9 +2610,76 @@
     showToast('تم تصدير الشريحة كصورة PNG عالية الدقة! 🖼️');
   };
 
-  window.exportAnnotatedPdf = function() {
+  window.exportAnnotatedPdf = async function() {
     document.querySelectorAll('.j-popover-menu').forEach(el => el.classList.remove('open'));
-    showToast('جاري تحضير ملف PDF للطباعة والتنزيل... 🖨️');
+    showToast('جاري تحضير ملف PDF المدمج مع الملاحظات... 📄');
+
+    try {
+      if (window.jspdf && window.jspdf.jsPDF) {
+        const { jsPDF } = window.jspdf;
+        let pdfDoc = null;
+
+        for (let p = 1; p <= totalPages; p++) {
+          const pageEl = document.getElementById('page-' + p);
+          if (!pageEl) continue;
+          const bgCanvas = pageEl.querySelector('.pdf-render-canvas');
+          const hlCanvas = pageEl.querySelector('.highlighter-canvas');
+          const canvas = pageEl.querySelector('.canvas-overlay');
+
+          const w = canvas ? canvas.width : 800;
+          const h = canvas ? canvas.height : 1100;
+          const mergeC = document.createElement('canvas');
+          mergeC.width = w;
+          mergeC.height = h;
+          const mctx = mergeC.getContext('2d');
+          mctx.fillStyle = '#FFFFFF';
+          mctx.fillRect(0, 0, w, h);
+
+          if (bgCanvas) mctx.drawImage(bgCanvas, 0, 0);
+          if (hlCanvas) {
+            mctx.save();
+            mctx.globalCompositeOperation = 'multiply';
+            mctx.drawImage(hlCanvas, 0, 0);
+            mctx.restore();
+          }
+          if (canvas) mctx.drawImage(canvas, 0, 0);
+
+          const scale = canvas ? (canvas.width / canvas.clientWidth) : 1;
+          pageEl.querySelectorAll('.jnotes-text-box').forEach(tb => {
+            const text = tb.textContent.trim();
+            if (!text) return;
+            const left = (parseFloat(tb.style.left) || 0) * scale;
+            const top = (parseFloat(tb.style.top) || 0) * scale;
+            mctx.save();
+            mctx.fillStyle = tb.style.color || '#0F172A';
+            mctx.font = `${Math.round(16 * scale)}px sans-serif`;
+            mctx.textBaseline = 'top';
+            mctx.fillText(text, left, top);
+            mctx.restore();
+          });
+
+          const imgData = mergeC.toDataURL('image/jpeg', 0.92);
+          const orientation = w > h ? 'landscape' : 'portrait';
+
+          if (!pdfDoc) {
+            pdfDoc = new jsPDF({ orientation, unit: 'px', format: [w, h] });
+            pdfDoc.addImage(imgData, 'JPEG', 0, 0, w, h);
+          } else {
+            pdfDoc.addPage([w, h], orientation);
+            pdfDoc.addImage(imgData, 'JPEG', 0, 0, w, h);
+          }
+        }
+
+        if (pdfDoc) {
+          pdfDoc.save((currentDoc?.title || 'sheet') + '-annotated.pdf');
+          showToast('تم تصدير ملف PDF المدمج بنجاح! 📑');
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('PDF export fallback to print:', err);
+    }
+
     setTimeout(() => window.print(), 300);
   };
 
@@ -2309,6 +2918,10 @@
         }
       };
 
+      let isMarqueeSelecting = false;
+      let marqueeStart = null;
+      let eraseSnapshot = null;
+
       const onStart = (e) => {
         if (currentTool === 'pan') return;
         if (Date.now() < preventDrawUntil) return;
@@ -2319,41 +2932,52 @@
         if (isRulerActive && (currentTool === 'pen' || currentTool === 'highlighter')) {
           pt = snapPointToRuler(pt, canvas, clientX, clientY);
         }
-        isDrawing = true;
         startX = pt.x;
         startY = pt.y;
 
-        if (currentTool === 'laser') {
+        if (currentTool === 'select') {
+          if (e.target && e.target.closest && e.target.closest('.jnotes-selection-box')) return;
+          isMarqueeSelecting = true;
+          marqueeStart = { x: pt.x, y: pt.y, clientX, clientY };
+          return;
+        } else if (currentTool === 'laser') {
           isDrawing = true;
           addLaserPoint(clientX, clientY);
           return;
         } else if (currentTool === 'eraser') {
+          isDrawing = true;
+          eraseSnapshot = [...(pageStrokes[pageNum] || [])];
           eraseAt(pageNum, pt.x, pt.y);
+          return;
         } else if (currentTool === 'text') {
           isDrawing = false;
           if (e.preventDefault) e.preventDefault();
           createNewTextBox(pageNum, clientX, clientY);
           return;
-        } else if (currentTool === 'pen') {
+        }
+
+        isDrawing = true;
+        const pressure = (e.pressure !== undefined && e.pressure > 0) ? e.pressure : 0.6;
+        if (currentTool === 'pen') {
           currentStroke = {
-            id: 'st_' + Date.now(),
+            id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             tool: 'pen',
             color: penState.color,
             strokeWidth: penState.width * 5, // mm to px on high-dpi canvas
             opacity: 1.0,
-            isStraight: penState.isStraight,
-            points: [{ x: pt.x, y: pt.y }]
+            isStraight: isStraightMode || penState.isStraight,
+            points: [{ x: pt.x, y: pt.y, p: pressure, t: Date.now() }]
           };
           if (!pageStrokes[pageNum]) pageStrokes[pageNum] = [];
         } else if (currentTool === 'highlighter') {
           currentStroke = {
-            id: 'hl_' + Date.now(),
+            id: 'hl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
             tool: 'highlighter',
             color: highlighterState.color,
             strokeWidth: highlighterState.width * 4.5, // wide highlighter
-            opacity: highlighterState.opacity || 0.38,
-            isStraight: highlighterState.isStraight,
-            points: [{ x: pt.x, y: pt.y }]
+            opacity: highlighterState.opacity || 0.45,
+            isStraight: isStraightMode || highlighterState.isStraight,
+            points: [{ x: pt.x, y: pt.y, p: 1.0, t: Date.now() }]
           };
           if (!pageStrokes[pageNum]) pageStrokes[pageNum] = [];
         }
@@ -2369,6 +2993,27 @@
             addLaserPoint(clientX, clientY);
           } else {
             updateLaserHover(clientX, clientY);
+          }
+          return;
+        }
+
+        if (currentTool === 'select' && isMarqueeSelecting) {
+          let pt = getCanvasPoint(e, canvas);
+          if (draftCanvas) {
+            const dctx = draftCanvas.getContext('2d');
+            dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
+            const minX = Math.min(marqueeStart.x, pt.x);
+            const maxX = Math.max(marqueeStart.x, pt.x);
+            const minY = Math.min(marqueeStart.y, pt.y);
+            const maxY = Math.max(marqueeStart.y, pt.y);
+            dctx.save();
+            dctx.strokeStyle = '#38BDF8';
+            dctx.lineWidth = 2.5;
+            dctx.setLineDash([6, 5]);
+            dctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
+            dctx.fillStyle = 'rgba(56, 189, 248, 0.1)';
+            dctx.fillRect(minX, minY, maxX - minX, maxY - minY);
+            dctx.restore();
           }
           return;
         }
@@ -2390,27 +3035,57 @@
               drawSingleSegment(dctx, startX, startY, pt.x, pt.y, currentStroke);
             }
           } else if (currentStroke.tool === 'highlighter') {
-            // REAL TRANSLUCENT HIGHLIGHTER:
-            currentStroke.points.push({ x: pt.x, y: pt.y });
+            // REAL TRANSLUCENT HIGHLIGHTER ON DRAFT CANVAS:
+            currentStroke.points.push({ x: pt.x, y: pt.y, p: 1.0, t: Date.now() });
             if (draftCanvas) {
               const dctx = draftCanvas.getContext('2d');
               dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
               drawPermanentStroke(draftCanvas, currentStroke);
             }
           } else {
-            // Smooth freehand drawing on canvas-overlay
-            currentStroke.points.push({ x: pt.x, y: pt.y });
+            // Smooth velocity/pressure-sensitive freehand drawing on canvas-overlay
+            const pts = currentStroke.points;
+            const lastPt = pts[pts.length - 1];
+            const now = Date.now();
+            const dt = Math.max(1, now - (lastPt.t || now));
+            const dist = Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y);
+            const vel = dist / dt;
+            const simP = Math.max(0.25, Math.min(1.0, 1.0 - (vel / 2.5)));
+            const pressure = (e.pressure !== undefined && e.pressure > 0) ? e.pressure : simP;
+            currentStroke.points.push({ x: pt.x, y: pt.y, p: pressure, t: now });
             drawStrokeIncrement(canvas, currentStroke);
           }
         }
       };
 
       const onEnd = (e) => {
+        if (currentTool === 'select' && isMarqueeSelecting) {
+          isMarqueeSelecting = false;
+          if (draftCanvas) {
+            const dctx = draftCanvas.getContext('2d');
+            dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
+          }
+          let pt = getCanvasPoint(e, canvas);
+          handleMarqueeEnd(pageNum, marqueeStart, pt, canvas);
+          return;
+        }
+
+        if (currentTool === 'eraser' && isDrawing) {
+          isDrawing = false;
+          if (eraseSnapshot) {
+            const currStrokes = pageStrokes[pageNum] || [];
+            if (currStrokes.length !== eraseSnapshot.length || JSON.stringify(currStrokes) !== JSON.stringify(eraseSnapshot)) {
+              historyMgr.execute(new EraseStrokesCommand(pageNum, eraseSnapshot, currStrokes));
+            }
+            eraseSnapshot = null;
+          }
+          return;
+        }
+
         if (!isDrawing) return;
         isDrawing = false;
 
         if (currentTool === 'laser') {
-          // Ephemeral trail decays automatically via rAF, never saved to localStorage
           return;
         }
 
@@ -2422,30 +3097,25 @@
             pt = snapPointToRuler(pt, canvas, clientX, clientY);
           }
 
+          if (draftCanvas) {
+            const dctx = draftCanvas.getContext('2d');
+            dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
+          }
+
           if (currentStroke.isStraight) {
-            // Finish straight line: clear draft canvas and commit clean 2-point line
-            if (draftCanvas) {
-              const dctx = draftCanvas.getContext('2d');
-              dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
-            }
             currentStroke.points = [{ x: startX, y: startY }, { x: pt.x, y: pt.y }];
-            pageStrokes[pageNum].push(currentStroke);
-            drawPermanentStroke(canvas, currentStroke);
-          } else if (currentStroke.tool === 'highlighter') {
-            // Commit clean single-path highlighter stroke to canvas-overlay
-            if (draftCanvas) {
-              const dctx = draftCanvas.getContext('2d');
-              dctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height);
-            }
-            if (currentStroke.points.length >= 2) {
-              pageStrokes[pageNum].push(currentStroke);
+          }
+
+          if (currentStroke.points.length >= 2 || (currentStroke.points.length === 1 && !currentStroke.isStraight)) {
+            const hlCanvas = document.getElementById('highlighter-canvas-' + pageNum);
+            if (currentStroke.tool === 'highlighter' && hlCanvas) {
+              drawPermanentStroke(hlCanvas, currentStroke);
+            } else {
               drawPermanentStroke(canvas, currentStroke);
             }
-          } else if (currentStroke.points.length > 0) {
-            pageStrokes[pageNum].push(currentStroke);
+            historyMgr.execute(new AddStrokeCommand(pageNum, currentStroke));
           }
           currentStroke = null;
-          saveAnnotations();
         }
       };
 
@@ -2543,35 +3213,46 @@
 
     ctx.save();
     ctx.strokeStyle = st.color;
-    ctx.lineWidth = st.strokeWidth;
-    ctx.lineCap = (st.tool === 'highlighter') ? 'square' : 'round';
-    ctx.lineJoin = (st.tool === 'highlighter') ? 'bevel' : 'round';
+    ctx.lineCap = (st.tool === 'highlighter') ? 'round' : 'round';
+    ctx.lineJoin = (st.tool === 'highlighter') ? 'round' : 'round';
     ctx.globalAlpha = st.opacity || 1.0;
 
     if (st.tool === 'highlighter') {
       ctx.globalCompositeOperation = 'multiply';
-    }
-
-    ctx.beginPath();
-    if (len === 2) {
-      ctx.moveTo(pts[0].x, pts[0].y);
-      ctx.lineTo(pts[1].x, pts[1].y);
-    } else {
+      ctx.lineWidth = st.strokeWidth;
+      ctx.beginPath();
       const p1 = pts[len - 2];
       const p2 = pts[len - 1];
-      const p0 = pts[len - 3];
-      const xc1 = (p0.x + p1.x) / 2;
-      const yc1 = (p0.y + p1.y) / 2;
-      const xc2 = (p1.x + p2.x) / 2;
-      const yc2 = (p1.y + p2.y) / 2;
-      ctx.moveTo(xc1, yc1);
-      ctx.quadraticCurveTo(p1.x, p1.y, xc2, yc2);
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+    } else {
+      // Dynamic pressure-aware smooth stroke for pen (Perfect Freehand principles)
+      const p1 = pts[len - 2];
+      const p2 = pts[len - 1];
+      const pressure = p2.p !== undefined ? p2.p : 0.6;
+      const dynamicWidth = Math.max(1, st.strokeWidth * (0.55 + 0.45 * pressure));
+      ctx.lineWidth = dynamicWidth;
+
+      ctx.beginPath();
+      if (len === 2) {
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y);
+      } else {
+        const p0 = pts[len - 3];
+        const xc1 = (p0.x + p1.x) / 2;
+        const yc1 = (p0.y + p1.y) / 2;
+        const xc2 = (p1.x + p2.x) / 2;
+        const yc2 = (p1.y + p2.y) / 2;
+        ctx.moveTo(xc1, yc1);
+        ctx.quadraticCurveTo(p1.x, p1.y, xc2, yc2);
+      }
+      ctx.stroke();
     }
-    ctx.stroke();
     ctx.restore();
   }
 
-  // Draw full permanent stroke (used on redraw or straight line completion)
+  // Draw full permanent stroke (used on redraw or stroke completion)
   function drawPermanentStroke(canvas, st) {
     const ctx = canvas.getContext('2d');
     const pts = st.points;
@@ -2579,45 +3260,78 @@
 
     ctx.save();
     ctx.strokeStyle = st.color;
-    ctx.lineWidth = st.strokeWidth;
-    ctx.lineCap = (st.tool === 'highlighter') ? 'square' : 'round';
-    ctx.lineJoin = (st.tool === 'highlighter') ? 'bevel' : 'round';
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.globalAlpha = st.opacity || 1.0;
 
     if (st.tool === 'highlighter') {
       ctx.globalCompositeOperation = 'multiply';
-    }
-
-    ctx.beginPath();
-    if (st.isStraight || pts.length === 2) {
-      ctx.moveTo(pts[0].x, pts[0].y);
-      ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-    } else if (st.isSegmentSplitted || st.tool === 'highlighter') {
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.lineWidth = st.strokeWidth;
+      ctx.beginPath();
+      if (st.isStraight || pts.length === 2) {
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+      } else {
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) {
+          const xc = (pts[i].x + pts[i - 1].x) / 2;
+          const yc = (pts[i].y + pts[i - 1].y) / 2;
+          ctx.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, xc, yc);
+        }
+        ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
       }
+      ctx.stroke();
     } else {
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) {
-        const xc = (pts[i].x + pts[i - 1].x) / 2;
-        const yc = (pts[i].y + pts[i - 1].y) / 2;
-        ctx.quadraticCurveTo(pts[i - 1].x, pts[i - 1].y, xc, yc);
+      // Pen stroke with Perfect Freehand smoothing
+      ctx.lineWidth = st.strokeWidth;
+      ctx.beginPath();
+      if (st.isStraight || pts.length === 2) {
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+        ctx.stroke();
+      } else if (st.isSegmentSplitted) {
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i].x, pts[i].y);
+        }
+        ctx.stroke();
+      } else {
+        // Multi-segment smoothed Bézier
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) {
+          const pPrev = pts[i - 1];
+          const pCurr = pts[i];
+          const xc = (pPrev.x + pCurr.x) / 2;
+          const yc = (pPrev.y + pCurr.y) / 2;
+          ctx.quadraticCurveTo(pPrev.x, pPrev.y, xc, yc);
+        }
+        ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+        ctx.stroke();
       }
-      ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
     }
-    ctx.stroke();
     ctx.restore();
   }
 
   function redrawCanvas(pageNum) {
     const canvas = document.getElementById('canvas-' + pageNum);
+    const hlCanvas = document.getElementById('highlighter-canvas-' + pageNum);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    if (hlCanvas) {
+      const hlCtx = hlCanvas.getContext('2d');
+      hlCtx.clearRect(0, 0, hlCanvas.width, hlCanvas.height);
+    }
+
     const strokes = pageStrokes[pageNum] || [];
-    strokes.forEach(st => drawPermanentStroke(canvas, st));
+    strokes.forEach(st => {
+      if (st.tool === 'highlighter' && hlCanvas) {
+        drawPermanentStroke(hlCanvas, st);
+      } else {
+        drawPermanentStroke(canvas, st);
+      }
+    });
   }
 
   // ==========================================================================
@@ -2746,31 +3460,37 @@
   }
 
   window.clearCurrentPageStrokes = function() {
-    pageStrokes[currentPage] = [];
-    redrawCanvas(currentPage);
-    saveAnnotations();
+    const prev = [...(pageStrokes[currentPage] || [])];
+    if (prev.length === 0) return;
+    historyMgr.execute(new EraseStrokesCommand(currentPage, prev, []));
     showToast('تم مسح رسومات الصفحة الحالية.');
   };
 
   window.undoAction = function() {
-    const strokes = pageStrokes[currentPage] || [];
-    if (strokes.length > 0) {
-      if (!undoStack[currentPage]) undoStack[currentPage] = [];
-      undoStack[currentPage].push(strokes.pop());
-      redrawCanvas(currentPage);
-      saveAnnotations();
-    }
+    clearActiveSelection();
+    historyMgr.undo();
   };
 
   window.redoAction = function() {
-    const stack = undoStack[currentPage] || [];
-    if (stack.length > 0) {
-      if (!pageStrokes[currentPage]) pageStrokes[currentPage] = [];
-      pageStrokes[currentPage].push(stack.pop());
-      redrawCanvas(currentPage);
-      saveAnnotations();
-    }
+    clearActiveSelection();
+    historyMgr.redo();
   };
+
+  // Global Undo / Redo Keyboard Shortcuts
+  window.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+      if (e.shiftKey) {
+        e.preventDefault();
+        window.redoAction();
+      } else {
+        e.preventDefault();
+        window.undoAction();
+      }
+    } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+      e.preventDefault();
+      window.redoAction();
+    }
+  });
 
   // Text Box Creation (Pure Typographic Borderless Freehand Text)
   function createNewTextBox(pageNum, clientX, clientY) {
@@ -2980,7 +3700,22 @@
         pdfCanvas.style.left = '0';
         pdfCanvas.style.zIndex = '1';
 
-        // 2. Real Selectable PDF TextLayer (z-index: 2)
+        // 2. Real Translucent Highlighter Canvas with Multiply Blend Mode (z-index: 3)
+        const highlighterCanvas = document.createElement('canvas');
+        highlighterCanvas.className = 'highlighter-canvas';
+        highlighterCanvas.id = 'highlighter-canvas-' + p;
+        highlighterCanvas.width = viewport.width;
+        highlighterCanvas.height = viewport.height;
+        highlighterCanvas.style.width = '100%';
+        highlighterCanvas.style.height = '100%';
+        highlighterCanvas.style.position = 'absolute';
+        highlighterCanvas.style.top = '0';
+        highlighterCanvas.style.left = '0';
+        highlighterCanvas.style.zIndex = '3';
+        highlighterCanvas.style.pointerEvents = 'none';
+        highlighterCanvas.style.mixBlendMode = 'multiply';
+
+        // 3. Real Selectable PDF TextLayer (z-index: 4)
         const textLayerDiv = document.createElement('div');
         textLayerDiv.className = 'textLayer';
         textLayerDiv.style.width = '100%';
@@ -2988,9 +3723,9 @@
         textLayerDiv.style.position = 'absolute';
         textLayerDiv.style.top = '0';
         textLayerDiv.style.left = '0';
-        textLayerDiv.style.zIndex = '2';
+        textLayerDiv.style.zIndex = '4';
 
-        // 3. Annotation Canvas Overlay (z-index: 5)
+        // 4. Annotation Canvas Overlay (z-index: 5)
         const overlayCanvas = document.createElement('canvas');
         overlayCanvas.className = 'canvas-overlay';
         overlayCanvas.id = 'canvas-' + p;
@@ -3004,7 +3739,7 @@
         overlayCanvas.style.zIndex = '5';
         overlayCanvas.style.pointerEvents = (currentTool === 'pan') ? 'none' : 'auto';
 
-        // 4. Straight Line Draft Preview Canvas (z-index: 6)
+        // 5. Straight Line Draft Preview Canvas (z-index: 6)
         const draftCanvas = document.createElement('canvas');
         draftCanvas.className = 'draft-canvas';
         draftCanvas.id = 'draft-canvas-' + p;
@@ -3019,6 +3754,7 @@
         draftCanvas.style.pointerEvents = 'none';
 
         pageDiv.appendChild(pdfCanvas);
+        pageDiv.appendChild(highlighterCanvas);
         pageDiv.appendChild(textLayerDiv);
         pageDiv.appendChild(overlayCanvas);
         pageDiv.appendChild(draftCanvas);
@@ -3111,6 +3847,20 @@
       bgCtx.font = 'bold 32px sans-serif';
       bgCtx.fillText('صفحة دراسية رقم ' + p, 50, 48);
 
+      const highlighterCanvas = document.createElement('canvas');
+      highlighterCanvas.className = 'highlighter-canvas';
+      highlighterCanvas.id = 'highlighter-canvas-' + p;
+      highlighterCanvas.width = pageWidth * 2;
+      highlighterCanvas.height = pageHeight * 2;
+      highlighterCanvas.style.width = '100%';
+      highlighterCanvas.style.height = '100%';
+      highlighterCanvas.style.position = 'absolute';
+      highlighterCanvas.style.top = '0';
+      highlighterCanvas.style.left = '0';
+      highlighterCanvas.style.zIndex = '3';
+      highlighterCanvas.style.pointerEvents = 'none';
+      highlighterCanvas.style.mixBlendMode = 'multiply';
+
       const overlayCanvas = document.createElement('canvas');
       overlayCanvas.className = 'canvas-overlay';
       overlayCanvas.id = 'canvas-' + p;
@@ -3138,6 +3888,7 @@
       draftCanvas.style.pointerEvents = 'none';
 
       pageDiv.appendChild(bgCanvas);
+      pageDiv.appendChild(highlighterCanvas);
       pageDiv.appendChild(overlayCanvas);
       pageDiv.appendChild(draftCanvas);
       pagesWrapper.appendChild(pageDiv);
