@@ -18,39 +18,24 @@ window.AdminPage = (function () {
     return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // Secure authenticate: compares hashed input against stored hash
-  // Never stores or compares plaintext passwords at runtime
+  // Built-in default hash (SHA-256) — this is how authentication works without any localStorage setup
+  // The plaintext is NOT stored anywhere in the code — only the hash
+  const _DEFAULT_HASH = '36a71a5bca2513f92fc85544531b1605c3515ee5f6039882db0b17b05082652f';
+
+  // Secure authenticate: compares hashed input against stored/default hash
   async function authenticate(passcode) {
     const inputHash = await _hashStr(passcode);
 
-    // Get stored hash (set on first successful login or by admin setup)
-    let storedHash = localStorage.getItem('_kf_adh');
-
-    if (!storedHash) {
-      // First-time setup: bootstrap from encoded init token if present
-      // Admin can set this by running in console:
-      //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOURPASSCODE'))
-      //     .then(b => localStorage.setItem('_kf_adh', Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')))
-      const initToken = localStorage.getItem('_kf_ait');
-      if (initToken) {
-        storedHash = initToken;
-      } else {
-        // No hash stored yet — first-run: accept and store the provided passcode as the master
-        // This means the very first person to log in sets the password
-        // To pre-set a password, run the console command above before first deployment
-        storedHash = null;
-      }
-    }
-
-    if (storedHash && inputHash === storedHash) {
+    // Priority 1: custom hash set by admin in localStorage (override)
+    const customHash = localStorage.getItem('_kf_adh');
+    if (customHash && inputHash === customHash) {
       isAdminAuthenticated = true;
       sessionStorage.setItem('kf_admin_auth', 'true');
       return true;
     }
 
-    // Fallback: if no hash stored yet, accept the first login and store it
-    if (!storedHash) {
-      localStorage.setItem('_kf_adh', inputHash);
+    // Priority 2: built-in default hash
+    if (inputHash === _DEFAULT_HASH) {
       isAdminAuthenticated = true;
       sessionStorage.setItem('kf_admin_auth', 'true');
       return true;
@@ -58,7 +43,6 @@ window.AdminPage = (function () {
 
     return false;
   }
-
 
 
   // --- LOCAL STORAGE & DELETION PERSISTENCE HELPERS ---
