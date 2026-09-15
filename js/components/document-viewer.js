@@ -1050,6 +1050,12 @@
           <span style="color: #EF4444; font-size: 0.95rem;">📍</span>
           <span>ليزر</span>
         </button>
+
+        <!-- 7. Virtual Straightedge Ruler -->
+        <button class="j-tool-btn" id="tbtn-ruler" data-tool="ruler" onclick="toggleRuler()" title="مسطرة التسطير الهندسي">
+          <span style="font-size: 1rem;">📐</span>
+          <span>مسطرة</span>
+        </button>
       </nav>
 
       <!-- LAYER C: DYNAMIC CONTEXTUAL PROPERTIES BAR -->
@@ -1324,10 +1330,16 @@
   window.setTool = function(tool) {
     currentTool = tool;
 
-    // Update active states on main toolbar buttons
-    document.querySelectorAll('.j-tool-btn').forEach(b => b.classList.remove('active'));
+    // Update active states on main toolbar buttons (excluding overlay toggles like ruler)
+    document.querySelectorAll('.j-tool-btn').forEach(b => {
+      if (b.id !== 'tbtn-ruler') b.classList.remove('active');
+    });
     const activeBtn = document.getElementById('tbtn-' + tool) || document.getElementById('ptool-' + tool) || document.querySelector('.ptool-' + tool);
     if (activeBtn) activeBtn.classList.add('active');
+
+    // Maintain ruler toggle active state
+    const rulerBtn = document.getElementById('tbtn-ruler');
+    if (rulerBtn && isRulerActive) rulerBtn.classList.add('active');
 
     // Manage pointer events:
     // When in 'pan' mode, overlayCanvas has pointer-events: none so textLayer is fully selectable and touch scroll is fluid!
@@ -1448,6 +1460,14 @@
         generateRulerTicks();
       } else {
         rulerEl.classList.remove('active');
+      }
+    }
+    const rulerBtn = document.getElementById('tbtn-ruler');
+    if (rulerBtn) {
+      if (isRulerActive) {
+        rulerBtn.classList.add('active');
+      } else {
+        rulerBtn.classList.remove('active');
       }
     }
     renderContextBar();
