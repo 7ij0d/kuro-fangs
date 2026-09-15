@@ -111,6 +111,46 @@
       padding: 6px 8px;
     }
 
+    /* Master Mode Toggle (👆 Reading / ✏️ Editing) */
+    .j-master-mode-btn {
+      font-weight: 700;
+      font-size: 0.775rem;
+      padding: 4px 12px;
+      border-radius: 16px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .j-master-mode-btn.reading {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #CBD5E1;
+    }
+    .j-master-mode-btn.reading:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #FFF;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .j-master-mode-btn.editing {
+      background: linear-gradient(135deg, #0284C7, #0369A1);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #FFFFFF;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.45);
+    }
+    .j-master-mode-btn.editing:hover {
+      background: linear-gradient(135deg, #0369A1, #075985);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+    }
+    .jnotes-annotation-toolbar.mode-reading .j-tool-btn:not(#tbtn-pan) {
+      opacity: 0.55;
+    }
+    .jnotes-annotation-toolbar.mode-reading .j-tool-btn:not(#tbtn-pan):hover {
+      opacity: 0.85;
+    }
+
     /* Meta Pill */
     .j-title-pill {
       display: flex;
@@ -422,25 +462,28 @@
       top: 0;
       left: 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      gap: 24px;
+      justify-content: flex-start;
+      width: max-content;
+      height: 100%;
       transform-origin: 0 0;
       will-change: transform;
     }
 
-    /* Document Page Container */
+    /* Document Page Container (Horizontal Slide) */
     .doc-page {
       position: relative;
       background: #FFFFFF;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
       border-radius: 6px;
       overflow: hidden;
-      margin: 0 auto;
+      flex-shrink: 0;
+      margin: 0 24px;
       transition: box-shadow 0.2s, filter 0.3s;
     }
     .doc-page.active-page-viewport {
-      box-shadow: 0 14px 44px rgba(2, 132, 199, 0.3), 0 0 0 2px rgba(2, 132, 199, 0.6);
+      box-shadow: 0 16px 48px rgba(2, 132, 199, 0.4), 0 0 0 2.5px #0284C7;
     }
     .pdf-render-canvas {
       position: absolute;
@@ -943,6 +986,11 @@
         padding: 4px 8px;
         font-size: 0.72rem;
       }
+      .j-master-mode-btn {
+        padding: 4px 8px;
+        font-size: 0.72rem;
+        gap: 4px;
+      }
       .jnotes-annotation-toolbar {
         height: 40px;
         padding: 0 8px;
@@ -975,6 +1023,7 @@
   let totalPages = 1;
   let currentPage = 1;
   let currentTool = 'pan'; // Default mode is Reading/Browse mode!
+  let isEditingMode = false; // Master Toggle: false = Reading/Browse Mode (👆), true = Editing/Drawing Mode (✏️)
   let currentTheme = 'white';
   let zoomLevel = 1.0;
   let isContextExpanded = false;
@@ -1232,7 +1281,7 @@
       <!-- Eraser Circle Cursor Indicator -->
       <div class="jnotes-eraser-cursor" id="jnotes-eraser-cursor"></div>
 
-      <!-- LAYER A: MINIMAL GLOBAL TOP BAR (Back, Sheet Name, Page Indicator) -->
+      <!-- LAYER A: MINIMAL GLOBAL TOP BAR (Back, Sheet Name, Master Toggle, Page Indicator) -->
       <header class="jnotes-global-bar">
         <div class="j-bar-section" style="flex: 1; min-width: 0; overflow: hidden; gap: 10px;">
           <button class="j-btn" onclick="exitStudio()" title="العودة">
@@ -1241,7 +1290,12 @@
           </button>
           <span class="j-title-text" style="font-size: 0.825rem; font-weight: 700; color: #F8FAFC; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${title}">${title}</span>
         </div>
-        <div class="j-bar-section" style="flex-shrink: 0;">
+        <div class="j-bar-section" style="flex-shrink: 0; gap: 8px;">
+          <!-- Master Toggle Button (👆 وضع القراءة / ✏️ وضع التحرير) -->
+          <button class="j-btn j-master-mode-btn reading" id="btn-master-mode" onclick="toggleEditingMode()" title="تبديل وضع التحرير والكتابة / وضع القراءة والتصفح">
+            <span id="master-mode-icon">👆</span>
+            <span id="master-mode-label">وضع القراءة</span>
+          </button>
           <span class="j-page-stepper-text" id="page-counter-stepper" onclick="openPageJumpModal()" style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--j-border); border-radius: 14px; padding: 3px 12px; font-size: 0.75rem; font-weight: 700; color: var(--j-accent); cursor: pointer;" title="انتقال مباشر لرقم الصفحة">
             1 / ${numPages}
           </span>
@@ -1429,6 +1483,69 @@
     highlighterState.isStraight = isStraightMode;
     renderContextBar();
   };
+
+  // Master Mode Toggle (👆 Reading Mode / ✏️ Editing Mode)
+  window.toggleEditingMode = function(forcedState) {
+    if (forcedState !== undefined) {
+      isEditingMode = !!forcedState;
+    } else {
+      isEditingMode = !isEditingMode;
+    }
+
+    const btn = document.getElementById('btn-master-mode');
+    const icon = document.getElementById('master-mode-icon');
+    const label = document.getElementById('master-mode-label');
+    const toolbar = document.querySelector('.jnotes-annotation-toolbar');
+
+    if (btn) {
+      if (isEditingMode) {
+        btn.classList.remove('reading');
+        btn.classList.add('editing');
+        if (icon) icon.textContent = '✏️';
+        if (label) label.textContent = 'وضع التحرير';
+        btn.title = 'وضع التحرير مفعّل (انقر للتبديل لوضع القراءة والتصفح)';
+      } else {
+        btn.classList.remove('editing');
+        btn.classList.add('reading');
+        if (icon) icon.textContent = '👆';
+        if (label) label.textContent = 'وضع القراءة';
+        btn.title = 'وضع القراءة مفعّل (انقر للتبديل لوضع التحرير والكتابة)';
+      }
+    }
+
+    if (toolbar) {
+      if (isEditingMode) {
+        toolbar.classList.remove('mode-reading');
+      } else {
+        toolbar.classList.add('mode-reading');
+      }
+    }
+
+    applyCanvasPointerEvents();
+
+    if (!isEditingMode) {
+      abortActiveDrawing();
+      if (typeof clearLaserCanvas === 'function') clearLaserCanvas();
+      const cursor = document.getElementById('jnotes-eraser-cursor');
+      if (cursor) cursor.style.display = 'none';
+    }
+  };
+
+  function applyCanvasPointerEvents() {
+    document.querySelectorAll('.canvas-overlay').forEach(c => {
+      if (!isEditingMode || currentTool === 'pan') {
+        c.style.pointerEvents = 'none';
+        c.style.cursor = 'default';
+      } else {
+        c.style.pointerEvents = 'auto';
+        if (currentTool === 'eraser') c.style.cursor = 'none';
+        else if (currentTool === 'text') c.style.cursor = 'text';
+        else if (currentTool === 'select') c.style.cursor = 'default';
+        else if (currentTool === 'laser') c.style.cursor = 'crosshair';
+        else c.style.cursor = 'crosshair';
+      }
+    });
+  }
 
   // Selection Tool Management Helpers
   function clearActiveSelection() {
@@ -1858,6 +1975,18 @@
       clearActiveSelection();
     }
 
+    // If user explicitly selected pan tool, switch to reading mode
+    if (tool === 'pan') {
+      if (isEditingMode) {
+        window.toggleEditingMode(false);
+      }
+    } else {
+      // If user selected an active editing tool and editing mode was off, activate editing mode
+      if (!isEditingMode) {
+        window.toggleEditingMode(true);
+      }
+    }
+
     // Update active states on main toolbar buttons (excluding persistent toggles)
     document.querySelectorAll('.j-tool-btn').forEach(b => {
       if (b.id !== 'tbtn-ruler' && b.id !== 'tbtn-straight') b.classList.remove('active');
@@ -1873,23 +2002,7 @@
     if (straightBtn && isStraightMode) straightBtn.classList.add('active');
 
     // Manage pointer events:
-    const isPan = (tool === 'pan');
-    document.querySelectorAll('.canvas-overlay').forEach(c => {
-      c.style.pointerEvents = isPan ? 'none' : 'auto';
-      if (tool === 'eraser') {
-        c.style.cursor = 'none';
-      } else if (tool === 'text') {
-        c.style.cursor = 'text';
-      } else if (tool === 'select') {
-        c.style.cursor = 'default';
-      } else if (tool === 'laser') {
-        c.style.cursor = 'crosshair';
-      } else if (isPan) {
-        c.style.cursor = 'grab';
-      } else {
-        c.style.cursor = 'crosshair';
-      }
-    });
+    applyCanvasPointerEvents();
 
     // Hide eraser circle if not eraser
     const cursor = document.getElementById('jnotes-eraser-cursor');
@@ -2186,67 +2299,70 @@
     return { width: Math.max(300, w), height: Math.max(400, h) };
   }
 
+  function getActivePageDimensions() {
+    const pEl = document.getElementById('page-' + currentPage) || document.querySelector('.doc-page');
+    if (pEl) {
+      return { width: pEl.offsetWidth || 850, height: pEl.offsetHeight || 1100 };
+    }
+    return { width: docNaturalWidth || 850, height: docNaturalHeight || 1100 };
+  }
+
   function getFitWidthScale() {
     const vp = getViewportDimensions();
-    const doc = getDocumentDimensions();
-    const targetW = vp.width - 24; // 12px margin each side
-    const scale = targetW / (doc.width || 850);
-    return Math.max(0.35, Math.min(1.5, scale));
+    const pDim = getActivePageDimensions();
+    const scaleW = (vp.width - 32) / pDim.width;
+    const scaleH = (vp.height - 40) / pDim.height;
+    const scale = Math.min(scaleW, scaleH);
+    return Math.max(minZoom, Math.min(maxZoom, scale));
   }
 
   function clampViewport(forceCenter = false) {
     const vp = getViewportDimensions();
-    const doc = getDocumentDimensions();
-    const scaledW = doc.width * zoomLevel;
-    const scaledH = doc.height * zoomLevel;
+    const pageEl = document.getElementById('page-' + currentPage) || document.querySelector('.doc-page');
+    if (!pageEl) return;
+
+    const pageCenterX = pageEl.offsetLeft + pageEl.offsetWidth / 2;
+    const pageCenterY = pageEl.offsetTop + pageEl.offsetHeight / 2;
 
     if (forceCenter) {
-      panX = (vp.width - scaledW) / 2;
-      panY = Math.max(15, (vp.height - scaledH) / 2);
+      panX = (vp.width / 2) - (pageCenterX * zoomLevel);
+      panY = (vp.height / 2) - (pageCenterY * zoomLevel);
       return;
     }
 
-    // Dynamic fluid viewport boundaries (Leaflet/Panzoom standard)
-    // Ensures document content never disappears completely from screen, without restricting focal zoom
-    const padX = Math.max(140, vp.width * 0.45);
-    const minX = vp.width - scaledW - padX;
-    const maxX = padX;
-    panX = Math.max(minX, Math.min(maxX, panX));
+    if (zoomLevel > 1.08) {
+      // Zoomed in: pan freely within the active page with comfortable boundary margins
+      const padX = Math.max(80, vp.width * 0.3);
+      const padY = Math.max(80, vp.height * 0.3);
 
-    const padY = Math.max(140, vp.height * 0.45);
-    const minY = vp.height - scaledH - padY;
-    const maxY = padY;
-    panY = Math.max(minY, Math.min(maxY, panY));
+      const minPanX = vp.width - (pageEl.offsetLeft + pageEl.offsetWidth) * zoomLevel - padX;
+      const maxPanX = -pageEl.offsetLeft * zoomLevel + padX;
+      panX = Math.max(minPanX, Math.min(maxPanX, panX));
+
+      const minPanY = vp.height - (pageEl.offsetTop + pageEl.offsetHeight) * zoomLevel - padY;
+      const maxPanY = -pageEl.offsetTop * zoomLevel + padY;
+      panY = Math.max(minPanY, Math.min(maxPanY, panY));
+    } else {
+      // Normal scale: maintain vertical centering of the horizontal slide row
+      panY = (vp.height / 2) - (pageCenterY * zoomLevel);
+
+      // Horizontal boundaries allow swiping between first and last page
+      const firstPage = document.getElementById('page-1') || pageEl;
+      const lastPage = document.getElementById('page-' + totalPages) || pageEl;
+      const firstCenterX = firstPage.offsetLeft + firstPage.offsetWidth / 2;
+      const lastCenterX = lastPage.offsetLeft + lastPage.offsetWidth / 2;
+
+      const maxPanX = (vp.width / 2) - (firstCenterX * zoomLevel) + 120;
+      const minPanX = (vp.width / 2) - (lastCenterX * zoomLevel) - 120;
+      panX = Math.max(minPanX, Math.min(maxPanX, panX));
+    }
   }
 
   function settleViewport() {
-    const vp = getViewportDimensions();
-    const doc = getDocumentDimensions();
-    const scaledW = doc.width * zoomLevel;
-    const scaledH = doc.height * zoomLevel;
-    let changed = false;
-
-    // Never snap or teleport to center if user is zoomed in!
-    if (scaledW > vp.width) {
-      const minX = vp.width - scaledW - 20;
-      const maxX = 20;
-      if (panX < minX) { panX = minX; changed = true; }
-      if (panX > maxX) { panX = maxX; changed = true; }
+    if (zoomLevel <= 1.08) {
+      window.scrollToPage(currentPage, true);
     } else {
-      // If smaller than viewport, only recenter if dragged excessively far away
-      const targetCenter = (vp.width - scaledW) / 2;
-      if (Math.abs(panX - targetCenter) > vp.width * 0.35) {
-        panX = targetCenter;
-        changed = true;
-      }
-    }
-
-    const minY = vp.height - scaledH - 40;
-    const maxY = 20;
-    if (panY < minY) { panY = minY; changed = true; }
-    if (panY > maxY) { panY = maxY; changed = true; }
-
-    if (changed) {
+      clampViewport(false);
       updateTransform(true);
     }
   }
@@ -2317,65 +2433,98 @@
 
   window.fitWidth = function() {
     zoomLevel = getFitWidthScale();
-    const vp = getViewportDimensions();
-    const doc = getDocumentDimensions();
-    panX = (vp.width - doc.width * zoomLevel) / 2;
-    panY = 15;
-    clampViewport(true);
-    updateTransform(true);
+    window.scrollToPage(currentPage, true);
   };
 
   window.fitPage = function() {
-    const vp = getViewportDimensions();
-    const doc = getDocumentDimensions();
-    const perPageH = (doc.height / totalPages) || 1100;
-    const scale = Math.min((vp.width - 24) / doc.width, (vp.height - 30) / perPageH);
-    zoomLevel = Math.max(minZoom, Math.min(maxZoom, scale));
-    panX = (vp.width - doc.width * zoomLevel) / 2;
-    panY = 15;
-    clampViewport(true);
-    updateTransform(true);
+    zoomLevel = getFitWidthScale();
+    window.scrollToPage(currentPage, true);
   };
 
-  // Page Stepper & Smooth Viewport Navigation
-  window.scrollToPage = function(pageNum, smooth) {
-    if (pageNum < 1 || pageNum > totalPages) return;
+  // Page Stepper & Smooth Viewport Navigation (Horizontal Slides)
+  window.scrollToPage = function(pageNum, smooth = true) {
+    if (pageNum < 1) pageNum = 1;
+    if (pageNum > totalPages) pageNum = totalPages;
     currentPage = pageNum;
     const pageEl = document.getElementById('page-' + pageNum);
     if (pageEl) {
-      const pageTopOffset = pageEl.offsetTop;
-      panY = -pageTopOffset * zoomLevel + 15;
+      const vp = getViewportDimensions();
+      const pageCenterX = pageEl.offsetLeft + pageEl.offsetWidth / 2;
+      const pageCenterY = pageEl.offsetTop + pageEl.offsetHeight / 2;
+      panX = (vp.width / 2) - (pageCenterX * zoomLevel);
+      panY = (vp.height / 2) - (pageCenterY * zoomLevel);
       clampViewport();
       updateTransform(smooth !== false);
     }
     const counter = document.getElementById('page-counter-stepper');
     if (counter) counter.textContent = currentPage + ' / ' + totalPages;
+
+    // Synchronize active classes on pages and sidebar thumbnails
+    document.querySelectorAll('.doc-page').forEach(p => {
+      const num = parseInt(p.getAttribute('data-page'), 10);
+      if (num === currentPage) p.classList.add('active-page-viewport');
+      else p.classList.remove('active-page-viewport');
+    });
+
+    document.querySelectorAll('.j-thumb-card').forEach((card, idx) => {
+      if (idx + 1 === currentPage) card.classList.add('active');
+      else card.classList.remove('active');
+    });
   };
 
   function updateCurrentPageFromPan() {
     const pages = document.querySelectorAll('.doc-page');
     if (pages.length === 0) return;
     const vp = getViewportDimensions();
-    const docCenterY = (vp.height / 2 - panY) / zoomLevel;
+    const viewportCenterDocX = (vp.width / 2 - panX) / zoomLevel;
+
+    let closestPage = currentPage;
+    let minDist = Infinity;
 
     for (let i = 0; i < pages.length; i++) {
       const pEl = pages[i];
-      const top = pEl.offsetTop;
-      const bottom = top + pEl.offsetHeight + 24;
-      if (docCenterY >= top && docCenterY <= bottom) {
+      const pageCenterX = pEl.offsetLeft + pEl.offsetWidth / 2;
+      const dist = Math.abs(viewportCenterDocX - pageCenterX);
+      if (dist < minDist) {
+        minDist = dist;
         const pNum = parseInt(pEl.getAttribute('data-page'), 10);
-        if (pNum && pNum !== currentPage) {
-          currentPage = pNum;
-          const counter = document.getElementById('page-counter-stepper');
-          if (counter) counter.textContent = currentPage + ' / ' + totalPages;
-        }
-        break;
+        if (pNum) closestPage = pNum;
       }
+    }
+
+    if (closestPage !== currentPage) {
+      currentPage = closestPage;
+      const counter = document.getElementById('page-counter-stepper');
+      if (counter) counter.textContent = currentPage + ' / ' + totalPages;
+
+      document.querySelectorAll('.doc-page').forEach(p => {
+        const num = parseInt(p.getAttribute('data-page'), 10);
+        if (num === currentPage) p.classList.add('active-page-viewport');
+        else p.classList.remove('active-page-viewport');
+      });
+
+      document.querySelectorAll('.j-thumb-card').forEach((card, idx) => {
+        if (idx + 1 === currentPage) card.classList.add('active');
+        else card.classList.remove('active');
+      });
     }
   }
 
-  window.prevPage = function() { window.scrollToPage(currentPage - 1); };
-  window.nextPage = function() { window.scrollToPage(currentPage + 1); };
+  window.prevPage = function() {
+    if (currentPage > 1) {
+      window.scrollToPage(currentPage - 1, true);
+    } else {
+      window.scrollToPage(1, true);
+    }
+  };
+
+  window.nextPage = function() {
+    if (currentPage < totalPages) {
+      window.scrollToPage(currentPage + 1, true);
+    } else {
+      window.scrollToPage(totalPages, true);
+    }
+  };
 
   window.openPageJumpModal = function() {
     const m = document.getElementById('modal-page-jump');
@@ -2923,7 +3072,7 @@
       let eraseSnapshot = null;
 
       const onStart = (e) => {
-        if (currentTool === 'pan') return;
+        if (!isEditingMode || currentTool === 'pan') return;
         if (Date.now() < preventDrawUntil) return;
         if (e.touches && e.touches.length >= 2) return;
         const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
@@ -2984,6 +3133,7 @@
       };
 
       const onMove = (e) => {
+        if (!isEditingMode || currentTool === 'pan') return;
         updateCursorPos(e);
         const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
@@ -3059,6 +3209,7 @@
       };
 
       const onEnd = (e) => {
+        if (!isEditingMode || currentTool === 'pan') return;
         if (currentTool === 'select' && isMarqueeSelecting) {
           isMarqueeSelecting = false;
           if (draftCanvas) {
@@ -3119,9 +3270,18 @@
         }
       };
 
-      canvas.addEventListener('mousedown', onStart);
-      canvas.addEventListener('mousemove', onMove);
-      canvas.addEventListener('mouseup', onEnd);
+      canvas.addEventListener('mousedown', (e) => {
+        if (!isEditingMode || currentTool === 'pan') return;
+        onStart(e);
+      });
+      canvas.addEventListener('mousemove', (e) => {
+        if (!isEditingMode || currentTool === 'pan') return;
+        onMove(e);
+      });
+      canvas.addEventListener('mouseup', (e) => {
+        if (!isEditingMode || currentTool === 'pan') return;
+        onEnd(e);
+      });
       canvas.addEventListener('mouseleave', () => {
         if (cursor) cursor.style.display = 'none';
         if (currentTool === 'laser') clearLaserHover();
@@ -3129,6 +3289,9 @@
 
       // Mobile Touch Handling: 1 finger draws/erases, 2 fingers abort drawing and bubble to gesture camera
       canvas.addEventListener('touchstart', (e) => {
+        if (!isEditingMode || currentTool === 'pan') {
+          return; // Let touch bubble cleanly to viewport for slide navigation!
+        }
         if (e.touches.length >= 2) {
           abortActiveDrawing();
           return; // Allow event to bubble to viewport gesture engine
@@ -3137,7 +3300,6 @@
           e.preventDefault();
           return;
         }
-        if (currentTool === 'pan') return;
         if (e.touches.length === 1) {
           if (currentTool !== 'text') {
             e.preventDefault();
@@ -3148,11 +3310,13 @@
       }, { passive: false });
 
       canvas.addEventListener('touchmove', (e) => {
+        if (!isEditingMode || currentTool === 'pan') {
+          return; // Let touch bubble cleanly to viewport for slide navigation!
+        }
         if (e.touches.length >= 2) {
           abortActiveDrawing();
           return; // Allow event to bubble to viewport gesture engine
         }
-        if (currentTool === 'pan') return;
         if (e.touches.length === 1 && (isDrawing || currentTool === 'laser')) {
           e.preventDefault();
           updateCursorPos(e.touches[0]);
@@ -3161,7 +3325,7 @@
       }, { passive: false });
 
       canvas.addEventListener('touchend', (e) => {
-        if (currentTool === 'pan') return;
+        if (!isEditingMode || currentTool === 'pan') return;
         if (cursor) cursor.style.display = 'none';
         if (currentTool === 'laser') {
           isDrawing = false;
@@ -3784,7 +3948,7 @@
 
       docNaturalWidth = maxPageW;
       if (pagesWrapper) {
-        pagesWrapper.style.width = docNaturalWidth + 'px';
+        pagesWrapper.style.width = 'max-content';
       }
       initCanvases();
       loadSavedAnnotations();
@@ -3803,7 +3967,7 @@
     const pageWidth = 850;
     const pageHeight = 1150;
     docNaturalWidth = pageWidth;
-    pagesWrapper.style.width = pageWidth + 'px';
+    pagesWrapper.style.width = 'max-content';
     totalPages = Math.max(1, count || 1);
 
     const stepper = document.getElementById('page-counter-stepper');
@@ -3961,6 +4125,13 @@
       return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
     }
 
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let panStartX = 0;
+    let panStartY = 0;
+    let touchStartTime = 0;
+    let isHorizontalSwiping = false;
+
     const onTouchStart = (e) => {
       stopMomentum();
       const vRect = viewport.getBoundingClientRect();
@@ -3972,6 +4143,7 @@
 
         isGesturePinching = true;
         isGesturePanning = false;
+        isHorizontalSwiping = false;
 
         const t1 = e.touches[0];
         const t2 = e.touches[1];
@@ -3981,7 +4153,7 @@
         const midX = (t1.clientX + t2.clientX) / 2 - vRect.left;
         const midY = (t1.clientY + t2.clientY) / 2 - vRect.top;
 
-        // Document coordinate locked under midpoint
+        // Document coordinate locked under midpoint (Focal-Point Invariant)
         focalDocX = (midX - panX) / zoomLevel;
         focalDocY = (midY - panY) / zoomLevel;
 
@@ -3989,16 +4161,35 @@
 
         const cursor = document.getElementById('jnotes-eraser-cursor');
         if (cursor) cursor.style.display = 'none';
-      } else if (e.touches.length === 1 && currentTool === 'pan') {
-        // ONE FINGER IN READING MODE: Direct 1:1 pan with velocity tracking!
-        isGesturePanning = true;
-        isGesturePinching = false;
-        lastPanPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        lastTouchTime = performance.now();
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
+        return;
+      }
+
+      if (e.touches.length === 1) {
+        // In editing mode with an active drawing tool, touches are handled by canvas
+        if (isEditingMode && currentTool !== 'pan') {
+          return;
+        }
+
+        // Reading mode or Pan tool:
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        panStartX = panX;
+        panStartY = panY;
+        touchStartTime = performance.now();
+        lastPanPoint = { x: touchStartX, y: touchStartY };
+        lastTouchX = touchStartX;
+        lastTouchY = touchStartY;
+        lastTouchTime = touchStartTime;
         velocityX = 0;
         velocityY = 0;
+
+        if (zoomLevel > 1.08) {
+          isGesturePanning = true;
+          isHorizontalSwiping = false;
+        } else {
+          isHorizontalSwiping = true;
+          isGesturePanning = false;
+        }
         updateTransform(false);
       }
     };
@@ -4025,37 +4216,39 @@
         const currMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
         const currMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
 
-        // Keep the exact document point locked under the current finger midpoint (Zero Jitter/No premature clamping):
+        // Keep the exact document point locked under the current finger midpoint (Zero Jitter):
         panX = currMidX - focalDocX * newZoom;
         panY = currMidY - focalDocY * newZoom;
 
         updateTransform(false);
         updateCurrentPageFromPan();
-      } else if (e.touches.length === 1 && isGesturePanning && currentTool === 'pan') {
-        e.preventDefault();
-        const t = e.touches[0];
-        const dx = t.clientX - lastPanPoint.x;
-        const dy = t.clientY - lastPanPoint.y;
-        lastPanPoint = { x: t.clientX, y: t.clientY };
+        return;
+      }
 
-        const now = performance.now();
-        const dt = now - lastTouchTime;
-        if (dt > 8) {
-          const vx = (t.clientX - lastTouchX) / dt;
-          const vy = (t.clientY - lastTouchY) / dt;
-          velocityX = velocityX * 0.4 + vx * 0.6;
-          velocityY = velocityY * 0.4 + vy * 0.6;
-          lastTouchX = t.clientX;
-          lastTouchY = t.clientY;
-          lastTouchTime = now;
+      if (e.touches.length === 1) {
+        if (isEditingMode && currentTool !== 'pan') {
+          return; // Handled by canvas overlay
         }
 
-        panX += dx;
-        panY += dy;
+        const t = e.touches[0];
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
 
-        clampViewport(false);
-        updateTransform(false);
-        updateCurrentPageFromPan();
+        if (isGesturePanning) {
+          // Zoomed in: pan inside the active page with rubber-band limits
+          e.preventDefault();
+          panX = panStartX + dx;
+          panY = panStartY + dy;
+          clampViewport(false);
+          updateTransform(false);
+          updateCurrentPageFromPan();
+        } else if (isHorizontalSwiping) {
+          // Normal scale: responsive horizontal slide following finger
+          e.preventDefault();
+          panX = panStartX + dx;
+          updateTransform(false);
+          updateCurrentPageFromPan();
+        }
       }
     };
 
@@ -4064,13 +4257,28 @@
         isGesturePinching = false;
         preventDrawUntil = Date.now() + 250;
         settleViewport();
+        return;
       }
+
       if (isGesturePanning && e.touches.length === 0) {
         isGesturePanning = false;
-        if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
-          startMomentum(velocityX * 16, velocityY * 16);
+        settleViewport();
+        return;
+      }
+
+      if (isHorizontalSwiping && e.touches.length === 0) {
+        isHorizontalSwiping = false;
+        const totalDx = panX - panStartX;
+        const dt = Math.max(1, performance.now() - touchStartTime);
+        const vx = totalDx / dt;
+
+        // Responsive page swipe threshold: 50px movement or quick flick velocity
+        if (totalDx < -50 || vx < -0.35) {
+          window.nextPage();
+        } else if (totalDx > 50 || vx > 0.35) {
+          window.prevPage();
         } else {
-          settleViewport();
+          window.scrollToPage(currentPage, true);
         }
       }
     };
@@ -4111,14 +4319,18 @@
       }
     });
 
-    // Desktop Mouse Drag Panning (when in 'pan' mode or middle-click)
+    // Desktop Mouse Drag Panning (when in Reading Mode or 'pan' mode or middle-click)
     let isMousePanning = false;
     let lastMousePos = { x: 0, y: 0 };
+    let mousePanStartX = 0;
+    let mousePanStartTime = 0;
 
     viewport.addEventListener('mousedown', (e) => {
-      if (e.button === 1 || (e.button === 0 && currentTool === 'pan')) {
+      if (e.button === 1 || (e.button === 0 && (!isEditingMode || currentTool === 'pan'))) {
         isMousePanning = true;
         lastMousePos = { x: e.clientX, y: e.clientY };
+        mousePanStartX = panX;
+        mousePanStartTime = performance.now();
         viewport.style.cursor = 'grabbing';
       }
     });
@@ -4129,7 +4341,9 @@
         const dy = e.clientY - lastMousePos.y;
         lastMousePos = { x: e.clientX, y: e.clientY };
         panX += dx;
-        panY += dy;
+        if (zoomLevel > 1.08) {
+          panY += dy;
+        }
         clampViewport(false);
         updateTransform(false);
         updateCurrentPageFromPan();
@@ -4139,8 +4353,21 @@
     window.addEventListener('mouseup', () => {
       if (isMousePanning) {
         isMousePanning = false;
-        viewport.style.cursor = (currentTool === 'pan') ? 'grab' : 'default';
-        settleViewport();
+        viewport.style.cursor = (!isEditingMode || currentTool === 'pan') ? 'grab' : 'default';
+        if (zoomLevel <= 1.08) {
+          const totalDx = panX - mousePanStartX;
+          const dt = Math.max(1, performance.now() - mousePanStartTime);
+          const vx = totalDx / dt;
+          if (totalDx < -60 || vx < -0.35) {
+            window.nextPage();
+          } else if (totalDx > 60 || vx > 0.35) {
+            window.prevPage();
+          } else {
+            window.scrollToPage(currentPage, true);
+          }
+        } else {
+          settleViewport();
+        }
       }
     });
 
@@ -4153,11 +4380,20 @@
         const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
         zoomAtPoint(zoomLevel * zoomFactor, e.clientX, e.clientY, false);
       } else {
-        panX -= e.deltaX;
-        panY -= e.deltaY;
-        clampViewport(false);
-        updateTransform(false);
-        updateCurrentPageFromPan();
+        if (zoomLevel > 1.08) {
+          panX -= e.deltaX;
+          panY -= e.deltaY;
+          clampViewport(false);
+          updateTransform(false);
+          updateCurrentPageFromPan();
+        } else {
+          const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+          if (delta > 35) {
+            window.nextPage();
+          } else if (delta < -35) {
+            window.prevPage();
+          }
+        }
       }
     }, { passive: false });
   }
