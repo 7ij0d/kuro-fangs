@@ -176,6 +176,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // 6.5. Setup Global Header Search Bar (works on all pages)
+  const globalSearchInput = document.getElementById('header-search-input');
+  let globalSearchDebounce = null;
+  if (globalSearchInput) {
+    globalSearchInput.addEventListener('input', (e) => {
+      const q = e.target.value.trim();
+      if (globalSearchDebounce) clearTimeout(globalSearchDebounce);
+      globalSearchDebounce = setTimeout(() => {
+        const currentPath = window.location.hash.slice(1).split('?')[0] || '/';
+        if (q.length >= 2) {
+          if (currentPath === '/' && window.HomePage && typeof window.HomePage.searchQuery !== 'undefined') {
+            window.HomePage.searchQuery = q;
+            if (typeof window.HomePage.renderSubjectsList === 'function') {
+              window.HomePage.renderSubjectsList(window.DATA.getSubjects(), false);
+            }
+          } else {
+            window.navigate('/search?q=' + encodeURIComponent(q));
+          }
+        } else if (q.length === 0 && currentPath === '/') {
+          if (window.HomePage) window.HomePage.searchQuery = '';
+        }
+      }, 350);
+    });
+
+    globalSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const q = globalSearchInput.value.trim();
+        if (q.length >= 1) {
+          globalSearchInput.blur();
+          window.navigate('/search?q=' + encodeURIComponent(q));
+        }
+      }
+    });
+  }
+
   // 7. Setup Mobile Sidebar Drawer Controls
   const sidebarEl = document.getElementById('app-sidebar');
   const sidebarBackdrop = document.getElementById('sidebar-backdrop');
@@ -260,6 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
   router.register('/rewards', (c, q) => window.SecondaryPages.renderRewards(c, q));
   router.register('/alerts', (c, q) => window.SecondaryPages.renderAlerts(c, q));
+  router.register('/search', (c, q) => window.SecondaryPages.renderSearch(c, q));
   router.register('/admin', (c, q) => window.AdminPage.render(c, q));
   router.register('/games', async (c, q) => {
     if (window.GamesPage && typeof window.GamesPage.render === 'function') {

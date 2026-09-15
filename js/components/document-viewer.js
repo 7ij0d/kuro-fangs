@@ -450,36 +450,41 @@
     }
     .jnotes-viewport {
       flex: 1;
-      overflow: hidden;
+      overflow: auto;
       position: relative;
       background: var(--j-bg);
-      touch-action: none;
       user-select: none;
       -webkit-user-select: none;
     }
+    /* Dynamic classes for touch-action applied based on Editing Mode */
+    .viewport-reading {
+      touch-action: pan-x pan-y pinch-zoom;
+    }
+    .viewport-editing {
+      touch-action: none;
+    }
+    
     .jnotes-pages-wrapper {
-      position: absolute;
-      top: 0;
-      left: 0;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: flex-start;
-      width: max-content;
+      gap: 32px;
+      padding: 24px;
       height: 100%;
-      transform-origin: 0 0;
-      will-change: transform;
+      min-width: max-content;
     }
 
-    /* Document Page Container (Horizontal Slide) */
+    /* Document Page Container */
     .doc-page {
       position: relative;
       background: #FFFFFF;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
       border-radius: 6px;
       overflow: hidden;
+      width: var(--page-render-width, 850px);
       flex-shrink: 0;
-      margin: 0 24px;
+      margin: 0;
       transition: box-shadow 0.2s, filter 0.3s;
     }
     .doc-page.active-page-viewport {
@@ -1178,11 +1183,9 @@
   let zoomLevel = 1.0;
   let isContextExpanded = false;
 
-  // 2D Matrix Camera Viewport State (Hardware-Accelerated Translation & Scale)
-  let panX = 0;
-  let panY = 15;
-  let minZoom = 0.85;
-  let maxZoom = 3.5;
+  // Zoom state (Controls --page-render-width CSS variable)
+  let minZoom = 0.5;
+  let maxZoom = 4.0;
   let docNaturalWidth = 850;
   let docNaturalHeight = 1100;
 
@@ -1655,6 +1658,7 @@
     const icon = document.getElementById('master-mode-icon');
     const label = document.getElementById('master-mode-label');
     const toolbar = document.querySelector('.jnotes-annotation-toolbar');
+    const viewport = document.getElementById('jnotes-viewport');
 
     if (btn) {
       if (isEditingMode) {
@@ -1677,6 +1681,16 @@
         toolbar.classList.remove('mode-reading');
       } else {
         toolbar.classList.add('mode-reading');
+      }
+    }
+
+    if (viewport) {
+      if (isEditingMode) {
+        viewport.classList.remove('viewport-reading');
+        viewport.classList.add('viewport-editing');
+      } else {
+        viewport.classList.remove('viewport-editing');
+        viewport.classList.add('viewport-reading');
       }
     }
 
@@ -2444,7 +2458,7 @@
   }
 
   // ==========================================================================
-  // 2D MATRIX CAMERA VIEWPORT CONTROLLER (Hardware-Accelerated Translation & Scale)
+  // VIEWPORT ZOOM & LAYOUT (Native Browser Scroll Architecture)
   // ==========================================================================
   function getViewportDimensions() {
     const vp = document.getElementById('jnotes-viewport');
@@ -2452,18 +2466,11 @@
     return { width: vp.clientWidth || window.innerWidth, height: vp.clientHeight || window.innerHeight };
   }
 
-  function getDocumentDimensions() {
-    const wrapper = document.getElementById('jnotes-pages-wrapper');
-    if (!wrapper) return { width: docNaturalWidth, height: docNaturalHeight };
-    const w = wrapper.offsetWidth || docNaturalWidth;
-    const h = wrapper.offsetHeight || docNaturalHeight;
-    return { width: Math.max(300, w), height: Math.max(400, h) };
-  }
-
   function getActivePageDimensions() {
     const pEl = document.getElementById('page-' + currentPage) || document.querySelector('.doc-page');
     if (pEl) {
-      return { width: pEl.offsetWidth || 850, height: pEl.offsetHeight || 1100 };
+      // Natural dimensions based on PDF viewport or default
+      return { width: pEl.style.aspectRatio ? 850 : (pEl.offsetWidth || 850), height: 1100 };
     }
     return { width: docNaturalWidth || 850, height: docNaturalHeight || 1100 };
   }
@@ -2471,101 +2478,45 @@
   function getFitWidthScale() {
     const vp = getViewportDimensions();
     const pDim = getActivePageDimensions();
-    const scaleW = (vp.width - 32) / pDim.width;
-    const scaleH = (vp.height - 40) / pDim.height;
-    const scale = Math.min(scaleW, scaleH);
+    // Leave small padding on sides
+    const scale = (vp.width - 32) / pDim.width;
     return Math.max(minZoom, Math.min(maxZoom, scale));
   }
 
-  function clampViewport(forceCenter = false) {
-    const vp = getViewportDimensions();
-    const pageEl = document.getElementById('page-' + currentPage) || document.querySelector('.doc-page');
-    if (!pageEl) return;
-
-    const pageCenterX = pageEl.offsetLeft + pageEl.offsetWidth / 2;
-    const pageCenterY = pageEl.offsetTop + pageEl.offsetHeight / 2;
-
-    if (forceCenter) {
-      panX = (vp.width / 2) - (pageCenterX * zoomLevel);
-      panY = (vp.height / 2) - (pageCenterY * zoomLevel);
-      return;
-    }
-
-    if (zoomLevel > 1.08) {
-      // Zoomed in: pan freely within the active page with comfortable boundary margins
-      const padX = Math.max(80, vp.width * 0.3);
-      const padY = Math.max(80, vp.height * 0.3);
-
-      const minPanX = vp.width - (pageEl.offsetLeft + pageEl.offsetWidth) * zoomLevel - padX;
-      const maxPanX = -pageEl.offsetLeft * zoomLevel + padX;
-      panX = Math.max(minPanX, Math.min(maxPanX, panX));
-
-      const minPanY = vp.height - (pageEl.offsetTop + pageEl.offsetHeight) * zoomLevel - padY;
-      const maxPanY = -pageEl.offsetTop * zoomLevel + padY;
-      panY = Math.max(minPanY, Math.min(maxPanY, panY));
-    } else {
-      // Normal scale: maintain vertical centering of the horizontal slide row
-      panY = (vp.height / 2) - (pageCenterY * zoomLevel);
-
-      // Horizontal boundaries allow swiping between first and last page
-      const firstPage = document.getElementById('page-1') || pageEl;
-      const lastPage = document.getElementById('page-' + totalPages) || pageEl;
-      const firstCenterX = firstPage.offsetLeft + firstPage.offsetWidth / 2;
-      const lastCenterX = lastPage.offsetLeft + lastPage.offsetWidth / 2;
-
-      const maxPanX = (vp.width / 2) - (firstCenterX * zoomLevel) + 120;
-      const minPanX = (vp.width / 2) - (lastCenterX * zoomLevel) - 120;
-      panX = Math.max(minPanX, Math.min(maxPanX, panX));
-    }
-  }
-
-  function settleViewport() {
-    if (zoomLevel <= 1.08) {
-      window.scrollToPage(currentPage, true);
-    } else {
-      clampViewport(false);
-      updateTransform(true);
-    }
-  }
-
-  function updateTransform(smooth) {
-    const wrapper = document.getElementById('jnotes-pages-wrapper');
-    if (!wrapper) return;
-
-    if (smooth) {
-      wrapper.style.transition = 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)';
-    } else {
-      wrapper.style.transition = 'none';
-    }
-
-    wrapper.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoomLevel})`;
-
+  function applyZoom() {
+    const root = document.documentElement;
+    const pDim = getActivePageDimensions();
+    const newWidth = Math.round(pDim.width * zoomLevel);
+    root.style.setProperty('--page-render-width', newWidth + 'px');
+    
     const textEl = document.getElementById('zoom-val-text');
     if (textEl) textEl.textContent = Math.round(zoomLevel * 100) + '%';
   }
 
-  // GitHub Panzoom & Leaflet Focal-Point Invariant Zoom Engine
+  // Focal-Point Invariant Zoom using native scroll adjustments
   function zoomAtPoint(targetZoom, clientX, clientY, smooth = false) {
-    const viewportEl = document.getElementById('jnotes-viewport');
-    if (!viewportEl) return;
-    const rect = viewportEl.getBoundingClientRect();
-    const focalX = clientX - rect.left;
-    const focalY = clientY - rect.top;
-
-    // 1. Clamp target zoom:
+    const vp = document.getElementById('jnotes-viewport');
+    if (!vp) return;
+    
     const newZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom));
     if (Math.abs(newZoom - zoomLevel) < 0.0005) return;
-
-    // 2. Panzoom Focal-Point Invariant Formula:
-    // panX_new = focalX - (focalX - panX) * (newZoom / zoomLevel)
+    
+    const rect = vp.getBoundingClientRect();
+    const focalX = clientX - rect.left;
+    const focalY = clientY - rect.top;
+    
+    // Document coordinate under the cursor
+    const docX = vp.scrollLeft + focalX;
+    const docY = vp.scrollTop + focalY;
+    
     const ratio = newZoom / zoomLevel;
-    panX = focalX - (focalX - panX) * ratio;
-    panY = focalY - (focalY - panY) * ratio;
     zoomLevel = newZoom;
-
-    clampViewport(false);
-    updateTransform(smooth);
-    updateCurrentPageFromPan();
+    
+    applyZoom();
+    
+    // After resizing pages, adjust scroll to keep focal point under cursor
+    vp.scrollLeft = (docX * ratio) - focalX;
+    vp.scrollTop = (docY * ratio) - focalY;
   }
 
   window.zoomAtPoint = zoomAtPoint;
@@ -2594,33 +2545,30 @@
 
   window.fitWidth = function() {
     zoomLevel = getFitWidthScale();
-    window.scrollToPage(currentPage, true);
+    applyZoom();
   };
 
   window.fitPage = function() {
-    zoomLevel = getFitWidthScale();
+    window.fitWidth();
     window.scrollToPage(currentPage, true);
   };
 
-  // Page Stepper & Smooth Viewport Navigation (Horizontal Slides)
+  // Page Stepper & Smooth Viewport Navigation
   window.scrollToPage = function(pageNum, smooth = true) {
     if (pageNum < 1) pageNum = 1;
     if (pageNum > totalPages) pageNum = totalPages;
-    currentPage = pageNum;
     const pageEl = document.getElementById('page-' + pageNum);
     if (pageEl) {
-      const vp = getViewportDimensions();
-      const pageCenterX = pageEl.offsetLeft + pageEl.offsetWidth / 2;
-      const pageCenterY = pageEl.offsetTop + pageEl.offsetHeight / 2;
-      panX = (vp.width / 2) - (pageCenterX * zoomLevel);
-      panY = (vp.height / 2) - (pageCenterY * zoomLevel);
-      clampViewport();
-      updateTransform(smooth !== false);
+      pageEl.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', inline: 'center', block: 'nearest' });
     }
+    // Note: The IntersectionObserver will automatically update the currentPage and counter
+    // when the page actually scrolls into view. We don't force it here to avoid glitches.
+  };
+
+  function updatePageCounter() {
     const counter = document.getElementById('page-counter-stepper');
     if (counter) counter.textContent = currentPage + ' / ' + totalPages;
 
-    // Synchronize active classes on pages and sidebar thumbnails
     document.querySelectorAll('.doc-page').forEach(p => {
       const num = parseInt(p.getAttribute('data-page'), 10);
       if (num === currentPage) p.classList.add('active-page-viewport');
@@ -2631,44 +2579,6 @@
       if (idx + 1 === currentPage) card.classList.add('active');
       else card.classList.remove('active');
     });
-  };
-
-  function updateCurrentPageFromPan() {
-    const pages = document.querySelectorAll('.doc-page');
-    if (pages.length === 0) return;
-    const vp = getViewportDimensions();
-    const viewportCenterDocX = (vp.width / 2 - panX) / zoomLevel;
-
-    let closestPage = currentPage;
-    let minDist = Infinity;
-
-    for (let i = 0; i < pages.length; i++) {
-      const pEl = pages[i];
-      const pageCenterX = pEl.offsetLeft + pEl.offsetWidth / 2;
-      const dist = Math.abs(viewportCenterDocX - pageCenterX);
-      if (dist < minDist) {
-        minDist = dist;
-        const pNum = parseInt(pEl.getAttribute('data-page'), 10);
-        if (pNum) closestPage = pNum;
-      }
-    }
-
-    if (closestPage !== currentPage) {
-      currentPage = closestPage;
-      const counter = document.getElementById('page-counter-stepper');
-      if (counter) counter.textContent = currentPage + ' / ' + totalPages;
-
-      document.querySelectorAll('.doc-page').forEach(p => {
-        const num = parseInt(p.getAttribute('data-page'), 10);
-        if (num === currentPage) p.classList.add('active-page-viewport');
-        else p.classList.remove('active-page-viewport');
-      });
-
-      document.querySelectorAll('.j-thumb-card').forEach((card, idx) => {
-        if (idx + 1 === currentPage) card.classList.add('active');
-        else card.classList.remove('active');
-      });
-    }
   }
 
   window.prevPage = function() {
@@ -3447,79 +3357,48 @@
         activeDrawingPage = null;
       };
 
-      canvas.addEventListener('mousedown', (e) => {
+      // Universal Pointer Events (Unified Mouse, Touch, Pen)
+      canvas.addEventListener('pointerdown', (e) => {
         if (!isEditingMode || currentTool === 'pan') return;
+        if (e.pointerType === 'touch' && !e.isPrimary) {
+          // If a second finger touches while drawing, abort drawing and let gesture engine take over
+          abortActiveDrawing();
+          return;
+        }
+        if (Date.now() < preventDrawUntil) return;
+        
+        // Lock pointer to this canvas so strokes don't break if pointer leaves page
+        if (currentTool !== 'text' && currentTool !== 'laser') {
+          canvas.setPointerCapture(e.pointerId);
+        }
+        
+        updateCursorPos(e);
         onStart(e);
       });
-      canvas.addEventListener('mousemove', (e) => {
+
+      canvas.addEventListener('pointermove', (e) => {
         if (!isEditingMode || currentTool === 'pan') return;
+        if (e.pointerType === 'touch' && !e.isPrimary) return;
+        
+        updateCursorPos(e);
         onMove(e);
       });
-      canvas.addEventListener('mouseup', (e) => {
-        if (!isEditingMode || currentTool === 'pan') return;
-        onEnd(e);
-      });
-      canvas.addEventListener('mouseleave', () => {
+
+      const endPointer = (e) => {
         if (cursor) cursor.style.display = 'none';
         if (currentTool === 'laser') clearLaserHover();
-      });
-
-      // `mouseup` is deliberately attached to window. Canvas-only mouseup was
-      // the reason a highlighter preview vanished whenever the pointer left a
-      // page before the user released it.
-      window.addEventListener('mouseup', (e) => {
         if (isDrawing && activeDrawingCanvas === canvas && activeDrawingPage === pageNum) {
           onEnd(e);
         }
-      });
+      };
 
-      // Mobile Touch Handling: 1 finger draws/erases, 2 fingers abort drawing and bubble to gesture camera
-      canvas.addEventListener('touchstart', (e) => {
-        if (!isEditingMode || currentTool === 'pan') {
-          return; // Let touch bubble cleanly to viewport for slide navigation!
-        }
-        if (e.touches.length >= 2) {
-          abortActiveDrawing();
-          return; // Allow event to bubble to viewport gesture engine
-        }
-        if (Date.now() < preventDrawUntil) {
-          e.preventDefault();
-          return;
-        }
-        if (e.touches.length === 1) {
-          if (currentTool !== 'text') {
-            e.preventDefault();
-          }
-          updateCursorPos(e.touches[0]);
-          onStart(e.touches[0]);
-        }
-      }, { passive: false });
-
-      canvas.addEventListener('touchmove', (e) => {
-        if (!isEditingMode || currentTool === 'pan') {
-          return; // Let touch bubble cleanly to viewport for slide navigation!
-        }
-        if (e.touches.length >= 2) {
-          abortActiveDrawing();
-          return; // Allow event to bubble to viewport gesture engine
-        }
-        if (e.touches.length === 1 && (isDrawing || currentTool === 'laser')) {
-          e.preventDefault();
-          updateCursorPos(e.touches[0]);
-          onMove(e.touches[0]);
-        }
-      }, { passive: false });
-
-      canvas.addEventListener('touchend', (e) => {
-        if (!isEditingMode || currentTool === 'pan') return;
+      canvas.addEventListener('pointerup', endPointer);
+      canvas.addEventListener('pointercancel', endPointer);
+      canvas.addEventListener('lostpointercapture', endPointer);
+      
+      canvas.addEventListener('pointerleave', () => {
         if (cursor) cursor.style.display = 'none';
-        if (currentTool === 'laser') {
-          isDrawing = false;
-          return;
-        }
-        if (isDrawing && e.changedTouches && e.changedTouches.length > 0) {
-          onEnd(e.changedTouches[0]);
-        }
+        if (currentTool === 'laser') clearLaserHover();
       });
     });
   }
@@ -3847,10 +3726,10 @@
     const pageEl = document.getElementById('page-' + pageNum);
     if (!pageEl) return;
 
-    // Zero Page Shift: Map directly to unscaled document coordinates on pageEl
+    // Zero Page Shift: Map directly to percentage coordinates on pageEl
     const pageRect = pageEl.getBoundingClientRect();
-    const unscaledLeft = (clientX - pageRect.left) / zoomLevel;
-    const unscaledTop = (clientY - pageRect.top) / zoomLevel;
+    const percentX = ((clientX - pageRect.left) / pageRect.width) * 100;
+    const percentY = ((clientY - pageRect.top) / pageRect.height) * 100;
 
     // Clean up any previously empty text boxes first
     document.querySelectorAll('.jnotes-text-box').forEach(b => {
@@ -3861,8 +3740,8 @@
     box.className = 'jnotes-text-box';
     box.contentEditable = 'true';
     box.spellcheck = false;
-    box.style.left = Math.max(0, unscaledLeft) + 'px';
-    box.style.top = Math.max(0, unscaledTop) + 'px';
+    box.style.left = Math.max(0, percentX) + '%';
+    box.style.top = Math.max(0, percentY) + '%';
     box.style.color = penState.color || '#0F172A';
     box.setAttribute('data-placeholder', 'اكتب هنا...');
 
@@ -4250,246 +4129,53 @@
   }
 
   // ==========================================================================
-  // TWO-FINGER PINCH-TO-ZOOM & PAN GESTURE ENGINE (Unified 2D Camera & Physics)
+  // VIEWPORT OBSERVERS & WHEEL ZOOM (Native Browser Scroll Architecture)
   // ==========================================================================
-  let isGesturePinching = false;
-  let isGesturePanning = false;
-  let startPinchDist = 0;
-  let startPinchZoom = 1.0;
-  let focalDocX = 0;
-  let focalDocY = 0;
-  let lastPanPoint = { x: 0, y: 0 };
-  let preventDrawUntil = 0;
-
-  // Smooth Inertial Momentum Physics State
-  let lastTouchTime = 0;
-  let lastTouchX = 0;
-  let lastTouchY = 0;
-  let velocityX = 0;
-  let velocityY = 0;
-  let momentumRafId = null;
-
-  function stopMomentum() {
-    if (momentumRafId) {
-      cancelAnimationFrame(momentumRafId);
-      momentumRafId = null;
-    }
-  }
-
-  function startMomentum(vx, vy) {
-    stopMomentum();
-    let currentVx = vx;
-    let currentVy = vy;
-
-    function step() {
-      currentVx *= 0.92;
-      currentVy *= 0.92;
-
-      panX += currentVx;
-      panY += currentVy;
-
-      clampViewport(false);
-      updateTransform(false);
-      updateCurrentPageFromPan();
-
-      if (Math.abs(currentVx) > 0.35 || Math.abs(currentVy) > 0.35) {
-        momentumRafId = requestAnimationFrame(step);
-      } else {
-        momentumRafId = null;
-        settleViewport();
-      }
-    }
-    momentumRafId = requestAnimationFrame(step);
-  }
-
+  
   function initGestureEngine() {
     const viewport = document.getElementById('jnotes-viewport');
     if (!viewport || viewport._gestureAttached) return;
     viewport._gestureAttached = true;
-
-    function getTouchDist(t1, t2) {
-      return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    
+    // Intersection Observer to update current page while scrolling vertically
+    const observerOptions = {
+      root: viewport,
+      rootMargin: '0px',
+      threshold: 0.5 // Page is current when 50% visible
+    };
+    
+    const pageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const pEl = entry.target;
+          const pNum = parseInt(pEl.getAttribute('data-page'), 10);
+          if (pNum && pNum !== currentPage) {
+            currentPage = pNum;
+            updatePageCounter();
+          }
+        }
+      });
+    }, observerOptions);
+    
+    // Connect observer to all pages
+    const connectObserver = () => {
+      document.querySelectorAll('.doc-page').forEach(page => {
+        pageObserver.observe(page);
+      });
+    };
+    
+    // Connect right away, but also after PDF render
+    connectObserver();
+    
+    // Re-connect observer when PDF renders (monkey patch render placeholder/pdf logic if needed)
+    // For safety, let's observe changes to the wrapper
+    const wrapper = document.getElementById('jnotes-pages-wrapper');
+    if (wrapper) {
+      new MutationObserver(() => {
+        pageObserver.disconnect();
+        connectObserver();
+      }).observe(wrapper, { childList: true });
     }
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let panStartX = 0;
-    let panStartY = 0;
-    let touchStartTime = 0;
-    let isHorizontalSwiping = false;
-    // Editing tools own only the actual sheet canvas. The surrounding
-    // workspace remains a navigation zone, exactly like paper apps on tablets.
-    let workspaceGestureActive = false;
-    const startedOnSheet = (target) => !!(target && target.closest && target.closest('.doc-page'));
-
-    const onTouchStart = (e) => {
-      stopMomentum();
-      const vRect = viewport.getBoundingClientRect();
-
-      if (e.touches.length >= 2) {
-        // TWO FINGERS: Always pinch & pan across all modes!
-        e.preventDefault();
-        abortActiveDrawing();
-
-        isGesturePinching = true;
-        isGesturePanning = false;
-        isHorizontalSwiping = false;
-
-        const t1 = e.touches[0];
-        const t2 = e.touches[1];
-        startPinchDist = getTouchDist(t1, t2);
-        startPinchZoom = zoomLevel;
-
-        const midX = (t1.clientX + t2.clientX) / 2 - vRect.left;
-        const midY = (t1.clientY + t2.clientY) / 2 - vRect.top;
-
-        // Document coordinate locked under midpoint (Focal-Point Invariant)
-        focalDocX = (midX - panX) / zoomLevel;
-        focalDocY = (midY - panY) / zoomLevel;
-
-        updateTransform(false);
-
-        const cursor = document.getElementById('jnotes-eraser-cursor');
-        if (cursor) cursor.style.display = 'none';
-        return;
-      }
-
-      if (e.touches.length === 1) {
-        const touchIsOnSheet = startedOnSheet(e.target);
-        // A pen/highlighter consumes touches on the page itself. A swipe from
-        // the empty workspace must always keep page navigation available.
-        if (isEditingMode && currentTool !== 'pan' && touchIsOnSheet) {
-          workspaceGestureActive = false;
-          return;
-        }
-        workspaceGestureActive = true;
-
-        // Reading mode or Pan tool:
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        panStartX = panX;
-        panStartY = panY;
-        touchStartTime = performance.now();
-        lastPanPoint = { x: touchStartX, y: touchStartY };
-        lastTouchX = touchStartX;
-        lastTouchY = touchStartY;
-        lastTouchTime = touchStartTime;
-        velocityX = 0;
-        velocityY = 0;
-
-        if (zoomLevel > 1.08) {
-          isGesturePanning = true;
-          isHorizontalSwiping = false;
-        } else {
-          isHorizontalSwiping = true;
-          isGesturePanning = false;
-        }
-        updateTransform(false);
-      }
-    };
-
-    const onTouchMove = (e) => {
-      const vRect = viewport.getBoundingClientRect();
-
-      if (e.touches.length >= 2 && isGesturePinching) {
-        e.preventDefault();
-
-        const t1 = e.touches[0];
-        const t2 = e.touches[1];
-        const currDist = getTouchDist(t1, t2);
-
-        // Calculate new zoom level
-        let newZoom = zoomLevel;
-        if (startPinchDist > 10) {
-          const ratio = currDist / startPinchDist;
-          newZoom = Math.max(minZoom, Math.min(maxZoom, startPinchZoom * ratio));
-          zoomLevel = newZoom;
-        }
-
-        // Current midpoint in viewport
-        const currMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
-        const currMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
-
-        // Keep the exact document point locked under the current finger midpoint (Zero Jitter):
-        panX = currMidX - focalDocX * newZoom;
-        panY = currMidY - focalDocY * newZoom;
-
-        updateTransform(false);
-        updateCurrentPageFromPan();
-        return;
-      }
-
-      if (e.touches.length === 1) {
-        if (!workspaceGestureActive) return; // Canvas owns this gesture.
-
-        const t = e.touches[0];
-        const dx = t.clientX - touchStartX;
-        const dy = t.clientY - touchStartY;
-
-        if (isGesturePanning) {
-          // Zoomed in: pan inside the active page with rubber-band limits
-          e.preventDefault();
-          panX = panStartX + dx;
-          panY = panStartY + dy;
-          clampViewport(false);
-          updateTransform(false);
-          updateCurrentPageFromPan();
-        } else if (isHorizontalSwiping) {
-          // Normal scale: responsive horizontal slide following finger
-          e.preventDefault();
-          panX = panStartX + dx;
-          updateTransform(false);
-          updateCurrentPageFromPan();
-        }
-      }
-    };
-
-    const onTouchEnd = (e) => {
-      if (isGesturePinching && e.touches.length < 2) {
-        isGesturePinching = false;
-        preventDrawUntil = Date.now() + 250;
-        settleViewport();
-        return;
-      }
-
-      if (isGesturePanning && e.touches.length === 0) {
-        isGesturePanning = false;
-        workspaceGestureActive = false;
-        settleViewport();
-        return;
-      }
-
-      if (isHorizontalSwiping && e.touches.length === 0) {
-        isHorizontalSwiping = false;
-        workspaceGestureActive = false;
-        const totalDx = panX - panStartX;
-        const dt = Math.max(1, performance.now() - touchStartTime);
-        const vx = totalDx / dt;
-
-        // Responsive page swipe threshold: 50px movement or quick flick velocity
-        if (totalDx < -50 || vx < -0.35) {
-          window.nextPage();
-        } else if (totalDx > 50 || vx > 0.35) {
-          window.prevPage();
-        } else {
-          window.scrollToPage(currentPage, true);
-        }
-      }
-      if (e.touches.length === 0) workspaceGestureActive = false;
-    };
-
-    viewport.addEventListener('touchstart', onTouchStart, { passive: false });
-    viewport.addEventListener('touchmove', onTouchMove, { passive: false });
-    viewport.addEventListener('touchend', onTouchEnd, { passive: false });
-    viewport.addEventListener('touchcancel', onTouchEnd, { passive: false });
-
-    // Neutralize any native scroll jump from keyboard or virtual keyboard
-    viewport.addEventListener('scroll', () => {
-      if (viewport.scrollTop !== 0 || viewport.scrollLeft !== 0) {
-        viewport.scrollTop = 0;
-        viewport.scrollLeft = 0;
-      }
-    });
 
     // Viewport-Level Laser Pointer Interactions
     viewport.addEventListener('pointermove', (e) => {
@@ -4514,82 +4200,14 @@
       }
     });
 
-    // Desktop Mouse Drag Panning (when in Reading Mode or 'pan' mode or middle-click)
-    let isMousePanning = false;
-    let lastMousePos = { x: 0, y: 0 };
-    let mousePanStartX = 0;
-    let mousePanStartTime = 0;
-
-    viewport.addEventListener('mousedown', (e) => {
-      if (e.button === 1 || (e.button === 0 && (!isEditingMode || currentTool === 'pan'))) {
-        isMousePanning = true;
-        lastMousePos = { x: e.clientX, y: e.clientY };
-        mousePanStartX = panX;
-        mousePanStartTime = performance.now();
-        viewport.style.cursor = 'grabbing';
-      }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (isMousePanning) {
-        const dx = e.clientX - lastMousePos.x;
-        const dy = e.clientY - lastMousePos.y;
-        lastMousePos = { x: e.clientX, y: e.clientY };
-        panX += dx;
-        if (zoomLevel > 1.08) {
-          panY += dy;
-        }
-        clampViewport(false);
-        updateTransform(false);
-        updateCurrentPageFromPan();
-      }
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (isMousePanning) {
-        isMousePanning = false;
-        viewport.style.cursor = (!isEditingMode || currentTool === 'pan') ? 'grab' : 'default';
-        if (zoomLevel <= 1.08) {
-          const totalDx = panX - mousePanStartX;
-          const dt = Math.max(1, performance.now() - mousePanStartTime);
-          const vx = totalDx / dt;
-          if (totalDx < -60 || vx < -0.35) {
-            window.nextPage();
-          } else if (totalDx > 60 || vx > 0.35) {
-            window.prevPage();
-          } else {
-            window.scrollToPage(currentPage, true);
-          }
-        } else {
-          settleViewport();
-        }
-      }
-    });
-
-    // Desktop Mouse Wheel & Trackpad Pinch
+    // Desktop Mouse Wheel Zoom
     viewport.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      stopMomentum();
-
       if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
         const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
         zoomAtPoint(zoomLevel * zoomFactor, e.clientX, e.clientY, false);
-      } else {
-        if (zoomLevel > 1.08) {
-          panX -= e.deltaX;
-          panY -= e.deltaY;
-          clampViewport(false);
-          updateTransform(false);
-          updateCurrentPageFromPan();
-        } else {
-          const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-          if (delta > 35) {
-            window.nextPage();
-          } else if (delta < -35) {
-            window.prevPage();
-          }
-        }
       }
+      // Note: native wheel panning is naturally handled by overflow-y: auto
     }, { passive: false });
   }
 
@@ -4609,8 +4227,8 @@
         if (wasFitted) {
           window.fitWidth();
         } else {
-          clampViewport(false);
-          updateTransform(false);
+          // If zoomed in, re-apply zoom to recalculate dimensions, native scroll keeps it contained
+          applyZoom();
         }
       }, 100);
     }, { passive: true });

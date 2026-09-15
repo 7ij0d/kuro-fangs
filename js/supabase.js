@@ -571,6 +571,61 @@
     };
   }
 
+  // --- CLOUD ALERTS OPERATIONS ---
+  async function fetchCloudAlerts() {
+    initClient();
+    if (!client) return [];
+    try {
+      const { data, error } = await client
+        .from('alerts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) { console.warn('Supabase fetchCloudAlerts note:', error.message); return []; }
+      return data || [];
+    } catch (e) {
+      console.warn('fetchCloudAlerts exception:', e.message);
+      return [];
+    }
+  }
+
+  async function publishAlertToCloud(alert) {
+    initClient();
+    if (!client) return null;
+    try {
+      const payload = {
+        id: alert.id,
+        type: alert.type || 'info',
+        badge_ar: alert.badge_ar || alert.badge || '',
+        badge_en: alert.badge_en || alert.badge || '',
+        title_ar: alert.title_ar || alert.title || '',
+        title_en: alert.title_en || alert.title || '',
+        content_ar: alert.content_ar || alert.content || '',
+        content_en: alert.content_en || alert.content || '',
+        date: alert.date || new Date().toISOString().split('T')[0],
+        created_at: alert.created_at || new Date().toISOString()
+      };
+      const { data, error } = await client.from('alerts').upsert(payload, { onConflict: 'id' }).select();
+      if (error) { console.warn('Supabase publishAlert error:', error.message); return null; }
+      return data?.[0] || payload;
+    } catch (e) {
+      console.warn('publishAlertToCloud exception:', e.message);
+      return null;
+    }
+  }
+
+  async function deleteAlertFromCloud(alertId) {
+    initClient();
+    if (!client) return false;
+    try {
+      const { error } = await client.from('alerts').delete().eq('id', alertId);
+      if (error) { console.warn('Supabase deleteAlert error:', error.message); return false; }
+      return true;
+    } catch (e) {
+      console.warn('deleteAlertFromCloud exception:', e.message);
+      return false;
+    }
+  }
+
   // Centralized Kuro Cloud API
   window.KuroCloud = {
     getClient: () => { initClient(); return client; },
@@ -578,6 +633,9 @@
     publishSheetToCloud,
     fetchCloudSheets,
     deleteSheetFromCloud,
+    fetchCloudAlerts,
+    publishAlertToCloud,
+    deleteAlertFromCloud,
     testConnection,
     saveCredentials,
     clearCredentials,

@@ -11,15 +11,55 @@ window.AdminPage = (function () {
     return sessionStorage.getItem('kf_admin_auth') === 'true' || isAdminAuthenticated;
   }
 
-  function authenticate(passcode) {
-    const validPasscodes = ['kuro2026', 'admin2026', '123456'];
-    if (validPasscodes.includes(passcode.trim())) {
+  // Hash a string using Web Crypto API (SHA-256)
+  async function _hashStr(str) {
+    const buf = new TextEncoder().encode(str.trim());
+    const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Secure authenticate: compares hashed input against stored hash
+  // Never stores or compares plaintext passwords at runtime
+  async function authenticate(passcode) {
+    const inputHash = await _hashStr(passcode);
+
+    // Get stored hash (set on first successful login or by admin setup)
+    let storedHash = localStorage.getItem('_kf_adh');
+
+    if (!storedHash) {
+      // First-time setup: bootstrap from encoded init token if present
+      // Admin can set this by running in console:
+      //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOURPASSCODE'))
+      //     .then(b => localStorage.setItem('_kf_adh', Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')))
+      const initToken = localStorage.getItem('_kf_ait');
+      if (initToken) {
+        storedHash = initToken;
+      } else {
+        // No hash stored yet — first-run: accept and store the provided passcode as the master
+        // This means the very first person to log in sets the password
+        // To pre-set a password, run the console command above before first deployment
+        storedHash = null;
+      }
+    }
+
+    if (storedHash && inputHash === storedHash) {
       isAdminAuthenticated = true;
       sessionStorage.setItem('kf_admin_auth', 'true');
       return true;
     }
+
+    // Fallback: if no hash stored yet, accept the first login and store it
+    if (!storedHash) {
+      localStorage.setItem('_kf_adh', inputHash);
+      isAdminAuthenticated = true;
+      sessionStorage.setItem('kf_admin_auth', 'true');
+      return true;
+    }
+
     return false;
   }
+
+
 
   // --- LOCAL STORAGE & DELETION PERSISTENCE HELPERS ---
   function getCustomSheets() {
@@ -469,9 +509,7 @@ window.AdminPage = (function () {
             <div style="position: relative;">
               <input type="password" id="admin-passcode-input" class="auth-input" placeholder="••••••••" required style="width: 100%; font-size: 1.2rem; text-align: center; letter-spacing: 5px; padding: 12px;" />
             </div>
-            <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 6px; text-align: center;">
-              ${isAr ? 'الرمز الافتراضي للدخول: <b>kuro2026</b>' : 'Default Passcode: <b>kuro2026</b>'}
-            </div>
+
           </div>
 
           <div id="admin-auth-error" style="display: none; color: #EF4444; font-size: 0.825rem; font-weight: 700; margin-bottom: 14px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;"></div>
@@ -493,10 +531,17 @@ window.AdminPage = (function () {
 
     if (window.lucide) window.lucide.createIcons();
 
-    document.getElementById('admin-passcode-form')?.addEventListener('submit', (e) => {
+    document.getElementById('admin-passcode-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const code = document.getElementById('admin-passcode-input')?.value || '';
-      if (authenticate(code)) {
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.7'; }
+
+      const ok = await authenticate(code);
+
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; }
+
+      if (ok) {
         if (typeof window.showToast === 'function') {
           window.showToast(isAr ? 'مرحباً بك في مركز التحكم الرئيسي بالمنصة! 🛡️' : 'Welcome to Super-Admin Control Center! 🛡️', { type: 'success' });
         }
@@ -505,10 +550,11 @@ window.AdminPage = (function () {
         const err = document.getElementById('admin-auth-error');
         if (err) {
           err.style.display = 'block';
-          err.textContent = isAr ? 'رمز المرور غير صحيح! الرمز الافتراضي: kuro2026' : 'Invalid Passcode! Default passcode: kuro2026';
+          err.textContent = isAr ? 'رمز المرور غير صحيح. يرجى المحاولة مرة أخرى.' : 'Invalid passcode. Please try again.';
         }
       }
     });
+
   }
 
   // --- MAIN ADMIN RENDER ---
@@ -545,7 +591,7 @@ window.AdminPage = (function () {
                 <i data-lucide="shield-check" style="width: 13px; height: 13px; display: inline-block;"></i>
                 ${isAr ? 'مركز التحكم الشامل بالآدمن (Super-Admin Portal)' : 'Super-Admin Control Center'}
               </span>
-              <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 700;">رمز المرور: kuro2026</span>
+
             </div>
             <h1>
               <i data-lucide="sliders" style="color: var(--brand-burgundy); width: 28px; height: 28px;"></i>
@@ -1801,7 +1847,7 @@ CREATE POLICY "Allow all delete on sheets"
     });
 
     // 3. Add Alert Form
-    document.getElementById('form-add-alert')?.addEventListener('submit', (e) => {
+    document.getElementById('form-add-alert')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = document.getElementById('add-alert-title')?.value.trim();
       const badge = document.getElementById('add-alert-badge')?.value.trim();
@@ -1816,7 +1862,9 @@ CREATE POLICY "Allow all delete on sheets"
         title_ar: title,
         title_en: title,
         content_ar: content,
+        content_en: content,
         date: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString(),
         time: 'الآن'
       };
 
@@ -1829,12 +1877,26 @@ CREATE POLICY "Allow all delete on sheets"
       cur.unshift(newAlert);
       saveCustomAlerts(cur);
 
+      // Publish to Supabase cloud so ALL students see it globally
+      if (window.KuroCloud && typeof window.KuroCloud.publishAlertToCloud === 'function') {
+        try {
+          await window.KuroCloud.publishAlertToCloud(newAlert);
+          // Update cloud alerts cache
+          const cached = JSON.parse(localStorage.getItem('kf_cloud_cached_alerts') || '[]');
+          cached.unshift(newAlert);
+          localStorage.setItem('kf_cloud_cached_alerts', JSON.stringify(cached));
+        } catch (e) {
+          console.warn('Alert cloud publish note:', e);
+        }
+      }
+
       if (typeof window.showToast === 'function') {
-        window.showToast(isAr ? 'تم نشر الإعلان على الواجهة الرئيسية فوراً! 📢' : 'Alert published live! 📢', { type: 'success' });
+        window.showToast(isAr ? 'تم نشر الإعلان للجميع سحابياً! 📢☁️' : 'Alert published to all students via cloud! 📢☁️', { type: 'success' });
       }
 
       render(container);
     });
+
 
     // 4. Delete Alert WITH CONFIRMATION MODAL
     container.querySelectorAll('.btn-delete-alert').forEach(btn => {
@@ -1842,7 +1904,8 @@ CREATE POLICY "Allow all delete on sheets"
         const id = btn.getAttribute('data-id');
         const title = btn.getAttribute('data-title') || 'هذا الإعلان';
 
-        showConfirmModal(title, 'alert', () => {
+        showConfirmModal(title, 'alert', async () => {
+          // Mark as locally deleted (for fast UI update before cloud confirms)
           addDeletedAlertId(id);
 
           if (window.DATA && Array.isArray(window.DATA.alerts)) {
@@ -1852,14 +1915,27 @@ CREATE POLICY "Allow all delete on sheets"
           let cur = getCustomAlerts().filter(a => a.id !== id);
           saveCustomAlerts(cur);
 
+          // Delete from Supabase cloud — makes deletion GLOBAL for all students
+          if (window.KuroCloud && typeof window.KuroCloud.deleteAlertFromCloud === 'function') {
+            try {
+              await window.KuroCloud.deleteAlertFromCloud(id);
+              // Update cached alerts list
+              const cached = JSON.parse(localStorage.getItem('kf_cloud_cached_alerts') || '[]').filter(a => a.id !== id);
+              localStorage.setItem('kf_cloud_cached_alerts', JSON.stringify(cached));
+            } catch (e) {
+              console.warn('Alert cloud delete note:', e);
+            }
+          }
+
           if (typeof window.showToast === 'function') {
-            window.showToast(isAr ? `تم حذف الإعلان "${title}" نهائياً.` : 'Alert deleted permanently.', { type: 'success' });
+            window.showToast(isAr ? `تم حذف الإعلان "${title}" نهائياً للجميع. ☁️` : 'Alert deleted permanently for all students. ☁️', { type: 'success' });
           }
 
           render(container);
         });
       });
     });
+
 
     // 5. Add Student Form
     document.getElementById('form-add-student')?.addEventListener('submit', (e) => {

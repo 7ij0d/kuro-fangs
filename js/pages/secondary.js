@@ -580,25 +580,40 @@ const SecondaryPages = {
 
   // Search
   renderSearch(container, queryParams) {
-    const q = (queryParams.get('q') || '').toLowerCase();
-    const subjects = window.DATA.getSubjects().filter(s => 
-      s.name_ar.toLowerCase().includes(q) || 
-      s.name_en.toLowerCase().includes(q) || 
-      s.code.toLowerCase().includes(q)
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const q = (queryParams.get('q') || '').toLowerCase().trim();
+    if (!q) {
+      window.navigate('/');
+      return;
+    }
+    const subjects = (window.DATA?.getSubjects() || []).filter(s =>
+      (s.name_ar || '').toLowerCase().includes(q) ||
+      (s.name_en || '').toLowerCase().includes(q) ||
+      (s.code || '').toLowerCase().includes(q)
     );
-    const sheets = window.DATA.getRecentSheets(20).filter(s => 
-      s.title.toLowerCase().includes(q) || 
-      (s.subject_name && s.subject_name.toLowerCase().includes(q))
+    const sheets = (window.DATA?.getRecentSheets(200) || []).filter(s =>
+      (s.title || '').toLowerCase().includes(q) ||
+      (s.title_ar || '').toLowerCase().includes(q) ||
+      (s.title_en || '').toLowerCase().includes(q) ||
+      (s.doctor_name || '').toLowerCase().includes(q) ||
+      (s.subject_name || '').toLowerCase().includes(q)
     );
+
 
     container.innerHTML = `
       <div class="page-title-bar">
         <div class="page-title-group">
           <h1>
             <i data-lucide="search" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
-            نتائج البحث عن: "${q}"
+            ${isAr ? `نتائج البحث عن: "${q}"` : `Search results for: "${q}"`}
           </h1>
-          <p>تم العثور على ${subjects.length} مادة و ${sheets.length} محاضرة مطابقة</p>
+          <p>${isAr ? `تم العثور على ${subjects.length} مادة و ${sheets.length} محاضرة مطابقة` : `Found ${subjects.length} subject(s) and ${sheets.length} sheet(s) matching your search`}</p>
+        </div>
+        <div>
+          <a href="#/" class="btn btn-secondary btn-sm" style="gap: 6px;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+            ${isAr ? 'العودة للرئيسية' : 'Back to Home'}
+          </a>
         </div>
       </div>
 

@@ -118,9 +118,14 @@ class DataService {
         }
 
         // Live Central Cloud Sync from Supabase in background
+        // Supabase is the source of truth: sheets not in Supabase are removed from local view
         if (window.KuroCloud && typeof window.KuroCloud.fetchCloudSheets === 'function') {
           const liveCloudSheets = await window.KuroCloud.fetchCloudSheets();
           if (Array.isArray(liveCloudSheets) && liveCloudSheets.length > 0) {
+            // Build set of cloud sheet IDs (authoritative list)
+            const cloudIds = new Set(liveCloudSheets.map(s => s.id));
+
+            // 1. Update/merge cloud sheets into local list
             liveCloudSheets.forEach(cs => {
               const idx = this.sheets.findIndex(s => s.id === cs.id);
               if (idx !== -1) {
@@ -129,14 +134,44 @@ class DataService {
                 this.sheets.push(cs);
               }
             });
+
+            // 2. Remove any sheets that exist locally but were deleted from Supabase
+            // (only remove sheets that were once synced to cloud — don't remove static/local-only sheets
+            //  that were never uploaded, identified by having no pdf_url from cloud)
+            const cachedCloudIds = new Set(
+              JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]').map(s => s.id)
+            );
+            this.sheets = this.sheets.filter(s => {
+              // Keep if it's in current cloud list
+              if (cloudIds.has(s.id)) return true;
+              // Keep if it was never in cloud before (static/built-in sheet)
+              if (!cachedCloudIds.has(s.id)) return true;
+              // Remove if it was in cloud before but no longer is (admin deleted it)
+              return false;
+            });
+
+            // Update cache with latest cloud state
             localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(liveCloudSheets));
+          } else if (Array.isArray(liveCloudSheets) && liveCloudSheets.length === 0) {
+            // Cloud returned empty — could be first run or all sheets deleted
+            // Only clear cached cloud sheets (don't touch built-in sheets)
+            const cachedIds = new Set(
+              JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]').map(s => s.id)
+            );
+            if (cachedIds.size > 0) {
+              // Previously had cloud sheets, now all gone — remove them
+              this.sheets = this.sheets.filter(s => !cachedIds.has(s.id));
+              localStorage.setItem('kf_cloud_cached_sheets', '[]');
+            }
           }
         }
       } catch (err) {
         console.warn('Background data sync note:', err);
       }
     }, 10);
-    // Merge custom admin announcements from localStorage if present
+
+    // Merge custom admin announcements from localStorage if present (legacy support)
+    // These will be superseded by Supabase cloud alerts when they load
     try {
       const customAlerts = JSON.parse(localStorage.getItem('kf_admin_custom_alerts') || '[]');
       if (Array.isArray(customAlerts) && customAlerts.length > 0) {
@@ -148,7 +183,8 @@ class DataService {
       }
     } catch (e) {}
 
-    // Filter out permanently deleted items stored by admin
+    // Also apply locally-cached deletions on initial load (for fast first-render before cloud sync)
+    // Cloud sync in background will eventually take over as source of truth
     const deletedSheetIds = this.getDeletedSheetIds();
     if (deletedSheetIds.length > 0) {
       this.sheets = (this.sheets || []).filter(s => !deletedSheetIds.includes(s.id));
@@ -160,7 +196,41 @@ class DataService {
     }
 
     this.loaded = true;
+
+    // Kick off a second background sync specifically for alerts (cloud alerts are global)
+    setTimeout(async () => {
+      try {
+        if (window.KuroCloud && typeof window.KuroCloud.fetchCloudAlerts === 'function') {
+          const liveCloudAlerts = await window.KuroCloud.fetchCloudAlerts();
+          if (Array.isArray(liveCloudAlerts) && liveCloudAlerts.length > 0) {
+            const cloudAlertIds = new Set(liveCloudAlerts.map(a => a.id));
+            const cachedCloudAlertIds = new Set(
+              JSON.parse(localStorage.getItem('kf_cloud_cached_alerts') || '[]').map(a => a.id)
+            );
+
+            // Merge cloud alerts
+            liveCloudAlerts.forEach(ca => {
+              const idx = this.alerts.findIndex(a => a.id === ca.id);
+              if (idx !== -1) { this.alerts[idx] = { ...this.alerts[idx], ...ca }; }
+              else { this.alerts.unshift(ca); }
+            });
+
+            // Remove alerts deleted from cloud
+            this.alerts = this.alerts.filter(a => {
+              if (cloudAlertIds.has(a.id)) return true;
+              if (!cachedCloudAlertIds.has(a.id)) return true;
+              return false;
+            });
+
+            localStorage.setItem('kf_cloud_cached_alerts', JSON.stringify(liveCloudAlerts));
+          }
+        }
+      } catch (err) {
+        console.warn('Cloud alerts sync note:', err);
+      }
+    }, 500); // slight delay so sheets sync runs first
   }
+
 
   getDeletedSheetIds() {
     try {
