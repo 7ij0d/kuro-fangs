@@ -504,6 +504,16 @@
       z-index: 6;
       pointer-events: none;
     }
+    .jnotes-laser-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      display: block;
+    }
 
     /* Dynamic Circle Eraser Cursor */
     .jnotes-eraser-cursor {
@@ -1083,6 +1093,7 @@
           <div class="jnotes-pages-wrapper" id="jnotes-pages-wrapper">
             <!-- RENDERED DYNAMICALLY WITH HIGH-DPI & REAL TEXT LAYER -->
           </div>
+          <canvas class="jnotes-laser-canvas" id="jnotes-laser-canvas"></canvas>
         </main>
 
         <!-- MULTI-TAB WORKSPACE SIDEBAR -->
@@ -1362,6 +1373,11 @@
     // Hide eraser circle if not eraser
     const cursor = document.getElementById('jnotes-eraser-cursor');
     if (cursor && tool !== 'eraser') cursor.style.display = 'none';
+
+    // Clear laser pointer if switched away
+    if (tool !== 'laser' && typeof clearLaserCanvas === 'function') {
+      clearLaserCanvas();
+    }
 
     renderContextBar();
   };
@@ -1664,38 +1680,22 @@
     const scaledH = doc.height * zoomLevel;
 
     if (forceCenter) {
-      if (scaledW <= vp.width) {
-        panX = (vp.width - scaledW) / 2;
-      }
-      if (scaledH <= vp.height) {
-        panY = Math.max(15, (vp.height - scaledH) / 2);
-      }
+      panX = (vp.width - scaledW) / 2;
+      panY = Math.max(15, (vp.height - scaledH) / 2);
       return;
     }
 
-    // Horizontal boundaries: preserve focal point during zoom/pan with soft margins
-    const padX = Math.min(vp.width * 0.45, 200);
-    if (scaledW <= vp.width) {
-      const minX = -padX;
-      const maxX = vp.width - scaledW + padX;
-      panX = Math.max(minX, Math.min(maxX, panX));
-    } else {
-      const minX = vp.width - scaledW - padX;
-      const maxX = padX;
-      panX = Math.max(minX, Math.min(maxX, panX));
-    }
+    // Dynamic fluid viewport boundaries (Leaflet/Panzoom standard)
+    // Ensures document content never disappears completely from screen, without restricting focal zoom
+    const padX = Math.max(140, vp.width * 0.45);
+    const minX = vp.width - scaledW - padX;
+    const maxX = padX;
+    panX = Math.max(minX, Math.min(maxX, panX));
 
-    // Vertical boundaries:
-    const padY = Math.min(vp.height * 0.45, 200);
-    if (scaledH <= vp.height) {
-      const minY = -padY;
-      const maxY = vp.height - scaledH + padY;
-      panY = Math.max(minY, Math.min(maxY, panY));
-    } else {
-      const minY = vp.height - scaledH - padY;
-      const maxY = padY;
-      panY = Math.max(minY, Math.min(maxY, panY));
-    }
+    const padY = Math.max(140, vp.height * 0.45);
+    const minY = vp.height - scaledH - padY;
+    const maxY = padY;
+    panY = Math.max(minY, Math.min(maxY, panY));
   }
 
   function settleViewport() {
@@ -1705,25 +1705,25 @@
     const scaledH = doc.height * zoomLevel;
     let changed = false;
 
-    if (scaledW <= vp.width) {
-      panX = (vp.width - scaledW) / 2;
-      changed = true;
-    } else {
-      const minX = vp.width - scaledW - 15;
-      const maxX = 15;
+    // Never snap or teleport to center if user is zoomed in!
+    if (scaledW > vp.width) {
+      const minX = vp.width - scaledW - 20;
+      const maxX = 20;
       if (panX < minX) { panX = minX; changed = true; }
       if (panX > maxX) { panX = maxX; changed = true; }
+    } else {
+      // If smaller than viewport, only recenter if dragged excessively far away
+      const targetCenter = (vp.width - scaledW) / 2;
+      if (Math.abs(panX - targetCenter) > vp.width * 0.35) {
+        panX = targetCenter;
+        changed = true;
+      }
     }
 
-    if (scaledH <= vp.height) {
-      panY = Math.max(15, (vp.height - scaledH) / 2);
-      changed = true;
-    } else {
-      const minY = vp.height - scaledH - 30;
-      const maxY = 15;
-      if (panY < minY) { panY = minY; changed = true; }
-      if (panY > maxY) { panY = maxY; changed = true; }
-    }
+    const minY = vp.height - scaledH - 40;
+    const maxY = 20;
+    if (panY < minY) { panY = minY; changed = true; }
+    if (panY > maxY) { panY = maxY; changed = true; }
 
     if (changed) {
       updateTransform(true);
@@ -1735,7 +1735,7 @@
     if (!wrapper) return;
 
     if (smooth) {
-      wrapper.style.transition = 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)';
+      wrapper.style.transition = 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)';
     } else {
       wrapper.style.transition = 'none';
     }
@@ -1754,16 +1754,15 @@
     const focalX = clientX - rect.left;
     const focalY = clientY - rect.top;
 
-    // 1. Calculate the point on the unscaled plane under the cursor:
-    const planeX = (focalX - panX) / zoomLevel;
-    const planeY = (focalY - panY) / zoomLevel;
-
-    // 2. Clamp target zoom:
+    // 1. Clamp target zoom:
     const newZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom));
+    if (Math.abs(newZoom - zoomLevel) < 0.0005) return;
 
-    // 3. Re-anchor pan so planeX and planeY remain precisely at focalX and focalY:
-    panX = focalX - planeX * newZoom;
-    panY = focalY - planeY * newZoom;
+    // 2. Panzoom Focal-Point Invariant Formula:
+    // panX_new = focalX - (focalX - panX) * (newZoom / zoomLevel)
+    const ratio = newZoom / zoomLevel;
+    panX = focalX - (focalX - panX) * ratio;
+    panY = focalY - (focalY - panY) * ratio;
     zoomLevel = newZoom;
 
     clampViewport(false);
@@ -2118,124 +2117,159 @@
   let startX = 0, startY = 0;
   let currentStroke = null;
 
-  // Laser Pointer Engine (Ephemeral Neon Glowing Comet-Trail with 650ms Decay)
-  let laserPoints = []; // Array of { pageNum, x, y, timestamp }
+  // ==========================================================================
+  // VIEWPORT-LEVEL HIGH-DPI NEON LASER POINTER ENGINE (680ms Ephemeral Ribbon)
+  // ==========================================================================
+  let laserPoints = []; // Array of { x, y, timestamp } in viewport coordinates
+  let laserCursorPos = null; // Hover point for desktop mouse: { x, y }
   let laserRafId = null;
+
+  function addLaserPoint(clientX, clientY) {
+    const vp = document.getElementById('jnotes-viewport');
+    if (!vp) return;
+    const rect = vp.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    laserCursorPos = { x, y };
+    laserPoints.push({ x, y, timestamp: performance.now() });
+    startLaserAnimation();
+  }
+
+  function updateLaserHover(clientX, clientY) {
+    const vp = document.getElementById('jnotes-viewport');
+    if (!vp) return;
+    const rect = vp.getBoundingClientRect();
+    laserCursorPos = { x: clientX - rect.left, y: clientY - rect.top };
+    startLaserAnimation();
+  }
+
+  function clearLaserHover() {
+    laserCursorPos = null;
+    if (laserPoints.length === 0) {
+      clearLaserCanvas();
+    }
+  }
 
   function startLaserAnimation() {
     if (laserRafId) return;
-    renderLaserFrame();
+    laserRafId = requestAnimationFrame(renderLaserFrame);
+  }
+
+  function clearLaserCanvas() {
+    const canvas = document.getElementById('jnotes-laser-canvas');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    laserPoints = [];
+    laserCursorPos = null;
+    if (laserRafId) {
+      cancelAnimationFrame(laserRafId);
+      laserRafId = null;
+    }
   }
 
   function renderLaserFrame() {
-    const now = Date.now();
-    // Decay points older than 650ms
-    laserPoints = laserPoints.filter(p => (now - p.timestamp) <= 650);
-
-    const pointsByPage = {};
-    for (let i = 0; i < laserPoints.length; i++) {
-      const p = laserPoints[i];
-      if (!pointsByPage[p.pageNum]) pointsByPage[p.pageNum] = [];
-      pointsByPage[p.pageNum].push(p);
+    const canvas = document.getElementById('jnotes-laser-canvas');
+    const vp = document.getElementById('jnotes-viewport');
+    if (!canvas || !vp) {
+      laserRafId = null;
+      return;
     }
 
-    document.querySelectorAll('.draft-canvas').forEach(dc => {
-      const pNum = parseInt(dc.id.replace('draft-canvas-', ''), 10);
-      const dctx = dc.getContext('2d');
-      if (pointsByPage[pNum] && pointsByPage[pNum].length > 0) {
-        dctx.clearRect(0, 0, dc.width, dc.height);
-        drawLaserCometTrail(dctx, pointsByPage[pNum], now);
-      } else {
-        if (!currentStroke || (!currentStroke.isStraight && currentStroke.tool !== 'highlighter')) {
-          dctx.clearRect(0, 0, dc.width, dc.height);
-        }
-      }
-    });
+    const dpr = window.devicePixelRatio || 1;
+    const w = vp.clientWidth;
+    const h = vp.clientHeight;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
 
-    if (laserPoints.length > 0) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const now = performance.now();
+    // Decay points after 680ms
+    laserPoints = laserPoints.filter(p => (now - p.timestamp) <= 680);
+
+    const shouldDrawTrail = laserPoints.length > 0;
+    const shouldDrawHover = (currentTool === 'laser' && laserCursorPos !== null);
+
+    if (shouldDrawTrail || shouldDrawHover) {
+      drawLaserCometTrail(ctx, laserPoints, laserCursorPos, now, dpr);
       laserRafId = requestAnimationFrame(renderLaserFrame);
     } else {
       laserRafId = null;
     }
   }
 
-  function drawLaserCometTrail(ctx, points, now) {
-    if (!points || points.length === 0) return;
-
+  function drawLaserCometTrail(ctx, points, hoverPos, now, dpr) {
     ctx.save();
+    ctx.scale(dpr, dpr);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (points.length === 1) {
-      const pt = points[0];
-      const age = now - pt.timestamp;
-      const alpha = Math.max(0, 1 - age / 650);
-      ctx.globalAlpha = alpha;
-      ctx.shadowBlur = 14;
-      ctx.shadowColor = '#EF4444';
-      ctx.fillStyle = '#F43F5E';
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, 6, 0, Math.PI * 2);
-      ctx.fill();
+    // 1. Draw glowing fading comet ribbon trail
+    if (points && points.length > 1) {
+      for (let i = 1; i < points.length; i++) {
+        const p0 = points[i - 1];
+        const p1 = points[i];
+        const age = now - p1.timestamp;
+        const progress = Math.max(0, 1 - age / 680);
 
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      return;
+        ctx.save();
+        ctx.globalAlpha = Math.pow(progress, 1.25);
+
+        // Outer vibrant neon red/pink glow
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = '#FF003C';
+        ctx.strokeStyle = '#FF1744';
+        ctx.lineWidth = Math.max(3, 10 * progress);
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.stroke();
+
+        // Hot white core
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = '#FFE4E6';
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = Math.max(1.5, 4 * progress);
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.stroke();
+
+        ctx.restore();
+      }
     }
 
-    for (let i = 1; i < points.length; i++) {
-      const p0 = points[i - 1];
-      const p1 = points[i];
-      const age = now - p1.timestamp;
-      const progress = Math.max(0, 1 - age / 650);
+    // 2. Draw glowing laser pointer head dot (at active point or hover)
+    const activeDot = (points && points.length > 0) ? points[points.length - 1] : hoverPos;
+    if (activeDot && currentTool === 'laser') {
+      const dotAge = activeDot.timestamp ? (now - activeDot.timestamp) : 0;
+      const dotProgress = Math.max(0, 1 - dotAge / 680);
 
       ctx.save();
-      ctx.globalAlpha = progress;
+      ctx.globalAlpha = Math.max(0.7, dotProgress);
 
-      // Outer glow and stroke
-      ctx.shadowBlur = 14;
-      ctx.shadowColor = '#EF4444';
-      ctx.strokeStyle = '#F43F5E';
-      ctx.lineWidth = Math.max(2, 6 * progress);
+      // Outer glowing halo
+      ctx.shadowBlur = 22;
+      ctx.shadowColor = '#FF003C';
+      ctx.fillStyle = '#FF1744';
       ctx.beginPath();
-      ctx.moveTo(p0.x, p0.y);
-      ctx.lineTo(p1.x, p1.y);
-      ctx.stroke();
+      ctx.arc(activeDot.x, activeDot.y, 8, 0, Math.PI * 2);
+      ctx.fill();
 
-      // Inner white core
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = Math.max(1, 2.5 * progress);
+      // Intense white core
+      ctx.shadowBlur = 2;
+      ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
-      ctx.moveTo(p0.x, p0.y);
-      ctx.lineTo(p1.x, p1.y);
-      ctx.stroke();
+      ctx.arc(activeDot.x, activeDot.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
 
       ctx.restore();
     }
-
-    // Glowing head dot at latest point
-    const head = points[points.length - 1];
-    const headAge = now - head.timestamp;
-    const headAlpha = Math.max(0, 1 - headAge / 650);
-    ctx.save();
-    ctx.globalAlpha = headAlpha;
-    ctx.shadowBlur = 14;
-    ctx.shadowColor = '#EF4444';
-    ctx.fillStyle = '#F43F5E';
-    ctx.beginPath();
-    ctx.arc(head.x, head.y, 4.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.arc(head.x, head.y, 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
 
     ctx.restore();
   }
@@ -2243,11 +2277,7 @@
   function abortActiveDrawing() {
     isDrawing = false;
     currentStroke = null;
-    laserPoints = [];
-    if (laserRafId) {
-      cancelAnimationFrame(laserRafId);
-      laserRafId = null;
-    }
+    clearLaserCanvas();
     document.querySelectorAll('.draft-canvas').forEach(dc => {
       const ctx = dc.getContext('2d');
       ctx.clearRect(0, 0, dc.width, dc.height);
@@ -2293,14 +2323,17 @@
         startX = pt.x;
         startY = pt.y;
 
-        if (currentTool === 'eraser') {
+        if (currentTool === 'laser') {
+          isDrawing = true;
+          addLaserPoint(clientX, clientY);
+          return;
+        } else if (currentTool === 'eraser') {
           eraseAt(pageNum, pt.x, pt.y);
         } else if (currentTool === 'text') {
           isDrawing = false;
+          if (e.preventDefault) e.preventDefault();
           createNewTextBox(pageNum, clientX, clientY);
-        } else if (currentTool === 'laser') {
-          laserPoints.push({ pageNum, x: pt.x, y: pt.y, timestamp: Date.now() });
-          startLaserAnimation();
+          return;
         } else if (currentTool === 'pen') {
           currentStroke = {
             id: 'st_' + Date.now(),
@@ -2328,9 +2361,19 @@
 
       const onMove = (e) => {
         updateCursorPos(e);
-        if (!isDrawing) return;
         const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+        if (currentTool === 'laser') {
+          if (isDrawing || (e.buttons && e.buttons === 1) || (e.touches && e.touches.length === 1)) {
+            addLaserPoint(clientX, clientY);
+          } else {
+            updateLaserHover(clientX, clientY);
+          }
+          return;
+        }
+
+        if (!isDrawing) return;
         let pt = getCanvasPoint(e, canvas);
         if (isRulerActive && (currentTool === 'pen' || currentTool === 'highlighter')) {
           pt = snapPointToRuler(pt, canvas, clientX, clientY);
@@ -2338,9 +2381,6 @@
 
         if (currentTool === 'eraser') {
           eraseAt(pageNum, pt.x, pt.y);
-        } else if (currentTool === 'laser') {
-          laserPoints.push({ pageNum, x: pt.x, y: pt.y, timestamp: Date.now() });
-          startLaserAnimation();
         } else if (currentStroke) {
           if (currentStroke.isStraight) {
             // GLITCH-FREE STRAIGHT LINE DRAFTING:
@@ -2414,6 +2454,7 @@
       canvas.addEventListener('mouseup', onEnd);
       canvas.addEventListener('mouseleave', () => {
         if (cursor) cursor.style.display = 'none';
+        if (currentTool === 'laser') clearLaserHover();
       });
 
       // Mobile Touch Handling: 1 finger draws/erases, 2 fingers abort drawing and bubble to gesture camera
@@ -2428,7 +2469,9 @@
         }
         if (currentTool === 'pan') return;
         if (e.touches.length === 1) {
-          e.preventDefault();
+          if (currentTool !== 'text') {
+            e.preventDefault();
+          }
           updateCursorPos(e.touches[0]);
           onStart(e.touches[0]);
         }
@@ -2440,7 +2483,7 @@
           return; // Allow event to bubble to viewport gesture engine
         }
         if (currentTool === 'pan') return;
-        if (e.touches.length === 1 && isDrawing) {
+        if (e.touches.length === 1 && (isDrawing || currentTool === 'laser')) {
           e.preventDefault();
           updateCursorPos(e.touches[0]);
           onMove(e.touches[0]);
@@ -2450,6 +2493,10 @@
       canvas.addEventListener('touchend', (e) => {
         if (currentTool === 'pan') return;
         if (cursor) cursor.style.display = 'none';
+        if (currentTool === 'laser') {
+          isDrawing = false;
+          return;
+        }
         if (isDrawing && e.changedTouches && e.changedTouches.length > 0) {
           onEnd(e.changedTouches[0]);
         }
@@ -2735,16 +2782,25 @@
     const unscaledLeft = (clientX - pageRect.left) / zoomLevel;
     const unscaledTop = (clientY - pageRect.top) / zoomLevel;
 
+    // Clean up any previously empty text boxes first
+    document.querySelectorAll('.jnotes-text-box').forEach(b => {
+      if (!b.textContent.trim()) b.remove();
+    });
+
     const box = document.createElement('div');
     box.className = 'jnotes-text-box';
     box.contentEditable = 'true';
     box.spellcheck = false;
-    box.style.left = unscaledLeft + 'px';
-    box.style.top = unscaledTop + 'px';
-    box.style.color = penState.color || '#F8FAFC';
+    box.style.left = Math.max(0, unscaledLeft) + 'px';
+    box.style.top = Math.max(0, unscaledTop) + 'px';
+    box.style.color = penState.color || '#0F172A';
     box.setAttribute('data-placeholder', 'اكتب هنا...');
 
+    let isComposing = true;
+    setTimeout(() => { isComposing = false; }, 350);
+
     box.addEventListener('blur', function() {
+      if (isComposing) return;
       if (!box.textContent.trim()) {
         box.remove();
       }
@@ -2757,14 +2813,27 @@
       }
     });
 
+    box.addEventListener('mousedown', (e) => e.stopPropagation());
+    box.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+
     pageEl.appendChild(box);
 
-    // CRITICAL UX FIX: Always call preventScroll: true to eliminate violent page shifts
-    try {
-      box.focus({ preventScroll: true });
-    } catch (err) {
-      box.focus();
-    }
+    // CRITICAL: Neutralize viewport and window scroll jumps on focus
+    const vp = document.getElementById('jnotes-viewport');
+    const resetScroll = () => {
+      if (vp) { vp.scrollTop = 0; vp.scrollLeft = 0; }
+      window.scrollTo(0, 0);
+    };
+
+    resetScroll();
+    requestAnimationFrame(() => {
+      try {
+        box.focus({ preventScroll: true });
+      } catch (err) {
+        box.focus();
+      }
+      resetScroll();
+    });
   }
 
   // Persistence & Auto-Save
@@ -3205,11 +3274,10 @@
         const currMidX = (t1.clientX + t2.clientX) / 2 - vRect.left;
         const currMidY = (t1.clientY + t2.clientY) / 2 - vRect.top;
 
-        // Keep the exact document point locked under the current finger midpoint:
+        // Keep the exact document point locked under the current finger midpoint (Zero Jitter/No premature clamping):
         panX = currMidX - focalDocX * newZoom;
         panY = currMidY - focalDocY * newZoom;
 
-        clampViewport(false);
         updateTransform(false);
         updateCurrentPageFromPan();
       } else if (e.touches.length === 1 && isGesturePanning && currentTool === 'pan') {
@@ -3243,7 +3311,7 @@
     const onTouchEnd = (e) => {
       if (isGesturePinching && e.touches.length < 2) {
         isGesturePinching = false;
-        preventDrawUntil = Date.now() + 320; // 320ms cooldown prevents accidental marks on lifting fingers
+        preventDrawUntil = Date.now() + 250;
         settleViewport();
       }
       if (isGesturePanning && e.touches.length === 0) {
@@ -3260,6 +3328,70 @@
     viewport.addEventListener('touchmove', onTouchMove, { passive: false });
     viewport.addEventListener('touchend', onTouchEnd, { passive: false });
     viewport.addEventListener('touchcancel', onTouchEnd, { passive: false });
+
+    // Neutralize any native scroll jump from keyboard or virtual keyboard
+    viewport.addEventListener('scroll', () => {
+      if (viewport.scrollTop !== 0 || viewport.scrollLeft !== 0) {
+        viewport.scrollTop = 0;
+        viewport.scrollLeft = 0;
+      }
+    });
+
+    // Viewport-Level Laser Pointer Interactions
+    viewport.addEventListener('pointermove', (e) => {
+      if (currentTool === 'laser') {
+        if (e.buttons === 1 || e.pointerType === 'touch') {
+          addLaserPoint(e.clientX, e.clientY);
+        } else if (e.pointerType === 'mouse') {
+          updateLaserHover(e.clientX, e.clientY);
+        }
+      }
+    });
+
+    viewport.addEventListener('pointerdown', (e) => {
+      if (currentTool === 'laser' && e.isPrimary) {
+        addLaserPoint(e.clientX, e.clientY);
+      }
+    });
+
+    viewport.addEventListener('pointerleave', () => {
+      if (currentTool === 'laser') {
+        clearLaserHover();
+      }
+    });
+
+    // Desktop Mouse Drag Panning (when in 'pan' mode or middle-click)
+    let isMousePanning = false;
+    let lastMousePos = { x: 0, y: 0 };
+
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.button === 1 || (e.button === 0 && currentTool === 'pan')) {
+        isMousePanning = true;
+        lastMousePos = { x: e.clientX, y: e.clientY };
+        viewport.style.cursor = 'grabbing';
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isMousePanning) {
+        const dx = e.clientX - lastMousePos.x;
+        const dy = e.clientY - lastMousePos.y;
+        lastMousePos = { x: e.clientX, y: e.clientY };
+        panX += dx;
+        panY += dy;
+        clampViewport(false);
+        updateTransform(false);
+        updateCurrentPageFromPan();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isMousePanning) {
+        isMousePanning = false;
+        viewport.style.cursor = (currentTool === 'pan') ? 'grab' : 'default';
+        settleViewport();
+      }
+    });
 
     // Desktop Mouse Wheel & Trackpad Pinch
     viewport.addEventListener('wheel', (e) => {
