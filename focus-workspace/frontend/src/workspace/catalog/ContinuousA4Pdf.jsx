@@ -473,15 +473,100 @@ export function ContinuousA4Pdf({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [commitPrimaryPage]);
 
-  const [touchStart, setTouchStart] = useState(null);
-  const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+  const transformRef = useRef(null);
+  const touchStateRef = useRef({
+    startX: 0, startY: 0, currentX: 0, currentY: 0, activeFingers: 0, isZoomedIn: false, panX: 0, panY: 0, basePanX: 0, basePanY: 0, zooming: false
+  });
+  const [panState, setPanState] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    touchStateRef.current.basePanX = panState.x;
+    touchStateRef.current.basePanY = panState.y;
+    touchStateRef.current.panX = panState.x;
+    touchStateRef.current.panY = panState.y;
+  }, [panState]);
+
+  const handleTouchStart = (e) => {
+    const touches = e.touches;
+    touchStateRef.current.activeFingers = touches.length;
+    
+    if (touches.length >= 2) {
+      touchStateRef.current.zooming = true;
+      return;
+    }
+
+    if (touches.length === 1) {
+      touchStateRef.current.zooming = false;
+      const currentRatio = pageAspectRatios.get(primaryPage) || defaultPageAspectRatio;
+      
+      const fitWidth = (window.innerWidth - 80) / A4_PAGE_WIDTH;
+      const fitHeight = (window.innerHeight - 132) / (A4_PAGE_WIDTH * currentRatio);
+      const fitZoom = Math.min(fitWidth, fitHeight);
+      
+      touchStateRef.current.isZoomedIn = zoom > fitZoom * 1.05;
+
+      touchStateRef.current.startX = touches[0].clientX;
+      touchStateRef.current.startY = touches[0].clientY;
+      touchStateRef.current.currentX = touches[0].clientX;
+      touchStateRef.current.currentY = touches[0].clientY;
+      
+      if (transformRef.current) {
+        transformRef.current.style.transition = "none";
+      }
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    const touches = e.touches;
+    if (touches.length !== 1 || touchStateRef.current.zooming) return;
+    
+    touchStateRef.current.currentX = touches[0].clientX;
+    touchStateRef.current.currentY = touches[0].clientY;
+    
+    if (touchStateRef.current.isZoomedIn) {
+      const dx = touchStateRef.current.currentX - touchStateRef.current.startX;
+      const dy = touchStateRef.current.currentY - touchStateRef.current.startY;
+      
+      const newPanX = touchStateRef.current.basePanX + dx;
+      const newPanY = touchStateRef.current.basePanY + dy;
+      
+      touchStateRef.current.panX = newPanX;
+      touchStateRef.current.panY = newPanY;
+      
+      if (transformRef.current) {
+        transformRef.current.style.transform = `translate(${newPanX}px, ${newPanY}px) scale(${zoom})`;
+      }
+      
+      // Stop native swipe navigation on some browsers
+      if (e.cancelable) e.preventDefault();
+    }
+  };
+
   const handleTouchEnd = (e) => {
-    if (!touchStart) return;
-    const touchEnd = e.changedTouches[0].clientX;
-    const diff = touchStart - touchEnd;
-    if (diff > 50) commitPrimaryPage(primaryPage + 1);
-    else if (diff < -50) commitPrimaryPage(primaryPage - 1);
-    setTouchStart(null);
+    if (touchStateRef.current.activeFingers === 1 && e.touches.length === 0 && !touchStateRef.current.zooming) {
+      const dx = touchStateRef.current.currentX - touchStateRef.current.startX;
+      const dy = touchStateRef.current.currentY - touchStateRef.current.startY;
+      
+      if (touchStateRef.current.isZoomedIn) {
+        setPanState({ x: touchStateRef.current.panX, y: touchStateRef.current.panY });
+      } else {
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+          if (dx < 0) {
+            commitPrimaryPage(primaryPage + 1);
+          } else {
+            commitPrimaryPage(primaryPage - 1);
+          }
+        }
+      }
+      
+      if (transformRef.current) {
+        transformRef.current.style.transition = "transform 0.3s ease-out";
+      }
+    }
+    touchStateRef.current.activeFingers = e.touches.length;
+    if (e.touches.length === 0) {
+      touchStateRef.current.zooming = false;
+    }
   };
 
   const pages = useMemo(() => (
@@ -510,7 +595,7 @@ export function ContinuousA4Pdf({
     justifyContent: "center",
     overflow: "hidden",
     position: "relative",
-    touchAction: "pan-y pinch-zoom"
+    touchAction: touchStateRef.current?.isZoomedIn ? "none" : "pan-y pinch-zoom"
   };
 
   const liveLayerStyle = {
@@ -525,14 +610,14 @@ export function ContinuousA4Pdf({
   const documentStyle = {
     "--workspace-a4-zoom": zoom,
     "--workspace-a4-page-gap": `${A4_PAGE_GAP}px`,
-    transform: `scale(${zoom})`,
+    transform: `translate(${panState.x}px, ${panState.y}px) scale(${zoom})`,
     display: "flex",
     transition: "transform 0.3s ease-out",
     transformOrigin: "center center"
   };
 
   return (
-    <div className="workspace-v2-a4-zoom-surface" style={surfaceStyle} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div className="workspace-v2-a4-zoom-surface" style={surfaceStyle} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
       <button 
         className="workspace-v2-nav-button left" 
         onClick={() => commitPrimaryPage(primaryPage - 1)} 
@@ -543,7 +628,7 @@ export function ContinuousA4Pdf({
       </button>
 
       <div ref={documentRootRef} className="workspace-v2-a4-live-layer" style={liveLayerStyle} aria-busy={Boolean(status)}>
-        <div className="workspace-v2-a4-document" style={documentStyle}>
+        <div ref={transformRef} className="workspace-v2-a4-document" style={documentStyle}>
         {pages.map((pageNumber) => {
           const isVisible = pagesToRender.has(pageNumber);
           if (!isVisible) return null;
