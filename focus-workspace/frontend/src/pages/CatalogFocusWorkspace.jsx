@@ -534,7 +534,9 @@ function ActiveStudyQuiz({ quiz, answers, setAnswers, result, busy, onSubmit, on
  * file delivery are the same either way, because they are the same reader.
  */
 export default function CatalogFocusWorkspace({ user = null, variant = "study" }) {
-  const { materialSlug, sheetSlug } = useParams();
+  const params = useParams();
+  const materialSlug = params.materialSlug || "local";
+  const sheetSlug = params.sheetSlug || "local-sheet";
   const { t } = useI18n();
   const { materials, loading: materialsLoading, error: materialsError, reload: reloadMaterials } = useCatalogMaterials(user);
   const material = materials.find((item) => item.slug === materialSlug) || null;
