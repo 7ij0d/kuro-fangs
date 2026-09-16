@@ -777,11 +777,12 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
   const minimumPdfZoom = useCallback(() => {
     if (!sheet?.pdfUrl) return MIN_FOCUS_ZOOM;
     const stage = stageRef.current;
-    return Math.min(MAX_FOCUS_ZOOM, Math.max(MIN_FOCUS_ZOOM, fitWidthZoom(
-      stage?.clientWidth || window.innerWidth,
-      A4_PAGE_WIDTH,
-      0
-    )));
+    const availableWidth = stage?.clientWidth || window.innerWidth;
+    const availableHeight = stage?.clientHeight || (window.innerHeight - 52);
+    const fitWidth = (availableWidth - 80) / A4_PAGE_WIDTH;
+    const fitHeight = (availableHeight - 80) / (A4_PAGE_WIDTH * (297 / 210));
+    const fitZoom = Math.min(fitWidth, fitHeight);
+    return Math.min(MAX_FOCUS_ZOOM, Math.max(MIN_FOCUS_ZOOM, fitZoom));
   }, [sheet?.pdfUrl]);
 
   const clampReaderZoom = useCallback((value) => {

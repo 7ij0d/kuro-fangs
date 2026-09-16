@@ -537,7 +537,7 @@ export function ContinuousA4Pdf({
         className="workspace-v2-nav-button left" 
         onClick={() => commitPrimaryPage(primaryPage - 1)} 
         disabled={primaryPage <= 1}
-        style={{ position: "absolute", left: "20px", zIndex: 10, background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", cursor: "pointer", opacity: primaryPage <= 1 ? 0.3 : 1 }}
+        style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: "20px", zIndex: 10, background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", cursor: "pointer", opacity: primaryPage <= 1 ? 0.3 : 1 }}
       >
         <ChevronLeft size={24} />
       </button>
@@ -598,7 +598,7 @@ export function ContinuousA4Pdf({
         className="workspace-v2-nav-button right" 
         onClick={() => commitPrimaryPage(primaryPage + 1)} 
         disabled={primaryPage >= pageCount}
-        style={{ position: "absolute", right: "20px", zIndex: 10, background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", cursor: "pointer", opacity: primaryPage >= pageCount ? 0.3 : 1 }}
+        style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", right: "20px", zIndex: 10, background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", cursor: "pointer", opacity: primaryPage >= pageCount ? 0.3 : 1 }}
       >
         <ChevronRight size={24} />
       </button>
