@@ -1,0 +1,139 @@
+from django.urls import path
+
+from .admin_views import (
+    AdminSheetActionView,
+    AdminSheetActiveStudyPreviewView,
+    AdminSheetActiveStudyQuestionsView,
+    AdminSheetActiveStudyView,
+    AdminSheetDetailView,
+    AdminSheetLockinPdfView,
+    AdminSheetPdfView,
+    AdminSheetReorderView,
+    AdminSheetSummaryPdfView,
+    AdminSubjectListView,
+    AdminSubjectSheetListView,
+)
+from .views import (
+    ArchiveLearningObjectView,
+    CatalogDocumentResolveView,
+    CatalogMaterialListView,
+    CatalogWorkspaceView,
+    ManagementLearningObjectDetailView,
+    ManagementLearningObjectListView,
+    PublicLearningObjectDetailView,
+    PublicLearningObjectListView,
+    PublishLearningObjectView,
+    RejectLearningObjectView,
+    SubmitLearningObjectView,
+    TransferLearningObjectView,
+)
+
+app_name = "content"
+
+urlpatterns = [
+    # Keep the structural UUID route before the two-slug alias resolver: UUIDs
+    # are valid slugs, so the broader pattern would otherwise shadow workspace
+    # GET/PATCH requests and return 404/405 before authorization is evaluated.
+    path("catalog/documents/<uuid:document_id>/workspace", CatalogWorkspaceView.as_view()),
+    path("catalog/materials", CatalogMaterialListView.as_view(), name="catalog-materials"),
+    path(
+        "catalog/documents/<slug:material_slug>/<slug:sheet_slug>",
+        CatalogDocumentResolveView.as_view(),
+    ),
+    path(
+        "operations/admin/content/subjects",
+        AdminSubjectListView.as_view(),
+        name="admin-subjects",
+    ),
+    path(
+        "operations/admin/content/subjects/<uuid:subject_id>/sheets",
+        AdminSubjectSheetListView.as_view(),
+        name="admin-subject-sheets",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>",
+        AdminSheetDetailView.as_view(),
+        name="admin-sheet-detail",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/actions",
+        AdminSheetActionView.as_view(),
+        name="admin-sheet-action",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/pdf",
+        AdminSheetPdfView.as_view(),
+        name="admin-sheet-pdf",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/summary-pdf",
+        AdminSheetSummaryPdfView.as_view(),
+        name="admin-sheet-summary-pdf",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/reorder",
+        AdminSheetReorderView.as_view(),
+        name="admin-sheet-reorder",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/lockin-pdf",
+        AdminSheetLockinPdfView.as_view(),
+        name="admin-sheet-lockin-pdf",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/active-study",
+        AdminSheetActiveStudyView.as_view(),
+        name="admin-sheet-active-study",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/active-study/preview",
+        AdminSheetActiveStudyPreviewView.as_view(),
+        name="admin-sheet-active-study-preview",
+    ),
+    path(
+        "operations/admin/content/sheets/<uuid:sheet_id>/active-study/questions/<str:difficulty>",
+        AdminSheetActiveStudyQuestionsView.as_view(),
+        name="admin-sheet-active-study-questions",
+    ),
+    path("learning-objects", PublicLearningObjectListView.as_view(), name="public-list"),
+    path(
+        "learning-objects/<uuid:learning_object_id>",
+        PublicLearningObjectDetailView.as_view(),
+        name="public-detail",
+    ),
+    path(
+        "management/content",
+        ManagementLearningObjectListView.as_view(),
+        name="management-list",
+    ),
+    path(
+        "management/content/<uuid:learning_object_id>",
+        ManagementLearningObjectDetailView.as_view(),
+        name="management-detail",
+    ),
+    path(
+        "management/content/<uuid:learning_object_id>/submit",
+        SubmitLearningObjectView.as_view(),
+        name="submit",
+    ),
+    path(
+        "management/content/<uuid:learning_object_id>/publish",
+        PublishLearningObjectView.as_view(),
+        name="publish",
+    ),
+    path(
+        "management/content/<uuid:learning_object_id>/reject",
+        RejectLearningObjectView.as_view(),
+        name="reject",
+    ),
+    path(
+        "management/content/<uuid:learning_object_id>/archive",
+        ArchiveLearningObjectView.as_view(),
+        name="archive",
+    ),
+    path(
+        "management/content/<uuid:learning_object_id>/transfer",
+        TransferLearningObjectView.as_view(),
+        name="transfer",
+    ),
+]

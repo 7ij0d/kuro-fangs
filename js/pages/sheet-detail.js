@@ -140,10 +140,15 @@ const SheetDetailPage = {
       <div id="discussion-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 100001; display: none; opacity: 0; pointer-events: none !important; transition: opacity 0.25s ease;"></div>
     `;
 
-    // Direct DOM Rendering: Render Note Studio directly into primary DOM (eliminates sandboxed iframe!)
     const studioContainer = document.getElementById('sheet-studio-container');
-    if (studioContainer && window.DocumentViewer) {
-      window.DocumentViewer.renderStudio(studioContainer, sheet, isAr);
+    if (studioContainer) {
+      const iframe = document.createElement('iframe');
+      // Point to the newly added Focus Workspace system
+      iframe.src = `focus-workspace/frontend/dist/index.html?sheet_id=${sheet.id}&title=${encodeURIComponent(isAr ? sheet.title_ar : sheet.title_en)}&pdf_url=${encodeURIComponent(sheet.pdf_url)}`;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      studioContainer.appendChild(iframe);
     }
 
     // Discussion Board Logic & Persistence
