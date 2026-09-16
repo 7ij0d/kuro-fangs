@@ -10,6 +10,8 @@ import {
 
 export function assetPath(path) {
   if (!path) return "";
+  // Absolute URLs (http/https/blob/data) must not be prefixed with the app base.
+  if (/^(https?|blob|data):/.test(path)) return path;
   const base = import.meta.env.BASE_URL || "/";
   const prefix = base.endsWith("/") ? base : `${base}/`;
   const cleanPath = path.startsWith("/") ? path.slice(1) : path;
