@@ -144,7 +144,9 @@ const SheetDetailPage = {
     if (studioContainer) {
       const iframe = document.createElement('iframe');
       // Point to the newly added Focus Workspace system
-      iframe.src = `focus-workspace/frontend/dist/index.html?sheet_id=${sheet.id}&title=${encodeURIComponent(isAr ? sheet.title_ar : sheet.title_en)}&pdf_url=${encodeURIComponent(sheet.pdf_url)}`;
+      const matSlug = sheet.subject_id || 'local';
+      const shSlug = sheet.id || 'local-sheet';
+      iframe.src = `focus-workspace/frontend/dist/index.html?material_slug=${encodeURIComponent(matSlug)}&sheet_slug=${encodeURIComponent(shSlug)}&title=${encodeURIComponent(isAr ? sheet.title_ar : sheet.title_en)}&pdf_url=${encodeURIComponent(sheet.pdf_url)}`;
       iframe.style.width = '100%';
       iframe.style.height = '100%';
       iframe.style.border = 'none';

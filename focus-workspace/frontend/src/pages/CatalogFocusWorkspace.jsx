@@ -535,8 +535,9 @@ function ActiveStudyQuiz({ quiz, answers, setAnswers, result, busy, onSubmit, on
  */
 export default function CatalogFocusWorkspace({ user = null, variant = "study" }) {
   const params = useParams();
-  const materialSlug = params.materialSlug || "local";
-  const sheetSlug = params.sheetSlug || "local-sheet";
+  const [searchParams] = useSearchParams();
+  const materialSlug = params.materialSlug || searchParams.get("material_slug") || "local";
+  const sheetSlug = params.sheetSlug || searchParams.get("sheet_slug") || "local-sheet";
   const { t } = useI18n();
   const { materials, loading: materialsLoading, error: materialsError, reload: reloadMaterials } = useCatalogMaterials(user);
   const material = materials.find((item) => item.slug === materialSlug) || null;

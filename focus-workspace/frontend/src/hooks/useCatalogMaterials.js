@@ -5,14 +5,23 @@ export function clearCatalogMaterialsCache() {}
 export function useCatalogMaterials(user) {
   const [searchParams] = useSearchParams();
   const title = searchParams.get("title") || "Local Sheet";
+  const pdfUrl = searchParams.get("pdf_url") || "";
+  const materialSlug = searchParams.get("material_slug") || "local";
+  const sheetSlug = searchParams.get("sheet_slug") || "local-sheet";
 
   return {
     materials: [{
-      slug: "local",
+      slug: materialSlug,
+      title: "Local Material",
       sheets: [{
-        slug: "local-sheet",
-        title: title,
-        pdfUrl: searchParams.get("pdf_url") || "/sample.pdf"
+        slug: sheetSlug,
+        title,
+        title_ar: title,
+        title_en: title,
+        pdfUrl,
+        pageCount: null,
+        hasActiveStudy: false,
+        deliverable: { type: "pdf", pdfUrl }
       }]
     }],
     loading: false,
