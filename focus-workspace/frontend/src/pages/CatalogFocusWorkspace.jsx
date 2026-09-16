@@ -724,7 +724,14 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
   const [page, setPage] = useState(() => Math.min(configuredPageCount, bookmarkedPage > 0 ? bookmarkedPage : 1));
   const [zoom, setZoom] = useState(() => {
     if (!sheet?.pdfUrl) return 1.3;
-    const fitZoom = fitWidthZoom(window.innerWidth, A4_PAGE_WIDTH, window.innerWidth < 1200 ? 16 : 360);
+    const padding = 40;
+    const availableWidth = window.innerWidth - (padding * 2);
+    const availableHeight = window.innerHeight - (padding * 2);
+    const pageRatio = 297 / 210;
+    const pageHeight = A4_PAGE_WIDTH * pageRatio;
+    const fitWidth = availableWidth / A4_PAGE_WIDTH;
+    const fitHeight = availableHeight / pageHeight;
+    const fitZoom = Math.min(fitWidth, fitHeight) * 0.85;
     return Math.min(MAX_FOCUS_ZOOM, Math.max(MIN_FOCUS_ZOOM, fitZoom));
   });
   const [activeTool, setActiveTool] = useState("hand");

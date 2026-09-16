@@ -47,7 +47,7 @@
 .workspace-v2-tool-options,
 .workspace-v2-side {
   border: 1px solid var(--workspace-border);
-  background: var(--workspace-panel);
+  background: #1a1b2e;
 }
 
 /* Resting shape only. Hover and the selected state are owned by the shared
