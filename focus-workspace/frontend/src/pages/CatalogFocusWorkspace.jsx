@@ -593,7 +593,10 @@ export default function CatalogFocusWorkspace({ user = null, variant = "study" }
 }
 
 function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocument = null, onDocumentChanged = () => {}, summaryMode = false }) {
-  const { materialSlug, sheetSlug } = useParams();
+  const _params = useParams();
+  const [_sp] = useSearchParams();
+  const materialSlug = _params.materialSlug || _sp.get("material_slug") || "local";
+  const sheetSlug = _params.sheetSlug || _sp.get("sheet_slug") || "local-sheet";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const rootRef = useRef(null);
