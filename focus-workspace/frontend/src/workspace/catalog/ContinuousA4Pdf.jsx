@@ -493,32 +493,75 @@ export function ContinuousA4Pdf({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [commitPrimaryPage]);
 
-  // Initial fit-to-page logic
-  useEffect(() => {
-    if (!stageViewport || !naturalDimensionsRef.current) return;
-    const viewportW = stageViewport.width;
-    const viewportH = stageViewport.height;
+  const calculateFitZoom = useCallback(() => {
+    const container = pageContainerRef.current?.parentElement;
+    if (!container) return 1;
+    
+    const availableW = container.clientWidth;
+    const availableH = container.clientHeight;
+    
     const naturalW = naturalDimensionsRef.current.width;
     const naturalH = naturalDimensionsRef.current.height;
     
-    // 132 for toolbar
-    const fitZoom = Math.min(
-      (viewportW - 80) / naturalW,
-      (viewportH - 132 - 80) / naturalH
-    );
-    fitZoomRef.current = fitZoom;
-    const initialPanX = (viewportW - naturalW * fitZoom) / 2;
-    const initialPanY = (viewportH - 132 - naturalH * fitZoom) / 2;
-
-    zoomRef.current = fitZoom;
-    panXRef.current = initialPanX;
-    panYRef.current = initialPanY;
+    if (!naturalW || !naturalH) return 1;
     
-    setViewTransform({ scale: fitZoom, panX: initialPanX, panY: initialPanY });
+    const PADDING = 24;
+    const scaleW = (availableW - PADDING) / naturalW;
+    const scaleH = (availableH - PADDING) / naturalH;
+    const fitScale = Math.min(scaleW, scaleH);
+    
+    return Math.max(0.1, fitScale);
+  }, []);
+
+  const applyFitZoom = useCallback(() => {
+    const fitScale = calculateFitZoom();
+    const container = pageContainerRef.current?.parentElement;
+    if (!container) return;
+    
+    const availableW = container.clientWidth;
+    const availableH = container.clientHeight;
+    const naturalW = naturalDimensionsRef.current.width;
+    const naturalH = naturalDimensionsRef.current.height;
+    
+    const scaledW = naturalW * fitScale;
+    const scaledH = naturalH * fitScale;
+    const panX = (availableW - scaledW) / 2;
+    const panY = (availableH - scaledH) / 2;
+    
+    fitZoomRef.current = fitScale;
+    zoomRef.current = fitScale;
+    panXRef.current = panX;
+    panYRef.current = panY;
+    
     if (pageContainerRef.current) {
-      pageContainerRef.current.style.transform = `translate(${initialPanX}px, ${initialPanY}px) scale(${fitZoom})`;
+      pageContainerRef.current.style.transform = `translate(${panX}px, ${panY}px) scale(${fitScale})`;
     }
-  }, [stageViewport, documentProxy]);
+    setViewTransform({ scale: fitScale, panX, panY });
+  }, [calculateFitZoom]);
+
+  useEffect(() => {
+    if (documentProxy && naturalDimensionsRef.current?.width) {
+      applyFitZoom();
+    }
+  }, [documentProxy, applyFitZoom]);
+
+  useEffect(() => {
+    const container = pageContainerRef.current?.parentElement;
+    if (!container) return;
+    
+    const observer = new ResizeObserver(() => {
+      const isAtFit = Math.abs(zoomRef.current - fitZoomRef.current) < 0.01;
+      const newFitScale = calculateFitZoom();
+      fitZoomRef.current = newFitScale;
+      
+      if (isAtFit) {
+        applyFitZoom();
+      }
+    });
+    
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [applyFitZoom, calculateFitZoom]);
 
   const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 
@@ -566,8 +609,8 @@ export function ContinuousA4Pdf({
       const t2 = touches[1];
       const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
       
-      const MIN_ZOOM = fitZoomRef.current * 0.5;
-      const MAX_ZOOM = 4.0;
+      const MIN_ZOOM = fitZoomRef.current;
+      const MAX_ZOOM = fitZoomRef.current * 8;
       const newScale = clamp(
         gesture.startScale * (currentDist / gesture.startDist),
         MIN_ZOOM, MAX_ZOOM
