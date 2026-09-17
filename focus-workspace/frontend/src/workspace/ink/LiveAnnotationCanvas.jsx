@@ -127,8 +127,8 @@ function drawDiagnostics(context, diagnostics, cssScale) {
  * what lets a long stroke stay incremental instead of repainting every sample.
  */
 export const LiveAnnotationCanvas = forwardRef(
-/** @param {{ pageNumber: number }} props */
-function LiveAnnotationCanvas({ pageNumber }, ref) {
+/** @param {{ pageNumber: number, activeTool?: string }} props */
+function LiveAnnotationCanvas({ pageNumber, activeTool }, ref) {
   const canvasRef = useRef(null);
   const sizeRef = useRef({ width: 0, height: 0, ratio: 1 });
   const contextRef = useRef(null);
@@ -284,5 +284,6 @@ function LiveAnnotationCanvas({ pageNumber }, ref) {
     return () => observer.disconnect();
   }, [ensureSize, paintFrame]);
 
-  return <canvas ref={canvasRef} className="workspace-v2-live-annotation-canvas" aria-hidden="true" />;
+  const isDrawing = activeTool && activeTool !== "hand" && activeTool !== "select";
+  return <canvas ref={canvasRef} className="workspace-v2-live-annotation-canvas" aria-hidden="true" style={{ pointerEvents: isDrawing ? "auto" : "none" }} />;
 });

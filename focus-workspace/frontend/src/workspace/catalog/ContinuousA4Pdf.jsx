@@ -207,6 +207,7 @@ export function ContinuousA4Pdf({
   visiblePageStart = 1,
   visiblePageCount = pageCount,
   zoom,
+  onZoomChange,
   stageRef,
   documentRootRef,
   onPageCount,
@@ -492,6 +493,25 @@ export function ContinuousA4Pdf({
     
     if (touches.length >= 2) {
       touchStateRef.current.zooming = true;
+      const touch1 = touches[0];
+      const touch2 = touches[1];
+      const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+      touchStateRef.current.pinchStartDist = dist;
+      touchStateRef.current.pinchStartScale = zoom;
+      touchStateRef.current.currentScale = zoom;
+      
+      // Store current pan state to base changes on
+      touchStateRef.current.basePanX = touchStateRef.current.panX;
+      touchStateRef.current.basePanY = touchStateRef.current.panY;
+
+      touchStateRef.current.pinchStartPanX = touchStateRef.current.panX;
+      touchStateRef.current.pinchStartPanY = touchStateRef.current.panY;
+      touchStateRef.current.pinchStartMidX = (touch1.clientX + touch2.clientX) / 2;
+      touchStateRef.current.pinchStartMidY = (touch1.clientY + touch2.clientY) / 2;
+      
+      if (transformRef.current) {
+        transformRef.current.style.transition = "none";
+      }
       return;
     }
 
@@ -510,6 +530,10 @@ export function ContinuousA4Pdf({
       touchStateRef.current.currentX = touches[0].clientX;
       touchStateRef.current.currentY = touches[0].clientY;
       
+      // Update base pan state to current pan state for relative movement
+      touchStateRef.current.basePanX = touchStateRef.current.panX;
+      touchStateRef.current.basePanY = touchStateRef.current.panY;
+      
       if (transformRef.current) {
         transformRef.current.style.transition = "none";
       }
@@ -518,6 +542,33 @@ export function ContinuousA4Pdf({
 
   const handleTouchMove = (e) => {
     const touches = e.touches;
+    
+    if (touches.length >= 2 && touchStateRef.current.zooming) {
+      const touch1 = touches[0];
+      const touch2 = touches[1];
+      const currentPinchDist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+      
+      // MIN_ZOOM = 0.5, MAX_ZOOM = 4.0
+      const nextScale = Math.min(4.0, Math.max(0.5, touchStateRef.current.pinchStartScale * (currentPinchDist / touchStateRef.current.pinchStartDist)));
+      touchStateRef.current.currentScale = nextScale;
+
+      const focalX = (touch1.clientX + touch2.clientX) / 2;
+      const focalY = (touch1.clientY + touch2.clientY) / 2;
+      
+      const scaleRatio = nextScale / touchStateRef.current.pinchStartScale;
+      const nextPanX = focalX - scaleRatio * (touchStateRef.current.pinchStartMidX - touchStateRef.current.pinchStartPanX) - (focalX - touchStateRef.current.pinchStartMidX);
+      const nextPanY = focalY - scaleRatio * (touchStateRef.current.pinchStartMidY - touchStateRef.current.pinchStartPanY) - (focalY - touchStateRef.current.pinchStartMidY);
+      
+      touchStateRef.current.panX = nextPanX;
+      touchStateRef.current.panY = nextPanY;
+      
+      if (transformRef.current) {
+        transformRef.current.style.transform = `translate(${nextPanX}px, ${nextPanY}px) scale(${nextScale})`;
+      }
+      if (e.cancelable) e.preventDefault();
+      return;
+    }
+
     if (touches.length !== 1 || touchStateRef.current.zooming) return;
     
     touchStateRef.current.currentX = touches[0].clientX;
@@ -537,12 +588,25 @@ export function ContinuousA4Pdf({
         transformRef.current.style.transform = `translate(${newPanX}px, ${newPanY}px) scale(${zoom})`;
       }
       
-      // Stop native swipe navigation on some browsers
       if (e.cancelable) e.preventDefault();
     }
   };
 
   const handleTouchEnd = (e) => {
+    if (touchStateRef.current.zooming && e.touches.length < 2) {
+      if (onZoomChange && touchStateRef.current.currentScale) {
+        onZoomChange(touchStateRef.current.currentScale);
+      }
+      setPanState({ x: touchStateRef.current.panX, y: touchStateRef.current.panY });
+      if (transformRef.current) {
+        transformRef.current.style.transition = "transform 0.3s ease-out";
+      }
+      if (e.touches.length === 0) {
+        touchStateRef.current.zooming = false;
+      }
+      return;
+    }
+
     if (touchStateRef.current.activeFingers === 1 && e.touches.length === 0 && !touchStateRef.current.zooming) {
       const dx = touchStateRef.current.currentX - touchStateRef.current.startX;
       const dy = touchStateRef.current.currentY - touchStateRef.current.startY;

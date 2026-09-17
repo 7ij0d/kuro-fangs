@@ -244,15 +244,17 @@ function WorkspaceIconButton({ label, active = false, children, className = "", 
 }
 
 function ToolRange({ label, value, displayValue = value, min, max, step, onChange, preview = "stroke", color = "#8b5cf6" }) {
-  const ratio = Math.min(1, Math.max(0, (value - min) / Math.max(step, max - min)));
-  const previewSize = preview === "opacity" ? 16 : preview === "eraser" ? Math.round(5 + ratio * 13) : Math.round(2 + ratio * 10);
   return (
-    <label className={`workspace-v2-tool-range is-${preview}`} aria-label={label} style={cssVars({ "--workspace-range-progress": `${ratio * 100}%` })}>
-      <span className="workspace-v2-range-heading"><span>{label}</span><output aria-label={`Current ${label.toLowerCase()}`}>{displayValue}</output></span>
-      <span className="workspace-v2-range-control">
-        <span className="workspace-v2-range-preview" aria-hidden="true" style={cssVars({ "--workspace-range-size": `${previewSize}px`, "--workspace-range-color": color, "--workspace-range-opacity": preview === "opacity" ? value : 1 })} />
-        <input type="range" min={min} max={max} step={step} value={value} aria-label={label} onChange={(event) => onChange(Number(event.target.value))} />
-      </span>
+    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#959cc0', fontSize: '0.7rem' }}>
+      {label}
+      <input
+        type="range" min={min} max={max} step={step}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="workspace-v2-slider"
+        style={{ width: '100px' }}
+      />
+      <span style={{ color: '#f2f4ff', fontWeight: 'bold' }}>{displayValue}</span>
     </label>
   );
 }
@@ -3989,7 +3991,7 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
           {[["top-left", selectedBounds.x, selectedBounds.y], ["top-right", selectedBounds.x + selectedBounds.width, selectedBounds.y], ["bottom-left", selectedBounds.x, selectedBounds.y + selectedBounds.height], ["bottom-right", selectedBounds.x + selectedBounds.width, selectedBounds.y + selectedBounds.height]].map(([handle, x, y]) => <circle key={handle} data-resize-handle={handle} cx={x} cy={y} r={handleRadius} />)}
         </g>}
       </svg>
-      {pageIsCurrent && <LiveAnnotationCanvas ref={liveStrokeCanvasRef} pageNumber={pageNumber} />}
+      {pageIsCurrent && <LiveAnnotationCanvas ref={liveStrokeCanvasRef} pageNumber={pageNumber} activeTool={activeTool} />}
       {pageIsCurrent && renderSelectionMenu()}
     </>;
   }
@@ -4126,7 +4128,7 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
                   {[["top-left", selectedBounds.x, selectedBounds.y], ["top-right", selectedBounds.x + selectedBounds.width, selectedBounds.y], ["bottom-left", selectedBounds.x, selectedBounds.y + selectedBounds.height], ["bottom-right", selectedBounds.x + selectedBounds.width, selectedBounds.y + selectedBounds.height]].map(([handle, x, y]) => <circle key={handle} data-resize-handle={handle} cx={x} cy={y} r={11 * pageUnitsPerCssPixel(page)} />)}
                 </g>}
               </svg>
-              <LiveAnnotationCanvas ref={liveStrokeCanvasRef} pageNumber={page} />
+              <LiveAnnotationCanvas ref={liveStrokeCanvasRef} pageNumber={page} activeTool={activeTool} />
               {renderSelectionMenu()}
               <h1>{topicTitle}</h1>
               <p className="workspace-v2-lead">{topicSummary} It helps connect foundational knowledge with confident clinical decisions.</p>
