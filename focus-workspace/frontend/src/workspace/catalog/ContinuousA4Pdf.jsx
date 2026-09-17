@@ -298,9 +298,14 @@ export function ContinuousA4Pdf({
     });
   }, []);
 
+  const naturalDimensionsRef = useRef({ width: A4_PAGE_WIDTH, height: A4_PAGE_WIDTH * A4_PAGE_RATIO });
+
   const applyMeasuredGeometry = useCallback((geometry) => {
     const first = geometry.get(1);
-    if (first) setDefaultPageAspectRatio(pdfPageAspectRatio(first.width, first.height));
+    if (first) {
+      naturalDimensionsRef.current = { width: first.width, height: first.height };
+      setDefaultPageAspectRatio(pdfPageAspectRatio(first.width, first.height));
+    }
     setPageAspectRatios(() => {
       const next = new Map();
       geometry.forEach(({ width, height }, pageNumber) => {
@@ -361,7 +366,7 @@ export function ContinuousA4Pdf({
   }, [flushPageGeometry]);
 
   useEffect(() => {
-    if (Math.abs(renderScaleRef.current - zoom) < .001) {
+    if (Math.abs(renderScaleRef.current - viewTransform.scale) < .001) {
       setRenderSuspension("zoom", false);
       return undefined;
     }
@@ -374,9 +379,9 @@ export function ContinuousA4Pdf({
         renderTimerRef.current = window.setTimeout(commitRenderScale, 60);
         return;
       }
-      renderScaleRef.current = zoom;
+      renderScaleRef.current = viewTransform.scale;
       setRenderSuspension("zoom", false);
-      setRenderScale(zoom);
+      setRenderScale(viewTransform.scale);
       renderTimerRef.current = null;
     }
     if (renderTimerRef.current) window.clearTimeout(renderTimerRef.current);
@@ -386,7 +391,7 @@ export function ContinuousA4Pdf({
       if (renderTimerRef.current) window.clearTimeout(renderTimerRef.current);
       renderTimerRef.current = null;
     };
-  }, [documentRootRef, setRenderSuspension, zoom]);
+  }, [documentRootRef, setRenderSuspension, viewTransform.scale]);
 
   useEffect(() => () => {
     if (renderResumeRafRef.current !== null) cancelAnimationFrame(renderResumeRafRef.current);
@@ -474,162 +479,193 @@ export function ContinuousA4Pdf({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [commitPrimaryPage]);
 
-  const transformRef = useRef(null);
-  const touchStateRef = useRef({
-    startX: 0, startY: 0, currentX: 0, currentY: 0, activeFingers: 0, isZoomedIn: false, panX: 0, panY: 0, basePanX: 0, basePanY: 0, zooming: false
-  });
-  const [panState, setPanState] = useState({ x: 0, y: 0 });
+  const zoomRef = useRef(1);
+  const panXRef = useRef(0);
+  const panYRef = useRef(0);
+  const pageContainerRef = useRef(null);
+  const [viewTransform, setViewTransform] = useState({ scale: 1, panX: 0, panY: 0 });
+  const fitZoomRef = useRef(1);
 
+  // Initial fit-to-page logic
   useEffect(() => {
-    touchStateRef.current.basePanX = panState.x;
-    touchStateRef.current.basePanY = panState.y;
-    touchStateRef.current.panX = panState.x;
-    touchStateRef.current.panY = panState.y;
-  }, [panState]);
+    if (!stageViewport || !naturalDimensionsRef.current) return;
+    const viewportW = stageViewport.width;
+    const viewportH = stageViewport.height;
+    const naturalW = naturalDimensionsRef.current.width;
+    const naturalH = naturalDimensionsRef.current.height;
+    
+    // 132 for toolbar
+    const fitZoom = Math.min(
+      (viewportW - 80) / naturalW,
+      (viewportH - 132 - 80) / naturalH
+    );
+    fitZoomRef.current = fitZoom;
+    const initialPanX = (viewportW - naturalW * fitZoom) / 2;
+    const initialPanY = (viewportH - 132 - naturalH * fitZoom) / 2;
+
+    zoomRef.current = fitZoom;
+    panXRef.current = initialPanX;
+    panYRef.current = initialPanY;
+    
+    setViewTransform({ scale: fitZoom, panX: initialPanX, panY: initialPanY });
+    if (pageContainerRef.current) {
+      pageContainerRef.current.style.transform = `translate(${initialPanX}px, ${initialPanY}px) scale(${fitZoom})`;
+    }
+  }, [stageViewport, documentProxy]);
+
+  const gestureRef = useRef({
+    startX: 0, startY: 0,
+    startScale: 1, startPanX: 0, startPanY: 0,
+    startDist: 0, focalX: 0, focalY: 0,
+    zooming: false
+  });
+
+  const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 
   const handleTouchStart = (e) => {
     const touches = e.touches;
-    touchStateRef.current.activeFingers = touches.length;
+    const gesture = gestureRef.current;
     
     if (touches.length >= 2) {
-      touchStateRef.current.zooming = true;
-      const touch1 = touches[0];
-      const touch2 = touches[1];
-      const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
-      touchStateRef.current.pinchStartDist = dist;
-      touchStateRef.current.pinchStartScale = zoom;
-      touchStateRef.current.currentScale = zoom;
+      gesture.zooming = true;
+      const t1 = touches[0];
+      const t2 = touches[1];
       
-      // Store current pan state to base changes on
-      touchStateRef.current.basePanX = touchStateRef.current.panX;
-      touchStateRef.current.basePanY = touchStateRef.current.panY;
-
-      touchStateRef.current.pinchStartPanX = touchStateRef.current.panX;
-      touchStateRef.current.pinchStartPanY = touchStateRef.current.panY;
-      touchStateRef.current.pinchStartMidX = (touch1.clientX + touch2.clientX) / 2;
-      touchStateRef.current.pinchStartMidY = (touch1.clientY + touch2.clientY) / 2;
+      gesture.startScale = zoomRef.current;
+      gesture.startPanX = panXRef.current;
+      gesture.startPanY = panYRef.current;
+      gesture.startDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      gesture.focalX = (t1.clientX + t2.clientX) / 2;
+      gesture.focalY = (t1.clientY + t2.clientY) / 2;
       
-      if (transformRef.current) {
-        transformRef.current.style.transition = "none";
+      if (pageContainerRef.current) {
+        pageContainerRef.current.style.transition = "none";
       }
       return;
     }
 
     if (touches.length === 1) {
-      touchStateRef.current.zooming = false;
-      const currentRatio = pageAspectRatios.get(primaryPage) || defaultPageAspectRatio;
+      gesture.zooming = false;
+      gesture.startX = touches[0].clientX;
+      gesture.startY = touches[0].clientY;
+      gesture.startPanX = panXRef.current;
+      gesture.startPanY = panYRef.current;
       
-      const fitWidth = (window.innerWidth - 80) / A4_PAGE_WIDTH;
-      const fitHeight = (window.innerHeight - 132) / (A4_PAGE_WIDTH * currentRatio);
-      const fitZoom = Math.min(fitWidth, fitHeight);
-      
-      touchStateRef.current.isZoomedIn = zoom > fitZoom * 1.05;
-
-      touchStateRef.current.startX = touches[0].clientX;
-      touchStateRef.current.startY = touches[0].clientY;
-      touchStateRef.current.currentX = touches[0].clientX;
-      touchStateRef.current.currentY = touches[0].clientY;
-      
-      // Update base pan state to current pan state for relative movement
-      touchStateRef.current.basePanX = touchStateRef.current.panX;
-      touchStateRef.current.basePanY = touchStateRef.current.panY;
-      
-      if (transformRef.current) {
-        transformRef.current.style.transition = "none";
+      if (pageContainerRef.current) {
+        pageContainerRef.current.style.transition = "none";
       }
     }
   };
 
   const handleTouchMove = (e) => {
     const touches = e.touches;
+    const gesture = gestureRef.current;
     
-    if (touches.length >= 2 && touchStateRef.current.zooming) {
-      const touch1 = touches[0];
-      const touch2 = touches[1];
-      const currentPinchDist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+    if (touches.length >= 2 && gesture.zooming) {
+      const t1 = touches[0];
+      const t2 = touches[1];
+      const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
       
-      // MIN_ZOOM = 0.5, MAX_ZOOM = 4.0
-      const nextScale = Math.min(4.0, Math.max(0.5, touchStateRef.current.pinchStartScale * (currentPinchDist / touchStateRef.current.pinchStartDist)));
-      touchStateRef.current.currentScale = nextScale;
+      const MIN_ZOOM = fitZoomRef.current * 0.5;
+      const MAX_ZOOM = 4.0;
+      const newScale = clamp(
+        gesture.startScale * (currentDist / gesture.startDist),
+        MIN_ZOOM, MAX_ZOOM
+      );
 
-      const focalX = (touch1.clientX + touch2.clientX) / 2;
-      const focalY = (touch1.clientY + touch2.clientY) / 2;
+      const contentX = (gesture.focalX - gesture.startPanX) / gesture.startScale;
+      const contentY = (gesture.focalY - gesture.startPanY) / gesture.startScale;
+
+      let newPanX = gesture.focalX - contentX * newScale;
+      let newPanY = gesture.focalY - contentY * newScale;
+
+      const viewportW = stageViewport.width;
+      const viewportH = stageViewport.height;
+      const MARGIN = 60;
+      const naturalW = naturalDimensionsRef.current.width;
+      const naturalH = naturalDimensionsRef.current.height;
       
-      const scaleRatio = nextScale / touchStateRef.current.pinchStartScale;
-      const nextPanX = focalX - scaleRatio * (touchStateRef.current.pinchStartMidX - touchStateRef.current.pinchStartPanX) - (focalX - touchStateRef.current.pinchStartMidX);
-      const nextPanY = focalY - scaleRatio * (touchStateRef.current.pinchStartMidY - touchStateRef.current.pinchStartPanY) - (focalY - touchStateRef.current.pinchStartMidY);
+      const pageW = naturalW * newScale;
+      const pageH = naturalH * newScale;
       
-      touchStateRef.current.panX = nextPanX;
-      touchStateRef.current.panY = nextPanY;
+      newPanX = Math.max(MARGIN - pageW, Math.min(viewportW - MARGIN, newPanX));
+      newPanY = Math.max(MARGIN - pageH, Math.min(viewportH - MARGIN, newPanY));
+
+      zoomRef.current = newScale;
+      panXRef.current = newPanX;
+      panYRef.current = newPanY;
       
-      if (transformRef.current) {
-        transformRef.current.style.transform = `translate(${nextPanX}px, ${nextPanY}px) scale(${nextScale})`;
+      if (pageContainerRef.current) {
+        pageContainerRef.current.style.transform = `translate(${newPanX}px, ${newPanY}px) scale(${newScale})`;
       }
+      
       if (e.cancelable) e.preventDefault();
       return;
     }
 
-    if (touches.length !== 1 || touchStateRef.current.zooming) return;
-    
-    touchStateRef.current.currentX = touches[0].clientX;
-    touchStateRef.current.currentY = touches[0].clientY;
-    
-    if (touchStateRef.current.isZoomedIn) {
-      const dx = touchStateRef.current.currentX - touchStateRef.current.startX;
-      const dy = touchStateRef.current.currentY - touchStateRef.current.startY;
-      
-      const newPanX = touchStateRef.current.basePanX + dx;
-      const newPanY = touchStateRef.current.basePanY + dy;
-      
-      touchStateRef.current.panX = newPanX;
-      touchStateRef.current.panY = newPanY;
-      
-      if (transformRef.current) {
-        transformRef.current.style.transform = `translate(${newPanX}px, ${newPanY}px) scale(${zoom})`;
+    if (touches.length === 1 && !gesture.zooming) {
+      const isZoomedIn = zoomRef.current > fitZoomRef.current * 1.05;
+      if (isZoomedIn) {
+        const touch = touches[0];
+        let newPanX = gesture.startPanX + (touch.clientX - gesture.startX);
+        let newPanY = gesture.startPanY + (touch.clientY - gesture.startY);
+
+        const viewportW = stageViewport.width;
+        const viewportH = stageViewport.height;
+        const MARGIN = 60;
+        const naturalW = naturalDimensionsRef.current.width;
+        const naturalH = naturalDimensionsRef.current.height;
+        const pageW = naturalW * zoomRef.current;
+        const pageH = naturalH * zoomRef.current;
+        
+        newPanX = Math.max(MARGIN - pageW, Math.min(viewportW - MARGIN, newPanX));
+        newPanY = Math.max(MARGIN - pageH, Math.min(viewportH - MARGIN, newPanY));
+
+        panXRef.current = newPanX;
+        panYRef.current = newPanY;
+        
+        if (pageContainerRef.current) {
+          pageContainerRef.current.style.transform = `translate(${newPanX}px, ${newPanY}px) scale(${zoomRef.current})`;
+        }
+        
+        if (e.cancelable) e.preventDefault();
       }
-      
-      if (e.cancelable) e.preventDefault();
     }
   };
 
   const handleTouchEnd = (e) => {
-    if (touchStateRef.current.zooming && e.touches.length < 2) {
-      if (onZoomChange && touchStateRef.current.currentScale) {
-        onZoomChange(touchStateRef.current.currentScale);
-      }
-      setPanState({ x: touchStateRef.current.panX, y: touchStateRef.current.panY });
-      if (transformRef.current) {
-        transformRef.current.style.transition = "transform 0.3s ease-out";
+    const gesture = gestureRef.current;
+    
+    if (gesture.zooming && e.touches.length < 2) {
+      setViewTransform({ scale: zoomRef.current, panX: panXRef.current, panY: panYRef.current });
+      if (onZoomChange) onZoomChange(zoomRef.current);
+      
+      if (pageContainerRef.current) {
+        pageContainerRef.current.style.transition = "transform 0.3s ease-out";
       }
       if (e.touches.length === 0) {
-        touchStateRef.current.zooming = false;
+        gesture.zooming = false;
       }
       return;
     }
 
-    if (touchStateRef.current.activeFingers === 1 && e.touches.length === 0 && !touchStateRef.current.zooming) {
-      const dx = touchStateRef.current.currentX - touchStateRef.current.startX;
-      const dy = touchStateRef.current.currentY - touchStateRef.current.startY;
-      
-      if (touchStateRef.current.isZoomedIn) {
-        setPanState({ x: touchStateRef.current.panX, y: touchStateRef.current.panY });
-      } else {
-        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-          if (dx < 0) {
-            commitPrimaryPage(primaryPage + 1);
-          } else {
-            commitPrimaryPage(primaryPage - 1);
-          }
-        }
+    if (e.changedTouches.length === 1 && e.touches.length === 0 && !gesture.zooming) {
+      const touch = e.changedTouches[0];
+      const isZoomedIn = zoomRef.current > fitZoomRef.current * 1.05;
+      const dx = touch.clientX - gesture.startX;
+      const dy = touch.clientY - gesture.startY;
+
+      if (!isZoomedIn && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0 && primaryPage < pageCount) commitPrimaryPage(primaryPage + 1);
+        if (dx > 0 && primaryPage > 1) commitPrimaryPage(primaryPage - 1);
+      } else if (isZoomedIn) {
+        setViewTransform({ scale: zoomRef.current, panX: panXRef.current, panY: panYRef.current });
       }
       
-      if (transformRef.current) {
-        transformRef.current.style.transition = "transform 0.3s ease-out";
+      if (pageContainerRef.current) {
+        pageContainerRef.current.style.transition = "transform 0.3s ease-out";
       }
-    }
-    touchStateRef.current.activeFingers = e.touches.length;
-    if (e.touches.length === 0) {
-      touchStateRef.current.zooming = false;
+      gesture.zooming = false;
     }
   };
 
@@ -646,12 +682,14 @@ export function ContinuousA4Pdf({
     return next;
   }, [primaryPage, pageCount]);
 
-  const scaledDocumentWidth = A4_PAGE_WIDTH * zoom;
+  const scaledDocumentWidth = A4_PAGE_WIDTH * viewTransform.scale;
   const currentRatio = pageAspectRatios.get(primaryPage) || defaultPageAspectRatio;
-  const scaledDocumentHeight = A4_PAGE_WIDTH * currentRatio * zoom;
+  const scaledDocumentHeight = A4_PAGE_WIDTH * currentRatio * viewTransform.scale;
+
+  const isZoomedIn = viewTransform.scale > fitZoomRef.current * 1.05;
 
   const surfaceStyle = {
-    "--workspace-a4-zoom": zoom,
+    "--workspace-a4-zoom": viewTransform.scale,
     width: "100%",
     height: "100%",
     display: "flex",
@@ -659,7 +697,7 @@ export function ContinuousA4Pdf({
     justifyContent: "center",
     overflow: "hidden",
     position: "relative",
-    touchAction: touchStateRef.current?.isZoomedIn ? "none" : "pan-y pinch-zoom"
+    touchAction: isZoomedIn ? "none" : "pan-y pinch-zoom"
   };
 
   const liveLayerStyle = {
@@ -672,12 +710,13 @@ export function ContinuousA4Pdf({
   };
 
   const documentStyle = {
-    "--workspace-a4-zoom": zoom,
+    "--workspace-a4-zoom": viewTransform.scale,
     "--workspace-a4-page-gap": `${A4_PAGE_GAP}px`,
-    transform: `translate(${panState.x}px, ${panState.y}px) scale(${zoom})`,
+    transform: `translate(${viewTransform.panX}px, ${viewTransform.panY}px) scale(${viewTransform.scale})`,
     display: "flex",
     transition: "transform 0.3s ease-out",
-    transformOrigin: "center center"
+    transformOrigin: "0 0",
+    willChange: "transform"
   };
 
   return (
@@ -692,7 +731,7 @@ export function ContinuousA4Pdf({
       </button>
 
       <div ref={documentRootRef} className="workspace-v2-a4-live-layer" style={liveLayerStyle} aria-busy={Boolean(status)}>
-        <div ref={transformRef} className="workspace-v2-a4-document" style={documentStyle}>
+        <div ref={pageContainerRef} className="workspace-v2-a4-document" style={documentStyle}>
         {pages.map((pageNumber) => {
           const isVisible = pagesToRender.has(pageNumber);
           if (!isVisible) return null;
