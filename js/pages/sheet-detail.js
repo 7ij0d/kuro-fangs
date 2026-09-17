@@ -106,12 +106,21 @@ const SheetDetailPage = {
             </div>
           </div>
 
-          <!-- Discussion Trigger Button -->
-          <button id="btn-toggle-discussion" style="background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-weight: 700; font-size: 0.825rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; flex-shrink: 0;">
-            <span style="font-size: 0.95rem;">💬</span>
-            <span>${isAr ? 'المناقشة' : 'Discussion'}</span>
-            <span id="discussion-count-badge" style="background: rgba(255,255,255,0.25); padding: 1px 7px; border-radius: 10px; font-size: 0.725rem; font-weight: 800;">${comments.length}</span>
-          </button>
+          <!-- Actions Group: Edit Sheet + Discussion -->
+          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <!-- Edit Sheet Button -->
+            <button id="btn-edit-sheet-studio" style="background: rgba(255,255,255,0.08); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.15s ease;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
+              <span style="font-size: 0.95rem;">✏️</span>
+              <span>${isAr ? 'تعديل الشيت' : 'Edit'}</span>
+            </button>
+
+            <!-- Discussion Trigger Button -->
+            <button id="btn-toggle-discussion" style="background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-weight: 700; font-size: 0.825rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; flex-shrink: 0;">
+              <span style="font-size: 0.95rem;">💬</span>
+              <span>${isAr ? 'المناقشة' : 'Discussion'}</span>
+              <span id="discussion-count-badge" style="background: rgba(255,255,255,0.25); padding: 1px 7px; border-radius: 10px; font-size: 0.725rem; font-weight: 800;">${comments.length}</span>
+            </button>
+          </div>
         </header>
 
         <!-- PDF Viewer Container fills remaining space -->
@@ -174,6 +183,26 @@ const SheetDetailPage = {
         studioContainer.appendChild(iframe);
       }
       mountPdfViewer();
+    }
+
+    const btnEditStudio = document.getElementById('btn-edit-sheet-studio');
+    if (btnEditStudio) {
+      btnEditStudio.addEventListener('click', () => {
+        if (typeof window.showEditSheetModal === 'function') {
+          window.showEditSheetModal(sheet.id, async (updatedSheet, updates) => {
+            if (updatedSheet) sheet = updatedSheet;
+            // Update title text in header
+            const titleDisplay = document.querySelector('#sheet-studio-header div span:last-child');
+            if (titleDisplay && updates.title) {
+              titleDisplay.textContent = updates.title;
+            }
+            // If PDF file or URL changed, remount viewer
+            if (updates.pdf_source || updates.pdf_url) {
+              mountPdfViewer();
+            }
+          });
+        }
+      });
     }
 
     const btnBackStudio = document.getElementById('btn-back-from-studio');

@@ -302,6 +302,10 @@ window.AdminPage = (function () {
   }
 
   function showEditSheetModal(sheetId, subjects, isAr, reRenderCallback) {
+    if (typeof window.showEditSheetModal === 'function') {
+      window.showEditSheetModal(sheetId, reRenderCallback);
+      return;
+    }
     let sheet = null;
     if (window.DATA && Array.isArray(window.DATA.sheets)) {
       sheet = window.DATA.sheets.find(s => s.id === sheetId);
