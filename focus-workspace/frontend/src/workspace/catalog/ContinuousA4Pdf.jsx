@@ -229,6 +229,20 @@ export function ContinuousA4Pdf({
   const [pageAspectRatios, setPageAspectRatios] = useState(() => new Map());
   const pageGeometryReady = pageAspectRatios.size > 0 || Boolean(pdfError);
   
+  const zoomRef = useRef(1);
+  const panXRef = useRef(0);
+  const panYRef = useRef(0);
+  const pageContainerRef = useRef(null);
+  const [viewTransform, setViewTransform] = useState({ scale: 1, panX: 0, panY: 0 });
+  const fitZoomRef = useRef(1);
+  
+  const gestureRef = useRef({
+    startX: 0, startY: 0,
+    startScale: 1, startPanX: 0, startPanY: 0,
+    startDist: 0, focalX: 0, focalY: 0,
+    zooming: false
+  });
+  
   const [stageViewport, setStageViewport] = useState(() => ({
     width: Math.max(1, stageRef.current?.clientWidth || window.innerWidth),
     height: Math.max(1, stageRef.current?.clientHeight || window.innerHeight)
@@ -479,13 +493,6 @@ export function ContinuousA4Pdf({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [commitPrimaryPage]);
 
-  const zoomRef = useRef(1);
-  const panXRef = useRef(0);
-  const panYRef = useRef(0);
-  const pageContainerRef = useRef(null);
-  const [viewTransform, setViewTransform] = useState({ scale: 1, panX: 0, panY: 0 });
-  const fitZoomRef = useRef(1);
-
   // Initial fit-to-page logic
   useEffect(() => {
     if (!stageViewport || !naturalDimensionsRef.current) return;
@@ -512,13 +519,6 @@ export function ContinuousA4Pdf({
       pageContainerRef.current.style.transform = `translate(${initialPanX}px, ${initialPanY}px) scale(${fitZoom})`;
     }
   }, [stageViewport, documentProxy]);
-
-  const gestureRef = useRef({
-    startX: 0, startY: 0,
-    startScale: 1, startPanX: 0, startPanY: 0,
-    startDist: 0, focalX: 0, focalY: 0,
-    zooming: false
-  });
 
   const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 
