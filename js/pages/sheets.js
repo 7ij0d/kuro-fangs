@@ -154,17 +154,10 @@ const SheetsPage = {
               </button>
             </div>
 
-            <div style="display: inline-flex; align-items: center; gap: 8px;">
-              <button type="button" class="btn btn-secondary btn-sm btn-edit-sheet-card" data-id="${item.id}" style="font-size: 0.8rem; gap: 4px; color: #38BDF8; border-color: rgba(56, 189, 248, 0.35); padding: 5px 10px;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
-                <span>✏️</span>
-                <span>${isAr ? 'تعديل' : 'Edit'}</span>
-              </button>
-
-              <a href="#/sheet-detail?id=${item.id}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; gap: 4px;">
-                <span>${isAr ? 'صفحة الشيت' : 'Full Page'}</span>
-                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 13px; height: 13px;"></i>
-              </a>
-            </div>
+            <a href="#/sheet-detail?id=${item.id}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; gap: 4px;">
+              <span>${isAr ? 'صفحة الشيت' : 'Full Page'}</span>
+              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 13px; height: 13px;"></i>
+            </a>
           </div>
         </div>
       `).join('');
@@ -175,22 +168,9 @@ const SheetsPage = {
       listContainer.querySelectorAll('.sheet-modern-card').forEach(card => {
         card.style.cursor = 'pointer';
         card.addEventListener('click', (e) => {
-          if (e.target.closest('.download-sheet-btn') || e.target.closest('.btn-edit-sheet-card')) return;
+          if (e.target.closest('.download-sheet-btn')) return;
           const sheetId = card.getAttribute('data-id');
           if (sheetId) window.location.hash = '#/sheet-detail?id=' + sheetId;
-        });
-      });
-
-      listContainer.querySelectorAll('.btn-edit-sheet-card').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const sId = btn.getAttribute('data-id');
-          if (typeof window.showEditSheetModal === 'function') {
-            window.showEditSheetModal(sId, () => {
-              allSheets = getAllSheets();
-              renderList();
-            });
-          }
         });
       });
 

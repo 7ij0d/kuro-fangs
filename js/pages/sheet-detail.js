@@ -59,6 +59,7 @@ const SheetDetailPage = {
     const date = sheet.date || '2026-09-11';
     const fileType = sheet.type || 'PDF Sheet';
     const isFav = window.STORE ? window.STORE.isFavorite(sheet.id, 'sheet') : false;
+    const isAdmin = Boolean(sessionStorage.getItem('kf_admin_auth') === 'true' || (window.AdminPage && window.AdminPage.checkAuth && window.AdminPage.checkAuth()));
 
     // Load saved comments for this sheet
     const commentsKey = 'kf_sheet_comments_' + sheet.id;
@@ -106,13 +107,15 @@ const SheetDetailPage = {
             </div>
           </div>
 
-          <!-- Actions Group: Edit Sheet + Discussion -->
+          <!-- Actions Group: Edit Sheet (Admin Only) + Discussion -->
           <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-            <!-- Edit Sheet Button -->
-            <button id="btn-edit-sheet-studio" style="background: rgba(255,255,255,0.08); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.15s ease;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
-              <span style="font-size: 0.95rem;">✏️</span>
-              <span>${isAr ? 'تعديل الشيت' : 'Edit'}</span>
-            </button>
+            ${isAdmin ? `
+              <!-- Edit Sheet Button (Admin Only) -->
+              <button id="btn-edit-sheet-studio" style="background: rgba(255,255,255,0.08); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.15s ease;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
+                <span style="font-size: 0.95rem;">✏️</span>
+                <span>${isAr ? 'تعديل الشيت' : 'Edit'}</span>
+              </button>
+            ` : ''}
 
             <!-- Discussion Trigger Button -->
             <button id="btn-toggle-discussion" style="background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-weight: 700; font-size: 0.825rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; flex-shrink: 0;">

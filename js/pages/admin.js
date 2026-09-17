@@ -169,27 +169,27 @@ window.AdminPage = (function () {
     if (confirmEl) confirmEl.remove();
 
     const markup = `
-      <div id="admin-confirm-backdrop" class="doc-viewer-backdrop active" style="z-index: 100000; background: rgba(10, 11, 18, 0.88); backdrop-filter: blur(12px);">
-        <div class="card" style="max-width: 440px; width: 90%; padding: 28px 24px; border-radius: 20px; text-align: center; border: 1.5px solid #EF4444; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: docZoomIn 0.2s ease;">
-          <div style="width: 64px; height: 64px; margin: 0 auto 14px; background: rgba(239, 68, 68, 0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #EF4444;">
-            <i data-lucide="alert-triangle" style="width: 32px; height: 32px;"></i>
+      <div id="admin-confirm-backdrop" class="kf-modal-backdrop">
+        <div class="kf-modal-card" style="text-align: center; padding: 24px 20px; max-width: 400px;">
+          <div style="width: 44px; height: 44px; margin: 0 auto 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #EF4444;">
+            <i data-lucide="alert-triangle" style="width: 22px; height: 22px;"></i>
           </div>
-          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">
-            ${isAr ? 'تأكيد الحذف النهائي' : 'Confirm Permanent Deletion'}
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">
+            ${isAr ? 'تأكيد الحذف النهائي' : 'Confirm Deletion'}
           </h3>
-          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+          <p style="font-size: 0.835rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5;">
             ${isAr 
-              ? `هل أنت تأكد من رغبتك في حذف <strong>"${itemTitle}"</strong>؟ سيتم إزالته فوراً ومنع ظهوره لجميع الطلبة على المنصة نهائياً.` 
-              : `Are you sure you want to permanently delete <strong>"${itemTitle}"</strong>? It will be removed from all student views immediately.`}
+              ? `هل أنت متأكد من رغبتك في حذف <strong>"${itemTitle}"</strong>؟` 
+              : `Are you sure you want to delete <strong>"${itemTitle}"</strong>?`}
           </p>
 
-          <div style="display: flex; gap: 10px; justify-content: center;">
-            <button id="btn-cancel-delete" class="btn btn-secondary" style="flex: 1; padding: 10px; font-weight: 700;">
+          <div style="display: flex; gap: 8px; justify-content: center;">
+            <button id="btn-cancel-delete" class="btn btn-secondary btn-sm" style="flex: 1; padding: 9px; font-weight: 600;">
               ${isAr ? 'إلغاء' : 'Cancel'}
             </button>
-            <button id="btn-confirm-delete" class="btn btn-primary" style="flex: 1; background: #EF4444; border-color: #EF4444; padding: 10px; font-weight: 800; gap: 6px;">
-              <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
-              <span>${isAr ? 'نعم، احذف نهائياً' : 'Delete Permanently'}</span>
+            <button id="btn-confirm-delete" class="btn btn-primary btn-sm" style="flex: 1; background: #EF4444; border-color: #EF4444; padding: 9px; font-weight: 700; gap: 6px;">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+              <span>${isAr ? 'حذف نهائي' : 'Delete'}</span>
             </button>
           </div>
         </div>
@@ -344,6 +344,10 @@ window.AdminPage = (function () {
               <input type="text" id="edit-sheet-doctor" class="auth-input" value="${sheet.doctor_name || ''}" placeholder="${isAr ? 'اسم الدكتور' : 'Doctor Name'}" />
             </div>
             <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'تاريخ أو وقت المحاضرة:' : 'Date / Time:'}</label>
+              <input type="text" id="edit-sheet-date" class="auth-input" value="${sheet.date || ''}" placeholder="${isAr ? 'تاريخ أو وقت المحاضرة' : 'Date or Time'}" />
+            </div>
+            <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'الترتيب (Order):' : 'Order Index:'}</label>
               <select id="edit-sheet-order" class="auth-input">
                 <option value="auto">${isAr ? 'تلقائي (آخر ترتيب)' : 'Auto'}</option>
@@ -389,6 +393,7 @@ window.AdminPage = (function () {
         title: singleTitle,
         subject_id: document.getElementById('edit-sheet-subject').value,
         doctor_name: document.getElementById('edit-sheet-doctor').value.trim(),
+        date: document.getElementById('edit-sheet-date')?.value.trim() || '',
       };
       
       const orderVal = document.getElementById('edit-sheet-order').value;
@@ -473,46 +478,33 @@ window.AdminPage = (function () {
   // --- RENDER AUTH PROMPT ---
   function renderAuthPrompt(container, isAr) {
     container.innerHTML = `
-      <div class="admin-auth-wrapper" style="max-width: 480px; margin: 60px auto; padding: 40px 30px; background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 20px; box-shadow: var(--shadow-lg); text-align: center;">
-        <div style="width: 72px; height: 72px; margin: 0 auto 18px; background: rgba(190, 18, 60, 0.12); border: 1.5px solid rgba(190, 18, 60, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-          <i data-lucide="shield-alert" style="width: 34px; height: 34px; color: var(--brand-burgundy);"></i>
-        </div>
-        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; color: var(--text-primary);">
-          ${isAr ? 'بوابة الآدمن والتحكم الكامل بالمنصة' : 'Super-Admin Control Center'}
-        </h2>
-        <div class="badge badge-primary" style="display: inline-flex; margin-bottom: 16px; font-size: 0.775rem;">
-          ${isAr ? 'منطقة محمية 100% • إدارة كلية طب الأسنان' : '100% Protected Area • Super-Admin'}
-        </div>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">
-          ${isAr 
-            ? 'تتيح هذه اللوحة التحكم الشامل: إضافة وتعديل وحذف الشيتات والإعلانات، واستعراض كافة حسابات الطلبة مع الأسماء والرموز السرية والنقاط وتعديل الجداول.' 
-            : 'Full control center to add, edit, and delete sheets, announcements, student accounts, passcodes, and schedules.'}
-        </p>
+      <div class="kf-vault-wrapper">
+        <div class="kf-vault-card">
+          <div class="kf-vault-seal">
+            <i data-lucide="shield" style="width: 26px; height: 26px;"></i>
+          </div>
+          <h2>${isAr ? 'مركز قيادة المنصة' : 'Admin Console'}</h2>
+          <p>${isAr ? 'منطقة محمية ومخصصة لإدارة المحتوى الأكاديمي والطلبة' : 'Secured access for academic content and student administration'}</p>
 
-        <form id="admin-passcode-form">
-          <div style="margin-bottom: 18px; text-align: ${isAr ? 'right' : 'left'};">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">
-              ${isAr ? 'رمز مرور الآدمن (Admin Passcode):' : 'Admin Passcode:'}
-            </label>
-            <div style="position: relative;">
-              <input type="password" id="admin-passcode-input" class="auth-input" placeholder="••••••••" required style="width: 100%; font-size: 1.2rem; text-align: center; letter-spacing: 5px; padding: 12px;" />
+          <form id="admin-passcode-form">
+            <div class="kf-input-group">
+              <input type="password" id="admin-passcode-input" class="kf-input" placeholder="${isAr ? 'أدخل رمز المرور...' : 'Enter passcode...'}" required style="text-align: center; letter-spacing: 5px; font-size: 1.15rem; font-family: monospace;" />
             </div>
 
+            <div id="admin-auth-error" style="display: none; color: #EF4444; font-size: 0.8125rem; font-weight: 600; margin-bottom: 12px; background: rgba(239, 68, 68, 0.08); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);"></div>
+
+            <button type="submit" class="kf-btn-tactile">
+              <i data-lucide="key-round" style="width: 16px; height: 16px;"></i>
+              <span>${isAr ? 'تأكيد الدخول' : 'Authenticate'}</span>
+            </button>
+          </form>
+
+          <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">
+            <a href="#/" class="btn btn-secondary btn-sm" style="font-size: 0.775rem; gap: 6px; width: 100%; justify-content: center;">
+              <i data-lucide="arrow-left" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? 'العودة للمنصة كطالب' : 'Return to Student Portal'}</span>
+            </a>
           </div>
-
-          <div id="admin-auth-error" style="display: none; color: #EF4444; font-size: 0.825rem; font-weight: 700; margin-bottom: 14px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;"></div>
-
-          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 13px; font-weight: 800; gap: 8px; font-size: 0.95rem;">
-            <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
-            <span>${isAr ? 'دخول لوحة الآدمن ⚡' : 'Enter Super-Admin Dashboard ⚡'}</span>
-          </button>
-        </form>
-
-        <div style="margin-top: 22px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <a href="#/" class="btn btn-secondary btn-sm" style="gap: 6px; font-size: 0.775rem;">
-            <i data-lucide="arrow-left" style="width: 13px; height: 13px;"></i>
-            <span>${isAr ? 'العودة للمنصة كطالب' : 'Return to Student App'}</span>
-          </a>
         </div>
       </div>
     `;
@@ -564,67 +556,59 @@ window.AdminPage = (function () {
     const isGlobalSyncActive = hasGitSync || hasCloudSync;
 
     container.innerHTML = `
-      <style>
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
-      </style>
-      <div class="admin-dashboard-wrapper" style="padding-bottom: 60px;">
+      <div class="kf-admin-shell">
         
-        <!-- Header -->
-        <div class="exams-page-header" style="margin-bottom: 20px;">
-          <div class="page-title-group">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-              <span class="badge badge-primary" style="background: #BE123C; color: #FFFFFF; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 8px;">
-                <i data-lucide="shield-check" style="width: 13px; height: 13px; display: inline-block;"></i>
-                ${isAr ? 'مركز التحكم الشامل بالآدمن (Super-Admin Portal)' : 'Super-Admin Control Center'}
-              </span>
-
+        <!-- Modern Header -->
+        <div class="kf-admin-header">
+          <div class="kf-admin-title-wrap">
+            <div class="kf-admin-breadcrumb">
+              <span class="kf-pulse-dot"></span>
+              <span>KURO FANGS • CONTROL CENTER</span>
             </div>
             <h1>
-              <i data-lucide="sliders" style="color: var(--brand-burgundy); width: 28px; height: 28px;"></i>
-              ${isAr ? 'لوحة الإدارة والتحكم الكامل بالمنصة والشيتات وحسابات الطلبة' : 'Full Platform & Student Accounts Control Center'}
+              <i data-lucide="sliders-horizontal" style="width: 26px; height: 26px; color: var(--brand-accent);"></i>
+              <span>${isAr ? 'لوحة الإدارة والتحكم' : 'Management & Operations'}</span>
             </h1>
-            <p>${isAr ? 'إضافة وتعديل وحذف الشيتات والإعلانات والجداول، واستعراض كافة حسابات ومطالعة رموز مرور الطلبة' : 'Manage, edit & delete sheets, announcements, timetables, and view registered student credentials'}</p>
+            <p>${isAr ? 'إدارة الشيتات والمواد الدراسية، نشر الإعلانات الفورية، حسابات الطلبة، والمزامنة السحابية' : 'Manage academic sheets, announcements, student accounts, and cloud storage'}</p>
           </div>
 
-          <div class="exams-header-actions no-print">
-            <button id="btn-admin-logout" class="btn btn-secondary btn-sm" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.3); font-weight: 700; gap: 6px;">
+          <div class="kf-admin-header-actions no-print">
+            <button id="btn-admin-logout" class="btn btn-secondary btn-sm" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.25); font-weight: 600; gap: 6px;">
               <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
-              <span>${isAr ? 'خروج الآدمن' : 'Logout Admin'}</span>
+              <span>${isAr ? 'خروج' : 'Logout'}</span>
             </button>
           </div>
         </div>
 
-        <!-- Navigation Tabs -->
-        <div style="display: flex; gap: 10px; border-bottom: 2px solid var(--border-subtle); margin-bottom: 24px; padding-bottom: 4px; overflow-x: auto; scrollbar-width: thin;">
-          <button class="btn ${activeTab === 'overview' ? 'btn-primary' : 'btn-secondary'} admin-tab-btn" data-tab="overview" style="font-weight: 800; gap: 6px; padding: 8px 16px; white-space: nowrap;">
-            <i data-lucide="layout-dashboard" style="width: 16px; height: 16px;"></i>
-            <span>${isAr ? '📊 نظرة عامة' : 'Overview'}</span>
+        <!-- Segmented Navigation (Linear Style) -->
+        <div class="kf-segmented-nav">
+          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'overview' ? 'active' : ''}" data-tab="overview">
+            <i data-lucide="layout-grid" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'نظرة عامة' : 'Overview'}</span>
           </button>
 
-          <button class="btn ${activeTab === 'sheets' ? 'btn-primary' : 'btn-secondary'} admin-tab-btn" data-tab="sheets" style="font-weight: 800; gap: 6px; padding: 8px 16px; white-space: nowrap;">
-            <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
-            <span>${isAr ? '📁 إدارة الشيتات (إضافة/تعديل/حذف)' : 'Manage Sheets'}</span>
-            <span class="badge" style="background: rgba(255,255,255,0.2); font-size: 0.7rem;">${sheets.length}</span>
+          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'sheets' ? 'active' : ''}" data-tab="sheets">
+            <i data-lucide="file-text" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'الشيتات' : 'Sheets'}</span>
+            <span class="kf-segmented-badge">${sheets.length}</span>
           </button>
 
-          <button class="btn ${activeTab === 'alerts' ? 'btn-primary' : 'btn-secondary'} admin-tab-btn" data-tab="alerts" style="font-weight: 800; gap: 6px; padding: 8px 16px; white-space: nowrap;">
-            <i data-lucide="megaphone" style="width: 16px; height: 16px;"></i>
-            <span>${isAr ? '📢 إدارة الإعلانات (إضافة/تعديل/حذف)' : 'Manage Alerts'}</span>
-            <span class="badge" style="background: rgba(255,255,255,0.2); font-size: 0.7rem;">${alerts.length}</span>
+          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'alerts' ? 'active' : ''}" data-tab="alerts">
+            <i data-lucide="bell" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'الإعلانات' : 'Alerts'}</span>
+            <span class="kf-segmented-badge">${alerts.length}</span>
           </button>
 
-          <button class="btn ${activeTab === 'students' ? 'btn-primary' : 'btn-secondary'} admin-tab-btn" data-tab="students" style="font-weight: 800; gap: 6px; padding: 8px 16px; white-space: nowrap;">
-            <i data-lucide="users" style="width: 16px; height: 16px;"></i>
-            <span>${isAr ? '👥 حسابات الطلبة والرموز السرية' : 'Student Accounts & Passcodes'}</span>
-            <span class="badge" style="background: rgba(255,255,255,0.2); font-size: 0.7rem;">${students.length}</span>
+          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'students' ? 'active' : ''}" data-tab="students">
+            <i data-lucide="users" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'الطلبة' : 'Students'}</span>
+            <span class="kf-segmented-badge">${students.length}</span>
           </button>
 
-          <button class="btn ${activeTab === 'sync' ? 'btn-primary' : 'btn-secondary'} admin-tab-btn" data-tab="sync" style="font-weight: 800; gap: 6px; padding: 8px 16px; white-space: nowrap; ${activeTab !== 'sync' && !isGlobalSyncActive ? 'border-color: rgba(245, 158, 11, 0.4);' : ''}">
-            <i data-lucide="cloud" style="width: 16px; height: 16px;"></i>
-            <span>${isAr ? '🌐 المزامنة السحابية والمستودع' : 'Cloud & Repo Sync'}</span>
-            <span class="badge" style="background: ${isGlobalSyncActive ? 'rgba(16,185,129,0.2); color: #34D399' : 'rgba(245,158,11,0.2); color: #FBBF24'}; font-size: 0.7rem; font-weight: 800;">${isGlobalSyncActive ? (isAr ? '🟢 متصل' : '🟢 Active') : (isAr ? '⚠️ إعداد' : '⚠️ Setup')}</span>
+          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'sync' ? 'active' : ''}" data-tab="sync">
+            <i data-lucide="cloud" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'المزامنة السحابية' : 'Cloud Sync'}</span>
+            <span class="kf-pulse-dot ${isGlobalSyncActive ? '' : 'warning'}"></span>
           </button>
         </div>
 
@@ -666,74 +650,114 @@ window.AdminPage = (function () {
 
   // --- OVERVIEW TAB ---
   function renderOverviewTab(isAr, sheets, alerts, subjects, students) {
+    const hasGitSync = Boolean(window.KuroGitSync && window.KuroGitSync.hasToken());
+    const hasCloudSync = Boolean(window.KuroCloud && window.KuroCloud.getCredentials && window.KuroCloud.getCredentials().isConfigured);
+    const isGlobalSyncActive = hasGitSync || hasCloudSync;
+
     return `
       <div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
-          <div class="card" style="padding: 20px; border-radius: 16px; border-left: 4px solid var(--brand-primary);">
-            <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 700;">${isAr ? 'إجمالي الملازم المتاحة للطلبة' : 'Published Handouts'}</div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: var(--brand-primary); margin-top: 4px;">${sheets.length}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Active sheets in database</div>
+        <div class="kf-bento-grid">
+          <div class="kf-bento-card">
+            <div class="kf-bento-header">
+              <span class="kf-bento-label">${isAr ? 'الشيتات والملازم' : 'Academic Sheets'}</span>
+              <div class="kf-bento-icon-wrap">
+                <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
+              </div>
+            </div>
+            <div class="kf-bento-value">${sheets.length}</div>
+            <div class="kf-bento-footer">
+              <span class="kf-pulse-dot"></span>
+              <span>${isAr ? 'متاحة للطلبة في قاعدة البيانات' : 'Published & indexed'}</span>
+            </div>
           </div>
 
-          <div class="card" style="padding: 20px; border-radius: 16px; border-left: 4px solid #0284C7;">
-            <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 700;">${isAr ? 'الإعلانات الرسمية النشطة' : 'Faculty Announcements'}</div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: #0284C7; margin-top: 4px;">${alerts.length}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Published on homepage</div>
+          <div class="kf-bento-card">
+            <div class="kf-bento-header">
+              <span class="kf-bento-label">${isAr ? 'الإعلانات النشطة' : 'Active Alerts'}</span>
+              <div class="kf-bento-icon-wrap">
+                <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
+              </div>
+            </div>
+            <div class="kf-bento-value">${alerts.length}</div>
+            <div class="kf-bento-footer">
+              <i data-lucide="megaphone" style="width: 13px; height: 13px; color: var(--text-muted);"></i>
+              <span>${isAr ? 'منشورة في الواجهة الرئيسية' : 'Broadcasting on homepage'}</span>
+            </div>
           </div>
 
-          <div class="card" style="padding: 20px; border-radius: 16px; border-left: 4px solid #10B981;">
-            <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 700;">${isAr ? 'حسابات الطلبة المسجلة' : 'Registered Students'}</div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: #10B981; margin-top: 4px;">${students.length}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Students with passcodes</div>
+          <div class="kf-bento-card">
+            <div class="kf-bento-header">
+              <span class="kf-bento-label">${isAr ? 'حسابات الطلبة' : 'Registered Students'}</span>
+              <div class="kf-bento-icon-wrap">
+                <i data-lucide="users" style="width: 16px; height: 16px;"></i>
+              </div>
+            </div>
+            <div class="kf-bento-value">${students.length}</div>
+            <div class="kf-bento-footer">
+              <i data-lucide="check-check" style="width: 13px; height: 13px; color: #10B981;"></i>
+              <span>${isAr ? 'حسابات مفعلة برمز مرور' : 'Verified credentials'}</span>
+            </div>
+          </div>
+
+          <div class="kf-bento-card">
+            <div class="kf-bento-header">
+              <span class="kf-bento-label">${isAr ? 'المزامنة السحابية' : 'Cloud Sync'}</span>
+              <div class="kf-bento-icon-wrap">
+                <i data-lucide="cloud" style="width: 16px; height: 16px;"></i>
+              </div>
+            </div>
+            <div class="kf-bento-value" style="font-size: 1.35rem; display: flex; align-items: center; gap: 8px;">
+              <span class="kf-pulse-dot ${isGlobalSyncActive ? '' : 'warning'}"></span>
+              <span style="font-size: 1.05rem;">${isGlobalSyncActive ? (isAr ? 'متصل ومحمي' : 'Active & Synced') : (isAr ? 'بحاجة لإعداد' : 'Needs Config')}</span>
+            </div>
+            <div class="kf-bento-footer">
+              <span>${hasGitSync ? 'GitHub Sync ✅' : ''} ${hasCloudSync ? '• Supabase ✅' : ''}</span>
+            </div>
           </div>
         </div>
 
         <!-- Google OAuth & Cloud Auth Setup Guide -->
-        <div class="card" style="padding: 24px; border-radius: 16px; margin-top: 20px; border-left: 4px solid #4285F4; background: var(--bg-card);">
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(66, 133, 244, 0.12); display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 24 24" width="20" height="20">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-              </div>
-              <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-primary);">
-                ${isAr ? 'دليل إعداد تفعيل تسجيل الدخول بحساب Google (Supabase Google Auth)' : 'Google OAuth Configuration Guide'}
-              </h4>
+        <div class="kf-panel">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>${isAr ? 'دليل تفعيل تسجيل الدخول بحساب Google (Supabase Auth)' : 'Google OAuth Configuration Guide'}</span>
             </div>
-            <span class="badge" style="background: rgba(66, 133, 244, 0.15); color: #60A5FA; font-weight: 700; font-size: 0.75rem;">
-              ${isAr ? 'إرشادات إدارة الكلية' : 'Faculty Setup Guide'}
-            </span>
+            <span class="kf-segmented-badge">${isAr ? 'إرشادات الكلية' : 'Faculty Guide'}</span>
           </div>
 
-          <p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px;">
-            ${isAr 
-              ? 'لتفعيل تسجيل دخول الطلبة بنقرة واحدة عبر حساب Google الرسمي بدون أخطاء، يرجى استكمال الخطوات التالية داخل لوحة تحكم Supabase:' 
-              : 'To enable 1-click student sign-in with Google without configuration errors, complete these steps in your Supabase Dashboard:'}
-          </p>
+          <div class="kf-panel-body">
+            <p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+              ${isAr 
+                ? 'لتفعيل تسجيل دخول الطلبة بنقرة واحدة عبر حساب Google الرسمي بدون أخطاء، يرجى استكمال الخطوات التالية داخل لوحة تحكم Supabase:' 
+                : 'To enable 1-click student sign-in with Google without errors, complete these steps in your Supabase Dashboard:'}
+            </p>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 0.8rem;">
-            <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-              <div style="font-weight: 800; color: var(--brand-primary); margin-bottom: 4px;">1. الانتقال للمزودين (Providers)</div>
-              <div style="color: var(--text-muted); font-size: 0.775rem;">افتح <code>Authentication</code> ← <code>Providers</code> ثم اختر <code>Google</code>.</div>
-            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 0.8rem;">
+              <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">1. المزودين (Providers)</div>
+                <div style="color: var(--text-secondary); font-size: 0.775rem;">افتح <code>Authentication</code> ← <code>Providers</code> ثم اختر <code>Google</code>.</div>
+              </div>
 
-            <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-              <div style="font-weight: 800; color: var(--brand-primary); margin-bottom: 4px;">2. تفعيل المزود (Enable)</div>
-              <div style="color: var(--text-muted); font-size: 0.775rem;">فعّل خيار <code>Enable Google Provider</code>.</div>
-            </div>
+              <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">2. تفعيل المزود (Enable)</div>
+                <div style="color: var(--text-secondary); font-size: 0.775rem;">فعّل خيار <code>Enable Google Provider</code>.</div>
+              </div>
 
-            <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-              <div style="font-weight: 800; color: var(--brand-primary); margin-bottom: 4px;">3. إدخال المفاتيح (Keys)</div>
-              <div style="color: var(--text-muted); font-size: 0.775rem;">أدخل <code>Client ID</code> و <code>Client Secret</code> من Google Cloud Console.</div>
-            </div>
+              <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">3. إدخال المفاتيح (Keys)</div>
+                <div style="color: var(--text-secondary); font-size: 0.775rem;">أدخل <code>Client ID</code> و <code>Client Secret</code> من Google Cloud.</div>
+              </div>
 
-            <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-              <div style="font-weight: 800; color: var(--brand-primary); margin-bottom: 4px;">4. روابط التوجيه (Redirect URI)</div>
-              <div style="color: var(--text-muted); font-size: 0.775rem;">أضف <code>https://kurofangs.id.ly</code> و <code>https://7ij0d.github.io/kuro-fangs/</code> إلى Redirect URLs.</div>
+              <div style="background: var(--bg-surface-subtle); padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">4. روابط التوجيه (Redirect)</div>
+                <div style="color: var(--text-secondary); font-size: 0.775rem;">أضف <code>https://kurofangs.id.ly</code> إلى Redirect URLs.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -855,6 +879,12 @@ window.AdminPage = (function () {
               <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="${isAr ? 'اسم أستاذ المادة...' : 'Doctor name...'}" required />
             </div>
 
+            <!-- 2.5 Lecture Date/Time Field -->
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'تاريخ أو وقت المحاضرة:' : 'Lecture Date / Time:'}</label>
+              <input type="text" id="add-sheet-date" class="auth-input" placeholder="${isAr ? 'مثال: 2026-09-18 أو الأحد 10:00 صباحاً' : 'e.g. 2026-09-18 or Sunday 10:00 AM'}" />
+            </div>
+
             <!-- 3. Subject Selection -->
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'المادة الدراسية:' : 'Subject:'}</label>
@@ -931,9 +961,13 @@ window.AdminPage = (function () {
                       <span style="font-size: 0.75rem; color: var(--text-muted); margin-inline-start: 8px;">(${s.pages || '—'} ${isAr ? 'صفحة' : 'pages'})</span>
                     </div>
                     <strong style="color: var(--text-primary); font-size: 1rem; display: block;">${s.title_ar || s.title_en || s.title || ''}</strong>
-                    <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">${s.subject_name || s.subject_id}${s.doctor_name ? ` • <span style="color: var(--text-muted);">${s.doctor_name}</span>` : ''}</div>
+                    <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">${s.subject_name || s.subject_id}${s.doctor_name ? ` • <span style="color: var(--text-muted);">${s.doctor_name}</span>` : ''}${s.date ? ` • <span style="color: #38BDF8; font-size: 0.75rem;">🕒 ${s.date}</span>` : ''}</div>
                   </div>
                   <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn-edit-sheet" data-id="${s.id}" style="background: #0284C7; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; transition: background 0.2s;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
+                      <span>✏️</span>
+                      <span>${isAr ? 'تعديل' : 'Edit'}</span>
+                    </button>
                     <button class="btn-move-up-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Up">⬆️</button>
                     <button class="btn-move-down-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Down">⬇️</button>
                     <button class="btn-delete-sheet" data-id="${s.id}" data-title="${s.title_ar || s.title_en || s.title}" style="background: #991B1B; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s;">🗑️ ${isAr ? 'حذف' : 'Delete'}</button>
@@ -1611,7 +1645,7 @@ CREATE POLICY "Allow all delete on sheets"
           pdf_source: pdf_source,
           pdf_url: finalPdfUrl,
           download_url: finalPdfUrl,
-          date: new Date().toISOString().split('T')[0]
+          date: document.getElementById('add-sheet-date')?.value.trim() || new Date().toISOString().split('T')[0]
         };
 
         // 3. Central Supabase Cloud Sync

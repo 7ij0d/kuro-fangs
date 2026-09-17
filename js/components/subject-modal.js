@@ -306,7 +306,7 @@ const SubjectModal = {
                 </div>
               </div>
 
-              <!-- Bottom: Dual Action Buttons + Edit Button -->
+              <!-- Bottom: Dual Action Buttons -->
               <div class="modal-file-actions-row">
                 <button class="btn btn-primary btn-sm btn-action-view" onclick="event.stopPropagation(); SubjectModal.previewDoc('${item.id}');">
                   <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
@@ -316,11 +316,6 @@ const SubjectModal = {
                 <button class="btn btn-secondary btn-sm btn-action-download" onclick="event.stopPropagation(); SubjectModal.downloadDoc('${item.id}');">
                   <i data-lucide="download" style="width: 14px; height: 14px;"></i>
                   <span>${isAr ? 'تنزيل PDF' : 'Download'}</span>
-                </button>
-
-                <button class="btn btn-secondary btn-sm btn-action-edit" onclick="event.stopPropagation(); window.showEditSheetModal('${item.id}', () => SubjectModal.renderCategoryFiles('${categoryId}'));" style="color: #38BDF8; border-color: rgba(56, 189, 248, 0.35); padding: 5px 10px;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
-                  <span>✏️</span>
-                  <span>${isAr ? 'تعديل' : 'Edit'}</span>
                 </button>
               </div>
             </div>
