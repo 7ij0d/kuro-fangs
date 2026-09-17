@@ -90,21 +90,33 @@ const SheetDetailPage = {
 
     container.innerHTML = `
       <div id="sheet-studio-fullscreen-root" class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; max-height: 100dvh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 99990; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-        <div id="sheet-studio-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;"></div>
+        <!-- Clean Dedicated Kuro Fangs Header (Docked, never covers PDF tools) -->
+        <header id="sheet-studio-header" style="height: 48px; min-height: 48px; background: #0E101A; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; flex-shrink: 0; z-index: 100000; direction: ${isAr ? 'rtl' : 'ltr'}; font-family: inherit; user-select: none;">
+          <!-- Back Button -->
+          <button id="btn-back-from-studio" style="background: rgba(255,255,255,0.07); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.15s ease;">
+            <span style="font-size: 1.1rem; line-height: 1;">${isAr ? '➔' : '←'}</span>
+            <span>${isAr ? 'الرجوع للمادة' : 'Back'}</span>
+          </button>
+
+          <!-- Sheet Title -->
+          <div style="flex: 1; min-width: 0; padding: 0 12px; text-align: center;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: #F8FAFC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 6px; max-width: 100%;">
+              <span>📄</span>
+              <span>${title}</span>
+            </div>
+          </div>
+
+          <!-- Discussion Trigger Button -->
+          <button id="btn-toggle-discussion" style="background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 14px; font-weight: 700; font-size: 0.825rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; flex-shrink: 0;">
+            <span style="font-size: 0.95rem;">💬</span>
+            <span>${isAr ? 'المناقشة' : 'Discussion'}</span>
+            <span id="discussion-count-badge" style="background: rgba(255,255,255,0.25); padding: 1px 7px; border-radius: 10px; font-size: 0.725rem; font-weight: 800;">${comments.length}</span>
+          </button>
+        </header>
+
+        <!-- PDF Viewer Container fills remaining space -->
+        <div id="sheet-studio-container" style="flex: 1; width: 100%; height: calc(100% - 48px); display: flex; flex-direction: column; overflow: hidden; position: relative;"></div>
       </div>
-
-      <!-- Floating Return Button -->
-      <button id="btn-back-from-studio" style="position: fixed; top: 12px; ${isAr ? 'right: 16px;' : 'left: 16px;'}; z-index: 100000; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 50px; padding: 7px 16px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 4px 18px rgba(0,0,0,0.5); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s, background 0.15s;">
-        <span style="font-size: 1rem;">←</span>
-        <span>${isAr ? 'الرجوع للمادة' : 'Back'}</span>
-      </button>
-
-      <!-- Floating Discussion Trigger Button -->
-      <button id="btn-toggle-discussion" style="position: fixed; bottom: 20px; ${isAr ? 'left: 20px;' : 'right: 20px;'} z-index: 100000; background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; border: 1px solid rgba(255,255,255,0.25); border-radius: 50px; padding: 9px 16px; font-weight: 700; font-size: 0.825rem; box-shadow: 0 8px 24px rgba(2,132,199,0.55); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: inherit;">
-        <span style="font-size: 1.1rem;">💬</span>
-        <span>${isAr ? 'مناقشة وأسئلة الشيت' : 'Sheet Discussion'}</span>
-        <span id="discussion-count-badge" style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 12px; font-size: 0.725rem; font-weight: 800;">${comments.length}</span>
-      </button>
 
       <!-- Slide-Over Discussion Drawer -->
       <div id="sheet-discussion-drawer" style="position: fixed; top: 0; bottom: 0; ${isAr ? 'left: 0;' : 'right: 0;'} width: min(440px, 94vw); background: #181926; z-index: 100002; box-shadow: ${isAr ? '10px 0 45px rgba(0,0,0,0.6)' : '-10px 0 45px rgba(0,0,0,0.6)'}; display: flex; flex-direction: column; transform: ${isAr ? 'translateX(-100%)' : 'translateX(100%)'}; transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1); border-${isAr ? 'right' : 'left'}: 1px solid rgba(255,255,255,0.1); color: #F8FAFC; direction: ${isAr ? 'rtl' : 'ltr'}; font-family: inherit;">
@@ -167,10 +179,12 @@ const SheetDetailPage = {
     const btnBackStudio = document.getElementById('btn-back-from-studio');
     if (btnBackStudio) {
       btnBackStudio.addEventListener('click', () => {
-        if (window.history.length > 1) {
+        if (sheet && sheet.subject_id) {
+          window.location.hash = '#/subject/' + sheet.subject_id;
+        } else if (window.history.length > 1) {
           window.history.back();
         } else {
-          window.location.hash = '#/subject/' + (sheet.subject_id || '');
+          window.location.hash = '#/home';
         }
       });
     }

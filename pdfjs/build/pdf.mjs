@@ -23711,13 +23711,13 @@ class HighlightEditor extends DrawingEditor {
     return shadow(this, "typesMap", new Map([[AnnotationEditorParamsType.HIGHLIGHT_COLOR, "fill"], [AnnotationEditorParamsType.HIGHLIGHT_THICKNESS, "thickness"]]));
   }
   static get isDrawer() {
-    return false;
+    return true;
   }
   static get _hasClipPath() {
     return true;
   }
   static get _hasDrawClass() {
-    return false;
+    return true;
   }
   _addOutlines(params) {
     const {
@@ -23907,7 +23907,7 @@ class HighlightEditor extends DrawingEditor {
   static _getDrawingTarget(parent, {
     target
   }) {
-    return target.closest(".textLayer");
+    return target?.closest?.(".textLayer") || parent.div;
   }
   static _getPointerCoords({
     x,
@@ -27328,7 +27328,7 @@ class AnnotationEditorLayer {
     this.createAndAddNewEditor(event, false);
   }
   pointerdown(event) {
-    if (this.#uiManager.getMode() === AnnotationEditorType.HIGHLIGHT) {
+    if (this.#uiManager.getMode() === AnnotationEditorType.HIGHLIGHT && !this.#currentEditorType?.isDrawer) {
       this.enableTextSelection();
     }
     if (this.#hadPointerDown) {
