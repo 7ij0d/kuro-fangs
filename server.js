@@ -6,9 +6,12 @@ const path = require('path');
 const root = __dirname;
 const mime = {
   '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.wasm': 'application/wasm',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
-  '.svg': 'image/svg+xml', '.webp': 'image/webp', '.pdf': 'application/pdf'
+  '.svg': 'image/svg+xml', '.webp': 'image/webp', '.pdf': 'application/pdf',
+  '.ftl': 'text/plain; charset=utf-8', '.map': 'application/json; charset=utf-8',
+  '.ttf': 'font/ttf'
 };
 
 http.createServer((req, res) => {

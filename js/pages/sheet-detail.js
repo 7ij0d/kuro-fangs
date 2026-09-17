@@ -93,6 +93,12 @@ const SheetDetailPage = {
         <div id="sheet-studio-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;"></div>
       </div>
 
+      <!-- Floating Return Button -->
+      <button id="btn-back-from-studio" style="position: fixed; top: 12px; ${isAr ? 'right: 16px;' : 'left: 16px;'}; z-index: 100000; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 50px; padding: 7px 16px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 4px 18px rgba(0,0,0,0.5); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s, background 0.15s;">
+        <span style="font-size: 1rem;">←</span>
+        <span>${isAr ? 'الرجوع للمادة' : 'Back'}</span>
+      </button>
+
       <!-- Floating Discussion Trigger Button -->
       <button id="btn-toggle-discussion" style="position: fixed; bottom: 20px; ${isAr ? 'left: 20px;' : 'right: 20px;'} z-index: 100000; background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; border: 1px solid rgba(255,255,255,0.25); border-radius: 50px; padding: 9px 16px; font-weight: 700; font-size: 0.825rem; box-shadow: 0 8px 24px rgba(2,132,199,0.55); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: inherit;">
         <span style="font-size: 1.1rem;">💬</span>
@@ -138,15 +144,35 @@ const SheetDetailPage = {
 
     const studioContainer = document.getElementById('sheet-studio-container');
     if (studioContainer) {
-      const iframe = document.createElement('iframe');
-      // Point to the newly added Focus Workspace system
-      const matSlug = sheet.subject_id || 'local';
-      const shSlug = sheet.id || 'local-sheet';
-      iframe.src = `focus-workspace/frontend/dist/index.html?material_slug=${encodeURIComponent(matSlug)}&sheet_slug=${encodeURIComponent(shSlug)}&title=${encodeURIComponent(isAr ? sheet.title_ar : sheet.title_en)}&pdf_url=${encodeURIComponent(sheet.pdf_url)}`;
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      studioContainer.appendChild(iframe);
+      async function mountPdfViewer() {
+        let pdfUrl = sheet.pdf_url;
+        if (!pdfUrl && window.DATA && window.DATA.pdfStore) {
+          pdfUrl = await window.DATA.pdfStore.getPdfUrl(sheet.id);
+        }
+        if (!pdfUrl) {
+          pdfUrl = 'pdfjs/web/compressed.tracemonkey-pldi-09.pdf';
+        }
+        const iframe = document.createElement('iframe');
+        iframe.src = `pdfjs/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.setAttribute('allow', 'fullscreen');
+        studioContainer.innerHTML = '';
+        studioContainer.appendChild(iframe);
+      }
+      mountPdfViewer();
+    }
+
+    const btnBackStudio = document.getElementById('btn-back-from-studio');
+    if (btnBackStudio) {
+      btnBackStudio.addEventListener('click', () => {
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.hash = '#/subject/' + (sheet.subject_id || '');
+        }
+      });
     }
 
     // Discussion Board Logic & Persistence
