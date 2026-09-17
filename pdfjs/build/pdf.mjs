@@ -3604,13 +3604,10 @@ class AnnotationEditorUIManager {
     this.#commentManager?.destroyPopup();
     this.#mode = mode;
     if (mode === AnnotationEditorType.NONE) {
-      this.setEditingState(true);
-      this.unselectAll();
-      for (const layer of this.#allLayers.values()) {
-        layer.updateMode(mode);
-      }
+      this.setEditingState(false);
+      this.#disableAll();
       for (const editor of this.#allEditors.values()) {
-        editor.enable();
+        editor.hideStandaloneCommentButton();
       }
       this._editorUndoBar?.hide();
       this.toggleComment(null);
@@ -26818,11 +26815,11 @@ class AnnotationEditorLayer {
     this.#cleanup();
     switch (mode) {
       case AnnotationEditorType.NONE:
-        this.div.classList.toggle("nonEditing", false);
+        this.div.classList.toggle("nonEditing", true);
         this.disableTextSelection();
-        this.togglePointerEvents(true);
+        this.togglePointerEvents(false);
         this.toggleAnnotationLayerPointerEvents(true);
-        this.enableClick();
+        this.disableClick();
         return;
       case AnnotationEditorType.INK:
       case AnnotationEditorType.HIGHLIGHT:

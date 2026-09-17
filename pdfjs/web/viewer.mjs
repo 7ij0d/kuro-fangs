@@ -18138,12 +18138,7 @@ class Toolbar {
           return classList.contains("toggled") ? AnnotationEditorType.NONE : AnnotationEditorType.FREETEXT;
         }
       }
-    }, {
-      element: options.editorSelectButton,
-      eventName: "switchannotationeditormode",
-      eventDetails: {
-        mode: AnnotationEditorType.NONE
-      }
+
     }, {
       element: options.editorHighlightButton,
       eventName: "switchannotationeditormode",
@@ -18195,6 +18190,15 @@ class Toolbar {
         }
       }
     }];
+    if (options.editorSelectButton) {
+      buttons.push({
+        element: options.editorSelectButton,
+        eventName: "switchannotationeditormode",
+        eventDetails: {
+          mode: AnnotationEditorType.NONE
+        }
+      });
+    }
     this.#bindListeners(buttons);
     this.#updateToolbarDensity({
       value: toolbarDensity
@@ -18261,6 +18265,9 @@ class Toolbar {
       eventDetails,
       telemetry
     } of buttons) {
+      if (!element) {
+        continue;
+      }
       element.addEventListener("click", evt => {
         if (eventName !== null) {
           eventBus.dispatch(eventName, {
@@ -18364,7 +18371,10 @@ class Toolbar {
     toggleExpandedBtn(editorStampButton, mode === AnnotationEditorType.STAMP, editorStampParamsToolbar);
     toggleExpandedBtn(editorSignatureButton, mode === AnnotationEditorType.SIGNATURE, editorSignatureParamsToolbar);
     editorSelectButton?.classList.toggle("toggled", mode === AnnotationEditorType.NONE);
-    editorCommentButton.disabled = editorFreeTextButton.disabled = editorHighlightButton.disabled = editorInkButton.disabled = editorStampButton.disabled = editorSignatureButton.disabled = (editorSelectButton ? (editorSelectButton.disabled = mode === AnnotationEditorType.DISABLE) : false);
+    editorCommentButton.disabled = editorFreeTextButton.disabled = editorHighlightButton.disabled = editorInkButton.disabled = editorStampButton.disabled = editorSignatureButton.disabled = mode === AnnotationEditorType.DISABLE;
+    if (editorSelectButton) {
+      editorSelectButton.disabled = mode === AnnotationEditorType.DISABLE;
+    }
   }
   #updateUIState(resetNumPages = false) {
     const {

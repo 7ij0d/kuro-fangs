@@ -165,7 +165,7 @@ const SheetDetailPage = {
           pdfUrl = 'pdfjs/web/compressed.tracemonkey-pldi-09.pdf';
         }
         const iframe = document.createElement('iframe');
-        iframe.src = `pdfjs/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+        iframe.src = `pdfjs/web/viewer.html?v=2.2.0&file=${encodeURIComponent(pdfUrl)}`;
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';
