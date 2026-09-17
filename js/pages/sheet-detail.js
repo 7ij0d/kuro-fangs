@@ -1,7 +1,7 @@
 /**
- * KURO FANGS — SHEET DETAIL PAGE
- * Clean sheet detail view: metadata, download, and discussion board.
- * No studio, no iframe, no canvas.
+ * KURO FANGS — DEDICATED FULL-PAGE SHEET & LECTURE EXPERIENCE
+ * Full-page dedicated workspace route for each individual sheet, featuring complete metadata,
+ * native JNotes interactive document studio, audio summary player, and student discussion board.
  */
 
 const SheetDetailPage = {
@@ -19,6 +19,7 @@ const SheetDetailPage = {
     }
 
     const sheets = window.DATA?.sheets || [];
+    const subjects = window.DATA?.getSubjects() || [];
 
     let sheet = sheets.find(s => s.id === targetId);
 
@@ -30,18 +31,18 @@ const SheetDetailPage = {
       } catch (e) {}
     }
 
+    // If not found — show error, NO automatic fallback to first sheet
     if (!sheet) {
       container.innerHTML = `
-        <div style="padding: 60px 24px; text-align: center; color: var(--text-primary, #F8FAFC);">
-          <div style="font-size: 3.5rem; margin-bottom: 16px;">📁</div>
-          <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">
+        <div style="padding: 40px; text-align: center;">
+          <div style="font-size: 3rem; margin-bottom: 12px;">📁</div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">
             ${isAr ? 'لم يتم العثور على الشيت' : 'Sheet Not Found'}
           </h2>
-          <p style="color: var(--text-muted, #94A3B8); font-size: 0.875rem; margin-bottom: 24px;">
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">
             ${isAr ? 'قد يكون تم حذف الشيت أو أن الرابط غير صحيح.' : 'This sheet may have been removed or the link is invalid.'}
           </p>
-          <a href="#/sheets" class="btn btn-primary" style="display: inline-flex; gap: 6px; align-items: center;">
-            <span>←</span>
+          <a href="#/sheets" class="btn btn-primary" style="display: inline-flex; gap: 6px;">
             <span>${isAr ? 'العودة لقائمة الشيتات' : 'Back to Sheets'}</span>
           </a>
         </div>
@@ -50,32 +51,33 @@ const SheetDetailPage = {
     }
 
     // Normalize metadata
-    const title    = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title_ar || sheet.title);
-    const subject  = sheet.subject_name || (isAr ? 'المادة الدراسية' : 'Academic Subject');
-    const doctor   = sheet.doctor_name  || '';
-    const pages    = sheet.pages  || '—';
-    const size     = sheet.size   || '—';
-    const date     = sheet.date   || '';
-    const fileType = sheet.type   || 'PDF';
-    const pdfUrl   = sheet.pdf_url || '';
-    const isFav    = window.STORE ? window.STORE.isFavorite(sheet.id, 'sheet') : false;
+    const title = sheet.title || (isAr ? sheet.title_ar : sheet.title_en);
+    const subjectName = sheet.subject_name || (isAr ? 'المادة الدراسية' : 'Academic Subject');
+    const doctorName = sheet.doctor_name || '';
+    const pages = sheet.pages || 16;
+    const size = sheet.size || '2.8 MB';
+    const date = sheet.date || '2026-09-11';
+    const fileType = sheet.type || 'PDF Sheet';
+    const isFav = window.STORE ? window.STORE.isFavorite(sheet.id, 'sheet') : false;
 
-    // Format date nicely
-    let displayDate = date;
-    if (date) {
-      try {
-        displayDate = new Date(date).toLocaleDateString(isAr ? 'ar-LY' : 'en-GB', {
-          year: 'numeric', month: 'long', day: 'numeric'
-        });
-      } catch (_) {}
-    }
-
-    // Load saved comments
+    // Load saved comments for this sheet
     const commentsKey = 'kf_sheet_comments_' + sheet.id;
     let comments = [];
     const rawComments = localStorage.getItem(commentsKey);
     if (rawComments === null) {
-      comments = [];
+      comments = [
+        {
+          id: 'c1',
+          author: isAr ? 'طالبة طب أسنان - دفعة 2026' : 'Dental Student - Class of 2026',
+          time: isAr ? 'منذ ساعتين' : '2 hours ago',
+          text: isAr
+            ? 'سؤال في صفحة 2: ماهو الفرق بين Positive Rake Angle و Negative Rake Angle في أجهزة القطع Rotatory burs؟'
+            : 'Question on page 2: What is the difference between Positive Rake Angle and Negative Rake Angle in rotary burs?',
+          reply: isAr
+            ? 'إجابة د. هالة: الـ Positive يزيد كفاءة القطع في الأنسجة اللينة، والـ Negative يزيد قوة الشفرة في حفر المينا والمعادن!'
+            : 'Dr. Hala: Positive rake angle increases cutting efficiency in soft tissues, while negative rake angle enhances blade strength for hard enamel and metals!'
+        }
+      ];
       localStorage.setItem(commentsKey, JSON.stringify(comments));
     } else {
       try {
@@ -86,549 +88,204 @@ const SheetDetailPage = {
       }
     }
 
-    // ─── Main HTML ────────────────────────────────────────────────────────────
     container.innerHTML = `
-      <style>
-        .sd-page {
-          min-height: 100vh;
-          background: var(--bg-primary, #0F1117);
-          color: var(--text-primary, #F8FAFC);
-          font-family: inherit;
-          direction: ${isAr ? 'rtl' : 'ltr'};
-        }
-        /* Header bar */
-        .sd-header {
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          background: rgba(15,17,23,0.92);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255,255,255,0.08);
-          padding: 0 20px;
-          height: 56px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-        }
-        .sd-back-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(255,255,255,0.07);
-          border: 1px solid rgba(255,255,255,0.12);
-          color: #CBD5E1;
-          border-radius: 8px;
-          padding: 6px 14px;
-          font-size: 0.825rem;
-          font-weight: 600;
-          cursor: pointer;
-          text-decoration: none;
-          transition: background 0.18s;
-        }
-        .sd-back-btn:hover { background: rgba(255,255,255,0.13); color: #F8FAFC; }
-        .sd-fav-btn {
-          background: none;
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 8px;
-          width: 36px; height: 36px;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 1.15rem;
-          cursor: pointer;
-          transition: background 0.18s;
-          color: #94A3B8;
-        }
-        .sd-fav-btn:hover { background: rgba(255,255,255,0.1); }
-        .sd-fav-btn.active { color: #F59E0B; border-color: #F59E0B44; }
+      <div id="sheet-studio-fullscreen-root" class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; max-height: 100dvh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 99990; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div id="sheet-studio-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;"></div>
+      </div>
 
-        /* Hero card */
-        .sd-hero {
-          padding: 32px 20px 24px;
-          max-width: 720px;
-          margin: 0 auto;
-        }
-        .sd-subject-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(139,92,246,0.15);
-          border: 1px solid rgba(139,92,246,0.3);
-          color: #A78BFA;
-          border-radius: 20px;
-          padding: 4px 12px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          margin-bottom: 14px;
-        }
-        .sd-title {
-          font-size: clamp(1.25rem, 4vw, 1.75rem);
-          font-weight: 900;
-          line-height: 1.3;
-          color: #F8FAFC;
-          margin: 0 0 10px;
-        }
-        .sd-doctor {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.875rem;
-          color: #94A3B8;
-          margin-bottom: 24px;
-        }
-        .sd-doctor strong { color: #CBD5E1; font-weight: 700; }
+      <!-- Floating Discussion Trigger Button -->
+      <button id="btn-toggle-discussion" style="position: fixed; bottom: 20px; ${isAr ? 'left: 20px;' : 'right: 20px;'} z-index: 100000; background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; border: 1px solid rgba(255,255,255,0.25); border-radius: 50px; padding: 9px 16px; font-weight: 700; font-size: 0.825rem; box-shadow: 0 8px 24px rgba(2,132,199,0.55); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: inherit;">
+        <span style="font-size: 1.1rem;">💬</span>
+        <span>${isAr ? 'مناقشة وأسئلة الشيت' : 'Sheet Discussion'}</span>
+        <span id="discussion-count-badge" style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 12px; font-size: 0.725rem; font-weight: 800;">${comments.length}</span>
+      </button>
 
-        /* Meta chips row */
-        .sd-meta-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-bottom: 28px;
-        }
-        .sd-meta-chip {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px;
-          padding: 8px 14px;
-          font-size: 0.8rem;
-          color: #CBD5E1;
-        }
-        .sd-meta-chip .chip-icon { font-size: 1rem; }
-        .sd-meta-chip .chip-label { color: #64748B; font-size: 0.7rem; display: block; }
-        .sd-meta-chip .chip-value { font-weight: 700; color: #E2E8F0; }
-
-        /* Action buttons */
-        .sd-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          margin-bottom: 32px;
-        }
-        .sd-btn-download {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          background: linear-gradient(135deg, #7C3AED, #5B21B6);
-          color: #FFF;
-          border: none;
-          border-radius: 14px;
-          padding: 16px 24px;
-          font-size: 1rem;
-          font-weight: 800;
-          cursor: pointer;
-          text-decoration: none;
-          transition: opacity 0.18s, transform 0.18s;
-          box-shadow: 0 8px 24px rgba(124,58,237,0.4);
-          width: 100%;
-        }
-        .sd-btn-download:hover { opacity: 0.9; transform: translateY(-1px); }
-        .sd-btn-download:active { transform: scale(0.98); }
-        .sd-btn-download:disabled,
-        .sd-btn-download.disabled {
-          background: rgba(255,255,255,0.08);
-          color: #64748B;
-          box-shadow: none;
-          cursor: not-allowed;
-          transform: none;
-        }
-        .sd-btn-share {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.12);
-          color: #CBD5E1;
-          border-radius: 14px;
-          padding: 13px 24px;
-          font-size: 0.875rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: background 0.18s;
-          width: 100%;
-        }
-        .sd-btn-share:hover { background: rgba(255,255,255,0.1); color: #F8FAFC; }
-
-        /* Divider */
-        .sd-divider {
-          border: none;
-          border-top: 1px solid rgba(255,255,255,0.08);
-          margin: 0 20px 28px;
-        }
-
-        /* Discussion section */
-        .sd-discussion {
-          max-width: 720px;
-          margin: 0 auto;
-          padding: 0 20px 40px;
-        }
-        .sd-discussion-title {
-          font-size: 1rem;
-          font-weight: 800;
-          color: #E2E8F0;
-          margin: 0 0 16px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .sd-comment-form {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 14px;
-          padding: 16px;
-          margin-bottom: 20px;
-        }
-        .sd-comment-textarea {
-          width: 100%;
-          background: rgba(0,0,0,0.25);
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 10px;
-          color: #F8FAFC;
-          padding: 10px 14px;
-          font-size: 0.85rem;
-          font-family: inherit;
-          resize: none;
-          outline: none;
-          box-sizing: border-box;
-          margin-bottom: 10px;
-          transition: border-color 0.18s;
-        }
-        .sd-comment-textarea:focus { border-color: rgba(124,58,237,0.5); }
-        .sd-comment-form-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-        }
-        .sd-points-hint {
-          font-size: 0.75rem;
-          color: #34D399;
-          font-weight: 600;
-        }
-        .sd-btn-post {
-          background: #7C3AED;
-          color: #FFF;
-          border: none;
-          padding: 8px 18px;
-          border-radius: 9px;
-          font-size: 0.8rem;
-          font-weight: 800;
-          cursor: pointer;
-          font-family: inherit;
-          transition: opacity 0.18s;
-        }
-        .sd-btn-post:hover { opacity: 0.85; }
-        .sd-comment-card {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
-          padding: 14px 16px;
-          margin-bottom: 12px;
-        }
-        .sd-comment-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-        .sd-comment-author { font-weight: 700; font-size: 0.8rem; color: #F1F5F9; }
-        .sd-comment-time { font-size: 0.7rem; color: #94A3B8; }
-        .sd-comment-text {
-          font-size: 0.84rem;
-          color: #CBD5E1;
-          line-height: 1.55;
-          white-space: pre-wrap;
-          margin: 0 0 6px;
-        }
-        .sd-comment-reply {
-          background: rgba(2,132,199,0.1);
-          border-${isAr ? 'right' : 'left'}: 3px solid #0284C7;
-          padding: 8px 12px;
-          border-radius: 6px;
-          font-size: 0.78rem;
-          color: #BAE6FD;
-          line-height: 1.45;
-          margin-top: 8px;
-        }
-        .sd-comment-reply-label {
-          font-weight: 700;
-          color: #38BDF8;
-          margin-bottom: 2px;
-          font-size: 0.72rem;
-        }
-        .sd-btn-delete {
-          background: rgba(239,68,68,0.1);
-          border: 1px solid rgba(239,68,68,0.25);
-          color: #EF4444;
-          border-radius: 6px;
-          padding: 2px 8px;
-          font-size: 0.7rem;
-          font-weight: 700;
-          cursor: pointer;
-          font-family: inherit;
-          display: inline-flex;
-          align-items: center;
-          gap: 3px;
-        }
-        .sd-empty-comments {
-          text-align: center;
-          padding: 32px 16px;
-          color: #64748B;
-        }
-        .sd-empty-comments .ec-icon { font-size: 2rem; margin-bottom: 8px; }
-        .sd-empty-comments p { margin: 0; font-size: 0.85rem; line-height: 1.5; }
-
-        @media (min-width: 600px) {
-          .sd-actions { flex-direction: row; }
-          .sd-btn-download, .sd-btn-share { width: auto; flex: 1; }
-        }
-      </style>
-
-      <div class="sd-page" id="sheet-detail-page">
-        <!-- ── Header ── -->
-        <div class="sd-header">
-          <a href="#/sheets" class="sd-back-btn">
-            <span>${isAr ? '→' : '←'}</span>
-            <span>${isAr ? 'الشيتات' : 'Sheets'}</span>
-          </a>
-          <span style="font-size:0.8rem;font-weight:700;color:#94A3B8;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 8px;">${title}</span>
-          <button class="sd-fav-btn ${isFav ? 'active' : ''}" id="sd-fav-btn" title="${isAr ? 'إضافة للمفضلة' : 'Add to favorites'}">
-            ${isFav ? '⭐' : '☆'}
-          </button>
-        </div>
-
-        <!-- ── Hero ── -->
-        <div class="sd-hero">
-          <div class="sd-subject-badge">
-            <span>📚</span>
-            <span>${subject}</span>
-          </div>
-
-          <h1 class="sd-title">${title}</h1>
-
-          ${doctor ? `
-          <div class="sd-doctor">
-            <span>👨‍⚕️</span>
-            <span>${isAr ? 'د.' : 'Dr.'} <strong>${doctor}</strong></span>
-          </div>` : ''}
-
-          <!-- Meta chips -->
-          <div class="sd-meta-row">
-            ${pages !== '—' ? `
-            <div class="sd-meta-chip">
-              <span class="chip-icon">📄</span>
-              <div>
-                <span class="chip-label">${isAr ? 'الصفحات' : 'Pages'}</span>
-                <span class="chip-value">${pages}</span>
-              </div>
-            </div>` : ''}
-            ${size !== '—' ? `
-            <div class="sd-meta-chip">
-              <span class="chip-icon">💾</span>
-              <div>
-                <span class="chip-label">${isAr ? 'الحجم' : 'Size'}</span>
-                <span class="chip-value">${size}</span>
-              </div>
-            </div>` : ''}
-            ${displayDate ? `
-            <div class="sd-meta-chip">
-              <span class="chip-icon">📅</span>
-              <div>
-                <span class="chip-label">${isAr ? 'التاريخ' : 'Date'}</span>
-                <span class="chip-value">${displayDate}</span>
-              </div>
-            </div>` : ''}
-            <div class="sd-meta-chip">
-              <span class="chip-icon">🗂️</span>
-              <div>
-                <span class="chip-label">${isAr ? 'النوع' : 'Type'}</span>
-                <span class="chip-value">${fileType}</span>
-              </div>
+      <!-- Slide-Over Discussion Drawer -->
+      <div id="sheet-discussion-drawer" style="position: fixed; top: 0; bottom: 0; ${isAr ? 'left: 0;' : 'right: 0;'} width: min(440px, 94vw); background: #181926; z-index: 100002; box-shadow: ${isAr ? '10px 0 45px rgba(0,0,0,0.6)' : '-10px 0 45px rgba(0,0,0,0.6)'}; display: flex; flex-direction: column; transform: ${isAr ? 'translateX(-100%)' : 'translateX(100%)'}; transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1); border-${isAr ? 'right' : 'left'}: 1px solid rgba(255,255,255,0.1); color: #F8FAFC; direction: ${isAr ? 'rtl' : 'ltr'}; font-family: inherit;">
+        <!-- Drawer Header -->
+        <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; background: #1F2133;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.3rem;">💬</span>
+            <div>
+              <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; color: #F8FAFC;">${isAr ? 'المناقشات والأسئلة الأكاديمية' : 'Academic Discussions'}</h3>
+              <p style="font-size: 0.725rem; color: #94A3B8; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${title}</p>
             </div>
           </div>
-
-          <!-- Action buttons -->
-          <div class="sd-actions">
-            ${pdfUrl
-              ? `<a href="${pdfUrl}" download target="_blank" rel="noopener" class="sd-btn-download" id="sd-download-btn">
-                   <span style="font-size:1.2rem">⬇️</span>
-                   <span>${isAr ? 'تحميل الشيت PDF' : 'Download PDF'}</span>
-                 </a>`
-              : `<button class="sd-btn-download disabled" disabled>
-                   <span style="font-size:1.2rem">⬇️</span>
-                   <span>${isAr ? 'الشيت غير متاح للتحميل حالياً' : 'PDF not available yet'}</span>
-                 </button>`
-            }
-            <button class="sd-btn-share" id="sd-share-btn">
-              <span>🔗</span>
-              <span>${isAr ? 'مشاركة الرابط' : 'Share Link'}</span>
-            </button>
-          </div>
+          <button id="btn-close-discussion" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #F8FAFC; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;" title="${isAr ? 'إغلاق' : 'Close'}">✕</button>
         </div>
 
-        <hr class="sd-divider">
+        <!-- Form to Post Question -->
+        <div style="padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.2);">
+          <form id="form-post-comment" style="display: flex; flex-direction: column; gap: 10px;">
+            <textarea id="comment-text-input" rows="2" placeholder="${isAr ? 'اطرح سؤالاً أو استفساراً علمياً حول هذه المحاضرة...' : 'Ask an academic question or note about this lecture...'}" style="width: 100%; background: #232536; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #F8FAFC; padding: 10px 12px; font-size: 0.825rem; resize: none; font-family: inherit; outline: none; box-sizing: border-box;" required></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.725rem; color: #34D399; font-weight: 600;">+5 ${isAr ? 'نقاط للمشاركة 🌟' : 'Academic points 🌟'}</span>
+              <button type="submit" style="background: #0284C7; color: #FFF; border: none; padding: 7px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <span>${isAr ? 'نشر السؤال' : 'Post Question'}</span>
+              </button>
+            </div>
+          </form>
+        </div>
 
-        <!-- ── Discussion ── -->
-        <div class="sd-discussion">
-          <h2 class="sd-discussion-title">
-            <span>💬</span>
-            <span>${isAr ? 'المناقشات والأسئلة' : 'Discussions & Questions'}</span>
-            <span id="sd-comment-count" style="background:rgba(124,58,237,0.2);color:#A78BFA;border-radius:12px;padding:2px 9px;font-size:0.72rem;">${comments.length}</span>
-          </h2>
-
-          <!-- Post form -->
-          <div class="sd-comment-form">
-            <form id="sd-comment-form">
-              <textarea
-                id="sd-comment-input"
-                class="sd-comment-textarea"
-                rows="3"
-                placeholder="${isAr ? 'اطرح سؤالاً أو استفساراً حول هذا الشيت...' : 'Ask a question or share a note about this sheet...'}"
-                required
-              ></textarea>
-              <div class="sd-comment-form-row">
-                <span class="sd-points-hint">+5 ${isAr ? 'نقاط للمشاركة 🌟' : 'points for contributing 🌟'}</span>
-                <button type="submit" class="sd-btn-post">
-                  ${isAr ? 'نشر السؤال' : 'Post Question'}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Comments list -->
-          <div id="sd-comments-list"></div>
+        <!-- Comments List Container -->
+        <div id="comments-list-container" style="flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
         </div>
       </div>
+
+      <!-- Backdrop for drawer -->
+      <div id="discussion-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index: 100001; display: none; opacity: 0; pointer-events: none !important; transition: opacity 0.25s ease;"></div>
     `;
 
-    // ─── Favourite button ─────────────────────────────────────────────────────
-    const favBtn = document.getElementById('sd-fav-btn');
-    if (favBtn) {
-      favBtn.addEventListener('click', () => {
-        if (!window.STORE) return;
-        const nowFav = window.STORE.isFavorite(sheet.id, 'sheet');
-        if (nowFav) {
-          window.STORE.removeFavorite(sheet.id, 'sheet');
-          favBtn.textContent = '☆';
-          favBtn.classList.remove('active');
-        } else {
-          window.STORE.addFavorite(sheet.id, 'sheet');
-          favBtn.textContent = '⭐';
-          favBtn.classList.add('active');
+    const studioContainer = document.getElementById('sheet-studio-container');
+    if (studioContainer) {
+      const iframe = document.createElement('iframe');
+      // Point to the newly added Focus Workspace system
+      const matSlug = sheet.subject_id || 'local';
+      const shSlug = sheet.id || 'local-sheet';
+      iframe.src = `focus-workspace/frontend/dist/index.html?material_slug=${encodeURIComponent(matSlug)}&sheet_slug=${encodeURIComponent(shSlug)}&title=${encodeURIComponent(isAr ? sheet.title_ar : sheet.title_en)}&pdf_url=${encodeURIComponent(sheet.pdf_url)}`;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      studioContainer.appendChild(iframe);
+    }
+
+    // Discussion Board Logic & Persistence
+    const drawerEl = document.getElementById('sheet-discussion-drawer');
+    const backdropEl = document.getElementById('discussion-backdrop');
+    const btnToggle = document.getElementById('btn-toggle-discussion');
+    const btnClose = document.getElementById('btn-close-discussion');
+    const formPost = document.getElementById('form-post-comment');
+
+    function openDrawer() {
+      if (!drawerEl || !backdropEl) return;
+      drawerEl.classList.add('open');
+      drawerEl.style.transform = 'translateX(0)';
+      backdropEl.style.display = 'block';
+      backdropEl.style.pointerEvents = 'auto';
+      setTimeout(() => { backdropEl.style.opacity = '1'; }, 10);
+    }
+
+    function closeDrawer() {
+      if (!drawerEl || !backdropEl) return;
+      drawerEl.classList.remove('open');
+      drawerEl.style.transform = isAr ? 'translateX(-100%)' : 'translateX(100%)';
+      backdropEl.style.opacity = '0';
+      backdropEl.style.pointerEvents = 'none';
+      setTimeout(() => {
+        if (!drawerEl.classList.contains('open')) {
+          backdropEl.style.display = 'none';
         }
-      });
+      }, 260);
     }
 
-    // ─── Share button ─────────────────────────────────────────────────────────
-    const shareBtn = document.getElementById('sd-share-btn');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', async () => {
-        const url = window.location.href;
-        try {
-          if (navigator.share) {
-            await navigator.share({ title, url });
-          } else {
-            await navigator.clipboard.writeText(url);
-            if (typeof window.showToast === 'function') {
-              window.showToast(isAr ? 'تم نسخ الرابط! 🔗' : 'Link copied! 🔗', { type: 'success' });
-            }
-          }
-        } catch (_) {}
-      });
+    if (btnToggle) btnToggle.addEventListener('click', openDrawer);
+    if (btnClose) btnClose.addEventListener('click', closeDrawer);
+    if (backdropEl) backdropEl.addEventListener('click', closeDrawer);
+
+    function deleteComment(commentId) {
+      comments = comments.filter(c => c.id !== commentId);
+      localStorage.setItem(commentsKey, JSON.stringify(comments));
+      renderCommentsList();
+      if (typeof window.showToast === 'function') {
+        window.showToast(isAr ? 'تم حذف السؤال من المناقشة بنجاح.' : 'Comment deleted successfully.', { type: 'success' });
+      }
     }
 
-    // ─── Discussion board ─────────────────────────────────────────────────────
-    function renderComments() {
-      const list = document.getElementById('sd-comments-list');
-      const badge = document.getElementById('sd-comment-count');
-      if (badge) badge.textContent = comments.length;
-      if (!list) return;
+    function renderCommentsList() {
+      const listEl = document.getElementById('comments-list-container');
+      const countBadge = document.getElementById('discussion-count-badge');
+      if (countBadge) countBadge.textContent = comments.length;
+      const headerBadge = document.getElementById('header-comment-badge');
+      if (headerBadge) headerBadge.textContent = comments.length;
+      if (!listEl) return;
 
       if (comments.length === 0) {
-        list.innerHTML = `
-          <div class="sd-empty-comments">
-            <div class="ec-icon">💭</div>
-            <p style="font-weight:700;color:#CBD5E1;margin-bottom:4px;">
-              ${isAr ? 'لا توجد أسئلة حتى الآن' : 'No questions yet'}
+        listEl.innerHTML = `
+          <div class="empty-comments-notice" style="text-align: center; padding: 40px 16px; color: #94A3B8;">
+            <div style="font-size: 2.2rem; margin-bottom: 10px;">💭</div>
+            <p style="font-size: 0.9rem; font-weight: 700; color: #E2E8F0; margin-bottom: 4px;">
+              ${isAr ? 'لا توجد أسئلة أو مناقشات حالياً' : 'No discussions or questions yet'}
             </p>
-            <p style="color:#64748B;">
-              ${isAr ? 'كن أول من يشارك!' : 'Be the first to contribute!'}
+            <p style="font-size: 0.775rem; color: #94A3B8; line-height: 1.5;">
+              ${isAr ? 'كن أول من يطرح استفساراً واكسب 5 نقاط أكاديمية فوراً!' : 'Be the first to post a question and earn 5 academic points!'}
             </p>
           </div>
         `;
         return;
       }
 
-      list.innerHTML = comments.map(c => `
-        <div class="sd-comment-card">
-          <div class="sd-comment-header">
-            <span class="sd-comment-author">${c.author || (isAr ? 'طالب' : 'Student')}</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="sd-comment-time">${c.time || (isAr ? 'الآن' : 'Just now')}</span>
-              <button class="sd-btn-delete" data-id="${c.id}">
-                🗑️ ${isAr ? 'حذف' : 'Delete'}
+      listEl.innerHTML = comments.map(c => `
+        <div class="comment-card" style="background: #232536; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.8rem; color: #F1F5F9;">${c.author || (isAr ? 'طالب' : 'Student')}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.7rem; color: #94A3B8;">${c.time || (isAr ? 'الآن' : 'Just now')}</span>
+              <button class="btn-delete-comment" data-id="${c.id}" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); color: #EF4444; border-radius: 6px; padding: 2px 7px; font-size: 0.7rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="${isAr ? 'حذف هذا السؤال نهائياً' : 'Delete this comment'}">
+                <span>🗑️</span>
+                <span>${isAr ? 'حذف' : 'Delete'}</span>
               </button>
             </div>
           </div>
-          <p class="sd-comment-text">${c.text}</p>
+          <p style="font-size: 0.825rem; color: #CBD5E1; margin: 0; line-height: 1.5; white-space: pre-wrap;">${c.text}</p>
           ${c.reply ? `
-            <div class="sd-comment-reply">
-              <div class="sd-comment-reply-label">${isAr ? 'رد معتمد:' : 'Verified Answer:'}</div>
+            <div style="background: rgba(2, 132, 199, 0.12); border-right: 3px solid #0284C7; padding: 8px 10px; border-radius: 6px 0 0 6px; margin-top: 4px; font-size: 0.775rem; color: #BAE6FD; line-height: 1.4;">
+              <div style="font-weight: 700; margin-bottom: 2px; color: #38BDF8;">${isAr ? 'رد وتوضيح معتمد:' : 'Verified Answer:'}</div>
               ${c.reply}
             </div>
           ` : ''}
         </div>
       `).join('');
 
-      list.querySelectorAll('.sd-btn-delete').forEach(btn => {
+      listEl.querySelectorAll('.btn-delete-comment').forEach(btn => {
         btn.addEventListener('click', () => {
-          const cid = btn.getAttribute('data-id');
-          comments = comments.filter(c => c.id !== cid);
-          localStorage.setItem(commentsKey, JSON.stringify(comments));
-          renderComments();
-          if (typeof window.showToast === 'function') {
-            window.showToast(isAr ? 'تم حذف السؤال.' : 'Comment deleted.', { type: 'success' });
-          }
+          const cId = btn.getAttribute('data-id');
+          deleteComment(cId);
         });
       });
     }
 
-    const commentForm = document.getElementById('sd-comment-form');
-    if (commentForm) {
-      commentForm.addEventListener('submit', e => {
+    if (formPost) {
+      formPost.addEventListener('submit', (e) => {
         e.preventDefault();
-        const input = document.getElementById('sd-comment-input');
+        const input = document.getElementById('comment-text-input');
         const text = input ? input.value.trim() : '';
         if (!text) return;
 
-        comments.unshift({
+        const newComment = {
           id: 'c_' + Date.now(),
           author: isAr ? 'طالب طب أسنان (أنت)' : 'Dental Student (You)',
           time: isAr ? 'الآن' : 'Just now',
-          text,
+          text: text,
           reply: null
-        });
+        };
+
+        comments.unshift(newComment);
         localStorage.setItem(commentsKey, JSON.stringify(comments));
 
         if (window.STORE && typeof window.STORE.addPoints === 'function') {
           window.STORE.addPoints(5);
         }
+
         if (typeof window.showToast === 'function') {
-          window.showToast(
-            isAr ? 'تم نشر سؤالك! (+5 نقاط) 🌟' : 'Question posted! (+5 pts) 🌟',
-            { type: 'success' }
-          );
+          window.showToast(isAr ? 'تم نشر سؤالك بنجاح (+5 نقاط أكاديمية) 🌟' : 'Question posted (+5 pts earned) 🌟', { type: 'success', points: 5 });
         }
 
         input.value = '';
-        renderComments();
+        renderCommentsList();
       });
     }
 
-    renderComments();
+    // Listen for TOGGLE_DISCUSSION message from inside JNotes iframe
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'TOGGLE_DISCUSSION') {
+        openDrawer();
+      }
+    });
+
+    // Expose openDiscussion for direct DOM studio calls
+    SheetDetailPage.openDiscussion = openDrawer;
+
+    renderCommentsList();
   }
 };
 
