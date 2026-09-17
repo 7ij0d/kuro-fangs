@@ -233,6 +233,7 @@ export function ContinuousA4Pdf({
   const panXRef = useRef(0);
   const panYRef = useRef(0);
   const pageContainerRef = useRef(null);
+  const surfaceRef = useRef(null);
   const [viewTransform, setViewTransform] = useState({ scale: 1, panX: 0, panY: 0 });
   const fitZoomRef = useRef(1);
   
@@ -494,7 +495,7 @@ export function ContinuousA4Pdf({
   }, [commitPrimaryPage]);
 
   const calculateFitZoom = useCallback(() => {
-    const container = pageContainerRef.current?.parentElement;
+    const container = surfaceRef.current;
     if (!container) return 1;
     
     const availableW = container.clientWidth;
@@ -503,19 +504,18 @@ export function ContinuousA4Pdf({
     const naturalW = naturalDimensionsRef.current.width;
     const naturalH = naturalDimensionsRef.current.height;
     
-    if (!naturalW || !naturalH) return 1;
+    if (!naturalW || !naturalH || !availableW || !availableH) return 1;
     
-    const PADDING = 24;
+    const PADDING = 48;
     const scaleW = (availableW - PADDING) / naturalW;
     const scaleH = (availableH - PADDING) / naturalH;
-    const fitScale = Math.min(scaleW, scaleH);
     
-    return Math.max(0.1, fitScale);
+    return Math.max(0.1, Math.min(scaleW, scaleH));
   }, []);
 
   const applyFitZoom = useCallback(() => {
     const fitScale = calculateFitZoom();
-    const container = pageContainerRef.current?.parentElement;
+    const container = surfaceRef.current;
     if (!container) return;
     
     const availableW = container.clientWidth;
@@ -540,26 +540,17 @@ export function ContinuousA4Pdf({
   }, [calculateFitZoom]);
 
   useEffect(() => {
-    if (documentProxy && naturalDimensionsRef.current?.width) {
-      applyFitZoom();
-    }
-  }, [documentProxy, applyFitZoom]);
-
-  useEffect(() => {
-    const container = pageContainerRef.current?.parentElement;
-    if (!container) return;
+    const surface = surfaceRef.current;
+    if (!surface) return;
     
     const observer = new ResizeObserver(() => {
-      const isAtFit = Math.abs(zoomRef.current - fitZoomRef.current) < 0.01;
       const newFitScale = calculateFitZoom();
+      const isAtFit = Math.abs(zoomRef.current - fitZoomRef.current) < 0.01;
       fitZoomRef.current = newFitScale;
-      
-      if (isAtFit) {
-        applyFitZoom();
-      }
+      if (isAtFit) applyFitZoom();
     });
     
-    observer.observe(container);
+    observer.observe(surface);
     return () => observer.disconnect();
   }, [applyFitZoom, calculateFitZoom]);
 
@@ -763,7 +754,7 @@ export function ContinuousA4Pdf({
   };
 
   return (
-    <div className="workspace-v2-a4-zoom-surface" style={surfaceStyle} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+    <div ref={surfaceRef} className="workspace-v2-a4-zoom-surface" style={surfaceStyle} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
       <button 
         className="workspace-v2-nav-button left" 
         onClick={() => commitPrimaryPage(primaryPage - 1)} 
