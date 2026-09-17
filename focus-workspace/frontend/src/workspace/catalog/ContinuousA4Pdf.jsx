@@ -188,7 +188,8 @@ export function ContinuousA4Pdf({
   onDocumentReady,
   onCurrentPageChange,
   renderPageOverlay,
-  onPdfPageRendered
+  onPdfPageRendered,
+  activeTool = "hand"
 }) {
   const surfaceRef = useRef(null);
   const cameraRef = useRef(null);
@@ -202,6 +203,10 @@ export function ContinuousA4Pdf({
   const rafRef = useRef(null);
   const renderScaleTimerRef = useRef(null);
 
+  const [pageGeometry, setPageGeometry] = useState({
+    width: A4_PAGE_WIDTH,
+    height: Math.round(A4_PAGE_WIDTH * A4_PAGE_RATIO)
+  });
   const [renderScale, setRenderScale] = useState(1);
   const [primaryPage, setPrimaryPage] = useState(visiblePageStart);
   const [pageCount, setPageCount] = useState(0);
@@ -258,6 +263,12 @@ export function ContinuousA4Pdf({
     };
   }
 
+  const goToPage = useCallback((pageNum) => {
+    if (pageNum < 1 || pageNum > pageCount) return;
+    setPrimaryPage(pageNum);
+    if (onCurrentPageChange) onCurrentPageChange(pageNum);
+  }, [pageCount, onCurrentPageChange]);
+
   const handleTouchStart = useCallback((e) => {
     if (e.touches.length === 2) {
       const t1 = e.touches[0], t2 = e.touches[1];
@@ -265,21 +276,34 @@ export function ContinuousA4Pdf({
       const focalY = (t1.clientY + t2.clientY) / 2;
       gestureRef.current = {
         type: 'pinch',
-        startTx: txRef.current, startTy: tyRef.current, startScale: scaleRef.current,
+        startTx: txRef.current,
+        startTy: tyRef.current,
+        startScale: scaleRef.current,
         startDist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
-        focalX, focalY,
+        focalX,
+        focalY,
       };
       if (e.cancelable) e.preventDefault();
-    } else if (e.touches.length === 1) {
+      return;
+    }
+
+    if (activeTool !== "hand") {
+      gestureRef.current = { type: 'none' };
+      return;
+    }
+
+    if (e.touches.length === 1) {
       const t = e.touches[0];
       const isZoomed = scaleRef.current > fitScaleRef.current * 1.05;
       gestureRef.current = {
         type: isZoomed ? 'pan' : 'swipe',
-        startX: t.clientX, startY: t.clientY,
-        startTx: txRef.current, startTy: tyRef.current,
+        startX: t.clientX,
+        startY: t.clientY,
+        startTx: txRef.current,
+        startTy: tyRef.current,
       };
     }
-  }, []);
+  }, [activeTool]);
 
   const handleTouchMove = useCallback((e) => {
     const g = gestureRef.current;
@@ -295,7 +319,12 @@ export function ContinuousA4Pdf({
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => applyCamera(newScale, newTx, newTy));
       if (e.cancelable) e.preventDefault();
-    } else if (g.type === 'pan' && e.touches.length === 1) {
+      return;
+    }
+
+    if (activeTool !== "hand") return;
+
+    if (g.type === 'pan' && e.touches.length === 1) {
       const t = e.touches[0];
       let newTx = g.startTx + (t.clientX - g.startX);
       let newTy = g.startTy + (t.clientY - g.startY);
@@ -304,7 +333,7 @@ export function ContinuousA4Pdf({
       rafRef.current = requestAnimationFrame(() => applyCamera(scaleRef.current, newTx, newTy));
       if (e.cancelable) e.preventDefault();
     }
-  }, []);
+  }, [activeTool]);
 
   const handleTouchEnd = useCallback((e) => {
     const g = gestureRef.current;
@@ -313,15 +342,8 @@ export function ContinuousA4Pdf({
       const dx = t.clientX - g.startX;
       const dy = t.clientY - g.startY;
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-        setPrimaryPage(prev => {
-          let next = prev;
-          if (dx < 0 && prev < pageCount) next = prev + 1;
-          if (dx > 0 && prev > 1) next = prev - 1;
-          if (next !== prev && onCurrentPageChange) {
-            onCurrentPageChange(next);
-          }
-          return next;
-        });
+        if (dx < 0 && primaryPage < pageCount) goToPage(primaryPage + 1);
+        if (dx > 0 && primaryPage > 1) goToPage(primaryPage - 1);
       }
     }
     if (g.type === 'pinch') {
@@ -332,7 +354,7 @@ export function ContinuousA4Pdf({
       }, 300);
     }
     gestureRef.current = { type: 'none' };
-  }, [pageCount, onCurrentPageChange, onZoomChange]);
+  }, [goToPage, onZoomChange, pageCount, primaryPage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -357,6 +379,7 @@ export function ContinuousA4Pdf({
         const vp = page1.getViewport({ scale: 1 });
         naturalWRef.current = vp.width;
         naturalHRef.current = vp.height;
+        setPageGeometry({ width: vp.width, height: vp.height });
         
         setDocumentProxy(doc);
         setStatus('');
@@ -425,11 +448,12 @@ export function ContinuousA4Pdf({
   }, [visiblePageStart]);
 
   const commitPageGeometry = useCallback((pageNumber, width, height) => {
-      if (pageNumber === 1 && width && height) {
+      if (width && height && (pageNumber === primaryPage || pageNumber === 1)) {
           naturalWRef.current = width;
           naturalHRef.current = height;
+          setPageGeometry({ width, height });
       }
-  }, []);
+  }, [primaryPage]);
 
   const notePageOutcome = useCallback((pageNumber, failed) => {
     setFailedPages((current) => {
@@ -497,51 +521,73 @@ export function ContinuousA4Pdf({
 
       <div
         ref={cameraRef}
-        style={{ position:'absolute', top:0, left:0, transformOrigin:'0 0', willChange:'transform' }}
+        style={{ position: 'absolute', top: 0, left: 0, transformOrigin: '0 0', willChange: 'transform' }}
       >
         <div 
           ref={documentRootRef}
           className="workspace-v2-a4-live-layer" 
           style={{
-          width: `px`,
-          height: `px`,
-          position: 'relative',
-          background: 'white',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-        }}>
-          {documentProxy && (
-            <A4PdfCanvas
-              documentProxy={documentProxy}
-              pageNumber={primaryPage}
-              pageAspectRatio={naturalHRef.current / naturalWRef.current}
-              renderZoom={renderScale}
-              shouldRender={true}
-              evictionDelayMs={CANVAS_EVICTION_MS}
-              renderRevision={renderRevision}
-              renderController={renderControllerRef.current}
-              priority={0}
-              renderQueue={renderQueueRef.current}
-              onPageGeometry={commitPageGeometry}
-              onPageRendered={onPdfPageRendered}
-              onPageOutcome={notePageOutcome}
-            />
-          )}
-          {renderPageOverlay?.(primaryPage)}
-          
-          {documentProxy && failedPages.has(primaryPage) && (
-            <div className="workspace-v2-a4-status" role="alert" style={{ position: "absolute", zIndex: 30, background: "rgba(255,255,255,0.9)", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-              <p>Page {primaryPage} could not be drawn.</p>
-              <button type="button" onClick={() => retryPage(primaryPage)}>Retry page {primaryPage}</button>
-            </div>
-          )}
+            width: `${pageGeometry.width}px`,
+            height: `${pageGeometry.height}px`,
+            position: 'relative',
+          }}
+        >
+          <div
+            className="workspace-v2-a4-document"
+            style={{
+              width: `${pageGeometry.width}px`,
+              height: `${pageGeometry.height}px`,
+              position: 'relative',
+            }}
+          >
+            <section
+              className="workspace-v2-a4-page"
+              data-pdf-page={primaryPage}
+              style={{
+                width: `${pageGeometry.width}px`,
+                height: `${pageGeometry.height}px`,
+                position: 'relative',
+                background: '#ffffff',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+                overflow: 'hidden'
+              }}
+              aria-label={`PDF page ${primaryPage} of ${pageCount}`}
+            >
+              {documentProxy && (
+                <A4PdfCanvas
+                  documentProxy={documentProxy}
+                  pageNumber={primaryPage}
+                  pageAspectRatio={pageGeometry.height / pageGeometry.width}
+                  renderZoom={renderScale}
+                  shouldRender={true}
+                  evictionDelayMs={CANVAS_EVICTION_MS}
+                  renderRevision={renderRevision}
+                  renderController={renderControllerRef.current}
+                  priority={0}
+                  renderQueue={renderQueueRef.current}
+                  onPageGeometry={commitPageGeometry}
+                  onPageRendered={onPdfPageRendered}
+                  onPageOutcome={notePageOutcome}
+                />
+              )}
+              {renderPageOverlay?.(primaryPage)}
+              
+              {documentProxy && failedPages.has(primaryPage) && (
+                <div className="workspace-v2-a4-status" role="alert" style={{ position: "absolute", zIndex: 30, background: "rgba(255,255,255,0.9)", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <p>Page {primaryPage} could not be drawn.</p>
+                  <button type="button" onClick={() => retryPage(primaryPage)}>Retry page {primaryPage}</button>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </div>
 
       {!documentProxy && (
         <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column',
-          alignItems:'center', justifyContent:'center', color:'black', background: 'rgba(255,255,255,0.8)', zIndex: 10 }}>
-          <p>{pdfError || (loadStalled ? 'This PDF is taking longer than usual.' : status)}</p>
-          {(pdfError || loadStalled) && <button type="button" onClick={retryDocument}>Retry PDF</button>}
+          alignItems:'center', justifyContent:'center', color:'white', background: 'rgba(9, 15, 30, 0.95)', zIndex: 10 }}>
+          <p>{pdfError || (loadStalled ? 'This PDF is taking longer than usual.' : status || 'Loading...')}</p>
+          {(pdfError || loadStalled) && <button type="button" onClick={retryDocument} style={{ marginTop: '12px', padding: '8px 16px', background: '#7650ed', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Retry PDF</button>}
         </div>
       )}
     </div>

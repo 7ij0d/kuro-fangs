@@ -763,8 +763,11 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
   const [showPageNumber, setShowPageNumber] = useState(storedWorkspaceSettings.showPageNumber !== false);
   const [keepScreenAwake, setKeepScreenAwake] = useState(storedWorkspaceSettings.keepScreenAwake === true);
   const [drawingInput, setDrawingInput] = useState(() => {
-    try { return window.localStorage.getItem("lock-in.catalog-workspace.drawing-input") === DRAWING_INPUT.STYLUS_AND_FINGER ? DRAWING_INPUT.STYLUS_AND_FINGER : DRAWING_INPUT.STYLUS_ONLY; }
-    catch { return DRAWING_INPUT.STYLUS_ONLY; }
+    try {
+      const saved = window.localStorage.getItem("lock-in.catalog-workspace.drawing-input");
+      return saved === DRAWING_INPUT.STYLUS_ONLY ? DRAWING_INPUT.STYLUS_ONLY : DRAWING_INPUT.STYLUS_AND_FINGER;
+    }
+    catch { return DRAWING_INPUT.STYLUS_AND_FINGER; }
   });
   const [annotations, setAnnotations] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -3521,7 +3524,11 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
       if (nextTool === "shapes" && remembered.shapeStyle) setShapeStyle(remembered.shapeStyle);
     }
     setActiveTool(nextTool);
-    setOpenSurface(null);
+    if (CONFIGURABLE_TOOLS.has(nextTool)) {
+      setOpenSurface(`tool:${nextTool}`);
+    } else {
+      setOpenSurface(null);
+    }
     setCustomColorEditorOpen(false);
     if (nextTool !== "select") setSelectedIds([]);
   }
@@ -4119,7 +4126,7 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
             onLostPointerCapture={lostWorkspacePointer}
             onPointerLeave={hideStylusHover}
           >
-            {sheet.pdfUrl ? <ContinuousA4Pdf pdfUrl={sheet.pdfUrl} pageCount={pageCount} visiblePageStart={accessiblePageStart} visiblePageCount={accessiblePageCount} zoom={zoom} stageRef={stageRef} documentRootRef={documentRef} onPageCount={syncPdfPageCount} onDocumentReady={markPdfDocumentReady} onCurrentPageChange={setPage} renderPageOverlay={renderPdfPageOverlay} onPdfPageRendered={recordPdfPageRender} /> : <article ref={documentRef} className="workspace-v2-document" onDoubleClick={smartZoom} style={cssVars({ "--workspace-document-width": `${PAGE_WIDTH * zoom}px`, "--workspace-document-min-height": `${760 * zoom}px`, "--workspace-document-max-width": "none" })}>
+            {sheet.pdfUrl ? <ContinuousA4Pdf pdfUrl={sheet.pdfUrl} pageCount={pageCount} visiblePageStart={accessiblePageStart} visiblePageCount={accessiblePageCount} zoom={zoom} stageRef={stageRef} documentRootRef={documentRef} onPageCount={syncPdfPageCount} onDocumentReady={markPdfDocumentReady} onCurrentPageChange={setPage} renderPageOverlay={renderPdfPageOverlay} onPdfPageRendered={recordPdfPageRender} activeTool={activeTool} /> : <article ref={documentRef} className="workspace-v2-document" onDoubleClick={smartZoom} style={cssVars({ "--workspace-document-width": `${PAGE_WIDTH * zoom}px`, "--workspace-document-min-height": `${760 * zoom}px`, "--workspace-document-max-width": "none" })}>
               <svg className={annotationLayerClass} viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-label="Document annotations">
                 <AnnotationVisuals annotations={pageAnnotations} prefix={`document-${page}`} includeHitTargets={activeTool === "select"} />
                 {draftAnnotation && draftAnnotation.type !== "lasso" && <WorkspaceAnnotation annotation={draftAnnotation} draft />}

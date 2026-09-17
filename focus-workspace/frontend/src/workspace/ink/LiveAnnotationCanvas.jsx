@@ -284,6 +284,5 @@ function LiveAnnotationCanvas({ pageNumber, activeTool }, ref) {
     return () => observer.disconnect();
   }, [ensureSize, paintFrame]);
 
-  const isDrawing = activeTool && activeTool !== "hand" && activeTool !== "select";
-  return <canvas ref={canvasRef} className="workspace-v2-live-annotation-canvas" aria-hidden="true" style={{ pointerEvents: isDrawing ? "auto" : "none" }} />;
+  return <canvas ref={canvasRef} className="workspace-v2-live-annotation-canvas" aria-hidden="true" style={{ pointerEvents: "none" }} />;
 });
