@@ -1,11 +1,10 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { assetPath } from "../../lib/utils.js";
 import { boundedOutputScale, pdfPageAspectRatio } from "../document/coordinateTransforms.js";
 import { WORKSPACE_RENDER } from "../config.js";
 import { PdfRenderQueue, pdfRenderGenerationIsCurrent } from "./pdfRenderQueue.js";
 import { loadPdfLibrary } from "./pdfJsAdapter.js";
 import { catalogCanvasPixelBudget } from "./renderBudget.js";
-import { visiblePdfPages } from "./visiblePdfPages.js";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const A4_PAGE_WIDTH = 595;
@@ -14,9 +13,6 @@ export const A4_PAGE_GAP = 40;
 export const MAX_A4_CANVAS_PIXELS = WORKSPACE_RENDER.maximumCatalogCanvasPixels;
 export const MAX_A4_CANVAS_EDGE = WORKSPACE_RENDER.maximumCatalogCanvasEdge;
 
-const A4_RENDER_OVERSCAN_PAGES = 1;
-const RENDER_SCALE_SETTLE_MS = WORKSPACE_RENDER.renderScaleSettleMs;
-const SCROLL_SETTLE_MS = WORKSPACE_RENDER.scrollSettleMs;
 const CANVAS_EVICTION_MS = WORKSPACE_RENDER.catalogCanvasEvictionMs;
 const DISTANT_CANVAS_EVICTION_MS = WORKSPACE_RENDER.catalogDistantCanvasEvictionMs;
 const SLOW_LOAD_NOTICE_MS = 15_000;
@@ -26,28 +22,6 @@ export function a4RenderQualityScale(renderZoom, devicePixelRatio = 1, pageAspec
   const budgetScale = boundedOutputScale(A4_PAGE_WIDTH, pageHeight, devicePixelRatio, renderZoom, maximumPixels);
   const limitedScale = Math.min(budgetScale, MAX_A4_CANVAS_EDGE / A4_PAGE_WIDTH, MAX_A4_CANVAS_EDGE / pageHeight);
   return Math.max(1, Math.round(limitedScale * 8) / 8);
-}
-
-const GEOMETRY_MEASURE_CONCURRENCY = 8;
-
-async function measureEveryPage(documentProxy, isCancelled) {
-  const total = documentProxy.numPages;
-  const geometry = new Map();
-  let nextPage = 1;
-  async function measure() {
-    while (nextPage <= total) {
-      const pageNumber = nextPage;
-      nextPage += 1;
-      if (isCancelled()) return;
-      const page = await documentProxy.getPage(pageNumber);
-      if (isCancelled()) return;
-      const viewport = page.getViewport({ scale: 1 });
-      geometry.set(pageNumber, { width: viewport.width, height: viewport.height });
-    }
-  }
-  const workers = Math.max(1, Math.min(GEOMETRY_MEASURE_CONCURRENCY, total));
-  await Promise.all(Array.from({ length: workers }, measure));
-  return geometry;
 }
 
 const A4PdfCanvas = memo(
@@ -203,10 +177,10 @@ function A4PdfCanvas({ documentProxy, pageNumber, pageAspectRatio, renderZoom, s
 
 export function ContinuousA4Pdf({
   pdfUrl,
-  pageCount,
+  pageCount: externalPageCount,
   visiblePageStart = 1,
-  visiblePageCount = pageCount,
-  zoom,
+  visiblePageCount,
+  zoom, 
   onZoomChange,
   stageRef,
   documentRootRef,
@@ -216,255 +190,193 @@ export function ContinuousA4Pdf({
   renderPageOverlay,
   onPdfPageRendered
 }) {
-  const [documentProxy, setDocumentProxy] = useState(null);
-  const [status, setStatus] = useState("Loading PDF…");
-  const [pdfError, setPdfError] = useState("");
-  const [loadRevision, setLoadRevision] = useState(0);
-  const [loadStalled, setLoadStalled] = useState(false);
-  const [failedPages, setFailedPages] = useState(() => new Set());
-  const [primaryPage, setPrimaryPage] = useState(visiblePageStart);
-  const [renderScale, setRenderScale] = useState(zoom);
-  const [renderRevision, setRenderRevision] = useState(0);
-  const [defaultPageAspectRatio, setDefaultPageAspectRatio] = useState(A4_PAGE_RATIO);
-  const [pageAspectRatios, setPageAspectRatios] = useState(() => new Map());
-  const pageGeometryReady = pageAspectRatios.size > 0 || Boolean(pdfError);
-  
-  const zoomRef = useRef(1);
-  const panXRef = useRef(0);
-  const panYRef = useRef(0);
-  const pageContainerRef = useRef(null);
   const surfaceRef = useRef(null);
-  const [viewTransform, setViewTransform] = useState({ scale: 1, panX: 0, panY: 0 });
-  const fitZoomRef = useRef(1);
+  const cameraRef = useRef(null);
+  const scaleRef = useRef(1);
+  const txRef = useRef(0);
+  const tyRef = useRef(0);
+  const fitScaleRef = useRef(1);
+  const naturalWRef = useRef(A4_PAGE_WIDTH);
+  const naturalHRef = useRef(A4_PAGE_WIDTH * A4_PAGE_RATIO);
+  const gestureRef = useRef({ type: 'none' });
+  const rafRef = useRef(null);
+  const renderScaleTimerRef = useRef(null);
+
+  const [renderScale, setRenderScale] = useState(1);
+  const [primaryPage, setPrimaryPage] = useState(visiblePageStart);
+  const [pageCount, setPageCount] = useState(0);
+  const [documentProxy, setDocumentProxy] = useState(null);
+  const [pdfError, setPdfError] = useState('');
+  const [status, setStatus] = useState('');
+  const [loadStalled, setLoadStalled] = useState(false);
   
-  const gestureRef = useRef({
-    startX: 0, startY: 0,
-    startScale: 1, startPanX: 0, startPanY: 0,
-    startDist: 0, focalX: 0, focalY: 0,
-    zooming: false
-  });
-  
-  const [stageViewport, setStageViewport] = useState(() => ({
-    width: Math.max(1, stageRef.current?.clientWidth || window.innerWidth),
-    height: Math.max(1, stageRef.current?.clientHeight || window.innerHeight)
-  }));
-  
-  const pageElementsRef = useRef(new Map());
-  const pendingPageGeometryRef = useRef(new Map());
-  const primaryPageRef = useRef(primaryPage);
-  const renderScaleRef = useRef(zoom);
-  const renderTimerRef = useRef(null);
-  const renderResumeRafRef = useRef(null);
-  const scrollTimerRef = useRef(null);
-  const scrollingRef = useRef(false);
-  const suspensionRef = useRef({ activity: false, pinch: false, scroll: false, zoom: false });
+  const [failedPages, setFailedPages] = useState(() => new Set());
+  const [renderRevision, setRenderRevision] = useState(0);
+  const [loadRevision, setLoadRevision] = useState(0);
+
   const renderControllerRef = useRef({ suspended: false, generation: 0, scrolling: false });
   const renderQueueRef = useRef(null);
   if (!renderQueueRef.current) renderQueueRef.current = new PdfRenderQueue({ concurrency: 1 });
 
-  useLayoutEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return undefined;
-    const publishSize = () => {
-      const width = Math.max(1, stage.clientWidth);
-      const height = Math.max(1, stage.clientHeight);
-      setStageViewport((current) => current.width === width && current.height === height ? current : { width, height });
+  function applyCamera(scale, tx, ty) {
+    scaleRef.current = scale;
+    txRef.current = tx;
+    tyRef.current = ty;
+    if (cameraRef.current) {
+      cameraRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
+    }
+  }
+
+  function applyFitAndCenter() {
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    const vw = surface.clientWidth;
+    const vh = surface.clientHeight;
+    const nw = naturalWRef.current;
+    const nh = naturalHRef.current;
+    if (!vw || !vh || !nw || !nh) return;
+    const PADDING = 40;
+    const fitScale = Math.max(0.05, Math.min((vw - PADDING) / nw, (vh - PADDING) / nh));
+    fitScaleRef.current = fitScale;
+    const scaledW = nw * fitScale;
+    const scaledH = nh * fitScale;
+    applyCamera(fitScale, (vw - scaledW) / 2, (vh - scaledH) / 2);
+    setRenderScale(fitScale);
+  }
+
+  function clampPan(scale, tx, ty) {
+    const surface = surfaceRef.current;
+    if (!surface) return { tx, ty };
+    const vw = surface.clientWidth;
+    const vh = surface.clientHeight;
+    const M = 60;
+    const sw = naturalWRef.current * scale;
+    const sh = naturalHRef.current * scale;
+    return {
+      tx: Math.max(M - sw, Math.min(vw - M, tx)),
+      ty: Math.max(M - sh, Math.min(vh - M, ty)),
     };
-    publishSize();
-    const observer = new window.ResizeObserver(publishSize);
-    observer.observe(stage);
-    return () => observer.disconnect();
-  }, [stageRef]);
+  }
 
-  const notePageOutcome = useCallback((pageNumber, failed) => {
-    setFailedPages((current) => {
-      if (failed === current.has(pageNumber)) return current;
-      const next = new Set(current);
-      if (failed) next.add(pageNumber);
-      else next.delete(pageNumber);
-      return next;
-    });
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches.length === 2) {
+      const t1 = e.touches[0], t2 = e.touches[1];
+      const focalX = (t1.clientX + t2.clientX) / 2;
+      const focalY = (t1.clientY + t2.clientY) / 2;
+      gestureRef.current = {
+        type: 'pinch',
+        startTx: txRef.current, startTy: tyRef.current, startScale: scaleRef.current,
+        startDist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
+        focalX, focalY,
+      };
+      if (e.cancelable) e.preventDefault();
+    } else if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const isZoomed = scaleRef.current > fitScaleRef.current * 1.05;
+      gestureRef.current = {
+        type: isZoomed ? 'pan' : 'swipe',
+        startX: t.clientX, startY: t.clientY,
+        startTx: txRef.current, startTy: tyRef.current,
+      };
+    }
   }, []);
 
-  const retryDocument = useCallback(() => {
-    setFailedPages(new Set());
-    setLoadStalled(false);
-    setLoadRevision((revision) => revision + 1);
+  const handleTouchMove = useCallback((e) => {
+    const g = gestureRef.current;
+    if (g.type === 'pinch' && e.touches.length === 2) {
+      const t1 = e.touches[0], t2 = e.touches[1];
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      const newScale = Math.max(fitScaleRef.current, Math.min(fitScaleRef.current * 8, g.startScale * (dist / g.startDist)));
+      const contentX = (g.focalX - g.startTx) / g.startScale;
+      const contentY = (g.focalY - g.startTy) / g.startScale;
+      let newTx = g.focalX - contentX * newScale;
+      let newTy = g.focalY - contentY * newScale;
+      ({ tx: newTx, ty: newTy } = clampPan(newScale, newTx, newTy));
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => applyCamera(newScale, newTx, newTy));
+      if (e.cancelable) e.preventDefault();
+    } else if (g.type === 'pan' && e.touches.length === 1) {
+      const t = e.touches[0];
+      let newTx = g.startTx + (t.clientX - g.startX);
+      let newTy = g.startTy + (t.clientY - g.startY);
+      ({ tx: newTx, ty: newTy } = clampPan(scaleRef.current, newTx, newTy));
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => applyCamera(scaleRef.current, newTx, newTy));
+      if (e.cancelable) e.preventDefault();
+    }
   }, []);
 
-  const retryPage = useCallback((pageNumber) => {
-    setFailedPages((current) => {
-      if (!current.has(pageNumber)) return current;
-      const next = new Set(current);
-      next.delete(pageNumber);
-      return next;
-    });
-    setRenderRevision((revision) => revision + 1);
-  }, []);
-
-  const applyPageGeometry = useCallback((pageNumber, width, height) => {
-    const ratio = pdfPageAspectRatio(width, height);
-    if (pageNumber === 1) setDefaultPageAspectRatio((current) => Math.abs(current - ratio) < .0001 ? current : ratio);
-    setPageAspectRatios((current) => {
-      if (Math.abs((current.get(pageNumber) || 0) - ratio) < .0001) return current;
-      const next = new Map(current);
-      next.set(pageNumber, ratio);
-      return next;
-    });
-  }, []);
-
-  const naturalDimensionsRef = useRef({ width: A4_PAGE_WIDTH, height: A4_PAGE_WIDTH * A4_PAGE_RATIO });
-
-  const applyMeasuredGeometry = useCallback((geometry) => {
-    const first = geometry.get(1);
-    if (first) {
-      naturalDimensionsRef.current = { width: first.width, height: first.height };
-      setDefaultPageAspectRatio(pdfPageAspectRatio(first.width, first.height));
-    }
-    setPageAspectRatios(() => {
-      const next = new Map();
-      geometry.forEach(({ width, height }, pageNumber) => {
-        next.set(pageNumber, pdfPageAspectRatio(width, height));
-      });
-      return next;
-    });
-  }, []);
-
-  const commitPageGeometry = useCallback((pageNumber, width, height) => {
-    if (renderControllerRef.current.suspended) {
-      pendingPageGeometryRef.current.set(pageNumber, { width, height });
-      return;
-    }
-    applyPageGeometry(pageNumber, width, height);
-  }, [applyPageGeometry]);
-
-  const flushPageGeometry = useCallback(() => {
-    if (!pendingPageGeometryRef.current.size) return;
-    const entries = [...pendingPageGeometryRef.current.entries()];
-    pendingPageGeometryRef.current.clear();
-    entries.forEach(([pageNumber, geometry]) => applyPageGeometry(pageNumber, geometry.width, geometry.height));
-  }, [applyPageGeometry]);
-
-  const commitPrimaryPage = useCallback((nextPage) => {
-    if (!Number.isFinite(nextPage) || nextPage < 1 || nextPage > pageCount || primaryPageRef.current === nextPage) return;
-    primaryPageRef.current = nextPage;
-    setPrimaryPage(nextPage);
-    onCurrentPageChange(nextPage);
-  }, [onCurrentPageChange, pageCount]);
-  
-  useEffect(() => {
-    if (visiblePageStart !== primaryPageRef.current) {
-      commitPrimaryPage(visiblePageStart);
-    }
-  }, [visiblePageStart, commitPrimaryPage]);
-
-  const setRenderSuspension = useCallback((reason, value, { renderOnResume = true } = {}) => {
-    if (suspensionRef.current[reason] === value) return;
-    suspensionRef.current[reason] = value;
-    const controller = renderControllerRef.current;
-    const next = Object.values(suspensionRef.current).some(Boolean);
-    if (controller.suspended === next) return;
-    controller.suspended = next;
-    if (next) {
-      controller.generation += 1;
-      renderQueueRef.current?.clear();
-      if (renderResumeRafRef.current !== null) cancelAnimationFrame(renderResumeRafRef.current);
-      renderResumeRafRef.current = null;
-      return;
-    }
-    renderResumeRafRef.current = requestAnimationFrame(() => {
-      renderResumeRafRef.current = null;
-      if (renderControllerRef.current.suspended) return;
-      flushPageGeometry();
-      if (renderOnResume) setRenderRevision((revision) => revision + 1);
-    });
-  }, [flushPageGeometry]);
-
-  useEffect(() => {
-    if (Math.abs(renderScaleRef.current - viewTransform.scale) < .001) {
-      setRenderSuspension("zoom", false);
-      return undefined;
-    }
-    let disposed = false;
-    setRenderSuspension("zoom", true);
-    function commitRenderScale() {
-      if (disposed) return;
-      const documentRoot = documentRootRef.current;
-      if (documentRoot?.classList.contains("is-live-pinching") || documentRoot?.classList.contains("is-zoom-settling")) {
-        renderTimerRef.current = window.setTimeout(commitRenderScale, 60);
-        return;
+  const handleTouchEnd = useCallback((e) => {
+    const g = gestureRef.current;
+    if (g.type === 'swipe' && e.changedTouches.length === 1) {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - g.startX;
+      const dy = t.clientY - g.startY;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        setPrimaryPage(prev => {
+          let next = prev;
+          if (dx < 0 && prev < pageCount) next = prev + 1;
+          if (dx > 0 && prev > 1) next = prev - 1;
+          if (next !== prev && onCurrentPageChange) {
+            onCurrentPageChange(next);
+          }
+          return next;
+        });
       }
-      renderScaleRef.current = viewTransform.scale;
-      setRenderSuspension("zoom", false);
-      setRenderScale(viewTransform.scale);
-      renderTimerRef.current = null;
     }
-    if (renderTimerRef.current) window.clearTimeout(renderTimerRef.current);
-    renderTimerRef.current = window.setTimeout(commitRenderScale, RENDER_SCALE_SETTLE_MS);
-    return () => {
-      disposed = true;
-      if (renderTimerRef.current) window.clearTimeout(renderTimerRef.current);
-      renderTimerRef.current = null;
-    };
-  }, [documentRootRef, setRenderSuspension, viewTransform.scale]);
-
-  useEffect(() => () => {
-    if (renderResumeRafRef.current !== null) cancelAnimationFrame(renderResumeRafRef.current);
-  }, []);
-
-  useEffect(() => () => renderQueueRef.current?.clear(), []);
-
-  useEffect(() => {
-    const root = documentRootRef.current;
-    if (!root) return undefined;
-    const suspendRendering = () => setRenderSuspension("pinch", true);
-    const resumeRendering = () => setRenderSuspension("pinch", false);
-    root.addEventListener("workspace:livezoomstart", suspendRendering);
-    root.addEventListener("workspace:livezoomcancel", resumeRendering);
-    root.addEventListener("workspace:livezoomcommit", resumeRendering);
-    return () => {
-      root.removeEventListener("workspace:livezoomstart", suspendRendering);
-      root.removeEventListener("workspace:livezoomcancel", resumeRendering);
-      root.removeEventListener("workspace:livezoomcommit", resumeRendering);
-    };
-  }, [documentRootRef, setRenderSuspension]);
+    if (g.type === 'pinch') {
+      clearTimeout(renderScaleTimerRef.current);
+      renderScaleTimerRef.current = setTimeout(() => {
+        setRenderScale(scaleRef.current);
+        if (onZoomChange) onZoomChange(scaleRef.current);
+      }, 300);
+    }
+    gestureRef.current = { type: 'none' };
+  }, [pageCount, onCurrentPageChange, onZoomChange]);
 
   useEffect(() => {
     let cancelled = false;
     let loadingTask;
     async function load() {
       try {
-        setStatus("Loading PDF…");
-        setPdfError("");
+        setStatus('Loading PDF…');
+        setPdfError('');
         setDocumentProxy(null);
         setFailedPages(new Set());
-        setDefaultPageAspectRatio(A4_PAGE_RATIO);
-        setPageAspectRatios(new Map());
         const pdfjs = await loadPdfLibrary();
         loadingTask = pdfjs.getDocument({ url: assetPath(pdfUrl) });
-        const nextDocument = await loadingTask.promise;
+        const doc = await loadingTask.promise;
         if (cancelled) return;
-        const geometry = await measureEveryPage(nextDocument, () => cancelled);
+        
+        const totalPages = doc.numPages;
+        setPageCount(totalPages);
+        if (onPageCount) onPageCount(totalPages);
+        
+        const page1 = await doc.getPage(1);
         if (cancelled) return;
-        applyMeasuredGeometry(geometry);
-        setDocumentProxy(nextDocument);
-        onPageCount(nextDocument.numPages);
-        setStatus("");
-      } catch (error) {
-        if (!cancelled) {
-          const message = error.message || "This PDF could not be displayed.";
-          setPdfError(message);
-          setStatus(message);
-        }
+        const vp = page1.getViewport({ scale: 1 });
+        naturalWRef.current = vp.width;
+        naturalHRef.current = vp.height;
+        
+        setDocumentProxy(doc);
+        setStatus('');
+        
+        requestAnimationFrame(() => {
+          applyFitAndCenter();
+          if (onDocumentReady) onDocumentReady();
+        });
+      } catch (err) {
+        if (cancelled) return;
+        setPdfError(String(err?.message || err));
       }
     }
     load();
     return () => {
       cancelled = true;
-      renderQueueRef.current?.clear();
       loadingTask?.destroy();
+      renderQueueRef.current?.clear();
     };
-  }, [applyMeasuredGeometry, loadRevision, onPageCount, pdfUrl]);
+  }, [pdfUrl, loadRevision, onPageCount, onDocumentReady]);
 
   useEffect(() => {
     if (documentProxy || pdfError) {
@@ -476,359 +388,162 @@ export function ContinuousA4Pdf({
   }, [documentProxy, loadRevision, pdfError]);
 
   useEffect(() => {
-    if (!documentProxy || !onDocumentReady) return undefined;
-    const frame = window.requestAnimationFrame(onDocumentReady);
-    return () => window.cancelAnimationFrame(frame);
-  }, [documentProxy, onDocumentReady]);
-
-  // Handle Swipe & Keyboard Navigation
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "ArrowLeft") {
-        commitPrimaryPage(primaryPageRef.current - 1);
-      } else if (e.key === "ArrowRight") {
-        commitPrimaryPage(primaryPageRef.current + 1);
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    const observer = new ResizeObserver(() => {
+      const isAtFit = Math.abs(scaleRef.current - fitScaleRef.current) < 0.01;
+      if (isAtFit) {
+        applyFitAndCenter();
+      } else {
+        const vw = surface.clientWidth, vh = surface.clientHeight;
+        const PADDING = 40;
+        fitScaleRef.current = Math.max(0.05, Math.min(
+          (vw - PADDING) / naturalWRef.current,
+          (vh - PADDING) / naturalHRef.current
+        ));
       }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [commitPrimaryPage]);
-
-  const calculateFitZoom = useCallback(() => {
-    const container = surfaceRef.current;
-    if (!container) return 1;
-    
-    const availableW = container.clientWidth;
-    const availableH = container.clientHeight;
-    
-    const naturalW = naturalDimensionsRef.current.width;
-    const naturalH = naturalDimensionsRef.current.height;
-    
-    if (!naturalW || !naturalH || !availableW || !availableH) return 1;
-    
-    const PADDING = 48;
-    const scaleW = (availableW - PADDING) / naturalW;
-    const scaleH = (availableH - PADDING) / naturalH;
-    
-    return Math.max(0.1, Math.min(scaleW, scaleH));
+    });
+    observer.observe(surface);
+    return () => observer.disconnect();
   }, []);
-
-  const applyFitZoom = useCallback(() => {
-    const fitScale = calculateFitZoom();
-    const container = surfaceRef.current;
-    if (!container) return;
-    
-    const availableW = container.clientWidth;
-    const availableH = container.clientHeight;
-    const naturalW = naturalDimensionsRef.current.width;
-    const naturalH = naturalDimensionsRef.current.height;
-    
-    const scaledW = naturalW * fitScale;
-    const scaledH = naturalH * fitScale;
-    const panX = (availableW - scaledW) / 2;
-    const panY = (availableH - scaledH) / 2;
-    
-    fitZoomRef.current = fitScale;
-    zoomRef.current = fitScale;
-    panXRef.current = panX;
-    panYRef.current = panY;
-    
-    if (pageContainerRef.current) {
-      pageContainerRef.current.style.transform = `translate(${panX}px, ${panY}px) scale(${fitScale})`;
-    }
-    setViewTransform({ scale: fitScale, panX, panY });
-  }, [calculateFitZoom]);
 
   useEffect(() => {
     const surface = surfaceRef.current;
     if (!surface) return;
-    
-    const observer = new ResizeObserver(() => {
-      const newFitScale = calculateFitZoom();
-      const isAtFit = Math.abs(zoomRef.current - fitZoomRef.current) < 0.01;
-      fitZoomRef.current = newFitScale;
-      if (isAtFit) applyFitZoom();
+    const vw = surface.clientWidth;
+    const vh = surface.clientHeight;
+    const sw = naturalWRef.current * scaleRef.current;
+    const sh = naturalHRef.current * scaleRef.current;
+    applyCamera(scaleRef.current, (vw - sw) / 2, (vh - sh) / 2);
+    setRenderScale(scaleRef.current);
+  }, [primaryPage]);
+  
+  useEffect(() => {
+    if (visiblePageStart !== primaryPage) {
+        setPrimaryPage(visiblePageStart);
+    }
+  }, [visiblePageStart]);
+
+  const commitPageGeometry = useCallback((pageNumber, width, height) => {
+      if (pageNumber === 1 && width && height) {
+          naturalWRef.current = width;
+          naturalHRef.current = height;
+      }
+  }, []);
+
+  const notePageOutcome = useCallback((pageNumber, failed) => {
+    setFailedPages((current) => {
+      if (failed === current.has(pageNumber)) return current;
+      const next = new Set(current);
+      if (failed) next.add(pageNumber);
+      else next.delete(pageNumber);
+      return next;
     });
-    
-    observer.observe(surface);
-    return () => observer.disconnect();
-  }, [applyFitZoom, calculateFitZoom]);
-
-  const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
-
-  const handleTouchStart = (e) => {
-    const touches = e.touches;
-    const gesture = gestureRef.current;
-    
-    if (touches.length >= 2) {
-      gesture.zooming = true;
-      const t1 = touches[0];
-      const t2 = touches[1];
-      
-      gesture.startScale = zoomRef.current;
-      gesture.startPanX = panXRef.current;
-      gesture.startPanY = panYRef.current;
-      gesture.startDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-      gesture.focalX = (t1.clientX + t2.clientX) / 2;
-      gesture.focalY = (t1.clientY + t2.clientY) / 2;
-      
-      if (pageContainerRef.current) {
-        pageContainerRef.current.style.transition = "none";
-      }
-      return;
-    }
-
-    if (touches.length === 1) {
-      gesture.zooming = false;
-      gesture.startX = touches[0].clientX;
-      gesture.startY = touches[0].clientY;
-      gesture.startPanX = panXRef.current;
-      gesture.startPanY = panYRef.current;
-      
-      if (pageContainerRef.current) {
-        pageContainerRef.current.style.transition = "none";
-      }
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    const touches = e.touches;
-    const gesture = gestureRef.current;
-    
-    if (touches.length >= 2 && gesture.zooming) {
-      const t1 = touches[0];
-      const t2 = touches[1];
-      const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-      
-      const MIN_ZOOM = fitZoomRef.current;
-      const MAX_ZOOM = fitZoomRef.current * 8;
-      const newScale = clamp(
-        gesture.startScale * (currentDist / gesture.startDist),
-        MIN_ZOOM, MAX_ZOOM
-      );
-
-      const contentX = (gesture.focalX - gesture.startPanX) / gesture.startScale;
-      const contentY = (gesture.focalY - gesture.startPanY) / gesture.startScale;
-
-      let newPanX = gesture.focalX - contentX * newScale;
-      let newPanY = gesture.focalY - contentY * newScale;
-
-      const viewportW = stageViewport.width;
-      const viewportH = stageViewport.height;
-      const MARGIN = 60;
-      const naturalW = naturalDimensionsRef.current.width;
-      const naturalH = naturalDimensionsRef.current.height;
-      
-      const pageW = naturalW * newScale;
-      const pageH = naturalH * newScale;
-      
-      newPanX = Math.max(MARGIN - pageW, Math.min(viewportW - MARGIN, newPanX));
-      newPanY = Math.max(MARGIN - pageH, Math.min(viewportH - MARGIN, newPanY));
-
-      zoomRef.current = newScale;
-      panXRef.current = newPanX;
-      panYRef.current = newPanY;
-      
-      if (pageContainerRef.current) {
-        pageContainerRef.current.style.transform = `translate(${newPanX}px, ${newPanY}px) scale(${newScale})`;
-      }
-      
-      if (e.cancelable) e.preventDefault();
-      return;
-    }
-
-    if (touches.length === 1 && !gesture.zooming) {
-      const isZoomedIn = zoomRef.current > fitZoomRef.current * 1.05;
-      if (isZoomedIn) {
-        const touch = touches[0];
-        let newPanX = gesture.startPanX + (touch.clientX - gesture.startX);
-        let newPanY = gesture.startPanY + (touch.clientY - gesture.startY);
-
-        const viewportW = stageViewport.width;
-        const viewportH = stageViewport.height;
-        const MARGIN = 60;
-        const naturalW = naturalDimensionsRef.current.width;
-        const naturalH = naturalDimensionsRef.current.height;
-        const pageW = naturalW * zoomRef.current;
-        const pageH = naturalH * zoomRef.current;
-        
-        newPanX = Math.max(MARGIN - pageW, Math.min(viewportW - MARGIN, newPanX));
-        newPanY = Math.max(MARGIN - pageH, Math.min(viewportH - MARGIN, newPanY));
-
-        panXRef.current = newPanX;
-        panYRef.current = newPanY;
-        
-        if (pageContainerRef.current) {
-          pageContainerRef.current.style.transform = `translate(${newPanX}px, ${newPanY}px) scale(${zoomRef.current})`;
-        }
-        
-        if (e.cancelable) e.preventDefault();
-      }
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    const gesture = gestureRef.current;
-    
-    if (gesture.zooming && e.touches.length < 2) {
-      setViewTransform({ scale: zoomRef.current, panX: panXRef.current, panY: panYRef.current });
-      if (onZoomChange) onZoomChange(zoomRef.current);
-      
-      if (pageContainerRef.current) {
-        pageContainerRef.current.style.transition = "transform 0.3s ease-out";
-      }
-      if (e.touches.length === 0) {
-        gesture.zooming = false;
-      }
-      return;
-    }
-
-    if (e.changedTouches.length === 1 && e.touches.length === 0 && !gesture.zooming) {
-      const touch = e.changedTouches[0];
-      const isZoomedIn = zoomRef.current > fitZoomRef.current * 1.05;
-      const dx = touch.clientX - gesture.startX;
-      const dy = touch.clientY - gesture.startY;
-
-      if (!isZoomedIn && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-        if (dx < 0 && primaryPage < pageCount) commitPrimaryPage(primaryPage + 1);
-        if (dx > 0 && primaryPage > 1) commitPrimaryPage(primaryPage - 1);
-      } else if (isZoomedIn) {
-        setViewTransform({ scale: zoomRef.current, panX: panXRef.current, panY: panYRef.current });
-      }
-      
-      if (pageContainerRef.current) {
-        pageContainerRef.current.style.transition = "transform 0.3s ease-out";
-      }
-      gesture.zooming = false;
-    }
-  };
-
-  const pages = useMemo(() => (
-    pageGeometryReady ? visiblePdfPages(pageCount, 1, pageCount) : []
-  ), [pageCount, pageGeometryReady]);
-
-  const pagesToRender = useMemo(() => {
-    const next = new Set();
-    for (let offset = -A4_RENDER_OVERSCAN_PAGES; offset <= A4_RENDER_OVERSCAN_PAGES; offset += 1) {
-      const pageNumber = primaryPage + offset;
-      if (pageNumber >= 1 && pageNumber <= pageCount) next.add(pageNumber);
-    }
-    return next;
-  }, [primaryPage, pageCount]);
-
-  const scaledDocumentWidth = A4_PAGE_WIDTH * viewTransform.scale;
-  const currentRatio = pageAspectRatios.get(primaryPage) || defaultPageAspectRatio;
-  const scaledDocumentHeight = A4_PAGE_WIDTH * currentRatio * viewTransform.scale;
-
-  const isZoomedIn = viewTransform.scale > fitZoomRef.current * 1.05;
-
-  const surfaceStyle = {
-    "--workspace-a4-zoom": viewTransform.scale,
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    position: "relative",
-    touchAction: isZoomedIn ? "none" : "pan-y pinch-zoom"
-  };
-
-  const liveLayerStyle = {
-    width: `${scaledDocumentWidth}px`,
-    height: `${scaledDocumentHeight}px`,
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  };
-
-  const documentStyle = {
-    "--workspace-a4-zoom": viewTransform.scale,
-    "--workspace-a4-page-gap": `${A4_PAGE_GAP}px`,
-    transform: `translate(${viewTransform.panX}px, ${viewTransform.panY}px) scale(${viewTransform.scale})`,
-    display: "flex",
-    transition: "transform 0.3s ease-out",
-    transformOrigin: "0 0",
-    willChange: "transform"
-  };
+  }, []);
+  
+  const retryDocument = useCallback(() => {
+    setLoadRevision(r => r + 1);
+  }, []);
+  
+  const retryPage = useCallback((pageNumber) => {
+      setFailedPages((current) => {
+          if (!current.has(pageNumber)) return current;
+          const next = new Set(current);
+          next.delete(pageNumber);
+          return next;
+      });
+      setRenderRevision((revision) => revision + 1);
+  }, []);
 
   return (
-    <div ref={surfaceRef} className="workspace-v2-a4-zoom-surface" style={surfaceStyle} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-      <button 
-        className="workspace-v2-nav-button left" 
-        onClick={() => commitPrimaryPage(primaryPage - 1)} 
-        disabled={primaryPage <= 1}
-        style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: "20px", zIndex: 10, background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", cursor: "pointer", opacity: primaryPage <= 1 ? 0.3 : 1 }}
-      >
-        <ChevronLeft size={24} />
-      </button>
+    <div
+      ref={surfaceRef}
+      className="workspace-v2-a4-zoom-surface"
+      style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', userSelect: 'none' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {pageCount > 1 && (
+        <button
+          className="workspace-v2-nav-button left"
+          onClick={() => {
+              const next = Math.max(1, primaryPage - 1);
+              setPrimaryPage(next);
+              if (onCurrentPageChange) onCurrentPageChange(next);
+          }}
+          disabled={primaryPage <= 1}
+          style={{ position:'absolute', left:16, top:'50%', transform:'translateY(-50%)', zIndex:20,
+            background:'rgba(0,0,0,0.5)', color:'white', border:'none', borderRadius:'50%',
+            width:40, height:40, display:'grid', placeItems:'center', cursor:'pointer',
+            opacity: primaryPage <= 1 ? 0.3 : 0.85 }}
+        ><ChevronLeft size={24} /></button>
+      )}
+      {pageCount > 1 && (
+        <button
+          className="workspace-v2-nav-button right"
+          onClick={() => {
+              const next = Math.min(pageCount, primaryPage + 1);
+              setPrimaryPage(next);
+              if (onCurrentPageChange) onCurrentPageChange(next);
+          }}
+          disabled={primaryPage >= pageCount}
+          style={{ position:'absolute', right:16, top:'50%', transform:'translateY(-50%)', zIndex:20,
+            background:'rgba(0,0,0,0.5)', color:'white', border:'none', borderRadius:'50%',
+            width:40, height:40, display:'grid', placeItems:'center', cursor:'pointer',
+            opacity: primaryPage >= pageCount ? 0.3 : 0.85 }}
+        ><ChevronRight size={24} /></button>
+      )}
 
-      <div ref={documentRootRef} className="workspace-v2-a4-live-layer" style={liveLayerStyle} aria-busy={Boolean(status)}>
-        <div ref={pageContainerRef} className="workspace-v2-a4-document" style={documentStyle}>
-        {pages.map((pageNumber) => {
-          const isVisible = pagesToRender.has(pageNumber);
-          if (!isVisible) return null;
+      <div
+        ref={cameraRef}
+        style={{ position:'absolute', top:0, left:0, transformOrigin:'0 0', willChange:'transform' }}
+      >
+        <div 
+          ref={documentRootRef}
+          className="workspace-v2-a4-live-layer" 
+          style={{
+          width: `px`,
+          height: `px`,
+          position: 'relative',
+          background: 'white',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        }}>
+          {documentProxy && (
+            <A4PdfCanvas
+              documentProxy={documentProxy}
+              pageNumber={primaryPage}
+              pageAspectRatio={naturalHRef.current / naturalWRef.current}
+              renderZoom={renderScale}
+              shouldRender={true}
+              evictionDelayMs={CANVAS_EVICTION_MS}
+              renderRevision={renderRevision}
+              renderController={renderControllerRef.current}
+              priority={0}
+              renderQueue={renderQueueRef.current}
+              onPageGeometry={commitPageGeometry}
+              onPageRendered={onPdfPageRendered}
+              onPageOutcome={notePageOutcome}
+            />
+          )}
+          {renderPageOverlay?.(primaryPage)}
           
-          return (
-            <section
-              key={pageNumber}
-              ref={(element) => { if (element) pageElementsRef.current.set(pageNumber, element); else pageElementsRef.current.delete(pageNumber); }}
-              className="workspace-v2-a4-page"
-              data-pdf-page={pageNumber}
-              style={{
-                width: `${A4_PAGE_WIDTH}px`,
-                height: `${A4_PAGE_WIDTH * (pageAspectRatios.get(pageNumber) || defaultPageAspectRatio)}px`,
-                position: "absolute",
-                left: 0,
-                top: 0,
-                opacity: pageNumber === primaryPage ? 1 : 0,
-                pointerEvents: pageNumber === primaryPage ? "auto" : "none",
-                transition: "opacity 0.2s ease-in-out",
-                backgroundColor: "#fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              }}
-              aria-label={`PDF page ${pageNumber} of ${pageCount}`}
-            >
-              <A4PdfCanvas
-                documentProxy={documentProxy}
-                pageNumber={pageNumber}
-                pageAspectRatio={pageAspectRatios.get(pageNumber) || defaultPageAspectRatio}
-                renderZoom={renderScale}
-                shouldRender={isVisible}
-                evictionDelayMs={Math.abs(pageNumber - primaryPage) > 1 ? DISTANT_CANVAS_EVICTION_MS : CANVAS_EVICTION_MS}
-                renderRevision={isVisible ? renderRevision : 0}
-                renderController={renderControllerRef.current}
-                priority={pageNumber === primaryPage ? 0 : Math.abs(pageNumber - primaryPage)}
-                renderQueue={renderQueueRef.current}
-                onPageGeometry={commitPageGeometry}
-                onPageRendered={onPdfPageRendered}
-                onPageOutcome={notePageOutcome}
-              />
-              {isVisible && renderPageOverlay(pageNumber)}
-              {documentProxy && failedPages.has(pageNumber) && <div className="workspace-v2-a4-status" role="alert">
-                <p>Page {pageNumber} could not be drawn.</p>
-                <button type="button" onClick={() => retryPage(pageNumber)}>Retry page {pageNumber}</button>
-              </div>}
-            </section>
-          );
-        })}
+          {documentProxy && failedPages.has(primaryPage) && (
+            <div className="workspace-v2-a4-status" role="alert" style={{ position: "absolute", zIndex: 30, background: "rgba(255,255,255,0.9)", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <p>Page {primaryPage} could not be drawn.</p>
+              <button type="button" onClick={() => retryPage(primaryPage)}>Retry page {primaryPage}</button>
+            </div>
+          )}
         </div>
       </div>
-      
-      <button 
-        className="workspace-v2-nav-button right" 
-        onClick={() => commitPrimaryPage(primaryPage + 1)} 
-        disabled={primaryPage >= pageCount}
-        style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", right: "20px", zIndex: 10, background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "40px", height: "40px", display: "grid", placeItems: "center", cursor: "pointer", opacity: primaryPage >= pageCount ? 0.3 : 1 }}
-      >
-        <ChevronRight size={24} />
-      </button>
 
-      {!documentProxy && <div className="workspace-v2-a4-status" role={pdfError ? "alert" : "status"} style={{ position: "absolute", bottom: "auto", height: `${stageViewport.height}px` }}>
-        <p>{pdfError || (loadStalled ? "This PDF is taking longer than usual." : status)}</p>
-        {(pdfError || loadStalled) && <button type="button" onClick={retryDocument}>Retry PDF</button>}
-      </div>}
+      {!documentProxy && (
+        <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column',
+          alignItems:'center', justifyContent:'center', color:'black', background: 'rgba(255,255,255,0.8)', zIndex: 10 }}>
+          <p>{pdfError || (loadStalled ? 'This PDF is taking longer than usual.' : status)}</p>
+          {(pdfError || loadStalled) && <button type="button" onClick={retryDocument}>Retry PDF</button>}
+        </div>
+      )}
     </div>
   );
 }
