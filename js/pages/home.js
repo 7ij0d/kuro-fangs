@@ -496,9 +496,10 @@ const HomePage = {
               </div>
             </div>
 
-            <!-- Quick Action Button ("تصفح المحتوى ⬅️") -->
+            <!-- Quick Action Button -->
             <button class="btn-explore-subject" onclick="event.stopPropagation(); window.SubjectModal.open('${subj.id}');" aria-label="${t('browseContent')}">
               <span>${t('browseContent')}</span>
+              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 14px; height: 14px;"></i>
             </button>
           </div>
         </div>

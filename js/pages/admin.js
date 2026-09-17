@@ -801,55 +801,59 @@ window.AdminPage = (function () {
 
     const syncBannerMarkup = isGlobalSyncActive ? `
       <!-- Global Publishing Active Banner -->
-      <div class="card" style="padding: 16px 20px; border-radius: 14px; margin-bottom: 20px; background: rgba(16, 185, 129, 0.08); border: 1.5px solid rgba(16, 185, 129, 0.35); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.18); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-            🟢
-          </div>
-          <div>
-            <div style="font-weight: 800; font-size: 0.95rem; color: #34D399; display: flex; align-items: center; gap: 6px;">
-              <span>${isAr ? 'المزامنة العامة مفعلة ونشطة' : 'Global Cloud & Repo Sync Active'}</span>
-              <span class="badge" style="background: rgba(16,185,129,0.25); color: #10B981; font-size: 0.7rem;">${hasGitSync && hasCloudSync ? 'Supabase + GitHub' : (hasCloudSync ? 'Supabase Cloud ☁️' : 'GitHub API')}</span>
+      <div class="kf-panel" style="margin-bottom: 20px; border-color: rgba(16, 185, 129, 0.3);">
+        <div class="kf-panel-header" style="background: rgba(16, 185, 129, 0.05);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="kf-pulse-dot"></span>
+            <div>
+              <div style="font-weight: 750; font-size: 0.9rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                <span>${isAr ? 'المزامنة العامة مفعلة ونشطة' : 'Global Cloud & Repo Sync Active'}</span>
+                <span class="kf-segmented-badge">${hasGitSync && hasCloudSync ? 'Supabase + GitHub' : (hasCloudSync ? 'Supabase' : 'GitHub API')}</span>
+              </div>
+              <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">
+                ${isAr ? 'أي شيت تقوم بإضافته أو تعديله ينعكس عالمياً لجميع الطلبة فوراً.' : 'Any published or modified sheet is synced worldwide immediately.'}
+              </div>
             </div>
-            <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">
-              ${isAr ? 'أي شيت تقوم بإضافته أو تعديله أو حذفه ينعكس عالمياً لجميع الطلبة على كافة أجهزتهم فوراً.' : 'All newly published, edited, or deleted sheets are synced worldwide for all students.'}
-            </div>
           </div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button id="btn-quick-download-json" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 700; gap: 4px;">
-            📥 <span>${isAr ? 'تنزيل sheets.json' : 'Download JSON'}</span>
-          </button>
-          <button id="btn-quick-sync-tab" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 700; gap: 4px;">
-            ⚙️ <span>${isAr ? 'إدارة المزامنة' : 'Manage Sync'}</span>
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-quick-download-json" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 600; gap: 6px;">
+              <i data-lucide="download" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? 'تنزيل JSON' : 'Download JSON'}</span>
+            </button>
+            <button id="btn-quick-sync-tab" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 600; gap: 6px;">
+              <i data-lucide="settings" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? 'إدارة المزامنة' : 'Manage Sync'}</span>
+            </button>
+          </div>
         </div>
       </div>
     ` : `
       <!-- Global Publishing Notice Banner (Local Storage Mode) -->
-      <div class="card" style="padding: 16px 20px; border-radius: 14px; margin-bottom: 20px; background: rgba(245, 158, 11, 0.08); border: 1.5px solid rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(245, 158, 11, 0.18); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-            ⚠️
-          </div>
-          <div>
-            <div style="font-weight: 800; font-size: 0.95rem; color: #FBBF24;">
-              ${isAr ? 'تنبيه النشر العام (وضع التخزين المحلي فقط)' : 'Global Publishing Notice (Local Storage Mode)'}
+      <div class="kf-panel" style="margin-bottom: 20px; border-color: rgba(245, 158, 11, 0.3);">
+        <div class="kf-panel-header" style="background: rgba(245, 158, 11, 0.05);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="kf-pulse-dot warning"></span>
+            <div>
+              <div style="font-weight: 750; font-size: 0.9rem; color: #D97706;">
+                ${isAr ? 'وضع التخزين المحلي فقط' : 'Local Storage Mode'}
+              </div>
+              <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">
+                ${isAr 
+                  ? 'الشيتات تُحفظ حالياً في متصفحك. لنشرها عالمياً للطلبة، قم بربط GitHub PAT من تبويب المزامنة.' 
+                  : 'Sheets are currently saved in your browser. Configure GitHub PAT in Cloud Sync to publish globally.'}
+              </div>
             </div>
-            <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px; line-height: 1.4;">
-              ${isAr 
-                ? 'الشيتات تُحفظ حالياً في متصفحك المحلي فقط. لتظهر لجميع الطلبة على هواتفهم، قم بربط GitHub PAT من تبويب <b>المزامنة السحابية والمستودع</b> أو قم بتنزيل ملف <code>sheets.json</code>.' 
-                : 'Sheets are currently saved to your local browser only. To publish globally for all students, configure GitHub Sync or export <code>sheets.json</code>.'}
-            </div>
           </div>
-        </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button id="btn-quick-download-json" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 700; border-color: rgba(245, 158, 11, 0.4); color: #FBBF24; gap: 4px;">
-            📥 <span>${isAr ? 'تنزيل sheets.json' : 'Download JSON'}</span>
-          </button>
-          <button id="btn-quick-sync-tab" class="btn btn-primary btn-sm" style="font-size: 0.75rem; font-weight: 800; background: #D97706; border-color: #D97706; gap: 4px;">
-            ⚙️ <span>${isAr ? 'إعداد المزامنة العامة ⚡' : 'Configure Global Sync ⚡'}</span>
-          </button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-quick-download-json" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; font-weight: 600; gap: 6px;">
+              <i data-lucide="download" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? 'تنزيل sheets.json' : 'Download JSON'}</span>
+            </button>
+            <button id="btn-quick-sync-tab" class="btn btn-primary btn-sm" style="font-size: 0.75rem; font-weight: 700; gap: 6px;">
+              <i data-lucide="zap" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? 'إعداد المزامنة' : 'Setup Sync'}</span>
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -858,123 +862,161 @@ window.AdminPage = (function () {
       <div>
         ${syncBannerMarkup}
 
-        <!-- Add New Sheet Form (Simplified Single Title, Single Doctor, Auto Pages) -->
-        <div class="card" style="padding: 24px; border-radius: 16px; margin-bottom: 24px; border-left: 4px solid var(--brand-burgundy);">
-          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="plus-circle" style="color: var(--brand-burgundy); width: 22px; height: 22px;"></i>
-            <span>${isAr ? 'إضافة ونشر شيت جديد للمنصة' : 'Add New Sheet / Handout'}</span>
-          </h3>
-
-          <form id="form-add-sheet" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
-            
-            <!-- 1. Single Title Field (Arabic or English) -->
-            <div style="grid-column: 1 / -1;">
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'عنوان الشيت / المحاضرة (عربي أو إنجليزي):' : 'Sheet / Handout Title:'}</label>
-              <input type="text" id="add-sheet-title" class="auth-input" placeholder="${isAr ? 'أدخل عنوان الشيت...' : 'Enter sheet title in Arabic or English...'}" required style="width: 100%; font-weight: 600;" />
+        <!-- Add New Sheet Panel -->
+        <div class="kf-panel">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="plus-circle" style="color: var(--brand-accent); width: 18px; height: 18px;"></i>
+              <span>${isAr ? 'إضافة ونشر شيت أو محاضرة جديدة' : 'Publish New Sheet / Lecture'}</span>
             </div>
+            <span class="kf-segmented-badge">${isAr ? 'نشر مباشر' : 'Live Publish'}</span>
+          </div>
 
-            <!-- 2. Single Doctor Name Field -->
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'أستاذ المادة (الدكتور):' : 'Doctor Name:'}</label>
-              <input type="text" id="add-sheet-doctor" class="auth-input" placeholder="${isAr ? 'اسم أستاذ المادة...' : 'Doctor name...'}" required />
-            </div>
-
-            <!-- 2.5 Lecture Date/Time Field -->
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'تاريخ أو وقت المحاضرة:' : 'Lecture Date / Time:'}</label>
-              <input type="text" id="add-sheet-date" class="auth-input" placeholder="${isAr ? 'مثال: 2026-09-18 أو الأحد 10:00 صباحاً' : 'e.g. 2026-09-18 or Sunday 10:00 AM'}" />
-            </div>
-
-            <!-- 3. Subject Selection -->
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'المادة الدراسية:' : 'Subject:'}</label>
-              <select id="add-sheet-subject" class="auth-input" required>
-                ${subjects.map(s => `<option value="${s.id}">${isAr ? s.name_ar : s.name_en}</option>`).join('')}
-              </select>
-            </div>
-
-            <!-- 4. Order Index Selection -->
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'ترتيب الشيت في المادة (Order):' : 'Sheet Order Index:'}</label>
-              <select id="add-sheet-order" class="auth-input">
-                <option value="auto">${isAr ? 'تلقائي (حسب التسلسل التالي)' : 'Auto (Next Sequence)'}</option>
-                ${Array.from({length: 30}, (_, i) => i + 1).map(i => `<option value="${i}">${isAr ? `الشيت رقم ${i}` : `Sheet #${i}`}</option>`).join('')}
-              </select>
-            </div>
-
-            <!-- 5. Auto-Detected Page Count Status Pill -->
-            <div style="display: flex; align-items: flex-end;">
-              <div id="pdf-auto-pages-pill" style="width: 100%; background: rgba(2, 132, 199, 0.08); border: 1px dashed rgba(2, 132, 199, 0.3); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
-                <span>📊 ${isAr ? 'عدد الصفحات (تلقائي):' : 'Page Count (Auto):'}</span>
-                <strong id="pdf-auto-pages-val" style="color: #0284C7; font-weight: 800;">${isAr ? 'يتم التحديد عند المعاينة' : 'Auto-detected'}</strong>
+          <div class="kf-panel-body">
+            <form id="form-add-sheet" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+              
+              <!-- Title -->
+              <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'عنوان الشيت / المحاضرة:' : 'Sheet / Lecture Title:'}
+                </label>
+                <input type="text" id="add-sheet-title" class="kf-input" placeholder="${isAr ? 'أدخل عنوان الشيت...' : 'Enter sheet title...'}" required />
               </div>
-            </div>
 
-            <!-- 6. PDF File Upload Drag & Drop Zone -->
-            <div style="grid-column: 1 / -1;">
-              <div id="pdf-drop-zone" style="border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.02); margin-bottom: 8px;">
-                <input type="file" id="add-sheet-file" accept="application/pdf" style="display: none;">
-                <div id="pdf-drop-label">
-                  <i data-lucide="file-up" style="width: 28px; height: 28px; color: #38BDF8; margin-bottom: 4px; display: inline-block;"></i>
-                  <div style="font-weight: 700; font-size: 0.875rem;">${isAr ? 'اسحب ملف الـ PDF هنا أو انقر للاختيار من جهازك' : 'Drag PDF here or click to select'}</div>
-                  <span style="font-size: 0.75rem; opacity: 0.6;">${isAr ? 'يتم حساب عدد الصفحات تلقائياً (الحد الأقصى: 15MB)' : 'Page count detected automatically (Max size: 15MB)'}</span>
+              <!-- Doctor -->
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'أستاذ المادة (الدكتور):' : 'Lecturer / Doctor:'}
+                </label>
+                <input type="text" id="add-sheet-doctor" class="kf-input" placeholder="${isAr ? 'اسم الدكتور...' : 'Doctor name...'}" required />
+              </div>
+
+              <!-- Date -->
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'تاريخ أو وقت المحاضرة:' : 'Lecture Date / Time:'}
+                </label>
+                <input type="text" id="add-sheet-date" class="kf-input" placeholder="${isAr ? 'مثال: الأحد 10:00 صباحاً' : 'e.g. Sunday 10:00 AM'}" />
+              </div>
+
+              <!-- Subject -->
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'المادة الدراسية:' : 'Subject:'}
+                </label>
+                <select id="add-sheet-subject" class="kf-input" required>
+                  ${subjects.map(s => `<option value="${s.id}">${isAr ? s.name_ar : s.name_en}</option>`).join('')}
+                </select>
+              </div>
+
+              <!-- Order -->
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'ترتيب الشيت في المادة:' : 'Sheet Sequence:'}
+                </label>
+                <select id="add-sheet-order" class="kf-input">
+                  <option value="auto">${isAr ? 'تلقائي (حسب التسلسل التالي)' : 'Auto (Next Sequence)'}</option>
+                  ${Array.from({length: 30}, (_, i) => i + 1).map(i => `<option value="${i}">${isAr ? `الشيت رقم ${i}` : `Sheet #${i}`}</option>`).join('')}
+                </select>
+              </div>
+
+              <!-- Auto-detected pages pill -->
+              <div style="display: flex; align-items: flex-end;">
+                <div id="pdf-auto-pages-pill" style="width: 100%; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 9px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                  <span>${isAr ? 'عدد الصفحات:' : 'Page Count:'}</span>
+                  <strong id="pdf-auto-pages-val" style="color: var(--brand-accent); font-weight: 700;">${isAr ? 'تلقائي عند الرفع' : 'Auto-detected'}</strong>
                 </div>
-                <div id="pdf-file-preview" style="display: none; color: #34D399; font-weight: 700;"></div>
               </div>
-              <div style="margin-top: 6px;">
-                <button type="button" id="toggle-url-input" style="background: none; border: none; color: #38BDF8; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0;">${isAr ? '🔗 أو أدخل رابط PDF يدوياً ▼' : '🔗 Or enter PDF URL manually ▼'}</button>
-                <input type="url" id="add-sheet-url" class="auth-input" placeholder="https://example.com/lecture.pdf" dir="ltr" style="display: none; margin-top: 6px; width: 100%;" />
-              </div>
-            </div>
 
-            <!-- 7. Submit Action Button -->
-            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 6px;">
-              <button type="submit" id="btn-publish-sheet" class="btn btn-primary" style="padding: 11px 26px; font-weight: 800; gap: 8px; font-size: 0.925rem;">
-                <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
-                <span>${isAr ? 'نشر الشيت ومزامنته سحابياً 🚀' : 'Publish & Cloud Sync Live 🚀'}</span>
-              </button>
-            </div>
-          </form>
+              <!-- PDF File Upload Drag & Drop Zone -->
+              <div style="grid-column: 1 / -1;">
+                <div id="pdf-drop-zone" style="border: 2px dashed var(--border-subtle); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-surface-subtle); margin-bottom: 8px;">
+                  <input type="file" id="add-sheet-file" accept="application/pdf" style="display: none;">
+                  <div id="pdf-drop-label">
+                    <i data-lucide="file-up" style="width: 26px; height: 26px; color: var(--brand-accent); margin-bottom: 6px; display: inline-block;"></i>
+                    <div style="font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">
+                      ${isAr ? 'اسحب ملف الـ PDF هنا أو انقر للاختيار من جهازك' : 'Drag PDF here or click to browse'}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                      ${isAr ? 'الحد الأقصى 15MB • يتم احتساب عدد الصفحات تلقائياً' : 'Maximum 15MB • Auto-detects page count'}
+                    </div>
+                  </div>
+                  <div id="pdf-file-preview" style="display: none; font-size: 0.85rem; font-weight: 600; color: #10B981;"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <button type="button" id="toggle-url-input" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; gap: 4px;">
+                    <i data-lucide="link" style="width: 12px; height: 12px;"></i>
+                    <span>${isAr ? 'أو أدخل رابط PDF يدوياً' : 'Or enter PDF URL manually'}</span>
+                  </button>
+                  <input type="url" id="add-sheet-url" class="kf-input" placeholder="https://.../sheet.pdf" style="display: none; max-width: 320px; font-size: 0.8rem;" />
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 6px;">
+                <button type="submit" id="btn-publish-sheet" class="btn btn-primary" style="padding: 10px 24px; font-weight: 700; gap: 8px;">
+                  <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i>
+                  <span>${isAr ? 'نشر الشيت فوراً للمنصة' : 'Publish Sheet'}</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
         </div>
 
-        <!-- Sheets Live Cards -->
-        <div class="card" style="padding: 24px; border-radius: 16px;">
-          <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="file-text" style="color: var(--brand-primary); width: 20px; height: 20px;"></i>
-            <span>${isAr ? 'قائمة الملازم والشيتات المنشورة (إمكانية التعديل والحذف مع تأكيد الحذف)' : 'Published Sheets List'}</span>
-          </h3>
+        <!-- Published Sheets List Panel -->
+        <div class="kf-panel">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="layers" style="width: 18px; height: 18px; color: var(--text-secondary);"></i>
+              <span>${isAr ? 'الملازم والشيتات المنشورة' : 'Published Handouts & Sheets'}</span>
+            </div>
+            <span class="kf-segmented-badge">${sheets.length} ${isAr ? 'شيت' : 'Sheets'}</span>
+          </div>
 
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            ${sheets.length === 0 ? `
-              <div style="text-align: center; padding: 28px; color: var(--text-muted); font-size: 0.9rem;">
-                ${isAr ? 'لا توجد شيتات أو ملازم منشورة حالياً' : 'No sheets published'}
-              </div>
-            ` : sheets.map(s => {
-              const pdfIcon = s.pdf_source === 'local' ? '📄' : (s.pdf_source === 'url' ? '🔗' : (s.pdf_url ? '🔗' : '⚠️'));
-              return `
-              <div class="sheet-item-row" data-sheet-id="${s.id}" style="display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; border-radius: 12px; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top center;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
-                  <div>
-                    <div style="margin-bottom: 6px;">
-                      <span style="background: #0284C7; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800;">${isAr ? 'الشيت #' : 'Sheet #'}${s.order_index || '—'}</span>
-                      <span style="font-size: 0.8rem; margin-inline-start: 8px; color: var(--text-secondary);">${pdfIcon}</span>
-                      <span style="font-size: 0.75rem; color: var(--text-muted); margin-inline-start: 8px;">(${s.pages || '—'} ${isAr ? 'صفحة' : 'pages'})</span>
+          <div class="kf-panel-body" style="padding: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${sheets.length === 0 ? `
+                <div style="text-align: center; padding: 36px 16px; color: var(--text-muted); font-size: 0.875rem;">
+                  ${isAr ? 'لا توجد شيتات منشورة حالياً في المنصة' : 'No sheets published yet'}
+                </div>
+              ` : sheets.map(s => `
+                <div class="sheet-item-row" data-sheet-id="${s.id}" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: 10px; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); transition: background 0.15s ease; flex-wrap: wrap; gap: 10px;">
+                  <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+                    <div style="font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-primary); font-variant-numeric: tabular-nums;">
+                      #${s.order_index || '—'}
                     </div>
-                    <strong style="color: var(--text-primary); font-size: 1rem; display: block;">${s.title_ar || s.title_en || s.title || ''}</strong>
-                    <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">${s.subject_name || s.subject_id}${s.doctor_name ? ` • <span style="color: var(--text-muted);">${s.doctor_name}</span>` : ''}${s.date ? ` • <span style="color: #38BDF8; font-size: 0.75rem;">🕒 ${s.date}</span>` : ''}</div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.925rem; color: var(--text-primary);">
+                        ${s.title_ar || s.title_en || s.title || ''}
+                      </div>
+                      <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="color: var(--brand-accent); font-weight: 600;">${s.subject_name || s.subject_id}</span>
+                        ${s.doctor_name ? `<span>• ${s.doctor_name}</span>` : ''}
+                        ${s.pages ? `<span>• ${s.pages} ${isAr ? 'صفحة' : 'pages'}</span>` : ''}
+                        ${s.date ? `<span style="color: var(--text-muted);">🕒 ${s.date}</span>` : ''}
+                      </div>
+                    </div>
                   </div>
-                  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <button class="btn-edit-sheet" data-id="${s.id}" style="background: #0284C7; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; transition: background 0.2s;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
-                      <span>✏️</span>
-                      <span>${isAr ? 'تعديل' : 'Edit'}</span>
+
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <button class="btn-edit-sheet kf-action-btn" data-id="${s.id}" title="${isAr ? 'تعديل بيانات الشيت' : 'Edit Sheet'}">
+                      <i data-lucide="pencil" style="width: 14px; height: 14px;"></i>
                     </button>
-                    <button class="btn-move-up-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Up">⬆️</button>
-                    <button class="btn-move-down-sheet" data-id="${s.id}" style="background: rgba(255,255,255,0.08); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;" title="Move Down">⬇️</button>
-                    <button class="btn-delete-sheet" data-id="${s.id}" data-title="${s.title_ar || s.title_en || s.title}" style="background: #991B1B; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s;">🗑️ ${isAr ? 'حذف' : 'Delete'}</button>
+                    <button class="btn-move-up-sheet kf-action-btn" data-id="${s.id}" title="Move Up">
+                      <i data-lucide="chevron-up" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button class="btn-move-down-sheet kf-action-btn" data-id="${s.id}" title="Move Down">
+                      <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button class="btn-delete-sheet kf-action-btn danger" data-id="${s.id}" data-title="${s.title_ar || s.title_en || s.title}" title="${isAr ? 'حذف الشيت' : 'Delete Sheet'}">
+                      <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    </button>
                   </div>
                 </div>
-              </div>
-            `}).join('')}
+              `).join('')}
+            </div>
           </div>
         </div>
       </div>
@@ -1057,101 +1099,103 @@ window.AdminPage = (function () {
   function renderStudentsTab(isAr, students) {
     return `
       <div>
-        <!-- Add New Student Form -->
-        <div class="card" style="padding: 24px; border-radius: 16px; margin-bottom: 24px; border-left: 4px solid #10B981;">
-          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="user-plus" style="color: #10B981; width: 22px; height: 22px;"></i>
-            <span>${isAr ? 'إضافة حساب طالب جديد يدوياً' : 'Create New Student Account'}</span>
-          </h3>
-
-          <form id="form-add-student" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'اسم الطالب الكامل:' : 'Student Full Name:'}</label>
-              <input type="text" id="add-student-name" class="auth-input" placeholder="أحمد علي الفيتوري..." required />
+        <!-- Add New Student Panel -->
+        <div class="kf-panel">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="user-plus" style="width: 18px; height: 18px; color: #10B981;"></i>
+              <span>${isAr ? 'إضافة حساب طالب جديد' : 'Register New Student'}</span>
             </div>
-
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'اسم المستخدم / البريد الإلكتروني:' : 'Email / Username:'}</label>
-              <input type="text" id="add-student-email" class="auth-input" placeholder="ahmed@dentistry.uot.edu.ly" required />
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'الرمز السري / كلمة المرور:' : 'Passcode / Password:'}</label>
-              <input type="text" id="add-student-passcode" class="auth-input" placeholder="ahmed2026" required />
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">${isAr ? 'النقاط الأكاديمية الأولى:' : 'Initial Points:'}</label>
-              <input type="number" id="add-student-points" class="auth-input" value="50" required />
-            </div>
-
-            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
-              <button type="submit" class="btn btn-primary" style="background: #10B981; border-color: #10B981; padding: 10px 24px; font-weight: 800; gap: 6px;">
-                <i data-lucide="user-check" style="width: 16px; height: 16px;"></i>
-                <span>${isAr ? 'إضافة حساب الطالب فوراً 👥' : 'Register Student 👥'}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Student Credentials Table -->
-        <div class="card" style="padding: 24px; border-radius: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0;">
-              <i data-lucide="shield-check" style="color: #10B981; width: 20px; height: 20px;"></i>
-              <span>${isAr ? 'جدول حسابات الطلبة والرموز السرية المسجلة بالمنصة' : 'Registered Student Accounts & Passcodes Table'}</span>
-            </h3>
-            <span class="badge badge-primary" style="background: #10B981; font-size: 0.75rem;">${students.length} ${isAr ? 'حسابات مسجلة' : 'Accounts'}</span>
+            <span class="kf-segmented-badge">${isAr ? 'يدوي' : 'Manual'}</span>
           </div>
 
-          <p style="font-size: 0.825rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
-            ${isAr 
-              ? 'يظهر هذا الجدول كافة بيانات الطلبة المسجلين بالمنصة، بما في ذلك الاسم، الحساب، والرمز السري (كلمة المرور) والنقاط المكتسبة لإدارتها واسترجاعها.' 
-              : 'Displays all registered student names, emails, passcodes, skins, and academic points for admin management.'}
-          </p>
+          <div class="kf-panel-body">
+            <form id="form-add-student" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'اسم الطالب الكامل:' : 'Student Full Name:'}
+                </label>
+                <input type="text" id="add-student-name" class="kf-input" placeholder="${isAr ? 'مثال: أحمد علي...' : 'e.g. Ahmed Ali...'}" required />
+              </div>
 
-          <div style="overflow-x: auto;">
-            <table class="table-spec" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'البريد أو المعرف:' : 'Email or Username:'}
+                </label>
+                <input type="text" id="add-student-email" class="kf-input" placeholder="student@dentistry.uot.edu.ly" required />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'رمز المرور (Passcode):' : 'Passcode:'}
+                </label>
+                <input type="text" id="add-student-passcode" class="kf-input" placeholder="code2026" required style="font-family: monospace;" />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'النقاط الأولية:' : 'Initial Points:'}
+                </label>
+                <input type="number" id="add-student-points" class="kf-input" value="50" required />
+              </div>
+
+              <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary" style="padding: 10px 22px; font-weight: 700; gap: 6px; background: #10B981; border-color: #10B981;">
+                  <i data-lucide="user-check" style="width: 16px; height: 16px;"></i>
+                  <span>${isAr ? 'حفظ وتسجيل الحساب' : 'Create Student Account'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Student Accounts Table Panel -->
+        <div class="kf-panel">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="shield-check" style="width: 18px; height: 18px; color: #10B981;"></i>
+              <span>${isAr ? 'بيانات وحسابات الطلبة المسجلة' : 'Registered Student Accounts'}</span>
+            </div>
+            <span class="kf-segmented-badge">${students.length} ${isAr ? 'طالب' : 'Students'}</span>
+          </div>
+
+          <div class="kf-table-wrap">
+            <table class="kf-data-table">
               <thead>
-                <tr style="background: var(--bg-surface-subtle); border-bottom: 2px solid var(--border-subtle);">
-                  <th style="padding: 12px; text-align: right;">${isAr ? 'اسم الطالب' : 'Student Name'}</th>
-                  <th style="padding: 12px; text-align: right;">${isAr ? 'الحساب / البريد' : 'Username / Email'}</th>
-                  <th style="padding: 12px; text-align: center;">${isAr ? 'الرمز السري (Passcode)' : 'Passcode / Password'}</th>
-                  <th style="padding: 12px; text-align: center;">${isAr ? 'السكن والمظهر' : 'Mascot Skin'}</th>
-                  <th style="padding: 12px; text-align: center;">${isAr ? 'النقاط' : 'Points'}</th>
-                  <th style="padding: 12px; text-align: center;">${isAr ? 'إجراءات' : 'Actions'}</th>
+                <tr>
+                  <th>${isAr ? 'اسم الطالب' : 'Student Name'}</th>
+                  <th>${isAr ? 'البريد / الحساب' : 'Email / User'}</th>
+                  <th style="text-align: center;">${isAr ? 'رمز المرور' : 'Passcode'}</th>
+                  <th style="text-align: center;">${isAr ? 'المظهر الأكاديمي' : 'Skin'}</th>
+                  <th style="text-align: center;">${isAr ? 'النقاط' : 'Points'}</th>
+                  <th style="text-align: center;">${isAr ? 'إجراء' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody>
                 ${students.length === 0 ? `
                   <tr>
-                    <td colspan="6" style="text-align: center; padding: 28px; color: var(--text-muted); font-size: 0.9rem;">
-                      ${isAr ? 'لا توجد حسابات طلبة مسجلة حالياً' : 'No registered students found'}
+                    <td colspan="6" style="text-align: center; padding: 36px; color: var(--text-muted);">
+                      ${isAr ? 'لا توجد حسابات طلبة مسجلة' : 'No registered students found'}
                     </td>
                   </tr>
-                ` : students.map((st, idx) => `
-                  <tr style="border-bottom: 1px solid var(--border-subtle);">
-                    <td style="padding: 12px 10px; font-weight: 800; color: var(--text-primary);">
-                      ${st.name}
+                ` : students.map(st => `
+                  <tr>
+                    <td style="font-weight: 750;">${st.name}</td>
+                    <td style="color: var(--text-secondary);">${st.email}</td>
+                    <td style="text-align: center;">
+                      <code style="background: var(--bg-surface-subtle); padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; font-weight: 700; color: var(--brand-accent); border: 1px solid var(--border-subtle);">
+                        ${st.passcode}
+                      </code>
                     </td>
-                    <td style="padding: 10px; color: var(--brand-primary); font-weight: 600;">
-                      ${st.email}
-                    </td>
-                    <td style="padding: 10px; text-align: center;">
-                      <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(2, 132, 199, 0.1); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(2, 132, 199, 0.2);">
-                        <code style="font-family: monospace; font-weight: 800; color: #0284C7; letter-spacing: 1px;">${st.passcode}</code>
-                      </div>
-                    </td>
-                    <td style="padding: 10px; text-align: center; color: var(--text-secondary); font-size: 0.775rem;">
+                    <td style="text-align: center; color: var(--text-secondary); font-size: 0.775rem;">
                       ${st.skinName || st.skin}
                     </td>
-                    <td style="padding: 10px; text-align: center; font-weight: 800; color: #10B981;">
+                    <td style="text-align: center; font-weight: 750; color: #10B981; font-variant-numeric: tabular-nums;">
                       +${st.points}
                     </td>
-                    <td style="padding: 10px; text-align: center;">
-                      <button class="btn btn-secondary btn-sm btn-delete-student" data-id="${st.id}" data-title="${st.name}" style="color: #EF4444; border-color: rgba(239,68,68,0.3); padding: 4px 8px; font-size: 0.75rem;">
-                        <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
-                        <span>${isAr ? 'حذف الحساب' : 'Delete'}</span>
+                    <td style="text-align: center;">
+                      <button class="btn-delete-student kf-action-btn danger" data-id="${st.id}" data-title="${st.name}" title="${isAr ? 'حذف الحساب' : 'Delete Account'}">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                       </button>
                     </td>
                   </tr>

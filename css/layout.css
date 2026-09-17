@@ -585,9 +585,9 @@ html[dir="rtl"] .header-search-box .search-icon {
 }
 
 /* ==========================================================================
-   5. RESPONSIVE BREAKPOINTS (Tablet & Mobile)
+   5. RESPONSIVE BREAKPOINTS (Mobile only, sidebar remains visible on laptops >= 768px)
    ========================================================================== */
-@media (max-width: 992px) {
+@media (max-width: 768px) {
   .app-sidebar {
     width: 270px;
     transform: translateX(-100%);

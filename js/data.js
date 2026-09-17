@@ -47,6 +47,8 @@ class DataService {
     });
     this.alerts = this.getDefaultAlerts();
     this.sheets = this.getDefaultSheets();
+    this.questions = this.getDefaultQuestions();
+    this.flashcards = this.getDefaultFlashcards();
 
     // 2. Merge cached cloud sheets & local custom admin sheets instantly
     try {
@@ -616,7 +618,32 @@ class DataService {
     ];
   }
 
+  
+  async fetchQuestions() {
+    try {
+      const res = await fetch('data/questions.json?v=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.questions) && data.questions.length > 0) {
+          this.questions = data.questions;
+          return this.questions;
+        }
+      }
+    } catch (e) {}
+    return this.questions;
+  }
+
+  
+  getDefaultQuestions() {
+    return [];
+  }
+
+  getDefaultFlashcards() {
+    return [];
+  }
+
   getDefaultSheets() {
+
     return [];
   }
 
@@ -850,16 +877,24 @@ window.DATA.pdfStore = new PdfStore();
 window.renderEmptyState = function(customTitle, customSubtitle, icon = 'folder-open') {
   const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
   const title = customTitle || (isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet');
-  const subtitle = customSubtitle || (isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.');
+  const subtitle = customSubtitle || (isAr ? 'جاري رفع واستكمال المحتوى الأكاديمي المعتمد من الكلية.' : 'Handouts and academic curriculum materials will be uploaded soon.');
 
   return `
-    <div class="empty-state-card">
-      <div class="empty-state-icon-wrap">
-        <i data-lucide="${icon}"></i>
+    <div class="kf-panel" style="text-align: center; padding: 42px 24px; max-width: 560px; margin: 30px auto; border-radius: 14px;">
+      <div style="width: 52px; height: 52px; margin: 0 auto 16px; border-radius: 12px; background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.2); display: flex; align-items: center; justify-content: center; color: var(--brand-accent);">
+        <i data-lucide="${icon}" style="width: 24px; height: 24px;"></i>
       </div>
-      <h3 class="empty-state-title">${title}</h3>
-      <p class="empty-state-subtitle">${subtitle}</p>
+      <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">${title}</h3>
+      <p style="font-size: 0.835rem; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px; line-height: 1.55;">${subtitle}</p>
+      <div style="display: flex; justify-content: center; gap: 10px;">
+        <a href="#/sheets" class="btn btn-primary btn-sm" style="font-weight: 700; gap: 6px; padding: 7px 16px;">
+          <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
+          <span>${isAr ? 'تصفح الشيتات المتاحة' : 'Browse Sheets'}</span>
+        </a>
+        <a href="#/" class="btn btn-secondary btn-sm" style="font-weight: 600; padding: 7px 16px;">
+          <span>${isAr ? 'الرئيسية' : 'Home'}</span>
+        </a>
+      </div>
     </div>
   `;
 };
-

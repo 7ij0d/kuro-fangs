@@ -202,9 +202,9 @@ const SheetsPage = {
       currentFilter = subjectId;
       container.querySelectorAll('.filter-btn').forEach(b => {
         if (b.getAttribute('data-subject') === currentFilter) {
-          b.className = 'btn btn-primary filter-btn';
+          b.classList.add('active');
         } else {
-          b.className = 'btn btn-secondary filter-btn';
+          b.classList.remove('active');
         }
       });
       renderList();
@@ -214,7 +214,7 @@ const SheetsPage = {
       <div class="page-title-bar">
         <div class="page-title-group">
           <h1>
-            <img src="assets/icons/sheets_cat.png" alt="Sheets & Lectures" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1.5px solid var(--border-subtle);" />
+            <i data-lucide="file-text" style="width: 28px; height: 28px; color: var(--brand-accent); vertical-align: middle; margin-inline-end: 8px;"></i>
             ${isAr ? 'المحاضرات والملازم الدراسية' : 'Lectures & Study Sheets'}
           </h1>
           <p>${isAr ? 'شيتات وتفريغات مواد السنة الثالثة طب وجراحة الفم والأسنان بصيغة PDF' : 'Third Year Dental Surgery lecture notes, handouts, and official transcripts'}</p>
@@ -222,16 +222,18 @@ const SheetsPage = {
       </div>
 
       <!-- Active Filter Indicator Bar -->
-      <div id="active-filter-indicator" class="card" style="display: none; justify-content: space-between; align-items: center; padding: 10px 16px; margin-bottom: 14px; background: rgba(139, 21, 56, 0.05); border: 1px solid rgba(139, 21, 56, 0.15);"></div>
+      <div id="active-filter-indicator" class="card" style="display: none; justify-content: space-between; align-items: center; padding: 10px 16px; margin-bottom: 14px; background: rgba(2, 132, 199, 0.05); border: 1px solid rgba(2, 132, 199, 0.18);"></div>
 
-      <!-- Subject Filters Horizontal Scroll -->
-      <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; scrollbar-width: thin;">
-        <button class="btn ${currentFilter === 'all' ? 'btn-primary' : 'btn-secondary'} filter-btn" data-subject="all" style="font-size: 0.8rem; padding: 6px 14px; white-space: nowrap;">
-          ${isAr ? 'الكل (12 مادة)' : 'All Subjects (12)'}
+      <!-- Subject Filters Segmented Nav -->
+      <div class="kf-segmented-nav" style="margin-bottom: 20px; width: 100%;">
+        <button class="kf-segmented-btn filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-subject="all">
+          <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
+          <span>${isAr ? 'كافة المواد' : 'All Subjects'}</span>
+          <span class="kf-segmented-badge">12</span>
         </button>
         ${subjects.map(s => `
-          <button class="btn ${currentFilter === s.id ? 'btn-primary' : 'btn-secondary'} filter-btn" data-subject="${s.id}" style="font-size: 0.8rem; padding: 6px 14px; white-space: nowrap;">
-            ${isAr ? s.name_ar : s.name_en}
+          <button class="kf-segmented-btn filter-btn ${currentFilter === s.id ? 'active' : ''}" data-subject="${s.id}">
+            <span>${isAr ? s.name_ar : s.name_en}</span>
           </button>
         `).join('')}
       </div>

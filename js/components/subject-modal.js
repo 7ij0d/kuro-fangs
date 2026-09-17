@@ -66,49 +66,49 @@ const SubjectModal = {
         id: 'sheets',
         title: t('catSheets'),
         desc: t('catSheetsDesc'),
-        icon: '<img src="assets/icons/sheets_cat.png" alt="Sheets & Lectures" class="sheets-cat-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />'
+        icon: '<i data-lucide="file-text" style="width: 24px; height: 24px; color: #0284C7;"></i>'
       },
       {
         id: 'recordings',
         title: t('catRecordings'),
         desc: t('catRecordingsDesc'),
-        icon: '🎙️'
+        icon: '<i data-lucide="mic" style="width: 24px; height: 24px; color: #10B981;"></i>'
       },
       {
         id: 'past-exams',
         title: t('catPastExams'),
         desc: t('catPastExamsDesc'),
-        icon: '🏛️'
+        icon: '<i data-lucide="archive" style="width: 24px; height: 24px; color: #F59E0B;"></i>'
       },
       {
         id: 'ai-questions',
         title: t('catAiQuestions'),
         desc: t('catAiQuestionsDesc'),
-        icon: '🤖'
+        icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
       },
       {
         id: 'doctor-notes',
         title: t('catDoctorNotes'),
         desc: t('catDoctorNotesDesc'),
-        icon: '👨‍⚕️'
+        icon: '<i data-lucide="stethoscope" style="width: 24px; height: 24px; color: #EC4899;"></i>'
       },
       {
         id: 'summaries',
         title: t('catSummaries'),
         desc: t('catSummariesDesc'),
-        icon: '📑'
+        icon: '<i data-lucide="book-marked" style="width: 24px; height: 24px; color: #3B82F6;"></i>'
       },
       {
         id: 'flashcards-atlas',
         title: t('catFlashcards'),
         desc: t('catFlashcardsDesc'),
-        icon: '🗂️'
+        icon: '<i data-lucide="layers" style="width: 24px; height: 24px; color: #6366F1;"></i>'
       },
       {
         id: 'files-slides',
         title: t('catFiles'),
         desc: t('catFilesDesc'),
-        icon: '📁'
+        icon: '<i data-lucide="folder" style="width: 24px; height: 24px; color: #64748B;"></i>'
       }
     ];
 
