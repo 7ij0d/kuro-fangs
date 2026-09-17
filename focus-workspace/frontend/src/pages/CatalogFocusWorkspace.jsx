@@ -3011,6 +3011,9 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
         unlockStageForDrawing(gesture.drawingPointerId);
         gesture.drawingPointerId = null;
         gesture.drawingPointerType = null;
+        if (sheet?.pdfUrl) {
+          return;
+        }
         for (const touch of gesture.touches.values()) {
           try { event.currentTarget.setPointerCapture(touch.pointerId); } catch { /* Capture only begins for the custom two-finger gesture. */ }
         }
@@ -3028,6 +3031,9 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
       }
       const canTouchDraw = pointerCanDraw(event.pointerType, drawingInput);
       if (activeTool === "hand" || !canTouchDraw) {
+        if (sheet?.pdfUrl) {
+          return;
+        }
         // One-finger navigation and two-finger pinch share the same pointer
         // stream, so the second contact upgrades one continuous session instead
         // of forcing the browser to cancel native scrolling and start again.
@@ -3045,7 +3051,10 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
       return;
     }
     const canDraw = pointerCanDraw(event.pointerType, drawingInput);
-    if (activeTool === "hand" || !canDraw) beginPan(event, GESTURE_DIRECTION.PENDING);
+    if (activeTool === "hand" || !canDraw) {
+      if (sheet?.pdfUrl) return;
+      beginPan(event, GESTURE_DIRECTION.PENDING);
+    }
     else if (DRAWING_TOOLS.has(activeTool)) beginAnnotation(event);
     let captured = false;
     try { event.currentTarget.setPointerCapture(event.pointerId); captured = true; } catch { /* Pointer capture is progressive enhancement. */ }
@@ -3443,6 +3452,7 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
   }
 
   function handleWheel(event) {
+    if (sheet?.pdfUrl) return;
     if (!event.ctrlKey) {
       const stage = stageRef.current;
       if (!stage || !sheet?.pdfUrl) return;
@@ -3947,9 +3957,8 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
   function fitPdfWidth() {
     const stage = stageRef.current;
     if (!stage) return;
-    const bounds = stage.getBoundingClientRect();
-    zoomTo(minimumPdfZoom(), bounds.left + bounds.width / 2, bounds.top + Math.min(bounds.height / 2, 180), { mode: "fit" });
-    setFocusMessage("PDF fitted to width.");
+    stage.querySelector(".workspace-v2-a4-zoom-surface")?.dispatchEvent(new CustomEvent("workspace:fitpage"));
+    setFocusMessage("PDF fitted to page.");
   }
 
   if (!material || !sheet) return <main className="workspace-v2 workspace-v2-missing"><h1>Workspace unavailable</h1><button type="button" onClick={() => navigate("/materials")}>Back to materials</button></main>;
@@ -4117,7 +4126,7 @@ function CatalogFocusWorkspaceView({ user = null, materials = [], catalogDocumen
           </section>}
 
           <div
-            className={`workspace-v2-document-stage is-tool-${activeTool}`}
+            className={`workspace-v2-document-stage is-tool-${activeTool}${sheet.pdfUrl ? " is-pdf-mode" : ""}`}
             ref={stageRef}
             onPointerDown={beginWorkspacePointer}
             onPointerMove={moveWorkspacePointer}

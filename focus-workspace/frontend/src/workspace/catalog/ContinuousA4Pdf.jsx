@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import Panzoom from "@panzoom/panzoom";
 import { assetPath } from "../../lib/utils.js";
 import { boundedOutputScale, pdfPageAspectRatio } from "../document/coordinateTransforms.js";
 import { WORKSPACE_RENDER } from "../config.js";
@@ -193,14 +194,12 @@ export function ContinuousA4Pdf({
 }) {
   const surfaceRef = useRef(null);
   const cameraRef = useRef(null);
-  const scaleRef = useRef(1);
-  const txRef = useRef(0);
-  const tyRef = useRef(0);
+  const panzoomRef = useRef(null);
+  const activeToolRef = useRef(activeTool);
+  activeToolRef.current = activeTool;
   const fitScaleRef = useRef(1);
   const naturalWRef = useRef(A4_PAGE_WIDTH);
   const naturalHRef = useRef(A4_PAGE_WIDTH * A4_PAGE_RATIO);
-  const gestureRef = useRef({ type: 'none' });
-  const rafRef = useRef(null);
   const renderScaleTimerRef = useRef(null);
 
   const [pageGeometry, setPageGeometry] = useState({
@@ -223,138 +222,186 @@ export function ContinuousA4Pdf({
   const renderQueueRef = useRef(null);
   if (!renderQueueRef.current) renderQueueRef.current = new PdfRenderQueue({ concurrency: 1 });
 
-  function applyCamera(scale, tx, ty) {
-    scaleRef.current = scale;
-    txRef.current = tx;
-    tyRef.current = ty;
-    if (cameraRef.current) {
-      cameraRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
-    }
-  }
-
-  function applyFitAndCenter() {
-    const surface = surfaceRef.current;
-    if (!surface) return;
-    const vw = surface.clientWidth;
-    const vh = surface.clientHeight;
-    const nw = naturalWRef.current;
-    const nh = naturalHRef.current;
-    if (!vw || !vh || !nw || !nh) return;
-    const PADDING = 40;
-    const fitScale = Math.max(0.05, Math.min((vw - PADDING) / nw, (vh - PADDING) / nh));
-    fitScaleRef.current = fitScale;
-    const scaledW = nw * fitScale;
-    const scaledH = nh * fitScale;
-    applyCamera(fitScale, (vw - scaledW) / 2, (vh - scaledH) / 2);
-    setRenderScale(fitScale);
-  }
-
-  function clampPan(scale, tx, ty) {
-    const surface = surfaceRef.current;
-    if (!surface) return { tx, ty };
-    const vw = surface.clientWidth;
-    const vh = surface.clientHeight;
-    const M = 60;
-    const sw = naturalWRef.current * scale;
-    const sh = naturalHRef.current * scale;
-    return {
-      tx: Math.max(M - sw, Math.min(vw - M, tx)),
-      ty: Math.max(M - sh, Math.min(vh - M, ty)),
-    };
-  }
-
   const goToPage = useCallback((pageNum) => {
     if (pageNum < 1 || pageNum > pageCount) return;
     setPrimaryPage(pageNum);
     if (onCurrentPageChange) onCurrentPageChange(pageNum);
   }, [pageCount, onCurrentPageChange]);
 
-  const handleTouchStart = useCallback((e) => {
-    if (e.touches.length === 2) {
-      const t1 = e.touches[0], t2 = e.touches[1];
-      const focalX = (t1.clientX + t2.clientX) / 2;
-      const focalY = (t1.clientY + t2.clientY) / 2;
-      gestureRef.current = {
-        type: 'pinch',
-        startTx: txRef.current,
-        startTy: tyRef.current,
-        startScale: scaleRef.current,
-        startDist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
-        focalX,
-        focalY,
-      };
-      if (e.cancelable) e.preventDefault();
-      return;
-    }
+  const applyFitAndCenter = useCallback(() => {
+    const surface = surfaceRef.current;
+    const pz = panzoomRef.current;
+    if (!surface || !pz) return;
 
-    if (activeTool !== "hand") {
-      gestureRef.current = { type: 'none' };
-      return;
-    }
+    const vw = surface.clientWidth;
+    const vh = surface.clientHeight;
+    const nw = naturalWRef.current;
+    const nh = naturalHRef.current;
+    if (!vw || !vh || !nw || !nh) return;
 
-    if (e.touches.length === 1) {
-      const t = e.touches[0];
-      const isZoomed = scaleRef.current > fitScaleRef.current * 1.05;
-      gestureRef.current = {
-        type: isZoomed ? 'pan' : 'swipe',
-        startX: t.clientX,
-        startY: t.clientY,
-        startTx: txRef.current,
-        startTy: tyRef.current,
-      };
-    }
-  }, [activeTool]);
+    const PADDING = 32;
+    const fitScale = Math.max(0.05, Math.min((vw - PADDING) / nw, (vh - PADDING) / nh));
+    fitScaleRef.current = fitScale;
 
-  const handleTouchMove = useCallback((e) => {
-    const g = gestureRef.current;
-    if (g.type === 'pinch' && e.touches.length === 2) {
-      const t1 = e.touches[0], t2 = e.touches[1];
-      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-      const newScale = Math.max(fitScaleRef.current, Math.min(fitScaleRef.current * 8, g.startScale * (dist / g.startDist)));
-      const contentX = (g.focalX - g.startTx) / g.startScale;
-      const contentY = (g.focalY - g.startTy) / g.startScale;
-      let newTx = g.focalX - contentX * newScale;
-      let newTy = g.focalY - contentY * newScale;
-      ({ tx: newTx, ty: newTy } = clampPan(newScale, newTx, newTy));
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => applyCamera(newScale, newTx, newTy));
-      if (e.cancelable) e.preventDefault();
-      return;
-    }
+    pz.setOptions({
+      minScale: fitScale,
+      maxScale: fitScale * 8,
+      startScale: fitScale,
+      startX: 0,
+      startY: 0
+    });
 
-    if (activeTool !== "hand") return;
+    pz.zoom(fitScale, { animate: false });
+    pz.reset({ animate: false });
+    setRenderScale(fitScale);
+  }, []);
 
-    if (g.type === 'pan' && e.touches.length === 1) {
-      const t = e.touches[0];
-      let newTx = g.startTx + (t.clientX - g.startX);
-      let newTy = g.startTy + (t.clientY - g.startY);
-      ({ tx: newTx, ty: newTy } = clampPan(scaleRef.current, newTx, newTy));
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => applyCamera(scaleRef.current, newTx, newTy));
-      if (e.cancelable) e.preventDefault();
-    }
-  }, [activeTool]);
+  useEffect(() => {
+    if (!cameraRef.current || !surfaceRef.current) return;
+    const surface = surfaceRef.current;
+    const camera = cameraRef.current;
 
-  const handleTouchEnd = useCallback((e) => {
-    const g = gestureRef.current;
-    if (g.type === 'swipe' && e.changedTouches.length === 1) {
-      const t = e.changedTouches[0];
-      const dx = t.clientX - g.startX;
-      const dy = t.clientY - g.startY;
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-        if (dx < 0 && primaryPage < pageCount) goToPage(primaryPage + 1);
-        if (dx > 0 && primaryPage > 1) goToPage(primaryPage - 1);
+    const pz = Panzoom(camera, {
+      maxScale: 8,
+      minScale: 0.1,
+      startScale: 1,
+      startX: 0,
+      startY: 0,
+      cursor: 'default',
+      touchAction: 'none',
+      excludeClass: 'panzoom-exclude',
+      setTransform: (elem, { scale, x, y }) => {
+        const vw = surface.clientWidth || window.innerWidth;
+        const vh = surface.clientHeight || window.innerHeight;
+        const nw = naturalWRef.current || A4_PAGE_WIDTH;
+        const nh = naturalHRef.current || (A4_PAGE_WIDTH * A4_PAGE_RATIO);
+        const sw = nw * scale;
+        const sh = nh * scale;
+
+        let clampedX = x;
+        let clampedY = y;
+
+        if (scale <= fitScaleRef.current * 1.02) {
+          clampedX = 0;
+          clampedY = 0;
+        } else {
+          const maxPanX = Math.max(0, (sw - vw) / 2 + (vw / 2 - 60)) / scale;
+          const maxPanY = Math.max(0, (sh - vh) / 2 + (vh / 2 - 60)) / scale;
+          clampedX = Math.max(-maxPanX, Math.min(maxPanX, x));
+          clampedY = Math.max(-maxPanY, Math.min(maxPanY, y));
+        }
+
+        elem.style.transform = `scale(${scale}) translate(${clampedX}px, ${clampedY}px)`;
+      },
+      handleStartEvent: (e) => {
+        if (activeToolRef.current !== 'hand') {
+          return;
+        }
+        if (e.cancelable) e.preventDefault();
       }
-    }
-    if (g.type === 'pinch') {
+    });
+
+    panzoomRef.current = pz;
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      pz.zoomWithWheel(e);
+    };
+
+    const onChange = (e) => {
+      const { scale } = e.detail;
       clearTimeout(renderScaleTimerRef.current);
       renderScaleTimerRef.current = setTimeout(() => {
-        setRenderScale(scaleRef.current);
-        if (onZoomChange) onZoomChange(scaleRef.current);
+        setRenderScale(scale);
+        if (onZoomChange) onZoomChange(scale);
       }, 300);
+    };
+
+    const onFitPage = () => {
+      applyFitAndCenter();
+    };
+
+    const onDblClick = (e) => {
+      const currentScale = pz.getScale();
+      if (currentScale > fitScaleRef.current * 1.25) {
+        applyFitAndCenter();
+      } else {
+        pz.zoomToPoint(fitScaleRef.current * 2.2, e, { animate: true });
+      }
+    };
+
+    surface.addEventListener('wheel', onWheel, { passive: false });
+    surface.addEventListener('dblclick', onDblClick);
+    surface.addEventListener('workspace:fitpage', onFitPage);
+    camera.addEventListener('panzoomchange', onChange);
+
+    return () => {
+      surface.removeEventListener('wheel', onWheel);
+      surface.removeEventListener('dblclick', onDblClick);
+      surface.removeEventListener('workspace:fitpage', onFitPage);
+      camera.removeEventListener('panzoomchange', onChange);
+      pz.destroy();
+      panzoomRef.current = null;
+    };
+  }, [applyFitAndCenter, onZoomChange]);
+
+  useEffect(() => {
+    if (!panzoomRef.current) return;
+    if (activeTool !== 'hand') {
+      panzoomRef.current.setOptions({ disablePan: true });
+    } else {
+      panzoomRef.current.setOptions({ disablePan: false });
     }
-    gestureRef.current = { type: 'none' };
-  }, [goToPage, onZoomChange, pageCount, primaryPage]);
+  }, [activeTool]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight') {
+        goToPage(primaryPage + 1);
+      } else if (e.key === 'ArrowLeft') {
+        goToPage(primaryPage - 1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goToPage, primaryPage]);
+
+  const swipeTouchRef = useRef(null);
+
+  const handleTouchStart = useCallback((e) => {
+    if (activeToolRef.current !== 'hand') return;
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      swipeTouchRef.current = { x: t.clientX, y: t.clientY, time: Date.now() };
+    } else {
+      swipeTouchRef.current = null;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (!swipeTouchRef.current || activeToolRef.current !== 'hand') return;
+    const start = swipeTouchRef.current;
+    swipeTouchRef.current = null;
+
+    const pz = panzoomRef.current;
+    const isAtFit = !pz || pz.getScale() <= fitScaleRef.current * 1.08;
+    if (!isAtFit) return;
+
+    if (e.changedTouches.length === 1) {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - start.x;
+      const dy = t.clientY - start.y;
+      const dt = Date.now() - start.time;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4 && dt < 600) {
+        if (dx < 0 && primaryPage < pageCount) {
+          goToPage(primaryPage + 1);
+        } else if (dx > 0 && primaryPage > 1) {
+          goToPage(primaryPage - 1);
+        }
+      }
+    }
+  }, [goToPage, pageCount, primaryPage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -414,32 +461,30 @@ export function ContinuousA4Pdf({
     const surface = surfaceRef.current;
     if (!surface) return;
     const observer = new ResizeObserver(() => {
-      const isAtFit = Math.abs(scaleRef.current - fitScaleRef.current) < 0.01;
+      const pz = panzoomRef.current;
+      if (!pz) return;
+      const currentScale = pz.getScale();
+      const isAtFit = Math.abs(currentScale - fitScaleRef.current) < 0.05;
       if (isAtFit) {
         applyFitAndCenter();
       } else {
         const vw = surface.clientWidth, vh = surface.clientHeight;
-        const PADDING = 40;
-        fitScaleRef.current = Math.max(0.05, Math.min(
+        const PADDING = 32;
+        const newFit = Math.max(0.05, Math.min(
           (vw - PADDING) / naturalWRef.current,
           (vh - PADDING) / naturalHRef.current
         ));
+        fitScaleRef.current = newFit;
+        pz.setOptions({ minScale: newFit, maxScale: newFit * 8 });
       }
     });
     observer.observe(surface);
     return () => observer.disconnect();
-  }, []);
+  }, [applyFitAndCenter]);
 
   useEffect(() => {
-    const surface = surfaceRef.current;
-    if (!surface) return;
-    const vw = surface.clientWidth;
-    const vh = surface.clientHeight;
-    const sw = naturalWRef.current * scaleRef.current;
-    const sh = naturalHRef.current * scaleRef.current;
-    applyCamera(scaleRef.current, (vw - sw) / 2, (vh - sh) / 2);
-    setRenderScale(scaleRef.current);
-  }, [primaryPage]);
+    applyFitAndCenter();
+  }, [primaryPage, applyFitAndCenter]);
   
   useEffect(() => {
     if (visiblePageStart !== primaryPage) {
@@ -483,45 +528,85 @@ export function ContinuousA4Pdf({
     <div
       ref={surfaceRef}
       className="workspace-v2-a4-zoom-surface"
-      style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', userSelect: 'none' }}
+      style={{
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        position: 'relative',
+        userSelect: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#090f1e'
+      }}
       onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {pageCount > 1 && (
         <button
-          className="workspace-v2-nav-button left"
-          onClick={() => {
-              const next = Math.max(1, primaryPage - 1);
-              setPrimaryPage(next);
-              if (onCurrentPageChange) onCurrentPageChange(next);
-          }}
+          className="workspace-v2-nav-button left panzoom-exclude"
+          onClick={() => goToPage(primaryPage - 1)}
           disabled={primaryPage <= 1}
-          style={{ position:'absolute', left:16, top:'50%', transform:'translateY(-50%)', zIndex:20,
-            background:'rgba(0,0,0,0.5)', color:'white', border:'none', borderRadius:'50%',
-            width:40, height:40, display:'grid', placeItems:'center', cursor:'pointer',
-            opacity: primaryPage <= 1 ? 0.3 : 0.85 }}
+          style={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 20,
+            background: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(8px)',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '50%',
+            width: 44,
+            height: 44,
+            display: 'grid',
+            placeItems: 'center',
+            cursor: primaryPage <= 1 ? 'not-allowed' : 'pointer',
+            opacity: primaryPage <= 1 ? 0.2 : 0.9,
+            transition: 'all 0.2s',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)'
+          }}
+          aria-label="Previous page"
         ><ChevronLeft size={24} /></button>
       )}
       {pageCount > 1 && (
         <button
-          className="workspace-v2-nav-button right"
-          onClick={() => {
-              const next = Math.min(pageCount, primaryPage + 1);
-              setPrimaryPage(next);
-              if (onCurrentPageChange) onCurrentPageChange(next);
-          }}
+          className="workspace-v2-nav-button right panzoom-exclude"
+          onClick={() => goToPage(primaryPage + 1)}
           disabled={primaryPage >= pageCount}
-          style={{ position:'absolute', right:16, top:'50%', transform:'translateY(-50%)', zIndex:20,
-            background:'rgba(0,0,0,0.5)', color:'white', border:'none', borderRadius:'50%',
-            width:40, height:40, display:'grid', placeItems:'center', cursor:'pointer',
-            opacity: primaryPage >= pageCount ? 0.3 : 0.85 }}
+          style={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 20,
+            background: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(8px)',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '50%',
+            width: 44,
+            height: 44,
+            display: 'grid',
+            placeItems: 'center',
+            cursor: primaryPage >= pageCount ? 'not-allowed' : 'pointer',
+            opacity: primaryPage >= pageCount ? 0.2 : 0.9,
+            transition: 'all 0.2s',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)'
+          }}
+          aria-label="Next page"
         ><ChevronRight size={24} /></button>
       )}
 
       <div
         ref={cameraRef}
-        style={{ position: 'absolute', top: 0, left: 0, transformOrigin: '0 0', willChange: 'transform' }}
+        style={{
+          width: `${pageGeometry.width}px`,
+          height: `${pageGeometry.height}px`,
+          position: 'relative',
+          willChange: 'transform'
+        }}
       >
         <div 
           ref={documentRootRef}
