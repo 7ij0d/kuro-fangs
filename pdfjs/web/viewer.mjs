@@ -18139,6 +18139,12 @@ class Toolbar {
         }
       }
     }, {
+      element: options.editorSelectButton,
+      eventName: "switchannotationeditormode",
+      eventDetails: {
+        mode: AnnotationEditorType.NONE
+      }
+    }, {
       element: options.editorHighlightButton,
       eventName: "switchannotationeditormode",
       eventDetails: {
@@ -18341,6 +18347,7 @@ class Toolbar {
       editorCommentParamsToolbar,
       editorFreeTextButton,
       editorFreeTextParamsToolbar,
+      editorSelectButton,
       editorHighlightButton,
       editorHighlightParamsToolbar,
       editorInkButton,
@@ -18356,7 +18363,8 @@ class Toolbar {
     toggleExpandedBtn(editorInkButton, mode === AnnotationEditorType.INK, editorInkParamsToolbar);
     toggleExpandedBtn(editorStampButton, mode === AnnotationEditorType.STAMP, editorStampParamsToolbar);
     toggleExpandedBtn(editorSignatureButton, mode === AnnotationEditorType.SIGNATURE, editorSignatureParamsToolbar);
-    editorCommentButton.disabled = editorFreeTextButton.disabled = editorHighlightButton.disabled = editorInkButton.disabled = editorStampButton.disabled = editorSignatureButton.disabled = mode === AnnotationEditorType.DISABLE;
+    editorSelectButton?.classList.toggle("toggled", mode === AnnotationEditorType.NONE);
+    editorCommentButton.disabled = editorFreeTextButton.disabled = editorHighlightButton.disabled = editorInkButton.disabled = editorStampButton.disabled = editorSignatureButton.disabled = (editorSelectButton ? (editorSelectButton.disabled = mode === AnnotationEditorType.DISABLE) : false);
   }
   #updateUIState(resetNumPages = false) {
     const {
@@ -21084,6 +21092,7 @@ function getViewerConfiguration() {
       editorCommentParamsToolbar: document.getElementById("editorCommentParamsToolbar"),
       editorFreeTextButton: document.getElementById("editorFreeTextButton"),
       editorFreeTextParamsToolbar: document.getElementById("editorFreeTextParamsToolbar"),
+      editorSelectButton: document.getElementById("editorSelectButton"),
       editorHighlightButton: document.getElementById("editorHighlightButton"),
       editorHighlightParamsToolbar: document.getElementById("editorHighlightParamsToolbar"),
       editorHighlightColorPicker: document.getElementById("editorHighlightColorPicker"),

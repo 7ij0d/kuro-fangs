@@ -3604,10 +3604,13 @@ class AnnotationEditorUIManager {
     this.#commentManager?.destroyPopup();
     this.#mode = mode;
     if (mode === AnnotationEditorType.NONE) {
-      this.setEditingState(false);
-      this.#disableAll();
+      this.setEditingState(true);
+      this.unselectAll();
+      for (const layer of this.#allLayers.values()) {
+        layer.updateMode(mode);
+      }
       for (const editor of this.#allEditors.values()) {
-        editor.hideStandaloneCommentButton();
+        editor.enable();
       }
       this._editorUndoBar?.hide();
       this.toggleComment(null);
@@ -22208,10 +22211,6 @@ class DrawingEditor extends AnnotationEditor {
     if (this.#mustBeCommitted) {
       this.#mustBeCommitted = false;
       this.commit();
-      this.parent.setSelected(this);
-      if (focus && this.isOnScreen) {
-        this.div.focus();
-      }
     }
   }
   remove() {
@@ -23832,9 +23831,6 @@ class HighlightEditor extends DrawingEditor {
   onceAdded(focus) {
     if (!this.annotationElementId) {
       this.parent.addUndoableEditor(this);
-    }
-    if (focus) {
-      this.div.focus();
     }
   }
   remove() {
@@ -26822,21 +26818,17 @@ class AnnotationEditorLayer {
     this.#cleanup();
     switch (mode) {
       case AnnotationEditorType.NONE:
-        this.div.classList.toggle("nonEditing", true);
+        this.div.classList.toggle("nonEditing", false);
         this.disableTextSelection();
-        this.togglePointerEvents(false);
+        this.togglePointerEvents(true);
         this.toggleAnnotationLayerPointerEvents(true);
-        this.disableClick();
+        this.enableClick();
         return;
       case AnnotationEditorType.INK:
+      case AnnotationEditorType.HIGHLIGHT:
         this.disableTextSelection();
         this.togglePointerEvents(true);
         this.enableClick();
-        break;
-      case AnnotationEditorType.HIGHLIGHT:
-        this.enableTextSelection();
-        this.togglePointerEvents(false);
-        this.disableClick();
         break;
       default:
         this.disableTextSelection();
