@@ -23836,6 +23836,16 @@ class HighlightEditor extends DrawingEditor {
     });
     super.remove();
   }
+  pointerdown(event) {
+    // Highlighter is purely visual ink: never select or focus on click/touch
+  }
+  focusin(event) {
+    // Never select on focus
+  }
+  select() {
+    // Never select
+    return;
+  }
   render() {
     if (this.div) {
       return this.div;
@@ -23853,6 +23863,8 @@ class HighlightEditor extends DrawingEditor {
       });
     }
     this.enableEditing();
+    div.style.pointerEvents = "none";
+    div.tabIndex = -1;
     return div;
   }
   #keydown(event) {
