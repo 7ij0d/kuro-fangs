@@ -15,7 +15,6 @@ class I18nManager {
         brandSub: 'Faculty of Dentistry — Year 3',
         searchPlaceholder: 'Search subjects, lectures, or topics...',
         navSubjects: 'Subjects (12)',
-        navCalculator: 'GPA Calculator',
 
 
         pointsSuffix: 'pts',
@@ -96,7 +95,6 @@ class I18nManager {
         sideNavLectureSchedule: 'Theory Lectures Schedule',
         sideNavPracticalSchedule: 'Clinical & Lab Schedule',
         sideNavExamsSchedule: 'Official Exam Schedules',
-        sideNavCalc: 'GPA Calculator',
 
         sideNavRewards: 'Fox Mascot Hub',
         sideNavGames: 'Arcade & Games',
@@ -154,7 +152,6 @@ class I18nManager {
         brandSub: 'كلية طب وجراحة الفم والأسنان — السنة الثالثة',
         searchPlaceholder: 'ابحث عن أي مادة أو شيت أو موضوع...',
         navSubjects: 'المواد (12)',
-        navCalculator: 'حاسبة المعدل',
 
 
         pointsSuffix: 'نقطة',
@@ -235,7 +232,6 @@ class I18nManager {
         sideNavLectureSchedule: 'جدول المحاضرات النظري',
         sideNavPracticalSchedule: 'جدول المعامل والعملي',
         sideNavExamsSchedule: 'جداول الامتحانات الرسمية',
-        sideNavCalc: 'حاسبة المعدل التراكمي',
 
         sideNavRewards: 'متجر سكنات الثعلب',
         sideNavGames: 'مركز الألعاب والترفيه',

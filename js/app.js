@@ -107,9 +107,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideExamsSchedule = document.getElementById('side-nav-exams-schedule');
     if (sideExamsSchedule) sideExamsSchedule.textContent = t('sideNavExamsSchedule');
 
-    const sideCalc = document.getElementById('side-nav-calc');
-    if (sideCalc) sideCalc.textContent = t('sideNavCalc');
-
     const sideSaved = document.getElementById('side-nav-saved');
 
 
@@ -281,11 +278,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.ExamsPage.renderExamsSchedule(c, q);
     } else if (window.ExamsPage) {
       window.ExamsPage.render(c, q);
-    }
-  });
-  router.register('/calculator', (c, q) => {
-    if (window.CalculatorPage && typeof window.CalculatorPage.render === 'function') {
-      window.CalculatorPage.render(c, q);
     }
   });
   router.register('/quizzes', (c, q) => window.QuizzesPage.render(c, q));

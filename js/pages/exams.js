@@ -833,7 +833,7 @@ const ExamsPage = {
   // Fallback general render function
   render(container, queryParams) {
     const hash = window.location.hash || '';
-    if (hash.includes('/exams') || hash.includes('/calculator')) {
+    if (hash.includes('/exams')) {
       return ExamsPage.renderExamsSchedule(container, queryParams);
     }
     if (hash.includes('/practical-schedule')) {
