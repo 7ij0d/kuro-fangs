@@ -152,10 +152,10 @@ const HomePage = {
     const counts = HomePage.getQuickAccessCounts();
 
     const items = [
-      { icon: 'help-circle', title: t('qaQuestionBank'), count: counts.questions, unit: t('qaQuestions'), route: '#/questions', color: 'var(--brand-burgundy)' },
-      { icon: 'archive',     title: t('qaPastExams'),    count: counts.exams,     unit: t('qaPapers'),    route: '#/previous-years', color: '#0284C7' },
-      { icon: 'layers',      title: t('qaFlashcards'),   count: counts.flashcards, unit: t('qaCards'),    route: '#/flashcards', color: '#D97706' },
-      { icon: 'calendar',    title: t('qaSchedules'),    count: '',               unit: '',               route: '#/lecture-schedule', color: '#059669' }
+      { icon: 'help-circle', title: t('qaQuestionBank'), count: counts.questions + counts.exams, unit: t('qaQuestions'), route: '#/questions', color: 'var(--brand-burgundy)' },
+      { icon: 'book-marked', title: isAr ? 'الملخصات' : 'Summaries',    count: '',     unit: '',    route: '#/summaries', color: '#0284C7' },
+      { icon: 'calendar',    title: t('qaSchedules'),    count: '',               unit: '',               route: '#/lecture-schedule', color: '#059669' },
+      { icon: 'file-check-2', title: isAr ? 'جداول الامتحانات' : 'Exam Schedule', count: '', unit: '', route: '#/exams', color: '#D97706' }
     ];
 
     return `

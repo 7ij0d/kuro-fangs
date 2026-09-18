@@ -276,9 +276,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   router.register('/quizzes', (c, q) => window.QuizzesPage.render(c, q));
   router.register('/questions', (c, q) => window.QuestionsPage.render(c, q));
-  router.register('/flashcards', (c, q) => window.FlashcardsPage.render(c, q));
+  // Redirect legacy routes to unified questions page
+  router.register('/flashcards', (c, q) => window.QuestionsPage.render(c, q));
+  router.register('/previous-years', (c, q) => window.QuestionsPage.render(c, q));
   router.register('/notes', (c, q) => window.NotesPage.render(c, q));
-  router.register('/previous-years', (c, q) => window.PreviousYearsPage.render(c, q));
   router.register('/favorites', (c, q) => window.SecondaryPages.renderFavorites(c, q));
   router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
   router.register('/rewards', (c, q) => window.SecondaryPages.renderRewards(c, q));

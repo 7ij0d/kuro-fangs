@@ -168,9 +168,9 @@ const SubjectModal = {
     if (!subject) return;
     const subjectId = subject.id;
 
-    // For file-based categories (sheets, summaries, files-slides, past-exams):
+    // For file-based categories (sheets, summaries, files-slides):
     // Provide instant in-modal explorer with 16px modern cards and dual action buttons!
-    if (categoryId === 'sheets' || categoryId === 'summaries' || categoryId === 'files-slides' || categoryId === 'past-exams') {
+    if (categoryId === 'sheets' || categoryId === 'summaries' || categoryId === 'files-slides') {
       SubjectModal.renderCategoryFiles(categoryId);
       return;
     }
@@ -182,10 +182,9 @@ const SubjectModal = {
         window.ROUTER.navigate(`/videos?subject=${subjectId}`);
         break;
       case 'ai-questions':
-        window.ROUTER.navigate(`/questions?subject=${subjectId}`);
-        break;
+      case 'past-exams':
       case 'flashcards-atlas':
-        window.ROUTER.navigate(`/flashcards?subject=${subjectId}`);
+        window.ROUTER.navigate(`/questions?subject=${subjectId}`);
         break;
       case 'doctor-notes':
         window.ROUTER.navigate(`/notes?subject=${subjectId}`);

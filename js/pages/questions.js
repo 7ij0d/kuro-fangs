@@ -10,6 +10,8 @@ const QuestionsPage = {
   activeQuizList: [],
   activeQuizIndex: 0,
   searchQuery: '',
+  pendingSheetQuestions: [],   // Questions pending type filter selection
+  pendingSubjectTitle: '',     // Subject + sheet title for pending quiz
 
   getQuestions() {
     if (window.DATA && Array.isArray(window.DATA.questions) && window.DATA.questions.length > 0) {
@@ -84,12 +86,12 @@ const QuestionsPage = {
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <span class="kf-segmented-badge" style="background: rgba(2, 132, 199, 0.08); color: var(--brand-accent); border-color: rgba(2, 132, 199, 0.25); font-weight: 800;">
                 <i data-lucide="layers" style="width: 13px; height: 13px;"></i>
-                ${isAr ? 'نظام الأسئلة التفاعلي المبوب' : 'Interactive Dental Curriculum Engine'}
+                ${isAr ? 'نظام الأسئلة الموحد' : 'Unified Questions Engine'}
               </span>
               <span class="kf-segmented-badge" id="q-total-counter">${allQuestions.length} ${isAr ? 'سؤال معتمد' : 'MCQs'}</span>
             </div>
             <h1 style="font-size: 1.45rem; font-weight: 850; color: var(--text-primary); margin: 0;">
-              ${isAr ? 'بنك الأسئلة والامتحانات السريرية' : 'Dental Clinical Question Bank'}
+              ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
             </h1>
           </div>
 
@@ -184,6 +186,58 @@ const QuestionsPage = {
           </div>
         </div>
       </div>
+
+      <!-- QUESTION TYPE SELECTOR MODAL -->
+      <div id="qt-type-selector-modal" class="dt-quiz-overlay" style="display: none;">
+        <div class="dt-quiz-card" style="max-width: 440px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(2, 132, 199, 0.08); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+              <i data-lucide="filter" style="width: 24px; height: 24px; color: var(--brand-accent);"></i>
+            </div>
+            <h2 style="font-size: 1.2rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
+              ${isAr ? 'اختر نوع الأسئلة' : 'Select Question Type'}
+            </h2>
+            <p id="qt-sheet-name-label" style="font-size: 0.825rem; color: var(--text-secondary); margin: 0; font-weight: 500;"></p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;">
+            <button type="button" class="qt-type-option" data-qtype="past_exam" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-subtle); background: var(--bg-card); cursor: pointer; transition: all var(--transition-fast); text-align: start;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(239, 68, 68, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i data-lucide="file-check-2" style="width: 18px; height: 18px; color: #EF4444;"></i>
+              </div>
+              <div>
+                <div style="font-size: 0.9rem; font-weight: 750; color: var(--text-primary);">${isAr ? 'أسئلة سنوات سابقة' : 'Past Exam Questions'}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${isAr ? 'أسئلة من الامتحانات النهائية والنصفية السابقة' : 'Questions from previous midterm & final exams'}</div>
+              </div>
+            </button>
+
+            <button type="button" class="qt-type-option" data-qtype="practice" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-subtle); background: var(--bg-card); cursor: pointer; transition: all var(--transition-fast); text-align: start;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(16, 185, 129, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i data-lucide="brain" style="width: 18px; height: 18px; color: #10B981;"></i>
+              </div>
+              <div>
+                <div style="font-size: 0.9rem; font-weight: 750; color: var(--text-primary);">${isAr ? 'أسئلة أخرى / بنك الأسئلة' : 'Practice / Question Bank'}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${isAr ? 'أسئلة تدريبية وبنك الأسئلة الذكي' : 'AI-generated practice & review questions'}</div>
+              </div>
+            </button>
+
+            <button type="button" class="qt-type-option" data-qtype="all" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-subtle); background: var(--bg-card); cursor: pointer; transition: all var(--transition-fast); text-align: start;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(2, 132, 199, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i data-lucide="layers" style="width: 18px; height: 18px; color: var(--brand-accent);"></i>
+              </div>
+              <div>
+                <div style="font-size: 0.9rem; font-weight: 750; color: var(--text-primary);">${isAr ? 'الكل — كلاهما معاً' : 'Both — All Questions'}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${isAr ? 'عرض جميع الأسئلة المتاحة لهذا الشيت' : 'Show all available questions for this sheet'}</div>
+              </div>
+            </button>
+          </div>
+
+          <button type="button" id="qt-cancel-btn" class="btn btn-secondary" style="width: 100%; justify-content: center; padding: 10px; font-weight: 700; gap: 6px;">
+            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+            <span>${isAr ? 'إلغاء' : 'Cancel'}</span>
+          </button>
+        </div>
+      </div>
     `;
 
     QuestionsPage.bindEvents(container);
@@ -247,6 +301,44 @@ const QuestionsPage = {
         QuestionsPage.activeQuizIndex--;
         QuestionsPage.renderModalQuestion();
       }
+    });
+
+    // Question Type Selector Modal
+    document.getElementById('qt-cancel-btn')?.addEventListener('click', () => {
+      QuestionsPage.closeTypeSelector();
+    });
+
+    container.querySelectorAll('.qt-type-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qtype = btn.getAttribute('data-qtype');
+        const pending = QuestionsPage.pendingSheetQuestions;
+        let filtered;
+
+        if (qtype === 'past_exam') {
+          filtered = pending.filter(q => q.type === 'past_exam' || q.source === 'past_exam');
+        } else if (qtype === 'practice') {
+          filtered = pending.filter(q => q.type !== 'past_exam' && q.source !== 'past_exam');
+        } else {
+          filtered = [...pending]; // 'all'
+        }
+
+        QuestionsPage.closeTypeSelector();
+
+        if (filtered.length > 0) {
+          QuestionsPage.launchQuizRunner(filtered, QuestionsPage.pendingSubjectTitle);
+        } else {
+          // If no questions match the filter, show all and notify
+          if (window.Toast) {
+            window.Toast.show(
+              isAr ? 'لا توجد أسئلة من هذا النوع، سيتم عرض جميع الأسئلة المتاحة.' : 'No questions of this type found. Showing all available questions.',
+              'info'
+            );
+          }
+          if (pending.length > 0) {
+            QuestionsPage.launchQuizRunner(pending, QuestionsPage.pendingSubjectTitle);
+          }
+        }
+      });
     });
   },
 
@@ -365,7 +457,10 @@ const QuestionsPage = {
           const shTitle = btn.getAttribute('data-sheet-title');
           const targetQuestions = sheetsMap[shTitle] || [];
           if (targetQuestions.length > 0) {
-            QuestionsPage.launchQuizRunner(targetQuestions, `${isAr ? subject.name_ar : subject.name_en} • ${shTitle}`);
+            QuestionsPage.showTypeSelector(
+              targetQuestions,
+              `${isAr ? subject.name_ar : subject.name_en} • ${shTitle}`
+            );
           }
         });
       });
@@ -624,6 +719,30 @@ const QuestionsPage = {
         }
       });
     });
+  },
+
+  // TYPE SELECTOR MODAL — Show/Hide
+  showTypeSelector(questions, subjectTitle) {
+    QuestionsPage.pendingSheetQuestions = questions;
+    QuestionsPage.pendingSubjectTitle = subjectTitle;
+
+    const label = document.getElementById('qt-sheet-name-label');
+    if (label) label.textContent = subjectTitle;
+
+    const modal = document.getElementById('qt-type-selector-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (window.lucide) window.lucide.createIcons();
+    }
+  },
+
+  closeTypeSelector() {
+    const modal = document.getElementById('qt-type-selector-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
   },
 
   // 4. LEVEL 3: DENTISTOIRE-STYLE FOCUSED MODAL QUIZ RUNNER
