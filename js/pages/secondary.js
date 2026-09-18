@@ -215,6 +215,148 @@ const SecondaryPages = {
     });
   },
 
+  // Audio Recordings
+  renderAudioRecordings(container, queryParams) {
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+    const subjects = window.DATA ? window.DATA.getSubjects() : [];
+    const targetSubject = queryParams?.get('subject') || 'all';
+    let currentFilter = targetSubject;
+
+    const baseRecordings = window.DATA?.recordings || [];
+
+    const renderList = async () => {
+      const filtered = currentFilter === 'all'
+        ? baseRecordings
+        : baseRecordings.filter(r => r.subject_id === currentFilter);
+
+      const gridEl = document.getElementById('recordings-list');
+      if (!gridEl) return;
+
+      if (filtered.length === 0) {
+        gridEl.innerHTML = `
+          <div style="grid-column: 1 / -1;">
+            ${window.renderEmptyState
+              ? window.renderEmptyState()
+              : `
+                <div class="empty-state-card">
+                  <div class="empty-state-icon-wrap">
+                    <i data-lucide="folder-open"></i>
+                  </div>
+                  <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+                  <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال المحتوى الصوتي قريباً' : 'Audio curriculum materials will be uploaded soon.'}</p>
+                </div>
+              `}
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
+
+      const itemsHtml = await Promise.all(filtered.map(async rec => {
+        let sheetName = isAr ? 'محاضرة غير محددة' : 'Unknown Sheet';
+        if (window.DATA?.sheets) {
+          const sheet = window.DATA.sheets.find(s => s.id === rec.sheet_id);
+          if (sheet) {
+            sheetName = sheet.title || sheet.title_ar || sheetName;
+          }
+        }
+
+        let audioSrc = rec.audio_url || '';
+        if (!audioSrc && window.DATA?.audioStore?.getAudio) {
+          try {
+            const blob = await window.DATA.audioStore.getAudio(rec.id);
+            if (blob) {
+              audioSrc = URL.createObjectURL(blob);
+            }
+          } catch (err) {
+            console.error('Failed to load audio from IDB:', err);
+          }
+        }
+
+        let playSection = '';
+        if (audioSrc) {
+          playSection = `<audio controls src="${audioSrc}" style="width: 100%; height: 40px; margin-top: 8px; border-radius: var(--radius-sm);"></audio>`;
+        }
+
+        let telegramBtn = '';
+        if (rec.telegram_url) {
+          telegramBtn = `
+            <button class="btn btn-secondary btn-sm" onclick="window.open('${rec.telegram_url}', '_blank')" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 6px 12px; margin-top: 8px;">
+              <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+              ${isAr ? 'فتح في تليجرام' : 'Open in Telegram'}
+            </button>
+          `;
+        }
+
+        return `
+          <div class="kf-panel" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+              <span class="badge badge-primary" style="display: inline-flex; align-items: center; gap: 4px;">
+                <i data-lucide="headphones" style="width: 12px; height: 12px;"></i>
+                ${sheetName}
+              </span>
+              ${rec.duration ? `<span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-surface-subtle); padding: 2px 8px; border-radius: var(--radius-full); border: 1px solid var(--border-subtle);">${rec.duration}</span>` : ''}
+            </div>
+            
+            <h3 style="font-size: 1.05rem; color: var(--text-primary); margin: 4px 0 0; line-height: 1.4;">
+              ${isAr ? (rec.title_ar || rec.title_en) : (rec.title_en || rec.title_ar)}
+            </h3>
+            
+            <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 8px; align-items: center;">
+              <span>${rec.doctor || (isAr ? 'دكتور الكلية' : 'Faculty Doctor')}</span>
+              ${rec.date ? `<span style="color: var(--border-subtle);">&bull;</span><span>${rec.date}</span>` : ''}
+            </div>
+
+            ${playSection}
+            
+            ${telegramBtn ? `<div>${telegramBtn}</div>` : ''}
+          </div>
+        `;
+      }));
+
+      gridEl.innerHTML = itemsHtml.join('');
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    container.innerHTML = `
+      <div class="page-title-bar">
+        <div class="page-title-group">
+          <h1>
+            <i data-lucide="headphones" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
+            ${isAr ? 'التسجيلات الصوتية' : 'Audio Recordings'}
+          </h1>
+          <p>${isAr ? 'تسجيلات صوتية لمحاضرات دكاترة الكلية مرتبطة بالشيتات' : 'Faculty lecture audio recordings linked to lecture sheets'}</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; scrollbar-width: thin;">
+        <button class="btn ${currentFilter === 'all' ? 'btn-primary' : 'btn-secondary'} audio-filter-btn" data-subject="all" style="font-size: 0.8rem; padding: 6px 14px; white-space: nowrap;">
+          ${isAr ? 'جميع المواد' : 'All Subjects'}
+        </button>
+        ${subjects.map(s => `
+          <button class="btn ${currentFilter === s.id ? 'btn-primary' : 'btn-secondary'} audio-filter-btn" data-subject="${s.id}" style="font-size: 0.8rem; padding: 6px 14px; white-space: nowrap;">
+            ${isAr ? s.name_ar : s.name_en}
+          </button>
+        `).join('')}
+      </div>
+
+      <div id="recordings-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;"></div>
+    `;
+
+    renderList();
+
+    container.querySelectorAll('.audio-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentFilter = btn.getAttribute('data-subject');
+        container.querySelectorAll('.audio-filter-btn').forEach(b => {
+          b.className = b.getAttribute('data-subject') === currentFilter ? 'btn btn-primary audio-filter-btn' : 'btn btn-secondary audio-filter-btn';
+        });
+        renderList();
+      });
+    });
+  },
+
   // Images / Clinical Atlas
   renderImages(container) {
     const images = [

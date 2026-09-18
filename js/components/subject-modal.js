@@ -179,7 +179,7 @@ const SubjectModal = {
     SubjectModal.close();
     switch (categoryId) {
       case 'recordings':
-        window.ROUTER.navigate(`/videos?subject=${subjectId}`);
+        window.ROUTER.navigate(`/recordings?subject=${subjectId}`);
         break;
       case 'ai-questions':
       case 'past-exams':

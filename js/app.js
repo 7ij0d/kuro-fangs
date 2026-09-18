@@ -236,7 +236,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/sheets', (c, q) => window.SheetsPage.render(c, q));
   router.register('/sheet-detail', (c, q) => window.SheetDetailPage.render(c, q));
   router.register('/sheet/:id', (c, id, q) => window.SheetDetailPage.render(c, id, q));
-  router.register('/videos', (c, q) => window.SecondaryPages.renderVideos(c, q));
+  router.register('/recordings', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
+  router.register('/videos', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
   router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
   router.register('/lecture-schedule', (c, q) => {
     if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {

@@ -373,7 +373,15 @@ const QuestionsPage = {
       // Group questions by sheet/topic
       const sheetsMap = {};
       subjQuestions.forEach(q => {
-        const shTitle = isAr ? (q.sheet_title_ar || q.tags?.[0] || 'الأسئلة العامة') : (q.sheet_title_en || q.tags?.[0] || 'General Questions');
+        let shTitle = isAr ? (q.sheet_title_ar || q.tags?.[0] || 'الأسئلة العامة') : (q.sheet_title_en || q.tags?.[0] || 'General Questions');
+        
+        if (q.sheet_id && window.DATA && window.DATA.sheets) {
+          const sheet = window.DATA.sheets.find(s => s.id === q.sheet_id);
+          if (sheet) {
+            shTitle = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
+          }
+        }
+
         if (!sheetsMap[shTitle]) {
           sheetsMap[shTitle] = [];
         }

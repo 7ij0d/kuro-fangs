@@ -610,6 +610,16 @@ window.AdminPage = (function () {
             <span>${isAr ? 'المزامنة السحابية' : 'Cloud Sync'}</span>
             <span class="kf-pulse-dot ${isGlobalSyncActive ? '' : 'warning'}"></span>
           </button>
+          
+          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'recordings' ? 'active' : ''}" data-tab="recordings">
+            <i data-lucide="headphones" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'التسجيلات' : 'Recordings'}</span>
+          </button>
+          
+          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'questions' ? 'active' : ''}" data-tab="questions">
+            <i data-lucide="help-circle" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'الأسئلة' : 'Questions'}</span>
+          </button>
         </div>
 
         <!-- TAB CONTENT CONTAINER -->
@@ -619,6 +629,8 @@ window.AdminPage = (function () {
           ${activeTab === 'alerts' ? renderAlertsTab(isAr, alerts) : ''}
           ${activeTab === 'students' ? renderStudentsTab(isAr, students) : ''}
           ${activeTab === 'sync' ? renderSyncTab(isAr, sheets) : ''}
+          ${activeTab === 'recordings' ? renderRecordingsTab(subjects, isAr) : ''}
+          ${activeTab === 'questions' ? renderQuestionsTab(subjects, isAr) : ''}
         </div>
 
       </div>
@@ -1499,6 +1511,298 @@ CREATE POLICY "Allow all delete on sheets"
     `;
   }
 
+  function renderRecordingsTab(subjects, isAr) {
+    const recordings = window.DATA.recordings || [];
+    const sheets = window.DATA.sheets || [];
+
+    return `
+      <div>
+        <div class="kf-panel">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="headphones" style="color: var(--brand-accent); width: 18px; height: 18px;"></i>
+              <span>${isAr ? 'إضافة تسجيل جديد' : 'Add New Recording'}</span>
+            </div>
+          </div>
+          <div class="kf-panel-body">
+            <form id="form-add-rec" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'المادة الدراسية:' : 'Subject:'}
+                </label>
+                <select id="add-rec-subject" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required>
+                  <option value="" disabled selected>${isAr ? 'اختر المادة...' : 'Select Subject...'}</option>
+                  ${subjects.map(s => `<option value="${s.id}">${isAr ? s.name_ar : s.name_en}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'الشيت:' : 'Sheet:'}
+                </label>
+                <select id="add-rec-sheet" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required>
+                  <option value="" disabled selected>${isAr ? 'اختر المادة أولاً...' : 'Select Subject First...'}</option>
+                </select>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'عنوان التسجيل:' : 'Title:'}
+                </label>
+                <input type="text" id="add-rec-title" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" placeholder="${isAr ? 'عنوان التسجيل' : 'Recording Title'}" required />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'الدكتور:' : 'Doctor:'}
+                </label>
+                <input type="text" id="add-rec-doctor" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'المدة:' : 'Duration:'}
+                </label>
+                <input type="text" id="add-rec-duration" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" placeholder="45:20" required />
+              </div>
+              
+              <div style="grid-column: 1 / -1; margin-top: 10px;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'مصدر التسجيل:' : 'Recording Source:'}
+                </label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-rec-src-file" style="flex: 1;">🎵 ${isAr ? 'ملف صوتي' : 'Audio File'}</button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-rec-src-link" style="flex: 1;">🔗 ${isAr ? 'رابط' : 'Link'}</button>
+                </div>
+                
+                <div id="rec-src-file-container">
+                  <div id="audio-drop-zone" style="border: 2px dashed var(--border-subtle); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-surface-subtle); margin-bottom: 8px;">
+                    <input type="file" id="add-rec-file" accept="audio/*" style="display: none;">
+                    <div id="audio-drop-label">
+                      <i data-lucide="upload-cloud" style="width: 26px; height: 26px; color: var(--brand-accent); margin-bottom: 6px; display: inline-block;"></i>
+                      <div style="font-weight: 600; font-size: 0.875rem; color: var(--text-primary);">
+                        ${isAr ? 'اسحب الملف الصوتي هنا أو انقر للاختيار' : 'Drag audio here or click to browse'}
+                      </div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                        ${isAr ? 'الحد الأقصى 50MB' : 'Max 50MB'}
+                      </div>
+                    </div>
+                    <div id="audio-file-preview" style="display: none; font-size: 0.85rem; font-weight: 600; color: #10B981;"></div>
+                  </div>
+                </div>
+
+                <div id="rec-src-link-container" style="display: none; grid-template-columns: 1fr 1fr; gap: 14px;">
+                  <div>
+                    <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                      ${isAr ? 'رابط تيليجرام:' : 'Telegram URL:'}
+                    </label>
+                    <input type="url" id="add-rec-telegram" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" placeholder="https://t.me/..." />
+                  </div>
+                  <div>
+                    <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                      ${isAr ? 'رابط صوت مباشر:' : 'Audio URL:'}
+                    </label>
+                    <input type="url" id="add-rec-audio-url" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" placeholder="https://..." />
+                  </div>
+                </div>
+              </div>
+
+              <div style="grid-column: 1 / -1; margin-top: 14px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                  <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                  ${isAr ? 'إضافة التسجيل' : 'Add Recording'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <div class="kf-panel" style="margin-top: 20px;">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="list" style="width: 18px; height: 18px;"></i>
+              <span>${isAr ? 'التسجيلات الحالية' : 'Existing Recordings'}</span>
+            </div>
+            <span class="badge">${recordings.length}</span>
+          </div>
+          <div class="kf-panel-body" style="padding: 0;">
+            <div style="max-height: 400px; overflow-y: auto;">
+              ${recordings.length === 0 ? `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">${isAr ? 'لا توجد تسجيلات بعد.' : 'No recordings yet.'}</div>` : 
+                recordings.map(rec => {
+                  const sheet = sheets.find(s => s.id === rec.sheet_id);
+                  const sheetTitle = sheet ? (isAr ? sheet.title_ar : sheet.title_en) : 'Unknown';
+                  const srcBadge = rec.has_local_audio ? '🎵 File' : (rec.telegram_url ? '📱 Telegram' : '🔗 Link');
+                  return `
+                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                      <div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+                          <span class="badge" style="background: rgba(56, 189, 248, 0.1); color: #38BDF8;">${sheetTitle}</span>
+                          <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">${srcBadge}</span>
+                        </div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">${rec.title || 'بدون عنوان'}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+                          👨‍⚕️ ${rec.doctor || ''} • ⏱️ ${rec.duration || ''}
+                        </div>
+                      </div>
+                      <button class="btn btn-sm btn-secondary btn-delete-rec" data-rec-id="${rec.id}" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.25);">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderQuestionsTab(subjects, isAr) {
+    const questions = window.DATA.questions || [];
+    const sheets = window.DATA.sheets || [];
+
+    return `
+      <div>
+        <div class="kf-panel">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="help-circle" style="color: var(--brand-accent); width: 18px; height: 18px;"></i>
+              <span>${isAr ? 'إضافة سؤال جديد' : 'Add New Question'}</span>
+            </div>
+          </div>
+          <div class="kf-panel-body">
+            <form id="form-add-q" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'المادة الدراسية:' : 'Subject:'}
+                </label>
+                <select id="add-q-subject" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required>
+                  <option value="" disabled selected>${isAr ? 'اختر المادة...' : 'Select Subject...'}</option>
+                  ${subjects.map(s => `<option value="${s.id}">${isAr ? s.name_ar : s.name_en}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'الشيت:' : 'Sheet:'}
+                </label>
+                <select id="add-q-sheet" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required>
+                  <option value="" disabled selected>${isAr ? 'اختر المادة أولاً...' : 'Select Subject First...'}</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'نوع السؤال:' : 'Question Type:'}
+                </label>
+                <select id="add-q-type" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required>
+                  <option value="past_exam">${isAr ? 'أسئلة سنوات (Past Exam)' : 'Past Exam'}</option>
+                  <option value="practice">${isAr ? 'تدريبية (Practice)' : 'Practice'}</option>
+                </select>
+              </div>
+              
+              <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'نص السؤال (عربي):' : 'Question Text (AR):'} <span style="color:#EF4444">*</span>
+                </label>
+                <textarea id="add-q-text-ar" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); min-height: 60px;" required></textarea>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'نص السؤال (إنجليزي):' : 'Question Text (EN):'}
+                </label>
+                <textarea id="add-q-text-en" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); min-height: 60px;"></textarea>
+              </div>
+
+              <div style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <!-- AR Options -->
+                <div>
+                  <h4 style="font-size: 0.8rem; margin-bottom: 8px; color: var(--text-primary);">${isAr ? 'الخيارات بالعربية' : 'AR Options'}</h4>
+                  <input type="text" id="add-q-opt-a-ar" class="kf-input" placeholder="أ" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;" required />
+                  <input type="text" id="add-q-opt-b-ar" class="kf-input" placeholder="ب" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;" required />
+                  <input type="text" id="add-q-opt-c-ar" class="kf-input" placeholder="ج" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;" required />
+                  <input type="text" id="add-q-opt-d-ar" class="kf-input" placeholder="د" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required />
+                </div>
+                <!-- EN Options -->
+                <div>
+                  <h4 style="font-size: 0.8rem; margin-bottom: 8px; color: var(--text-primary);">${isAr ? 'الخيارات بالإنجليزية' : 'EN Options'}</h4>
+                  <input type="text" id="add-q-opt-a-en" class="kf-input" placeholder="A" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;" />
+                  <input type="text" id="add-q-opt-b-en" class="kf-input" placeholder="B" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;" />
+                  <input type="text" id="add-q-opt-c-en" class="kf-input" placeholder="C" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;" />
+                  <input type="text" id="add-q-opt-d-en" class="kf-input" placeholder="D" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" />
+                </div>
+              </div>
+
+              <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'الإجابة الصحيحة:' : 'Correct Answer:'}
+                </label>
+                <select id="add-q-correct" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" required>
+                  <option value="0">A / أ</option>
+                  <option value="1">B / ب</option>
+                  <option value="2">C / ج</option>
+                  <option value="3">D / د</option>
+                </select>
+              </div>
+
+              <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'تفسير الإجابة (عربي):' : 'Explanation (AR):'}
+                </label>
+                <textarea id="add-q-explain-ar" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); min-height: 60px;"></textarea>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                  ${isAr ? 'تفسير الإجابة (إنجليزي):' : 'Explanation (EN):'}
+                </label>
+                <textarea id="add-q-explain-en" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); min-height: 60px;"></textarea>
+              </div>
+
+              <div style="grid-column: 1 / -1; margin-top: 14px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                  <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                  ${isAr ? 'إضافة السؤال' : 'Add Question'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="kf-panel" style="margin-top: 20px;">
+          <div class="kf-panel-header">
+            <div class="kf-panel-title">
+              <i data-lucide="list" style="width: 18px; height: 18px;"></i>
+              <span>${isAr ? 'الأسئلة الحالية' : 'Existing Questions'}</span>
+            </div>
+            <span class="badge">${questions.length}</span>
+          </div>
+          <div class="kf-panel-body" style="padding: 0;">
+            <div style="max-height: 400px; overflow-y: auto;">
+              ${questions.length === 0 ? `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">${isAr ? 'لا توجد أسئلة بعد.' : 'No questions yet.'}</div>` : 
+                questions.map(q => {
+                  const sheetTitle = (isAr ? q.sheet_title_ar : q.sheet_title_en) || 'Unknown Sheet';
+                  const subjectName = (isAr ? q.subject_name_ar : q.subject_name_en) || 'Unknown Subject';
+                  const typeBadge = q.type === 'past_exam' 
+                    ? `<span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">${isAr ? 'سنوات' : 'Past'}</span>`
+                    : `<span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">${isAr ? 'تدريبي' : 'Practice'}</span>`;
+                  const textPreview = (q.text_ar || q.text_en || '').substring(0, 80) + '...';
+                  return `
+                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                      <div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+                          ${typeBadge}
+                          <span class="badge" style="background: rgba(56, 189, 248, 0.1); color: #38BDF8;">${subjectName}</span>
+                          <span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">${sheetTitle}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-primary); line-height: 1.4;">${textPreview}</div>
+                      </div>
+                      <button class="btn btn-sm btn-secondary btn-delete-q" data-q-id="${q.id}" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.25); min-width: 32px;">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // --- ATTACH EVENT LISTENERS & CONFIRM MODAL CALLS ---
   function attachTabListeners(container, isAr) {
     // 1. Add Sheet Form & Drag-and-drop
@@ -2270,6 +2574,171 @@ CREATE POLICY "Allow all delete on sheets"
       navigator.clipboard.writeText(jsonContent).then(() => {
         if (typeof window.showToast === 'function') {
           window.showToast(isAr ? 'تم نسخ محتوى sheets.json كاملاً للحافظة! 📋' : 'Copied sheets.json to clipboard! 📋', { type: 'success' });
+        }
+      });
+    });
+
+    // --- RECORDINGS LISTENERS ---
+    const addRecSubject = document.getElementById('add-rec-subject');
+    const addRecSheet = document.getElementById('add-rec-sheet');
+    if (addRecSubject && addRecSheet) {
+      addRecSubject.addEventListener('change', () => {
+        const sheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(addRecSubject.value) : window.DATA.sheets.filter(s => s.subject_id === addRecSubject.value);
+        addRecSheet.innerHTML = sheets.map(s => `<option value="${s.id}">${isAr ? s.title_ar : s.title_en}</option>`).join('');
+        if (sheets.length === 0) addRecSheet.innerHTML = `<option value="" disabled selected>${isAr ? 'لا توجد شيتات' : 'No sheets'}</option>`;
+      });
+    }
+
+    const recFileBtn = document.getElementById('btn-rec-src-file');
+    const recLinkBtn = document.getElementById('btn-rec-src-link');
+    const recFileCont = document.getElementById('rec-src-file-container');
+    const recLinkCont = document.getElementById('rec-src-link-container');
+    if (recFileBtn) {
+      recFileBtn.addEventListener('click', () => {
+        recFileBtn.className = 'btn btn-primary btn-sm';
+        recLinkBtn.className = 'btn btn-secondary btn-sm';
+        recFileCont.style.display = 'block';
+        recLinkCont.style.display = 'none';
+      });
+      recLinkBtn.addEventListener('click', () => {
+        recLinkBtn.className = 'btn btn-primary btn-sm';
+        recFileBtn.className = 'btn btn-secondary btn-sm';
+        recFileCont.style.display = 'none';
+        recLinkCont.style.display = 'grid';
+      });
+    }
+
+    const recDropZone = document.getElementById('audio-drop-zone');
+    const recFileInput = document.getElementById('add-rec-file');
+    const recDropLabel = document.getElementById('audio-drop-label');
+    const recFilePreview = document.getElementById('audio-file-preview');
+    if (recDropZone && recFileInput) {
+      recDropZone.addEventListener('click', () => recFileInput.click());
+      recDropZone.addEventListener('dragover', (e) => { e.preventDefault(); recDropZone.style.borderColor = '#38BDF8'; });
+      recDropZone.addEventListener('dragleave', () => { recDropZone.style.borderColor = 'rgba(255,255,255,0.2)'; });
+      recDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        recDropZone.style.borderColor = 'rgba(255,255,255,0.2)';
+        if (e.dataTransfer.files.length) {
+          recFileInput.files = e.dataTransfer.files;
+          updateRecFilePreview();
+        }
+      });
+      recFileInput.addEventListener('change', updateRecFilePreview);
+      function updateRecFilePreview() {
+        if (recFileInput.files.length > 0) {
+          const file = recFileInput.files[0];
+          if (file.size > 50 * 1024 * 1024) {
+            window.showToast?.(isAr ? 'حجم الملف يتجاوز 50 ميجا' : 'File exceeds 50MB', {type: 'error'});
+            recFileInput.value = '';
+            return;
+          }
+          recDropLabel.style.display = 'none';
+          recFilePreview.style.display = 'block';
+          recFilePreview.innerHTML = `✅ <strong>${file.name}</strong> (${(file.size / (1024*1024)).toFixed(2)} MB)`;
+        } else {
+          recDropLabel.style.display = 'block';
+          recFilePreview.style.display = 'none';
+        }
+      }
+    }
+
+    document.getElementById('form-add-rec')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = 'rec_' + Date.now();
+      const file = recFileInput?.files[0];
+      const useFile = recFileCont?.style.display !== 'none';
+      let hasLocal = false;
+      if (useFile && file && window.DATA.audioStore) {
+        await window.DATA.audioStore.saveAudio(id, file);
+        hasLocal = true;
+      }
+      
+      const newRec = {
+        id,
+        subject_id: addRecSubject.value,
+        sheet_id: addRecSheet.value,
+        title: document.getElementById('add-rec-title').value.trim(),
+        doctor: document.getElementById('add-rec-doctor').value.trim(),
+        duration: document.getElementById('add-rec-duration').value.trim(),
+        telegram_url: useFile ? '' : document.getElementById('add-rec-telegram').value.trim(),
+        audio_url: useFile ? '' : document.getElementById('add-rec-audio-url').value.trim(),
+        has_local_audio: hasLocal
+      };
+      
+      if (window.DATA.addRecording) window.DATA.addRecording(newRec);
+      window.showToast?.(isAr ? 'تمت إضافة التسجيل' : 'Recording added', {type: 'success'});
+      render(container);
+    });
+
+    container.querySelectorAll('.btn-delete-rec').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-rec-id');
+        if (confirm(isAr ? 'هل أنت متأكد من حذف هذا التسجيل؟' : 'Are you sure you want to delete this recording?')) {
+          if (window.DATA.audioStore) await window.DATA.audioStore.deleteAudio(id);
+          if (window.DATA.deleteRecording) window.DATA.deleteRecording(id);
+          render(container);
+        }
+      });
+    });
+
+    // --- QUESTIONS LISTENERS ---
+    const addQSubject = document.getElementById('add-q-subject');
+    const addQSheet = document.getElementById('add-q-sheet');
+    if (addQSubject && addQSheet) {
+      addQSubject.addEventListener('change', () => {
+        const sheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(addQSubject.value) : window.DATA.sheets.filter(s => s.subject_id === addQSubject.value);
+        addQSheet.innerHTML = sheets.map(s => `<option value="${s.id}">${isAr ? s.title_ar : s.title_en}</option>`).join('');
+        if (sheets.length === 0) addQSheet.innerHTML = `<option value="" disabled selected>${isAr ? 'لا توجد شيتات' : 'No sheets'}</option>`;
+      });
+    }
+
+    document.getElementById('form-add-q')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const subjectId = addQSubject.value;
+      const sheetId = addQSheet.value;
+      const sheet = window.DATA.sheets.find(s => s.id === sheetId);
+      const subject = window.DATA.subjects?.find(s => s.id === subjectId) || {};
+      
+      const q = {
+        id: 'q_admin_' + Date.now(),
+        subject_id: subjectId,
+        sheet_id: sheetId,
+        type: document.getElementById('add-q-type').value,
+        text_ar: document.getElementById('add-q-text-ar').value.trim(),
+        text_en: document.getElementById('add-q-text-en').value.trim(),
+        options_ar: [
+          document.getElementById('add-q-opt-a-ar').value.trim(),
+          document.getElementById('add-q-opt-b-ar').value.trim(),
+          document.getElementById('add-q-opt-c-ar').value.trim(),
+          document.getElementById('add-q-opt-d-ar').value.trim()
+        ],
+        options_en: [
+          document.getElementById('add-q-opt-a-en').value.trim(),
+          document.getElementById('add-q-opt-b-en').value.trim(),
+          document.getElementById('add-q-opt-c-en').value.trim(),
+          document.getElementById('add-q-opt-d-en').value.trim()
+        ],
+        correct_index: parseInt(document.getElementById('add-q-correct').value, 10),
+        answer_ar: document.getElementById('add-q-explain-ar').value.trim(),
+        answer_en: document.getElementById('add-q-explain-en').value.trim(),
+        sheet_title_ar: sheet?.title_ar || sheet?.title || '',
+        sheet_title_en: sheet?.title_en || sheet?.title || '',
+        subject_name_ar: subject?.name_ar || '',
+        subject_name_en: subject?.name_en || ''
+      };
+      
+      if (window.DATA.addQuestion) window.DATA.addQuestion(q);
+      window.showToast?.(isAr ? 'تمت إضافة السؤال' : 'Question added', {type: 'success'});
+      render(container);
+    });
+
+    container.querySelectorAll('.btn-delete-q').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-q-id');
+        if (confirm(isAr ? 'هل أنت متأكد من حذف هذا السؤال؟' : 'Are you sure you want to delete this question?')) {
+          if (window.DATA.deleteQuestion) window.DATA.deleteQuestion(id);
+          render(container);
         }
       });
     });

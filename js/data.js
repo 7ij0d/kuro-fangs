@@ -15,6 +15,7 @@ class DataService {
     this.requirements = [];
     this.summaries = [];
     this.videos = [];
+    this.recordings = [];
     this.notes = [];
     this.loaded = false;
 
@@ -82,6 +83,30 @@ class DataService {
         customSheets.forEach(cs => {
           if (!this.sheets.some(s => s.id === cs.id)) {
             this.sheets.unshift(cs);
+          }
+        });
+      }
+    } catch (e) {}
+
+    // 2b. Merge admin-created recordings from localStorage
+    try {
+      const adminRecs = JSON.parse(localStorage.getItem('kf_admin_recordings') || '[]');
+      if (Array.isArray(adminRecs)) {
+        adminRecs.forEach(r => {
+          if (!this.recordings.some(x => x.id === r.id)) {
+            this.recordings.push(r);
+          }
+        });
+      }
+    } catch (e) {}
+
+    // 2c. Merge admin-created questions from localStorage
+    try {
+      const adminQs = JSON.parse(localStorage.getItem('kf_admin_questions') || '[]');
+      if (Array.isArray(adminQs)) {
+        adminQs.forEach(q => {
+          if (!this.questions.some(x => x.id === q.id)) {
+            this.questions.push(q);
           }
         });
       }
@@ -399,16 +424,29 @@ class DataService {
         questionsRes,
         flashcardsRes,
         examsRes,
-        reqRes
+        reqRes,
+        recordingsRes
       ] = await Promise.allSettled([
         fetch('data/questions.json').then(r => r.json()),
         fetch('data/flashcards.json').then(r => r.json()),
         fetch('data/previous_exams.json').then(r => r.json()),
-        fetch('data/requirements.json').then(r => r.json())
+        fetch('data/requirements.json').then(r => r.json()),
+        fetch('data/recordings.json').then(r => r.json())
       ]);
 
       if (questionsRes.status === 'fulfilled' && questionsRes.value?.questions) {
         this.questions = questionsRes.value.questions;
+        // Re-merge admin questions
+        try {
+          const adminQs = JSON.parse(localStorage.getItem('kf_admin_questions') || '[]');
+          if (Array.isArray(adminQs)) {
+            adminQs.forEach(q => {
+              if (!this.questions.some(x => x.id === q.id)) {
+                this.questions.push(q);
+              }
+            });
+          }
+        } catch (e) {}
       }
       if (flashcardsRes.status === 'fulfilled' && flashcardsRes.value?.flashcards) {
         this.flashcards = flashcardsRes.value.flashcards;
@@ -418,6 +456,20 @@ class DataService {
       }
       if (reqRes.status === 'fulfilled' && reqRes.value?.requirements) {
         this.requirements = reqRes.value.requirements;
+      }
+      if (recordingsRes.status === 'fulfilled' && recordingsRes.value?.recordings) {
+        this.recordings = recordingsRes.value.recordings;
+        // Re-merge admin recordings
+        try {
+          const adminRecs = JSON.parse(localStorage.getItem('kf_admin_recordings') || '[]');
+          if (Array.isArray(adminRecs)) {
+            adminRecs.forEach(r => {
+              if (!this.recordings.some(x => x.id === r.id)) {
+                this.recordings.push(r);
+              }
+            });
+          }
+        } catch (e) {}
       }
       this._deferredLoaded = true;
     } catch (err) {
@@ -433,6 +485,53 @@ class DataService {
     }
     if (!subjectId) return this.questions || [];
     return (this.questions || []).filter(q => q.subject_id === subjectId);
+  }
+
+  getRecordings(subjectId) {
+    if (!this._deferredLoaded && !this._deferredLoading) {
+      this.loadDeferredData();
+    }
+    if (!subjectId) return this.recordings || [];
+    return (this.recordings || []).filter(r => r.subject_id === subjectId);
+  }
+
+  getRecordingsBySheet(sheetId) {
+    if (!sheetId) return [];
+    return (this.recordings || []).filter(r => r.sheet_id === sheetId);
+  }
+
+  addRecording(recording) {
+    this.recordings.push(recording);
+    try {
+      const stored = JSON.parse(localStorage.getItem('kf_admin_recordings') || '[]');
+      stored.push(recording);
+      localStorage.setItem('kf_admin_recordings', JSON.stringify(stored));
+    } catch (e) {}
+  }
+
+  deleteRecording(id) {
+    this.recordings = this.recordings.filter(r => r.id !== id);
+    try {
+      const stored = JSON.parse(localStorage.getItem('kf_admin_recordings') || '[]');
+      localStorage.setItem('kf_admin_recordings', JSON.stringify(stored.filter(r => r.id !== id)));
+    } catch (e) {}
+  }
+
+  addQuestion(question) {
+    this.questions.push(question);
+    try {
+      const stored = JSON.parse(localStorage.getItem('kf_admin_questions') || '[]');
+      stored.push(question);
+      localStorage.setItem('kf_admin_questions', JSON.stringify(stored));
+    } catch (e) {}
+  }
+
+  deleteQuestion(id) {
+    this.questions = this.questions.filter(q => q.id !== id);
+    try {
+      const stored = JSON.parse(localStorage.getItem('kf_admin_questions') || '[]');
+      localStorage.setItem('kf_admin_questions', JSON.stringify(stored.filter(q => q.id !== id)));
+    } catch (e) {}
   }
 
   getFlashcards(subjectId) {
@@ -467,6 +566,8 @@ class DataService {
     const lecturesCount = (this.sheets || []).filter(s => s.subject_id === subjectId).length;
     const summariesCount = (this.summaries || []).filter(s => s.subject_id === subjectId).length;
     const examsCount = (this.previousExams || []).filter(e => e.subject_id === subjectId).length;
+    const recordingsCount = (this.recordings || []).filter(r => r.subject_id === subjectId).length;
+    const questionsCount = (this.questions || []).filter(q => q.subject_id === subjectId).length;
     const completedCount = window.STORE && window.STORE.getCompletedSheets 
       ? (window.STORE.getCompletedSheets(subjectId) || []).length 
       : 0;
@@ -476,6 +577,8 @@ class DataService {
       lecturesCount,
       summariesCount,
       examsCount,
+      recordingsCount,
+      questionsCount,
       progress
     };
   }
@@ -869,6 +972,121 @@ class PdfStore {
 }
 
 window.DATA.pdfStore = new PdfStore();
+
+/**
+ * IndexedDB Audio Storage Engine
+ * Stores large audio files locally as ArrayBuffers in IndexedDB.
+ */
+class AudioStore {
+  constructor() {
+    this.dbName = 'kf_audio_store';
+    this.storeName = 'audios';
+    this.dbVersion = 1;
+    this._db = null;
+  }
+
+  async _getDB() {
+    if (this._db) return this._db;
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.dbVersion);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName, { keyPath: 'recordingId' });
+        }
+      };
+      request.onsuccess = (e) => {
+        this._db = e.target.result;
+        resolve(this._db);
+      };
+      request.onerror = (e) => {
+        console.warn('AudioStore: IndexedDB open error', e);
+        reject(e);
+      };
+    });
+  }
+
+  async saveAudio(recordingId, file) {
+    try {
+      const db = await this._getDB();
+      const arrayBuffer = await file.arrayBuffer();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(this.storeName, 'readwrite');
+        const store = tx.objectStore(this.storeName);
+        store.put({
+          recordingId: recordingId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          data: arrayBuffer,
+          savedAt: new Date().toISOString()
+        });
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = (e) => { console.warn('AudioStore saveAudio error', e); reject(e); };
+      });
+    } catch (e) {
+      console.warn('AudioStore saveAudio failed:', e);
+      return false;
+    }
+  }
+
+  async getAudioUrl(recordingId) {
+    try {
+      const db = await this._getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(this.storeName, 'readonly');
+        const store = tx.objectStore(this.storeName);
+        const request = store.get(recordingId);
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result && result.data) {
+            const blob = new Blob([result.data], { type: result.fileType || 'audio/mpeg' });
+            resolve(URL.createObjectURL(blob));
+          } else {
+            resolve(null);
+          }
+        };
+        request.onerror = () => resolve(null);
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async hasAudio(recordingId) {
+    try {
+      const db = await this._getDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.storeName, 'readonly');
+        const store = tx.objectStore(this.storeName);
+        const request = store.get(recordingId);
+        request.onsuccess = () => {
+          resolve(!!request.result);
+        };
+        request.onerror = () => resolve(false);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async deleteAudio(recordingId) {
+    try {
+      const db = await this._getDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.storeName, 'readwrite');
+        const store = tx.objectStore(this.storeName);
+        store.delete(recordingId);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+}
+
+window.DATA.audioStore = new AudioStore();
 
 /**
  * Modern Empty State UI Helper
