@@ -225,14 +225,17 @@ const SecondaryPages = {
     const baseRecordings = window.DATA?.recordings || [];
 
     const renderList = async () => {
-      const filtered = currentFilter === 'all'
-        ? baseRecordings
-        : baseRecordings.filter(r => r.subject_id === currentFilter);
+      let targetSheets = [];
+      if (currentFilter === 'all') {
+        targetSheets = window.DATA?.sheets || [];
+      } else {
+        targetSheets = (window.DATA?.sheets || []).filter(s => s.subject_id === currentFilter);
+      }
 
       const gridEl = document.getElementById('recordings-list');
       if (!gridEl) return;
 
-      if (filtered.length === 0) {
+      if (targetSheets.length === 0) {
         gridEl.innerHTML = `
           <div style="grid-column: 1 / -1;">
             ${window.renderEmptyState
@@ -252,64 +255,80 @@ const SecondaryPages = {
         return;
       }
 
-      const itemsHtml = await Promise.all(filtered.map(async rec => {
-        let sheetName = isAr ? 'محاضرة غير محددة' : 'Unknown Sheet';
-        if (window.DATA?.sheets) {
-          const sheet = window.DATA.sheets.find(s => s.id === rec.sheet_id);
-          if (sheet) {
-            sheetName = sheet.title || sheet.title_ar || sheetName;
-          }
-        }
+      const itemsHtml = await Promise.all(targetSheets.map(async sheet => {
+        const sheetRecs = baseRecordings.filter(r => r.sheet_id === sheet.id);
+        const sheetName = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
+        const subjObj = subjects.find(s => s.id === sheet.subject_id);
+        const subjName = subjObj ? (isAr ? subjObj.name_ar : subjObj.name_en) : '';
 
-        let audioSrc = rec.audio_url || '';
-        if (!audioSrc && window.DATA?.audioStore?.getAudio) {
-          try {
-            const blob = await window.DATA.audioStore.getAudio(rec.id);
-            if (blob) {
-              audioSrc = URL.createObjectURL(blob);
-            }
-          } catch (err) {
-            console.error('Failed to load audio from IDB:', err);
-          }
-        }
-
-        let playSection = '';
-        if (audioSrc) {
-          playSection = `<audio controls src="${audioSrc}" style="width: 100%; height: 40px; margin-top: 8px; border-radius: var(--radius-sm);"></audio>`;
-        }
-
-        let telegramBtn = '';
-        if (rec.telegram_url) {
-          telegramBtn = `
-            <button class="btn btn-secondary btn-sm" onclick="window.open('${rec.telegram_url}', '_blank')" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 6px 12px; margin-top: 8px;">
-              <i data-lucide="send" style="width: 14px; height: 14px;"></i>
-              ${isAr ? 'فتح في تليجرام' : 'Open in Telegram'}
-            </button>
+        if (sheetRecs.length === 0) {
+          return `
+            <div class="kf-panel empty-sheet-box" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-surface-subtle); border: 1px dashed var(--border-subtle); border-radius: var(--radius-md); opacity: 0.85;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+                <span class="badge" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(2, 132, 199, 0.08); color: var(--brand-accent);">
+                  <i data-lucide="headphones" style="width: 12px; height: 12px;"></i>
+                  ${sheetName}
+                </span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">${subjName}</span>
+              </div>
+              
+              <h3 style="font-size: 1.05rem; color: var(--text-muted); margin: 4px 0 0; line-height: 1.4;">
+                ${isAr ? 'قريباً... لا توجد تسجيلات متاحة حالياً لهذا الشيت' : 'Coming soon... no recordings yet'}
+              </h3>
+              
+              <button class="btn btn-secondary btn-sm" disabled style="margin-top: auto; opacity: 0.6; cursor: not-allowed; justify-content: center;">
+                <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                <span>${isAr ? 'غير متاح حالياً' : 'Not Available'}</span>
+              </button>
+            </div>
           `;
         }
 
+        const recsHtml = await Promise.all(sheetRecs.map(async rec => {
+          let audioSrc = rec.audio_url || '';
+          if (!audioSrc && window.DATA?.audioStore?.getAudioUrl) {
+            try {
+              audioSrc = await window.DATA.audioStore.getAudioUrl(rec.id) || '';
+            } catch (err) {}
+          }
+
+          let playSection = '';
+          if (audioSrc) {
+            playSection = `<audio controls src="${audioSrc}" style="width: 100%; height: 40px; margin-top: 8px; border-radius: var(--radius-sm);"></audio>`;
+          }
+
+          let telegramBtn = '';
+          if (rec.telegram_url) {
+            telegramBtn = `
+              <button class="btn btn-secondary btn-sm" onclick="window.open('${rec.telegram_url}', '_blank')" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; gap: 6px; font-size: 0.85rem; padding: 8px 12px; margin-top: 8px;">
+                <i data-lucide="send" style="width: 14px; height: 14px; color: #0EA5E9;"></i>
+                <span>${isAr ? 'فتح في تيليجرام' : 'Open in Telegram'}</span>
+              </button>
+            `;
+          }
+
+          return `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+              <h4 style="font-size: 0.95rem; color: var(--text-primary); margin: 0 0 4px;">${isAr ? (rec.title_ar || rec.title_en || rec.title) : (rec.title_en || rec.title_ar || rec.title)}</h4>
+              <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">
+                👨‍⚕️ ${rec.doctor || ''} ${rec.duration ? `&bull; ⏱️ ${rec.duration}` : ''}
+              </div>
+              ${playSection}
+              ${telegramBtn}
+            </div>
+          `;
+        }));
+
         return `
-          <div class="kf-panel" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+          <div class="kf-panel" style="padding: 16px; display: flex; flex-direction: column; gap: 4px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
               <span class="badge badge-primary" style="display: inline-flex; align-items: center; gap: 4px;">
                 <i data-lucide="headphones" style="width: 12px; height: 12px;"></i>
                 ${sheetName}
               </span>
-              ${rec.duration ? `<span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-surface-subtle); padding: 2px 8px; border-radius: var(--radius-full); border: 1px solid var(--border-subtle);">${rec.duration}</span>` : ''}
+              <span style="font-size: 0.75rem; color: var(--text-secondary);">${subjName}</span>
             </div>
-            
-            <h3 style="font-size: 1.05rem; color: var(--text-primary); margin: 4px 0 0; line-height: 1.4;">
-              ${isAr ? (rec.title_ar || rec.title_en) : (rec.title_en || rec.title_ar)}
-            </h3>
-            
-            <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 8px; align-items: center;">
-              <span>${rec.doctor || (isAr ? 'دكتور الكلية' : 'Faculty Doctor')}</span>
-              ${rec.date ? `<span style="color: var(--border-subtle);">&bull;</span><span>${rec.date}</span>` : ''}
-            </div>
-
-            ${playSection}
-            
-            ${telegramBtn ? `<div>${telegramBtn}</div>` : ''}
+            ${recsHtml.join('')}
           </div>
         `;
       }));

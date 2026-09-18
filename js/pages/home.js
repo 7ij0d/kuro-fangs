@@ -70,7 +70,20 @@ const HomePage = {
     }
   },
 
-  /* ─── Track subject visit ─── */
+  handleSubjectClick(subjectId) {
+    if (window.SubjectModal && window.SubjectModal.open) {
+      window.SubjectModal.open(subjectId);
+    }
+    setTimeout(() => {
+      try {
+        HomePage.trackSubjectVisit(subjectId);
+      } catch (e) {
+        console.error('Error tracking subject visit', e);
+      }
+    }, 10);
+  },
+
+  /* ✨ Track subject visit ✨ */
   trackSubjectVisit(subjectId) {
     try {
       let recent = JSON.parse(localStorage.getItem('kf_recent_subjects') || '[]');
@@ -354,7 +367,7 @@ const HomePage = {
       const examsCount = stats.examsCount || 0;
 
       return `
-        <div class="subject-card" onclick="window.HomePage.trackSubjectVisit('${subj.id}'); window.SubjectModal.open('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
+        <div class="subject-card" onclick="window.HomePage.handleSubjectClick('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
           <!-- Subject Cover -->
           <div class="subject-cover-wrap card-banner">
             <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" width="600" height="337" loading="lazy" decoding="async" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp'; this.classList.add('loaded');" />
@@ -394,7 +407,7 @@ const HomePage = {
             </div>
 
             <!-- Action Button -->
-            <button class="btn-explore-subject" onclick="event.stopPropagation(); window.HomePage.trackSubjectVisit('${subj.id}'); window.SubjectModal.open('${subj.id}');" aria-label="${t('openSubject')}">
+            <button class="btn-explore-subject" onclick="event.stopPropagation(); window.HomePage.handleSubjectClick('${subj.id}');" aria-label="${t('openSubject')}">
               <span>${t('openSubject')}</span>
               <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
             </button>

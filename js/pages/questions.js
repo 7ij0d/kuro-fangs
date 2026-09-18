@@ -370,8 +370,15 @@ const QuestionsPage = {
 
       const subjQuestions = allQuestions.filter(q => q.subject_id === QuestionsPage.selectedSubjectId);
       
-      // Group questions by sheet/topic
+      // Group questions by sheet/topic, initializing with ALL sheets first
+      const allSheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(QuestionsPage.selectedSubjectId) : [];
       const sheetsMap = {};
+
+      allSheets.forEach(sheet => {
+        const shTitle = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
+        sheetsMap[shTitle] = { sheetId: sheet.id, questions: [] };
+      });
+
       subjQuestions.forEach(q => {
         let shTitle = isAr ? (q.sheet_title_ar || q.tags?.[0] || 'الأسئلة العامة') : (q.sheet_title_en || q.tags?.[0] || 'General Questions');
         
@@ -383,9 +390,9 @@ const QuestionsPage = {
         }
 
         if (!sheetsMap[shTitle]) {
-          sheetsMap[shTitle] = [];
+          sheetsMap[shTitle] = { sheetId: q.sheet_id || null, questions: [] };
         }
-        sheetsMap[shTitle].push(q);
+        sheetsMap[shTitle].questions.push(q);
       });
 
       const sheetKeys = Object.keys(sheetsMap);
@@ -417,34 +424,38 @@ const QuestionsPage = {
         ${sheetKeys.length === 0 ? `
           <div class="kf-panel" style="padding: 40px; text-align: center;">
             <p style="color: var(--text-secondary); font-size: 0.9rem;">
-              ${isAr ? 'لا توجد أسئلة مضافة حالياً لهذه المادة.' : 'No questions available for this subject yet.'}
+              ${isAr ? 'لا توجد أسئلة أو شيتات مضافة حالياً لهذه المادة.' : 'No questions or sheets available for this subject yet.'}
             </p>
           </div>
         ` : `
           <div class="bento-sheet-grid">
             ${sheetKeys.map((shKey) => {
-              const qList = sheetsMap[shKey];
+              const qList = sheetsMap[shKey].questions;
+              const hasQuestions = qList.length > 0;
               return `
-                <div class="bento-sheet-box">
+                <div class="bento-sheet-box ${hasQuestions ? '' : 'empty-sheet-box'}">
                   <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                       <span class="kf-segmented-badge" style="font-size: 0.7rem; font-weight: 800; color: var(--brand-accent); background: rgba(2, 132, 199, 0.08);">
                         ${isAr ? 'شيت معتمد' : 'Official Sheet'}
                       </span>
-                      <span class="kf-segmented-badge">
+                      <span class="kf-segmented-badge" style="${!hasQuestions ? 'background: var(--bg-surface-subtle); color: var(--text-muted);' : ''}">
                         ${qList.length} ${isAr ? 'أسئلة' : 'MCQs'}
                       </span>
                     </div>
-                    <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px; line-height: 1.4;">
+                    <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px; line-height: 1.4; ${!hasQuestions ? 'opacity: 0.7;' : ''}">
                       ${shKey}
                     </h3>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.5;">
-                      ${isAr ? `تدرب على ${qList.length} أسئلة امتحانية منتقاة لهذا الشيت مع تعليلات سريرية.` : `Practice ${qList.length} verified faculty questions for this lecture.`}
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.5; ${!hasQuestions ? 'opacity: 0.7;' : ''}">
+                      ${hasQuestions 
+                        ? (isAr ? `تدرب على ${qList.length} أسئلة امتحانية منتقاة لهذا الشيت مع تعليلات سريرية.` : `Practice ${qList.length} verified faculty questions for this lecture.`)
+                        : (isAr ? 'قريباً... جاري تجهيز الأسئلة لهذا الشيت' : 'Coming soon... questions are being prepared for this sheet')
+                      }
                     </p>
                   </div>
-                  <button type="button" class="btn btn-primary btn-sm btn-start-sheet-quiz" data-sheet-title="${shKey}" style="width: 100%; justify-content: center; font-weight: 750; gap: 8px; padding: 10px;">
-                    <i data-lucide="play" style="width: 14px; height: 14px;"></i>
-                    <span>${isAr ? 'ابدأ الاختبار السريع' : 'Start Sheet Quiz'}</span>
+                  <button type="button" class="btn ${hasQuestions ? 'btn-primary' : 'btn-secondary'} btn-sm btn-start-sheet-quiz" data-sheet-title="${shKey}" style="width: 100%; justify-content: center; font-weight: 750; gap: 8px; padding: 10px;" ${!hasQuestions ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                    <i data-lucide="${hasQuestions ? 'play' : 'clock'}" style="width: 14px; height: 14px;"></i>
+                    <span>${hasQuestions ? (isAr ? 'ابدأ الاختبار السريع' : 'Start Sheet Quiz') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
                   </button>
                 </div>
               `;
@@ -462,8 +473,9 @@ const QuestionsPage = {
 
       mainEl.querySelectorAll('.btn-start-sheet-quiz').forEach(btn => {
         btn.addEventListener('click', () => {
+          if (btn.hasAttribute('disabled')) return;
           const shTitle = btn.getAttribute('data-sheet-title');
-          const targetQuestions = sheetsMap[shTitle] || [];
+          const targetQuestions = sheetsMap[shTitle]?.questions || [];
           if (targetQuestions.length > 0) {
             QuestionsPage.showTypeSelector(
               targetQuestions,

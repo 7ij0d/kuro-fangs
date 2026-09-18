@@ -61,51 +61,39 @@ const SubjectModal = {
     const primaryTitle = isAr ? subject.name_ar : subject.name_en;
     const subTitle = isAr ? `${subject.name_en} • ${subject.code}` : `${subject.name_ar} • ${subject.code}`;
 
-    const categories = [
-      {
-        id: 'sheets',
-        title: t('catSheets'),
-        desc: t('catSheetsDesc'),
-        icon: '<i data-lucide="file-text" style="width: 24px; height: 24px; color: #0284C7;"></i>'
-      },
-      {
-        id: 'recordings',
-        title: t('catRecordings'),
-        desc: t('catRecordingsDesc'),
-        icon: '<i data-lucide="mic" style="width: 24px; height: 24px; color: #10B981;"></i>'
-      },
-      {
-        id: 'past-exams',
-        title: t('catPastExams'),
-        desc: t('catPastExamsDesc'),
-        icon: '<i data-lucide="archive" style="width: 24px; height: 24px; color: #F59E0B;"></i>'
-      },
-      {
-        id: 'ai-questions',
-        title: t('catAiQuestions'),
-        desc: t('catAiQuestionsDesc'),
-        icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
-      },
-      {
-        id: 'doctor-notes',
-        title: t('catDoctorNotes'),
-        desc: t('catDoctorNotesDesc'),
-        icon: '<i data-lucide="stethoscope" style="width: 24px; height: 24px; color: #EC4899;"></i>'
-      },
-      {
-        id: 'summaries',
-        title: t('catSummaries'),
-        desc: t('catSummariesDesc'),
-        icon: '<i data-lucide="book-marked" style="width: 24px; height: 24px; color: #3B82F6;"></i>'
-      },
-      {
-        id: 'flashcards-atlas',
-        title: t('catFlashcards'),
-        desc: t('catFlashcardsDesc'),
-        icon: '<i data-lucide="layers" style="width: 24px; height: 24px; color: #6366F1;"></i>'
-      },
-      {
-        id: 'files-slides',
+      const categories = [
+        {
+          id: 'sheets',
+          title: t('catSheets') || (isAr ? 'الشيتات والمحاضرات' : 'Sheets & Lectures'),
+          desc: t('catSheetsDesc') || (isAr ? 'تصفح الشيتات الرسمية' : 'Browse official sheets'),
+          icon: '<i data-lucide="file-text" style="width: 24px; height: 24px; color: #0284C7;"></i>'
+        },
+        {
+          id: 'recordings',
+          title: t('catRecordings') || (isAr ? 'التسجيلات الصوتية' : 'Audio Recordings'),
+          desc: t('catRecordingsDesc') || (isAr ? 'تسجيلات دكاترة الكلية' : 'Faculty lecture audio'),
+          icon: '<i data-lucide="mic" style="width: 24px; height: 24px; color: #10B981;"></i>'
+        },
+        {
+          id: 'ai-questions',
+          title: t('catQuestions') || (isAr ? 'الأسئلة' : 'Questions'),
+          desc: t('catQuestionsDesc') || (isAr ? 'بنك الأسئلة وأرشيف الامتحانات' : 'Question bank & past exams'),
+          icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
+        },
+        {
+          id: 'doctor-notes',
+          title: t('catDoctorNotes') || (isAr ? 'الملاحظات السريرية' : 'Clinical Notes'),
+          desc: t('catDoctorNotesDesc') || (isAr ? 'ملاحظات وتلخيصات' : 'Clinical summaries'),
+          icon: '<i data-lucide="stethoscope" style="width: 24px; height: 24px; color: #EC4899;"></i>'
+        },
+        {
+          id: 'summaries',
+          title: t('catSummaries') || (isAr ? 'الملخصات والمراجعات' : 'Summaries'),
+          desc: t('catSummariesDesc') || (isAr ? 'مراجعات سريعة' : 'Quick reviews'),
+          icon: '<i data-lucide="book-marked" style="width: 24px; height: 24px; color: #3B82F6;"></i>'
+        },
+        {
+          id: 'files-slides',
         title: t('catFiles'),
         desc: t('catFilesDesc'),
         icon: '<i data-lucide="folder" style="width: 24px; height: 24px; color: #64748B;"></i>'
