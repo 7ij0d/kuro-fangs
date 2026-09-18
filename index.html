@@ -200,8 +200,16 @@
           </div>
         </div>
 
-        <!-- Header Actions: Language, Theme, Points & Mascot Profile -->
+        <!-- Header Actions: Notifications, Auth, Language, Theme, Points & Mascot Profile -->
         <div class="header-actions">
+          <!-- Notifications Bell Trigger -->
+          <div class="notifications-bell-wrapper" id="notifications-bell-wrapper">
+            <button id="header-notifications-btn" class="header-toggle-btn notifications-bell-btn" title="الإشعارات والأخبار | Notifications" aria-label="Notifications">
+              <i data-lucide="bell"></i>
+              <span id="notifications-badge" class="notifications-badge" style="display: none;">0</span>
+            </button>
+          </div>
+
           <!-- Optional Supabase Auth / User Badge -->
           <div id="header-auth-action-box" class="header-auth-action-box"></div>
 
@@ -230,23 +238,6 @@
         </div>
       </header>
 
-      <!-- Optional Cloud Sync Guest Encouragement Banner -->
-      <div id="guest-encourage-banner" class="guest-encourage-banner" style="display: none;">
-        <div class="guest-banner-left">
-          <span class="guest-banner-icon">☁️</span>
-          <div class="guest-banner-text">
-            <strong id="guest-banner-strong">أنشئ حسابك الاختياري لحفظ نقاطك وتقدمك وسكناتك في السحابة</strong>
-            <span id="guest-banner-sub">التسجيل اختياري 100% ولا يمنعك من تصفح كافة محتويات وألعاب المنصة كزائر.</span>
-          </div>
-        </div>
-        <div class="guest-banner-actions">
-          <button class="btn btn-sm btn-primary guest-banner-btn" onclick="window.AuthModal.open('signup')">
-            <span id="guest-banner-btn-text">إنشاء حساب / تسجيل ☁️</span>
-          </button>
-          <button class="guest-banner-dismiss" onclick="sessionStorage.setItem('kf_guest_banner_dismissed','true'); document.getElementById('guest-encourage-banner').style.display='none';" aria-label="Dismiss">✕</button>
-        </div>
-      </div>
-
       <!-- MAIN ROUTED CONTENT CONTAINER -->
       <main class="main-content" id="app" role="main"></main>
     </div>
@@ -262,6 +253,7 @@
   <script src="js/data-clinical.js?v=9.0"></script>
   <script src="js/components/subject-modal.js?v=9.0"></script>
   <script src="js/components/sheet-edit-modal.js?v=9.0"></script>
+  <script src="js/components/notifications-center.js?v=9.0"></script>
   <script src="js/router.js?v=9.0"></script>
   <script src="js/pages/home.js?v=9.0"></script>
   <script src="js/pages/sheets.js?v=9.0"></script>

@@ -54,24 +54,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       pointsEl.textContent = `${window.STORE.getPoints()} ${t('pointsSuffix')}`;
     }
 
-    // Update Guest Banner texts
-    const bannerStrong = document.getElementById('guest-banner-strong');
-    const bannerSub = document.getElementById('guest-banner-sub');
-    const bannerBtnText = document.getElementById('guest-banner-btn-text');
-    if (bannerStrong) {
-      bannerStrong.textContent = lang === 'ar'
-        ? 'أنشئ حسابك الاختياري لحفظ نقاطك وتقدمك وسكناتك في السحابة'
-        : 'Create your optional account to sync points, progress & skins to the cloud';
-    }
-    if (bannerSub) {
-      bannerSub.textContent = lang === 'ar'
-        ? 'التسجيل اختياري 100% ولا يمنعك من تصفح كافة محتويات وألعاب المنصة كزائر.'
-        : '100% optional. You can explore all academic content & arcade games freely as a guest.';
-    }
-    if (bannerBtnText) {
-      bannerBtnText.textContent = lang === 'ar'
-        ? 'إنشاء حساب / تسجيل ☁️'
-        : 'Sign In / Register ☁️';
+    // Update Notifications Center texts & badge
+    if (window.NotificationsCenter && typeof window.NotificationsCenter.updateUI === 'function') {
+      window.NotificationsCenter.updateUI();
     }
 
     // Update Auth header state
@@ -386,8 +371,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateGlobalMascotAvatars();
   });
 
-  // 12. Handle Initial Route & Initial Mascot Sync
+  // 12. Handle Initial Route, Notifications Center & Mascot Sync
   updateGlobalMascotAvatars();
+  if (window.NotificationsCenter && typeof window.NotificationsCenter.init === 'function') {
+    window.NotificationsCenter.init();
+  }
   router.handleRoute();
   updateActiveSidebarNav(window.location.hash.slice(1).split('?')[0] || '/');
 });

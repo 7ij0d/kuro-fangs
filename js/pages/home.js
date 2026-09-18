@@ -253,69 +253,14 @@ const HomePage = {
   },
 
   openNewsModal(newsId) {
-    const pool = (HomePage.currentActiveNews && HomePage.currentActiveNews.length > 0) ? HomePage.currentActiveNews : HomePage.facultyNews;
-    const item = pool.find(n => n.id === newsId) || HomePage.facultyNews.find(n => n.id === newsId);
-    if (!item) return;
-
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-    const title = isAr ? item.title_ar : item.title_en;
-    const dept = isAr ? item.dept_ar : item.dept_en;
-    const badge = isAr ? item.badge_ar : item.badge_en;
-    const details = isAr ? item.details_ar : item.details_en;
-
-    let overlay = document.getElementById('faculty-news-modal');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'faculty-news-modal';
-      overlay.className = 'news-modal-overlay';
-      overlay.onclick = (e) => {
-        if (e.target === overlay) HomePage.closeNewsModal();
-      };
-      document.body.appendChild(overlay);
+    if (window.NotificationsCenter && typeof window.NotificationsCenter.openDetailModal === 'function') {
+      window.NotificationsCenter.openDetailModal(newsId);
     }
-
-    overlay.innerHTML = `
-      <div class="news-modal-box">
-        <button class="news-modal-close" onclick="window.HomePage.closeNewsModal()" aria-label="Close">
-          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
-        </button>
-
-        <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-          <span class="news-badge ${item.badge_type}">${badge}</span>
-          <span style="font-size: 0.75rem; color: var(--text-muted);">${item.date}</span>
-        </div>
-
-        <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4;">${title}</h2>
-        <div style="font-size: 0.825rem; font-weight: 600; color: var(--brand-burgundy); margin-bottom: 16px;">${dept}</div>
-
-        <div style="background: var(--bg-surface-subtle); border-radius: 8px; padding: 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; white-space: pre-line;">
-          ${details}
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-          ${item.url ? `
-            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
-              <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-              <span>${isAr ? 'فتح البوابة الرسمية' : 'Open Portal'}</span>
-            </a>
-          ` : '<span></span>'}
-          <button class="btn btn-secondary" onclick="window.HomePage.closeNewsModal()" style="padding: 8px 18px; font-size: 0.85rem;">
-            ${isAr ? 'إغلاق' : 'Close'}
-          </button>
-        </div>
-      </div>
-    `;
-
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    if (window.lucide) window.lucide.createIcons();
   },
 
   closeNewsModal() {
-    const overlay = document.getElementById('faculty-news-modal');
-    if (overlay) {
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
+    if (window.NotificationsCenter && typeof window.NotificationsCenter.closeDetailModal === 'function') {
+      window.NotificationsCenter.closeDetailModal();
     }
   },
 
@@ -326,10 +271,7 @@ const HomePage = {
     const equippedSkin = window.STORE ? window.STORE.getEquippedSkinData() : { image: 'assets/fox_skins/fox_skin_1.jpg', name_ar: 'الثعلب الكلاسيكي', name_en: 'Classic Kuro Fox' };
 
     container.innerHTML = `
-      <!-- 1. Faculty Official News & Next Exam Countdown Section -->
-      ${HomePage.renderFacultyOverview(isAr, t)}
-
-      <!-- 2. The 12 Academic Subjects Showcase Section -->
+      <!-- The 12 Academic Subjects Showcase Section -->
       <div class="subjects-hero-bar">
         <div class="hero-text-wrap">
           <h1 id="hero-title">${t('heroTitle')}</h1>
@@ -519,27 +461,6 @@ const HomePage = {
       clearInterval(HomePage.countdownInterval);
       HomePage.countdownInterval = null;
     }
-
-    const nextExam = HomePage.getNextExam(false);
-
-    HomePage.countdownInterval = setInterval(() => {
-      const cdDays = document.getElementById('cd-days');
-      const cdHours = document.getElementById('cd-hours');
-      const cdMins = document.getElementById('cd-mins');
-      const cdSecs = document.getElementById('cd-secs');
-
-      if (!cdDays || !cdHours || !cdMins || !cdSecs) {
-        clearInterval(HomePage.countdownInterval);
-        HomePage.countdownInterval = null;
-        return;
-      }
-
-      const countdown = HomePage.calculateCountdown(nextExam.dateStr);
-      cdDays.textContent = String(countdown.days).padStart(2, '0');
-      cdHours.textContent = String(countdown.hours).padStart(2, '0');
-      cdMins.textContent = String(countdown.minutes).padStart(2, '0');
-      cdSecs.textContent = String(countdown.seconds).padStart(2, '0');
-    }, 1000);
 
     const searchInput = document.getElementById('header-search-input');
     if (searchInput) {
