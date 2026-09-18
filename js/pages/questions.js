@@ -47,7 +47,7 @@ const QuestionsPage = {
       if (existsIdx === -1) {
         saved.push(question);
         localStorage.setItem('kf_saved_quizzes', JSON.stringify(saved));
-        if (window.Toast) window.Toast.show('★ تم حفظ السؤال للمراجعة لاحقاً', 'success');
+        if (window.Toast) window.Toast.show('★ تم حفظ السؤال بنجاح', 'success');
         return true;
       } else {
         saved.splice(existsIdx, 1);
@@ -217,7 +217,7 @@ const QuestionsPage = {
               </div>
               <div>
                 <div style="font-size: 0.9rem; font-weight: 750; color: var(--text-primary);">${isAr ? 'أسئلة أخرى / بنك الأسئلة' : 'Practice / Question Bank'}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${isAr ? 'أسئلة تدريبية وبنك الأسئلة الذكي' : 'AI-generated practice & review questions'}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${isAr ? 'أسئلة تدريبية وبنك الأسئلة الذكي' : 'AI-generated practice & test questions'}</div>
               </div>
             </button>
 
@@ -698,7 +698,7 @@ const QuestionsPage = {
             ${isAr ? 'لا توجد أسئلة محفوظة حالياً' : 'No Saved Questions Yet'}
           </h3>
           <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px;">
-            ${isAr ? 'أثناء خوض أي اختبار، انقر على زر (★ حفظ للمراجعة) لحفظ السؤال هنا.' : 'Click "Save Question" inside any active quiz card to review it here.'}
+            ${isAr ? 'أثناء خوض أي اختبار، انقر على زر (★ حفظ) لحفظ السؤال هنا.' : 'Click "Save Question" inside any active quiz card to keep it here.'}
           </p>
         </div>
       ` : `

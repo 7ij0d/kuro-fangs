@@ -89,9 +89,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideExams = document.getElementById('side-nav-exams');
     if (sideExams) sideExams.textContent = t('sideNavExams');
 
-    const sideSummaries = document.getElementById('side-nav-summaries');
-    if (sideSummaries) sideSummaries.textContent = t('sideNavSummaries');
-
     const sideQuestions = document.getElementById('side-nav-questions');
     if (sideQuestions) sideQuestions.textContent = t('sideNavQuestions');
 
@@ -238,7 +235,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/sheet/:id', (c, id, q) => window.SheetDetailPage.render(c, id, q));
   router.register('/recordings', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
   router.register('/videos', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
-  router.register('/summaries', (c, q) => window.SecondaryPages.renderSummaries(c, q));
   router.register('/lecture-schedule', (c, q) => {
     if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
       window.ExamsPage.renderAcademicSchedules(c, q);

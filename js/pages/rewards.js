@@ -205,7 +205,7 @@ const RewardsPage = {
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
             <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
               <div style="font-weight: 700; color: var(--brand-primary); font-size: 0.9rem;">+10 ${isAr ? 'نقاط' : 'pts'}</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'تحميل شيت أو ملخص معتمد' : 'Download verified sheet / summary'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'تحميل شيت معتمد' : 'Download verified sheet'}</div>
             </div>
             <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
               <div style="font-weight: 700; color: var(--brand-primary); font-size: 0.9rem;">+15 ${isAr ? 'نقطة' : 'pts'}</div>
@@ -213,7 +213,7 @@ const RewardsPage = {
             </div>
             <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
               <div style="font-weight: 700; color: var(--brand-primary); font-size: 0.9rem;">+5 ${isAr ? 'نقاط' : 'pts'}</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'مراجعة أطلس البطاقات التفاعلية' : 'Review Flashcard Atlas set'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'دراسة أطلس البطاقات التفاعلية' : 'Study Flashcard Atlas set'}</div>
             </div>
           </div>
         </div>

@@ -166,7 +166,7 @@ const HomePage = {
 
     const items = [
       { icon: 'help-circle', title: t('qaQuestionBank'), count: counts.questions + counts.exams, unit: t('qaQuestions'), route: '#/questions', color: 'var(--brand-burgundy)' },
-      { icon: 'book-marked', title: isAr ? 'الملخصات' : 'Summaries',    count: '',     unit: '',    route: '#/summaries', color: '#0284C7' },
+      { icon: 'headphones', title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings', count: '', unit: '', route: '#/recordings', color: '#0284C7' },
       { icon: 'calendar',    title: t('qaSchedules'),    count: '',               unit: '',               route: '#/lecture-schedule', color: '#059669' },
       { icon: 'file-check-2', title: isAr ? 'جداول الامتحانات' : 'Exam Schedule', count: '', unit: '', route: '#/exams', color: '#D97706' }
     ];

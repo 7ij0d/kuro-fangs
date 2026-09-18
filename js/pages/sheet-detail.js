@@ -1,7 +1,7 @@
 /**
  * KURO FANGS — DEDICATED FULL-PAGE SHEET & LECTURE EXPERIENCE
  * Full-page dedicated workspace route for each individual sheet, featuring complete metadata,
- * native JNotes interactive document studio, audio summary player, and student discussion board.
+ * native JNotes interactive document studio, audio recording player, and student discussion board.
  */
 
 const SheetDetailPage = {

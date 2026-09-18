@@ -154,7 +154,7 @@ const QuizzesPage = {
             ${!submitted ? `
               <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
                 <p style="font-size: 0.825rem; color: var(--text-secondary); margin: 0;">
-                  ${isAr ? 'تأكد من مراجعة اختياراتك قبل التسليم لإضافة النقاط إلى ملفك الأكاديمي.' : 'Review your responses before submitting to claim your academic XP.'}
+                  ${isAr ? 'تأكد من تدقيق اختياراتك قبل التسليم لإضافة النقاط إلى ملفك الأكاديمي.' : 'Double-check your responses before submitting to claim your academic XP.'}
                 </p>
                 <button id="btn-submit-quiz" class="btn btn-primary" style="padding: 10px 32px; font-weight: 750; font-size: 0.925rem; display: inline-flex; align-items: center; gap: 8px;">
                   <i data-lucide="send" style="width: 16px; height: 16px;"></i>
@@ -184,8 +184,8 @@ const QuizzesPage = {
                       ${isExcellent 
                         ? (isAr ? 'أداء سريري ممتاز! تم استيعاب المفاهيم الجوهرية بنجاح وتمت إضافة النقاط لرصيدك.' : 'Outstanding clinical performance! Full points awarded to your profile.')
                         : (isPass 
-                          ? (isAr ? 'نتيجة جيدة ومطمئنة. نوصي بمراجعة التعليلات السريرية للأسئلة الخاطئة لترسيخ المعلومة.' : 'Good passing performance. Review incorrect faculty explanations above.')
-                          : (isAr ? 'فرصة ممتازة لمراجعة الملازم والشيتات المتعلقة بهذه الأسئلة وإعادة المحاولة.' : 'Keep studying. We recommend revisiting the lecture sheets and trying again.'))}
+                          ? (isAr ? 'نتيجة جيدة ومطمئنة. نوصي بالاطلاع على التعليلات السريرية للأسئلة الخاطئة لترسيخ المعلومة.' : 'Good passing performance. Check incorrect faculty explanations above.')
+                          : (isAr ? 'فرصة ممتازة لدراسة الملازم والشيتات المتعلقة بهذه الأسئلة وإعادة المحاولة.' : 'Keep studying. We recommend revisiting the lecture sheets and trying again.'))}
                     </p>
                     <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
                       <button id="btn-retry-quiz" class="btn btn-secondary" style="font-weight: 700; gap: 6px;">

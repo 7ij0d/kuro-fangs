@@ -81,12 +81,7 @@ const SubjectModal = {
           icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
         },
         
-        {
-          id: 'summaries',
-          title: t('catSummaries') || (isAr ? 'الملخصات والمراجعات' : 'Summaries'),
-          desc: t('catSummariesDesc') || (isAr ? 'مراجعات سريعة' : 'Quick reviews'),
-          icon: '<i data-lucide="book-marked" style="width: 24px; height: 24px; color: #3B82F6;"></i>'
-        },
+        
         {
           id: 'files-slides',
         title: t('catFiles'),
@@ -151,9 +146,9 @@ const SubjectModal = {
     if (!subject) return;
     const subjectId = subject.id;
 
-    // For file-based categories (sheets, summaries, files-slides):
+    // For file-based categories (sheets, files-slides):
     // Provide instant in-modal explorer with 16px modern cards and dual action buttons!
-    if (categoryId === 'sheets' || categoryId === 'summaries' || categoryId === 'files-slides') {
+    if (categoryId === 'sheets' || categoryId === 'files-slides') {
       SubjectModal.renderCategoryFiles(categoryId);
       return;
     }
@@ -195,7 +190,6 @@ const SubjectModal = {
       : [];
 
     let categoryLabel = isAr ? 'شيتات ومحاضرات المادة' : 'Subject Handouts & Lectures';
-    if (categoryId === 'summaries') categoryLabel = isAr ? 'الملخصات المركزة والمراجعات' : 'High-Yield Summaries';
     if (categoryId === 'past-exams') categoryLabel = isAr ? 'أرشيف امتحانات السنوات السابقة' : 'Past Exams Archive';
     if (categoryId === 'files-slides') categoryLabel = isAr ? 'عروض السلايدات والمراجع' : 'Slides & Supplementary Files';
 

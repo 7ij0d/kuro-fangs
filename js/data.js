@@ -13,7 +13,6 @@ class DataService {
     this.flashcards = [];
     this.previousExams = [];
     this.requirements = [];
-    this.summaries = [];
     this.videos = [];
     this.recordings = [];
     this.notes = [];
@@ -564,7 +563,6 @@ class DataService {
    */
   getSubjectStats(subjectId) {
     const lecturesCount = (this.sheets || []).filter(s => s.subject_id === subjectId).length;
-    const summariesCount = (this.summaries || []).filter(s => s.subject_id === subjectId).length;
     const examsCount = (this.previousExams || []).filter(e => e.subject_id === subjectId).length;
     const recordingsCount = (this.recordings || []).filter(r => r.subject_id === subjectId).length;
     const questionsCount = (this.questions || []).filter(q => q.subject_id === subjectId).length;
@@ -575,7 +573,6 @@ class DataService {
 
     return {
       lecturesCount,
-      summariesCount,
       examsCount,
       recordingsCount,
       questionsCount,

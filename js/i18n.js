@@ -79,7 +79,6 @@ class I18nManager {
         completed: 'completed',
         browseContent: 'Explore Content ➔',
         lectures: 'lectures',
-        summaries: 'summaries',
         exams: 'exams',
         doctor: 'Doctor',
         academicHubs: 'ACADEMIC HUBS',
@@ -91,7 +90,6 @@ class I18nManager {
         sideNavHome: 'Home',
         sideNavVideos: 'Audio Recordings',
         sideNavExams: 'Past Exams Archive',
-        sideNavSummaries: 'Summaries & Reviews',
         sideNavQuestions: 'Question Bank',
         sideNavFlashcards: 'Interactive Flashcards',
 
@@ -135,7 +133,7 @@ class I18nManager {
 
         // 8 Categories
         catSheets: 'Subject Sheets & Lectures',
-        catSheetsDesc: 'Official university lectures and batch summaries (PDF)',
+        catSheetsDesc: 'Official university lectures and batch handouts (PDF)',
         catRecordings: 'Recordings & Video Lectures',
         catRecordingsDesc: 'Audio explanations and clinical lab demonstrations',
         catPastExams: 'Past Exam Papers',
@@ -143,9 +141,6 @@ class I18nManager {
         catAiQuestions: 'AI-Generated Practice Bank',
         catAiQuestionsDesc: 'Interactive smart quiz questions with instant rationale',
 
-
-        catSummaries: 'High-Yield Summaries',
-        catSummariesDesc: 'Quick revision sheets and night-before-exam mindmaps',
         catFlashcards: 'Interactive Flashcards & Atlas',
         catFlashcardsDesc: 'Fast recall cards, clinical photographs, and radiographs',
         catFiles: 'Files, Slides & Extra Resources',
@@ -223,7 +218,6 @@ class I18nManager {
         completed: 'مكتمل',
         browseContent: 'تصفح المحتوى ⬅️',
         lectures: 'محاضرة',
-        summaries: 'ملخصات',
         exams: 'امتحانات',
         doctor: 'الدكتور',
         academicHubs: 'الأقسام الأكاديمية',
@@ -235,7 +229,6 @@ class I18nManager {
         sideNavHome: 'الرئيسية',
         sideNavVideos: 'التسجيلات الصوتية',
         sideNavExams: 'أرشيف الامتحانات',
-        sideNavSummaries: 'الملخصات المركزة',
         sideNavQuestions: 'بنك الأسئلة',
         sideNavFlashcards: 'البطاقات التعليمية',
 
@@ -287,9 +280,6 @@ class I18nManager {
         catAiQuestions: 'أسئلة مولدة بالـ AI',
         catAiQuestionsDesc: 'كويزات ذكية تفاعلية وتدريب بنك الأسئلة مع تصحيح فوري',
 
-
-        catSummaries: 'ملخصات المادة المركزة',
-        catSummariesDesc: 'مذكرات المراجعة السريعة ومخططات ليلة الامتحان',
         catFlashcards: 'البطاقات التفاعلية والأطلس',
         catFlashcardsDesc: 'بطاقات التذكر السريع وصور الأشعة والحالات السريرية',
         catFiles: 'ملفات ومصادر إضافية',
