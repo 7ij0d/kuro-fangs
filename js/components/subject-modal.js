@@ -80,12 +80,7 @@ const SubjectModal = {
           desc: t('catQuestionsDesc') || (isAr ? 'بنك الأسئلة وأرشيف الامتحانات' : 'Question bank & past exams'),
           icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
         },
-        {
-          id: 'doctor-notes',
-          title: t('catDoctorNotes') || (isAr ? 'الملاحظات السريرية' : 'Clinical Notes'),
-          desc: t('catDoctorNotesDesc') || (isAr ? 'ملاحظات وتلخيصات' : 'Clinical summaries'),
-          icon: '<i data-lucide="stethoscope" style="width: 24px; height: 24px; color: #EC4899;"></i>'
-        },
+        
         {
           id: 'summaries',
           title: t('catSummaries') || (isAr ? 'الملخصات والمراجعات' : 'Summaries'),
@@ -174,9 +169,7 @@ const SubjectModal = {
       case 'flashcards-atlas':
         window.ROUTER.navigate(`/questions?subject=${subjectId}`);
         break;
-      case 'doctor-notes':
-        window.ROUTER.navigate(`/notes?subject=${subjectId}`);
-        break;
+      
       default:
         window.ROUTER.navigate(`/sheets?subject=${subjectId}`);
         break;

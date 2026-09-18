@@ -413,51 +413,7 @@ const SecondaryPages = {
   },
 
   // Favorites
-  renderFavorites(container) {
-    const favs = window.STORE.getFavorites();
-
-    container.innerHTML = `
-      <div class="page-title-bar">
-        <div class="page-title-group">
-          <h1>
-            <i data-lucide="bookmark" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
-            المفضلة والمحفوظات
-          </h1>
-          <p>جميع المحاضرات والملخصات والأسئلة التي قمت بحفظها للرجوع إليها سريعاً</p>
-        </div>
-      </div>
-
-      ${favs.length === 0 ? `
-        <div class="card" style="padding: 40px; text-align: center; color: var(--text-muted);">
-          لم تقم بحفظ أي عنصر في المفضلة بعد. يمكنك النقر على أيقونة المفضلة داخل أي شيت أو مادة لحفظه هنا.
-        </div>
-      ` : `
-        <div class="recent-list-view">
-          ${favs.map(item => `
-            <div class="recent-list-row">
-              <div class="recent-col-icon">
-                <i data-lucide="bookmark"></i>
-              </div>
-              <div class="recent-col-type">
-                <span class="badge badge-primary">${item.type === 'sheet' ? 'محاضرة' : 'عنصر'}</span>
-              </div>
-              <div class="recent-col-title">
-                ${item.title}
-                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">${item.subject_name || 'طب الأسنان'}</div>
-              </div>
-              <div class="recent-col-doctor">
-                ${item.addedAt ? item.addedAt.split('T')[0] : 'محفوظ'}
-              </div>
-              <div></div>
-              <a href="#/${item.type}/${item.id}" class="recent-col-arrow" title="عرض">
-                <i data-lucide="arrow-left"></i>
-              </a>
-            </div>
-          `).join('')}
-        </div>
-      `}
-    `;
-  },
+  
 
   // Helper: Generate Fox Mascot Skins Grid HTML (Delegated to RewardsPage)
   getFoxSkinsGridHtml(isAr) {
@@ -488,8 +444,6 @@ const SecondaryPages = {
     const renderView = () => {
       const userInfo = window.STORE.getUserInfo();
       const points = window.STORE.getPoints();
-      const notesCount = window.STORE.getNotes().length;
-      const favsCount = window.STORE.getFavorites().length;
       const equippedSkin = window.STORE.getEquippedSkinData();
 
       container.innerHTML = `
@@ -565,14 +519,6 @@ const SecondaryPages = {
             </div>
 
             <div style="display: flex; justify-content: space-around; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-              <div>
-                <div style="font-weight: 700; font-size: 1.1rem;">${notesCount}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">${isAr ? 'الملاحظات' : 'Notes'}</div>
-              </div>
-              <div>
-                <div style="font-weight: 700; font-size: 1.1rem;">${favsCount}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">${isAr ? 'المفضلة' : 'Bookmarks'}</div>
-              </div>
               <div>
                 <div style="font-weight: 700; font-size: 1.1rem;">12</div>
                 <div style="font-size: 0.75rem; color: var(--text-muted);">${isAr ? 'المواد' : 'Subjects'}</div>

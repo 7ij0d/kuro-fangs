@@ -58,8 +58,7 @@ const SheetDetailPage = {
     const size = sheet.size || '2.8 MB';
     const date = sheet.date || '2026-09-11';
     const fileType = sheet.type || 'PDF Sheet';
-    const isFav = window.STORE ? window.STORE.isFavorite(sheet.id, 'sheet') : false;
-    const isAdmin = Boolean(sessionStorage.getItem('kf_admin_auth') === 'true' || (window.AdminPage && window.AdminPage.checkAuth && window.AdminPage.checkAuth()));
+        const isAdmin = Boolean(sessionStorage.getItem('kf_admin_auth') === 'true' || (window.AdminPage && window.AdminPage.checkAuth && window.AdminPage.checkAuth()));
 
     // Load saved comments for this sheet
     const commentsKey = 'kf_sheet_comments_' + sheet.id;

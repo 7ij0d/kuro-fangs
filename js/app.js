@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sideFlashcards) sideFlashcards.textContent = t('sideNavFlashcards');
 
     const sideNotes = document.getElementById('side-nav-notes');
-    if (sideNotes) sideNotes.textContent = t('sideNavNotes');
+
 
     const sideLectureSchedule = document.getElementById('side-nav-lecture-schedule');
     if (sideLectureSchedule) sideLectureSchedule.textContent = t('sideNavLectureSchedule');
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sideExamsSchedule) sideExamsSchedule.textContent = t('sideNavExamsSchedule');
 
     const sideSaved = document.getElementById('side-nav-saved');
-    if (sideSaved) sideSaved.textContent = t('sideNavSaved');
+
 
     const sideRewards = document.getElementById('side-nav-rewards');
     if (sideRewards) sideRewards.textContent = t('sideNavRewards');
@@ -280,8 +280,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Redirect legacy routes to unified questions page
   router.register('/flashcards', (c, q) => window.QuestionsPage.render(c, q));
   router.register('/previous-years', (c, q) => window.QuestionsPage.render(c, q));
-  router.register('/notes', (c, q) => window.NotesPage.render(c, q));
-  router.register('/favorites', (c, q) => window.SecondaryPages.renderFavorites(c, q));
+
+
   router.register('/profile', (c, q) => window.SecondaryPages.renderProfile(c, q));
   router.register('/rewards', (c, q) => window.SecondaryPages.renderRewards(c, q));
   router.register('/alerts', (c, q) => window.SecondaryPages.renderAlerts(c, q));
@@ -384,3 +384,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.handleRoute();
   updateActiveSidebarNav(window.location.hash.slice(1).split('?')[0] || '/');
 });
+

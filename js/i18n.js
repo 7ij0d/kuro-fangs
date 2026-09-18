@@ -16,8 +16,8 @@ class I18nManager {
         searchPlaceholder: 'Search subjects, lectures, or topics...',
         navSubjects: 'Subjects (12)',
         navCalculator: 'GPA Calculator',
-        navBookmarks: 'Bookmarks',
-        navNotes: 'Notes',
+
+
         pointsSuffix: 'pts',
 
         // Faculty News & Next Exam
@@ -94,12 +94,12 @@ class I18nManager {
         sideNavSummaries: 'Summaries & Reviews',
         sideNavQuestions: 'Question Bank',
         sideNavFlashcards: 'Interactive Flashcards',
-        sideNavNotes: 'Clinical Notes',
+
         sideNavLectureSchedule: 'Academic Schedules (Theory & Practical)',
         sideNavPracticalSchedule: 'Clinical & Lab Schedule',
         sideNavExamsSchedule: 'Official Exam Schedules',
         sideNavCalc: 'Official Exam Schedules',
-        sideNavSaved: 'Bookmarks',
+
         sideNavRewards: 'Fox Mascot Hub',
         sideNavGames: 'Arcade & Games',
         sideNavAdmin: 'Faculty Admin Portal',
@@ -142,8 +142,8 @@ class I18nManager {
         catPastExamsDesc: 'Previous midterm & final exam models with answer keys',
         catAiQuestions: 'AI-Generated Practice Bank',
         catAiQuestionsDesc: 'Interactive smart quiz questions with instant rationale',
-        catDoctorNotes: 'Doctor Notes & Clinical Pearls',
-        catDoctorNotesDesc: 'High-yield clinical focus points from teaching faculty',
+
+
         catSummaries: 'High-Yield Summaries',
         catSummariesDesc: 'Quick revision sheets and night-before-exam mindmaps',
         catFlashcards: 'Interactive Flashcards & Atlas',
@@ -160,8 +160,8 @@ class I18nManager {
         searchPlaceholder: 'ابحث عن أي مادة أو شيت أو موضوع...',
         navSubjects: 'المواد (12)',
         navCalculator: 'حاسبة المعدل',
-        navBookmarks: 'المفضلة',
-        navNotes: 'ملاحظاتي',
+
+
         pointsSuffix: 'نقطة',
 
         // Faculty News & Next Exam
@@ -238,12 +238,12 @@ class I18nManager {
         sideNavSummaries: 'الملخصات المركزة',
         sideNavQuestions: 'بنك الأسئلة',
         sideNavFlashcards: 'البطاقات التعليمية',
-        sideNavNotes: 'الملاحظات السريرية',
+
         sideNavLectureSchedule: 'الجداول الدراسية (نظري وعملي)',
         sideNavPracticalSchedule: 'جدول المعامل والعملي',
         sideNavExamsSchedule: 'جداول الامتحانات الرسمية',
         sideNavCalc: 'جداول الامتحانات الرسمية',
-        sideNavSaved: 'المحفوظات',
+
         sideNavRewards: 'متجر سكنات الثعلب',
         sideNavGames: 'مركز الألعاب والترفيه',
         sideNavAdmin: 'بوابة الإدارة الأكاديمية',
@@ -286,8 +286,8 @@ class I18nManager {
         catPastExamsDesc: 'نماذج الامتحانات النصفية والنهائية السابقة والحلول',
         catAiQuestions: 'أسئلة مولدة بالـ AI',
         catAiQuestionsDesc: 'كويزات ذكية تفاعلية وتدريب بنك الأسئلة مع تصحيح فوري',
-        catDoctorNotes: 'ملاحظات وتفريغات الدكاترة',
-        catDoctorNotesDesc: 'التنبيهات السريرية وأهم النقاط المركزة من هيئة التدريس',
+
+
         catSummaries: 'ملخصات المادة المركزة',
         catSummariesDesc: 'مذكرات المراجعة السريعة ومخططات ليلة الامتحان',
         catFlashcards: 'البطاقات التفاعلية والأطلس',

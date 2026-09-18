@@ -76,8 +76,7 @@ class AppStore {
       LANG: 'kf_lang',
       THEME: 'kf_theme',
       FAVORITES: 'kf_user_favorites',
-      NOTES: 'kf_user_notes',
-      USER_INFO: 'kf_user_info',
+            USER_INFO: 'kf_user_info',
       OWNED_SKINS: 'kf_owned_skins',
       EQUIPPED_SKIN: 'kf_equipped_skin'
     };
@@ -132,18 +131,7 @@ class AppStore {
       ]));
     }
 
-    // 6. Notes
-    if (!localStorage.getItem(this.STORAGE_KEYS.NOTES)) {
-      localStorage.setItem(this.STORAGE_KEYS.NOTES, JSON.stringify([
-        {
-          id: 'note-1',
-          title: 'Local Anesthesia Dosages',
-          content: 'Lidocaine 2% max 4.4 mg/kg with epinephrine 1:80,000. Avoid intravascular injection.',
-          subjectId: 'omfs',
-          date: '2026-09-08'
-        }
-      ]));
-    }
+    
 
     // 7. User Info
     if (!localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) {
@@ -227,39 +215,7 @@ class AppStore {
     return idx < 0;
   }
 
-  // Notes
-  getNotes() {
-    try {
-      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.NOTES)) || [];
-    } catch {
-      return [];
-    }
-  }
-
-  saveNote(note) {
-    const notes = this.getNotes();
-    if (!note.id) {
-      note.id = 'note_' + Date.now();
-      note.date = new Date().toISOString().split('T')[0];
-      notes.unshift(note);
-      this.addPoints(5);
-    } else {
-      const idx = notes.findIndex(n => n.id === note.id);
-      if (idx >= 0) notes[idx] = note;
-      else notes.unshift(note);
-    }
-    localStorage.setItem(this.STORAGE_KEYS.NOTES, JSON.stringify(notes));
-    this.notify('notes_changed', notes);
-    return note;
-  }
-
-  deleteNote(id) {
-    let notes = this.getNotes();
-    notes = notes.filter(n => n.id !== id);
-    localStorage.setItem(this.STORAGE_KEYS.NOTES, JSON.stringify(notes));
-    this.notify('notes_changed', notes);
-  }
-
+  
   getUserInfo() {
     try {
       return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) || {

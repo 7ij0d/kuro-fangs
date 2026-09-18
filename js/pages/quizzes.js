@@ -79,7 +79,6 @@ const QuizzesPage = {
             const correctIndex = typeof q.correct_index === 'number' ? q.correct_index : (typeof q.correct === 'number' ? q.correct : 0);
             const explanation = isAr ? (q.answer_ar || q.explanation) : (q.answer_en || q.explanation || q.answer_ar);
             const subjectName = isAr ? (q.subject_name_ar || q.subject || 'طب الأسنان') : (q.subject_name_en || q.subject || 'Dentistry');
-            const clinicalNote = q.clinical_note || null;
             const isUserAnswered = userAnswers[idx] !== undefined;
 
             return `
@@ -139,15 +138,11 @@ const QuizzesPage = {
                   ${submitted ? `
                     <div style="margin-top: 14px; padding: 14px 18px; border-radius: 10px; background: var(--bg-surface-subtle); border-inline-start: 4px solid var(--brand-accent); font-size: 0.835rem; color: var(--text-secondary); line-height: 1.6;">
                       <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                        <i data-lucide="help-circle" style="width: 15px; height: 15px; color: var(--brand-accent);"></i>
-                        ${isAr ? 'التعليل السريري النموذجي:' : 'Verified Faculty Explanation:'}
-                      </div>
-                      ${explanation || (isAr ? 'لا يوجد تعليل متاح لهذا السؤال.' : 'No explanation provided.')}
-                      ${clinicalNote ? `
-                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-subtle); font-size: 0.775rem; color: var(--text-muted);">
-                          💡 <strong>Pearl:</strong> ${clinicalNote}
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #16A34A; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                          ${isAr ? 'التعليل السريري النموذجي:' : 'Verified Faculty Explanation:'}
                         </div>
-                      ` : ''}
+                        ${explanation || (isAr ? 'لا يوجد تعليل متاح لهذا السؤال.' : 'No explanation provided.')}
+                      </div>
                     </div>
                   ` : ''}
                 </div>
