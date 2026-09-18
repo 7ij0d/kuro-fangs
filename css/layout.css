@@ -585,12 +585,14 @@ html[dir="rtl"] .header-search-box .search-icon {
 }
 
 /* ==========================================================================
-   5. RESPONSIVE BREAKPOINTS (Mobile only, sidebar remains visible on laptops >= 768px)
+   5. RESPONSIVE BREAKPOINTS (Tablets / iPads <= 1024px & touch devices)
    ========================================================================== */
-@media (max-width: 768px) {
+@media (max-width: 1024px), (max-width: 1180px) and (pointer: coarse) {
   .app-sidebar {
-    width: 270px;
+    width: 280px;
     transform: translateX(-100%);
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.45);
+    z-index: 250;
   }
 
   html[dir="rtl"] .app-sidebar {
@@ -607,12 +609,12 @@ html[dir="rtl"] .header-search-box .search-icon {
 
   html[dir="ltr"] .app-main-wrapper,
   html[dir="rtl"] .app-main-wrapper {
-    margin-left: 0;
-    margin-right: 0;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   .mobile-toggle-btn {
-    display: flex;
+    display: flex !important;
   }
 
   .site-header {

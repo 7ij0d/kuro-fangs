@@ -104,8 +104,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sidePracticalSchedule = document.getElementById('side-nav-practical-schedule');
     if (sidePracticalSchedule) sidePracticalSchedule.textContent = t('sideNavPracticalSchedule');
 
-    const sideExamsSchedule = document.getElementById('side-nav-exams-schedule') || document.getElementById('side-nav-calc');
+    const sideExamsSchedule = document.getElementById('side-nav-exams-schedule');
     if (sideExamsSchedule) sideExamsSchedule.textContent = t('sideNavExamsSchedule');
+
+    const sideCalc = document.getElementById('side-nav-calc');
+    if (sideCalc) sideCalc.textContent = t('sideNavCalc');
 
     const sideSaved = document.getElementById('side-nav-saved');
 
@@ -226,6 +229,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     sidebarBackdrop.addEventListener('click', closeMobileSidebar);
   }
 
+  // Auto-close drawer on navigation click for mobile & tablet (iPad)
+  if (sidebarEl) {
+    sidebarEl.querySelectorAll('.sidebar-menu-item, .sidebar-brand, .sidebar-user-card').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024 || window.matchMedia('(pointer: coarse)').matches) {
+          closeMobileSidebar();
+        }
+      });
+    });
+  }
+
   // 8. Register Routes
   const router = window.ROUTER;
 
@@ -236,18 +250,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/recordings', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
   router.register('/videos', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
   router.register('/lecture-schedule', (c, q) => {
-    if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
-      window.ExamsPage.renderAcademicSchedules(c, q);
-    } else if (window.ExamsPage) {
-      window.ExamsPage.render(c, q);
+    if (window.ExamsPage) {
+      window.ExamsPage.academicTab = 'theory';
+      if (typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+        window.ExamsPage.renderAcademicSchedules(c, q);
+      } else {
+        window.ExamsPage.render(c, q);
+      }
     }
   });
   router.register('/practical-schedule', (c, q) => {
-    if (q) q.set('tab', 'practical');
-    if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
-      window.ExamsPage.renderAcademicSchedules(c, q);
-    } else if (window.ExamsPage) {
-      window.ExamsPage.render(c, q);
+    if (window.ExamsPage) {
+      window.ExamsPage.academicTab = 'practical';
+      if (typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+        window.ExamsPage.renderAcademicSchedules(c, q);
+      } else {
+        window.ExamsPage.render(c, q);
+      }
     }
   });
   router.register('/schedules', (c, q) => {
@@ -265,10 +284,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   router.register('/calculator', (c, q) => {
-    if (window.ExamsPage && typeof window.ExamsPage.renderExamsSchedule === 'function') {
-      window.ExamsPage.renderExamsSchedule(c, q);
-    } else if (window.ExamsPage) {
-      window.ExamsPage.render(c, q);
+    if (window.CalculatorPage && typeof window.CalculatorPage.render === 'function') {
+      window.CalculatorPage.render(c, q);
     }
   });
   router.register('/quizzes', (c, q) => window.QuizzesPage.render(c, q));

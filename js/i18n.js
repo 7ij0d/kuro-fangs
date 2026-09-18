@@ -93,10 +93,10 @@ class I18nManager {
         sideNavQuestions: 'Question Bank',
         sideNavFlashcards: 'Interactive Flashcards',
 
-        sideNavLectureSchedule: 'Academic Schedules (Theory & Practical)',
+        sideNavLectureSchedule: 'Theory Lectures Schedule',
         sideNavPracticalSchedule: 'Clinical & Lab Schedule',
         sideNavExamsSchedule: 'Official Exam Schedules',
-        sideNavCalc: 'Official Exam Schedules',
+        sideNavCalc: 'GPA Calculator',
 
         sideNavRewards: 'Fox Mascot Hub',
         sideNavGames: 'Arcade & Games',
@@ -232,10 +232,10 @@ class I18nManager {
         sideNavQuestions: 'بنك الأسئلة',
         sideNavFlashcards: 'البطاقات التعليمية',
 
-        sideNavLectureSchedule: 'الجداول الدراسية (نظري وعملي)',
+        sideNavLectureSchedule: 'جدول المحاضرات النظري',
         sideNavPracticalSchedule: 'جدول المعامل والعملي',
         sideNavExamsSchedule: 'جداول الامتحانات الرسمية',
-        sideNavCalc: 'جداول الامتحانات الرسمية',
+        sideNavCalc: 'حاسبة المعدل التراكمي',
 
         sideNavRewards: 'متجر سكنات الثعلب',
         sideNavGames: 'مركز الألعاب والترفيه',
