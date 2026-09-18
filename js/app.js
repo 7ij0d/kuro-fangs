@@ -68,11 +68,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideSub = document.getElementById('sidebar-brand-sub');
     if (sideSub) sideSub.textContent = t('brandSub');
 
-    const secAcad = document.getElementById('side-sec-academic');
-    if (secAcad) secAcad.textContent = t('academicHubs');
+    const secLearning = document.getElementById('side-sec-learning');
+    if (secLearning) secLearning.textContent = t('sideSecLearning');
 
-    const secTools = document.getElementById('side-sec-tools');
-    if (secTools) secTools.textContent = t('studentTools');
+    const secMySpace = document.getElementById('side-sec-myspace');
+    if (secMySpace) secMySpace.textContent = t('sideSecMySpace');
+
+    const secMore = document.getElementById('side-sec-more');
+    if (secMore) secMore.textContent = t('sideSecMore');
 
     const sideSubjects = document.getElementById('side-nav-subjects');
     if (sideSubjects) sideSubjects.textContent = t('navSubjects');

@@ -699,7 +699,7 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
 
 .subject-cover-wrap {
   position: relative;
-  height: 140px;
+  height: 100px;
   overflow: hidden;
   background: #0F172A;
 }

@@ -33,9 +33,40 @@ class I18nManager {
         countdownSecs: 'Secs',
         viewFullSchedule: 'View Full Schedule ➔',
 
-        // Hero
+        // Hero — Redesigned Welcome Section
         heroTitle: 'Academic Subjects — Year 3 (12)',
         heroSubtitle: '',
+        heroGreetingMorning: 'Good morning',
+        heroGreetingAfternoon: 'Good afternoon',
+        heroGreetingEvening: 'Good evening',
+        heroSubline: 'Ready to continue your dental journey?',
+        heroStatSubjects: 'Subjects',
+        heroStatProgress: 'Overall Progress',
+        heroStatLectures: 'Lectures Available',
+        heroStatExams: 'Past Exams',
+        heroContinueBtn: 'Continue Learning',
+        heroMascotLine: 'is ready to help you study',
+
+        // Quick Access
+        quickAccessTitle: 'Quick Access',
+        qaQuestionBank: 'Question Bank',
+        qaPastExams: 'Past Exams',
+        qaFlashcards: 'Flashcards',
+        qaSchedules: 'Schedules',
+        qaQuestions: 'questions',
+        qaPapers: 'papers',
+        qaCards: 'cards',
+
+        // Continue Learning
+        continueLearnTitle: 'Continue Learning',
+        continueLearnSub: 'Pick up where you left off',
+        continueBtn: 'Continue',
+
+        // Subjects Section
+        yourSubjects: 'Your Subjects',
+        subjectsAvailable: 'subjects available',
+        openSubject: 'Open Subject',
+
         filterAll: 'All Subjects (12)',
         filterSem1: 'Semester 1',
         filterSem2: 'Semester 2',
@@ -53,6 +84,9 @@ class I18nManager {
         doctor: 'Doctor',
         academicHubs: 'ACADEMIC HUBS',
         studentTools: 'STUDENT TOOLS',
+        sideSecLearning: 'LEARNING',
+        sideSecMySpace: 'MY SPACE',
+        sideSecMore: 'MORE',
         sideNavSheets: 'Sheets & Lectures',
         sideNavVideos: 'Recordings & Videos',
         sideNavExams: 'Past Exams Archive',
@@ -142,9 +176,40 @@ class I18nManager {
         countdownSecs: 'ثواني',
         viewFullSchedule: 'عرض جدول الامتحانات الكامل ➔',
 
-        // Hero
+        // Hero — Redesigned Welcome Section
         heroTitle: 'المواد الدراسية — السنة الثالثة (12)',
         heroSubtitle: '',
+        heroGreetingMorning: 'صباح الخير',
+        heroGreetingAfternoon: 'مساء الخير',
+        heroGreetingEvening: 'مساء الخير',
+        heroSubline: 'جاهز تكمل رحلتك في طب الأسنان؟',
+        heroStatSubjects: 'مادة',
+        heroStatProgress: 'التقدم الكلي',
+        heroStatLectures: 'محاضرة متاحة',
+        heroStatExams: 'امتحانات سابقة',
+        heroContinueBtn: 'واصل الدراسة',
+        heroMascotLine: 'جاهز يساعدك في المذاكرة',
+
+        // Quick Access
+        quickAccessTitle: 'وصول سريع',
+        qaQuestionBank: 'بنك الأسئلة',
+        qaPastExams: 'امتحانات سابقة',
+        qaFlashcards: 'بطاقات تعليمية',
+        qaSchedules: 'الجداول',
+        qaQuestions: 'سؤال',
+        qaPapers: 'نموذج',
+        qaCards: 'بطاقة',
+
+        // Continue Learning
+        continueLearnTitle: 'واصل الدراسة',
+        continueLearnSub: 'أكمل من حيث توقفت',
+        continueBtn: 'متابعة',
+
+        // Subjects Section
+        yourSubjects: 'موادك الدراسية',
+        subjectsAvailable: 'مادة متاحة',
+        openSubject: 'فتح المادة',
+
         filterAll: 'جميع المواد (12)',
         filterSem1: 'الفصل الأول',
         filterSem2: 'الفصل الثاني',
@@ -162,6 +227,9 @@ class I18nManager {
         doctor: 'الدكتور',
         academicHubs: 'الأقسام الأكاديمية',
         studentTools: 'أدوات الطالب',
+        sideSecLearning: 'التعليم',
+        sideSecMySpace: 'مساحتي',
+        sideSecMore: 'المزيد',
         sideNavSheets: 'المحاضرات والشيتات',
         sideNavVideos: 'التسجيلات والشروحات',
         sideNavExams: 'أرشيف الامتحانات',
