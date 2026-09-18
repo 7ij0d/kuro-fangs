@@ -400,13 +400,13 @@ window.NotificationsCenter = (function () {
     if (window.lucide) window.lucide.createIcons();
 
     // Attach Search Input Handlers
-    const searchInput = document.getElementById('notifications-search-input');
+    const searchInput = panel.querySelector('#notifications-search-input');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         currentSearchQuery = e.target.value;
         renderPanel(currentSearchQuery);
         // Keep focus on input after re-render
-        const reInput = document.getElementById('notifications-search-input');
+        const reInput = panel.querySelector('#notifications-search-input');
         if (reInput) {
           reInput.focus();
           reInput.setSelectionRange(reInput.value.length, reInput.value.length);
@@ -414,32 +414,52 @@ window.NotificationsCenter = (function () {
       });
     }
 
-    document.getElementById('btn-clear-notifications-search')?.addEventListener('click', () => {
-      currentSearchQuery = '';
-      renderPanel('');
-    });
+    // Direct Event Delegation on Panel for 100% Reliable Clicks
+    panel.onclick = (e) => {
+      // Prevent bubbling outside the panel to avoid closing
+      e.stopPropagation();
 
-    // Mark All Read Button
-    document.getElementById('btn-mark-all-read')?.addEventListener('click', () => {
-      markAllAsRead();
-    });
+      // 1. Close Button Click
+      const closeBtn = e.target.closest('#btn-close-notifications-panel');
+      if (closeBtn) {
+        e.preventDefault();
+        togglePanel(false);
+        return;
+      }
 
-    // Close Button
-    document.getElementById('btn-close-notifications-panel')?.addEventListener('click', () => {
-      togglePanel(false);
-    });
+      // 2. Mark All Read Button Click
+      const markReadBtn = e.target.closest('#btn-mark-all-read');
+      if (markReadBtn) {
+        e.preventDefault();
+        markAllAsRead();
+        return;
+      }
 
-    // Item Click Handlers -> Open Details Modal
-    panel.querySelectorAll('.notification-item-card').forEach(card => {
-      card.addEventListener('click', () => {
+      // 3. Clear Search Button Click
+      const clearSearchBtn = e.target.closest('#btn-clear-notifications-search');
+      if (clearSearchBtn) {
+        e.preventDefault();
+        currentSearchQuery = '';
+        renderPanel('');
+        return;
+      }
+
+      // 4. Notification Item Card Click -> Open Modal
+      const card = e.target.closest('.notification-item-card');
+      if (card) {
+        e.preventDefault();
         const id = card.getAttribute('data-id');
         if (id) {
           markAsRead(id);
           togglePanel(false);
           openDetailModal(id);
         }
-      });
+        return;
+      }
+    };
 
+    // Keyboard support for notification cards
+    panel.querySelectorAll('.notification-item-card').forEach(card => {
       card.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -457,34 +477,32 @@ window.NotificationsCenter = (function () {
   // Toggle Dropdown Panel
   function togglePanel(forceOpen) {
     let panel = document.getElementById('notifications-dropdown-panel');
-    let backdrop = document.getElementById('notifications-dropdown-backdrop');
-
     if (!panel) {
       createPanelDOM();
       panel = document.getElementById('notifications-dropdown-panel');
-      backdrop = document.getElementById('notifications-dropdown-backdrop');
     }
 
     isOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+
+    const bellBtn = document.getElementById('header-notifications-btn');
+    const header = document.querySelector('.site-header');
 
     if (isOpen) {
       currentSearchQuery = '';
       renderPanel('');
       panel.classList.add('open');
-      if (backdrop) backdrop.classList.add('open');
-      const bellBtn = document.getElementById('header-notifications-btn');
       if (bellBtn) bellBtn.classList.add('active');
+      if (header) header.style.zIndex = '1050';
       
       // Auto focus search input
       setTimeout(() => {
-        const searchInput = document.getElementById('notifications-search-input');
+        const searchInput = panel.querySelector('#notifications-search-input');
         if (searchInput) searchInput.focus();
       }, 120);
     } else {
       panel.classList.remove('open');
-      if (backdrop) backdrop.classList.remove('open');
-      const bellBtn = document.getElementById('header-notifications-btn');
       if (bellBtn) bellBtn.classList.remove('active');
+      if (header) header.style.zIndex = '';
     }
   }
 
@@ -495,14 +513,9 @@ window.NotificationsCenter = (function () {
       wrapper = document.querySelector('.header-actions');
     }
 
-    // Floating Panel Backdrop (invisible or subtle to handle click-outside)
-    if (!document.getElementById('notifications-dropdown-backdrop')) {
-      const backdrop = document.createElement('div');
-      backdrop.id = 'notifications-dropdown-backdrop';
-      backdrop.className = 'notifications-dropdown-backdrop';
-      backdrop.addEventListener('click', () => togglePanel(false));
-      document.body.appendChild(backdrop);
-    }
+    // Clean up any legacy blocking backdrop
+    const legacyBackdrop = document.getElementById('notifications-dropdown-backdrop');
+    if (legacyBackdrop) legacyBackdrop.remove();
 
     // The Panel Box itself
     if (!document.getElementById('notifications-dropdown-panel')) {
@@ -676,6 +689,16 @@ window.NotificationsCenter = (function () {
         togglePanel();
       };
     }
+
+    // Bulletproof click-outside handler (replaces blocking backdrop)
+    document.addEventListener('click', (e) => {
+      if (!isOpen) return;
+      const panel = document.getElementById('notifications-dropdown-panel');
+      const bell = document.getElementById('header-notifications-btn');
+      if (panel && !panel.contains(e.target) && bell && !bell.contains(e.target)) {
+        togglePanel(false);
+      }
+    });
 
     updateBadge();
 
