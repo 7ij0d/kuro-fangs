@@ -4094,6 +4094,186 @@ html[dir="rtl"] .fox-skin-cost-badge {
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   OFFICIAL THEORETICAL LECTURE MATRIX (Faculty of Dentistry - Auditorium 2)
+   ========================================================================== */
+.theory-table-card {
+  overflow: hidden;
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.theory-matrix-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  min-width: 860px;
+}
+
+.theory-matrix-table th {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 14px 10px;
+  text-align: center;
+  border-bottom: 2px solid var(--border-subtle);
+  border-inline-end: 1px solid var(--border-subtle);
+}
+
+.theory-matrix-table th:last-child {
+  border-inline-end: none;
+}
+
+.theory-matrix-table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  border-inline-end: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+
+.theory-matrix-table tr:last-child td {
+  border-bottom: none;
+}
+
+.theory-matrix-table td:last-child {
+  border-inline-end: none;
+}
+
+.theory-day-cell {
+  background: var(--bg-surface-subtle) !important;
+  text-align: center;
+  vertical-align: middle !important;
+  width: 120px;
+  font-weight: 800;
+}
+
+.theory-slot-card {
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 98px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  background: var(--bg-card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.theory-slot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.theory-slot-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.theory-code-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.theory-hall-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.theory-course-title {
+  font-size: 0.925rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.theory-course-sub {
+  font-size: 0.725rem;
+  color: var(--text-muted);
+}
+
+.theory-time-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.theory-empty-slot {
+  height: 100%;
+  min-height: 98px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px dashed var(--border-subtle);
+  background: rgba(0, 0, 0, 0.015);
+  padding: 8px;
+  text-align: center;
+}
+
+[data-theme="dark"] .theory-empty-slot {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.theory-empty-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+.theory-view-toggle {
+  display: inline-flex;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.theory-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.785rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.theory-toggle-btn.active {
+  background: var(--bg-card);
+  color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
 .clinical-grid-table td {
   vertical-align: top;
   padding: 8px 10px;

@@ -13,6 +13,7 @@ const ExamsPage = {
   academicTab: localStorage.getItem('kf_academic_active_tab') || 'theory', // 'theory' | 'practical'
   examTab: localStorage.getItem('kf_exam_active_tab') || 'midterm',         // 'midterm' | 'final'
   viewMode: 'table',                                                       // 'table' | 'timeline'
+  theoryViewMode: localStorage.getItem('kf_theory_view_mode') || 'matrix', // 'matrix' | 'timeline'
   practicalViewMode: 'table',                                              // 'table' | 'timeline'
 
   getSelectedGroup() {
@@ -26,49 +27,113 @@ const ExamsPage = {
     return sanitized;
   },
 
+  // Official Weekly Theoretical Schedule Matrix (Tripoli Dental Faculty Official Portal: tables.dentaluot.com)
+  theoryScheduleMatrix: [
+    {
+      day_ar: 'السبت',
+      day_en: 'Saturday',
+      slots: {
+        slot1: { code: 'MS310', course_ar: 'الباطنة العامة', course_en: 'General Medicine', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#0284C7' },
+        slot2: { code: 'MS320', course_ar: 'الجراحة العامة', course_en: 'General Surgery', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#2563EB' },
+        slot3: null,
+        slot4: null
+      }
+    },
+    {
+      day_ar: 'الأحد',
+      day_en: 'Sunday',
+      slots: {
+        slot1: { code: 'DS331', course_ar: 'الاستعاضة السنية الثابتة 2', course_en: 'Fixed Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#0D9488' },
+        slot2: { code: 'DS341', course_ar: 'جراحة الفم والوجه والفكين 1', course_en: 'OMFS I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#059669' },
+        slot3: null,
+        slot4: null
+      }
+    },
+    {
+      day_ar: 'الإثنين',
+      day_en: 'Monday',
+      slots: {
+        slot1: { code: 'DS380', course_ar: 'أمراض الفم', course_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#D97706' },
+        slot2: { code: 'DS351', course_ar: 'أمراض وعلاج اللثة 1', course_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#C2410C' },
+        slot3: null,
+        slot4: null
+      }
+    },
+    {
+      day_ar: 'الثلاثاء',
+      day_en: 'Tuesday',
+      slots: {
+        slot1: { code: 'DS381', course_ar: 'طب الأسنان الوقائي', course_en: 'Preventive Dentistry', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#CA8A04' },
+        slot2: { code: 'DS361', course_ar: 'طب الفم والتشخيص والأشعة 1', course_en: 'Oral Diagnosis & Radiology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#EAB308' },
+        slot3: null,
+        slot4: null
+      }
+    },
+    {
+      day_ar: 'الأربعاء',
+      day_en: 'Wednesday',
+      slots: {
+        slot1: { code: 'DS311', course_ar: 'العلاج التحفظي وعلاج الجذور 2', course_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#DB2777' },
+        slot2: { code: 'DS371', course_ar: 'تقويم الأسنان 1', course_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#9333EA' },
+        slot3: null,
+        slot4: { code: 'DS380', course_ar: 'أمراض الفم (المحاضرة 2)', course_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '02:00 - 04:00', color: '#D97706' }
+      }
+    },
+    {
+      day_ar: 'الخميس',
+      day_en: 'Thursday',
+      slots: {
+        slot1: { code: 'DS321', course_ar: 'الاستعاضة السنية المتحركة 2', course_en: 'Removable Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#7C3AED' },
+        slot2: { code: 'DS470', course_ar: 'طب أسنان الأطفال 1', course_en: 'Pediatric Dentistry I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#16A34A' },
+        slot3: null,
+        slot4: null
+      }
+    }
+  ],
+
   // Official Weekly Theoretical Lectures Timetable (Official Faculty of Dentistry Schedule)
   theoryScheduleDays: [
     {
       day_ar: 'السبت', day_en: 'Saturday',
       slots: [
-        { time: '08:00 - 10:00', code: 'MS310', subject_ar: 'الباطنة العامة', subject_en: 'General Medicine', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
-        { time: '10:00 - 12:00', code: 'MS320', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
+        { time: '08:00 - 10:00', code: 'MS310', subject_ar: 'الباطنة العامة', subject_en: 'General Medicine', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#0284C7' },
+        { time: '10:00 - 12:00', code: 'MS320', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#2563EB' }
       ]
     },
     {
       day_ar: 'الأحد', day_en: 'Sunday',
       slots: [
-        { time: '08:00 - 10:00', code: 'DS331', subject_ar: 'الاستعاضة السنية الثابتة 2', subject_en: 'Fixed Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
-        { time: '10:00 - 12:00', code: 'DS341', subject_ar: 'جراحة الفم والوجه والفكين 1', subject_en: 'OMFS I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
+        { time: '08:00 - 10:00', code: 'DS331', subject_ar: 'الاستعاضة السنية الثابتة 2', subject_en: 'Fixed Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#0D9488' },
+        { time: '10:00 - 12:00', code: 'DS341', subject_ar: 'جراحة الفم والوجه والفكين 1', subject_en: 'OMFS I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#059669' }
       ]
     },
     {
       day_ar: 'الإثنين', day_en: 'Monday',
       slots: [
-        { time: '08:00 - 10:00', code: 'DS380', subject_ar: 'أمراض الفم', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
-        { time: '10:00 - 12:00', code: 'DS351', subject_ar: 'أمراض وعلاج اللثة 1', subject_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
+        { time: '08:00 - 10:00', code: 'DS380', subject_ar: 'أمراض الفم', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' },
+        { time: '10:00 - 12:00', code: 'DS351', subject_ar: 'أمراض وعلاج اللثة 1', subject_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#C2410C' }
       ]
     },
     {
       day_ar: 'الثلاثاء', day_en: 'Tuesday',
       slots: [
-        { time: '08:00 - 10:00', code: 'DS381', subject_ar: 'طب الأسنان الوقائي', subject_en: 'Preventive Dentistry', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
-        { time: '10:00 - 12:00', code: 'DS361', subject_ar: 'طب الفم والتشخيص والأشعة 1', subject_en: 'OMDR I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
+        { time: '08:00 - 10:00', code: 'DS381', subject_ar: 'طب الأسنان الوقائي', subject_en: 'Preventive Dentistry', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#CA8A04' },
+        { time: '10:00 - 12:00', code: 'DS361', subject_ar: 'طب الفم والتشخيص والأشعة 1', subject_en: 'Oral Diagnosis & Radiology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#EAB308' }
       ]
     },
     {
       day_ar: 'الأربعاء', day_en: 'Wednesday',
       slots: [
-        { time: '08:00 - 10:00', code: 'DS311', subject_ar: 'العلاج التحفظي وعلاج الجذور 2', subject_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
-        { time: '10:00 - 12:00', code: 'DS371', subject_ar: 'تقويم الأسنان 1', subject_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
-        { time: '02:00 - 04:00', code: 'DS380', subject_ar: 'أمراض الفم (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
+        { time: '08:00 - 10:00', code: 'DS311', subject_ar: 'العلاج التحفظي وعلاج الجذور 2', subject_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#DB2777' },
+        { time: '10:00 - 12:00', code: 'DS371', subject_ar: 'تقويم الأسنان 1', subject_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#9333EA' },
+        { time: '02:00 - 04:00', code: 'DS380', subject_ar: 'أمراض الفم (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' }
       ]
     },
     {
       day_ar: 'الخميس', day_en: 'Thursday',
       slots: [
-        { time: '08:00 - 10:00', code: 'DS321', subject_ar: 'الاستعاضة السنية المتحركة 2', subject_en: 'Removable Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' },
-        { time: '10:00 - 12:00', code: 'DS470', subject_ar: 'طب أسنان الأطفال 1', subject_en: 'Pediatric Dentistry I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2' }
+        { time: '08:00 - 10:00', code: 'DS321', subject_ar: 'الاستعاضة السنية المتحركة 2', subject_en: 'Removable Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#7C3AED' },
+        { time: '10:00 - 12:00', code: 'DS470', subject_ar: 'طب أسنان الأطفال 1', subject_en: 'Pediatric Dentistry I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#16A34A' }
       ]
     }
   ],
@@ -114,7 +179,13 @@ const ExamsPage = {
   renderAcademicSchedules(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
 
-    if (queryParams?.get('tab')) {
+    // Detect tab from hash or query parameters
+    const hash = window.location.hash || '';
+    if (hash.includes('/practical-schedule')) {
+      ExamsPage.academicTab = 'practical';
+    } else if (hash.includes('/lecture-schedule')) {
+      ExamsPage.academicTab = 'theory';
+    } else if (queryParams?.get('tab')) {
       const t = queryParams.get('tab');
       if (['theory', 'practical'].includes(t)) {
         ExamsPage.academicTab = t;
@@ -192,11 +263,12 @@ const ExamsPage = {
           <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
             <b>${isAr ? 'تنبيه أكاديمي موحد بالمحاضرات النظرية:' : 'Academic Lecture Guidelines:'}</b>
             ${isAr 
-              ? 'تُعقد كافة المحاضرات النظرية الموحدة في <b>مدرج 2</b> من السبت إلى الخميس (8:00 ص – 12:00 م). الحضور إلزامي بنسبة لا تقل عن 75% لدخول الامتحانات النهائية.' 
-              : 'All unified theoretical lectures take place in <b>Auditorium 2</b> Saturday through Thursday (8:00 AM – 12:00 PM). Minimum 75% attendance is required for exam entry.'}
+              ? 'تُعقد كافة المحاضرات النظرية الموحدة في <b>مدرج 2</b> بالكلية من السبت إلى الخميس (8:00 ص – 12:00 م، ومحاضرة أمراض الفم الإضافية الأربعاء 2:00 م – 4:00 م). الحضور إلزامي بنسبة لا تقل عن 75% لدخول الامتحانات النهائية.' 
+              : 'All unified theoretical lectures take place in <b>Auditorium 2</b> Saturday through Thursday (8:00 AM – 12:00 PM, and Wednesday Oral Path at 2:00 PM – 4:00 PM). Minimum 75% attendance is required for exam entry.'}
           </div>
         </div>
       `;
+      ExamsPage.setupTheoryModeListeners(contentArea, isAr);
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -213,70 +285,165 @@ const ExamsPage = {
         ExamsPage.renderAcademicTabContent(isAr);
       });
     });
+
+    ExamsPage.setupTheoryModeListeners(container, isAr);
+  },
+
+  setupTheoryModeListeners(container, isAr) {
+    const matrixBtn = container.querySelector('#btn-theory-matrix');
+    const cardsBtn = container.querySelector('#btn-theory-cards');
+
+    if (matrixBtn && cardsBtn) {
+      matrixBtn.addEventListener('click', () => {
+        ExamsPage.theoryViewMode = 'matrix';
+        localStorage.setItem('kf_theory_view_mode', 'matrix');
+        ExamsPage.renderAcademicTabContent(isAr);
+      });
+
+      cardsBtn.addEventListener('click', () => {
+        ExamsPage.theoryViewMode = 'timeline';
+        localStorage.setItem('kf_theory_view_mode', 'timeline');
+        ExamsPage.renderAcademicTabContent(isAr);
+      });
+    }
   },
 
   renderTheoryTableView(isAr) {
-    const title = isAr ? 'جدول المحاضرات النظري الأسبوعي — مدرج 2 (2026 / 2027)' : 'Weekly Theory Lectures Timetable — Auditorium 2 (2026 / 2027)';
-    const subtitle = isAr ? 'المواعيد الأسبوعية المعتمدة للمحاضرات النظرية بمدرج 2 بكلية طب وجراحة الفم والأسنان' : 'Official weekly timetable for theoretical lectures in Auditorium 2';
+    const title = isAr ? 'جدول المحاضرات النظري الموحد — مدرج 2' : 'Unified Theoretical Lectures Timetable — Auditorium 2';
+    const subtitle = isAr ? 'كلية طب وجراحة الفم والأسنان • جامعة طرابلس • العام الجامعي 2026 / 2027' : 'Faculty of Oral & Dental Surgery • University of Tripoli • Academic Year 2026 - 2027';
+    const isMatrix = ExamsPage.theoryViewMode !== 'timeline';
+    const matrix = ExamsPage.theoryScheduleMatrix;
     const scheduleDays = ExamsPage.theoryScheduleDays;
 
+    const renderCard = (slot) => {
+      if (!slot) return '';
+      return `
+        <div class="theory-slot-card" style="border-inline-start: 4px solid ${slot.color};">
+          <div class="theory-slot-card-header">
+            <span class="theory-code-badge" style="background: ${slot.color}; color: #FFFFFF;">${slot.code}</span>
+            <span class="theory-hall-badge">
+              <i data-lucide="map-pin" style="width: 12px; height: 12px; color: ${slot.color};"></i>
+              <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
+            </span>
+          </div>
+          <div class="theory-course-title">${isAr ? slot.course_ar : slot.course_en}</div>
+          <div class="theory-course-sub">${isAr ? slot.course_en : slot.course_ar}</div>
+          <div class="theory-time-footer">
+            <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+            <span>${slot.time}</span>
+          </div>
+        </div>
+      `;
+    };
+
+    const renderEmpty = (label) => {
+      return `
+        <div class="theory-empty-slot">
+          <span class="theory-empty-text">${label}</span>
+        </div>
+      `;
+    };
+
     return `
-      <div class="exams-table-card card">
-        <div class="table-card-header">
+      <div class="exams-table-card card theory-table-card">
+        <div class="table-card-header" style="flex-wrap: wrap; gap: 12px;">
           <div>
             <h2>📚 ${title}</h2>
             <p>${subtitle}</p>
           </div>
-          <div class="print-watermark">KURO FANGS • THEORETICAL LECTURE SCHEDULE</div>
+
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <!-- Official Source Portal Link -->
+            <a href="https://tables.dentaluot.com/print.php?year=3&mode=theory" target="_blank" rel="noopener" class="official-source-pill" style="background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border-subtle);" title="${isAr ? 'عرض الجدول في موقع الكلية الرسمي' : 'Open official timetable portal'}">
+              <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? '🔗 المصدر الرسمي بالكلية' : '🔗 Faculty Portal'}</span>
+            </a>
+
+            <!-- View Mode Switcher -->
+            <div class="theory-view-toggle no-print">
+              <button type="button" id="btn-theory-matrix" class="theory-toggle-btn ${isMatrix ? 'active' : ''}" title="${isAr ? 'عرض مصفوفة الجدول الأسبوعي' : 'Weekly Matrix View'}">
+                <i data-lucide="grid" style="width: 14px; height: 14px;"></i>
+                <span>${isAr ? 'المصفوفة المعتمدة' : 'Matrix'}</span>
+              </button>
+              <button type="button" id="btn-theory-cards" class="theory-toggle-btn ${!isMatrix ? 'active' : ''}" title="${isAr ? 'عرض بطاقات الأيام' : 'Day Cards View'}">
+                <i data-lucide="list" style="width: 14px; height: 14px;"></i>
+                <span>${isAr ? 'بطاقات الأيام' : 'Cards'}</span>
+              </button>
+            </div>
+
+            <div class="print-watermark">KURO FANGS • THEORETICAL LECTURES • AUDITORIUM 2</div>
+          </div>
         </div>
 
-        <div class="table-responsive" style="margin-top: 14px;">
-          <table class="academia-exam-table">
-            <thead>
-              <tr>
-                <th style="width: 130px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
-                <th style="width: 150px; text-align: center;">${isAr ? 'التوقيت' : 'Time'}</th>
-                <th style="width: 110px; text-align: center;">${isAr ? 'رمز المقرر' : 'Code'}</th>
-                <th>${isAr ? 'المادة الدراسية' : 'Course Subject'}</th>
-                <th style="width: 150px; text-align: center;">${isAr ? 'المدرج' : 'Auditorium'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${scheduleDays.map(dayObj => {
-                return dayObj.slots.map((slot, sIdx) => `
+        ${isMatrix ? `
+          <!-- Official Matrix Grid View (Matching tables.dentaluot.com) -->
+          <div class="table-responsive" style="margin-top: 14px;">
+            <table class="theory-matrix-table">
+              <thead>
+                <tr>
+                  <th style="width: 120px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
+                  <th style="width: 24%;">${isAr ? 'الفترة الأولى (08:00 ص – 10:00 ص)' : 'Period 1 (08:00 AM – 10:00 AM)'}</th>
+                  <th style="width: 24%;">${isAr ? 'الفترة الثانية (10:00 ص – 12:00 م)' : 'Period 2 (10:00 AM – 12:00 PM)'}</th>
+                  <th style="width: 24%;">${isAr ? 'الفترة الثالثة (12:00 م – 02:00 م)' : 'Period 3 (12:00 PM – 02:00 PM)'}</th>
+                  <th style="width: 24%;">${isAr ? 'الفترة الرابعة (02:00 م – 04:00 م)' : 'Period 4 (02:00 PM – 04:00 PM)'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${matrix.map(row => `
                   <tr>
-                    ${sIdx === 0 ? `
-                      <td rowspan="${dayObj.slots.length}" style="font-weight: 800; background: var(--bg-hover); vertical-align: middle; text-align: center; border-left: 3px solid var(--brand-burgundy);">
-                        <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">${isAr ? dayObj.day_ar : dayObj.day_en}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">${isAr ? dayObj.day_en : dayObj.day_ar}</div>
-                      </td>
-                    ` : ''}
-                    <td style="font-weight: 700; direction: ltr; text-align: center;">
-                      <span class="exam-time-badge">
-                        <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-                        ${slot.time}
-                      </span>
-                    </td>
-                    <td style="text-align: center;">
-                      <span class="course-code-pill">${slot.code}</span>
-                    </td>
-                    <td style="font-weight: 700; color: var(--text-primary);">
-                      <div class="subject-name-cell">
-                        <span class="subject-primary-name">${isAr ? slot.subject_ar : slot.subject_en}</span>
-                        <span class="subject-sub-name">${isAr ? slot.subject_en : slot.subject_ar}</span>
+                    <td class="theory-day-cell">
+                      <div class="day-header-content">
+                        <span class="day-name-main">${isAr ? row.day_ar : row.day_en}</span>
+                        <span class="day-name-sub">${isAr ? row.day_en : row.day_ar}</span>
                       </div>
                     </td>
-                    <td style="text-align: center;">
-                      <span class="badge badge-subtle" style="font-size: 0.8rem; font-weight: 700; color: var(--brand-burgundy); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); padding: 4px 12px; border-radius: 20px;">
-                        🏛️ ${isAr ? slot.hall_ar : slot.hall_en}
-                      </span>
-                    </td>
+                    <td>${row.slots.slot1 ? renderCard(row.slots.slot1) : renderEmpty('—')}</td>
+                    <td>${row.slots.slot2 ? renderCard(row.slots.slot2) : renderEmpty('—')}</td>
+                    <td>${renderEmpty(isAr ? 'استراحة / عيادات ومعامل 🏥' : 'Clinics & Labs 🏥')}</td>
+                    <td>${row.slots.slot4 ? renderCard(row.slots.slot4) : renderEmpty('—')}</td>
                   </tr>
-                `).join('');
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : `
+          <!-- Day-by-Day Stack View -->
+          <div class="clinical-days-stack" style="margin-top: 14px;">
+            ${scheduleDays.map(dayObj => `
+              <div class="clinical-day-card">
+                <div class="clinical-day-card-header">
+                  <div class="day-badge-title">
+                    <i data-lucide="calendar" style="width: 20px; height: 20px; color: var(--brand-burgundy);"></i>
+                    <span>${isAr ? dayObj.day_ar : dayObj.day_en}</span>
+                    <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">(${isAr ? dayObj.day_en : dayObj.day_ar})</span>
+                  </div>
+                  <div class="day-theory-hint">
+                    ${isAr ? 'المدرج: مدرج 2 (الكلية)' : 'Auditorium: Hall 2'}
+                  </div>
+                </div>
+                <div class="day-sessions-grid">
+                  ${dayObj.slots.map(s => `
+                    <div class="theory-slot-card" style="border-inline-start: 4px solid ${s.color};">
+                      <div class="theory-slot-card-header">
+                        <span class="theory-code-badge" style="background: ${s.color}; color: #FFFFFF;">${s.code}</span>
+                        <span class="theory-hall-badge">
+                          <i data-lucide="map-pin" style="width: 12px; height: 12px; color: ${s.color};"></i>
+                          <span>${isAr ? s.hall_ar : s.hall_en}</span>
+                        </span>
+                      </div>
+                      <div class="theory-course-title">${isAr ? s.subject_ar : s.subject_en}</div>
+                      <div class="theory-course-sub">${isAr ? s.subject_en : s.subject_ar}</div>
+                      <div class="theory-time-footer">
+                        <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                        <span>${s.time}</span>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
       </div>
     `;
   },

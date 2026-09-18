@@ -26,18 +26,29 @@ class Router {
         }
       },
       '/lecture-schedule': async (container, params) => {
-        if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
-          window.ExamsPage.renderAcademicSchedules(container, params);
-        } else if (window.ExamsPage) {
-          window.ExamsPage.render(container, params);
+        if (!params) params = new URLSearchParams();
+        params.set('tab', 'theory');
+        if (window.ExamsPage) {
+          window.ExamsPage.academicTab = 'theory';
+          localStorage.setItem('kf_academic_active_tab', 'theory');
+          if (typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+            window.ExamsPage.renderAcademicSchedules(container, params);
+          } else {
+            window.ExamsPage.render(container, params);
+          }
         }
       },
       '/practical-schedule': async (container, params) => {
-        if (params) params.set('tab', 'practical');
-        if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
-          window.ExamsPage.renderAcademicSchedules(container, params);
-        } else if (window.ExamsPage) {
-          window.ExamsPage.render(container, params);
+        if (!params) params = new URLSearchParams();
+        params.set('tab', 'practical');
+        if (window.ExamsPage) {
+          window.ExamsPage.academicTab = 'practical';
+          localStorage.setItem('kf_academic_active_tab', 'practical');
+          if (typeof window.ExamsPage.renderAcademicSchedules === 'function') {
+            window.ExamsPage.renderAcademicSchedules(container, params);
+          } else {
+            window.ExamsPage.render(container, params);
+          }
         }
       },
       '/exams': async (container, params) => {
