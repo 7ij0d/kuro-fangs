@@ -61,6 +61,26 @@
   --border-card-hover: #C84343;
   --border-focus: #C84343;
 
+  /* Semantic Theme Tokens (Requirement 12 Architecture) */
+  --background: #FAF8F5;
+  --surface: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --primary: #C84343;
+  --secondary: #1E1F2B;
+  --accent: #F59E0B;
+  --text: #14151E;
+  --muted-text: #8E92A8;
+  --border: #E8E2D8;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --sidebar: #14151E;
+  --focus-ring: 0 0 0 3px rgba(200, 67, 67, 0.35);
+
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+
   /* Modal Backdrop & Blur */
   --backdrop-color: rgba(20, 21, 30, 0.6);
   --backdrop-blur: blur(6px);
@@ -159,6 +179,22 @@
   --border-card-hover: rgba(222, 83, 83, 0.6);
   --border-focus: #DE5353;
 
+  /* Semantic Theme Tokens (Dark Mode) */
+  --background: #0E0F15;
+  --surface: #14151E;
+  --surface-elevated: #1A1C28;
+  --primary: #DE5353;
+  --secondary: #242636;
+  --accent: #F59E0B;
+  --text: #F6F2EC;
+  --muted-text: #6C7086;
+  --border: #242636;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --sidebar: #0E0F15;
+  --focus-ring: 0 0 0 3px rgba(222, 83, 83, 0.4);
+
   /* Dark Progress */
   --progress-track: #242636;
   --progress-fill: #10B981;
@@ -177,11 +213,19 @@
 .kuro-character-img {
   display: inline-block;
   object-fit: contain;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: auto;
   background: transparent !important;
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: auto;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
+}
+
+/* Subtle, tactile hover feedback */
+.kuro-character-img:hover {
+  transform: translateY(-2px) scale(1.02);
 }
 
 /* Subtle, dignified academic companion floating motion */
