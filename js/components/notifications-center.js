@@ -189,48 +189,63 @@ window.NotificationsCenter = (function () {
     return timeStr ? `${dateStr} • ${timeStr}` : dateStr;
   }
 
-  // Badge Visual Color Tokens
+  // Badge Visual Color Tokens (Optimized for High Contrast in Light & Dark Mode)
   function getBadgeColorStyles(type) {
     switch (type) {
       case 'urgent':
         return {
           icon: 'alert-triangle',
           emoji: '🔴',
-          bg: 'rgba(239, 68, 68, 0.14)',
-          color: '#EF4444',
-          border: 'rgba(239, 68, 68, 0.3)'
+          bg: 'rgba(239, 68, 68, 0.1)',
+          color: '#DC2626',
+          border: 'rgba(239, 68, 68, 0.25)',
+          accentBg: 'rgba(239, 68, 68, 0.1)',
+          accentColor: '#DC2626',
+          accentBorder: 'rgba(239, 68, 68, 0.25)'
         };
       case 'exam':
         return {
           icon: 'calendar',
           emoji: '🟣',
-          bg: 'rgba(190, 18, 60, 0.14)',
-          color: '#FDA4AF',
-          border: 'rgba(190, 18, 60, 0.3)'
+          bg: 'rgba(124, 58, 237, 0.1)',
+          color: '#7C3AED',
+          border: 'rgba(124, 58, 237, 0.25)',
+          accentBg: 'rgba(124, 58, 237, 0.1)',
+          accentColor: '#7C3AED',
+          accentBorder: 'rgba(124, 58, 237, 0.25)'
         };
       case 'plan':
         return {
           icon: 'book-open',
           emoji: '🔵',
-          bg: 'rgba(2, 132, 199, 0.14)',
-          color: '#38BDF8',
-          border: 'rgba(2, 132, 199, 0.3)'
+          bg: 'rgba(2, 132, 199, 0.1)',
+          color: '#0284C7',
+          border: 'rgba(2, 132, 199, 0.25)',
+          accentBg: 'rgba(2, 132, 199, 0.1)',
+          accentColor: '#0284C7',
+          accentBorder: 'rgba(2, 132, 199, 0.25)'
         };
       case 'link':
         return {
           icon: 'globe',
           emoji: '🟢',
-          bg: 'rgba(16, 185, 129, 0.14)',
-          color: '#34D399',
-          border: 'rgba(16, 185, 129, 0.3)'
+          bg: 'rgba(16, 185, 129, 0.1)',
+          color: '#059669',
+          border: 'rgba(16, 185, 129, 0.25)',
+          accentBg: 'rgba(16, 185, 129, 0.1)',
+          accentColor: '#059669',
+          accentBorder: 'rgba(16, 185, 129, 0.25)'
         };
       default:
         return {
           icon: 'bell',
           emoji: '📢',
-          bg: 'rgba(255, 255, 255, 0.08)',
-          color: '#F8FAFC',
-          border: 'rgba(255, 255, 255, 0.15)'
+          bg: 'rgba(100, 116, 139, 0.1)',
+          color: '#475569',
+          border: 'rgba(100, 116, 139, 0.2)',
+          accentBg: 'rgba(100, 116, 139, 0.1)',
+          accentColor: '#475569',
+          accentBorder: 'rgba(100, 116, 139, 0.2)'
         };
     }
   }
@@ -278,27 +293,27 @@ window.NotificationsCenter = (function () {
       <!-- Panel Header -->
       <div class="notifications-panel-header">
         <div class="notifications-header-title-group">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="bell" style="width: 18px; height: 18px; color: var(--brand-primary, #0284C7);"></i>
-            <h3 class="notifications-panel-title">${isAr ? 'مركز الإشعارات والأخبار' : 'Notifications'}</h3>
+          <div class="notifications-panel-heading-wrap">
+            <i data-lucide="bell" class="notifications-header-bell-icon"></i>
+            <h3 class="notifications-panel-title">${isAr ? 'الإشعارات' : 'Notifications'}</h3>
           </div>
           ${unreadCount > 0 ? `
-            <span class="notifications-unread-pill">${unreadCount} ${isAr ? 'جديد' : 'new'}</span>
+            <span class="notifications-unread-pill">${unreadCount} ${isAr ? 'جديدة' : 'new'}</span>
           ` : ''}
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="notifications-header-actions">
           ${unreadCount > 0 ? `
             <button type="button" id="btn-mark-all-read" class="notifications-mark-read-btn" title="${isAr ? 'تحديد كافة الإشعارات كمقروءة' : 'Mark all as read'}">
-              <i data-lucide="check-check" style="width: 14px; height: 14px;"></i>
+              <i data-lucide="check-check" style="width: 13px; height: 13px;"></i>
               <span>${isAr ? 'تحديد الكل كمقروء' : 'Mark all read'}</span>
             </button>
           ` : ''}
-          <button type="button" id="btn-close-notifications-panel" class="notifications-panel-close-btn" aria-label="Close">✕</button>
+          <button type="button" id="btn-close-notifications-panel" class="notifications-panel-close-btn" aria-label="${isAr ? 'إغلاق' : 'Close'}">✕</button>
         </div>
       </div>
 
-      <!-- Live Search Box -->
+      <!-- Live Search Box (Compact & Accessible) -->
       <div class="notifications-search-wrap">
         <div class="notifications-search-box">
           <i data-lucide="search" class="notifications-search-icon"></i>
@@ -306,7 +321,7 @@ window.NotificationsCenter = (function () {
             type="text"
             id="notifications-search-input"
             class="notifications-search-input"
-            placeholder="${isAr ? 'ابحث في الإشعارات بالعنوان أو المحتوى أو التاريخ...' : 'Search notifications by title, content or date...'}"
+            placeholder="${isAr ? 'ابحث في الإعلانات...' : 'Search notifications...'}"
             value="${query}"
             autocomplete="off"
             dir="${isAr ? 'rtl' : 'ltr'}"
@@ -317,11 +332,11 @@ window.NotificationsCenter = (function () {
         </div>
       </div>
 
-      <!-- Notifications List -->
+      <!-- Notifications List Container -->
       <div class="notifications-list-container" id="notifications-list-container" role="feed">
         ${filtered.length === 0 ? `
           <div class="notifications-empty-state">
-            <div style="font-size: 2.2rem; margin-bottom: 8px;">${cleanQuery ? '🔍' : '🎉'}</div>
+            <div style="font-size: 2rem; margin-bottom: 6px;">${cleanQuery ? '🔍' : '🎉'}</div>
             <div class="notifications-empty-title">
               ${cleanQuery ? (isAr ? 'لا توجد نتائج مطابقة لبحثك' : 'No matching notifications found') : (isAr ? 'لا توجد إشعارات جديدة' : 'You are all caught up!')}
             </div>
@@ -333,9 +348,12 @@ window.NotificationsCenter = (function () {
           const isItemRead = readIds.has(item.id);
           const title = isAr ? item.title_ar : (item.title_en || item.title_ar);
           const badgeText = isAr ? item.badge_ar : (item.badge_en || item.badge_ar);
-          const dept = isAr ? (item.publisher_ar || item.dept_ar || '') : (item.publisher_en || item.dept_en || item.publisher_ar || '');
           const formattedDate = formatAlertDate(item.date, item.time);
-          const summary = isAr ? (item.content_ar ? item.content_ar.split('\n')[0] : '') : (item.content_en ? item.content_en.split('\n')[0] : (item.content_ar ? item.content_ar.split('\n')[0] : ''));
+
+          // Clean up multiline breaks and truncate to 85 characters
+          const rawContent = (isAr ? item.content_ar : (item.content_en || item.content_ar)) || '';
+          const singleLine = rawContent.replace(/\s+/g, ' ').trim();
+          const previewText = singleLine.length > 85 ? singleLine.slice(0, 85) + '...' : singleLine;
           const badgeStyles = getBadgeColorStyles(item.type);
 
           return `
@@ -346,53 +364,36 @@ window.NotificationsCenter = (function () {
               tabindex="0"
               aria-label="${title}"
             >
+              <!-- 1. Start Column: Icon Badge -->
               <div class="notification-item-icon-col">
-                <div class="notification-type-badge-icon" style="background: ${badgeStyles.bg}; color: ${badgeStyles.color}; border: 1px solid ${badgeStyles.border};">
-                  <span style="font-size: 0.95rem; line-height: 1;">${badgeStyles.emoji}</span>
+                <div class="notification-type-badge-icon" style="background: ${badgeStyles.accentBg}; color: ${badgeStyles.accentColor}; border: 1px solid ${badgeStyles.accentBorder};">
+                  <span class="notification-emoji">${badgeStyles.emoji}</span>
                 </div>
               </div>
 
+              <!-- 2. Main Content: Title -> Badge • Date -> Short Preview ... [Unread Dot] -->
               <div class="notification-item-content-col">
-                <div class="notification-meta-strip">
-                  <span class="notification-category-pill" style="color: ${badgeStyles.color}; background: ${badgeStyles.bg}; border: 1px solid ${badgeStyles.border};">
+                <h4 class="notification-item-title">${title}</h4>
+
+                <div class="notification-item-meta-row">
+                  <span class="notification-category-pill" style="color: ${badgeStyles.accentColor}; background: ${badgeStyles.accentBg}; border: 1px solid ${badgeStyles.accentBorder};">
                     ${badgeText}
                   </span>
+                  <span class="notification-meta-bullet">•</span>
                   <span class="notification-date-label">
-                    <i data-lucide="clock" style="width: 11px; height: 11px; display: inline-block;"></i>
+                    <i data-lucide="clock" style="width: 10px; height: 10px; display: inline-block;"></i>
                     ${formattedDate}
                   </span>
                 </div>
 
-                <h4 class="notification-item-title">${title}</h4>
-                <p class="notification-item-snippet">${summary}</p>
-
-                ${dept ? `
-                  <div class="notification-item-dept">
-                    <span>${dept}</span>
-                  </div>
-                ` : ''}
-              </div>
-
-              <div class="notification-item-status-col">
-                ${!isItemRead ? `
-                  <span class="notification-unread-dot" title="${isAr ? 'إشعار غير مقروء' : 'Unread'}"></span>
-                ` : `
-                  <span class="notification-read-check" title="${isAr ? 'تمت القراءة' : 'Read'}">✓</span>
-                `}
+                <div class="notification-item-preview-row">
+                  <p class="notification-item-snippet">${previewText}</p>
+                  ${!isItemRead ? `<span class="notification-unread-dot" title="${isAr ? 'غير مقروء' : 'Unread'}"></span>` : ''}
+                </div>
               </div>
             </div>
           `;
         }).join('')}
-      </div>
-
-      <!-- Panel Footer -->
-      <div class="notifications-panel-footer">
-        <span style="font-size: 0.75rem; color: var(--text-muted, #94A3B8);">
-          ${isAr ? 'كلية طب وجراحة الفم والأسنان • مركز الإعلانات' : 'Faculty of Dentistry • Notifications'}
-        </span>
-        <button type="button" id="btn-panel-bottom-close" class="notifications-footer-btn">
-          ${isAr ? 'إغلاق' : 'Close'}
-        </button>
       </div>
     `;
 
@@ -425,9 +426,6 @@ window.NotificationsCenter = (function () {
 
     // Close Button
     document.getElementById('btn-close-notifications-panel')?.addEventListener('click', () => {
-      togglePanel(false);
-    });
-    document.getElementById('btn-panel-bottom-close')?.addEventListener('click', () => {
       togglePanel(false);
     });
 
@@ -607,12 +605,12 @@ window.NotificationsCenter = (function () {
           ${item.url ? `
             <div class="notification-modal-attachment-box">
               <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(2,132,199,0.15); display: flex; align-items: center; justify-content: center; color: #38BDF8;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(2,132,199,0.12); display: flex; align-items: center; justify-content: center; color: #0284C7;">
                   <i data-lucide="external-link" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div>
-                  <div style="font-size: 0.85rem; font-weight: 700; color: #F8FAFC;">${isAr ? 'بوابة الرابط الخارجي الرسمي' : 'Official External Portal Link'}</div>
-                  <div style="font-size: 0.75rem; color: #94A3B8; word-break: break-all;" dir="ltr">${item.url}</div>
+                  <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary, #181C32);">${isAr ? 'بوابة الرابط الخارجي الرسمي' : 'Official External Portal Link'}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted, #64748B); word-break: break-all;" dir="ltr">${item.url}</div>
                 </div>
               </div>
 
