@@ -1,227 +1,268 @@
 /**
- * KURO FANGS — REWARDS & FOX MASCOT SKINS HUB (4 Core Mascots & Site-Wide Themes)
+ * KURO FANGS — OFFICIAL CHARACTER & THEME HUB (KURO THEME SYSTEM)
+ * Showcases the official Kuro character, color identity, active theme toggles,
+ * and the 8 official academic/emotional states across the platform.
  */
 
 const RewardsPage = {
-  // Helper: Generate Fox Mascot Skins Grid HTML (Exact 4 Core Skins)
-  getFoxSkinsGridHtml(isAr) {
-    const skins = window.STORE.getFoxSkins();
-    const ownedSkins = window.STORE.getOwnedSkins();
-    const equippedId = window.STORE.getEquippedSkin();
-    const currentPoints = window.STORE.getPoints();
+  activePreviewState: 'idle',
 
-    return `
-      <div class="fox-skins-grid">
-        ${skins.map(skin => {
-          const isEquipped = skin.id === equippedId;
-          const isOwned = ownedSkins.includes(skin.id);
-          const canAfford = currentPoints >= skin.cost;
-          const name = isAr ? skin.name_ar : skin.name_en;
-          const subName = isAr ? skin.name_en : skin.name_ar;
-          const tag = isAr ? skin.tag_ar : skin.tag_en;
-          const themeName = isAr ? skin.theme_name_ar : skin.theme_name_en;
-          const desc = isAr ? skin.desc_ar : skin.desc_en;
-          const colors = skin.theme_colors || ['#BE123C', '#881337', '#F5F8FA'];
+  render(container) {
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const currentPoints = window.STORE ? window.STORE.getPoints() : 25;
+    const currentTheme = window.STORE ? window.STORE.getTheme() : 'kuro';
+    const isDark = currentTheme === 'kuro-dark' || currentTheme === 'dark';
 
-          let costLabel = '';
-          if (skin.isFree) {
-            costLabel = isAr ? 'الافتراضي (مجاناً)' : 'Default (Free)';
-          } else {
-            costLabel = isAr ? `${skin.cost} نقطة` : `${skin.cost} pts`;
-          }
+    const kuroTheme = window.CharacterThemeSystem 
+      ? window.CharacterThemeSystem.getTheme('kuro')
+      : {
+          name_ar: 'كورو',
+          name_en: 'Kuro',
+          title_ar: 'التميمة والشخصية الرسمية لمنصة كورو فانغز',
+          title_en: 'Official Mascot & Visual Identity of Kuro Fangs',
+          desc_ar: 'الشخصية الرسمية المعتمدة لدفعة طب وجراحة الفم والأسنان. يرتدي معطف الأكاديميا العاجي، قناع الأوبسيديان، والوشاح القرمزي المتوهج.',
+          desc_en: 'The official visual source of truth for Kuro Fangs dental students. Cloaked in warm bone ivory, charcoal obsidian mask, and radiant crimson scarf.',
+          states: []
+        };
 
-          let actionButtonHtml = '';
-          if (isEquipped) {
-            actionButtonHtml = `
-              <button class="btn-skin-action btn-skin-current" disabled>
-                <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
-                <span>${isAr ? '✓ السكن والثيم النشط حالياً' : '✓ Active Skin & Theme'}</span>
-              </button>
-            `;
-          } else if (isOwned) {
-            actionButtonHtml = `
-              <button class="btn-skin-action btn-skin-equip" data-skin-id="${skin.id}">
-                <i data-lucide="palette" style="width: 16px; height: 16px;"></i>
-                <span>${isAr ? 'ارتداء السكن وتفعيل الثيم' : 'Equip Skin & Theme'}</span>
-              </button>
-            `;
-          } else if (canAfford) {
-            actionButtonHtml = `
-              <button class="btn-skin-action btn-skin-unlock" data-skin-id="${skin.id}">
-                <i data-lucide="unlock" style="width: 16px; height: 16px;"></i>
-                <span>${isAr ? `فتح بـ ${skin.cost} نقطة` : `Unlock for ${skin.cost} pts`}</span>
-              </button>
-            `;
-          } else {
-            const needed = skin.cost - currentPoints;
-            actionButtonHtml = `
-              <button class="btn-skin-action btn-skin-locked" disabled title="${isAr ? `ينقصك ${needed} نقطة` : `Need ${needed} more pts`}">
-                <i data-lucide="lock" style="width: 16px; height: 16px;"></i>
-                <span>${isAr ? `مقفل (${skin.cost} نقطة)` : `Locked (${skin.cost} pts)`}</span>
-              </button>
-            `;
-          }
-
-          return `
-            <div class="fox-skin-card ${isEquipped ? 'is-equipped' : ''}" data-skin-id="${skin.id}">
-              <div class="fox-skin-visual">
-                <img src="${skin.image}" alt="${name}" loading="lazy" />
-                <div class="fox-skin-cost-badge">${costLabel}</div>
-                <div class="fox-skin-tag-badge">${tag}</div>
-              </div>
-              <div class="fox-skin-content">
-                <!-- Theme Preview Banner -->
-                <div class="fox-skin-theme-bar">
-                  <div class="fox-skin-theme-dots">
-                    ${colors.map(c => `<span class="fox-skin-theme-dot" style="background: ${c};"></span>`).join('')}
-                  </div>
-                  <span class="fox-skin-theme-name">${themeName}</span>
-                </div>
-
-                <div class="fox-skin-title-wrap">
-                  <div class="fox-skin-name-ar">${name}</div>
-                  <div class="fox-skin-name-en">${subName}</div>
-                </div>
-                <p class="fox-skin-desc">${desc}</p>
-                <div class="fox-skin-actions">
-                  ${actionButtonHtml}
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-  },
-
-  // Helper: Attach Event Listeners to Skin Cards
-  attachSkinActionListeners(container, isAr, onUpdateCallback) {
-    container.querySelectorAll('.btn-skin-equip').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const skinId = btn.getAttribute('data-skin-id');
-        const success = window.STORE.equipSkin(skinId);
-        if (success) {
-          const skin = window.STORE.getSkinById(skinId);
-          const name = isAr ? skin.name_ar : skin.name_en;
-          const themeName = isAr ? skin.theme_name_ar : skin.theme_name_en;
-          const msg = isAr 
-            ? `تم ارتداء "${name}" وتفعيل "${themeName}" لكافة صفحات الموقع! 🦊✨` 
-            : `Equipped "${name}" and activated "${themeName}" across the site! 🦊✨`;
-          window.showToast(msg, { type: 'success' });
-          if (typeof onUpdateCallback === 'function') onUpdateCallback();
-        }
-      });
-    });
-
-    container.querySelectorAll('.btn-skin-unlock').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const skinId = btn.getAttribute('data-skin-id');
-        const res = window.STORE.unlockSkin(skinId);
-        const skin = window.STORE.getSkinById(skinId);
-        const name = isAr ? skin.name_ar : skin.name_en;
-        const themeName = isAr ? skin.theme_name_ar : skin.theme_name_en;
-
-        if (res.success) {
-          const msg = isAr 
-            ? `🎉 مبارك! تم فتح "${name}" وارتداؤه وتفعيل "${themeName}" بنجاح!` 
-            : `🎉 Congratulations! Unlocked and equipped "${name}" with "${themeName}"!`;
-          window.showToast(msg, { type: 'success' });
-          if (typeof onUpdateCallback === 'function') onUpdateCallback();
-        } else if (res.reason === 'insufficient_points') {
-          const msg = isAr 
-            ? `عذراً، تحتاج إلى ${res.needed} نقطة إضافية لفتح هذا السكن!` 
-            : `Insufficient points! You need ${res.needed} more points to unlock this skin.`;
-          window.showToast(msg, { type: 'warning' });
-        }
-      });
-    });
-  },
-
-  // Main Render View for /rewards
-  render(container, queryParams) {
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+    const states = kuroTheme.states || [];
+    const activeAssetUrl = window.CharacterThemeSystem
+      ? window.CharacterThemeSystem.getAsset(this.activePreviewState, 'kuro')
+      : 'assets/characters/kuro/Kuro-Idle.png';
 
     const renderView = () => {
-      const currentPoints = window.STORE.getPoints();
-      const equippedSkin = window.STORE.getEquippedSkinData();
-      const currentTheme = window.STORE.getTheme();
-      const themeColors = equippedSkin.theme_colors || ['#BE123C', '#881337', '#F5F8FA'];
+      const activeStateObj = states.find(s => s.key === this.activePreviewState) || states[0] || {
+        name_ar: 'الوضع الافتراضي',
+        name_en: 'Idle & Welcome',
+        context_ar: 'الصفحة الرئيسية والأفاتار العام',
+        context_en: 'Home & Global Avatars'
+      };
 
       container.innerHTML = `
         <div class="page-title-bar">
           <div class="page-title-group">
-            <h1>
-              <i data-lucide="sparkles" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
-              ${isAr ? 'متجر سكنات الثعلب الـ 4 وثيمات المنصة' : 'Fox Mascot Skins & Site Themes (4 Mascots)'}
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span class="kf-segmented-badge" style="background: rgba(200, 67, 67, 0.1); color: var(--color-primary); border-color: rgba(200, 67, 67, 0.25); font-weight: 800;">
+                <i data-lucide="sparkles" style="width: 13px; height: 13px;"></i>
+                ${isAr ? 'الهوية الرسمية الأولى' : 'First Official Theme'}
+              </span>
+              <span class="kf-segmented-badge" style="font-weight: 700;">8 ${isAr ? 'حالات أكاديمية' : 'Official States'}</span>
+            </div>
+            <h1 style="font-size: 1.55rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
+              ${isAr ? 'مركز شخصية كورو وثيمات المنصة' : 'Official Kuro Character & Theme Hub'}
             </h1>
-            <p>${isAr ? 'اختر وارتدِ سكن الثعلب المفضل؛ كل سكن يحول ثيم وألوان الموقع بالكامل فور ارتدائه' : 'Choose and equip your mascot; each skin instantly transforms the full site-wide theme upon equipping'}</p>
+            <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
+              ${isAr ? 'كورو هو الرمز الرسمي المعتمد لدفعة طب وجراحة الفم والأسنان؛ يتفاعل مع دراستك عبر 8 حالات سريرية وأكاديمية متكاملة.' : 'Kuro is the official visual identity of Kuro Fangs; guiding students through 8 emotional and academic states.'}
+            </p>
           </div>
         </div>
 
-        <!-- Banner & Current Status -->
-        <div class="fox-skins-header-card">
-          <div class="fox-skins-header-info">
-            <div class="fox-current-equipped-preview">
-              <img src="${equippedSkin.image}" alt="${isAr ? equippedSkin.name_ar : equippedSkin.name_en}" class="current-mascot-img" />
-            </div>
-            <div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
-                <span class="badge badge-primary" style="font-size: 0.725rem;">
-                  ${isAr ? 'السكن النشط' : 'Active Mascot'}
-                </span>
-                <span class="fox-active-theme-pill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.725rem; font-weight: 700; background: var(--bg-hover); padding: 2px 10px; border-radius: 12px; border: 1px solid var(--border-subtle); color: var(--text-secondary);">
-                  <span style="display: inline-flex; gap: 3px;">
-                    ${themeColors.map(c => `<span style="width: 8px; height: 8px; border-radius: 50%; background: ${c}; display: inline-block;"></span>`).join('')}
-                  </span>
-                  ${isAr ? equippedSkin.theme_name_ar : equippedSkin.theme_name_en}
-                </span>
+        <!-- 1. Hero Showcase: Kuro Official Character & Palette -->
+        <div class="card" style="padding: 28px 32px; border-radius: 18px; margin-bottom: 28px; background: var(--bg-card); border: 1px solid var(--border-card); box-shadow: var(--shadow-card); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #C84343 0%, #1E1F2B 50%, #C84343 100%);"></div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap;">
+            <!-- Character Spotlight (Transparent, No Artificial Borders) -->
+            <div style="display: flex; align-items: center; gap: 24px; flex: 1; min-width: 320px;">
+              <div style="width: 130px; height: 130px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%); border-radius: 50%;">
+                <img 
+                  id="kuro-hub-spotlight-img"
+                  src="${activeAssetUrl}" 
+                  alt="Kuro Character" 
+                  class="kuro-character-img kuro-float" 
+                  style="width: 120px; height: 120px; object-fit: contain;" 
+                />
               </div>
-              <h2 style="font-size: 1.25rem; margin-bottom: 4px; color: var(--text-primary);">
-                ${isAr ? equippedSkin.name_ar : equippedSkin.name_en}
-              </h2>
-              <p style="font-size: 0.825rem; color: var(--text-secondary); margin: 0;">
-                ${isAr ? equippedSkin.desc_ar : equippedSkin.desc_en}
-              </p>
-            </div>
-          </div>
 
-          <div class="fox-balance-pill">
-            <div class="fox-balance-val">${currentPoints}</div>
-            <div class="fox-balance-lbl">${isAr ? 'نقطة أكاديمية متاحة' : 'Available Points'}</div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                  <span class="badge" style="background: var(--color-primary); color: #FFFFFF; font-size: 0.75rem; font-weight: 800; padding: 3px 10px; border-radius: 99px;">
+                    ✓ ${isAr ? 'الشخصية والثيم النشط' : 'Active Character & Theme'}
+                  </span>
+                  <span style="font-size: 0.775rem; font-weight: 700; color: var(--text-secondary); background: var(--bg-surface-subtle); padding: 3px 10px; border-radius: 99px; border: 1px solid var(--border-subtle);">
+                    ${isAr ? activeStateObj.name_ar : activeStateObj.name_en}
+                  </span>
+                </div>
+
+                <h2 style="font-size: 1.4rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
+                  ${isAr ? kuroTheme.name_ar : kuroTheme.name_en} — ${isAr ? 'التميمة الرسمية' : 'Official Visual Identity'}
+                </h2>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 14px; max-width: 580px; line-height: 1.6;">
+                  ${isAr ? kuroTheme.desc_ar : kuroTheme.desc_en}
+                </p>
+
+                <!-- Official Palette Swatches -->
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">${isAr ? 'الألوان الرسمية:' : 'Palette:'}</span>
+                  
+                  <div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-surface-subtle); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border-subtle); font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #C84343; display: inline-block;"></span>
+                    <span style="font-weight: 600; color: var(--text-primary);">${isAr ? 'القرمزي (Crimson)' : 'Crimson'}</span>
+                  </div>
+
+                  <div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-surface-subtle); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border-subtle); font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #14151E; display: inline-block;"></span>
+                    <span style="font-weight: 600; color: var(--text-primary);">${isAr ? 'الأوبسيديان (Obsidian)' : 'Obsidian'}</span>
+                  </div>
+
+                  <div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-surface-subtle); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border-subtle); font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #FAF8F5; border: 1px solid #D1D5DB; display: inline-block;"></span>
+                    <span style="font-weight: 600; color: var(--text-primary);">${isAr ? 'العاجي الدافئ (Ivory)' : 'Warm Ivory'}</span>
+                  </div>
+
+                  <div style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-surface-subtle); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border-subtle); font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #F59E0B; display: inline-block;"></span>
+                    <span style="font-weight: 600; color: var(--text-primary);">${isAr ? 'الكهرمان الذهبي (Amber)' : 'Golden Amber'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controls: Mode Switcher & Academic Points -->
+            <div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-end; min-width: 220px;">
+              <div class="fox-balance-pill" style="width: 100%; text-align: center; border-color: rgba(200, 67, 67, 0.3); background: rgba(200, 67, 67, 0.05);">
+                <div class="fox-balance-val" style="color: var(--color-primary);">${currentPoints}</div>
+                <div class="fox-balance-lbl">${isAr ? 'نقطة أكاديمية مسجلة' : 'Registered Points'}</div>
+              </div>
+
+              <!-- Live Theme Toggle -->
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <button 
+                  id="hub-toggle-light"
+                  class="btn ${!isDark ? 'btn-primary' : 'btn-secondary'}" 
+                  style="flex: 1; justify-content: center; font-size: 0.785rem; padding: 8px 12px; font-weight: 700; gap: 6px;"
+                >
+                  <i data-lucide="sun" style="width: 14px; height: 14px;"></i>
+                  <span>${isAr ? 'كورو عاجي (فاتح)' : 'Kuro Ivory (Light)'}</span>
+                </button>
+
+                <button 
+                  id="hub-toggle-dark"
+                  class="btn ${isDark ? 'btn-primary' : 'btn-secondary'}" 
+                  style="flex: 1; justify-content: center; font-size: 0.785rem; padding: 8px 12px; font-weight: 700; gap: 6px;"
+                >
+                  <i data-lucide="moon" style="width: 14px; height: 14px;"></i>
+                  <span>${isAr ? 'كورو ليلي (داكن)' : 'Kuro Night (Dark)'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 4 Core Skins Grid -->
-        ${this.getFoxSkinsGridHtml(isAr)}
+        <!-- 2. Interactive Gallery: 8 Official States of Kuro -->
+        <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-size: 1.25rem; font-weight: 850; color: var(--text-primary); margin: 0 0 4px;">
+              ${isAr ? 'حالات كورو الثمانية عبر المنصة' : 'The 8 Official States of Kuro'}
+            </h2>
+            <p style="font-size: 0.825rem; color: var(--text-secondary); margin: 0;">
+              ${isAr ? 'انقر على أي وضع لمعاينته والتعرف على سياقه التعليمي داخل صفحات النظام' : 'Select any pose to preview and learn its academic context'}
+            </p>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+            ${isAr ? 'الأصول الأصلية 100% بدون أي تعديل أو إعادة رسم' : '100% Official Source of Truth Assets'}
+          </span>
+        </div>
 
-        <!-- How to earn points info card -->
-        <div class="card" style="padding: 24px; border-radius: 16px; margin-top: 10px;">
-          <h3 style="font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-bottom: 32px;">
+          ${states.map(state => {
+            const isSelected = state.key === this.activePreviewState;
+            const assetUrl = window.CharacterThemeSystem
+              ? window.CharacterThemeSystem.getAsset(state.key, 'kuro')
+              : `assets/characters/kuro/${state.file}`;
+
+            return `
+              <div 
+                class="card kuro-state-card" 
+                data-state-key="${state.key}"
+                style="padding: 18px; border-radius: 14px; cursor: pointer; transition: all var(--transition-fast); border: 1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--border-card)'}; background: ${isSelected ? 'var(--bg-surface-subtle)' : 'var(--bg-card)'}; position: relative; box-shadow: ${isSelected ? '0 4px 18px rgba(200, 67, 67, 0.18)' : 'var(--shadow-card)'};"
+              >
+                ${isSelected ? `
+                  <span style="position: absolute; top: 12px; inset-inline-end: 12px; background: var(--color-primary); color: white; font-size: 0.675rem; font-weight: 800; padding: 2px 8px; border-radius: 99px;">
+                    ${isAr ? 'معروض حالياً' : 'Selected'}
+                  </span>
+                ` : ''}
+
+                <!-- Clean Transparent Character Visual -->
+                <div style="height: 160px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.06) 0%, transparent 70%); border-radius: 10px; margin-bottom: 12px; padding: 8px;">
+                  <img 
+                    src="${assetUrl}" 
+                    alt="${isAr ? state.name_ar : state.name_en}" 
+                    class="kuro-character-img ${isSelected ? 'kuro-bounce' : ''}" 
+                    style="max-height: 144px; width: auto; object-fit: contain;" 
+                    loading="lazy"
+                  />
+                </div>
+
+                <div style="border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+                  <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">
+                    ${isAr ? state.name_ar : state.name_en}
+                  </div>
+                  <div style="font-size: 0.775rem; color: var(--color-primary); font-weight: 700; margin-bottom: 6px;">
+                    ${isAr ? state.role_ar : state.name_en}
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
+                    ${isAr ? state.context_ar : state.context_en}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- 3. Points Earning Reference Guide -->
+        <div class="card" style="padding: 24px 28px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-card);">
+          <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
             <i data-lucide="zap" style="color: #F59E0B; width: 20px; height: 20px;"></i>
-            ${isAr ? 'طرق حصد النقاط الأكاديمية لفتح السكنات' : 'How to Earn Academic Points for Skins'}
+            ${isAr ? 'كيفية حصد النقاط الأكاديمية بالمنصة' : 'How to Earn Academic Points'}
           </h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
-            <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-              <div style="font-weight: 700; color: var(--brand-primary); font-size: 0.9rem;">+10 ${isAr ? 'نقاط' : 'pts'}</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'تحميل شيت معتمد' : 'Download verified sheet'}</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px;">
+            <div style="background: var(--bg-surface-subtle); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+              <div style="font-weight: 800; color: var(--color-primary); font-size: 0.95rem;">+10 ${isAr ? 'نقاط' : 'pts'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">${isAr ? 'تحميل شيت معتمد ومراجعته' : 'Download verified lecture sheet'}</div>
             </div>
-            <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-              <div style="font-weight: 700; color: var(--brand-primary); font-size: 0.9rem;">+15 ${isAr ? 'نقطة' : 'pts'}</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'إتمام كويز ذكي وتجاوز 80%' : 'Complete AI Quiz with >80% score'}</div>
+            <div style="background: var(--bg-surface-subtle); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+              <div style="font-weight: 800; color: var(--color-primary); font-size: 0.95rem;">+15 ${isAr ? 'نقطة' : 'pts'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">${isAr ? 'إتمام كويز سريري بنتيجة تفوق 80%' : 'Complete clinical quiz with >80% score'}</div>
             </div>
-            <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-              <div style="font-weight: 700; color: var(--brand-primary); font-size: 0.9rem;">+5 ${isAr ? 'نقاط' : 'pts'}</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'دراسة أطلس البطاقات التفاعلية' : 'Study Flashcard Atlas set'}</div>
+            <div style="background: var(--bg-surface-subtle); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+              <div style="font-weight: 800; color: var(--color-primary); font-size: 0.95rem;">+5 ${isAr ? 'نقاط' : 'pts'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">${isAr ? 'حل ومراجعة أسئلة بنك الأسئلة المبوب' : 'Solve questions from the practice bank'}</div>
+            </div>
+            <div style="background: var(--bg-surface-subtle); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+              <div style="font-weight: 800; color: var(--color-primary); font-size: 0.95rem;">+25 ${isAr ? 'نقطة' : 'pts'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">${isAr ? 'الفوز في ألعاب وتحديات الذاكرة السريرية' : 'Win clinical memory challenges in arcade'}</div>
             </div>
           </div>
         </div>
       `;
 
       if (window.lucide) window.lucide.createIcons();
-      this.attachSkinActionListeners(container, isAr, () => {
-        renderView();
+
+      // State card click to preview
+      container.querySelectorAll('.kuro-state-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const key = card.getAttribute('data-state-key');
+          if (key && key !== this.activePreviewState) {
+            this.activePreviewState = key;
+            renderView();
+          }
+        });
+      });
+
+      // Live Theme Toggles
+      document.getElementById('hub-toggle-light')?.addEventListener('click', () => {
+        if (window.STORE) {
+          window.STORE.setTheme('kuro');
+          renderView();
+        }
+      });
+
+      document.getElementById('hub-toggle-dark')?.addEventListener('click', () => {
+        if (window.STORE) {
+          window.STORE.setTheme('kuro-dark');
+          renderView();
+        }
       });
     };
 

@@ -44,21 +44,26 @@ const QuizzesPage = {
 
       container.innerHTML = `
         <div class="kf-panel" style="margin-bottom: 24px; padding: 22px 26px; border-radius: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
-            <div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                <span class="kf-segmented-badge" style="background: rgba(2, 132, 199, 0.08); color: var(--brand-accent); border-color: rgba(2, 132, 199, 0.25); font-weight: 800;">
-                  <i data-lucide="activity" style="width: 13px; height: 13px;"></i>
-                  ${isAr ? 'محاكاة سريرية تفاعلية' : 'Clinical Simulation Engine'}
-                </span>
-                <span class="kf-segmented-badge">${totalCount} ${isAr ? 'أسئلة معتمدة' : 'Questions'}</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 18px;">
+              <div style="width: 64px; height: 64px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
+                <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('focused') : 'assets/characters/kuro/Kuro-Focused.png'}" alt="Kuro Focused" class="kuro-character-img kuro-float" style="width: 58px; height: 58px; object-fit: contain;" />
               </div>
-              <h1 style="font-size: 1.4rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
-                ${isAr ? 'الامتحانات والكويزات التفاعلية' : 'Dentistry Clinical Quizzes'}
-              </h1>
-              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">
-                ${isAr ? 'اختبر معلوماتك في مقررات طب الأسنان وتدرب على أسئلة الامتحانات النصفية والنهائية بتعليلات سريرية.' : 'Evaluate your diagnostic competence across Year 3 dental modules with immediate faculty feedback.'}
-              </p>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span class="kf-segmented-badge" style="background: rgba(200, 67, 67, 0.08); color: var(--color-primary); border-color: rgba(200, 67, 67, 0.25); font-weight: 800;">
+                    <i data-lucide="activity" style="width: 13px; height: 13px;"></i>
+                    ${isAr ? 'محاكاة سريرية تفاعلية' : 'Clinical Simulation Engine'}
+                  </span>
+                  <span class="kf-segmented-badge">${totalCount} ${isAr ? 'أسئلة معتمدة' : 'Questions'}</span>
+                </div>
+                <h1 style="font-size: 1.4rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
+                  ${isAr ? 'الامتحانات والكويزات التفاعلية' : 'Dentistry Clinical Quizzes'}
+                </h1>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">
+                  ${isAr ? 'اختبر معلوماتك في مقررات طب الأسنان وتدرب على أسئلة الامتحانات النصفية والنهائية بتعليلات سريرية.' : 'Evaluate your diagnostic competence across Year 3 dental modules with immediate faculty feedback.'}
+                </p>
+              </div>
             </div>
 
             <div style="min-width: 180px; text-align: ${isAr ? 'left' : 'right'};">
@@ -172,10 +177,21 @@ const QuizzesPage = {
                   const percentage = Math.round((score / totalCount) * 100);
                   const isExcellent = percentage >= 85;
                   const isPass = percentage >= 60;
+                  const resultAsset = isExcellent
+                    ? (window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('achieving') : 'assets/characters/kuro/Kuro-Achieving.png')
+                    : (isPass
+                      ? (window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('happy') : 'assets/characters/kuro/Kuro-Happy.png')
+                      : (window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('tired') : 'assets/characters/kuro/Kuro-Tired.png'));
+                  const resultBadgeText = isExcellent ? (isAr ? 'تفوق سريري استثنائي! 🏆' : 'Clinical Mastery! 🏆') : (isPass ? (isAr ? 'اجتياز ممتاز ونقاط مستحقة! ✨' : 'Passed Successfully! ✨') : (isAr ? 'استرح قليلاً ثم أعد المحاولة ☕' : 'Study Break & Retry ☕'));
 
                   return `
-                    <div style="width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 18px; background: ${isPass ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; border: 1px solid ${isPass ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}; display: flex; align-items: center; justify-content: center; color: ${isPass ? '#10B981' : '#EF4444'}; font-size: 1.6rem;">
-                      ${isPass ? '🏆' : '📚'}
+                    <div style="width: 120px; height: 120px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
+                      <img src="${resultAsset}" alt="Kuro Result" class="kuro-character-img kuro-bounce" style="max-height: 110px; object-fit: contain;" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <span class="kf-segmented-badge" style="background: ${isPass ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; color: ${isPass ? '#10B981' : '#EF4444'}; font-weight: 800; font-size: 0.8rem; padding: 4px 12px;">
+                        ${resultBadgeText}
+                      </span>
                     </div>
                     <h2 style="font-size: 1.35rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
                       ${isAr ? `الدرجة المستحقة: ${score} من ${totalCount} (${percentage}%)` : `Final Score: ${score} / ${totalCount} (${percentage}%)`}

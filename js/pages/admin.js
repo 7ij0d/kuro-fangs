@@ -112,8 +112,8 @@ window.AdminPage = (function () {
             name: 'هدى فتحي العريبي',
             email: 'huda.fathie@dentistry.uot.edu.ly',
             passcode: 'huda2026',
-            skin: 'fox_skin_1',
-            skinName: 'الثعلب الأكاديمي الكلاسيكي',
+            skin: 'kuro',
+            skinName: 'كورو',
             points: 145,
             date: '2026-09-10'
           },
@@ -122,8 +122,8 @@ window.AdminPage = (function () {
             name: 'محمد علي الورفلي',
             email: 'mohamed.warfalli@dentistry.uot.edu.ly',
             passcode: 'mohed998',
-            skin: 'fox_skin_2',
-            skinName: 'الثعلب المقاتل النينجا',
+            skin: 'kuro',
+            skinName: 'كورو',
             points: 210,
             date: '2026-09-08'
           },
@@ -132,8 +132,8 @@ window.AdminPage = (function () {
             name: 'سارة خالد الماجري',
             email: 'sara.majri@dentistry.uot.edu.ly',
             passcode: 'sara_dent2026',
-            skin: 'fox_skin_3',
-            skinName: 'ثعلب الطبيب الاستشاري',
+            skin: 'kuro',
+            skinName: 'كورو',
             points: 90,
             date: '2026-09-11'
           },
@@ -142,8 +142,8 @@ window.AdminPage = (function () {
             name: 'طه مصطفى الفيتوري',
             email: 'taha.fituri@dentistry.uot.edu.ly',
             passcode: 'taha_kuro2026',
-            skin: 'fox_skin_1',
-            skinName: 'الثعلب الأكاديمي الكلاسيكي',
+            skin: 'kuro',
+            skinName: 'كورو',
             points: 320,
             date: '2026-09-01'
           }
@@ -2320,8 +2320,8 @@ CREATE POLICY "Allow all delete on sheets"
         name: name,
         email: email,
         passcode: passcode,
-        skin: 'fox_skin_1',
-        skinName: 'الثعلب الأكاديمي',
+        skin: 'kuro',
+        skinName: 'كورو',
         points: points,
         date: new Date().toISOString().split('T')[0]
       };

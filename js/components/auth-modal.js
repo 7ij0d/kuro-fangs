@@ -266,8 +266,8 @@ window.AuthModal = (function () {
           name: email.split('@')[0],
           email: email,
           passcode: password,
-          skin: window.STORE ? window.STORE.getEquippedSkin() : 'fox_skin_1',
-          skinName: 'الثعلب الأكاديمي',
+          skin: 'kuro',
+          skinName: 'كورو',
           points: window.STORE ? window.STORE.getPoints() : 50,
           date: new Date().toISOString().split('T')[0]
         });
@@ -319,8 +319,8 @@ window.AuthModal = (function () {
         name: name,
         email: email,
         passcode: password,
-        skin: window.STORE ? window.STORE.getEquippedSkin() : 'fox_skin_1',
-        skinName: 'الثعلب الأكاديمي',
+        skin: 'kuro',
+        skinName: 'كورو',
         points: window.STORE ? window.STORE.getPoints() : 50,
         date: new Date().toISOString().split('T')[0]
       };

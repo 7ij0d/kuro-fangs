@@ -82,17 +82,22 @@ const QuestionsPage = {
       <!-- TOP COMMAND BAR & MODE SWITCHER -->
       <div class="kf-panel" style="margin-bottom: 24px; padding: 20px 24px; border-radius: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span class="kf-segmented-badge" style="background: rgba(2, 132, 199, 0.08); color: var(--brand-accent); border-color: rgba(2, 132, 199, 0.25); font-weight: 800;">
-                <i data-lucide="layers" style="width: 13px; height: 13px;"></i>
-                ${isAr ? 'نظام الأسئلة الموحد' : 'Unified Questions Engine'}
-              </span>
-              <span class="kf-segmented-badge" id="q-total-counter">${allQuestions.length} ${isAr ? 'سؤال معتمد' : 'MCQs'}</span>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 58px; height: 58px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
+              <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('thinking') : 'assets/characters/kuro/Kuro-Thinking.png'}" alt="Kuro Thinking" class="kuro-character-img kuro-float" style="width: 52px; height: 52px; object-fit: contain;" />
             </div>
-            <h1 style="font-size: 1.45rem; font-weight: 850; color: var(--text-primary); margin: 0;">
-              ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
-            </h1>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="kf-segmented-badge" style="background: rgba(200, 67, 67, 0.08); color: var(--color-primary); border-color: rgba(200, 67, 67, 0.25); font-weight: 800;">
+                  <i data-lucide="layers" style="width: 13px; height: 13px;"></i>
+                  ${isAr ? 'نظام الأسئلة الموحد' : 'Unified Questions Engine'}
+                </span>
+                <span class="kf-segmented-badge" id="q-total-counter">${allQuestions.length} ${isAr ? 'سؤال معتمد' : 'MCQs'}</span>
+              </div>
+              <h1 style="font-size: 1.45rem; font-weight: 850; color: var(--text-primary); margin: 0;">
+                ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
+              </h1>
+            </div>
           </div>
 
           <!-- Mode Switcher Tabs -->
@@ -690,15 +695,15 @@ const QuestionsPage = {
       </div>
 
       ${saved.length === 0 ? `
-        <div class="kf-panel" style="text-align: center; padding: 48px 24px; border-radius: 14px;">
-          <div style="width: 52px; height: 52px; margin: 0 auto 16px; border-radius: 12px; background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.2); display: flex; align-items: center; justify-content: center; color: var(--brand-accent);">
-            <i data-lucide="star" style="width: 24px; height: 24px;"></i>
+        <div class="kf-panel" style="text-align: center; padding: 44px 24px; border-radius: 14px;">
+          <div style="width: 100px; height: 100px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
+            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('thinking') : 'assets/characters/kuro/Kuro-Thinking.png'}" alt="Kuro Thinking" class="kuro-character-img kuro-float" style="max-height: 90px; object-fit: contain;" />
           </div>
           <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">
             ${isAr ? 'لا توجد أسئلة محفوظة حالياً' : 'No Saved Questions Yet'}
           </h3>
           <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px;">
-            ${isAr ? 'أثناء خوض أي اختبار، انقر على زر (★ حفظ) لحفظ السؤال هنا.' : 'Click "Save Question" inside any active quiz card to keep it here.'}
+            ${isAr ? 'أثناء خوض أي اختبار، انقر على زر (★ حفظ) لحفظ السؤال هنا للمراجعة مع كورو.' : 'Click "Save Question" inside any active quiz card to keep it here for review with Kuro.'}
           </p>
         </div>
       ` : `

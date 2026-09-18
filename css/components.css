@@ -550,25 +550,29 @@ html[dir="rtl"] .news-modal-close { left: 16px; }
 }
 
 .home-hero-mascot-link {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid var(--brand-burgundy);
+  border: 2px solid var(--color-primary);
   flex-shrink: 0;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-subtle);
+  padding: 3px;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .home-hero-mascot-link:hover {
   transform: scale(1.08);
-  box-shadow: 0 0 0 3px var(--brand-burgundy-light);
+  box-shadow: 0 0 12px rgba(200, 67, 67, 0.35);
 }
 
 .home-hero-mascot-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -6629,143 +6633,122 @@ html[dir="rtl"] .fox-skin-cost-badge {
    DARK THEME OVERRIDES FOR NOTIFICATIONS CENTER
    ========================================================================== */
 [data-theme="dark"] .notifications-dropdown-panel,
-[data-theme="ninja"] .notifications-dropdown-panel,
-[data-theme="cyber"] .notifications-dropdown-panel {
+[data-theme="kuro-dark"] .notifications-dropdown-panel {
   background: #151926;
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="dark"] .notifications-panel-header,
-[data-theme="ninja"] .notifications-panel-header,
-[data-theme="cyber"] .notifications-panel-header {
+[data-theme="kuro-dark"] .notifications-panel-header {
   background: #151926;
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .notifications-panel-title,
-[data-theme="ninja"] .notifications-panel-title,
-[data-theme="cyber"] .notifications-panel-title {
+[data-theme="kuro-dark"] .notifications-panel-title {
   color: #F8FAFC;
 }
 
 [data-theme="dark"] .notifications-unread-pill,
-[data-theme="ninja"] .notifications-unread-pill,
-[data-theme="cyber"] .notifications-unread-pill {
-  background: rgba(56, 189, 248, 0.16);
-  color: #38BDF8;
-  border-color: rgba(56, 189, 248, 0.3);
+[data-theme="kuro-dark"] .notifications-unread-pill {
+  background: rgba(200, 67, 67, 0.16);
+  color: #DE5353;
+  border-color: rgba(200, 67, 67, 0.3);
 }
 
 [data-theme="dark"] .notifications-mark-read-btn,
-[data-theme="ninja"] .notifications-mark-read-btn,
-[data-theme="cyber"] .notifications-mark-read-btn {
-  color: #38BDF8;
+[data-theme="kuro-dark"] .notifications-mark-read-btn {
+  color: #DE5353;
 }
 
 [data-theme="dark"] .notifications-mark-read-btn:hover,
-[data-theme="ninja"] .notifications-mark-read-btn:hover,
-[data-theme="cyber"] .notifications-mark-read-btn:hover {
-  background: rgba(56, 189, 248, 0.12);
+[data-theme="kuro-dark"] .notifications-mark-read-btn:hover {
+  background: rgba(200, 67, 67, 0.12);
 }
 
 [data-theme="dark"] .notifications-panel-close-btn,
-[data-theme="ninja"] .notifications-panel-close-btn,
-[data-theme="cyber"] .notifications-panel-close-btn {
+[data-theme="kuro-dark"] .notifications-panel-close-btn {
   border-color: rgba(255, 255, 255, 0.1);
   color: #94A3B8;
   background: rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="dark"] .notifications-panel-close-btn:hover,
-[data-theme="ninja"] .notifications-panel-close-btn:hover,
-[data-theme="cyber"] .notifications-panel-close-btn:hover {
+[data-theme="kuro-dark"] .notifications-panel-close-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #FFFFFF;
 }
 
 [data-theme="dark"] .notifications-search-wrap,
-[data-theme="ninja"] .notifications-search-wrap,
-[data-theme="cyber"] .notifications-search-wrap {
+[data-theme="kuro-dark"] .notifications-search-wrap {
   background: #151926;
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="dark"] .notifications-search-input,
-[data-theme="ninja"] .notifications-search-input,
-[data-theme="cyber"] .notifications-search-input {
+[data-theme="kuro-dark"] .notifications-search-input {
   background: #1E2333;
   border-color: rgba(255, 255, 255, 0.08);
   color: #F8FAFC;
 }
 
 [data-theme="dark"] .notifications-search-input:focus,
-[data-theme="ninja"] .notifications-search-input:focus,
-[data-theme="cyber"] .notifications-search-input:focus {
+[data-theme="kuro-dark"] .notifications-search-input:focus {
   background: #23283B;
-  border-color: #38BDF8;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  border-color: #DE5353;
+  box-shadow: 0 0 0 2px rgba(222, 83, 83, 0.2);
 }
 
 [data-theme="dark"] .notification-item-card,
-[data-theme="ninja"] .notification-item-card,
-[data-theme="cyber"] .notification-item-card {
+[data-theme="kuro-dark"] .notification-item-card {
   background: #151926;
   border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .notification-item-card:hover,
-[data-theme="ninja"] .notification-item-card:hover,
-[data-theme="cyber"] .notification-item-card:hover {
+[data-theme="kuro-dark"] .notification-item-card:hover {
   background: rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="dark"] .notification-item-card.unread,
-[data-theme="ninja"] .notification-item-card.unread,
-[data-theme="cyber"] .notification-item-card.unread {
-  background: rgba(56, 189, 248, 0.06);
+[data-theme="kuro-dark"] .notification-item-card.unread {
+  background: rgba(200, 67, 67, 0.06);
 }
 
 [data-theme="dark"] .notification-item-card.unread:hover,
-[data-theme="ninja"] .notification-item-card.unread:hover,
-[data-theme="cyber"] .notification-item-card.unread:hover {
-  background: rgba(56, 189, 248, 0.1);
+[data-theme="kuro-dark"] .notification-item-card.unread:hover {
+  background: rgba(200, 67, 67, 0.1);
 }
 
 [data-theme="dark"] .notification-item-title,
-[data-theme="ninja"] .notification-item-title,
-[data-theme="cyber"] .notification-item-title {
+[data-theme="kuro-dark"] .notification-item-title {
   color: #F8FAFC;
 }
 
 [data-theme="dark"] .notification-item-card.read .notification-item-title,
-[data-theme="ninja"] .notification-item-card.read .notification-item-title,
-[data-theme="cyber"] .notification-item-card.read .notification-item-title {
+[data-theme="kuro-dark"] .notification-item-card.read .notification-item-title {
   color: #CBD5E1;
 }
 
 [data-theme="dark"] .notification-item-snippet,
-[data-theme="ninja"] .notification-item-snippet,
-[data-theme="cyber"] .notification-item-snippet {
+[data-theme="kuro-dark"] .notification-item-snippet {
   color: #94A3B8;
 }
 
 [data-theme="dark"] .notifications-empty-title,
-[data-theme="ninja"] .notifications-empty-title,
-[data-theme="cyber"] .notifications-empty-title {
+[data-theme="kuro-dark"] .notifications-empty-title {
   color: #F8FAFC;
 }
 
 [data-theme="dark"] .notifications-list-container::-webkit-scrollbar-thumb,
-[data-theme="ninja"] .notifications-list-container::-webkit-scrollbar-thumb,
-[data-theme="cyber"] .notifications-list-container::-webkit-scrollbar-thumb {
+[data-theme="kuro-dark"] .notifications-list-container::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.16);
 }
 
 /* Dark Theme Modal */
 [data-theme="dark"] .notification-detail-modal-card,
-[data-theme="ninja"] .notification-detail-modal-card,
-[data-theme="cyber"] .notification-detail-modal-card {
+[data-theme="kuro-dark"] .notification-detail-modal-card {
   background: #151926;
   border-color: rgba(255, 255, 255, 0.12);
   color: #F8FAFC;
@@ -6773,69 +6756,59 @@ html[dir="rtl"] .fox-skin-cost-badge {
 }
 
 [data-theme="dark"] .notification-modal-top-bar,
-[data-theme="ninja"] .notification-modal-top-bar,
-[data-theme="cyber"] .notification-modal-top-bar {
+[data-theme="kuro-dark"] .notification-modal-top-bar {
   background: #151926;
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .notification-modal-close-icon-btn,
-[data-theme="ninja"] .notification-modal-close-icon-btn,
-[data-theme="cyber"] .notification-modal-close-icon-btn {
+[data-theme="kuro-dark"] .notification-modal-close-icon-btn {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.1);
   color: #F8FAFC;
 }
 
 [data-theme="dark"] .notification-modal-heading,
-[data-theme="ninja"] .notification-modal-heading,
-[data-theme="cyber"] .notification-modal-heading {
+[data-theme="kuro-dark"] .notification-modal-heading {
   color: #F8FAFC;
 }
 
 [data-theme="dark"] .notification-modal-date-pill,
-[data-theme="ninja"] .notification-modal-date-pill,
-[data-theme="cyber"] .notification-modal-date-pill {
+[data-theme="kuro-dark"] .notification-modal-date-pill {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
   color: #94A3B8;
 }
 
 [data-theme="dark"] .notification-modal-publisher-box,
-[data-theme="ninja"] .notification-modal-publisher-box,
-[data-theme="cyber"] .notification-modal-publisher-box {
-  background: rgba(2, 132, 199, 0.09);
-  border-color: rgba(2, 132, 199, 0.25);
+[data-theme="kuro-dark"] .notification-modal-publisher-box {
+  background: rgba(200, 67, 67, 0.09);
+  border-color: rgba(200, 67, 67, 0.25);
 }
 
 [data-theme="dark"] .notification-modal-publisher-name,
-[data-theme="ninja"] .notification-modal-publisher-name,
-[data-theme="cyber"] .notification-modal-publisher-name {
+[data-theme="kuro-dark"] .notification-modal-publisher-name {
   color: #F8FAFC;
 }
 
 [data-theme="dark"] .notification-modal-divider,
-[data-theme="ninja"] .notification-modal-divider,
-[data-theme="cyber"] .notification-modal-divider {
+[data-theme="kuro-dark"] .notification-modal-divider {
   border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .notification-modal-content-text,
-[data-theme="ninja"] .notification-modal-content-text,
-[data-theme="cyber"] .notification-modal-content-text {
+[data-theme="kuro-dark"] .notification-modal-content-text {
   color: #E2E8F0;
 }
 
 [data-theme="dark"] .notification-modal-attachment-box,
-[data-theme="ninja"] .notification-modal-attachment-box,
-[data-theme="cyber"] .notification-modal-attachment-box {
+[data-theme="kuro-dark"] .notification-modal-attachment-box {
   background: rgba(255, 255, 255, 0.03);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .notification-modal-footer,
-[data-theme="ninja"] .notification-modal-footer,
-[data-theme="cyber"] .notification-modal-footer {
+[data-theme="kuro-dark"] .notification-modal-footer {
   background: #151926;
   border-top-color: rgba(255, 255, 255, 0.08);
 }

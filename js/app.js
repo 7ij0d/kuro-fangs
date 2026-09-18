@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.documentElement.setAttribute('data-theme', theme);
     const themeIcon = document.getElementById('theme-icon');
     if (themeIcon) {
-      themeIcon.setAttribute('data-lucide', (theme === 'ninja' || theme === 'dark') ? 'sun' : 'moon');
+      themeIcon.setAttribute('data-lucide', (theme === 'kuro-dark' || theme === 'dark') ? 'sun' : 'moon');
       if (window.lucide) window.lucide.createIcons();
     }
   };
@@ -310,36 +310,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 9. Global Mascot Avatars & Watermark Synchronization
+  // 9. Global Mascot Avatars Synchronization (Official Kuro Theme)
   const updateGlobalMascotAvatars = () => {
-    if (!window.STORE) return;
-    const equipped = window.STORE.getEquippedSkinData();
-    if (!equipped || !equipped.image) return;
+    const charImg = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('idle')) || 'assets/characters/kuro/Kuro-Idle.png';
+    const isEn = window.I18N && window.I18N.getLang() === 'en';
+    const charName = isEn ? 'Kuro' : 'كورو';
 
     // 1. Sidebar user avatar
     const sideAvatar = document.getElementById('sidebar-user-avatar-img');
     if (sideAvatar) {
-      sideAvatar.src = equipped.image;
-      sideAvatar.alt = equipped.name_ar;
+      sideAvatar.src = charImg;
+      sideAvatar.alt = charName;
     }
 
     // 2. Sidebar Mascot Subtle Watermark
     const sideWatermark = document.getElementById('sidebar-watermark-img');
     if (sideWatermark) {
-      sideWatermark.src = equipped.image;
+      sideWatermark.src = charImg;
     }
 
     // 3. Header Mascot Avatar Button
     const headerAvatar = document.getElementById('header-mascot-avatar-img');
     if (headerAvatar) {
-      headerAvatar.src = equipped.image;
-      headerAvatar.alt = equipped.name_ar;
+      headerAvatar.src = charImg;
+      headerAvatar.alt = charName;
     }
 
     // 4. Any other on-screen current mascot images (profile, rewards, etc.)
     document.querySelectorAll('.current-mascot-img').forEach(img => {
-      img.src = equipped.image;
-      img.alt = equipped.name_ar;
+      img.src = charImg;
+      img.alt = charName;
     });
   };
 

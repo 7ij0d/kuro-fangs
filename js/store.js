@@ -1,73 +1,7 @@
 /**
- * KURO FANGS — STORE (State, LocalStorage, Lang & Theme Manager)
+ * KURO FANGS — STORE (State, LocalStorage, Lang & Official Kuro Theme Manager)
+ * Architected with CharacterThemeSystem for extensible character themes.
  */
-
-const FOX_SKINS = [
-  {
-    id: 'fox_skin_1',
-    theme: 'classic',
-    name_en: 'Classic Kuro Fox',
-    name_ar: 'الثعلب الكلاسيكي',
-    cost: 0,
-    isFree: true,
-    image: 'assets/fox_skins/fox_skin_1.jpg',
-    tag_en: 'Royal Burgundy Academia',
-    tag_ar: 'البرغندي الملكي الأكاديمي',
-    theme_name_ar: 'ثيم البرغندي الملكي الفاتح',
-    theme_name_en: 'Classic Royal Burgundy Theme',
-    theme_colors: ['#881337', '#BE123C', '#F5F8FA'],
-    desc_en: 'The official original mascot for Kuro Fangs dental students. Unlocks the iconic Royal Burgundy academia light theme.',
-    desc_ar: 'التميمة الأصلية الرسمية المعتمدة لدفعة طب وجراحة الفم والأسنان. تفعّل ثيم البرغندي الملكي الأكاديمي الأصيل.'
-  },
-  {
-    id: 'fox_skin_2',
-    theme: 'surgeon',
-    name_en: 'Surgeon Fox',
-    name_ar: 'الثعلب الجراح',
-    cost: 40,
-    isFree: false,
-    image: 'assets/fox_skins/fox_skin_2.jpg',
-    tag_en: 'Clinical & Surgical',
-    tag_ar: 'أزرق سريري ونعناعي',
-    theme_name_ar: 'ثيم العيادات والأزرق السريري',
-    theme_name_en: 'Clinical & Surgical Teal Theme',
-    theme_colors: ['#0284C7', '#0D9488', '#F0F7FB'],
-    desc_en: 'Equipped with sterile surgical scrubs and clinical precision. Transforms the site into a modern clinical medical-blue and mint theme.',
-    desc_ar: 'جاهز للعمليات الجراحية في العيادات ومعامل الفانتوم بدقة متناهية. يحول واجهة الموقع لثيم أزرق سريري وأخضر جراحي منعش.'
-  },
-  {
-    id: 'fox_skin_4',
-    theme: 'scholar',
-    name_en: 'Academic Scholar',
-    name_ar: 'المتفوق الأكاديمي',
-    cost: 50,
-    isFree: false,
-    image: 'assets/fox_skins/fox_skin_4.jpg',
-    tag_en: 'Academic Pro',
-    tag_ar: 'وردي دافئ وكهرمان ذهبي',
-    theme_name_ar: 'ثيم المتفوق الأكاديمي الدافئ',
-    theme_name_en: 'Warm Rose & Amber Scholar Theme',
-    theme_colors: ['#D97706', '#E11D48', '#FFFBF7'],
-    desc_en: 'Armed with dental textbooks, high-yield notes, and top GPA power. Unlocks an elegant warm academia theme in soft rose and amber-gold.',
-    desc_ar: 'حامل مذكرات الأسنان والمراجع العلمية وصاحب المعدلات التراكمية العليا. يفعّل ثيماً أكاديمياً دافئاً وراقياً بلمسات وردية وكهرمانية مريحة للعين.'
-  },
-  {
-    id: 'fox_skin_5',
-    theme: 'cyber',
-    name_en: 'Special Cyber Neon Fox',
-    name_ar: 'الثعلب السايبر المتوهج',
-    cost: 55,
-    isFree: false,
-    image: 'assets/fox_skins/fox_skin_5.jpg',
-    tag_en: 'Special Cyber Neon Glow',
-    tag_ar: 'ثيم سايبر نيون ليلي متوهج',
-    theme_name_ar: 'ثيم السايبر والنيون المتوهج',
-    theme_name_en: 'Special Cyber Neon Glow Theme',
-    theme_colors: ['#8B5CF6', '#06B6D4', '#0B0F19'],
-    desc_en: 'Equipped with futuristic cybernetic energy and neon focus for midnight study sessions. Transforms the platform into an electric dark cyber realm.',
-    desc_ar: 'مزوّد بطاقة السايبر المتطورة والنيون الليلي للمذاكرة الفائقة ليلة الامتحان. يحوّل واجهة المنصة لثيم ليلي مظلم مشع بالبنفسجي والسيان.'
-  }
-];
 
 class AppStore {
   constructor() {
@@ -76,9 +10,12 @@ class AppStore {
       LANG: 'kf_lang',
       THEME: 'kf_theme',
       FAVORITES: 'kf_user_favorites',
-            USER_INFO: 'kf_user_info',
-      OWNED_SKINS: 'kf_owned_skins',
-      EQUIPPED_SKIN: 'kf_equipped_skin'
+      USER_INFO: 'kf_user_info',
+      EQUIPPED_CHARACTER: 'kf_equipped_character',
+      OWNED_CHARACTERS: 'kf_owned_characters',
+      // Legacy storage key aliases
+      EQUIPPED_SKIN: 'kf_equipped_skin',
+      OWNED_SKINS: 'kf_owned_skins'
     };
 
     this.listeners = new Set();
@@ -86,36 +23,43 @@ class AppStore {
   }
 
   initDefaults() {
-    // 1. Fox Mascot Skins Hub (Strictly 4 Active Skins)
-    const validSkinIds = FOX_SKINS.map(s => s.id);
-    let owned = ['fox_skin_1'];
+    // 1. Official Character Management (Default: 'kuro')
+    let owned = ['kuro'];
     try {
-      const storedOwned = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.OWNED_SKINS));
-      if (Array.isArray(storedOwned)) {
-        owned = storedOwned.filter(id => validSkinIds.includes(id));
+      const stored = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.OWNED_CHARACTERS));
+      if (Array.isArray(stored) && stored.length > 0) {
+        owned = stored;
       }
     } catch (e) {
-      owned = ['fox_skin_1'];
+      owned = ['kuro'];
     }
-    if (!owned.includes('fox_skin_1')) owned.unshift('fox_skin_1');
+    if (!owned.includes('kuro')) owned.unshift('kuro');
+    localStorage.setItem(this.STORAGE_KEYS.OWNED_CHARACTERS, JSON.stringify(owned));
     localStorage.setItem(this.STORAGE_KEYS.OWNED_SKINS, JSON.stringify(owned));
 
-    let equipped = localStorage.getItem(this.STORAGE_KEYS.EQUIPPED_SKIN) || 'fox_skin_1';
-    if (!validSkinIds.includes(equipped)) {
-      equipped = 'fox_skin_1';
-      localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, equipped);
+    let equipped = localStorage.getItem(this.STORAGE_KEYS.EQUIPPED_CHARACTER) || 'kuro';
+    if (!owned.includes(equipped)) {
+      equipped = 'kuro';
+    }
+    localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_CHARACTER, equipped);
+    localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, equipped);
+
+    // 2. Site-wide Official Theme ('kuro' light / 'kuro-dark' dark)
+    let savedTheme = localStorage.getItem(this.STORAGE_KEYS.THEME);
+    if (savedTheme === 'classic' || savedTheme === 'surgeon' || savedTheme === 'scholar' || savedTheme === 'light') {
+      savedTheme = 'kuro';
+    } else if (savedTheme === 'cyber' || savedTheme === 'ninja' || savedTheme === 'dark') {
+      savedTheme = 'kuro-dark';
+    } else if (!savedTheme || (savedTheme !== 'kuro' && savedTheme !== 'kuro-dark')) {
+      savedTheme = 'kuro';
     }
 
-    // 2. Site-wide Theme (Coupled to equipped mascot skin or saved theme)
-    const skinData = this.getSkinById(equipped) || FOX_SKINS[0];
-    const savedTheme = localStorage.getItem(this.STORAGE_KEYS.THEME);
-    const initialTheme = savedTheme || (skinData ? skinData.theme : 'classic');
-    localStorage.setItem(this.STORAGE_KEYS.THEME, initialTheme);
-    document.documentElement.setAttribute('data-theme', initialTheme);
+    localStorage.setItem(this.STORAGE_KEYS.THEME, savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // 3. Language (Default: English)
+    // 3. Language (Default: Arabic first for dental batch)
     if (!localStorage.getItem(this.STORAGE_KEYS.LANG)) {
-      localStorage.setItem(this.STORAGE_KEYS.LANG, 'en');
+      localStorage.setItem(this.STORAGE_KEYS.LANG, 'ar');
     }
 
     // 4. Points
@@ -131,9 +75,7 @@ class AppStore {
       ]));
     }
 
-    
-
-    // 7. User Info
+    // 6. User Info
     if (!localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) {
       localStorage.setItem(this.STORAGE_KEYS.USER_INFO, JSON.stringify({
         name: 'Kuro Student',
@@ -154,27 +96,38 @@ class AppStore {
     });
   }
 
-  // Theme Manager: Supports 4 Mascot Themes (classic, surgeon, ninja, scholar) + light/dark fallbacks
+  // ==========================================================================
+  // THEME MANAGEMENT (Official Kuro Light & Kuro Dark)
+  // ==========================================================================
   getTheme() {
-    return localStorage.getItem(this.STORAGE_KEYS.THEME) || 'classic';
+    const theme = localStorage.getItem(this.STORAGE_KEYS.THEME) || 'kuro';
+    if (theme === 'kuro-dark' || theme === 'dark') return 'kuro-dark';
+    return 'kuro';
   }
 
   setTheme(theme) {
-    const validThemes = ['classic', 'surgeon', 'scholar', 'cyber', 'ninja', 'light', 'dark'];
-    if (!validThemes.includes(theme)) theme = 'classic';
-    localStorage.setItem(this.STORAGE_KEYS.THEME, theme);
-    document.documentElement.setAttribute('data-theme', theme);
-    this.notify('theme_changed', theme);
-    return theme;
+    let normalizedTheme = 'kuro';
+    if (theme === 'kuro-dark' || theme === 'dark' || theme === 'cyber' || theme === 'ninja') {
+      normalizedTheme = 'kuro-dark';
+    } else {
+      normalizedTheme = 'kuro';
+    }
+
+    localStorage.setItem(this.STORAGE_KEYS.THEME, normalizedTheme);
+    document.documentElement.setAttribute('data-theme', normalizedTheme);
+    this.notify('theme_changed', normalizedTheme);
+    return normalizedTheme;
   }
 
   toggleTheme() {
     const current = this.getTheme();
-    const next = (current === 'cyber' || current === 'ninja' || current === 'dark') ? 'classic' : 'cyber';
+    const next = (current === 'kuro-dark' || current === 'dark') ? 'kuro' : 'kuro-dark';
     return this.setTheme(next);
   }
 
-  // Points
+  // ==========================================================================
+  // POINTS
+  // ==========================================================================
   getPoints() {
     return parseInt(localStorage.getItem(this.STORAGE_KEYS.POINTS) || '25', 10);
   }
@@ -187,35 +140,9 @@ class AppStore {
     return updated;
   }
 
-  // Favorites
-  getFavorites() {
-    try {
-      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.FAVORITES)) || [];
-    } catch {
-      return [];
-    }
-  }
-
-  isFavorite(id, type = 'sheet') {
-    const favs = this.getFavorites();
-    return favs.some(f => f.id === id && f.type === type);
-  }
-
-  toggleFavorite(item) {
-    let favs = this.getFavorites();
-    const idx = favs.findIndex(f => f.id === item.id && f.type === item.type);
-    if (idx >= 0) {
-      favs.splice(idx, 1);
-    } else {
-      favs.push({ ...item, addedAt: new Date().toISOString() });
-      this.addPoints(2);
-    }
-    localStorage.setItem(this.STORAGE_KEYS.FAVORITES, JSON.stringify(favs));
-    this.notify('favorites_changed', favs);
-    return idx < 0;
-  }
-
-  
+  // ==========================================================================
+  // USER INFO
+  // ==========================================================================
   getUserInfo() {
     try {
       return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.USER_INFO)) || {
@@ -228,11 +155,49 @@ class AppStore {
     }
   }
 
+  setUserInfo(info) {
+    const current = this.getUserInfo();
+    const updated = { ...current, ...info };
+    localStorage.setItem(this.STORAGE_KEYS.USER_INFO, JSON.stringify(updated));
+    this.notify('user_updated', updated);
+  }
+
+  // ==========================================================================
+  // FAVORITES
+  // ==========================================================================
+  getFavorites() {
+    try {
+      return JSON.parse(localStorage.getItem(this.STORAGE_KEYS.FAVORITES)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  toggleFavorite(item) {
+    let favorites = this.getFavorites();
+    const idx = favorites.findIndex(f => f.id === item.id);
+    if (idx >= 0) {
+      favorites.splice(idx, 1);
+    } else {
+      favorites.push(item);
+    }
+    localStorage.setItem(this.STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+    this.notify('favorites_changed', favorites);
+    return idx < 0;
+  }
+
+  isFavorite(id) {
+    return this.getFavorites().some(f => f.id === id);
+  }
+
+  // ==========================================================================
+  // GPA / CALCULATOR DATA
+  // ==========================================================================
   getCalculatorData() {
     try {
-      return JSON.parse(localStorage.getItem('kf_calc_data')) || {};
+      return JSON.parse(localStorage.getItem('kf_calc_data')) || null;
     } catch {
-      return {};
+      return null;
     }
   }
 
@@ -242,91 +207,106 @@ class AppStore {
   }
 
   // ==========================================================================
-  // FOX MASCOT SKINS HUB (6 MASCOT CHARACTERS & REWARDS)
+  // OFFICIAL CHARACTER THEME SYSTEM INTEGRATION
   // ==========================================================================
-  getFoxSkins() {
-    return FOX_SKINS;
-  }
-
-  getSkinById(id) {
-    return FOX_SKINS.find(s => s.id === id) || FOX_SKINS[0];
-  }
-
-  getOwnedSkins() {
-    try {
-      const owned = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.OWNED_SKINS)) || ['fox_skin_1'];
-      if (!owned.includes('fox_skin_1')) owned.unshift('fox_skin_1');
-      return owned;
-    } catch {
-      return ['fox_skin_1'];
+  getCharacterThemes() {
+    if (window.CharacterThemeSystem) {
+      return window.CharacterThemeSystem.getAllThemes();
     }
+    return [{
+      id: 'kuro',
+      name_en: 'Kuro',
+      name_ar: 'كورو',
+      image: 'assets/characters/kuro/Kuro-Idle.png',
+      theme_colors: ['#C84343', '#1E1F2B', '#FAF8F5', '#F59E0B']
+    }];
   }
 
-  isSkinOwned(id) {
-    if (id === 'fox_skin_1') return true;
-    return this.getOwnedSkins().includes(id);
-  }
-
-  getEquippedSkin() {
-    return localStorage.getItem(this.STORAGE_KEYS.EQUIPPED_SKIN) || 'fox_skin_1';
-  }
-
-  getEquippedSkinData() {
-    const id = this.getEquippedSkin();
-    return this.getSkinById(id);
-  }
-
-  unlockSkin(skinId) {
-    const skin = this.getSkinById(skinId);
-    if (!skin) return { success: false, reason: 'not_found' };
-
-    if (this.isSkinOwned(skinId)) {
-      this.equipSkin(skinId);
-      return { success: true, alreadyOwned: true, skin };
+  getCharacterById(id) {
+    if (window.CharacterThemeSystem) {
+      return window.CharacterThemeSystem.getTheme(id);
     }
-
-    const currentPoints = this.getPoints();
-    if (currentPoints < skin.cost) {
-      return { success: false, reason: 'insufficient_points', needed: skin.cost - currentPoints, skin };
-    }
-
-    // Deduct points
-    this.addPoints(-skin.cost);
-
-    // Add to owned skins
-    const owned = this.getOwnedSkins();
-    if (!owned.includes(skinId)) {
-      owned.push(skinId);
-      localStorage.setItem(this.STORAGE_KEYS.OWNED_SKINS, JSON.stringify(owned));
-    }
-
-    // Auto-equip unlocked skin
-    this.equipSkin(skinId);
-
-    this.notify('skin_unlocked', skin);
-    this.notify('skins_changed', { owned: this.getOwnedSkins(), equipped: skinId });
-    return { success: true, skin };
+    return this.getCharacterThemes()[0];
   }
 
-  equipSkin(skinId) {
-    if (!this.isSkinOwned(skinId)) return false;
-    localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, skinId);
-    const skin = this.getSkinById(skinId);
+  getEquippedCharacter() {
+    return localStorage.getItem(this.STORAGE_KEYS.EQUIPPED_CHARACTER) || 'kuro';
+  }
 
-    // Bind equipped skin directly to the site-wide theme
-    if (skin && skin.theme) {
-      this.setTheme(skin.theme);
-    }
+  getEquippedCharacterData() {
+    const id = this.getEquippedCharacter();
+    const charData = this.getCharacterById(id);
+    return {
+      ...charData,
+      image: charData?.assets?.idle || 'assets/characters/kuro/Kuro-Idle.png'
+    };
+  }
+
+  equipCharacter(characterId) {
+    const character = this.getCharacterById(characterId);
+    if (!character) return false;
+
+    localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_CHARACTER, characterId);
+    localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, characterId);
 
     if (typeof window.updateGlobalMascotAvatars === 'function') {
       window.updateGlobalMascotAvatars();
     }
 
-    this.notify('skin_equipped', skin);
-    this.notify('skins_changed', { owned: this.getOwnedSkins(), equipped: skinId });
+    this.notify('character_equipped', character);
+    this.notify('skin_equipped', character);
     return true;
+  }
+
+  // ==========================================================================
+  // BACKWARDS COMPATIBILITY BRIDGE (For pages calling getFoxSkins, getSkinById)
+  // ==========================================================================
+  getFoxSkins() {
+    return this.getCharacterThemes().map(c => ({
+      ...c,
+      image: c.assets ? c.assets.idle : 'assets/characters/kuro/Kuro-Idle.png'
+    }));
+  }
+
+  getSkinById(id) {
+    const charData = this.getCharacterById(id);
+    if (!charData) return this.getFoxSkins()[0];
+    return {
+      ...charData,
+      image: charData.assets ? charData.assets.idle : 'assets/characters/kuro/Kuro-Idle.png'
+    };
+  }
+
+  getOwnedSkins() {
+    try {
+      const owned = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.OWNED_CHARACTERS)) || ['kuro'];
+      if (!owned.includes('kuro')) owned.unshift('kuro');
+      return owned;
+    } catch {
+      return ['kuro'];
+    }
+  }
+
+  isSkinOwned(id) {
+    if (id === 'kuro') return true;
+    return this.getOwnedSkins().includes(id);
+  }
+
+  getEquippedSkin() {
+    return this.getEquippedCharacter();
+  }
+
+  getEquippedSkinData() {
+    return this.getEquippedCharacterData();
+  }
+
+  equipSkin(skinId) {
+    return this.equipCharacter(skinId);
+  }
+
+  unlockSkin(skinId) {
+    return { success: true, alreadyOwned: true, skin: this.getSkinById(skinId) };
   }
 }
 
 window.STORE = new AppStore();
-

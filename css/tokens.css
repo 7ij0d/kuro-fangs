@@ -1,69 +1,81 @@
 /* ==========================================================================
-   KURO FANGS — DESIGN TOKENS (ACADEMIA DESIGN SYSTEM)
-   Sidebar: Academia Dark (#1E1E2D) with Vertical Accent Indicator
-   Content Background: Soft Comfort (#F5F8FA) | Cards: Crisp White (#FFFFFF, 12px, #E4E6EF)
-   Typography: Inter (EN) & IBM Plex Sans Arabic (AR)
+   KURO FANGS — DESIGN TOKENS (OFFICIAL KURO THEME SYSTEM)
+   Official Visual Source of Truth:
+   - Charcoal Obsidian (#14151E / #1E1F2B / #242636)
+   - Warm Ivory & Bone Parchment (#FAF8F5 / #F4EFEA / #E8E2D8)
+   - Crimson & Coral Rose (#C84343 / #B33636 / #DE5353)
+   - Golden Amber (#F59E0B / #FBBF24)
    ========================================================================== */
 
-:root {
-  /* Academia Dark Sidebar (Persistent in Light & Dark Mode) */
-  --bg-sidebar: #1E1E2D;
-  --bg-sidebar-hover: #252538;
-  --bg-sidebar-active: #2B2B40;
-  --sidebar-text: #9899AC;
-  --sidebar-text-muted: #6B6C80;
+:root,
+[data-theme="kuro"],
+[data-theme="light"] {
+  /* Kuro Obsidian Persistent Sidebar */
+  --bg-sidebar: #14151E;
+  --bg-sidebar-hover: #1E1F2B;
+  --bg-sidebar-active: #242636;
+  --sidebar-text: #A6ADC8;
+  --sidebar-text-muted: #6C7086;
   --sidebar-text-active: #FFFFFF;
-  --sidebar-border: #2B2B40;
-  --sidebar-indicator: #BE123C; /* Radiant Burgundy vertical line */
-  --sidebar-indicator-glow: 0 0 10px rgba(190, 18, 60, 0.7);
+  --sidebar-border: #242636;
+  --sidebar-indicator: #C84343; /* Kuro Crimson indicator line */
+  --sidebar-indicator-glow: 0 0 12px rgba(200, 67, 67, 0.75);
   --sidebar-width: 265px;
 
-  /* Academia App Background & Surfaces (Default Light) */
-  --bg-app: #F5F8FA;
+  /* Kuro Warm Ivory Surfaces (Light Mode) */
+  --bg-app: #FAF8F5;
   --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #EEF3F7;
+  --bg-surface-subtle: #F4EFEA;
   --bg-card: #FFFFFF;
   --bg-card-hover: #FFFFFF;
-  --bg-hover: #F1F4F8;
+  --bg-hover: #EFE9E1;
   --bg-input: #FFFFFF;
 
-  /* Royal Burgundy Primary */
-  --brand-burgundy: #881337;
-  --brand-burgundy-hover: #5D0C25;
-  --brand-burgundy-light: #FFF1F2;
-  --brand-burgundy-surface: #FDF2F4;
-  --brand-burgundy-border: #FDA4AF;
-  --brand-burgundy-glow: 0 4px 18px rgba(136, 19, 55, 0.16);
-  --brand-burgundy-gradient: linear-gradient(135deg, #A2143D 0%, #881337 50%, #5B0C24 100%);
-  --brand-accent: #BE123C;
+  /* Kuro Crimson & Rose Primary */
+  --color-primary: #C84343;
+  --color-primary-hover: #B33636;
+  --color-secondary: #1E1F2B;
+  --color-accent: #F59E0B;
+  --color-accent-hover: #D97706;
 
-  /* Neutrals & Text (Light Mode) */
-  --text-primary: #181C32; /* Academia high-contrast navy-black */
-  --text-secondary: #5E6278; /* Academia muted slate */
-  --text-muted: #A1A5B7;
+  /* System Brand Aliases (Maintains full component compatibility) */
+  --brand-primary: #C84343;
+  --brand-accent: #C84343;
+  --brand-burgundy: #C84343;
+  --brand-burgundy-hover: #B33636;
+  --brand-burgundy-light: rgba(200, 67, 67, 0.08);
+  --brand-burgundy-surface: rgba(200, 67, 67, 0.04);
+  --brand-burgundy-border: rgba(200, 67, 67, 0.25);
+  --brand-burgundy-glow: 0 4px 18px rgba(200, 67, 67, 0.18);
+  --brand-burgundy-gradient: linear-gradient(135deg, #DE5353 0%, #C84343 50%, #A82E2E 100%);
+
+  /* Kuro Typography & Neutrals */
+  --text-primary: #14151E; /* Deep Kuro charcoal */
+  --text-secondary: #5A5D72;
+  --text-muted: #8E92A8;
   --text-inverted: #FFFFFF;
 
-  /* Borders & Dividers (Light Mode) */
-  --border-subtle: #E4E6EF; /* Academia crisp border */
-  --border-card: #E4E6EF;
-  --border-card-hover: #D1D5E4;
-  --border-focus: #881337;
+  /* Crisp Bone & Slate Borders */
+  --border-subtle: #E8E2D8;
+  --border-card: #E8E2D8;
+  --border-card-hover: #C84343;
+  --border-focus: #C84343;
 
   /* Modal Backdrop & Blur */
-  --backdrop-color: rgba(24, 28, 50, 0.55);
+  --backdrop-color: rgba(20, 21, 30, 0.6);
   --backdrop-blur: blur(6px);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 3px 12px rgba(24, 28, 50, 0.04);
-  --shadow-card-hover: 0 8px 24px rgba(24, 28, 50, 0.08), 0 2px 6px rgba(136, 19, 55, 0.06);
-  --shadow-modal: 0 25px 50px -12px rgba(24, 28, 50, 0.35);
+  /* Elevation & Shadows */
+  --shadow-sm: 0 1px 3px rgba(20, 21, 30, 0.04);
+  --shadow-card: 0 3px 12px rgba(20, 21, 30, 0.04);
+  --shadow-card-hover: 0 8px 24px rgba(20, 21, 30, 0.08), 0 2px 6px rgba(200, 67, 67, 0.06);
+  --shadow-modal: 0 25px 50px -12px rgba(20, 21, 30, 0.35);
 
-  /* Radius (Academia 12px Standard) */
+  /* Radius */
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 10px;
-  --radius-card: 12px;
+  --radius-card: 14px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
 
@@ -72,212 +84,151 @@
   --container-max: 1380px;
 
   /* Progress Bar */
-  --progress-track: #E4E6EF;
-  --progress-fill: #10B981; /* Green completion indicator */
-  --progress-fill-accent: #881337;
+  --progress-track: #E8E2D8;
+  --progress-fill: #10B981;
+  --progress-fill-accent: #C84343;
 
   /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-base: 0.22s ease-in-out;
   --transition-smooth: 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Character Assets (8 Official Kuro States) */
+  --character-idle: url('../assets/characters/kuro/Kuro-Idle.png');
+  --character-happy: url('../assets/characters/kuro/Kuro-Happy.png');
+  --character-excited: url('../assets/characters/kuro/Kuro-Excited.png');
+  --character-thinking: url('../assets/characters/kuro/Kuro-Thinking.png');
+  --character-focused: url('../assets/characters/kuro/Kuro-Focused.png');
+  --character-tired: url('../assets/characters/kuro/Kuro-Tired.png');
+  --character-reading: url('../assets/characters/kuro/Kuro-Reading.png');
+  --character-achieving: url('../assets/characters/kuro/Kuro-Achieving.png');
 }
 
 /* ==========================================================================
-   THEME 1: CLASSIC KURO FOX (data-theme="classic" / default light)
-   Royal Burgundy Academia Palette
+   KURO OBSIDIAN NIGHT (data-theme="kuro-dark" / data-theme="dark")
+   Charcoal Obsidian Surfaces with Glowing Kuro Crimson & Warm Parchment Text
    ========================================================================== */
-[data-theme="classic"],
-[data-theme="light"] {
-  --bg-sidebar: #1E1E2D;
-  --bg-sidebar-hover: #252538;
-  --bg-sidebar-active: #2B2B40;
-  --sidebar-text: #9899AC;
-  --sidebar-text-muted: #6B6C80;
-  --sidebar-text-active: #FFFFFF;
-  --sidebar-border: #2B2B40;
-  --sidebar-indicator: #BE123C;
-  --sidebar-indicator-glow: 0 0 10px rgba(190, 18, 60, 0.7);
-
-  --bg-app: #F5F8FA;
-  --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #EEF3F7;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #FFFFFF;
-  --bg-hover: #F1F4F8;
-  --bg-input: #FFFFFF;
-
-  --brand-burgundy: #881337;
-  --brand-burgundy-hover: #5D0C25;
-  --brand-burgundy-light: #FFF1F2;
-  --brand-burgundy-surface: #FDF2F4;
-  --brand-burgundy-border: #FDA4AF;
-  --brand-burgundy-glow: 0 4px 18px rgba(136, 19, 55, 0.16);
-  --brand-burgundy-gradient: linear-gradient(135deg, #A2143D 0%, #881337 50%, #5B0C24 100%);
-  --brand-accent: #BE123C;
-  --brand-primary: #881337;
-
-  --text-primary: #181C32;
-  --text-secondary: #5E6278;
-  --text-muted: #A1A5B7;
-  --text-inverted: #FFFFFF;
-
-  --border-subtle: #E4E6EF;
-  --border-card: #E4E6EF;
-  --border-card-hover: #D1D5E4;
-  --border-focus: #881337;
-
-  --progress-track: #E4E6EF;
-  --progress-fill: #10B981;
-  --progress-fill-accent: #881337;
-}
-
-/* ==========================================================================
-   THEME 2: SURGEON FOX (data-theme="surgeon")
-   Medical Blue & Clinical Mint/Teal Surgical Palette
-   ========================================================================== */
-[data-theme="surgeon"] {
-  --bg-sidebar: #0B1E28;
-  --bg-sidebar-hover: #122B3A;
-  --bg-sidebar-active: #183749;
-  --sidebar-text: #94A3B8;
-  --sidebar-text-muted: #64748B;
-  --sidebar-text-active: #FFFFFF;
-  --sidebar-border: #163242;
-  --sidebar-indicator: #0EA5E9;
-  --sidebar-indicator-glow: 0 0 12px rgba(14, 165, 233, 0.7);
-
-  --bg-app: #F0F7FB;
-  --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #E2EFF7;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #FFFFFF;
-  --bg-hover: #E0F2FE;
-  --bg-input: #FFFFFF;
-
-  --brand-burgundy: #0284C7;
-  --brand-burgundy-hover: #0369A1;
-  --brand-burgundy-light: #E0F2FE;
-  --brand-burgundy-surface: #F0F9FF;
-  --brand-burgundy-border: #7DD3FC;
-  --brand-burgundy-glow: 0 4px 18px rgba(2, 132, 199, 0.2);
-  --brand-burgundy-gradient: linear-gradient(135deg, #0284C7 0%, #0D9488 100%);
-  --brand-accent: #0D9488;
-  --brand-primary: #0284C7;
-
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
-  --text-inverted: #FFFFFF;
-
-  --border-subtle: #D2E7F5;
-  --border-card: #D2E7F5;
-  --border-card-hover: #7DD3FC;
-  --border-focus: #0284C7;
-
-  --progress-track: #E2E8F0;
-  --progress-fill: #0D9488;
-  --progress-fill-accent: #0284C7;
-}
-
-/* ==========================================================================
-   THEME 3: NINJA STUDY FOX (data-theme="ninja" / data-theme="dark")
-   Glowing Nocturnal Dark Theme with Electric Violet & Cyber Cyan
-   ========================================================================== */
-[data-theme="cyber"],
-[data-theme="ninja"],
+[data-theme="kuro-dark"],
 [data-theme="dark"] {
-  --bg-sidebar: #090D16;
-  --bg-sidebar-hover: #111827;
-  --bg-sidebar-active: #1F2937;
-  --sidebar-border: #1F293D;
-  --sidebar-text: #94A3B8;
-  --sidebar-text-muted: #64748B;
+  /* Kuro Nocturnal Dark Sidebar */
+  --bg-sidebar: #0E0F15;
+  --bg-sidebar-hover: #14151E;
+  --bg-sidebar-active: #1E1F2B;
+  --sidebar-border: #1E1F2B;
+  --sidebar-text: #A6ADC8;
+  --sidebar-text-muted: #6C7086;
   --sidebar-text-active: #FFFFFF;
-  --sidebar-indicator: #8B5CF6;
-  --sidebar-indicator-glow: 0 0 14px rgba(139, 92, 246, 0.8);
+  --sidebar-indicator: #DE5353;
+  --sidebar-indicator-glow: 0 0 14px rgba(222, 83, 83, 0.85);
 
-  --bg-app: #0B0F19;
-  --bg-surface: #111827;
-  --bg-surface-subtle: #162032;
-  --bg-card: #151D2E;
-  --bg-card-hover: #1B253B;
-  --bg-hover: #1F293D;
-  --bg-input: #0F172A;
+  /* Kuro Obsidian Void Surfaces */
+  --bg-app: #0E0F15;
+  --bg-surface: #14151E;
+  --bg-surface-subtle: #1A1C28;
+  --bg-card: #1A1C28;
+  --bg-card-hover: #202232;
+  --bg-hover: #242636;
+  --bg-input: #12131C;
 
-  --brand-burgundy: #8B5CF6;
-  --brand-burgundy-hover: #A78BFA;
-  --brand-burgundy-light: rgba(139, 92, 246, 0.18);
-  --brand-burgundy-surface: rgba(139, 92, 246, 0.12);
-  --brand-burgundy-border: rgba(139, 92, 246, 0.45);
-  --brand-burgundy-glow: 0 4px 22px rgba(139, 92, 246, 0.4);
-  --brand-burgundy-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-  --brand-accent: #06B6D4;
-  --brand-primary: #8B5CF6;
+  /* Radiant Kuro Crimson in Dark Mode */
+  --color-primary: #DE5353;
+  --color-primary-hover: #E66868;
+  --color-secondary: #242636;
+  --color-accent: #F59E0B;
+  --color-accent-hover: #FBBF24;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --text-inverted: #0F172A;
+  --brand-primary: #DE5353;
+  --brand-accent: #DE5353;
+  --brand-burgundy: #DE5353;
+  --brand-burgundy-hover: #E66868;
+  --brand-burgundy-light: rgba(222, 83, 83, 0.18);
+  --brand-burgundy-surface: rgba(222, 83, 83, 0.10);
+  --brand-burgundy-border: rgba(222, 83, 83, 0.35);
+  --brand-burgundy-glow: 0 4px 22px rgba(222, 83, 83, 0.35);
+  --brand-burgundy-gradient: linear-gradient(135deg, #E66868 0%, #DE5353 50%, #C84343 100%);
 
-  --border-subtle: #1F293D;
-  --border-card: #1F293D;
-  --border-card-hover: rgba(139, 92, 246, 0.6);
-  --border-focus: #8B5CF6;
+  /* Text & Inverted */
+  --text-primary: #F6F2EC; /* Warm bone white */
+  --text-secondary: #A6ADC8;
+  --text-muted: #6C7086;
+  --text-inverted: #0E0F15;
 
-  --progress-track: #1F293D;
-  --progress-fill: #06B6D4;
-  --progress-fill-accent: #8B5CF6;
+  /* Dark Obsidian Borders */
+  --border-subtle: #242636;
+  --border-card: #242636;
+  --border-card-hover: rgba(222, 83, 83, 0.6);
+  --border-focus: #DE5353;
 
+  /* Dark Progress */
+  --progress-track: #242636;
+  --progress-fill: #10B981;
+  --progress-fill-accent: #DE5353;
+
+  /* Dark Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.35);
-  --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.55), 0 0 15px rgba(139, 92, 246, 0.3);
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.38);
+  --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.58), 0 0 15px rgba(222, 83, 83, 0.25);
   --shadow-modal: 0 25px 60px -10px rgba(0, 0, 0, 0.9);
 }
 
 /* ==========================================================================
-   THEME 4: ACADEMIC SCHOLAR (data-theme="scholar")
-   Soft Academic Rose-Pink & Warm Amber-Gold Palette
+   OFFICIAL KURO CHARACTER UTILITY & ANIMATION CLASSES
    ========================================================================== */
-[data-theme="scholar"] {
-  --bg-sidebar: #261C1E;
-  --bg-sidebar-hover: #362629;
-  --bg-sidebar-active: #473236;
-  --sidebar-border: #3D2B2E;
-  --sidebar-text: #BCA3A7;
-  --sidebar-text-muted: #8F767A;
-  --sidebar-text-active: #FFFFFF;
-  --sidebar-indicator: #F59E0B;
-  --sidebar-indicator-glow: 0 0 12px rgba(245, 158, 11, 0.7);
+.kuro-character-img {
+  display: inline-block;
+  object-fit: contain;
+  background: transparent !important;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: auto;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
+}
 
-  --bg-app: #FFFBF7;
-  --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #FFF1E6;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #FFFFFF;
-  --bg-hover: #FDF2E9;
-  --bg-input: #FFFFFF;
+/* Subtle, dignified academic companion floating motion */
+.kuro-float {
+  animation: kuroFloat 3.8s ease-in-out infinite alternate;
+}
 
-  --brand-burgundy: #D97706;
-  --brand-burgundy-hover: #B45309;
-  --brand-burgundy-light: #FEF3C7;
-  --brand-burgundy-surface: #FFFBEB;
-  --brand-burgundy-border: #FCD34D;
-  --brand-burgundy-glow: 0 4px 18px rgba(217, 119, 6, 0.22);
-  --brand-burgundy-gradient: linear-gradient(135deg, #E11D48 0%, #D97706 100%);
-  --brand-accent: #E11D48;
-  --brand-primary: #D97706;
+@keyframes kuroFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-5px);
+  }
+}
 
-  --text-primary: #292524;
-  --text-secondary: #57534E;
-  --text-muted: #A8A29E;
-  --text-inverted: #FFFFFF;
+/* Spring entrance when state changes */
+.kuro-bounce {
+  animation: kuroBounce 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-  --border-subtle: #F3E4D8;
-  --border-card: #F3E4D8;
-  --border-card-hover: #FCD34D;
-  --border-focus: #D97706;
+@keyframes kuroBounce {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
-  --progress-track: #F3E4D8;
-  --progress-fill: #E11D48;
-  --progress-fill-accent: #D97706;
+/* Smooth fade-in for page transitions */
+.kuro-fade-in {
+  animation: kuroFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes kuroFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

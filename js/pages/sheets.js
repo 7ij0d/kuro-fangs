@@ -74,12 +74,12 @@ const SheetsPage = {
         listContainer.innerHTML = window.renderEmptyState
           ? window.renderEmptyState()
           : `
-            <div class="empty-state-card">
-              <div class="empty-state-icon-wrap">
-                <i data-lucide="folder-open"></i>
+            <div class="empty-state-card" style="padding: 44px 24px; text-align: center;">
+              <div style="width: 100px; height: 100px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
+                <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro Reading" class="kuro-character-img kuro-float" style="max-height: 90px; object-fit: contain;" />
               </div>
-              <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
-              <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
+              <h3 class="empty-state-title" style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">${isAr ? 'لا توجد شيتات مضافة لهذه المادة حالياً' : 'No sheets available yet'}</h3>
+              <p class="empty-state-subtitle" style="font-size: 0.85rem; color: var(--text-secondary); max-width: 440px; margin: 0 auto;">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً مع كورو.' : 'Handouts and academic materials will be uploaded soon.'}</p>
             </div>
           `;
         if (window.lucide) window.lucide.createIcons();
@@ -212,12 +212,18 @@ const SheetsPage = {
 
     container.innerHTML = `
       <div class="page-title-bar">
-        <div class="page-title-group">
-          <h1>
-            <i data-lucide="file-text" style="width: 28px; height: 28px; color: var(--brand-accent); vertical-align: middle; margin-inline-end: 8px;"></i>
-            ${isAr ? 'المحاضرات والملازم الدراسية' : 'Lectures & Study Sheets'}
-          </h1>
-          <p>${isAr ? 'شيتات وتفريغات مواد السنة الثالثة طب وجراحة الفم والأسنان بصيغة PDF' : 'Third Year Dental Surgery lecture notes, handouts, and official transcripts'}</p>
+        <div class="page-title-group" style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 58px; height: 58px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
+            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro Reading" class="kuro-character-img kuro-float" style="width: 52px; height: 52px; object-fit: contain;" />
+          </div>
+          <div>
+            <h1 style="font-size: 1.55rem; font-weight: 850; color: var(--text-primary); margin: 0 0 4px;">
+              ${isAr ? 'المحاضرات والملازم الدراسية' : 'Lectures & Study Sheets'}
+            </h1>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+              ${isAr ? 'شيتات وتفريغات مواد السنة الثالثة طب وجراحة الفم والأسنان بصيغة PDF' : 'Third Year Dental Surgery lecture notes, handouts, and official transcripts'}
+            </p>
+          </div>
         </div>
       </div>
 

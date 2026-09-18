@@ -112,8 +112,8 @@ const HomePage = {
   renderHeroSection(isAr, t) {
     const stats = HomePage.getAggregateStats();
     const greeting = HomePage.getGreeting(t);
-    const equippedSkin = window.STORE ? window.STORE.getEquippedSkinData() : { image: 'assets/fox_skins/fox_skin_1.jpg', name_ar: 'الثعلب الكلاسيكي', name_en: 'Classic Kuro Fox' };
-    const mascotName = isAr ? equippedSkin.name_ar : equippedSkin.name_en;
+    const charImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('idle') : 'assets/characters/kuro/Kuro-Idle.png';
+    const mascotName = isAr ? 'كورو' : 'Kuro';
     const userName = window.STORE?.getUserInfo?.()?.name || (isAr ? 'طالب' : 'Student');
 
     return `
@@ -125,10 +125,10 @@ const HomePage = {
           </div>
           <div class="home-hero-mascot">
             <a href="#/rewards" class="home-hero-mascot-link" title="${mascotName}">
-              <img src="${equippedSkin.image}" alt="${mascotName}" class="home-hero-mascot-img" width="48" height="48" loading="lazy" />
+              <img src="${charImg}" alt="${mascotName}" class="home-hero-mascot-img kuro-character-img kuro-float" width="52" height="52" loading="lazy" />
             </a>
             <div class="home-hero-mascot-meta">
-              <span class="home-hero-mascot-name">🦊 ${mascotName}</span>
+              <span class="home-hero-mascot-name">✨ ${mascotName}</span>
               <span class="home-hero-mascot-role">${t('heroMascotLine')}</span>
             </div>
           </div>

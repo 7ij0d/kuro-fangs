@@ -798,8 +798,8 @@ window.GamesPage = (function () {
     modalHost.innerHTML = `
       <div class="arcade-win-modal-backdrop">
         <div class="arcade-win-modal-card animate-pop">
-          <div class="win-mascot-avatar">
-            <img src="assets/fox_skins/fox_skin_4.jpg" alt="Scholar Fox" />
+          <div class="win-mascot-avatar" style="background: transparent; display: flex; align-items: center; justify-content: center;">
+            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('excited') : 'assets/characters/kuro/Kuro-Excited.png'}" alt="Kuro Excited" class="kuro-character-img kuro-bounce" style="max-height: 100px; object-fit: contain;" />
           </div>
           <div class="win-confetti-stars">✨ 🏆 🧠 🌟</div>
           <h2 class="win-title">${isAr ? 'انتصار ذاكرة طبيب الأسنان!' : 'Dental Memory Champion!'}</h2>
@@ -1006,8 +1006,8 @@ window.GamesPage = (function () {
     modalHost.innerHTML = `
       <div class="arcade-win-modal-backdrop">
         <div class="arcade-win-modal-card animate-pop">
-          <div class="win-mascot-avatar">
-            <img src="assets/fox_skins/fox_skin_2.jpg" alt="Surgeon Fox" />
+          <div class="win-mascot-avatar" style="background: transparent; display: flex; align-items: center; justify-content: center;">
+            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('achieving') : 'assets/characters/kuro/Kuro-Achieving.png'}" alt="Kuro Achieving" class="kuro-character-img kuro-bounce" style="max-height: 100px; object-fit: contain;" />
           </div>
           <div class="win-confetti-stars">✨ 🪞 🩺 🌟</div>
           <h2 class="win-title">${isAr ? 'خبير أدوات العيادات السريرية!' : 'Clinical Instruments Master!'}</h2>
@@ -1196,34 +1196,34 @@ window.GamesPage = (function () {
     let titleAr = '';
     let titleEn = '';
     let badgeIcon = '🏆';
-    let skinImg = 'assets/fox_skins/fox_skin_1.jpg';
+    let skinImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('idle') : 'assets/characters/kuro/Kuro-Idle.png';
 
     if (score === 10) {
       titleAr = '🏆 بروفيسور الأسنان الفولاذي (Legendary Dental Chief)';
       titleEn = '🏆 Legendary Dental Chief (Perfect Score)';
       badgeIcon = '👑';
-      skinImg = 'assets/fox_skins/fox_skin_4.jpg';
+      skinImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('achieving') : 'assets/characters/kuro/Kuro-Achieving.png';
     } else if (score >= 8) {
       titleAr = '🌟 جراح سريري محنك (Senior Clinical Resident)';
       titleEn = '🌟 Senior Clinical Resident';
       badgeIcon = '🩺';
-      skinImg = 'assets/fox_skins/fox_skin_2.jpg';
+      skinImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('excited') : 'assets/characters/kuro/Kuro-Excited.png';
     } else if (score >= 6) {
       titleAr = '🩺 طبيب امتياز طموح (Rising Dental Star)';
       titleEn = '🩺 Rising Dental Star';
       badgeIcon = '✨';
-      skinImg = 'assets/fox_skins/fox_skin_5.jpg';
+      skinImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('happy') : 'assets/characters/kuro/Kuro-Happy.png';
     } else {
-      titleAr = '🦊 ثعلب قيد التدريب بالمعمل (Phantom Apprentice)';
-      titleEn = '🦊 Phantom Lab Apprentice';
+      titleAr = '✨ بداية موفقة قيد التدريب بالمعمل (Phantom Apprentice)';
+      titleEn = '✨ Phantom Lab Apprentice';
       badgeIcon = '💡';
-      skinImg = 'assets/fox_skins/fox_skin_1.jpg';
+      skinImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('tired') : 'assets/characters/kuro/Kuro-Tired.png';
     }
 
     stageEl.innerHTML = `
       <div class="quiz-results-card animate-pop">
-        <div class="results-mascot-avatar">
-          <img src="${skinImg}" alt="Fox Mascot" />
+        <div class="results-mascot-avatar" style="background: transparent; display: flex; align-items: center; justify-content: center;">
+          <img src="${skinImg}" alt="Kuro Character" class="kuro-character-img kuro-bounce" style="max-height: 100px; object-fit: contain;" />
         </div>
         <div class="results-badge">${badgeIcon}</div>
         <h2 class="results-title">${isAr ? 'انتهى الكويز الأكاديمي السريع!' : 'Dental Trivia Completed!'}</h2>
@@ -1231,8 +1231,8 @@ window.GamesPage = (function () {
         <h4 class="results-rank-title">${isAr ? titleAr : titleEn}</h4>
         <p class="results-sub">
           ${isAr
-            ? `حصلت على إجمالي <strong>+25 نقطة أكاديمية</strong> أضيفت مباشرة إلى رصيدك لاستبدال سكنات الثعلب المميزة!`
-            : `You earned <strong>+25 academic points</strong> added directly to your balance for fox mascot skin unlocks!`}
+            ? `حصلت على إجمالي <strong>+25 نقطة أكاديمية</strong> أضيفت مباشرة إلى رصيدك بالمنصة!`
+            : `You earned <strong>+25 academic points</strong> added directly to your profile balance!`}
         </p>
 
         <div class="results-actions-row">
@@ -1242,7 +1242,7 @@ window.GamesPage = (function () {
           </button>
           <a href="#/rewards" class="btn btn-secondary">
             <i data-lucide="sparkles"></i>
-            <span>${isAr ? 'فتح سكنات الثعلب' : 'Open Mascot Hub'}</span>
+            <span>${isAr ? 'مركز شخصية كورو' : 'Kuro Theme Hub'}</span>
           </a>
         </div>
       </div>
@@ -1283,17 +1283,17 @@ window.GamesPage = (function () {
             </h1>
             <p class="arcade-hero-sub">
               ${isAr
-                ? 'اختبر سرعة بديهتك، واكسب نقاطاً أكاديمية لفتح سكنات الثعلب وثيمات المنصة!'
-                : 'Test your clinical reflexes, master terms, and earn points for mascot skins!'}
+                ? 'اختبر سرعة بديهتك، واكسب نقاطاً أكاديمية وتعرف على حالات شخصية كورو!'
+                : 'Test your clinical reflexes, master terms, and earn points for Kuro Theme!'}
             </p>
           </div>
 
           <!-- Points & Equipped Mascot Pill -->
           <div class="arcade-hero-mascot-box">
-            <a href="#/rewards" class="arcade-mascot-chip" title="${isAr ? 'انتقل إلى متجر سكنات الثعلب' : 'Open Fox Mascot Skins Hub'}">
-              <img src="${equipped ? equipped.image : 'assets/fox_skins/fox_skin_1.jpg'}" alt="Mascot" class="arcade-mascot-avatar" />
+            <a href="#/rewards" class="arcade-mascot-chip" title="${isAr ? 'مركز شخصية كورو وثيمات المنصة' : 'Kuro Theme Hub'}">
+              <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('idle') : 'assets/characters/kuro/Kuro-Idle.png'}" alt="Kuro" class="arcade-mascot-avatar kuro-character-img" style="object-fit: contain;" />
               <div class="arcade-mascot-meta">
-                <span class="arcade-mascot-name">${equipped ? (isAr ? equipped.name_ar : equipped.name_en) : 'Kuro Fox'}</span>
+                <span class="arcade-mascot-name">${isAr ? 'كورو' : 'Kuro'}</span>
                 <span class="arcade-points-balance">
                   <i data-lucide="sparkles"></i>
                   <span id="arcade-hero-points">${currentPoints} ${isAr ? 'نقطة' : 'pts'}</span>
