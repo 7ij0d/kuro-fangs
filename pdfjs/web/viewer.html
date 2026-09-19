@@ -39,6 +39,7 @@ See https://github.com/adobe-type-tools/cmap-resources
     <link rel="stylesheet" href="viewer.css?v=2.3.0" />
 
   <script src="viewer.mjs?v=2.3.0" type="module"></script>
+  <script src="kuro-viewer-bridge.js?v=2.3.0"></script>
   </head>
 
   <body tabindex="0">
@@ -321,6 +322,19 @@ See https://github.com/adobe-type-tools/cmap-resources
                     />
                   </span>
                   <span id="numPages" class="toolbarLabel"></span>
+                  <button
+                    id="kuroToolbarCopyPageBtn"
+                    class="toolbarButton"
+                    type="button"
+                    tabindex="0"
+                    title="نسخ نصوص الصفحة الحالية (مرتبة ومنسقة)"
+                    style="margin-inline-start: 6px; display: inline-flex; align-items: center; justify-content: center; color: #38bdf8;"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
               <div id="toolbarViewerMiddle" class="toolbarHorizontalGroup">

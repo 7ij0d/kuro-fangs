@@ -106,8 +106,50 @@ const SheetDetailPage = {
             </div>
           </div>
 
-          <!-- Actions Group: Edit Sheet (Admin Only) + Discussion -->
+          <!-- Actions Group: Copy Buttons + Edit Sheet (Admin Only) + Discussion -->
           <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <!-- Structured Copy Actions Group -->
+            <div id="sheet-copy-group" class="sheet-copy-group">
+              <!-- Desktop Buttons (Visible on screens >= 769px) -->
+              <div class="sheet-copy-desktop-btns" style="display: inline-flex; align-items: center; gap: 6px;">
+                <button id="btn-copy-current-page" class="kuro-copy-btn kuro-copy-btn-page" title="${isAr ? 'نسخ نصوص الصفحة الحالية مع الحفاظ على ترتيب الأسطر والعناوين' : 'Copy structured text of current page'}">
+                  <span class="copy-icon" style="font-size: 0.95rem;">📄</span>
+                  <span>${isAr ? 'نسخ صفحة' : 'Copy Pg'}</span>
+                  <span id="copy-page-num-badge" class="kuro-copy-badge">1</span>
+                </button>
+                <button id="btn-copy-full-sheet" class="kuro-copy-btn kuro-copy-btn-full" title="${isAr ? 'نسخ كامل الشيت بجميع صفحاته مرتباً ومقسماً في الحافظة' : 'Copy entire sheet formatted'}">
+                  <span class="copy-icon" style="font-size: 0.95rem;">📚</span>
+                  <span>${isAr ? 'نسخ الشيت كامل' : 'Copy All'}</span>
+                  <span id="copy-total-pages-badge" class="kuro-copy-badge">${pages} ص</span>
+                </button>
+              </div>
+
+              <!-- Mobile / Compact Dropdown (Visible on screens <= 768px) -->
+              <div class="sheet-copy-mobile-btn" style="position: relative;">
+                <button id="btn-copy-dropdown-trigger" class="kuro-copy-btn" style="padding: 6px 10px;" title="${isAr ? 'خيارات نسخ محتوى الشيت' : 'Copy options'}">
+                  <span style="font-size: 0.95rem;">📋</span>
+                  <span>${isAr ? 'نسخ' : 'Copy'}</span>
+                  <span style="font-size: 0.7rem; opacity: 0.7;">▾</span>
+                </button>
+                <div id="sheet-copy-dropdown-menu" class="kuro-copy-dropdown-menu" style="display: none;">
+                  <button id="btn-mobile-copy-page" class="kuro-copy-dropdown-item">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                      <span>📄</span>
+                      <span>${isAr ? 'نسخ الصفحة الحالية' : 'Copy Current Page'}</span>
+                    </span>
+                    <span id="mobile-copy-page-badge" class="kuro-copy-badge">1</span>
+                  </button>
+                  <button id="btn-mobile-copy-full" class="kuro-copy-dropdown-item">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                      <span>📚</span>
+                      <span>${isAr ? 'نسخ الشيت كاملاً' : 'Copy Entire Sheet'}</span>
+                    </span>
+                    <span id="mobile-total-pages-badge" class="kuro-copy-badge">${pages} ص</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             ${isAdmin ? `
               <!-- Edit Sheet Button (Admin Only) -->
               <button id="btn-edit-sheet-studio" style="background: rgba(255,255,255,0.08); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.15s ease;" title="${isAr ? 'تعديل بيانات وملف الشيت' : 'Edit Sheet & File'}">
@@ -166,6 +208,230 @@ const SheetDetailPage = {
     `;
 
     const studioContainer = document.getElementById('sheet-studio-container');
+    let activeCurrentPage = 1;
+    let activeTotalPages = pages || 1;
+
+    function getPdfViewerApp() {
+      const iframe = document.getElementById('sheet-pdf-iframe');
+      try {
+        return iframe?.contentWindow?.PDFViewerApplication || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function updateCopyPageBadges(pageNum, total) {
+      if (typeof pageNum === 'number' && pageNum > 0) activeCurrentPage = pageNum;
+      if (typeof total === 'number' && total > 0) activeTotalPages = total;
+
+      const pBadge = document.getElementById('copy-page-num-badge');
+      const mBadge = document.getElementById('mobile-copy-page-badge');
+      const tBadge = document.getElementById('copy-total-pages-badge');
+      const mtBadge = document.getElementById('mobile-total-pages-badge');
+
+      if (pBadge) pBadge.textContent = activeCurrentPage;
+      if (mBadge) mBadge.textContent = activeCurrentPage;
+      if (tBadge) tBadge.textContent = activeTotalPages + (isAr ? ' ص' : ' p');
+      if (mtBadge) mtBadge.textContent = activeTotalPages + (isAr ? ' ص' : ' p');
+    }
+
+    // Handle messages from viewer iframe bridge
+    const onPdfMessage = (e) => {
+      if (!e.data) return;
+      if (e.data.type === 'KURO_PAGE_CHANGE') {
+        updateCopyPageBadges(e.data.pageNumber, e.data.pagesCount);
+      } else if (e.data.type === 'KURO_TRIGGER_COPY_PAGE') {
+        handleCopyCurrentPage();
+      }
+    };
+    window.addEventListener('message', onPdfMessage);
+
+    // Copy Current Page Handler
+    async function handleCopyCurrentPage() {
+      const app = getPdfViewerApp();
+      if (!app || !app.pdfDocument) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'جاري تحميل ملف الشيت، يُرجى الانتظار ثوانٍ معدودة... ⏳' : 'Loading PDF, please wait a moment... ⏳', { type: 'warning' });
+        }
+        return;
+      }
+
+      const pageNum = app.page || activeCurrentPage || 1;
+      let pageProxy = null;
+      try {
+        pageProxy = await app.pdfDocument.getPage(pageNum);
+      } catch (err) {
+        console.error('Failed to get page proxy:', err);
+      }
+
+      if (!pageProxy || !window.SheetCopyEngine) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'تعذر استخراج الصفحة المحددة.' : 'Failed to extract page text.', { type: 'error' });
+        }
+        return;
+      }
+
+      const btnDesk = document.getElementById('btn-copy-current-page');
+      const btnMob = document.getElementById('btn-mobile-copy-page');
+
+      try {
+        const formattedText = await window.SheetCopyEngine.extractPageText(pageProxy, {
+          pageNum: pageNum,
+          totalPages: app.pagesCount || activeTotalPages,
+          sheetTitle: title,
+          isAr: isAr
+        });
+
+        if (!formattedText || !formattedText.trim()) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? `صفحة ${pageNum} لا تحتوي على نصوص قابلة للاستخراج (رسومات أو شيت ممسوح ضوئياً) 📄` : `Page ${pageNum} has no extractable text 📄`, { type: 'info' });
+          }
+          return;
+        }
+
+        const copied = await window.SheetCopyEngine.copyToClipboard(formattedText);
+        if (copied) {
+          [btnDesk, btnMob].forEach(btn => {
+            if (!btn) return;
+            btn.classList.add('copied');
+            const icon = btn.querySelector('.copy-icon') || btn.querySelector('span:first-child');
+            const oldIcon = icon ? icon.textContent : '📄';
+            if (icon) icon.textContent = '✓';
+            setTimeout(() => {
+              btn.classList.remove('copied');
+              if (icon) icon.textContent = oldIcon;
+            }, 1800);
+          });
+
+          if (typeof window.showToast === 'function') {
+            window.showToast(
+              isAr ? `تم نسخ نصوص صفحة (${pageNum}) مرتبة ومنسقة بالحافظة بنجاح! 📋` : `Page (${pageNum}) text copied formatted to clipboard! 📋`,
+              { type: 'success' }
+            );
+          }
+        } else {
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'تعذر النسخ إلى الحافظة تلقائياً.' : 'Failed to copy to clipboard.', { type: 'error' });
+          }
+        }
+      } catch (e) {
+        console.error('Extraction error:', e);
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'حدث خطأ أثناء معالجة نصوص الصفحة.' : 'Error extracting page text.', { type: 'error' });
+        }
+      }
+    }
+
+    // Copy Entire Sheet Handler
+    async function handleCopyFullSheet() {
+      const app = getPdfViewerApp();
+      if (!app || !app.pdfDocument) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'جاري تحميل ملف الشيت، يُرجى الانتظار ثوانٍ معدودة... ⏳' : 'Loading PDF, please wait a moment... ⏳', { type: 'warning' });
+        }
+        return;
+      }
+
+      const btnDesk = document.getElementById('btn-copy-full-sheet');
+      const origDeskContent = btnDesk ? btnDesk.innerHTML : '';
+      const totalP = app.pagesCount || activeTotalPages || 1;
+
+      if (btnDesk) {
+        btnDesk.disabled = true;
+        btnDesk.style.opacity = '0.85';
+      }
+
+      try {
+        const fullDocumentText = await window.SheetCopyEngine.extractDocumentText(app.pdfDocument, {
+          sheetTitle: title,
+          onProgress: (current, total) => {
+            const pct = Math.round((current / total) * 100);
+            if (btnDesk) {
+              btnDesk.innerHTML = `<span>⏳</span><span>${isAr ? `جاري الترتيب... %${pct}` : `Extracting... ${pct}%`}</span>`;
+            }
+          }
+        });
+
+        const copied = await window.SheetCopyEngine.copyToClipboard(fullDocumentText);
+        if (copied) {
+          if (btnDesk) {
+            btnDesk.classList.add('copied');
+            btnDesk.innerHTML = `<span>✓</span><span>${isAr ? 'تم نسخ كامل الشيت!' : 'Full Sheet Copied!'}</span>`;
+            setTimeout(() => {
+              btnDesk.classList.remove('copied');
+              btnDesk.innerHTML = origDeskContent;
+              btnDesk.disabled = false;
+              btnDesk.style.opacity = '1';
+            }, 2200);
+          }
+
+          if (typeof window.showToast === 'function') {
+            window.showToast(
+              isAr ? `تم نسخ كامل الشيت (${totalP} صفحة) مرتباً ومنسقاً في الحافظة بنجاح 🌟` : `Full sheet (${totalP} pages) copied formatted successfully 🌟`,
+              { type: 'success' }
+            );
+          }
+        } else {
+          if (btnDesk) {
+            btnDesk.innerHTML = origDeskContent;
+            btnDesk.disabled = false;
+            btnDesk.style.opacity = '1';
+          }
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'تعذر النسخ إلى الحافظة تلقائياً.' : 'Failed to copy to clipboard.', { type: 'error' });
+          }
+        }
+      } catch (err) {
+        console.error('Copy full sheet error:', err);
+        if (btnDesk) {
+          btnDesk.innerHTML = origDeskContent;
+          btnDesk.disabled = false;
+          btnDesk.style.opacity = '1';
+        }
+        if (typeof window.showToast === 'function') {
+          window.showToast(isAr ? 'حدث خطأ أثناء نسخ كامل الشيت.' : 'Error copying full sheet.', { type: 'error' });
+        }
+      }
+    }
+
+    // Attach copy button listeners
+    const btnDeskPage = document.getElementById('btn-copy-current-page');
+    const btnMobPage = document.getElementById('btn-mobile-copy-page');
+    if (btnDeskPage) btnDeskPage.addEventListener('click', handleCopyCurrentPage);
+    if (btnMobPage) {
+      btnMobPage.addEventListener('click', () => {
+        const menu = document.getElementById('sheet-copy-dropdown-menu');
+        if (menu) menu.style.display = 'none';
+        handleCopyCurrentPage();
+      });
+    }
+
+    const btnDeskFull = document.getElementById('btn-copy-full-sheet');
+    const btnMobFull = document.getElementById('btn-mobile-copy-full');
+    if (btnDeskFull) btnDeskFull.addEventListener('click', handleCopyFullSheet);
+    if (btnMobFull) {
+      btnMobFull.addEventListener('click', () => {
+        const menu = document.getElementById('sheet-copy-dropdown-menu');
+        if (menu) menu.style.display = 'none';
+        handleCopyFullSheet();
+      });
+    }
+
+    const dropdownTrigger = document.getElementById('btn-copy-dropdown-trigger');
+    const dropdownMenu = document.getElementById('sheet-copy-dropdown-menu');
+    if (dropdownTrigger && dropdownMenu) {
+      dropdownTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dropdownMenu.style.display === 'flex';
+        dropdownMenu.style.display = isOpen ? 'none' : 'flex';
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#sheet-copy-group')) {
+          dropdownMenu.style.display = 'none';
+        }
+      });
+    }
+
     if (studioContainer) {
       async function mountPdfViewer() {
         let pdfUrl = sheet.pdf_url;
@@ -176,11 +442,27 @@ const SheetDetailPage = {
           pdfUrl = 'pdfjs/web/compressed.tracemonkey-pldi-09.pdf';
         }
         const iframe = document.createElement('iframe');
+        iframe.id = 'sheet-pdf-iframe';
         iframe.src = `pdfjs/web/viewer.html?v=2.3.0&file=${encodeURIComponent(pdfUrl)}`;
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';
         iframe.setAttribute('allow', 'fullscreen');
+
+        iframe.addEventListener('load', () => {
+          try {
+            const app = getPdfViewerApp();
+            if (app && app.eventBus) {
+              app.eventBus.on('pagechanging', (evt) => {
+                updateCopyPageBadges(evt.pageNumber, app.pagesCount);
+              });
+              app.eventBus.on('pagesloaded', () => {
+                updateCopyPageBadges(app.page, app.pagesCount);
+              });
+            }
+          } catch (e) {}
+        });
+
         studioContainer.innerHTML = '';
         studioContainer.appendChild(iframe);
       }

@@ -6812,3 +6812,153 @@ html[dir="rtl"] .fox-skin-cost-badge {
   background: #151926;
   border-top-color: rgba(255, 255, 255, 0.08);
 }
+
+/* ==========================================================================
+   KURO FANGS — STRUCTURED SHEET COPYING COMPONENT STYLES
+   ========================================================================== */
+.sheet-copy-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  user-select: none;
+}
+
+.kuro-copy-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #F8FAFC;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.kuro-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.kuro-copy-btn:active {
+  transform: scale(0.96);
+}
+
+.kuro-copy-btn-page {
+  border-inline-start: 3px solid #38BDF8;
+}
+
+.kuro-copy-btn-full {
+  background: linear-gradient(135deg, rgba(200, 67, 67, 0.25), rgba(30, 31, 43, 0.7));
+  border: 1px solid rgba(200, 67, 67, 0.45);
+  border-inline-start: 3px solid #C84343;
+  color: #FFE4E6;
+}
+
+.kuro-copy-btn-full:hover {
+  background: linear-gradient(135deg, rgba(200, 67, 67, 0.4), rgba(30, 31, 43, 0.85));
+  border-color: rgba(200, 67, 67, 0.65);
+  color: #FFFFFF;
+}
+
+.kuro-copy-btn.copied {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10B981 !important;
+  color: #34D399 !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.4) !important;
+}
+
+.kuro-copy-badge {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38BDF8;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+}
+
+.kuro-copy-btn-full .kuro-copy-badge {
+  background: rgba(200, 67, 67, 0.3);
+  color: #FDA4AF;
+}
+
+/* Dropdown Menu for Mobile & Compact Devices */
+.kuro-copy-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-start: 0;
+  min-width: 230px;
+  background: #151824;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  z-index: 100010;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  backdrop-filter: blur(12px);
+  animation: kuroMenuPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes kuroMenuPop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.kuro-copy-dropdown-item {
+  background: transparent;
+  border: none;
+  color: #F8FAFC;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: inherit;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.kuro-copy-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #38BDF8;
+}
+
+.kuro-copy-dropdown-item:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .sheet-copy-desktop-btns {
+    display: none !important;
+  }
+  .sheet-copy-mobile-btn {
+    display: inline-flex !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .sheet-copy-desktop-btns {
+    display: inline-flex !important;
+  }
+  .sheet-copy-mobile-btn {
+    display: none !important;
+  }
+}
+
