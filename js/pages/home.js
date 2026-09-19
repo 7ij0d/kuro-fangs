@@ -159,6 +159,161 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
+     TODAY & TOMORROW DAILY LECTURES SECTION
+     ══════════════════════════════════════════ */
+  renderDailyLecturesSection(isAr, t) {
+    const todayDate = new Date();
+    const todayDayIndex = todayDate.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    const tomorrowDate = new Date(todayDate);
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrowDayIndex = tomorrowDate.getDay();
+
+    const todaySchedule = window.DATA && typeof window.DATA.getTheoryScheduleForDay === 'function'
+      ? window.DATA.getTheoryScheduleForDay(todayDayIndex)
+      : { slots: [], isWeekend: todayDayIndex === 5 };
+
+    const tomorrowSchedule = window.DATA && typeof window.DATA.getTheoryScheduleForDay === 'function'
+      ? window.DATA.getTheoryScheduleForDay(tomorrowDayIndex)
+      : { slots: [], isWeekend: tomorrowDayIndex === 5 };
+
+    const arMonths = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const enMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const todayDateFormatted = isAr
+      ? `${todaySchedule.day_ar || ''}، ${todayDate.getDate()} ${arMonths[todayDate.getMonth()]}`
+      : `${todaySchedule.day_en || ''}, ${enMonths[todayDate.getMonth()]} ${todayDate.getDate()}`;
+
+    const tomorrowDateFormatted = isAr
+      ? `${tomorrowSchedule.day_ar || ''}، ${tomorrowDate.getDate()} ${arMonths[tomorrowDate.getMonth()]}`
+      : `${tomorrowSchedule.day_en || ''}, ${enMonths[tomorrowDate.getMonth()]} ${tomorrowDate.getDate()}`;
+
+    const nowH = todayDate.getHours();
+    const nowM = todayDate.getMinutes();
+    const nowTotalMin = nowH * 60 + nowM;
+
+    const getSlotLiveStatus = (slot) => {
+      const startMin = (slot.startHour || 8) * 60;
+      const endMin = (slot.endHour || 10) * 60;
+      if (nowTotalMin >= startMin && nowTotalMin < endMin) {
+        return { label: isAr ? 'مباشرة الآن' : 'Live Now', badgeClass: 'slot-status-live' };
+      } else if (nowTotalMin < startMin) {
+        return { label: isAr ? 'قادمة' : 'Upcoming', badgeClass: 'slot-status-upcoming' };
+      } else {
+        return { label: isAr ? 'انتهت' : 'Completed', badgeClass: 'slot-status-completed' };
+      }
+    };
+
+    const renderColumnContent = (schedule, isToday) => {
+      if (schedule.isWeekend || !schedule.slots || schedule.slots.length === 0) {
+        const charImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png';
+        return `
+          <div class="home-lecture-weekend-card">
+            <div class="weekend-mascot-wrap">
+              <img src="${charImg}" alt="Kuro Relax" class="weekend-mascot-img kuro-float" width="52" height="52" loading="lazy" />
+            </div>
+            <h4 class="weekend-title">${isAr ? 'عطلة نهاية الأسبوع ☕' : 'Weekend Break ☕'}</h4>
+            <p class="weekend-desc">${isAr ? 'لا توجد محاضرات نظرية مقررة. فرصة ممتازة للمراجعة الذاتية أو إنجاز كويزات كورو!' : 'No theoretical lectures scheduled today. A great time to study handouts with Kuro!'}</p>
+            <a href="#/sheets" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; gap: 6px; padding: 5px 14px; margin-top: 4px; display: inline-flex; border-radius: 8px;">
+              <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
+              <span>${isAr ? 'تصفح شيتات المواد' : 'Browse Handouts'}</span>
+            </a>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="home-daily-slots-list">
+          ${schedule.slots.map(slot => {
+            const status = isToday ? getSlotLiveStatus(slot) : null;
+            return `
+              <div class="home-lecture-card" data-subject="${slot.subject_id}" style="--slot-color: ${slot.color || '#0284C7'}; border-inline-start-color: ${slot.color || '#0284C7'};" role="button" tabindex="0" title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}">
+                <div class="home-lecture-top-row">
+                  <div class="home-lecture-code-time">
+                    <span class="home-lecture-code">${slot.code}</span>
+                    <span class="home-lecture-time">
+                      <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+                      <span>${slot.time}</span>
+                    </span>
+                  </div>
+                  ${status ? `<span class="home-lecture-status-pill ${status.badgeClass}">${status.label}</span>` : `
+                    <span class="home-lecture-status-pill slot-status-upcoming">${isAr ? 'مجدولة غداً' : 'Tomorrow'}</span>
+                  `}
+                </div>
+                <h4 class="home-lecture-title">${isAr ? slot.subject_ar : slot.subject_en}</h4>
+                <div class="home-lecture-bottom-row">
+                  <span class="home-lecture-hall">
+                    <i data-lucide="map-pin" style="width: 13px; height: 13px; color: #38BDF8;"></i>
+                    <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
+                  </span>
+                  <span class="home-lecture-action-hint">
+                    <span>${isAr ? 'فتح المادة' : 'Open'}</span>
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 12px; height: 12px;"></i>
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    };
+
+    return `
+      <section class="home-daily-lectures-section">
+        <div class="home-section-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h2 class="home-section-title" style="display: inline-flex; align-items: center; gap: 8px;">
+              <i data-lucide="calendar-days" style="width: 20px; height: 20px; color: #38BDF8;"></i>
+              <span>${isAr ? 'محاضرات اليوم ومحاضرات الغد' : "Today & Tomorrow's Lectures"}</span>
+            </h2>
+            <p class="home-section-sub">${isAr ? 'الجدول النظري المعتمد لدفعة طب وجراحة الفم والأسنان — مدرج 2' : 'Official Faculty of Dentistry Lecture Timetable — Auditorium 2'}</p>
+          </div>
+          <a href="#/lecture-schedule" class="btn btn-secondary btn-sm" style="font-size: 0.78rem; font-weight: 700; gap: 6px; padding: 6px 12px; display: inline-flex; align-items: center; border-radius: 8px; color: #38BDF8;">
+            <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+            <span>${isAr ? 'الجدول الأسبوعي الكامل' : 'Weekly Schedule'}</span>
+            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 13px; height: 13px;"></i>
+          </a>
+        </div>
+
+        <div class="home-daily-lectures-grid">
+          <!-- Today's Panel -->
+          <div class="home-daily-column today-column">
+            <div class="home-daily-col-header">
+              <div class="home-daily-col-title-wrap">
+                <span class="home-daily-col-badge today-badge">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: #34D399; display: inline-block;"></span>
+                  <span>${isAr ? 'محاضرات اليوم' : "Today's Lectures"}</span>
+                </span>
+                <h3 class="home-daily-day-name">${todayDateFormatted}</h3>
+              </div>
+              <span class="home-daily-count-badge">
+                ${todaySchedule.slots && todaySchedule.slots.length > 0 ? `${todaySchedule.slots.length} ${isAr ? 'محاضرات' : 'slots'}` : (isAr ? 'عطلة' : 'Off')}
+              </span>
+            </div>
+            ${renderColumnContent(todaySchedule, true)}
+          </div>
+
+          <!-- Tomorrow's Panel -->
+          <div class="home-daily-column tomorrow-column">
+            <div class="home-daily-col-header">
+              <div class="home-daily-col-title-wrap">
+                <span class="home-daily-col-badge tomorrow-badge">
+                  <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                  <span>${isAr ? 'محاضرات الغد' : "Tomorrow's Lectures"}</span>
+                </span>
+                <h3 class="home-daily-day-name">${tomorrowDateFormatted}</h3>
+              </div>
+              <span class="home-daily-count-badge">
+                ${tomorrowSchedule.slots && tomorrowSchedule.slots.length > 0 ? `${tomorrowSchedule.slots.length} ${isAr ? 'محاضرات' : 'slots'}` : (isAr ? 'عطلة' : 'Off')}
+              </span>
+            </div>
+            ${renderColumnContent(tomorrowSchedule, false)}
+          </div>
+        </div>
+      </section>
+    `;
+  },
+
+  /* ══════════════════════════════════════════
      QUICK ACCESS SECTION
      ══════════════════════════════════════════ */
   renderQuickAccess(isAr, t) {
@@ -275,6 +430,7 @@ const HomePage = {
 
     container.innerHTML = `
       ${HomePage.renderHeroSection(isAr, t)}
+      ${HomePage.renderDailyLecturesSection(isAr, t)}
       ${HomePage.renderQuickAccess(isAr, t)}
       ${HomePage.renderContinueLearning(isAr, t)}
 
@@ -432,6 +588,15 @@ const HomePage = {
         HomePage.renderSubjectsList(window.DATA.getSubjects(), false);
       };
     }
+
+    document.querySelectorAll('.home-lecture-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const subjId = card.getAttribute('data-subject');
+        if (subjId) {
+          HomePage.handleSubjectClick(subjId);
+        }
+      });
+    });
   }
 };
 

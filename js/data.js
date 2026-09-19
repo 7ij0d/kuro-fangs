@@ -34,6 +34,82 @@ class DataService {
       'pediatric': 'assets/covers/pediatric.webp',
       'removable-pros': 'assets/covers/removable-pros.webp'
     };
+
+    // Official Weekly Theoretical Lectures Timetable (Tripoli Dental Faculty Official Schedule)
+    this.theoryScheduleDays = [
+      {
+        dayIndex: 6, // Saturday
+        day_ar: 'السبت', day_en: 'Saturday',
+        slots: [
+          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'MS310', subject_id: 'gen-med', subject_ar: 'الباطنة العامة', subject_en: 'General Medicine', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#0284C7' },
+          { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'MS320', subject_id: 'gen-surgery', subject_ar: 'الجراحة العامة', subject_en: 'General Surgery', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#2563EB' }
+        ]
+      },
+      {
+        dayIndex: 0, // Sunday
+        day_ar: 'الأحد', day_en: 'Sunday',
+        slots: [
+          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS331', subject_id: 'fixed-pros', subject_ar: 'الاستعاضة السنية الثابتة 2', subject_en: 'Fixed Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#0D9488' },
+          { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'DS341', subject_id: 'omfs', subject_ar: 'جراحة الفم والوجه والفكين 1', subject_en: 'OMFS I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#059669' }
+        ]
+      },
+      {
+        dayIndex: 1, // Monday
+        day_ar: 'الإثنين', day_en: 'Monday',
+        slots: [
+          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS380', subject_id: 'oral-diseases', subject_ar: 'أمراض الفم', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' },
+          { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'DS351', subject_id: 'endo', subject_ar: 'أمراض وعلاج اللثة 1', subject_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#C2410C' }
+        ]
+      },
+      {
+        dayIndex: 2, // Tuesday
+        day_ar: 'الثلاثاء', day_en: 'Tuesday',
+        slots: [
+          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS381', subject_id: 'preventive', subject_ar: 'طب الأسنان الوقائي', subject_en: 'Preventive Dentistry', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#CA8A04' },
+          { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'DS361', subject_id: 'omdr', subject_ar: 'طب الفم والتشخيص والأشعة 1', subject_en: 'Oral Diagnosis & Radiology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#EAB308' }
+        ]
+      },
+      {
+        dayIndex: 3, // Wednesday
+        day_ar: 'الأربعاء', day_en: 'Wednesday',
+        slots: [
+          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS311', subject_id: 'cons-endo', subject_ar: 'العلاج التحفظي وعلاج الجذور 2', subject_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#DB2777' },
+          { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'DS371', subject_id: 'ortho', subject_ar: 'تقويم الأسنان 1', subject_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#9333EA' },
+          { time: '02:00 - 04:00', startHour: 14, endHour: 16, code: 'DS380', subject_id: 'oral-diseases', subject_ar: 'أمراض الفم (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' }
+        ]
+      },
+      {
+        dayIndex: 4, // Thursday
+        day_ar: 'الخميس', day_en: 'Thursday',
+        slots: [
+          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS321', subject_id: 'removable-pros', subject_ar: 'الاستعاضة السنية المتحركة 2', subject_en: 'Removable Prosthodontics II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#7C3AED' },
+          { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'DS470', subject_id: 'pedo', subject_ar: 'طب أسنان الأطفال 1', subject_en: 'Pediatric Dentistry I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#16A34A' }
+        ]
+      }
+    ];
+  }
+
+  getTheoryScheduleForDay(dayIndex) {
+    if (dayIndex === 5) {
+      return {
+        dayIndex: 5,
+        day_ar: 'الجمعة',
+        day_en: 'Friday',
+        slots: [],
+        isWeekend: true
+      };
+    }
+    const day = (this.theoryScheduleDays || []).find(d => d.dayIndex === dayIndex);
+    if (day) return day;
+    const arDays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const enDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return {
+      dayIndex: dayIndex,
+      day_ar: arDays[dayIndex] || '',
+      day_en: enDays[dayIndex] || '',
+      slots: [],
+      isWeekend: dayIndex === 5
+    };
   }
 
   async init() {
