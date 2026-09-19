@@ -1,1 +1,344 @@
-{"questions":[]}
+{
+  "questions": [
+    {
+      "id": "q_omdr_01",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 4,
+      "topic_ar": "أنواع التشخيص الفموي",
+      "topic_en": "Types of Oral Diagnosis",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Oral Diagnosis",
+        "Spot diagnosis",
+        "Types of Diagnosis"
+      ],
+      "text_ar": "فيما يتعلق بأهمية التشخيص، الحد الأدنى من البيانات والمعلومات البسيطة التي يمكن جمعها فوراً من المريض والمرتبطة مباشرة بشكواه الرئيسية يُسمى:",
+      "text_en": "Regarding importance of diagnosis, a minimum simple little data or information can be immediately collected from a patient which is closely related to his chief complaint is called:",
+      "options_ar": [
+        "التشخيص النهائي (Final diagnosis)",
+        "التشخيص الخاطف السريع (Spot diagnosis)",
+        "التشخيص التفريقي (Differential diagnosis)",
+        "التشخيص الشامل (Comprehensive diagnosis)"
+      ],
+      "options_en": [
+        "Final diagnosis",
+        "Spot diagnosis",
+        "Differential diagnosis",
+        "Comprehensive diagnosis"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة المعتمدة: B. التشخيص الخاطف السريع (Spot diagnosis)\n\nمرجع الشيت (صفحة 4):\n«3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data.»\nالتشخيص الخاطف هو الحالات البسيطة التي يمكن فيها التوصل إلى التشخيص الدقيق والفوري بالاعتماد على أقل قدر ممكن من البيانات المرتبطة مباشرة بالشكوى الرئيسية.",
+      "answer_en": "Correct Answer: B. Spot diagnosis\n\nSheet Reference (Page 4):\n\"3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data.\"\nMinimal simple data closely related to chief complaint leads to spot diagnosis.",
+      "quote_ref": "3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data."
+    },
+    {
+      "id": "q_omdr_02",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 4,
+      "topic_ar": "التشخيص التفريقي",
+      "topic_en": "Differential Diagnosis",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Differential diagnosis",
+        "Oral Diagnosis",
+        "Clinical Presentation"
+      ],
+      "text_ar": "هو جمع وتحليل البيانات لوضع قائمة بمرضين مختلفين أو أكثر يشتركان في ذات العرض والمظهر السريري الأولي:",
+      "text_en": "It is the collection of data to develop a list of two or more different Diseases having common primary clinical presentation:",
+      "options_ar": [
+        "التشخيص الخاطف (Spot diagnosis)",
+        "التشخيص التفريقي (Differential diagnosis)",
+        "التشخيص المبدئي المؤقت (Working or provisional diagnosis)",
+        "التشخيص الفموي الشامل (Comprehensive oral diagnosis)"
+      ],
+      "options_en": [
+        "Spot (snap) diagnosis",
+        "Differential diagnosis",
+        "Working or provisional diagnosis",
+        "Comprehensive oral diagnosis"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة المعتمدة: B. التشخيص التفريقي (Differential diagnosis)\n\nمرجع الشيت (صفحة 4):\n«4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.»\nالتشخيص التفريقي هو عملية وضع قائمة بالأمراض المشتبه بها ومقارنتها سريرياً.",
+      "answer_en": "Correct Answer: B. Differential diagnosis\n\nSheet Reference (Page 4):\n\"4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.\"\nDifferential diagnosis compares diseases sharing similar clinical presentations.",
+      "quote_ref": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation."
+    },
+    {
+      "id": "q_omdr_03",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 4,
+      "topic_ar": "تعريف التشخيص التفريقي وترتيب القائمة",
+      "topic_en": "Definition of Differential Diagnosis & Priority",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Differential diagnosis",
+        "Definition",
+        "Short Answer"
+      ],
+      "text_ar": "عرّف التشخيص التفريقي (Define: Differential diagnosis)؟",
+      "text_en": "Define: Differential diagnosis? (or: What is the differential diagnosis?)",
+      "options_ar": [
+        "جمع البيانات لتطوير قائمة بمرضين مختلفين أو أكثر يشتركان في نفس المظهر السريري الأولي (مع وضع الآفة الأرجح في قمة القائمة)",
+        "تشخيص سريع يتم التوصل إليه في الحالات البسيطة بناءً على الحد الأدنى من البيانات",
+        "إجراء مسح إشعاعي ومخبري كامل دون فحص سريري",
+        "تحديد السن المصاب بناءً على فحص القرع فقط"
+      ],
+      "options_en": [
+        "It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation (with most likely lesion placed on top)",
+        "Rapid diagnosis achieved in simple cases based on minimal little data",
+        "A complete laboratory and radiographic screening without clinical examination",
+        "Identifying the diseased tooth solely through percussion test"
+      ],
+      "correct_index": 0,
+      "answer_ar": "الإجابة النموذجية المعتمدة (Model Answer):\n«It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.»\n\n📌 ملاحظة سريرية هامة من الكلية (Clinical Note):\n«The most likely lesion is put on the top of the list according to clinical impression.»\nيتم وضع المرض أو الآفة الأرجح والأكثر احتمالاً في أعلى القائمة بناءً على الانطباع السريري الأولي.\n\nمرجع الشيت (صفحة 4): البند رقم 4 تحت Types of Oral Diagnosis.",
+      "answer_en": "Model Answer:\n\"It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.\"\n\n*(Note: The most likely lesion is put on the top of the list according to clinical impression)*.\n\nSheet Reference (Page 4): Item 4 under Types of Oral Diagnosis.",
+      "quote_ref": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation. (Note: The most likely lesion is put on the top of the list according to clinical impression)."
+    },
+    {
+      "id": "q_omdr_04",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 8,
+      "topic_ar": "العوامل المؤثرة على الشكوى الرئيسية",
+      "topic_en": "Factors Affecting Chief Complaint",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Chief Complaint",
+        "Patient Evaluation",
+        "Clinical History"
+      ],
+      "text_ar": "تتأثر الشكوى الرئيسية للمريض (The chief complaint is affected by) بـ:",
+      "text_en": "The chief complaint is affected by:",
+      "options_ar": [
+        "ذاكرة المريض (Patient memory)",
+        "عمر المريض (The age of the patient)",
+        "الحالة النفسية والشخصية للمريض (The mental attitude and personality of patient)",
+        "هيبة ومكانة طبيب الأسنان (The prestige of the dentist)",
+        "جميع ما سبق صحيح (All of the above)"
+      ],
+      "options_en": [
+        "Patient memory",
+        "The age of the patient",
+        "The mental attitude and personality of patient",
+        "The prestige of the dentist",
+        "All of the above"
+      ],
+      "correct_index": 4,
+      "answer_ar": "الإجابة المعتمدة: E. جميع ما سبق صحيح (All of the above)\n\nمرجع الشيت (صفحة 8):\n«The chief complaint affected by:\n• Patient memory.\n• The age of the patient.\n• The mental attitude and personality of patient.\n• The prestige of the dentist.»\nكل هذه العوامل الأربعة تؤثر تأثيراً مباشراً على كيفية وصف المريض لشكواه ومدى دقتها.",
+      "answer_en": "Correct Answer: E. All of the above\n\nSheet Reference (Page 8):\n\"The chief complaint affected by:\n• Patient memory.\n• The age of the patient.\n• The mental attitude and personality of patient.\n• The prestige of the dentist.\"\nAll listed factors significantly affect the chief complaint.",
+      "quote_ref": "The chief complaint affected by: • Patient memory. • The age of the patient. • The mental attitude and personality of patient. • The prestige of the dentist."
+    },
+    {
+      "id": "q_omdr_05",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 8,
+      "topic_ar": "تصنيف آلام الشكوى الرئيسية",
+      "topic_en": "Types of Pain in Chief Complaint",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Chief Complaint",
+        "Pain",
+        "Somatic",
+        "Neurogenic",
+        "Psychogenic"
+      ],
+      "text_ar": "فيما يتعلق بالشكوى الرئيسية للمريض، قد يكون الألم (Pain) منشؤه:",
+      "text_en": "Regarding chief complaint of patient, the pain may be:",
+      "options_ar": [
+        "جسدي (Somatic)",
+        "عصبي المنشأ (Neurogenic)",
+        "نفسي المنشأ (Psychogenic)",
+        "جميع ما سبق (All of the above)"
+      ],
+      "options_en": [
+        "Somatic",
+        "Neurogenic",
+        "Psychogenic",
+        "All of the above"
+      ],
+      "correct_index": 3,
+      "answer_ar": "الإجابة المعتمدة: D. جميع ما سبق (All of the above)\n\nمرجع الشيت (صفحة 8):\n«The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic»\nالألم هو الشكوى الأكثر شيوعاً في عيادة طب الفم والأسنان، ويمكن أن يكون جسدياً أو عصبياً أو نفسياً.",
+      "answer_en": "Correct Answer: D. All of the above (Somatic, Neurogenic, Psychogenic)\n\nSheet Reference (Page 8):\n\"The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic\"\nPain can be categorized into somatic, neurogenic, or psychogenic etiologies.",
+      "quote_ref": "The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic"
+    },
+    {
+      "id": "q_omdr_06",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 9,
+      "topic_ar": "أسباب الحرقة في تجويف الفم",
+      "topic_en": "Causes of Burning Sensation in Oral Cavity",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Burning sensation",
+        "Chief Complaint",
+        "Oral Cavity"
+      ],
+      "text_ar": "اذكر الحالات التي قد تسبب شعوراً بالحرقة في تجويف الفم (Conditions causing burning sensation in oral cavity)؟",
+      "text_en": "Mention 6 conditions that may cause burning sensation in the oral cavity?",
+      "options_ar": [
+        "العدوى الفطرية، الفيروسية، والبكتيرية (Infections)",
+        "اللسان الجغرافي واللسان المشقق (Geographic & Fissured tongue)",
+        "فقر الدم، نقص الفيتامينات، وجفاف الفم (Anemia, Vitamin deficiency, Xerostomia)",
+        "جميع ما سبق (أي من الحالات السريرية التسع المعتمدة)"
+      ],
+      "options_en": [
+        "Fungal, viral & bacterial infections",
+        "Geographic tongue & fissured tongue",
+        "Anemia, vitamin deficiency & xerostomia condition",
+        "All of the above (Any of the 9 clinical conditions)"
+      ],
+      "correct_index": 3,
+      "answer_ar": "الإجابة النموذجية المعتمدة (Model Answer - أي 6 من الآتية):\n1. Fungal infection (العدوى الفطرية)\n2. Viral infection (العدوى الفيروسية)\n3. Bacterial infection (العدوى البكتيرية)\n4. Fissured tongue (اللسان المشقق)\n5. Geographic tongue (اللسان الجغرافي)\n6. Anemia (فقر الدم)\n7. Coating atrophy of tongue (ضمور حليمات اللسان)\n8. Vitamin deficiency (نقص الفيتامينات)\n9. Xerostomia condition (جفاف الفم)\n\nمرجع الشيت (صفحة 9): Section 8, Item 2: «Burning sensation — e.g.»",
+      "answer_en": "Model Answer (List any 6):\n1. Fungal infection\n2. Viral infection\n3. Bacterial infection\n4. Fissured tongue\n5. Geographic tongue\n6. Anemia\n7. Coating atrophy of tongue\n8. Vitamin deficiency\n9. Xerostomia condition\n\nSheet Reference (Page 9): Section 8, Item 2: Burning sensation — e.g.",
+      "quote_ref": "Burning sensation — e.g.: Fungal infection / Viral infection / Bacterial infection / Fissured tongue / Geographic tongue / Anemia / Coating atrophy of tongue / Vitamin deficiency / Xerostomia condition"
+    },
+    {
+      "id": "q_omdr_07",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 9,
+      "topic_ar": "الأمراض المرتبطة بجفاف الفم",
+      "topic_en": "Diseases Associated with Dry Mouth",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Dry mouth",
+        "Xerostomia",
+        "Sjogren",
+        "Radiation"
+      ],
+      "text_ar": "يُعد جفاف الفم (Dry mouth) سمة سريرية للأمراض والحالات التالية:",
+      "text_en": "Dry mouth is a clinical feature of the following diseases:",
+      "options_ar": [
+        "العلاج الدوائي ومتلازمة شوغرن (Drug therapy & Sjogren's syndrome)",
+        "ما بعد العلاج الإشعاعي والعلاج الكيميائي (Post-radiation therapy & Chemotherapy)",
+        "مرض ميكوليتز (Mikulicz's disease)",
+        "جميع ما سبق (All of the above)"
+      ],
+      "options_en": [
+        "Drug therapy & Sjogren's syndrome",
+        "Post-radiation therapy & Chemotherapy",
+        "Mikulicz's disease",
+        "All of the above"
+      ],
+      "correct_index": 3,
+      "answer_ar": "الإجابة المعتمدة (Model Answer):\nيحدث جفاف الفم كسمة سريرية في الحالات الخمس الآتية:\n1. Drug therapy (العلاجات الدوائية)\n2. Sjogren's syndrome (متلازمة شوغرن)\n3. Post-radiation therapy (ما بعد العلاج الإشعاعي للرأس والعنق)\n4. Chemotherapy (العلاج الكيميائي)\n5. Mikulicz's disease (مرض ميكوليتز)\n\nمرجع الشيت (صفحة 9): Section 8, Item 4: «Dry mouth — e.g.»",
+      "answer_en": "Model Answer:\n1. Drug therapy\n2. Sjogren's syndrome\n3. Post-radiation therapy\n4. Chemotherapy\n5. Mikulicz's disease\n\nSheet Reference (Page 9): Section 8, Item 4: Dry mouth — e.g.",
+      "quote_ref": "Dry mouth — e.g.: 1. Drug therapy 2. Sjogren's syndrome 3. Post-radiation therapy 4. Chemotherapy 5. Mikulicz's disease"
+    },
+    {
+      "id": "q_omdr_08",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 10,
+      "topic_ar": "أسباب تأخر بزوغ الأسنان",
+      "topic_en": "Causes of Delayed Tooth Eruption",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Delayed eruption",
+        "Malposed tooth",
+        "Cysts",
+        "Tumors"
+      ],
+      "text_ar": "الأسنان المعوجة أو المنزاحة (Mal-posed tooth)، والأكياس والأورام قد تسبب:",
+      "text_en": "Mal-posed tooth, cysts & tumours may cause:",
+      "options_ar": [
+        "طعم كريه بالفم (Bad taste)",
+        "جفاف الفم (Dry mouth)",
+        "تأخر بزوغ الأسنان (Delayed tooth eruption)",
+        "لا شيء مما سبق (None of the above)"
+      ],
+      "options_en": [
+        "Bad taste",
+        "Dry mouth",
+        "Delayed tooth eruption",
+        "None of the above"
+      ],
+      "correct_index": 2,
+      "answer_ar": "الإجابة المعتمدة: C. تأخر بزوغ الأسنان (Delayed tooth eruption)\n\nمرجع الشيت (صفحات 9–10):\n«7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas»\nالأسنان المنزاحة والأكياس والأورام والأودنتوما تُعد من العوائق الفيزيائية والموضعية التي تسبب تأخر بزوغ السن في الفك.",
+      "answer_en": "Correct Answer: C. Delayed tooth eruption\n\nSheet Reference (Pages 9–10):\n\"7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas\"\nPhysical obstructions like malposed teeth, cysts, tumors, and odontomas cause delayed eruption.",
+      "quote_ref": "7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas"
+    },
+    {
+      "id": "q_omdr_09",
+      "subject_id": "omdr",
+      "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
+      "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
+      "sheet_id": "sh-omdr-01",
+      "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
+      "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
+      "page_ref": 11,
+      "topic_ar": "أسباب البخر ورائحة الفم الكريهة",
+      "topic_en": "Causes of Halitosis",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Halitosis",
+        "Diabetes",
+        "Periodontal",
+        "Decayed teeth"
+      ],
+      "text_ar": "رائحة الفم الكريهة (Halitosis) تُعد سمة تشخيصية إكلينيكية لـ:",
+      "text_en": "Halitosis is a clinical diagnostic feature of:",
+      "options_ar": [
+        "داء السكري (Diabetes mellitus)",
+        "أمراض الأنسجة الداعمة واللثة (Periodontal diseases)",
+        "الأسنان المسوسة (Decayed teeth)",
+        "جميع ما سبق (All of the above)"
+      ],
+      "options_en": [
+        "Diabetes mellitus",
+        "Periodontal diseases",
+        "Decayed teeth",
+        "All of the above"
+      ],
+      "correct_index": 3,
+      "answer_ar": "الإجابة المعتمدة: D. جميع ما سبق (All of the above)\n\nمرجع الشيت (صفحة 11):\nمذكورة مباشرة تحت البند: «8. Halitosis — e.g.»:\n• Periodontal disease (الخيار B)\n• Diabetes (الخيار A)\n• Decayed teeth (الخيار C)\nلذا فإن جميع الحالات المذكورة تُعد أسباباً سريرية للبخر الفموي.",
+      "answer_en": "Correct Answer: D. All of the above\n\nSheet Reference (Page 11):\nListed directly under \"8. Halitosis — e.g.\":\n• Periodontal disease (Option B)\n• Diabetes (Option A)\n• Decayed teeth (Option C)\nAll listed conditions present with halitosis.",
+      "quote_ref": "8. Halitosis — e.g.: • Periodontal disease • Diabetes • Decayed teeth"
+    }
+  ]
+}

@@ -12,6 +12,9 @@ const QuestionsPage = {
   searchQuery: '',
   pendingSheetQuestions: [],   // Questions pending type filter selection
   pendingSubjectTitle: '',     // Subject + sheet title for pending quiz
+  kuroExplanationOpen: false,  // Interactive mascot explanation pane state
+  hasCurrentQuestionBeenAnswered: false,
+  isCurrentQuestionAnswerCorrect: false,
 
   getQuestions() {
     if (window.DATA && Array.isArray(window.DATA.questions) && window.DATA.questions.length > 0) {
@@ -131,64 +134,111 @@ const QuestionsPage = {
 
       <!-- DENTISTOIRE-GRADE LUXURY MODAL QUIZ RUNNER (OVERLAY) -->
       <div id="dt-quiz-runner-modal" class="dt-quiz-overlay" style="display: none;">
-        <div class="dt-quiz-card" id="dt-quiz-card-box">
-          <!-- Header Bar -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="kf-segmented-badge" style="background: rgba(2, 132, 199, 0.08); color: var(--brand-accent); font-weight: 800;" id="dt-modal-subject-tag">
-                Oral Histology
-              </span>
-              <span style="font-size: 0.775rem; font-weight: 700; color: var(--text-secondary);" id="dt-modal-counter">
-                Question 1 of 10
-              </span>
+        <div class="dt-quiz-stage-container" id="dt-quiz-stage-container">
+          <!-- MAIN CARD: QUESTION & OPTIONS -->
+          <div class="dt-quiz-card" id="dt-quiz-card-box">
+            <!-- Header Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 10px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="kf-segmented-badge" style="background: rgba(2, 132, 199, 0.08); color: var(--brand-accent); font-weight: 800;" id="dt-modal-subject-tag">
+                  Oral Medicine
+                </span>
+                <span class="kf-segmented-badge" style="background: rgba(200, 67, 67, 0.08); color: #C84343; font-weight: 800;" id="dt-modal-sheet-tag">
+                  Sheet 1
+                </span>
+                <span class="kf-segmented-badge" style="background: var(--bg-surface-subtle); color: var(--text-secondary); font-weight: 700; display: none;" id="dt-modal-page-tag">
+                  Page 4
+                </span>
+                <span style="font-size: 0.775rem; font-weight: 700; color: var(--text-secondary);" id="dt-modal-counter">
+                  Question 1 of 9
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="dt-btn-star" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 6px 12px; gap: 6px;">
+                  <i data-lucide="star" style="width: 14px; height: 14px;"></i>
+                  <span id="dt-star-text">${isAr ? 'حفظ للمراجعة' : 'Save'}</span>
+                </button>
+                <button type="button" id="dt-btn-exit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 6px 12px; color: #EF4444; border-color: rgba(239, 68, 68, 0.3);">
+                  <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                  <span>${isAr ? 'خروج' : 'Exit'}</span>
+                </button>
+              </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <button type="button" id="dt-btn-star" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 6px 12px; gap: 6px;">
-                <i data-lucide="star" style="width: 14px; height: 14px;"></i>
-                <span id="dt-star-text">${isAr ? 'حفظ للمراجعة' : 'Save'}</span>
+
+            <!-- Progress Bar -->
+            <div style="width: 100%; height: 5px; border-radius: 99px; background: var(--bg-surface-subtle); overflow: hidden; margin-bottom: 22px; border: 1px solid var(--border-subtle);">
+              <div id="dt-modal-progress-bar" style="height: 100%; width: 10%; background: var(--brand-accent); border-radius: 99px; transition: width 0.25s ease;"></div>
+            </div>
+
+            <!-- Question Title -->
+            <h2 id="dt-modal-q-title" style="font-size: 1.12rem; font-weight: 800; color: var(--text-primary); margin: 0 0 20px; line-height: 1.6; text-align: start;">
+              Question text goes here
+            </h2>
+
+            <!-- Vertical Tappable Option Buttons -->
+            <div id="dt-modal-options-box" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;">
+              <!-- Options dynamically injected -->
+            </div>
+
+            <!-- Navigation Controls -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--border-subtle); padding-top: 18px;">
+              <button type="button" id="dt-btn-prev" class="btn btn-secondary btn-sm" style="font-weight: 700; gap: 6px; padding: 8px 16px;">
+                <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 14px; height: 14px;"></i>
+                <span>${isAr ? 'السابق' : 'Previous'}</span>
               </button>
-              <button type="button" id="dt-btn-exit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 6px 12px; color: #EF4444; border-color: rgba(239, 68, 68, 0.3);">
-                <i data-lucide="x" style="width: 14px; height: 14px;"></i>
-                <span>${isAr ? 'خروج' : 'Exit'}</span>
+              <button type="button" id="dt-btn-next" class="btn btn-primary btn-sm" style="font-weight: 700; gap: 6px; padding: 8px 20px;">
+                <span>${isAr ? 'التالي' : 'Next'}</span>
+                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 14px; height: 14px;"></i>
               </button>
             </div>
           </div>
 
-          <!-- Progress Bar -->
-          <div style="width: 100%; height: 5px; border-radius: 99px; background: var(--bg-surface-subtle); overflow: hidden; margin-bottom: 22px; border: 1px solid var(--border-subtle);">
-            <div id="dt-modal-progress-bar" style="height: 100%; width: 10%; background: var(--brand-accent); border-radius: 99px; transition: width 0.25s ease;"></div>
-          </div>
+          <!-- SECONDARY STAGE: LARGE KURO COMPANION & NON-OBSCURING EXPLANATION WING -->
+          <aside class="dt-kuro-companion-stage" id="dt-kuro-companion-stage" aria-label="Kuro Study Companion">
+            <!-- Clickable Large Kuro Character Avatar -->
+            <button type="button" class="dt-kuro-mascot-trigger" id="dt-kuro-mascot-trigger" title="${isAr ? 'انقر على كورو لإظهار أو إخفاء الشرح السريري المعتمد' : 'Click Kuro to toggle verified faculty explanation'}" aria-expanded="false">
+              <div class="dt-kuro-avatar-frame">
+                <img id="dt-kuro-mascot-img" class="dt-kuro-mascot-img" src="assets/characters/kuro/Kuro-Thinking.png" alt="Kuro Character Companion" />
+                <span class="dt-kuro-pulse-ring"></span>
+              </div>
+              <div class="dt-kuro-bubble-callout" id="dt-kuro-bubble-callout">
+                <span class="dt-kuro-bubble-icon">💡</span>
+                <span class="dt-kuro-bubble-text" id="dt-kuro-bubble-text">${isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation'}</span>
+              </div>
+            </button>
 
-          <!-- Question Title -->
-          <h2 id="dt-modal-q-title" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0 0 22px; line-height: 1.55; text-align: start;">
-            Question text goes here
-          </h2>
+            <!-- Slide-out / Expandable Explanation Panel (Sits beside Kuro, NOT covering the question card!) -->
+            <div class="dt-kuro-explanation-pane" id="dt-kuro-explanation-pane" style="display: none;">
+              <div class="dt-kuro-exp-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="dt-kuro-exp-badge-icon">
+                    <i data-lucide="book-open" style="width: 16px; height: 16px; color: var(--brand-accent);"></i>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary);">${isAr ? 'شرح كورو والكلية المعتمد' : 'Faculty Explanation'}</div>
+                    <div id="dt-kuro-exp-ref-subtitle" style="font-size: 0.73rem; color: var(--brand-accent); font-weight: 700;"></div>
+                  </div>
+                </div>
+                <button type="button" class="dt-kuro-exp-close-btn" id="dt-kuro-exp-close-btn" title="${isAr ? 'إغلاق الشرح' : 'Close Explanation'}">
+                  <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                </button>
+              </div>
 
-          <!-- Vertical Tappable Option Buttons -->
-          <div id="dt-modal-options-box" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-            <!-- Options dynamically injected -->
-          </div>
+              <div class="dt-kuro-exp-body">
+                <!-- Faculty Model Answer & Detailed Breakdown -->
+                <div class="dt-kuro-answer-highlight" id="dt-kuro-model-answer"></div>
 
-          <!-- Faculty Model Explanation Box -->
-          <div id="dt-modal-explanation-box" style="display: none; padding: 16px 18px; border-radius: 12px; background: var(--bg-surface-subtle); border-inline-start: 4px solid var(--brand-accent); margin-bottom: 22px; text-align: start;">
-            <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
-              <i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: #10B981;"></i>
-              <span>${isAr ? 'التعليل السريري المعتمد من الكلية:' : 'Verified Faculty Explanation:'}</span>
+                <!-- Sheet Verbatim Quote Box -->
+                <div class="dt-kuro-sheet-quote-box" id="dt-kuro-sheet-quote-box" style="display: none;">
+                  <div class="dt-kuro-quote-header">
+                    <i data-lucide="quote" style="width: 12px; height: 12px; color: var(--brand-accent);"></i>
+                    <span id="dt-kuro-quote-label">${isAr ? 'نص الشيت الرسمي المعتمد:' : 'Official Sheet Quote:'}</span>
+                  </div>
+                  <div class="dt-kuro-quote-text" id="dt-kuro-quote-text"></div>
+                </div>
+              </div>
             </div>
-            <div id="dt-modal-explanation-text" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65;"></div>
-          </div>
-
-          <!-- Navigation Controls -->
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--border-subtle); padding-top: 18px;">
-            <button type="button" id="dt-btn-prev" class="btn btn-secondary btn-sm" style="font-weight: 700; gap: 6px; padding: 8px 16px;">
-              <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 14px; height: 14px;"></i>
-              <span>${isAr ? 'السابق' : 'Previous'}</span>
-            </button>
-            <button type="button" id="dt-btn-next" class="btn btn-primary btn-sm" style="font-weight: 700; gap: 6px; padding: 8px 20px;">
-              <span>${isAr ? 'التالي' : 'Next'}</span>
-              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 14px; height: 14px;"></i>
-            </button>
-          </div>
+          </aside>
         </div>
       </div>
 
@@ -306,6 +356,15 @@ const QuestionsPage = {
         QuestionsPage.activeQuizIndex--;
         QuestionsPage.renderModalQuestion();
       }
+    });
+
+    // Mascot click toggle & explanation close
+    document.getElementById('dt-kuro-mascot-trigger')?.addEventListener('click', () => {
+      QuestionsPage.toggleKuroExplanation();
+    });
+
+    document.getElementById('dt-kuro-exp-close-btn')?.addEventListener('click', () => {
+      QuestionsPage.toggleKuroExplanation(false);
     });
 
     // Question Type Selector Modal
@@ -770,12 +829,58 @@ const QuestionsPage = {
     }
   },
 
+  toggleKuroExplanation(forceState) {
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const pane = document.getElementById('dt-kuro-explanation-pane');
+    const bubbleText = document.getElementById('dt-kuro-bubble-text');
+    const mascotImg = document.getElementById('dt-kuro-mascot-img');
+    const trigger = document.getElementById('dt-kuro-mascot-trigger');
+    if (!pane) return;
+
+    if (typeof forceState === 'boolean') {
+      QuestionsPage.kuroExplanationOpen = forceState;
+    } else {
+      QuestionsPage.kuroExplanationOpen = !QuestionsPage.kuroExplanationOpen;
+    }
+
+    const isOpen = QuestionsPage.kuroExplanationOpen;
+    pane.style.display = isOpen ? 'block' : 'none';
+    if (trigger) trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+    if (isOpen) {
+      if (bubbleText) bubbleText.textContent = isAr ? 'إغلاق الشرح السريري ✕' : 'Close Explanation ✕';
+      if (mascotImg) {
+        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('reading')) || 'assets/characters/kuro/Kuro-Reading.png';
+      }
+    } else {
+      if (mascotImg) {
+        if (QuestionsPage.hasCurrentQuestionBeenAnswered && QuestionsPage.isCurrentQuestionAnswerCorrect) {
+          mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('happy')) || 'assets/characters/kuro/Kuro-Happy.png';
+        } else {
+          mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
+        }
+      }
+      if (bubbleText) {
+        if (QuestionsPage.hasCurrentQuestionBeenAnswered) {
+          bubbleText.textContent = QuestionsPage.isCurrentQuestionAnswerCorrect
+            ? (isAr ? '🎉 إجابة صحيحة! انقر للشرح' : '🎉 Correct! Click for explanation')
+            : (isAr ? '💡 انقر لمراجعة الشرح والصفحة' : '💡 Click to review explanation');
+        } else {
+          bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
+        }
+      }
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
   // 4. LEVEL 3: DENTISTOIRE-STYLE FOCUSED MODAL QUIZ RUNNER
   launchQuizRunner(questionsList, subjectTitle) {
     if (!Array.isArray(questionsList) || questionsList.length === 0) return;
     QuestionsPage.activeQuizList = questionsList;
     QuestionsPage.activeQuizIndex = 0;
     QuestionsPage.activeSubjectTitle = subjectTitle;
+    QuestionsPage.kuroExplanationOpen = false;
 
     const overlay = document.getElementById('dt-quiz-runner-modal');
     if (overlay) {
@@ -798,12 +903,31 @@ const QuestionsPage = {
     const q = QuestionsPage.activeQuizList[QuestionsPage.activeQuizIndex];
     if (!q) return;
 
+    QuestionsPage.hasCurrentQuestionBeenAnswered = false;
+    QuestionsPage.isCurrentQuestionAnswerCorrect = false;
+
     const total = QuestionsPage.activeQuizList.length;
     const current = QuestionsPage.activeQuizIndex + 1;
     const percent = Math.round((current / total) * 100);
 
     const tagEl = document.getElementById('dt-modal-subject-tag');
     if (tagEl) tagEl.textContent = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en);
+
+    const sheetTagEl = document.getElementById('dt-modal-sheet-tag');
+    if (sheetTagEl) {
+      const shName = isAr ? (q.sheet_title_ar || 'الشيت 1') : (q.sheet_title_en || 'Sheet 1');
+      sheetTagEl.textContent = shName;
+    }
+
+    const pageTagEl = document.getElementById('dt-modal-page-tag');
+    if (pageTagEl) {
+      if (q.page_ref) {
+        pageTagEl.textContent = isAr ? `صفحة ${q.page_ref}` : `Page ${q.page_ref}`;
+        pageTagEl.style.display = 'inline-block';
+      } else {
+        pageTagEl.style.display = 'none';
+      }
+    }
 
     const counterEl = document.getElementById('dt-modal-counter');
     if (counterEl) counterEl.textContent = isAr ? `السؤال ${current} من ${total}` : `Question ${current} of ${total}`;
@@ -816,9 +940,51 @@ const QuestionsPage = {
 
     QuestionsPage.updateStarButton(q);
 
-    // Hide explanation box
-    const expBox = document.getElementById('dt-modal-explanation-box');
-    if (expBox) expBox.style.display = 'none';
+    // Update Kuro explanation contents
+    const expSubtitle = document.getElementById('dt-kuro-exp-ref-subtitle');
+    if (expSubtitle) {
+      const shTitle = isAr ? (q.sheet_title_ar || 'الشيت المعتمد') : (q.sheet_title_en || 'Official Sheet');
+      const pageInfo = q.page_ref ? (isAr ? ` • صفحة ${q.page_ref}` : ` • Page ${q.page_ref}`) : '';
+      expSubtitle.textContent = `${shTitle}${pageInfo}`;
+    }
+
+    const ansEl = document.getElementById('dt-kuro-model-answer');
+    if (ansEl) {
+      ansEl.textContent = isAr ? (q.answer_ar || q.explanation_ar || q.answer_en) : (q.answer_en || q.explanation_en || q.answer_ar);
+    }
+
+    const quoteBox = document.getElementById('dt-kuro-sheet-quote-box');
+    const quoteEl = document.getElementById('dt-kuro-quote-text');
+    if (quoteBox && quoteEl) {
+      if (q.quote_ref) {
+        quoteEl.textContent = `«${q.quote_ref}»`;
+        quoteBox.style.display = 'block';
+      } else {
+        quoteBox.style.display = 'none';
+      }
+    }
+
+    // Reset mascot state and explanation pane visibility
+    const expPane = document.getElementById('dt-kuro-explanation-pane');
+    const bubbleText = document.getElementById('dt-kuro-bubble-text');
+    const mascotImg = document.getElementById('dt-kuro-mascot-img');
+    const trigger = document.getElementById('dt-kuro-mascot-trigger');
+
+    if (QuestionsPage.kuroExplanationOpen && expPane) {
+      expPane.style.display = 'block';
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+      if (mascotImg) {
+        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('reading')) || 'assets/characters/kuro/Kuro-Reading.png';
+      }
+      if (bubbleText) bubbleText.textContent = isAr ? 'إغلاق الشرح السريري ✕' : 'Close Explanation ✕';
+    } else {
+      if (expPane) expPane.style.display = 'none';
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      if (mascotImg) {
+        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
+      }
+      if (bubbleText) bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
+    }
 
     // Render options
     const optBox = document.getElementById('dt-modal-options-box');
@@ -826,7 +992,7 @@ const QuestionsPage = {
 
     const options = isAr ? (q.options_ar || q.options_en || []) : (q.options_en || q.options_ar || []);
     const correctIdx = typeof q.correct_index === 'number' ? q.correct_index : 0;
-    const optLetters = ['A', 'B', 'C', 'D'];
+    const optLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
     optBox.innerHTML = options.map((opt, idx) => `
       <button type="button" class="dt-quiz-option" data-opt-idx="${idx}">
@@ -842,7 +1008,11 @@ const QuestionsPage = {
     optBox.querySelectorAll('.dt-quiz-option').forEach(btn => {
       btn.addEventListener('click', () => {
         const selectedIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+        const isCorrect = (selectedIdx === correctIdx);
         
+        QuestionsPage.hasCurrentQuestionBeenAnswered = true;
+        QuestionsPage.isCurrentQuestionAnswerCorrect = isCorrect;
+
         optBox.querySelectorAll('.dt-quiz-option').forEach((b, bIdx) => {
           b.disabled = true;
           const statusIcon = b.querySelector('.dt-opt-status-icon');
@@ -863,21 +1033,25 @@ const QuestionsPage = {
           }
         });
 
+        // Update Kuro Mascot reaction
+        if (mascotImg && !QuestionsPage.kuroExplanationOpen) {
+          if (isCorrect) {
+            mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('happy')) || 'assets/characters/kuro/Kuro-Happy.png';
+            if (bubbleText) bubbleText.textContent = isAr ? '🎉 إجابة صحيحة! انقر للشرح والصفحة' : '🎉 Correct! Click for explanation';
+          } else {
+            mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
+            if (bubbleText) bubbleText.textContent = isAr ? '💡 انقر على كورو لمراجعة الشرح والصفحة' : '💡 Click Kuro to review explanation';
+          }
+        }
+
         // If wrong, record as weak question
-        if (selectedIdx !== correctIdx) {
+        if (!isCorrect) {
           QuestionsPage.recordWeakQuestion(q);
         } else {
           // Add academic points XP
           if (window.STORE && typeof window.STORE.addPoints === 'function') {
             window.STORE.addPoints(5);
           }
-        }
-
-        // Reveal explanation
-        if (expBox) {
-          const expText = document.getElementById('dt-modal-explanation-text');
-          if (expText) expText.textContent = isAr ? q.answer_ar : q.answer_en;
-          expBox.style.display = 'block';
         }
       });
     });
