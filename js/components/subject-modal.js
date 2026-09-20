@@ -66,13 +66,13 @@ const SubjectModal = {
           id: 'sheets',
           title: t('catSheets') || (isAr ? 'الشيتات والمحاضرات' : 'Sheets & Lectures'),
           desc: t('catSheetsDesc') || (isAr ? 'تصفح الشيتات الرسمية' : 'Browse official sheets'),
-          icon: '<i data-lucide="file-text" style="width: 24px; height: 24px; color: #0284C7;"></i>'
+          icon: '<img src="assets/icons/sheets_cat.png" alt="Sheets" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #0284C7;" />'
         },
         {
           id: 'recordings',
           title: t('catRecordings') || (isAr ? 'التسجيلات الصوتية' : 'Audio Recordings'),
           desc: t('catRecordingsDesc') || (isAr ? 'تسجيلات دكاترة الكلية' : 'Faculty lecture audio'),
-          icon: '<i data-lucide="mic" style="width: 24px; height: 24px; color: #10B981;"></i>'
+          icon: '<img src="assets/icons/recordings_icon.png" alt="Recordings" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #10B981;" />'
         },
         {
           id: 'ai-questions',

@@ -173,6 +173,11 @@ html[dir="rtl"] .app-sidebar {
   transform: scale(1.15);
 }
 
+.sidebar-menu-item[data-route="/recordings"]:hover .sidebar-cat-icon,
+.sidebar-menu-item[data-route="/recordings"].active .sidebar-cat-icon {
+  border-color: #0284C7;
+}
+
 .sidebar-menu-text {
   flex: 1;
   white-space: nowrap;

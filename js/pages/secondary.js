@@ -235,8 +235,8 @@ const SecondaryPages = {
     container.innerHTML = `
       <div class="page-title-bar">
         <div class="page-title-group">
-          <h1>
-            <i data-lucide="headphones" style="color: var(--brand-primary); width: 26px; height: 26px;"></i>
+          <h1 style="display: flex; align-items: center; gap: 10px;">
+            <img src="assets/icons/recordings_icon.png" alt="Recordings" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-subtle); box-shadow: 0 2px 8px rgba(0,0,0,0.12);" />
             ${isAr ? 'التسجيلات الصوتية' : 'Audio Recordings'}
           </h1>
           <p>${isAr ? 'تسجيلات صوتية لمحاضرات دكاترة الكلية مرتبطة بالشيتات' : 'Faculty lecture audio recordings linked to lecture sheets'}</p>

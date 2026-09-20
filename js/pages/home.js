@@ -321,7 +321,7 @@ const HomePage = {
 
     const items = [
       { icon: 'help-circle', title: t('qaQuestionBank'), count: counts.questions + counts.exams, unit: t('qaQuestions'), route: '#/questions', color: 'var(--brand-burgundy)' },
-      { icon: 'headphones', title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings', count: '', unit: '', route: '#/recordings', color: '#0284C7' },
+      { icon: 'headphones', img: 'assets/icons/recordings_icon.png', title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings', count: '', unit: '', route: '#/recordings', color: '#0284C7' },
       { icon: 'calendar',    title: isAr ? 'جدول المحاضرات النظري' : 'Theory Schedule',    count: '',               unit: '',               route: '#/lecture-schedule', color: '#059669' },
       { icon: 'file-check-2', title: isAr ? 'جداول الامتحانات الرسمية' : 'Exam Schedule', count: '', unit: '', route: '#/exams', color: '#D97706' }
     ];
@@ -335,7 +335,7 @@ const HomePage = {
           ${items.map(item => `
             <a href="${item.route}" class="home-qa-card">
               <div class="home-qa-icon" style="color: ${item.color};">
-                <i data-lucide="${item.icon}"></i>
+                ${item.img ? `<img src="${item.img}" alt="${item.title}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid ${item.color};" />` : `<i data-lucide="${item.icon}"></i>`}
               </div>
               <div class="home-qa-meta">
                 <span class="home-qa-title">${item.title}</span>

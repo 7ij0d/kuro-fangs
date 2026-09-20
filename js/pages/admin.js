@@ -612,7 +612,7 @@ window.AdminPage = (function () {
           </button>
           
           <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'recordings' ? 'active' : ''}" data-tab="recordings">
-            <i data-lucide="headphones" style="width: 15px; height: 15px;"></i>
+            <img src="assets/icons/recordings_icon.png" alt="Recordings" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover; vertical-align: middle;" />
             <span>${isAr ? 'التسجيلات' : 'Recordings'}</span>
           </button>
           
