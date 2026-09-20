@@ -338,6 +338,7 @@ const QuestionsPage = {
       if (q) {
         QuestionsPage.saveQuestion(q);
         QuestionsPage.updateStarButton(q);
+        if (window.SoundFX) window.SoundFX.play('badge');
       }
     });
 
@@ -345,7 +346,9 @@ const QuestionsPage = {
       if (QuestionsPage.activeQuizIndex < QuestionsPage.activeQuizList.length - 1) {
         QuestionsPage.activeQuizIndex++;
         QuestionsPage.renderModalQuestion();
+        if (window.SoundFX) window.SoundFX.play('tap');
       } else {
+        if (window.SoundFX) window.SoundFX.play('victory');
         if (window.Toast) window.Toast.show(isAr ? '🎉 أكملت جميع أسئلة هذا الاختبار بنجاح!' : 'You completed all questions!', 'success');
         QuestionsPage.closeQuizModal();
       }
@@ -898,11 +901,13 @@ const QuestionsPage = {
     if (trigger) trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 
     if (isOpen) {
+      if (window.SoundFX) window.SoundFX.play('kuroThinking');
       if (bubbleText) bubbleText.textContent = isAr ? 'إغلاق الشرح السريري ✕' : 'Close Explanation ✕';
       if (mascotImg) {
         mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('reading')) || 'assets/characters/kuro/Kuro-Reading.png';
       }
     } else {
+      if (window.SoundFX) window.SoundFX.play('close');
       if (mascotImg) {
         if (QuestionsPage.hasCurrentQuestionBeenAnswered && QuestionsPage.isCurrentQuestionAnswerCorrect) {
           mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('happy')) || 'assets/characters/kuro/Kuro-Happy.png';
@@ -1062,6 +1067,15 @@ const QuestionsPage = {
         
         QuestionsPage.hasCurrentQuestionBeenAnswered = true;
         QuestionsPage.isCurrentQuestionAnswerCorrect = isCorrect;
+
+        if (window.SoundFX) {
+          if (isCorrect) {
+            window.SoundFX.play('correct');
+            setTimeout(() => { if (window.SoundFX) window.SoundFX.play('kuroHappy'); }, 220);
+          } else {
+            window.SoundFX.play('incorrect');
+          }
+        }
 
         optBox.querySelectorAll('.dt-quiz-option').forEach((b, bIdx) => {
           b.disabled = true;

@@ -41,6 +41,10 @@
 
     const container = ensureContainer();
 
+    if (window.SoundFX) {
+      window.SoundFX.play(points ? 'badge' : 'toast');
+    }
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
 

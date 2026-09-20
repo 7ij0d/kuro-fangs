@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     langToggleBtn.addEventListener('click', () => {
       const newLang = window.I18N.toggleLang();
       applyLanguage(newLang);
+      if (window.SoundFX) window.SoundFX.play('pop');
       // Re-render current page
       window.ROUTER.handleRoute();
       updateGlobalMascotAvatars();
@@ -158,8 +159,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     themeToggleBtn.addEventListener('click', () => {
       const newTheme = window.STORE.toggleTheme();
       applyTheme(newTheme);
+      if (window.SoundFX) window.SoundFX.play('switch');
     });
   }
+
+  // 6.2. Setup Sound Effects Toggle Event Listener
+  const soundToggleBtn = document.getElementById('sound-toggle-btn');
+  const updateSoundUI = (enabled) => {
+    const soundIcon = document.getElementById('sound-icon');
+    if (soundIcon) {
+      soundIcon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
+      if (window.lucide) window.lucide.createIcons();
+    }
+    if (soundToggleBtn) {
+      soundToggleBtn.setAttribute('data-sound-active', enabled ? 'true' : 'false');
+      soundToggleBtn.style.opacity = enabled ? '1' : '0.55';
+    }
+  };
+
+  if (soundToggleBtn) {
+    if (window.SoundFX) {
+      updateSoundUI(window.SoundFX.isEnabled());
+    }
+    soundToggleBtn.addEventListener('click', () => {
+      if (window.SoundFX) {
+        const newState = window.SoundFX.toggle();
+        updateSoundUI(newState);
+        if (window.Toast) {
+          const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+          window.Toast.show(
+            newState 
+              ? (isAr ? 'تم تفعيل المؤثرات الصوتية 🔊' : 'Sound Effects Enabled 🔊') 
+              : (isAr ? 'تم كتم المؤثرات الصوتية 🔇' : 'Sound Effects Muted 🔇'),
+            'info'
+          );
+        }
+      }
+    });
+  }
+
+  window.addEventListener('kf:sound-toggle', (e) => {
+    if (e.detail) updateSoundUI(e.detail.enabled);
+  });
 
   // 6.5. Setup Global Header Search Bar (works on all pages)
   const globalSearchInput = document.getElementById('header-search-input');

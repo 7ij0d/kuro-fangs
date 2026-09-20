@@ -274,6 +274,7 @@
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
+        if (window.SoundFX) window.SoundFX.play('copy');
         return true;
       }
     } catch (e) {
@@ -293,6 +294,7 @@
       textarea.select();
       const success = document.execCommand('copy');
       document.body.removeChild(textarea);
+      if (success && window.SoundFX) window.SoundFX.play('copy');
       return success;
     } catch (err) {
       console.error('All copy methods failed:', err);

@@ -1543,5 +1543,25 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   }
 }
 
+/* Sound Effects Toggle Button Micro-interactions */
+#sound-toggle-btn {
+  position: relative;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, border-color 0.15s ease, opacity 0.2s ease;
+}
 
+#sound-toggle-btn:hover {
+  transform: translateY(-1px);
+}
 
+#sound-toggle-btn:active {
+  transform: translateY(1px) scale(0.95);
+}
+
+#sound-toggle-btn[data-sound-active="false"] {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+}
+
+#sound-toggle-btn[data-sound-active="true"] #sound-icon {
+  color: var(--brand-accent, #0284C7);
+}
