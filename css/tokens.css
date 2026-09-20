@@ -30,6 +30,7 @@
   --bg-card-hover: #FFFFFF;
   --bg-hover: #EFE9E1;
   --bg-input: #FFFFFF;
+  --surface-card: #FFFFFF;
 
   /* Kuro Crimson & Rose Primary */
   --color-primary: #C84343;
@@ -149,6 +150,7 @@
   --bg-card-hover: #202232;
   --bg-hover: #242636;
   --bg-input: #12131C;
+  --surface-card: #1A1C28;
 
   /* Radiant Kuro Crimson in Dark Mode */
   --color-primary: #DE5353;

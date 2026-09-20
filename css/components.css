@@ -6977,29 +6977,29 @@ html[dir="rtl"] .fox-skin-cost-badge {
 }
 
 .home-daily-column {
-  background: var(--surface-card, #131520);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-sm);
   border-radius: 14px;
   padding: 18px 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   position: relative;
-  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .home-daily-column:hover {
-  border-color: rgba(255, 255, 255, 0.13);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: var(--border-card-hover, rgba(200, 67, 67, 0.35));
+  box-shadow: var(--shadow-card);
 }
 
 .home-daily-column.today-column {
-  border-inline-start: 3px solid #10B981;
+  border-inline-start: 4px solid #10B981;
 }
 
 .home-daily-column.tomorrow-column {
-  border-inline-start: 3px solid #0284C7;
+  border-inline-start: 4px solid #0284C7;
 }
 
 .home-daily-col-header {
@@ -7007,7 +7007,7 @@ html[dir="rtl"] .fox-skin-cost-badge {
   align-items: center;
   justify-content: space-between;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .home-daily-col-title-wrap {
@@ -7020,38 +7020,40 @@ html[dir="rtl"] .fox-skin-cost-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 800;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 9999px;
   letter-spacing: 0.02em;
 }
 
 .home-daily-col-badge.today-badge {
-  background: rgba(16, 185, 129, 0.14);
-  color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 .home-daily-col-badge.tomorrow-badge {
-  background: rgba(56, 189, 248, 0.12);
-  color: #38BDF8;
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(2, 132, 199, 0.08);
+  color: #0284C7;
+  border: 1px solid rgba(2, 132, 199, 0.25);
 }
 
 .home-daily-day-name {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  color: var(--text-primary, #F8FAFC);
+  color: var(--text-primary);
   margin: 0;
+  line-height: 1.3;
 }
 
 .home-daily-count-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-muted, #94A3B8);
-  background: rgba(255, 255, 255, 0.06);
-  padding: 2px 8px;
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: var(--text-secondary);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 9px;
   border-radius: 6px;
   font-variant-numeric: tabular-nums;
 }
@@ -7063,11 +7065,11 @@ html[dir="rtl"] .fox-skin-cost-badge {
 }
 
 .home-lecture-card {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   border-radius: 11px;
-  padding: 12px 14px;
+  padding: 13px 15px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -7080,10 +7082,10 @@ html[dir="rtl"] .fox-skin-cost-badge {
 }
 
 .home-lecture-card:hover {
-  background: rgba(255, 255, 255, 0.065);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--bg-surface);
+  border-color: var(--border-card-hover, var(--brand-accent));
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .home-lecture-card:active {
@@ -7104,68 +7106,33 @@ html[dir="rtl"] .fox-skin-cost-badge {
 }
 
 .home-lecture-code {
-  background: rgba(255, 255, 255, 0.08);
-  color: #CBD5E1;
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font-family: var(--font-mono, monospace);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 800;
   padding: 2px 7px;
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .home-lecture-time {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #38BDF8;
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #0284C7;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-variant-numeric: tabular-nums;
 }
 
-.home-lecture-status-pill {
-  font-size: 0.68rem;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-}
-
-.home-lecture-status-pill.slot-status-live {
-  background: rgba(16, 185, 129, 0.18);
-  color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-  animation: kuroPulseLive 2s infinite ease-in-out;
-}
-
-@keyframes kuroPulseLive {
-  0%, 100% { box-shadow: 0 0 6px rgba(16, 185, 129, 0.2); }
-  50% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.5); }
-}
-
-.home-lecture-status-pill.slot-status-upcoming {
-  background: rgba(56, 189, 248, 0.12);
-  color: #38BDF8;
-  border: 1px solid rgba(56, 189, 248, 0.25);
-}
-
-.home-lecture-status-pill.slot-status-completed {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94A3B8;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
 .home-lecture-title {
-  font-size: 0.92rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  color: var(--text-primary, #F8FAFC);
+  color: var(--text-primary);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
 }
 
 .home-lecture-bottom-row {
@@ -7173,22 +7140,23 @@ html[dir="rtl"] .fox-skin-cost-badge {
   align-items: center;
   justify-content: space-between;
   margin-top: 2px;
-  font-size: 0.74rem;
-  color: var(--text-secondary, #94A3B8);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
 }
 
 .home-lecture-hall {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  font-weight: 600;
 }
 
 .home-lecture-action-hint {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #38BDF8;
-  font-weight: 700;
+  color: var(--brand-accent);
+  font-weight: 750;
   opacity: 0;
   transform: translateX(-4px);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -7207,12 +7175,44 @@ html[dir="rtl"] .fox-skin-cost-badge {
   transform: translateX(0);
 }
 
+/* Status pills */
+.home-lecture-status-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.home-lecture-status-pill.slot-status-live {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+  animation: kuroPulseLive 2s infinite ease-in-out;
+}
+
+.home-lecture-status-pill.slot-status-upcoming {
+  background: rgba(2, 132, 199, 0.08);
+  color: #0284C7;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+}
+
+.home-lecture-status-pill.slot-status-completed {
+  background: rgba(100, 116, 139, 0.08);
+  color: #64748B;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
 /* Weekend Break Card */
 .home-lecture-weekend-card {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background: var(--bg-surface-subtle);
+  border: 1px dashed var(--border-subtle);
   border-radius: 12px;
-  padding: 20px 16px;
+  padding: 24px 16px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -7235,18 +7235,98 @@ html[dir="rtl"] .fox-skin-cost-badge {
 }
 
 .weekend-title {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  color: var(--text-primary, #F8FAFC);
+  color: var(--text-primary);
   margin: 0;
 }
 
 .weekend-desc {
-  font-size: 0.78rem;
-  color: var(--text-secondary, #94A3B8);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.55;
   max-width: 320px;
 }
+
+/* Dark Mode Specific Overrides */
+[data-theme="dark"] .home-daily-column,
+[data-theme="kuro-dark"] .home-daily-column {
+  background: var(--bg-card);
+  border-color: var(--border-card);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .home-daily-column.today-column,
+[data-theme="kuro-dark"] .home-daily-column.today-column {
+  border-inline-start-color: #34D399;
+}
+
+[data-theme="dark"] .home-daily-column.tomorrow-column,
+[data-theme="kuro-dark"] .home-daily-column.tomorrow-column {
+  border-inline-start-color: #38BDF8;
+}
+
+[data-theme="dark"] .home-daily-col-badge.today-badge,
+[data-theme="kuro-dark"] .home-daily-col-badge.today-badge {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+[data-theme="dark"] .home-daily-col-badge.tomorrow-badge,
+[data-theme="kuro-dark"] .home-daily-col-badge.tomorrow-badge {
+  background: rgba(56, 189, 248, 0.14);
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+[data-theme="dark"] .home-lecture-card,
+[data-theme="kuro-dark"] .home-lecture-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .home-lecture-card:hover,
+[data-theme="kuro-dark"] .home-lecture-card:hover {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .home-lecture-code,
+[data-theme="kuro-dark"] .home-lecture-code {
+  background: rgba(255, 255, 255, 0.08);
+  color: #E2E8F0;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .home-lecture-time,
+[data-theme="kuro-dark"] .home-lecture-time {
+  color: #38BDF8;
+}
+
+[data-theme="dark"] .home-lecture-status-pill.slot-status-upcoming,
+[data-theme="kuro-dark"] .home-lecture-status-pill.slot-status-upcoming {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+[data-theme="dark"] .home-lecture-status-pill.slot-status-live,
+[data-theme="kuro-dark"] .home-lecture-status-pill.slot-status-live {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+[data-theme="dark"] .home-lecture-status-pill.slot-status-completed,
+[data-theme="kuro-dark"] .home-lecture-status-pill.slot-status-completed {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94A3B8;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
 
 
