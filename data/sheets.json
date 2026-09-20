@@ -1,16 +1,20 @@
 {
   "sheets": [
     {
-      "id": "sh-omdr-01",
+      "id": "sh_admin_1789462201436",
       "subject_id": "omdr",
       "title": "Sheet 1: Approach to the Evaluation of the Patient",
       "title_ar": "الشيت 1: تقييم وفحص المريض",
       "title_en": "Sheet 1: Approach to the Evaluation of the Patient",
-      "order_index": 1,
+      "doctor_name": "د عبدالعظيم قداد",
+      "doctor": "د عبدالعظيم قداد",
+      "pages": 12,
       "pages_count": 12,
-      "doctor": "قسم طب الفم والتشخيص والأشعة",
-      "date_added": "2026-09-20",
-      "pdf_source": "none"
+      "order_index": 1,
+      "pdf_url": "https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/pdf-sheets/sheets/sh_admin_1789462201436_1789687054748.pdf",
+      "download_url": "https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/pdf-sheets/sheets/sh_admin_1789462201436_1789687054748.pdf",
+      "pdf_source": "cloud",
+      "date": "2026-09-15"
     }
   ]
 }

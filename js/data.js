@@ -135,11 +135,30 @@ class DataService {
             const parsed = JSON.parse(raw).filter(s => s && s.id !== 'sh-fixed-provisional' && s.id !== 'sh_admin_1789336010378' && !(s.title || '').toLowerCase().includes('provisional'));
             localStorage.setItem(k, JSON.stringify(parsed));
           }
+          // Sanitize OMDR Sheet 1 legacy ID and stale title
+          if (raw && (raw.includes('sh-omdr-01') || raw.toLowerCase().includes('evaluation of the patient'))) {
+            let parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              parsed = parsed.filter(s => s && s.id !== 'sh-omdr-01');
+              parsed.forEach(s => {
+                if (s && (s.id === 'sh_admin_1789462201436' || (s.title || '').toLowerCase().includes('evaluation of the patient'))) {
+                  s.id = 'sh_admin_1789462201436';
+                  s.title = 'Sheet 1: Approach to the Evaluation of the Patient';
+                  s.title_ar = 'الشيت 1: تقييم وفحص المريض';
+                  s.title_en = 'Sheet 1: Approach to the Evaluation of the Patient';
+                  s.doctor = 'د عبدالعظيم قداد';
+                  s.doctor_name = 'د عبدالعظيم قداد';
+                }
+              });
+              localStorage.setItem(k, JSON.stringify(parsed));
+            }
+          }
         } catch (err) {}
       });
       if (this.pdfStore && typeof this.pdfStore.deletePdf === 'function') {
         this.pdfStore.deletePdf('sh-fixed-provisional').catch(() => {});
         this.pdfStore.deletePdf('sh_admin_1789336010378').catch(() => {});
+        this.pdfStore.deletePdf('sh-omdr-01').catch(() => {});
       }
 
       const cachedCloudSheets = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
@@ -161,6 +180,15 @@ class DataService {
           }
         });
       }
+
+      // Deduplicate sheets by ID
+      const seenIds = new Set();
+      this.sheets = this.sheets.filter(s => {
+        if (!s || !s.id || s.id === 'sh-omdr-01') return false;
+        if (seenIds.has(s.id)) return false;
+        seenIds.add(s.id);
+        return true;
+      });
     } catch (e) {}
 
     // 2b. Merge admin-created recordings from localStorage
@@ -361,8 +389,25 @@ class DataService {
   getSheetsBySubject(subjectId) {
     const deleted = this.getDeletedSheetIds();
     let list = (this.sheets || []).filter(s => !deleted.includes(s.id));
-    if (!subjectId) return list;
-    list = list.filter(s => s.subject_id === subjectId);
+    if (subjectId) {
+      list = list.filter(s => s.subject_id === subjectId);
+    }
+    // Deduplicate by ID and normalized title
+    const seen = new Set();
+    const cleanList = [];
+    for (const s of list) {
+      if (!s || !s.id || s.id === 'sh-omdr-01') continue;
+      const rawTitle = s.title_en || s.title || s.title_ar || '';
+      const normKey = (s.subject_id || '') + '::' + rawTitle.toLowerCase().replace(/sheet\s*\d+\s*[:\-–—]?/gi, '').replace(/الشيت\s*\d+\s*[:\-–—]?/gi, '').trim();
+      if (seen.has(s.id) || (normKey.length > 5 && seen.has(normKey))) {
+        continue;
+      }
+      seen.add(s.id);
+      if (normKey.length > 5) seen.add(normKey);
+      cleanList.push(s);
+    }
+    list = cleanList;
+
     // Sort by order_index ascending, then by date descending for ties
     list.sort((a, b) => {
       const oa = typeof a.order_index === 'number' ? a.order_index : 9999;
@@ -817,7 +862,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 4,
@@ -854,7 +899,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 4,
@@ -891,7 +936,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 4,
@@ -928,7 +973,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 8,
@@ -967,7 +1012,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 8,
@@ -1006,7 +1051,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 9,
@@ -1043,7 +1088,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 9,
@@ -1081,7 +1126,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 10,
@@ -1119,7 +1164,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh-omdr-01",
+        "sheet_id": "sh_admin_1789462201436",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 11,
@@ -1162,24 +1207,24 @@ class DataService {
   getDefaultSheets() {
     return [
     {
-        "id": "sh-omdr-01",
+        "id": "sh_admin_1789462201436",
         "subject_id": "omdr",
         "title": "Sheet 1: Approach to the Evaluation of the Patient",
         "title_ar": "الشيت 1: تقييم وفحص المريض",
         "title_en": "Sheet 1: Approach to the Evaluation of the Patient",
-        "order_index": 1,
+        "doctor_name": "د عبدالعظيم قداد",
+        "doctor": "د عبدالعظيم قداد",
+        "pages": 12,
         "pages_count": 12,
-        "doctor": "قسم طب الفم والتشخيص والأشعة",
-        "date_added": "2026-09-20",
-        "pdf_source": "none"
+        "order_index": 1,
+        "pdf_url": "https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/pdf-sheets/sheets/sh_admin_1789462201436_1789687054748.pdf",
+        "download_url": "https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/pdf-sheets/sheets/sh_admin_1789462201436_1789687054748.pdf",
+        "pdf_source": "cloud",
+        "date": "2026-09-15"
     }
 ];
   }
 
-  /**
-   * Export all currently active sheets as a formatted JSON string
-   * ready for data/sheets.json or GitHub API commit
-   */
   exportSheetsJson() {
     const deleted = this.getDeletedSheetIds();
     const activeSheets = (this.sheets || []).filter(s => !deleted.includes(s.id));

@@ -434,32 +434,82 @@ const QuestionsPage = {
 
       const subjQuestions = allQuestions.filter(q => q.subject_id === QuestionsPage.selectedSubjectId);
       
-      // Group questions by sheet/topic, initializing with ALL sheets first
+      // Group questions by sheet/topic, initializing with ALL sheets first, with robust deduplication
       const allSheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(QuestionsPage.selectedSubjectId) : [];
-      const sheetsMap = {};
+      
+      const normalizeTitle = (t) => {
+        if (!t) return '';
+        return String(t).toLowerCase()
+          .replace(/sheet\s*\d+\s*[:\-–—]?/gi, '')
+          .replace(/الشيت\s*\d+\s*[:\-–—]?/gi, '')
+          .replace(/[^\w\s\u0600-\u06FF]/gi, '')
+          .trim();
+      };
+
+      const sheetEntries = []; // Array of { id, titleAr, titleEn, displayTitle, normTitle, pdf_url, questions: [] }
 
       allSheets.forEach(sheet => {
-        const shTitle = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
-        sheetsMap[shTitle] = { sheetId: sheet.id, questions: [] };
+        const titleAr = sheet.title_ar || sheet.title || '';
+        const titleEn = sheet.title_en || sheet.title || '';
+        const displayTitle = isAr ? (titleAr || titleEn) : (titleEn || titleAr);
+        const norm = normalizeTitle(displayTitle) || normalizeTitle(sheet.title_en) || normalizeTitle(sheet.title_ar);
+
+        let existing = sheetEntries.find(e => e.id === sheet.id || (norm && e.normTitle === norm));
+        if (existing) {
+          if (sheet.pdf_url) existing.pdf_url = sheet.pdf_url;
+          if (displayTitle.length > existing.displayTitle.length) {
+            existing.displayTitle = displayTitle;
+            existing.titleAr = titleAr;
+            existing.titleEn = titleEn;
+          }
+        } else {
+          sheetEntries.push({
+            id: sheet.id,
+            titleAr,
+            titleEn,
+            displayTitle,
+            normTitle: norm,
+            pdf_url: sheet.pdf_url,
+            questions: []
+          });
+        }
       });
 
       subjQuestions.forEach(q => {
-        let shTitle = isAr ? (q.sheet_title_ar || q.tags?.[0] || 'الأسئلة العامة') : (q.sheet_title_en || q.tags?.[0] || 'General Questions');
-        
-        if (q.sheet_id && window.DATA && window.DATA.sheets) {
-          const sheet = window.DATA.sheets.find(s => s.id === q.sheet_id);
-          if (sheet) {
-            shTitle = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
+        let qTitle = isAr ? (q.sheet_title_ar || q.tags?.[0] || '') : (q.sheet_title_en || q.tags?.[0] || '');
+        if (!qTitle) qTitle = q.sheet_title_en || q.sheet_title_ar || '';
+        const qNorm = normalizeTitle(qTitle) || normalizeTitle(q.sheet_title_en) || normalizeTitle(q.sheet_title_ar);
+
+        let target = null;
+        if (q.sheet_id) {
+          target = sheetEntries.find(e => e.id === q.sheet_id || (q.sheet_id === 'sh-omdr-01' && e.id === 'sh_admin_1789462201436'));
+        }
+        if (!target && qNorm) {
+          target = sheetEntries.find(e => e.normTitle === qNorm);
+        }
+        if (!target && qTitle) {
+          target = sheetEntries.find(e => e.displayTitle.toLowerCase().includes(qTitle.toLowerCase()) || qTitle.toLowerCase().includes(e.displayTitle.toLowerCase()));
+        }
+
+        if (target) {
+          target.questions.push(q);
+        } else {
+          const fallbackTitle = qTitle || (isAr ? 'الأسئلة العامة' : 'General Questions');
+          let fallback = sheetEntries.find(e => e.displayTitle === fallbackTitle);
+          if (!fallback) {
+            fallback = {
+              id: q.sheet_id || null,
+              titleAr: q.sheet_title_ar || fallbackTitle,
+              titleEn: q.sheet_title_en || fallbackTitle,
+              displayTitle: fallbackTitle,
+              normTitle: qNorm,
+              questions: []
+            };
+            sheetEntries.push(fallback);
           }
+          fallback.questions.push(q);
         }
-
-        if (!sheetsMap[shTitle]) {
-          sheetsMap[shTitle] = { sheetId: q.sheet_id || null, questions: [] };
-        }
-        sheetsMap[shTitle].questions.push(q);
       });
-
-      const sheetKeys = Object.keys(sheetsMap);
 
       mainEl.innerHTML = `
         <!-- Breadcrumb back navigation -->
@@ -485,7 +535,7 @@ const QuestionsPage = {
           </p>
         </div>
 
-        ${sheetKeys.length === 0 ? `
+        ${sheetEntries.length === 0 ? `
           <div class="kf-panel" style="padding: 40px; text-align: center;">
             <p style="color: var(--text-secondary); font-size: 0.9rem;">
               ${isAr ? 'لا توجد أسئلة أو شيتات مضافة حالياً لهذه المادة.' : 'No questions or sheets available for this subject yet.'}
@@ -493,8 +543,8 @@ const QuestionsPage = {
           </div>
         ` : `
           <div class="bento-sheet-grid">
-            ${sheetKeys.map((shKey) => {
-              const qList = sheetsMap[shKey].questions;
+            ${sheetEntries.map((entry, idx) => {
+              const qList = entry.questions;
               const hasQuestions = qList.length > 0;
               return `
                 <div class="bento-sheet-box ${hasQuestions ? '' : 'empty-sheet-box'}">
@@ -508,7 +558,7 @@ const QuestionsPage = {
                       </span>
                     </div>
                     <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px; line-height: 1.4; ${!hasQuestions ? 'opacity: 0.7;' : ''}">
-                      ${shKey}
+                      ${entry.displayTitle}
                     </h3>
                     <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.5; ${!hasQuestions ? 'opacity: 0.7;' : ''}">
                       ${hasQuestions 
@@ -517,7 +567,7 @@ const QuestionsPage = {
                       }
                     </p>
                   </div>
-                  <button type="button" class="btn ${hasQuestions ? 'btn-primary' : 'btn-secondary'} btn-sm btn-start-sheet-quiz" data-sheet-title="${shKey}" style="width: 100%; justify-content: center; font-weight: 750; gap: 8px; padding: 10px;" ${!hasQuestions ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                  <button type="button" class="btn ${hasQuestions ? 'btn-primary' : 'btn-secondary'} btn-sm btn-start-sheet-quiz" data-entry-idx="${idx}" style="width: 100%; justify-content: center; font-weight: 750; gap: 8px; padding: 10px;" ${!hasQuestions ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
                     <i data-lucide="${hasQuestions ? 'play' : 'clock'}" style="width: 14px; height: 14px;"></i>
                     <span>${hasQuestions ? (isAr ? 'ابدأ الاختبار السريع' : 'Start Sheet Quiz') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
                   </button>
@@ -538,12 +588,12 @@ const QuestionsPage = {
       mainEl.querySelectorAll('.btn-start-sheet-quiz').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.hasAttribute('disabled')) return;
-          const shTitle = btn.getAttribute('data-sheet-title');
-          const targetQuestions = sheetsMap[shTitle]?.questions || [];
-          if (targetQuestions.length > 0) {
+          const idx = parseInt(btn.getAttribute('data-entry-idx'), 10);
+          const entry = sheetEntries[idx];
+          if (entry && entry.questions.length > 0) {
             QuestionsPage.showTypeSelector(
-              targetQuestions,
-              `${isAr ? subject.name_ar : subject.name_en} • ${shTitle}`
+              entry.questions,
+              `${isAr ? subject.name_ar : subject.name_en} • ${entry.displayTitle}`
             );
           }
         });
