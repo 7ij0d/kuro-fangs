@@ -83,7 +83,20 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .dt-kuro-mascot-img,
+  .dt-kuro-pulse-ring,
+  .kuro-float,
+  .kuro-bounce,
+  .kuro-character-img {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
 /* ==========================================================================
@@ -1316,11 +1329,22 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   outline: none;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-.dt-kuro-mascot-trigger:hover {
-  transform: translateY(-3px) scale(1.02);
+@media (hover: hover) and (pointer: fine) {
+  .dt-kuro-mascot-trigger:hover {
+    transform: translateY(-3px) scale(1.02);
+  }
+  .dt-kuro-mascot-trigger:hover .dt-kuro-mascot-img {
+    filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.45)) drop-shadow(0 6px 18px rgba(200, 67, 67, 0.35));
+  }
+  .dt-kuro-mascot-trigger:hover .dt-kuro-bubble-callout {
+    border-color: var(--brand-accent);
+    background: var(--bg-card);
+    box-shadow: 0 6px 18px rgba(200, 67, 67, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
 }
 
 .dt-kuro-mascot-trigger:active {
@@ -1342,19 +1366,18 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   object-fit: contain;
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.35)) drop-shadow(0 4px 12px rgba(200, 67, 67, 0.18));
   animation: kuroCompanionFloat 4s ease-in-out infinite;
-  transition: filter 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dt-kuro-mascot-trigger:hover .dt-kuro-mascot-img {
-  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.45)) drop-shadow(0 6px 18px rgba(200, 67, 67, 0.35));
+  transition: filter 0.3s ease, opacity 0.25s ease;
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 @keyframes kuroCompanionFloat {
   0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translateY(0px) rotate(0deg) translateZ(0);
   }
   50% {
-    transform: translateY(-8px) rotate(1deg);
+    transform: translateY(-8px) rotate(1deg) translateZ(0);
   }
 }
 
@@ -1366,19 +1389,20 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   border: 1.5px solid rgba(200, 67, 67, 0.3);
   pointer-events: none;
   animation: kuroRingPulse 3s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes kuroRingPulse {
   0% {
-    transform: scale(0.9);
+    transform: scale(0.9) translateZ(0);
     opacity: 0.8;
   }
   70% {
-    transform: scale(1.15);
+    transform: scale(1.15) translateZ(0);
     opacity: 0;
   }
   100% {
-    transform: scale(1.15);
+    transform: scale(1.15) translateZ(0);
     opacity: 0;
   }
 }
@@ -1398,12 +1422,6 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   color: var(--text-primary);
   white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dt-kuro-mascot-trigger:hover .dt-kuro-bubble-callout {
-  border-color: var(--brand-accent);
-  background: var(--bg-card);
-  box-shadow: 0 6px 18px rgba(200, 67, 67, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .dt-kuro-bubble-icon {
@@ -1535,6 +1553,7 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
     max-height: 94vh;
     overflow-y: auto;
     padding-bottom: 24px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .dt-quiz-card {
@@ -1547,17 +1566,54 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
     position: static;
     width: 100%;
     max-width: 650px;
+    transition: opacity 0.25s ease;
   }
 
   .dt-kuro-avatar-frame {
-    width: 110px;
-    height: 110px;
+    width: 105px;
+    height: 105px;
+  }
+
+  .dt-kuro-mascot-img {
+    animation: kuroCompanionFloatMobile 4.5s ease-in-out infinite;
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.28));
+  }
+
+  .dt-kuro-pulse-ring {
+    animation: kuroRingPulseMobile 4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  .dt-kuro-mascot-trigger:active {
+    transform: scale(0.97);
   }
 
   .dt-kuro-explanation-pane {
     width: 100%;
     max-width: 100%;
     max-height: none;
+  }
+}
+
+@keyframes kuroCompanionFloatMobile {
+  0%, 100% {
+    transform: translateY(0px) translateZ(0);
+  }
+  50% {
+    transform: translateY(-4px) translateZ(0);
+  }
+}
+
+@keyframes kuroRingPulseMobile {
+  0% {
+    transform: scale(0.92) translateZ(0);
+    opacity: 0.6;
+  }
+  70%, 100% {
+    transform: scale(1.1) translateZ(0);
+    opacity: 0;
   }
 }
 

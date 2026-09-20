@@ -233,14 +233,17 @@
 /* Subtle, dignified academic companion floating motion */
 .kuro-float {
   animation: kuroFloat 3.8s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 @keyframes kuroFloat {
   0% {
-    transform: translateY(0px);
+    transform: translateY(0px) translateZ(0);
   }
   100% {
-    transform: translateY(-5px);
+    transform: translateY(-5px) translateZ(0);
   }
 }
 
