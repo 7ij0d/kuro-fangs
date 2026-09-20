@@ -113,8 +113,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideRewards = document.getElementById('side-nav-rewards');
     if (sideRewards) sideRewards.textContent = t('sideNavRewards');
 
+    const sideSoonRewards = document.getElementById('side-soon-rewards');
+    if (sideSoonRewards) sideSoonRewards.textContent = lang === 'ar' ? 'قريباً' : 'Soon';
+
     const sideGames = document.getElementById('side-nav-games');
     if (sideGames) sideGames.textContent = t('sideNavGames');
+
+    const sideSoonGames = document.getElementById('side-soon-games');
+    if (sideSoonGames) sideSoonGames.textContent = lang === 'ar' ? 'قريباً' : 'Soon';
 
     const sideAdmin = document.getElementById('side-nav-admin');
     if (sideAdmin) sideAdmin.textContent = t('sideNavAdmin');

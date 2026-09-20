@@ -36,6 +36,24 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
 .sidebar-menu-item { padding: 11px 13px; border-radius: 12px; color: #aeb8ca; }
 .sidebar-menu-item.active { background: rgba(72, 116, 239, .18); color: #fff; }
 .sidebar-menu-item.active::before { background: #79a1ff; box-shadow: 0 0 12px rgba(121,161,255,.75); }
+.sidebar-soon-badge {
+  margin-inline-start: auto;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-menu-item:hover .sidebar-soon-badge {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fef08a;
+}
 .site-header { height: 76px; padding: 0 34px; background: rgba(255,255,255,.84); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .header-search-box input { min-height: 42px; background: #f4f6fa; border-color: transparent; }
 .header-search-box input:focus { background: #fff; box-shadow: 0 0 0 4px rgba(50,104,237,.12); border-color: #9db8ff; }

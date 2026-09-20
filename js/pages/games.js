@@ -1251,9 +1251,97 @@ window.GamesPage = (function () {
   }
 
   // =========================================================================
-  // MAIN PAGE RENDER & TAB SWITCHING
+  // MAIN PAGE RENDER & COMING SOON GATE
   // =========================================================================
+  function isDevMode() {
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    if (hash.includes('preview=soon') || search.includes('preview=soon')) {
+      return false;
+    }
+    if (hash.includes('dev=true') || hash.includes('preview=1') || search.includes('dev=true') || search.includes('preview=1')) {
+      return true;
+    }
+    const host = window.location.hostname || '';
+    if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || window.location.protocol === 'file:') {
+      return true;
+    }
+    try {
+      if (localStorage.getItem('kf_dev_preview') === 'true' || localStorage.getItem('kf_admin_auth') || localStorage.getItem('kf_admin_pin_verified') === 'true') {
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function renderComingSoon(container) {
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+    const mascotAsset = 'assets/characters/kuro/Kuro-Focused.png';
+
+    container.innerHTML = `
+      <div style="min-height: 72vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;">
+        <div class="card" style="max-width: 600px; width: 100%; padding: 44px 32px; text-align: center; border-radius: 20px; border: 1px solid var(--border-card); background: var(--bg-card); box-shadow: var(--shadow-card); position: relative; overflow: hidden;">
+          
+          <div style="position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 280px; height: 160px; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%); pointer-events: none;"></div>
+
+          <div style="width: 140px; height: 140px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative;">
+            <div style="position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(200, 67, 67, 0.08) 0%, transparent 70%);"></div>
+            <img 
+              src="${mascotAsset}" 
+              alt="Kuro Gaming Mascot" 
+              style="max-width: 130px; max-height: 130px; object-fit: contain; animation: kuroCompanionFloat 3.5s ease-in-out infinite; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.18));"
+            />
+          </div>
+
+          <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 9999px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.28); color: #D97706; font-size: 0.78rem; font-weight: 800; margin-bottom: 16px; letter-spacing: 0.02em;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #F59E0B; box-shadow: 0 0 8px #F59E0B;"></span>
+            <span>${isAr ? 'قريباً • قيد التجهيز والبرمجة' : 'Coming Soon • Under Active Development'}</span>
+          </div>
+
+          <h1 style="font-size: 1.45rem; font-weight: 850; color: var(--text-primary); margin: 0 0 10px; line-height: 1.35; letter-spacing: -0.015em;">
+            ${isAr ? 'صالة الألعاب والتحديات السريرية' : 'Dental Arcade & Memory Challenges'}
+          </h1>
+
+          <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin: 0 auto 24px; max-width: 480px;">
+            ${isAr ? 'نعمل حالياً على برمجة وتطوير ألعاب وتحديات الذاكرة السريرية لمصطلحات وتراكيب طب الأسنان لتكون جاهزة للمنافسة وحصد النقاط قريباً.' : 'We are currently developing clinical memory challenges and dental terminology arcade games for friendly cohort competition.'}
+          </p>
+
+          <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 32px;">
+            <span class="kf-segmented-badge" style="font-size: 0.75rem; font-weight: 750; padding: 5px 12px; background: var(--bg-surface-subtle); border-color: var(--border-subtle); color: var(--text-primary);">
+              ${isAr ? '🧠 تحدي مصطلحات الأسنان' : '🧠 Dental Terms Challenge'}
+            </span>
+            <span class="kf-segmented-badge" style="font-size: 0.75rem; font-weight: 750; padding: 5px 12px; background: var(--bg-surface-subtle); border-color: var(--border-subtle); color: var(--text-primary);">
+              ${isAr ? '🃏 مطابقة الصور السريرية' : '🃏 Visual Match Arcade'}
+            </span>
+            <span class="kf-segmented-badge" style="font-size: 0.75rem; font-weight: 750; padding: 5px 12px; background: var(--bg-surface-subtle); border-color: var(--border-subtle); color: var(--text-primary);">
+              ${isAr ? '⚡ كويزات السرعة والبديهة' : '⚡ Rapid Reflex Trivia'}
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="#/sheets" class="btn btn-primary" style="font-weight: 750; gap: 8px; padding: 10px 20px; font-size: 0.85rem;">
+              <i data-lucide="book-open" style="width: 16px; height: 16px;"></i>
+              <span>${isAr ? 'تصفح المحاضرات والشيتات' : 'Explore Lecture Sheets'}</span>
+            </a>
+            <a href="#/" class="btn btn-secondary" style="font-weight: 750; gap: 8px; padding: 10px 18px; font-size: 0.85rem;">
+              <i data-lucide="home" style="width: 16px; height: 16px;"></i>
+              <span>${isAr ? 'الصفحة الرئيسية' : 'Back to Home'}</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
   function render(container, queryParams) {
+    if (!isDevMode()) {
+      renderComingSoon(container);
+      return;
+    }
+
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
     const equipped = window.STORE ? window.STORE.getEquippedSkinData() : null;
     const currentPoints = window.STORE ? window.STORE.getPoints() : 25;
@@ -1264,6 +1352,20 @@ window.GamesPage = (function () {
     }
 
     container.innerHTML = `
+      <!-- Dev Preview Mode Banner -->
+      <div class="card" style="padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.25); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.825rem; color: var(--text-primary);">
+          <span style="font-size: 1.1rem;">🛠️</span>
+          <span>
+            <strong>${isAr ? 'وضع المعاينة المحلي (Local Dev Active):' : 'Local Developer Preview:'}</strong>
+            ${isAr ? 'صالة الألعاب مغلقة للعامة (Coming Soon) ومعروضة لك فقط للتطوير والتعديل.' : 'Dental Arcade is locked for public users (Coming Soon) and visible only to you.'}
+          </span>
+        </div>
+        <a href="#/games?preview=soon" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 4px 10px; font-weight: 750;">
+          ${isAr ? 'معاينة شاشة الزوار 👁️' : 'Preview Visitor Screen 👁️'}
+        </a>
+      </div>
+
       <div class="arcade-page-wrapper">
         <!-- Hero Header -->
         <div class="arcade-hero-card">
