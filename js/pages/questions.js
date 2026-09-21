@@ -81,50 +81,70 @@ const QuestionsPage = {
     }
     const allQuestions = QuestionsPage.getQuestions();
 
-    container.innerHTML = `
-      <!-- TOP COMMAND BAR & MODE SWITCHER -->
-      <div class="kf-panel" style="margin-bottom: 24px; padding: 20px 24px; border-radius: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="width: 58px; height: 58px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
-              <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('thinking') : 'assets/characters/kuro/Kuro-Thinking.png'}" alt="Kuro Thinking" class="kuro-character-img kuro-float" style="width: 52px; height: 52px; object-fit: contain;" />
-            </div>
-            <div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span class="kf-segmented-badge" style="background: rgba(200, 67, 67, 0.08); color: var(--color-primary); border-color: rgba(200, 67, 67, 0.25); font-weight: 800;">
-                  <i data-lucide="layers" style="width: 13px; height: 13px;"></i>
-                  ${isAr ? 'نظام الأسئلة الموحد' : 'Unified Questions Engine'}
-                </span>
-                <span class="kf-segmented-badge" id="q-total-counter">${allQuestions.length} ${isAr ? 'سؤال معتمد' : 'MCQs'}</span>
-              </div>
-              <h1 style="font-size: 1.45rem; font-weight: 850; color: var(--text-primary); margin: 0;">
-                ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
-              </h1>
-            </div>
-          </div>
+    const subjects = window.DATA ? window.DATA.getSubjects() : [];
 
-          <!-- Mode Switcher Tabs -->
-          <div class="kf-segmented-scroll" style="margin: 0;">
-            <button class="kf-tab-pill ${QuestionsPage.currentTab === 'bento' ? 'active' : ''}" data-tab="bento">
-              <i data-lucide="layout-grid" style="width: 14px; height: 14px;"></i>
-              <span>${isAr ? 'المربعات (المواد والشيتات)' : 'Curriculum Bento'}</span>
-            </button>
-            <button class="kf-tab-pill ${QuestionsPage.currentTab === 'direct' ? 'active' : ''}" data-tab="direct">
-              <i data-lucide="list-filter" style="width: 14px; height: 14px;"></i>
-              <span>${isAr ? 'قائمة الأسئلة والبحث' : 'All Questions Search'}</span>
-            </button>
-            <button class="kf-tab-pill ${QuestionsPage.currentTab === 'saved' ? 'active' : ''}" data-tab="saved">
-              <i data-lucide="star" style="width: 14px; height: 14px;"></i>
-              <span>${isAr ? 'الأسئلة المحفوظة' : 'Saved Questions'}</span>
-            </button>
+    container.innerHTML = `
+      <!-- Page Title Bar -->
+      <div class="page-title-bar">
+        <div class="page-title-group" style="display:flex;align-items:center;gap:16px;">
+          <div style="width:58px;height:58px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(200,67,67,0.12) 0%,transparent 70%);">
+            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('thinking') : 'assets/characters/kuro/Kuro-Thinking.png'}" alt="Kuro Thinking" class="kuro-character-img kuro-float" style="width:52px;height:52px;object-fit:contain;" />
+          </div>
+          <div>
+            <h1 style="font-size:1.55rem;font-weight:850;color:var(--text-primary);margin:0 0 4px;letter-spacing:-0.02em;">
+              ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
+            </h1>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin:0;">
+              ${isAr ? `${allQuestions.length} سؤال معتمد من مواد السنة الثالثة — استعرض المواد أو ابحث مباشرة` : `${allQuestions.length} verified MCQs across 3rd year dental modules`}
+            </p>
           </div>
         </div>
+      </div>
 
-        <!-- Live Search Bar for Direct Mode -->
-        <div id="q-search-wrapper" style="display: ${QuestionsPage.currentTab === 'direct' ? 'block' : 'none'};">
-          <div style="position: relative; max-width: 600px;">
-            <i data-lucide="search" style="position: absolute; top: 12px; inset-inline-start: 14px; width: 16px; height: 16px; color: var(--text-muted);"></i>
-            <input type="text" id="q-search-input" placeholder="${isAr ? 'ابحث في نصوص الأسئلة، الكلمات المفتاحية، أو المواد...' : 'Search questions, clinical tags, or subjects...'}" style="width: 100%; padding: 10px 14px; padding-inline-start: 40px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" />
+      <!-- Control Bar: Subject Dropdown + Search + Mode Tabs -->
+      <div class="sheets-control-bar" style="margin-bottom:20px;">
+        <!-- Subject Dropdown -->
+        <div class="sheets-dropdown-wrap">
+          <i data-lucide="chevron-down" class="sheets-dropdown-chevron"></i>
+          <select id="q-subject-dropdown" class="sheets-dropdown">
+            <option value="all">${isAr ? 'كل المواد' : 'All Subjects'}</option>
+            ${subjects.map(s => `
+              <option value="${s.id}">
+                ${isAr ? s.name_ar : s.name_en}
+              </option>
+            `).join('')}
+          </select>
+        </div>
+
+        <!-- Search Bar (always visible) -->
+        <div class="sheets-search-wrap">
+          <i data-lucide="search" class="sheets-search-icon"></i>
+          <input
+            type="text"
+            id="q-search-input"
+            class="sheets-search-input"
+            placeholder="${isAr ? 'ابحث في نصوص الأسئلة، المواد، أو الكلمات المفتاحية...' : 'Search questions, subjects, or clinical tags...'}"
+            autocomplete="off"
+          />
+          <button id="q-search-clear" class="sheets-search-clear" style="display:none;">
+            <i data-lucide="x" style="width:14px;height:14px;"></i>
+          </button>
+        </div>
+
+        <!-- Right: count + Mode Tabs -->
+        <div class="sheets-control-right">
+          <span id="q-total-counter" class="sheets-count-label">${allQuestions.length} ${isAr ? 'سؤال' : 'MCQs'}</span>
+          <div class="sheets-view-toggle">
+            <span class="sheets-view-label">${isAr ? 'العرض' : 'View'}</span>
+            <button class="sheets-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'bento' ? 'active' : ''}" data-tab="bento" title="${isAr ? 'المربعات' : 'Bento Grid'}">
+              <i data-lucide="layout-grid" style="width:15px;height:15px;"></i>
+            </button>
+            <button class="sheets-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'direct' ? 'active' : ''}" data-tab="direct" title="${isAr ? 'قائمة الأسئلة' : 'All Questions'}">
+              <i data-lucide="list" style="width:15px;height:15px;"></i>
+            </button>
+            <button class="sheets-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'saved' ? 'active' : ''}" data-tab="saved" title="${isAr ? 'المحفوظات' : 'Saved'}">
+              <i data-lucide="star" style="width:15px;height:15px;"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -302,31 +322,71 @@ const QuestionsPage = {
   bindEvents(container) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
 
-    // Mode tabs
+    // ── Tab (view mode) buttons ──────────────────────────────────────────────
     container.querySelectorAll('.kf-tab-pill').forEach(btn => {
       btn.addEventListener('click', () => {
         container.querySelectorAll('.kf-tab-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         QuestionsPage.currentTab = btn.getAttribute('data-tab');
-        
-        const searchWrap = document.getElementById('q-search-wrapper');
-        if (searchWrap) {
-          searchWrap.style.display = QuestionsPage.currentTab === 'direct' ? 'block' : 'none';
+        // Reset subject filter when going back to bento
+        if (QuestionsPage.currentTab === 'bento') {
+          QuestionsPage.selectedSubjectId = null;
+          const dd = document.getElementById('q-subject-dropdown');
+          if (dd) dd.value = 'all';
         }
         QuestionsPage.renderCurrentView();
       });
     });
 
-    // Search box
-    const searchIn = document.getElementById('q-search-input');
-    if (searchIn) {
-      searchIn.addEventListener('input', (e) => {
-        QuestionsPage.searchQuery = e.target.value.trim().toLowerCase();
-        if (QuestionsPage.currentTab === 'direct') {
+    // ── Subject Dropdown ─────────────────────────────────────────────────────
+    document.getElementById('q-subject-dropdown')?.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val === 'all') {
+        QuestionsPage.selectedSubjectId = null;
+        // Stay in current tab
+        QuestionsPage.renderCurrentView();
+      } else {
+        QuestionsPage.selectedSubjectId = val;
+        // Switch to bento (sheet view) when subject selected
+        if (QuestionsPage.currentTab === 'bento') {
+          QuestionsPage.renderBentoView();
+        } else {
+          // In direct mode: re-filter by subject
           QuestionsPage.renderDirectView();
         }
-      });
-    }
+      }
+    });
+
+    // ── Search box (always visible) ──────────────────────────────────────────
+    const searchIn = document.getElementById('q-search-input');
+    const searchClear = document.getElementById('q-search-clear');
+    let searchDebounce;
+
+    searchIn?.addEventListener('input', (e) => {
+      QuestionsPage.searchQuery = e.target.value.trim().toLowerCase();
+      if (searchClear) searchClear.style.display = QuestionsPage.searchQuery ? 'flex' : 'none';
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        // If there's a search query and we're in bento mode, auto-switch to direct
+        if (QuestionsPage.searchQuery && QuestionsPage.currentTab === 'bento') {
+          QuestionsPage.currentTab = 'direct';
+          container.querySelectorAll('.kf-tab-pill').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-tab') === 'direct');
+          });
+        }
+        if (QuestionsPage.currentTab === 'direct' || QuestionsPage.searchQuery) {
+          QuestionsPage.renderDirectView();
+        }
+      }, 220);
+    });
+
+    searchClear?.addEventListener('click', () => {
+      QuestionsPage.searchQuery = '';
+      if (searchIn) searchIn.value = '';
+      searchClear.style.display = 'none';
+      QuestionsPage.renderCurrentView();
+      searchIn?.focus();
+    });
 
     // Modal quiz buttons
     document.getElementById('dt-btn-exit')?.addEventListener('click', () => {
@@ -734,9 +794,15 @@ const QuestionsPage = {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
     let list = QuestionsPage.getQuestions();
 
+    // Filter by selected subject (from dropdown)
+    if (QuestionsPage.selectedSubjectId) {
+      list = list.filter(item => item.subject_id === QuestionsPage.selectedSubjectId);
+    }
+
+    // Filter by search query
     if (QuestionsPage.searchQuery) {
       const q = QuestionsPage.searchQuery;
-      list = list.filter(item => 
+      list = list.filter(item =>
         (item.text_ar && item.text_ar.toLowerCase().includes(q)) ||
         (item.text_en && item.text_en.toLowerCase().includes(q)) ||
         (item.tags && item.tags.some(t => t.toLowerCase().includes(q))) ||
@@ -744,6 +810,10 @@ const QuestionsPage = {
         (item.subject_name_en && item.subject_name_en.toLowerCase().includes(q))
       );
     }
+
+    // Update count label in control bar
+    const counterEl = document.getElementById('q-total-counter');
+    if (counterEl) counterEl.textContent = `${list.length} ${isAr ? 'سؤال' : 'MCQs'}`;
 
     if (list.length === 0) {
       mainEl.innerHTML = `
