@@ -539,8 +539,8 @@ const QuestionsPage = {
         </div>
 
         ${sheetEntries.length === 0 ? `
-          <div class="kf-panel" style="padding: 40px; text-align: center;">
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+          <div class="kf-panel" style="padding:40px;text-align:center;">
+            <p style="color:var(--text-secondary);font-size:0.9rem;">
               ${isAr ? 'لا توجد أسئلة أو شيتات مضافة حالياً لهذه المادة.' : 'No questions or sheets available for this subject yet.'}
             </p>
           </div>
@@ -549,31 +549,52 @@ const QuestionsPage = {
             ${sheetEntries.map((entry, idx) => {
               const qList = entry.questions;
               const hasQuestions = qList.length > 0;
+              const subjectColor = (() => {
+                const COLORS = {
+                  'preventive':{'bg':'rgba(2,132,199,0.10)','text':'#0284C7','border':'rgba(2,132,199,0.25)'},
+                  'oral-diseases':{'bg':'rgba(234,88,12,0.10)','text':'#EA580C','border':'rgba(234,88,12,0.25)'},
+                  'omdr':{'bg':'rgba(124,58,237,0.10)','text':'#7C3AED','border':'rgba(124,58,237,0.25)'},
+                  'omfs':{'bg':'rgba(200,67,67,0.10)','text':'#C84343','border':'rgba(200,67,67,0.25)'},
+                  'cons-endo':{'bg':'rgba(5,150,105,0.10)','text':'#059669','border':'rgba(5,150,105,0.25)'},
+                  'fixed-pros':{'bg':'rgba(245,158,11,0.10)','text':'#D97706','border':'rgba(245,158,11,0.25)'},
+                  'removable-pros':{'bg':'rgba(219,39,119,0.10)','text':'#DB2777','border':'rgba(219,39,119,0.25)'},
+                  'ortho':{'bg':'rgba(14,165,233,0.10)','text':'#0EA5E9','border':'rgba(14,165,233,0.25)'},
+                  'pedo':{'bg':'rgba(168,85,247,0.10)','text':'#A855F7','border':'rgba(168,85,247,0.25)'},
+                  'gen-med':{'bg':'rgba(20,184,166,0.10)','text':'#0D9488','border':'rgba(20,184,166,0.25)'},
+                  'gen-surgery':{'bg':'rgba(239,68,68,0.10)','text':'#EF4444','border':'rgba(239,68,68,0.25)'},
+                };
+                return COLORS[QuestionsPage.selectedSubjectId] || {'bg':'rgba(142,146,168,0.10)','text':'#8E92A8','border':'rgba(142,146,168,0.25)'};
+              })();
               return `
                 <div class="bento-sheet-box ${hasQuestions ? '' : 'empty-sheet-box'}">
                   <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                      <span class="kf-segmented-badge" style="font-size: 0.7rem; font-weight: 800; color: var(--brand-accent); background: rgba(2, 132, 199, 0.08);">
-                        ${isAr ? 'شيت معتمد' : 'Official Sheet'}
+                    <div class="sgc-header" style="margin-bottom:10px;">
+                      <span class="sgc-subject-badge" style="background:${subjectColor.bg};color:${subjectColor.text};border-color:${subjectColor.border};">
+                        ${isAr ? subject.name_ar : subject.name_en}
                       </span>
-                      <span class="kf-segmented-badge" style="${!hasQuestions ? 'background: var(--bg-surface-subtle); color: var(--text-muted);' : ''}">
+                      <span class="kf-segmented-badge" style="${!hasQuestions ? 'background:var(--bg-surface-subtle);color:var(--text-muted);' : ''}font-weight:800;">
                         ${qList.length} ${isAr ? 'أسئلة' : 'MCQs'}
                       </span>
                     </div>
-                    <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px; line-height: 1.4; ${!hasQuestions ? 'opacity: 0.7;' : ''}">
+                    <h3 class="sgc-title" style="${!hasQuestions ? 'color:var(--text-muted);' : ''}margin-bottom:8px;">
                       ${entry.displayTitle}
                     </h3>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.5; ${!hasQuestions ? 'opacity: 0.7;' : ''}">
-                      ${hasQuestions 
+                    <p class="sgc-meta" style="margin-bottom:16px;${!hasQuestions ? 'opacity:0.7;' : ''}">
+                      ${hasQuestions
                         ? (isAr ? `تدرب على ${qList.length} أسئلة امتحانية منتقاة لهذا الشيت مع تعليلات سريرية.` : `Practice ${qList.length} verified faculty questions for this lecture.`)
                         : (isAr ? 'قريباً... جاري تجهيز الأسئلة لهذا الشيت' : 'Coming soon... questions are being prepared for this sheet')
                       }
                     </p>
                   </div>
-                  <button type="button" class="btn ${hasQuestions ? 'btn-primary' : 'btn-secondary'} btn-sm btn-start-sheet-quiz" data-entry-idx="${idx}" style="width: 100%; justify-content: center; font-weight: 750; gap: 8px; padding: 10px;" ${!hasQuestions ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                    <i data-lucide="${hasQuestions ? 'play' : 'clock'}" style="width: 14px; height: 14px;"></i>
-                    <span>${hasQuestions ? (isAr ? 'ابدأ الاختبار السريع' : 'Start Sheet Quiz') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
-                  </button>
+                  <div class="sgc-actions">
+                    <button type="button" class="${hasQuestions ? 'sgc-btn-view' : 'sgc-btn-download'} btn-start-sheet-quiz"
+                      data-entry-idx="${idx}"
+                      style="flex:1;justify-content:center;"
+                      ${!hasQuestions ? 'disabled style="opacity:0.45;cursor:not-allowed;"' : ''}>
+                      <i data-lucide="${hasQuestions ? 'play' : 'clock'}" style="width:14px;height:14px;"></i>
+                      <span>${hasQuestions ? (isAr ? 'ابدأ الاختبار السريع' : 'Start Sheet Quiz') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
+                    </button>
+                  </div>
                 </div>
               `;
             }).join('')}
@@ -605,7 +626,7 @@ const QuestionsPage = {
       return;
     }
 
-    // LEVEL 1: ALL SUBJECTS BENTO GRID ("المربعات")
+    // LEVEL 1: ALL SUBJECTS BENTO GRID
     const subjectStats = {};
     allQuestions.forEach(q => {
       subjectStats[q.subject_id] = (subjectStats[q.subject_id] || 0) + 1;
@@ -626,13 +647,28 @@ const QuestionsPage = {
       'gen-surgery': 'scalpel'
     };
 
+    const SUBJ_COLORS = {
+      'preventive':     { bg:'rgba(2,132,199,0.10)',  text:'#0284C7', border:'rgba(2,132,199,0.25)' },
+      'oral-diseases':  { bg:'rgba(234,88,12,0.10)',  text:'#EA580C', border:'rgba(234,88,12,0.25)' },
+      'omdr':           { bg:'rgba(124,58,237,0.10)', text:'#7C3AED', border:'rgba(124,58,237,0.25)' },
+      'omfs':           { bg:'rgba(200,67,67,0.10)',  text:'#C84343', border:'rgba(200,67,67,0.25)' },
+      'cons-endo':      { bg:'rgba(5,150,105,0.10)',  text:'#059669', border:'rgba(5,150,105,0.25)' },
+      'fixed-pros':     { bg:'rgba(245,158,11,0.10)', text:'#D97706', border:'rgba(245,158,11,0.25)' },
+      'removable-pros': { bg:'rgba(219,39,119,0.10)', text:'#DB2777', border:'rgba(219,39,119,0.25)' },
+      'ortho':          { bg:'rgba(14,165,233,0.10)', text:'#0EA5E9', border:'rgba(14,165,233,0.25)' },
+      'pedo':           { bg:'rgba(168,85,247,0.10)', text:'#A855F7', border:'rgba(168,85,247,0.25)' },
+      'gen-med':        { bg:'rgba(20,184,166,0.10)', text:'#0D9488', border:'rgba(20,184,166,0.25)' },
+      'gen-surgery':    { bg:'rgba(239,68,68,0.10)',  text:'#EF4444', border:'rgba(239,68,68,0.25)' },
+    };
+    const getColor = (id) => SUBJ_COLORS[id] || { bg:'rgba(142,146,168,0.10)', text:'#8E92A8', border:'rgba(142,146,168,0.25)' };
+
     mainEl.innerHTML = `
       <div style="margin-bottom: 20px;">
-        <h2 style="font-size: 1.25rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
+        <h2 style="font-size:1.25rem;font-weight:850;color:var(--text-primary);margin:0 0 6px;">
           ${isAr ? 'مواد طب الأسنان (المربعات التعليمية)' : 'Dental Curriculum Subjects'}
         </h2>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
-          ${isAr ? 'انقر على أي مادة لاستعراض شيتاتها وخوض اختبارات سريعة على كروت الأسئلة المطابقة لنظام Dentistoire.' : 'Choose a dental module to browse lecture-linked MCQs and test your knowledge.'}
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin:0;">
+          ${isAr ? 'انقر على أي مادة لاستعراض شيتاتها وخوض اختبارات سريعة على كروت الأسئلة.' : 'Choose a dental module to browse lecture-linked MCQs and test your knowledge.'}
         </p>
       </div>
 
@@ -642,31 +678,37 @@ const QuestionsPage = {
           const icon = subjectIcons[s.id] || 'book-open';
           const title = isAr ? s.name_ar : s.name_en;
           const desc = isAr ? s.description_ar : s.description_en;
+          const color = getColor(s.id);
 
           return `
             <div class="bento-subject-box" data-subj-id="${s.id}">
               <div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
-                  <div class="bento-icon-badge">
-                    <i data-lucide="${icon}" style="width: 22px; height: 22px;"></i>
-                  </div>
-                  <span class="kf-segmented-badge" style="background: ${qCount > 0 ? 'rgba(2, 132, 199, 0.08)' : 'var(--bg-surface-subtle)'}; color: ${qCount > 0 ? 'var(--brand-accent)' : 'var(--text-muted)'}; font-weight: 800;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:8px;">
+                  <span class="sgc-subject-badge" style="background:${color.bg};color:${color.text};border-color:${color.border};font-size:0.7rem;">
+                    ${title}
+                  </span>
+                  <span class="kf-segmented-badge" style="background:${qCount > 0 ? 'rgba(200,67,67,0.08)' : 'var(--bg-surface-subtle)'};color:${qCount > 0 ? 'var(--brand-burgundy)' : 'var(--text-muted)'};font-weight:800;white-space:nowrap;flex-shrink:0;">
                     ${qCount} ${isAr ? 'سؤال' : 'MCQs'}
                   </span>
                 </div>
-                <h3 style="font-size: 1.08rem; font-weight: 800; color: var(--text-primary); margin: 0 0 6px; line-height: 1.4;">
-                  ${title}
-                </h3>
-                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                  ${desc}
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                  <div class="bento-icon-badge" style="background:${color.bg};color:${color.text};border-color:${color.border};">
+                    <i data-lucide="${icon}" style="width:20px;height:20px;"></i>
+                  </div>
+                  <h3 style="font-size:1rem;font-weight:800;color:var(--text-primary);margin:0;line-height:1.4;">
+                    ${title}
+                  </h3>
+                </div>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin:0 0 16px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                  ${desc || ''}
                 </p>
               </div>
 
-              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 12px; margin-top: 12px;">
-                <span style="font-size: 0.775rem; font-weight: 700; color: var(--brand-accent);">
+              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:auto;">
+                <span style="font-size:0.775rem;font-weight:700;color:${color.text};">
                   ${isAr ? 'استعراض الشيتات والأسئلة' : 'Open Subject Sheets'}
                 </span>
-                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 14px; height: 14px; color: var(--brand-accent);"></i>
+                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;color:${color.text};"></i>
               </div>
             </div>
           `;
