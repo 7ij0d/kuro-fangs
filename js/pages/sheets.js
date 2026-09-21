@@ -188,7 +188,7 @@ const SheetsPage = {
         listContainer.innerHTML = `
           <div class="empty-state-card" style="padding: 48px 24px; text-align: center; grid-column: 1/-1;">
             <div style="width:100px;height:100px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(200,67,67,0.12) 0%,transparent 70%);">
-              <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro Reading" class="kuro-character-img kuro-float" style="max-height:90px;object-fit:contain;" />
+              <img src="assets/icons/sheets_cat.png" alt="Sheets Cat" class="kuro-character-img kuro-float" style="max-height:90px;object-fit:contain;" />
             </div>
             <h3 style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-bottom:6px;">${isAr ? 'لا توجد شيتات تطابق بحثك' : 'No sheets match your search'}</h3>
             <p style="font-size:0.85rem;color:var(--text-secondary);max-width:440px;margin:0 auto;">${isAr ? 'جرّب تغيير المادة أو كلمات البحث.' : 'Try a different subject or search term.'}</p>
@@ -271,7 +271,7 @@ const SheetsPage = {
       <div class="page-title-bar">
         <div class="page-title-group" style="display:flex;align-items:center;gap:16px;">
           <div style="width:58px;height:58px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(200,67,67,0.12) 0%,transparent 70%);">
-            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro" class="kuro-character-img kuro-float" style="width:52px;height:52px;object-fit:contain;" />
+            <img src="assets/icons/sheets_cat.png" alt="Sheets Cat" class="kuro-character-img kuro-float" style="width:52px;height:52px;object-fit:contain;" />
           </div>
           <div>
             <h1 style="font-size:1.55rem;font-weight:850;color:var(--text-primary);margin:0 0 4px;letter-spacing:-0.02em;">
