@@ -148,6 +148,27 @@ window.AuthModal = (function () {
   function renderSignUpForm(isAr) {
     return `
       <form id="auth-signup-form" onsubmit="window.AuthModal.handleSubmitSignUp(event)">
+
+        <!-- Profile Picture Upload -->
+        <div class="auth-avatar-upload-group">
+          <div class="auth-avatar-preview" id="auth-avatar-preview-wrap" onclick="document.getElementById('auth-avatar-file').click()" title="${isAr ? 'انقر لاختيار صورة' : 'Click to choose a photo'}">
+            <img id="auth-avatar-preview-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+            <div id="auth-avatar-placeholder">
+              <i data-lucide="camera" style="width:22px;height:22px;color:var(--text-muted);"></i>
+              <span style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-weight:700;">${isAr ? 'صورتك' : 'Your Photo'}</span>
+            </div>
+          </div>
+          <div class="auth-avatar-upload-info">
+            <p class="auth-avatar-label">${isAr ? 'صورة الملف الشخصي' : 'Profile Picture'}</p>
+            <p class="auth-avatar-hint">${isAr ? 'اختياري — JPG أو PNG بحجم أقصى 2MB' : 'Optional — JPG or PNG, max 2MB'}</p>
+            <button type="button" class="auth-avatar-btn" onclick="document.getElementById('auth-avatar-file').click()">
+              <i data-lucide="upload" style="width:13px;height:13px;"></i>
+              <span>${isAr ? 'اختيار صورة' : 'Choose Photo'}</span>
+            </button>
+          </div>
+          <input type="file" id="auth-avatar-file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" onchange="window.AuthModal._onAvatarChange(this)" />
+        </div>
+
         <div class="auth-input-group">
           <label class="auth-input-label">${isAr ? 'اسم الطالب / اللقب' : 'Student Full Name'}</label>
           <div class="auth-input-wrapper">
@@ -179,6 +200,7 @@ window.AuthModal = (function () {
       </form>
     `;
   }
+
 
   function renderForgotForm(isAr) {
     return `
@@ -236,6 +258,40 @@ window.AuthModal = (function () {
     } else {
       btn.innerHTML = `<span>${defaultText}</span>`;
     }
+  }
+
+  // =========================================================================
+  // AVATAR UPLOAD HANDLER
+  // =========================================================================
+  let _pendingAvatarBase64 = null;
+
+  function _onAvatarChange(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+      showAlert(isAr ? 'حجم الصورة أكبر من 2MB. الرجاء اختيار صورة أصغر.' : 'Image must be under 2MB. Please choose a smaller file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      _pendingAvatarBase64 = e.target.result;
+      const img = document.getElementById('auth-avatar-preview-img');
+      const placeholder = document.getElementById('auth-avatar-placeholder');
+      if (img) {
+        img.src = _pendingAvatarBase64;
+        img.style.display = 'block';
+      }
+      if (placeholder) placeholder.style.display = 'none';
+
+      // Add "change" button text
+      const btn = document.querySelector('.auth-avatar-btn span');
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+      if (btn) btn.textContent = isAr ? 'تغيير الصورة' : 'Change Photo';
+    };
+    reader.readAsDataURL(file);
   }
 
   // =========================================================================
@@ -322,7 +378,8 @@ window.AuthModal = (function () {
         skin: 'kuro',
         skinName: 'كورو',
         points: window.STORE ? window.STORE.getPoints() : 50,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        avatar: _pendingAvatarBase64 || null
       };
       if (existingIdx >= 0) {
         curStudents[existingIdx] = studentRecord;
@@ -330,6 +387,28 @@ window.AuthModal = (function () {
         curStudents.unshift(studentRecord);
       }
       localStorage.setItem('kf_registered_students', JSON.stringify(curStudents));
+
+      // Also persist avatar + name to kf_user_info for immediate sidebar display
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
+        userInfo.name = name;
+        userInfo.email = email;
+        if (_pendingAvatarBase64) userInfo.avatar = _pendingAvatarBase64;
+        localStorage.setItem('kf_user_info', JSON.stringify(userInfo));
+
+        // Update sidebar avatar immediately if it exists in DOM
+        if (_pendingAvatarBase64) {
+          const sidebarAvatarImgs = document.querySelectorAll('.user-avatar-img, [data-user-avatar]');
+          sidebarAvatarImgs.forEach(el => {
+            el.src = _pendingAvatarBase64;
+            el.style.display = 'block';
+            el.style.objectFit = 'cover';
+            el.style.borderRadius = '50%';
+          });
+        }
+      } catch (e) {}
+
+      _pendingAvatarBase64 = null; // reset after use
     } catch (e) {}
 
     try {
@@ -352,6 +431,7 @@ window.AuthModal = (function () {
       setButtonLoading('auth-signup-submit', false, isAr ? 'إنشاء الحساب ومزامنة السحابة' : 'Create Account & Enable Sync');
     }
   }
+
 
   async function handleSubmitForgot(e) {
     e.preventDefault();
@@ -488,6 +568,7 @@ window.AuthModal = (function () {
     handleSubmitSignIn,
     handleSubmitSignUp,
     handleSubmitForgot,
-    handleGoogleAuth
+    handleGoogleAuth,
+    _onAvatarChange
   };
 })();
