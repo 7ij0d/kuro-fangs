@@ -133,17 +133,10 @@ const SecondaryPages = {
       if (targetSheets.length === 0) {
         gridEl.innerHTML = `
           <div style="grid-column: 1 / -1;">
-            ${window.renderEmptyState
-              ? window.renderEmptyState()
-              : `
-                <div class="empty-state-card">
-                  <div class="empty-state-icon-wrap">
-                    <i data-lucide="folder-open"></i>
-                  </div>
-                  <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
-                  <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال المحتوى الصوتي قريباً' : 'Audio curriculum materials will be uploaded soon.'}</p>
-                </div>
-              `}
+            <div class="empty-state-card" style="padding:44px 24px;text-align:center;">
+              <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
+              <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال المحتوى الصوتي قريباً' : 'Audio curriculum materials will be uploaded soon.'}</p>
+            </div>
           </div>
         `;
         if (window.lucide) window.lucide.createIcons();
@@ -155,26 +148,27 @@ const SecondaryPages = {
         const sheetName = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
         const subjObj = subjects.find(s => s.id === sheet.subject_id);
         const subjName = subjObj ? (isAr ? subjObj.name_ar : subjObj.name_en) : '';
+        const color = window.SecondaryPages._subjectColor(sheet.subject_id);
 
         if (sheetRecs.length === 0) {
           return `
-            <div class="kf-panel empty-sheet-box" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-surface-subtle); border: 1px dashed var(--border-subtle); border-radius: var(--radius-md); opacity: 0.85;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
-                <span class="badge" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(2, 132, 199, 0.08); color: var(--brand-accent);">
-                  <i data-lucide="headphones" style="width: 12px; height: 12px;"></i>
-                  ${sheetName}
-                </span>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">${subjName}</span>
+            <div class="sheets-grid-card rec-card-empty">
+              <div class="sgc-header">
+                <span class="sgc-subject-badge" style="background:${color.bg}; color:${color.text}; border-color:${color.border};">${subjName}</span>
               </div>
-              
-              <h3 style="font-size: 1.05rem; color: var(--text-muted); margin: 4px 0 0; line-height: 1.4;">
-                ${isAr ? 'قريباً... لا توجد تسجيلات متاحة حالياً لهذا الشيت' : 'Coming soon... no recordings yet'}
-              </h3>
-              
-              <button class="btn btn-secondary btn-sm" disabled style="margin-top: auto; opacity: 0.6; cursor: not-allowed; justify-content: center;">
-                <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
-                <span>${isAr ? 'غير متاح حالياً' : 'Not Available'}</span>
-              </button>
+              <h3 class="sgc-title" style="color:var(--text-muted);">${sheetName}</h3>
+              <div class="sgc-meta">
+                <span class="sgc-meta-item" style="color:var(--text-muted);">
+                  <i data-lucide="clock" class="sgc-meta-icon"></i>
+                  ${isAr ? 'لا توجد تسجيلات حالياً' : 'No recordings yet'}
+                </span>
+              </div>
+              <div class="sgc-actions">
+                <button class="sgc-btn-download" disabled style="opacity:0.5;cursor:not-allowed;flex:1;justify-content:center;">
+                  <i data-lucide="mic-off" style="width:14px;height:14px;"></i>
+                  <span>${isAr ? 'غير متاح' : 'Not Available'}</span>
+                </button>
+              </div>
             </div>
           `;
         }
@@ -187,29 +181,28 @@ const SecondaryPages = {
             } catch (err) {}
           }
 
-          let playSection = '';
-          if (audioSrc) {
-            playSection = `<audio controls src="${audioSrc}" style="width: 100%; height: 40px; margin-top: 8px; border-radius: var(--radius-sm);"></audio>`;
-          }
-
-          let telegramBtn = '';
-          if (rec.telegram_url) {
-            telegramBtn = `
-              <button class="btn btn-secondary btn-sm" onclick="window.open('${rec.telegram_url}', '_blank')" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; gap: 6px; font-size: 0.85rem; padding: 8px 12px; margin-top: 8px;">
-                <i data-lucide="send" style="width: 14px; height: 14px; color: #0EA5E9;"></i>
-                <span>${isAr ? 'فتح في تيليجرام' : 'Open in Telegram'}</span>
-              </button>
-            `;
-          }
+          const recTitle = isAr ? (rec.title_ar || rec.title_en || rec.title) : (rec.title_en || rec.title_ar || rec.title);
+          const recDoctor = rec.doctor || '';
+          const recDuration = rec.duration || '';
 
           return `
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
-              <h4 style="font-size: 0.95rem; color: var(--text-primary); margin: 0 0 4px;">${isAr ? (rec.title_ar || rec.title_en || rec.title) : (rec.title_en || rec.title_ar || rec.title)}</h4>
-              <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">
-                👨‍⚕️ ${rec.doctor || ''} ${rec.duration ? `&bull; ⏱️ ${rec.duration}` : ''}
+            <div class="rec-track-item">
+              <div class="rec-track-header">
+                <div class="rec-track-info">
+                  <span class="rec-track-title">${recTitle}</span>
+                  <span class="rec-track-meta">
+                    ${recDoctor ? `<span class="sgc-meta-item"><i data-lucide="user-round" class="sgc-meta-icon"></i>${isAr ? 'د.' : 'Dr.'} ${recDoctor}</span>` : ''}
+                    ${recDuration ? `<span class="sgc-meta-sep">·</span><span class="sgc-meta-item"><i data-lucide="clock" class="sgc-meta-icon"></i>${recDuration}</span>` : ''}
+                  </span>
+                </div>
               </div>
-              ${playSection}
-              ${telegramBtn}
+              ${audioSrc ? `<audio controls src="${audioSrc}" class="rec-audio-player"></audio>` : ''}
+              ${rec.telegram_url ? `
+                <button class="sgc-btn-download rec-telegram-btn" onclick="window.open('${rec.telegram_url}', '_blank')">
+                  <i data-lucide="send" style="width:14px;height:14px;color:#0EA5E9;"></i>
+                  <span>${isAr ? 'فتح في تيليجرام' : 'Open in Telegram'}</span>
+                </button>
+              ` : ''}
             </div>
           `;
         }));
@@ -309,6 +302,24 @@ const SecondaryPages = {
 
   // Favorites
   
+
+  // Helper: Subject color palette (mirrors Sheets page)
+  _subjectColor(subjectId) {
+    const COLORS = {
+      'preventive':      { bg: 'rgba(2,132,199,0.10)',   text: '#0284C7', border: 'rgba(2,132,199,0.25)' },
+      'oral-diseases':   { bg: 'rgba(234,88,12,0.10)',   text: '#EA580C', border: 'rgba(234,88,12,0.25)' },
+      'omdr':            { bg: 'rgba(124,58,237,0.10)',   text: '#7C3AED', border: 'rgba(124,58,237,0.25)' },
+      'omfs':            { bg: 'rgba(200,67,67,0.10)',    text: '#C84343', border: 'rgba(200,67,67,0.25)' },
+      'cons-endo':       { bg: 'rgba(5,150,105,0.10)',   text: '#059669', border: 'rgba(5,150,105,0.25)' },
+      'fixed-pros':      { bg: 'rgba(245,158,11,0.10)',  text: '#D97706', border: 'rgba(245,158,11,0.25)' },
+      'removable-pros':  { bg: 'rgba(219,39,119,0.10)',  text: '#DB2777', border: 'rgba(219,39,119,0.25)' },
+      'ortho':           { bg: 'rgba(14,165,233,0.10)',  text: '#0EA5E9', border: 'rgba(14,165,233,0.25)' },
+      'pedo':            { bg: 'rgba(168,85,247,0.10)',  text: '#A855F7', border: 'rgba(168,85,247,0.25)' },
+      'gen-med':         { bg: 'rgba(20,184,166,0.10)',  text: '#0D9488', border: 'rgba(20,184,166,0.25)' },
+      'gen-surgery':     { bg: 'rgba(239,68,68,0.10)',   text: '#EF4444', border: 'rgba(239,68,68,0.25)' },
+    };
+    return COLORS[subjectId] || { bg: 'rgba(142,146,168,0.10)', text: '#8E92A8', border: 'rgba(142,146,168,0.25)' };
+  },
 
   // Helper: Generate Fox Mascot Skins Grid HTML (Delegated to RewardsPage)
   getFoxSkinsGridHtml(isAr) {
