@@ -1,6 +1,6 @@
 /**
- * KURO FANGS — SHEETS & LECTURES PAGE
- * Direct Destination with Pre-filtering Support & Bilingual Display
+ * KURO FANGS — SHEETS & LECTURES PAGE (REDESIGNED)
+ * 3-Column Card Grid with Dropdown Filter, Search Bar & View Mode Toggle
  */
 
 const SheetsPage = {
@@ -11,6 +11,26 @@ const SheetsPage = {
 
     const subjectParam = queryParams?.get('subject') || 'all';
     let currentFilter = subjectParam;
+    let searchQuery = '';
+    let viewMode = localStorage.getItem('kf_sheets_view') || 'grid'; // 'grid' | 'list'
+
+    // Subject color palette — maps subject ID to a semantic color token
+    const SUBJECT_COLORS = {
+      'preventive':      { bg: 'rgba(2, 132, 199, 0.10)',   text: '#0284C7', border: 'rgba(2, 132, 199, 0.25)' },
+      'oral-diseases':   { bg: 'rgba(234, 88, 12, 0.10)',   text: '#EA580C', border: 'rgba(234, 88, 12, 0.25)' },
+      'omdr':            { bg: 'rgba(124, 58, 237, 0.10)',   text: '#7C3AED', border: 'rgba(124, 58, 237, 0.25)' },
+      'omfs':            { bg: 'rgba(200, 67, 67, 0.10)',    text: '#C84343', border: 'rgba(200, 67, 67, 0.25)' },
+      'cons-endo':       { bg: 'rgba(5, 150, 105, 0.10)',   text: '#059669', border: 'rgba(5, 150, 105, 0.25)' },
+      'fixed-pros':      { bg: 'rgba(245, 158, 11, 0.10)',  text: '#D97706', border: 'rgba(245, 158, 11, 0.25)' },
+      'removable-pros':  { bg: 'rgba(219, 39, 119, 0.10)',  text: '#DB2777', border: 'rgba(219, 39, 119, 0.25)' },
+      'ortho':           { bg: 'rgba(14, 165, 233, 0.10)',  text: '#0EA5E9', border: 'rgba(14, 165, 233, 0.25)' },
+      'pedo':            { bg: 'rgba(168, 85, 247, 0.10)',  text: '#A855F7', border: 'rgba(168, 85, 247, 0.25)' },
+      'gen-med':         { bg: 'rgba(20, 184, 166, 0.10)',  text: '#0D9488', border: 'rgba(20, 184, 166, 0.25)' },
+      'gen-surgery':     { bg: 'rgba(239, 68, 68, 0.10)',   text: '#EF4444', border: 'rgba(239, 68, 68, 0.25)' },
+    };
+
+    const getSubjectColor = (subjectId) =>
+      SUBJECT_COLORS[subjectId] || { bg: 'rgba(142, 146, 168, 0.10)', text: '#8E92A8', border: 'rgba(142, 146, 168, 0.25)' };
 
     // Get all sheets from DATA service
     const getAllSheets = () => {
@@ -18,14 +38,14 @@ const SheetsPage = {
       return list.map(item => ({
         id: item.id,
         subject_id: item.subject_id,
-        subject_name: isAr 
+        subject_name: isAr
           ? (item.subject_name || subjects.find(s => s.id === item.subject_id)?.name_ar || 'طب الأسنان')
           : (subjects.find(s => s.id === item.subject_id)?.name_en || 'Dentistry'),
         title: isAr ? (item.title_ar || item.title) : (item.title_en || item.title_ar || item.title),
         doctor_name: item.doctor_name || (isAr ? 'هيئة التدريس' : 'Faculty Board'),
-        date: item.date || '2026-09-12',
+        date: item.date || '2026-09-16',
         type: item.type || (isAr ? 'شيت' : 'Sheet'),
-        pages: item.pages || 18,
+        pages: item.pages || 12,
         size: item.size || '3.2 MB',
         order_index: typeof item.order_index === 'number' ? item.order_index : null,
         pdf_source: item.pdf_source || 'none'
@@ -39,225 +59,315 @@ const SheetsPage = {
 
     let allSheets = getAllSheets();
 
+    // ── Card HTML ──────────────────────────────────────────────────────────
+    const renderCardHTML = (item) => {
+      const color = getSubjectColor(item.subject_id);
+      const orderLabel = item.order_index
+        ? `<span class="sheets-order-pill">${isAr ? `#${item.order_index}` : `#${item.order_index}`}</span>`
+        : '';
+      return `
+        <div class="sheets-grid-card" data-id="${item.id}">
+          <div class="sgc-header">
+            <span class="sgc-subject-badge" style="background:${color.bg}; color:${color.text}; border-color:${color.border};">
+              ${item.subject_name}
+            </span>
+            ${orderLabel}
+          </div>
+
+          <h3 class="sgc-title">${item.title}</h3>
+
+          <div class="sgc-meta">
+            <span class="sgc-meta-item">
+              <i data-lucide="user-round" class="sgc-meta-icon"></i>
+              ${isAr ? 'د.' : 'Dr.'} ${item.doctor_name}
+            </span>
+            <span class="sgc-meta-sep">·</span>
+            <span class="sgc-meta-item">
+              <i data-lucide="book-open" class="sgc-meta-icon"></i>
+              ${item.pages} ${isAr ? 'صفحة' : 'Pages'}
+            </span>
+            <span class="sgc-meta-sep">·</span>
+            <span class="sgc-meta-item">
+              <i data-lucide="hard-drive" class="sgc-meta-icon"></i>
+              ${item.size}
+            </span>
+            <span class="sgc-meta-sep">·</span>
+            <span class="sgc-meta-item">
+              <i data-lucide="calendar" class="sgc-meta-icon"></i>
+              ${item.date}
+            </span>
+            <span class="sgc-meta-sep">·</span>
+            <span class="sgc-verified-badge">
+              <i data-lucide="badge-check" class="sgc-meta-icon" style="color:#10B981;"></i>
+              ${isAr ? 'معتمد' : 'Verified'}
+            </span>
+          </div>
+
+          <div class="sgc-actions">
+            <button class="sgc-btn-view view-sheet-btn" data-id="${item.id}">
+              <i data-lucide="eye" style="width:14px;height:14px;"></i>
+              <span>${isAr ? 'عرض الشيت' : 'View Sheet'}</span>
+            </button>
+            <button class="sgc-btn-download download-sheet-btn" data-id="${item.id}">
+              <i data-lucide="download" style="width:14px;height:14px;"></i>
+              <span>${isAr ? 'تنزيل' : 'Download'}</span>
+            </button>
+          </div>
+        </div>
+      `;
+    };
+
+    // ── List-mode row HTML ────────────────────────────────────────────────
+    const renderRowHTML = (item) => {
+      const color = getSubjectColor(item.subject_id);
+      return `
+        <div class="sheets-list-row" data-id="${item.id}">
+          <div class="slr-left">
+            <span class="sgc-subject-badge" style="background:${color.bg}; color:${color.text}; border-color:${color.border}; flex-shrink:0;">
+              ${item.subject_name}
+            </span>
+            <div class="slr-info">
+              <h3 class="sgc-title slr-title">${item.title}</h3>
+              <div class="sgc-meta">
+                <span class="sgc-meta-item">
+                  <i data-lucide="user-round" class="sgc-meta-icon"></i>
+                  ${isAr ? 'د.' : 'Dr.'} ${item.doctor_name}
+                </span>
+                <span class="sgc-meta-sep">·</span>
+                <span class="sgc-meta-item">
+                  <i data-lucide="book-open" class="sgc-meta-icon"></i>
+                  ${item.pages} ${isAr ? 'صفحة' : 'Pages'}
+                </span>
+                <span class="sgc-meta-sep">·</span>
+                <span class="sgc-meta-item">
+                  <i data-lucide="calendar" class="sgc-meta-icon"></i>
+                  ${item.date}
+                </span>
+                <span class="sgc-meta-sep">·</span>
+                <span class="sgc-verified-badge">
+                  <i data-lucide="badge-check" class="sgc-meta-icon" style="color:#10B981;"></i>
+                  ${isAr ? 'معتمد' : 'Verified'}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="sgc-actions slr-actions">
+            <button class="sgc-btn-view view-sheet-btn" data-id="${item.id}">
+              <i data-lucide="eye" style="width:14px;height:14px;"></i>
+              <span>${isAr ? 'عرض الشيت' : 'View Sheet'}</span>
+            </button>
+            <button class="sgc-btn-download download-sheet-btn" data-id="${item.id}">
+              <i data-lucide="download" style="width:14px;height:14px;"></i>
+              <span>${isAr ? 'تنزيل' : 'Download'}</span>
+            </button>
+          </div>
+        </div>
+      `;
+    };
+
+    // ── Render filtered list ───────────────────────────────────────────────
     const renderList = () => {
-      const filtered = currentFilter === 'all'
+      let filtered = currentFilter === 'all'
         ? allSheets
         : allSheets.filter(s => s.subject_id === currentFilter);
 
-      const listContainer = document.getElementById('sheets-list-container');
-      const activeFilterBanner = document.getElementById('active-filter-indicator');
-      if (!listContainer) return;
-
-      const activeSubjectObj = subjects.find(s => s.id === currentFilter);
-
-      if (activeFilterBanner) {
-        if (currentFilter !== 'all' && activeSubjectObj) {
-          activeFilterBanner.style.display = 'flex';
-          activeFilterBanner.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <i data-lucide="filter" style="width: 16px; height: 16px; color: var(--brand-burgundy);"></i>
-              <span>${isAr ? 'المادة المحددة:' : 'Filtered by:'} <strong>${isAr ? activeSubjectObj.name_ar : activeSubjectObj.name_en}</strong> (${filtered.length} ${isAr ? 'شيت متاح' : 'handouts available'})</span>
-            </div>
-            <button id="clear-filter-btn" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;">
-              ${isAr ? 'عرض كل المواد' : 'Show All Subjects'}
-            </button>
-          `;
-          document.getElementById('clear-filter-btn')?.addEventListener('click', () => {
-            selectFilter('all');
-          });
-        } else {
-          activeFilterBanner.style.display = 'none';
-        }
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(s =>
+          s.title?.toLowerCase().includes(q) ||
+          s.subject_name?.toLowerCase().includes(q) ||
+          s.doctor_name?.toLowerCase().includes(q)
+        );
       }
 
+      const listContainer = document.getElementById('sheets-list-container');
+      if (!listContainer) return;
+
       if (filtered.length === 0) {
-        listContainer.innerHTML = window.renderEmptyState
-          ? window.renderEmptyState()
-          : `
-            <div class="empty-state-card" style="padding: 44px 24px; text-align: center;">
-              <div style="width: 100px; height: 100px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
-                <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro Reading" class="kuro-character-img kuro-float" style="max-height: 90px; object-fit: contain;" />
-              </div>
-              <h3 class="empty-state-title" style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">${isAr ? 'لا توجد شيتات مضافة لهذه المادة حالياً' : 'No sheets available yet'}</h3>
-              <p class="empty-state-subtitle" style="font-size: 0.85rem; color: var(--text-secondary); max-width: 440px; margin: 0 auto;">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً مع كورو.' : 'Handouts and academic materials will be uploaded soon.'}</p>
+        listContainer.className = '';
+        listContainer.innerHTML = `
+          <div class="empty-state-card" style="padding: 48px 24px; text-align: center; grid-column: 1/-1;">
+            <div style="width:100px;height:100px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(200,67,67,0.12) 0%,transparent 70%);">
+              <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro Reading" class="kuro-character-img kuro-float" style="max-height:90px;object-fit:contain;" />
             </div>
-          `;
+            <h3 style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-bottom:6px;">${isAr ? 'لا توجد شيتات تطابق بحثك' : 'No sheets match your search'}</h3>
+            <p style="font-size:0.85rem;color:var(--text-secondary);max-width:440px;margin:0 auto;">${isAr ? 'جرّب تغيير المادة أو كلمات البحث.' : 'Try a different subject or search term.'}</p>
+          </div>
+        `;
         if (window.lucide) window.lucide.createIcons();
         return;
       }
 
-      listContainer.innerHTML = filtered.map(item => `
-        <div class="sheet-modern-card" data-id="${item.id}">
-          <!-- Top: Type Badge + Lecture Title -->
-          <div class="sheet-card-top">
-            <div class="sheet-badge-group">
-              ${item.order_index ? `
-                <span class="sheet-order-pill" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px;">
-                  ${isAr ? `الشيت #${item.order_index}` : `Sheet #${item.order_index}`}
-                </span>
-              ` : ''}
-              <span class="sheet-type-pill" style="display: inline-flex; align-items: center; gap: 6px;">
-                <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;" />
-                ${item.type || 'PDF Sheet'}
-              </span>
-              <span class="sheet-verified-pill">
-                <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
-                ${isAr ? 'نسخة معتمدة' : 'Verified'}
-              </span>
-            </div>
-            <h3 class="sheet-main-title">
-              <a href="#/sheet-detail?id=${item.id}" style="color: inherit; text-decoration: none;">
-                ${item.title}
-              </a>
-            </h3>
-          </div>
-
-          <!-- Information: Pages • Size • Doctor • Subject • Date -->
-          <div class="sheet-card-meta-row">
-            <div class="sheet-meta-item" title="${isAr ? 'عدد الصفحات' : 'Pages'}">
-              <i data-lucide="book-open"></i>
-              <span><strong>${item.pages || 18}</strong> ${isAr ? 'صفحة' : 'pages'}</span>
-            </div>
-
-            <div class="sheet-meta-item" title="${isAr ? 'حجم الملف' : 'Size'}">
-              <i data-lucide="hard-drive"></i>
-              <span><strong>${item.size || '3.2 MB'}</strong></span>
-            </div>
-
-            <div class="sheet-meta-item" title="${isAr ? 'الأستاذ' : 'Doctor'}">
-              <i data-lucide="user-check"></i>
-              <span>${isAr ? 'الدكتور:' : 'Doctor:'} <strong>${item.doctor_name || (isAr ? 'د. طارق الزاوي' : 'Dr. Tarek Alzawi')}</strong></span>
-            </div>
-
-            <div class="sheet-meta-item" title="${isAr ? 'المادة' : 'Subject'}">
-              <i data-lucide="graduation-cap"></i>
-              <span>${item.subject_name || (isAr ? 'طب الأسنان' : 'Dentistry')}</span>
-            </div>
-
-            <div class="sheet-meta-item" title="${isAr ? 'التاريخ' : 'Date'}">
-              <i data-lucide="calendar"></i>
-              <span>${item.date || '2026-09-12'}</span>
-            </div>
-          </div>
-
-          <!-- Bottom: Dual Action Buttons (View + Download) -->
-          <div class="sheet-card-actions-row">
-            <div class="dual-buttons-group">
-              <button class="btn btn-primary btn-action-view view-sheet-btn" data-id="${item.id}">
-                <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
-                <span>${isAr ? 'قراءة / معاينة' : 'Read / View'}</span>
-              </button>
-
-              <button class="btn btn-secondary btn-action-download download-sheet-btn" data-id="${item.id}">
-                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
-                <span>${isAr ? 'تنزيل الملف (PDF)' : 'Download PDF'}</span>
-              </button>
-            </div>
-
-            <a href="#/sheet-detail?id=${item.id}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; gap: 4px;">
-              <span>${isAr ? 'صفحة الشيت' : 'Full Page'}</span>
-              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 13px; height: 13px;"></i>
-            </a>
-          </div>
-        </div>
-      `).join('');
+      if (viewMode === 'grid') {
+        listContainer.className = 'sheets-grid-container';
+        listContainer.innerHTML = filtered.map(renderCardHTML).join('');
+      } else {
+        listContainer.className = 'sheets-list-container-view';
+        listContainer.innerHTML = filtered.map(renderRowHTML).join('');
+      }
 
       if (window.lucide) window.lucide.createIcons();
 
-      // Direct Dedicated Sheet Navigation (Cards & View Buttons)
-      listContainer.querySelectorAll('.sheet-modern-card').forEach(card => {
+      // Card click → navigate to sheet detail
+      listContainer.querySelectorAll('.sheets-grid-card, .sheets-list-row').forEach(card => {
         card.style.cursor = 'pointer';
         card.addEventListener('click', (e) => {
           if (e.target.closest('.download-sheet-btn')) return;
-          const sheetId = card.getAttribute('data-id');
-          if (sheetId) window.location.hash = '#/sheet-detail?id=' + sheetId;
+          const id = card.getAttribute('data-id');
+          if (id) window.location.hash = '#/sheet-detail?id=' + id;
         });
       });
 
+      // View buttons
       listContainer.querySelectorAll('.view-sheet-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const sheetId = btn.getAttribute('data-id');
-          if (sheetId) window.location.hash = '#/sheet-detail?id=' + sheetId;
+          const id = btn.getAttribute('data-id');
+          if (id) window.location.hash = '#/sheet-detail?id=' + id;
         });
       });
 
-      // Download Buttons
+      // Download buttons
       listContainer.querySelectorAll('.download-sheet-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const sheetId = btn.getAttribute('data-id');
-          const doc = filtered.find(s => s.id === sheetId);
+          const id = btn.getAttribute('data-id');
+          const doc = filtered.find(s => s.id === id);
           if (window.DocumentViewer) {
             window.DocumentViewer.download(doc || { title: 'Dental Sheet' });
           } else {
-            window.STORE.addPoints(10);
-            window.showToast(isAr ? 'تم بدء التنزيل بنجاح (+10 نقاط)' : 'Download started (+10 pts)', { type: 'success', points: 10 });
+            if (window.STORE) window.STORE.addPoints(10);
+            if (window.showToast) window.showToast(isAr ? 'تم بدء التنزيل (+10 نقاط)' : 'Download started (+10 pts)', { type: 'success', points: 10 });
           }
         });
       });
+
+      // Update count label
+      const countEl = document.getElementById('sheets-count-label');
+      if (countEl) {
+        countEl.textContent = isAr ? `${filtered.length} شيت` : `${filtered.length} Sheets`;
+      }
     };
 
-    const selectFilter = (subjectId) => {
-      currentFilter = subjectId;
-      container.querySelectorAll('.filter-btn').forEach(b => {
-        if (b.getAttribute('data-subject') === currentFilter) {
-          b.classList.add('active');
-        } else {
-          b.classList.remove('active');
-        }
+    // ── Update subject dropdown active state ───────────────────────────────
+    const updateDropdown = () => {
+      const dropdown = document.getElementById('sheets-subject-dropdown');
+      if (dropdown) dropdown.value = currentFilter;
+    };
+
+    // ── View mode toggle ───────────────────────────────────────────────────
+    const setViewMode = (mode) => {
+      viewMode = mode;
+      localStorage.setItem('kf_sheets_view', mode);
+      document.querySelectorAll('.sheets-view-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-view') === mode);
       });
       renderList();
     };
 
+    // ── Page scaffold HTML ─────────────────────────────────────────────────
     container.innerHTML = `
+      <!-- Page Title Bar -->
       <div class="page-title-bar">
-        <div class="page-title-group" style="display: flex; align-items: center; gap: 16px;">
-          <div style="width: 58px; height: 58px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
-            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro Reading" class="kuro-character-img kuro-float" style="width: 52px; height: 52px; object-fit: contain;" />
+        <div class="page-title-group" style="display:flex;align-items:center;gap:16px;">
+          <div style="width:58px;height:58px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(200,67,67,0.12) 0%,transparent 70%);">
+            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png'}" alt="Kuro" class="kuro-character-img kuro-float" style="width:52px;height:52px;object-fit:contain;" />
           </div>
           <div>
-            <h1 style="font-size: 1.55rem; font-weight: 850; color: var(--text-primary); margin: 0 0 4px;">
+            <h1 style="font-size:1.55rem;font-weight:850;color:var(--text-primary);margin:0 0 4px;letter-spacing:-0.02em;">
               ${isAr ? 'المحاضرات والملازم الدراسية' : 'Lectures & Study Sheets'}
             </h1>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin:0;">
               ${isAr ? 'شيتات وتفريغات مواد السنة الثالثة طب وجراحة الفم والأسنان بصيغة PDF' : 'Third Year Dental Surgery lecture notes, handouts, and official transcripts'}
             </p>
           </div>
         </div>
       </div>
 
-      <!-- Active Filter Indicator Bar -->
-      <div id="active-filter-indicator" class="card" style="display: none; justify-content: space-between; align-items: center; padding: 10px 16px; margin-bottom: 14px; background: rgba(2, 132, 199, 0.05); border: 1px solid rgba(2, 132, 199, 0.18);"></div>
+      <!-- Control Bar: Dropdown + Search + View Toggle -->
+      <div class="sheets-control-bar">
+        <!-- Subject Dropdown -->
+        <div class="sheets-dropdown-wrap">
+          <i data-lucide="chevron-down" class="sheets-dropdown-chevron"></i>
+          <select id="sheets-subject-dropdown" class="sheets-dropdown">
+            <option value="all">${isAr ? 'كل المواد' : 'All Subjects'}</option>
+            ${subjects.map(s => `
+              <option value="${s.id}" ${currentFilter === s.id ? 'selected' : ''}>
+                ${isAr ? s.name_ar : s.name_en}
+              </option>
+            `).join('')}
+          </select>
+        </div>
 
-      <!-- Subject Filters Segmented Nav -->
-      <div class="kf-segmented-nav" style="margin-bottom: 20px; width: 100%;">
-        <button class="kf-segmented-btn filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-subject="all">
-          <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
-          <span>${isAr ? 'كافة المواد' : 'All Subjects'}</span>
-          <span class="kf-segmented-badge">12</span>
-        </button>
-        ${subjects.map(s => `
-          <button class="kf-segmented-btn filter-btn ${currentFilter === s.id ? 'active' : ''}" data-subject="${s.id}">
-            <span>${isAr ? s.name_ar : s.name_en}</span>
+        <!-- Search Bar -->
+        <div class="sheets-search-wrap">
+          <i data-lucide="search" class="sheets-search-icon"></i>
+          <input
+            id="sheets-search-input"
+            type="text"
+            class="sheets-search-input"
+            placeholder="${isAr ? 'ابحث عن شيت أو مادة...' : 'Search subjects, or topics...'}"
+            autocomplete="off"
+          />
+          <button id="sheets-search-clear" class="sheets-search-clear" style="display:none;" title="${isAr ? 'مسح' : 'Clear'}">
+            <i data-lucide="x" style="width:14px;height:14px;"></i>
           </button>
-        `).join('')}
+        </div>
+
+        <!-- Right: Count + View Toggle -->
+        <div class="sheets-control-right">
+          <span id="sheets-count-label" class="sheets-count-label"></span>
+          <div class="sheets-view-toggle" role="group" aria-label="${isAr ? 'طريقة العرض' : 'View Mode'}">
+            <span class="sheets-view-label">${isAr ? 'طريقة العرض' : 'View Mode'}</span>
+            <button class="sheets-view-btn ${viewMode === 'grid' ? 'active' : ''}" data-view="grid" title="${isAr ? 'شبكة' : 'Grid'}">
+              <i data-lucide="layout-grid" style="width:16px;height:16px;"></i>
+            </button>
+            <button class="sheets-view-btn ${viewMode === 'list' ? 'active' : ''}" data-view="list" title="${isAr ? 'قائمة' : 'List'}">
+              <i data-lucide="list" style="width:16px;height:16px;"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Sheets List -->
-      <div class="recent-list-view" id="sheets-list-container"></div>
+      <!-- Content Area -->
+      <div id="sheets-list-container" class="${viewMode === 'grid' ? 'sheets-grid-container' : 'sheets-list-container-view'}"></div>
     `;
 
     renderList();
+    updateDropdown();
 
-    // Event listeners for filters
-    container.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectFilter(btn.getAttribute('data-subject'));
-      });
+    // ── Event Listeners ────────────────────────────────────────────────────
+
+    // Subject dropdown
+    document.getElementById('sheets-subject-dropdown')?.addEventListener('change', (e) => {
+      currentFilter = e.target.value;
+      renderList();
     });
 
-    // Background cloud sync to pull newly published sheets from Supabase
+    // Search input
+    const searchInput = document.getElementById('sheets-search-input');
+    const searchClear = document.getElementById('sheets-search-clear');
+    let searchDebounce;
+    searchInput?.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      searchClear.style.display = searchQuery ? 'flex' : 'none';
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(renderList, 220);
+    });
+    searchClear?.addEventListener('click', () => {
+      searchQuery = '';
+      searchInput.value = '';
+      searchClear.style.display = 'none';
+      renderList();
+      searchInput.focus();
+    });
+
+    // View toggle
+    container.querySelectorAll('.sheets-view-btn').forEach(btn => {
+      btn.addEventListener('click', () => setViewMode(btn.getAttribute('data-view')));
+    });
+
+    // Background cloud sync
     if (window.DATA && typeof window.DATA.syncCloudSheets === 'function') {
       window.DATA.syncCloudSheets().then((newSheets) => {
         if (Array.isArray(newSheets) && newSheets.length > 0) {
