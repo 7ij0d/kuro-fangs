@@ -1238,6 +1238,23 @@ class DataService {
         "download_url": "data/sheets/dentin-pulp-complex.pdf",
         "pdf_source": "local",
         "date": "2026-09-23"
+    },
+    {
+        "id": "sh_prev_dental_caries_02",
+        "subject_id": "preventive",
+        "title": "Lecture 2: Dental Caries & Current Concepts of Etiology",
+        "title_ar": "المحاضرة 2: تسوس الأسنان والنظريات الحديثة للأسباب (Dental Caries)",
+        "title_en": "Lecture 2: Dental Caries & Current Concepts of Etiology",
+        "doctor_name": "د. حنان عمران",
+        "doctor": "د. حنان عمران",
+        "pages": 5,
+        "pages_count": 5,
+        "order_index": 2,
+        "size": "253 KB",
+        "pdf_url": "data/sheets/dental-caries-prevention.pdf",
+        "download_url": "data/sheets/dental-caries-prevention.pdf",
+        "pdf_source": "local",
+        "date": "2026-09-22"
     }
 ];
   }

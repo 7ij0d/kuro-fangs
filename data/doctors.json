@@ -12,6 +12,7 @@
     { "id": "dr-aisha",   "name_ar": "د. عائشة الصياد",   "name_en": "Dr. Aisha Al-Sayyad",  "title": "ماجستير طب الفم والأشعة",    "subjects": ["omdr"] },
     { "id": "dr-hana",    "name_ar": "د. هناء التركي",    "name_en": "Dr. Hana Al-Turki",    "title": "دكتوراه تقويم الأسنان",     "subjects": ["ortho"] },
     { "id": "dr-rima",    "name_ar": "د. ريما الأمين",    "name_en": "Dr. Rima Al-Amin",     "title": "ماجستير طب أسنان الأطفال",   "subjects": ["pedo"] },
-    { "id": "dr-amal",    "name_ar": "د. آمال كشلاف",    "name_en": "Dr. Amal Kashlaf",     "title": "أستاذة العلاج التحفظي وعلاج الجذور", "subjects": ["cons-endo"] }
+    { "id": "dr-amal",    "name_ar": "د. آمال كشلاف",    "name_en": "Dr. Amal Kashlaf",     "title": "أستاذة العلاج التحفظي وعلاج الجذور", "subjects": ["cons-endo"] },
+    { "id": "dr-hanan",   "name_ar": "د. حنان عمران",    "name_en": "Dr. Hanan Omran",      "title": "أستاذة طب الأسنان الوقائي ومجتمع الأسنان", "subjects": ["preventive"] }
   ]
 }

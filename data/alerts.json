@@ -66,6 +66,20 @@
       "content_ar": "تم إضافة الشيت الأول في مقرر العلاج التحفظي وعلاج الجذور 2 بعنوان «معقد العاج واللب - Dentin-Pulp Complex» للدكتورة آمال كشلاف.\nالشيت متاح الآن للدراسة والتصفح مع محرك الأسئلة والملخصات التفاعلية.",
       "publisher_ar": "قسم العلاج التحفظي وعلاج الجذور – كلية طب وجراحة الفم والأسنان",
       "url": "#/sheet-detail?id=sh_cons_dentin_pulp"
+    },
+    {
+      "id": "alt_2026_06",
+      "type": "plan",
+      "badge_ar": "محاضرة جديدة • طب الأسنان الوقائي 1",
+      "badge_en": "New Lecture • Preventive Dentistry I",
+      "title_ar": "رفع المحاضرة الثانية (Dental Caries) في مادة طب الأسنان الوقائي للدكتورة حنان عمران",
+      "title_en": "Uploaded Lecture 2 (Dental Caries & Current Concepts of Etiology) for Preventive Dentistry by Dr. Hanan Omran",
+      "date": "2026-09-22",
+      "time": "10:30 AM",
+      "cover": "assets/covers/preventive.webp",
+      "content_ar": "تم إضافة المحاضرة الثانية في مقرر طب الأسنان الوقائي 1 بعنوان «تسوس الأسنان والنظريات الحديثة للأسباب - Dental Caries & Current Concepts of Etiology» للدكتورة حنان عمران.\nالمحاضرة متوفرة الآن للدراسة والتصفح مع بنك الأسئلة والملخصات.",
+      "publisher_ar": "قسم طب الأسنان الوقائي وصحة المجتمع – كلية طب وجراحة الفم والأسنان",
+      "url": "#/sheet-detail?id=sh_prev_dental_caries_02"
     }
   ]
 }

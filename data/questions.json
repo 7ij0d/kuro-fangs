@@ -413,6 +413,80 @@
       "answer_ar": "الإجابة المعتمدة: B. ألياف A-دلتا (A-delta fibers)\n\nمرجع الشيت (صفحة 16):\n«A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain. In contrast, C fibers are slower in conduction and are responsible for dull and throbbing pain.»\nألياف A تقع سطحياً وتوصل الإحساس بالألم الحاد والموضعي سريعاً.",
       "answer_en": "Correct Answer: B. A-delta fibers\n\nSheet Reference (Page 16):\n\"A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain. C fibers are slower in conduction and are responsible for dull and throbbing pain.\"",
       "quote_ref": "A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain."
+    },
+    {
+      "id": "q_prev_01",
+      "subject_id": "preventive",
+      "subject_name_ar": "طب الأسنان الوقائي 1",
+      "subject_name_en": "Preventive Dentistry I",
+      "sheet_id": "sh_prev_dental_caries_02",
+      "sheet_title_ar": "المحاضرة 2: تسوس الأسنان والنظريات الحديثة للأسباب (Dental Caries)",
+      "sheet_title_en": "Lecture 2: Dental Caries & Current Concepts of Etiology",
+      "page_ref": 3,
+      "topic_ar": "الفروق السريرية بين تسوس الرضاعة والتسوس المتفشي",
+      "topic_en": "Nursing Caries vs Rampant Caries",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Nursing Bottle Caries",
+        "Rampant Caries",
+        "Mandibular Incisors"
+      ],
+      "text_ar": "ما هي السمة السريرية الفارقة الأكثر تمييزاً لتسوس الرضاعة (Nursing Bottle Caries) عند مقارنته بالتسوس المتفشي (Rampant Caries)؟",
+      "text_en": "What is the hallmark clinical feature that distinguishes Nursing Bottle Caries from Rampant Caries regarding tooth involvement?",
+      "options_ar": [
+        "إصابة القواطع السفلية بشكل مبكر وعنيف",
+        "عدم إصابة القواطع السفلية وسلامتها (Mandibular incisors NOT involved)",
+        "اقتصاره على الأسنان الدائمة فقط دون اللبنية",
+        "عدم ارتباطه بالسكريات المضافة أو العسل"
+      ],
+      "options_en": [
+        "Early aggressive involvement of mandibular incisors",
+        "Mandibular incisors are spared and NOT involved",
+        "Confined exclusively to permanent dentition",
+        "Not associated with added sugars or honey"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة المعتمدة: B. عدم إصابة القواطع السفلية وسلامتها (Mandibular incisors NOT involved)\n\nمرجع المحاضرة (صفحة 3):\n«Involvement of Mandibular Incisors: In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected.»\nتسوس الرضاعة ينجو منه القواطع السفلية بسبب حماية اللسان وتدفق اللعاب من الغدد تحت الفك وتحت اللسان.",
+      "answer_en": "Correct Answer: B. Mandibular incisors are spared and NOT involved\n\nLecture Reference (Page 3):\n\"Involvement of Mandibular Incisors: In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected.\"\nMandibular incisors are protected during sucking by the tongue and saliva flow.",
+      "quote_ref": "In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected."
+    },
+    {
+      "id": "q_prev_02",
+      "subject_id": "preventive",
+      "subject_name_ar": "طب الأسنان الوقائي 1",
+      "subject_name_en": "Preventive Dentistry I",
+      "sheet_id": "sh_prev_dental_caries_02",
+      "sheet_title_ar": "المحاضرة 2: تسوس الأسنان والنظريات الحديثة للأسباب (Dental Caries)",
+      "sheet_title_en": "Lecture 2: Dental Caries & Current Concepts of Etiology",
+      "page_ref": 5,
+      "topic_ar": "ميكروبات اللويحة ومبدأ التسوس",
+      "topic_en": "Plaque Microorganisms & Caries Initiation",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Mutans Streptococci",
+        "Lactobacilli",
+        "Caries Etiology"
+      ],
+      "text_ar": "أي من بكتيريا الفم التالية تُعد البادئ الأساسي (Primary Initiator) لظهور نخر وتسوس الأسنان عبر إنتاج الجلوكان والتخمير السريع لحمض اللاكتيك؟",
+      "text_en": "Which oral microorganism acts as the primary initiator of dental caries through extracellular glucan synthesis and rapid lactic acid fermentation?",
+      "options_ar": [
+        "بكتيريا العصيات اللبنية (Lactobacilli)",
+        "المكورات العقدية الطافرة (Mutans Streptococci)",
+        "بكتيريا الشعية الفطرية (Actinomyces viscosus)",
+        "المغزلية المتقيحة (Fusobacterium nucleatum)"
+      ],
+      "options_en": [
+        "Lactobacilli (LB)",
+        "Mutans Streptococci (MS)",
+        "Actinomyces viscosus",
+        "Fusobacterium nucleatum"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة المعتمدة: B. المكورات العقدية الطافرة (Mutans Streptococci)\n\nمرجع المحاضرة (صفحة 5):\n«Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid. Lactobacilli (LB): Secondary Continuer.»\nالمكورات العقدية الطافرة هي المبادرة للتسوس، بينما اللاكتوباسيلس مكمل ومستمر للتجويف العميق.",
+      "answer_en": "Correct Answer: B. Mutans Streptococci (MS)\n\nLecture Reference (Page 5):\n\"Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid. Lactobacilli (LB): Secondary Continuer.\"",
+      "quote_ref": "Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid."
     }
   ]
 }
