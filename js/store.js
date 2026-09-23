@@ -44,18 +44,20 @@ class AppStore {
     localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_CHARACTER, equipped);
     localStorage.setItem(this.STORAGE_KEYS.EQUIPPED_SKIN, equipped);
 
-    // 2. Site-wide Official Theme (Default: 'dark' Obsidian Night)
+    // 2. Site-wide Official Theme ('kuro' light / 'kuro-dark' dark)
     let savedTheme = localStorage.getItem(this.STORAGE_KEYS.THEME);
-    const userSelected = localStorage.getItem('kf_theme_user_selected') === 'true';
-
-    if (!userSelected) {
-      // Default primary theme is black/dark
-      savedTheme = 'dark';
-    } else if (savedTheme === 'classic' || savedTheme === 'surgeon' || savedTheme === 'scholar' || savedTheme === 'light' || savedTheme === 'kuro') {
-      savedTheme = 'light';
-    } else {
-      savedTheme = 'dark';
+    if (savedTheme === 'classic' || savedTheme === 'surgeon' || savedTheme === 'scholar' || savedTheme === 'light') {
+      savedTheme = 'kuro';
+    } else if (savedTheme === 'cyber' || savedTheme === 'ninja' || savedTheme === 'dark') {
+      savedTheme = 'kuro-dark';
+    } else if (!savedTheme || (savedTheme !== 'kuro' && savedTheme !== 'kuro-dark')) {
+      savedTheme = 'kuro';
     }
+
+    // Clear temporary force-dark flag and restore default 'kuro'
+    localStorage.removeItem('kf_theme_user_selected');
+    if (savedTheme === 'dark') savedTheme = 'kuro';
+    if (!savedTheme) savedTheme = 'kuro';
 
     localStorage.setItem(this.STORAGE_KEYS.THEME, savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -100,26 +102,23 @@ class AppStore {
   }
 
   // ==========================================================================
-  // THEME MANAGEMENT (Official Kuro Dark & Kuro Light)
+  // THEME MANAGEMENT (Official Kuro Light & Kuro Dark)
   // ==========================================================================
   getTheme() {
-    const userSelected = localStorage.getItem('kf_theme_user_selected') === 'true';
-    if (!userSelected) return 'dark';
-    const theme = localStorage.getItem(this.STORAGE_KEYS.THEME);
-    if (theme === 'kuro' || theme === 'light') return 'light';
-    return 'dark';
+    const theme = localStorage.getItem(this.STORAGE_KEYS.THEME) || 'kuro';
+    if (theme === 'kuro-dark' || theme === 'dark') return 'kuro-dark';
+    return 'kuro';
   }
 
   setTheme(theme) {
-    let normalizedTheme = 'dark';
-    if (theme === 'kuro' || theme === 'light' || theme === 'classic' || theme === 'scholar') {
-      normalizedTheme = 'light';
+    let normalizedTheme = 'kuro';
+    if (theme === 'kuro-dark' || theme === 'dark' || theme === 'cyber' || theme === 'ninja') {
+      normalizedTheme = 'kuro-dark';
     } else {
-      normalizedTheme = 'dark';
+      normalizedTheme = 'kuro';
     }
 
     localStorage.setItem(this.STORAGE_KEYS.THEME, normalizedTheme);
-    localStorage.setItem('kf_theme_user_selected', 'true');
     document.documentElement.setAttribute('data-theme', normalizedTheme);
     this.notify('theme_changed', normalizedTheme);
     return normalizedTheme;
@@ -127,7 +126,7 @@ class AppStore {
 
   toggleTheme() {
     const current = this.getTheme();
-    const next = current === 'dark' ? 'light' : 'dark';
+    const next = (current === 'kuro-dark' || current === 'dark') ? 'kuro' : 'kuro-dark';
     return this.setTheme(next);
   }
 
