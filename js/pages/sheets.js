@@ -41,7 +41,7 @@ const SheetsPage = {
         subject_name: isAr
           ? (item.subject_name || subjects.find(s => s.id === item.subject_id)?.name_ar || 'طب الأسنان')
           : (subjects.find(s => s.id === item.subject_id)?.name_en || 'Dentistry'),
-        title: isAr ? (item.title_ar || item.title) : (item.title_en || item.title_ar || item.title),
+        title: item.title_en || item.title || item.title_ar,
         doctor_name: item.doctor_name || (isAr ? 'هيئة التدريس' : 'Faculty Board'),
         date: item.date || '2026-09-16',
         type: item.type || (isAr ? 'شيت' : 'Sheet'),

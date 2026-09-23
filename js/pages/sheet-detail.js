@@ -51,7 +51,7 @@ const SheetDetailPage = {
     }
 
     // Normalize metadata
-    const title = sheet.title || (isAr ? sheet.title_ar : sheet.title_en);
+    const title = sheet.title_en || sheet.title || sheet.title_ar;
     const subjectName = sheet.subject_name || (isAr ? 'المادة الدراسية' : 'Academic Subject');
     const doctorName = sheet.doctor_name || '';
     const pages = sheet.pages || 16;

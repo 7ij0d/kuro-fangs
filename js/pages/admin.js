@@ -1001,7 +1001,7 @@ window.AdminPage = (function () {
                     </div>
                     <div>
                       <div style="font-weight: 700; font-size: 0.925rem; color: var(--text-primary);">
-                        ${s.title_ar || s.title_en || s.title || ''}
+                        ${s.title_en || s.title || s.title_ar || ''}
                       </div>
                       <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <span style="color: var(--brand-accent); font-weight: 600;">${s.subject_name || s.subject_id}</span>
@@ -2584,7 +2584,7 @@ CREATE POLICY "Allow all delete on sheets"
     if (addRecSubject && addRecSheet) {
       addRecSubject.addEventListener('change', () => {
         const sheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(addRecSubject.value) : window.DATA.sheets.filter(s => s.subject_id === addRecSubject.value);
-        addRecSheet.innerHTML = sheets.map(s => `<option value="${s.id}">${isAr ? s.title_ar : s.title_en}</option>`).join('');
+        addRecSheet.innerHTML = sheets.map(s => `<option value="${s.id}">${s.title_en || s.title || s.title_ar}</option>`).join('');
         if (sheets.length === 0) addRecSheet.innerHTML = `<option value="" disabled selected>${isAr ? 'لا توجد شيتات' : 'No sheets'}</option>`;
       });
     }
@@ -2688,7 +2688,7 @@ CREATE POLICY "Allow all delete on sheets"
     if (addQSubject && addQSheet) {
       addQSubject.addEventListener('change', () => {
         const sheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(addQSubject.value) : window.DATA.sheets.filter(s => s.subject_id === addQSubject.value);
-        addQSheet.innerHTML = sheets.map(s => `<option value="${s.id}">${isAr ? s.title_ar : s.title_en}</option>`).join('');
+        addQSheet.innerHTML = sheets.map(s => `<option value="${s.id}">${s.title_en || s.title || s.title_ar}</option>`).join('');
         if (sheets.length === 0) addQSheet.innerHTML = `<option value="" disabled selected>${isAr ? 'لا توجد شيتات' : 'No sheets'}</option>`;
       });
     }

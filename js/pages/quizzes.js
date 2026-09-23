@@ -79,8 +79,8 @@ const QuizzesPage = {
 
         <div style="max-width: 860px; margin: 0 auto;">
           ${questions.map((q, idx) => {
-            const questionText = isAr ? (q.text_ar || q.question) : (q.text_en || q.question || q.text_ar);
-            const options = isAr ? (q.options_ar || q.options || q.options_en) : (q.options_en || q.options || q.options_ar);
+            const questionText = q.text_en || q.question || q.text_ar;
+            const options = q.options_en || q.options || q.options_ar;
             const correctIndex = typeof q.correct_index === 'number' ? q.correct_index : (typeof q.correct === 'number' ? q.correct : 0);
             const explanation = isAr ? (q.answer_ar || q.explanation) : (q.answer_en || q.explanation || q.answer_ar);
             const subjectName = isAr ? (q.subject_name_ar || q.subject || 'طب الأسنان') : (q.subject_name_en || q.subject || 'Dentistry');
@@ -104,9 +104,24 @@ const QuizzesPage = {
                 </div>
 
                 <div class="kf-panel-body">
-                  <h3 style="font-size: 1.05rem; font-weight: 750; color: var(--text-primary); margin: 0 0 16px; line-height: 1.55;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.68rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(35, 87, 217, 0.08); color: var(--brand-accent);">EN</span>
+                    ${q.text_ar ? `
+                      <button type="button" class="btn-toggle-quiz-trans btn btn-secondary btn-sm" data-idx="${idx}" style="font-size: 0.72rem; padding: 3px 8px; gap: 4px; border-radius: 6px;">
+                        <i data-lucide="languages" style="width: 12px; height: 12px;"></i>
+                        <span>${isAr ? 'ترجمة السؤال' : 'Translate'}</span>
+                      </button>
+                    ` : ''}
+                  </div>
+                  <h3 style="font-size: 1.05rem; font-weight: 750; color: var(--text-primary); margin: 0 0 12px; line-height: 1.55; text-align: start; direction: ltr;">
                     ${questionText}
                   </h3>
+                  ${q.text_ar ? `
+                    <div id="quiz-trans-${idx}" style="display: none; margin-bottom: 14px; padding: 8px 12px; border-radius: 8px; background: rgba(2, 132, 199, 0.06); border: 1px solid rgba(2, 132, 199, 0.18); font-size: 0.85rem; color: var(--text-primary); text-align: start; direction: rtl;">
+                      <span style="font-weight: 750; color: #0284C7; font-size: 0.7rem; display: block; margin-bottom: 2px;">الترجمة:</span>
+                      ${q.text_ar}
+                    </div>
+                  ` : ''}
 
                   <div style="display: grid; gap: 8px; margin-bottom: 16px;">
                     ${(options || []).map((opt, optIdx) => {
@@ -222,6 +237,22 @@ const QuizzesPage = {
       `;
 
       if (window.lucide) window.lucide.createIcons();
+
+      // Translation toggle handling
+      container.querySelectorAll('.btn-toggle-quiz-trans').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.getAttribute('data-idx');
+          const transDiv = document.getElementById('quiz-trans-' + idx);
+          if (transDiv) {
+            const isClosed = transDiv.style.display === 'none';
+            transDiv.style.display = isClosed ? 'block' : 'none';
+            const labelSpan = btn.querySelector('span');
+            if (labelSpan) {
+              labelSpan.textContent = isClosed ? (isAr ? 'إخفاء الترجمة' : 'Hide') : (isAr ? 'ترجمة السؤال' : 'Translate');
+            }
+          }
+        });
+      });
 
       // Click handling
       if (!submitted) {

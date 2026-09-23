@@ -3196,3 +3196,26 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   }
 }
 
+/* 4. Question Translation Controls */
+.dt-btn-translate-q,
+.btn-toggle-direct-trans,
+.btn-toggle-saved-trans,
+.btn-toggle-quiz-trans {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.dt-btn-translate-q:hover {
+  background: rgba(35, 87, 217, 0.08);
+  border-color: rgba(35, 87, 217, 0.28);
+  color: var(--brand-accent);
+}
+
+.dt-btn-translate-q:active,
+.btn-toggle-direct-trans:active,
+.btn-toggle-saved-trans:active,
+.btn-toggle-quiz-trans:active {
+  transform: scale(0.96);
+}
+
+

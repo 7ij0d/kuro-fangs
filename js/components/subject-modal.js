@@ -252,7 +252,7 @@ const SubjectModal = {
                   <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 4px;" />
                   ${item.type || 'PDF Sheet'}
                 </span>
-                <h3 class="modal-file-title">${item.title_ar || item.title}</h3>
+                <h3 class="modal-file-title">${item.title_en || item.title || item.title_ar}</h3>
               </div>
 
               <!-- Information Row: Pages • Size • Doctor • Date -->

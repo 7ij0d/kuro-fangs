@@ -190,10 +190,31 @@ const QuestionsPage = {
               <div id="dt-modal-progress-bar" style="height: 100%; width: 10%; background: var(--brand-accent); border-radius: 99px; transition: width 0.25s ease;"></div>
             </div>
 
-            <!-- Question Title -->
-            <h2 id="dt-modal-q-title" style="font-size: 1.12rem; font-weight: 800; color: var(--text-primary); margin: 0 0 20px; line-height: 1.6; text-align: start;">
+            <!-- Question Language & Translation Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: rgba(35, 87, 217, 0.08); color: var(--brand-accent); border: 1px solid rgba(35, 87, 217, 0.2);">ENG</span>
+                <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--bg-surface-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle);">MCQ</span>
+              </div>
+              <button type="button" id="dt-btn-translate-q" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 10px; font-weight: 700; gap: 6px; color: var(--text-primary); border-radius: 8px;" title="${isAr ? 'ترجمة السؤال للغة العربية' : 'Translate question to Arabic'}">
+                <i data-lucide="languages" style="width: 13px; height: 13px; color: var(--brand-accent);"></i>
+                <span id="dt-btn-translate-label">${isAr ? 'ترجمة السؤال' : 'Translate'}</span>
+              </button>
+            </div>
+
+            <!-- Question Title (English) -->
+            <h2 id="dt-modal-q-title" style="font-size: 1.12rem; font-weight: 800; color: var(--text-primary); margin: 0 0 14px; line-height: 1.6; text-align: start; direction: ltr;">
               Question text goes here
             </h2>
+
+            <!-- Collapsible Arabic Translation Box (Independent from Clinical Explanation) -->
+            <div id="dt-modal-q-translation" style="display: none; margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; background: rgba(2, 132, 199, 0.06); border: 1px solid rgba(2, 132, 199, 0.2); animation: fadeIn 0.2s ease;">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; color: #0284C7; margin-bottom: 4px;">
+                <i data-lucide="globe" style="width: 12px; height: 12px;"></i>
+                <span>${isAr ? 'الترجمة العربية للسؤال:' : 'Arabic Question Translation:'}</span>
+              </div>
+              <p id="dt-modal-q-translation-text" style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); line-height: 1.55; text-align: start; direction: rtl;"></p>
+            </div>
 
             <!-- Vertical Tappable Option Buttons -->
             <div id="dt-modal-options-box" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;">
@@ -514,7 +535,7 @@ const QuestionsPage = {
       allSheets.forEach(sheet => {
         const titleAr = sheet.title_ar || sheet.title || '';
         const titleEn = sheet.title_en || sheet.title || '';
-        const displayTitle = isAr ? (titleAr || titleEn) : (titleEn || titleAr);
+        const displayTitle = titleEn || titleAr;
         const norm = normalizeTitle(displayTitle) || normalizeTitle(sheet.title_en) || normalizeTitle(sheet.title_ar);
 
         let existing = sheetEntries.find(e => e.id === sheet.id || (norm && e.normTitle === norm));
@@ -539,8 +560,8 @@ const QuestionsPage = {
       });
 
       subjQuestions.forEach(q => {
-        let qTitle = isAr ? (q.sheet_title_ar || q.tags?.[0] || '') : (q.sheet_title_en || q.tags?.[0] || '');
-        if (!qTitle) qTitle = q.sheet_title_en || q.sheet_title_ar || '';
+        let qTitle = q.sheet_title_en || q.sheet_title || q.tags?.[0] || '';
+        if (!qTitle) qTitle = q.sheet_title_ar || '';
         const qNorm = normalizeTitle(qTitle) || normalizeTitle(q.sheet_title_en) || normalizeTitle(q.sheet_title_ar);
 
         let target = null;
@@ -557,7 +578,7 @@ const QuestionsPage = {
         if (target) {
           target.questions.push(q);
         } else {
-          const fallbackTitle = qTitle || (isAr ? 'الأسئلة العامة' : 'General Questions');
+          const fallbackTitle = qTitle || 'General Questions';
           let fallback = sheetEntries.find(e => e.displayTitle === fallbackTitle);
           if (!fallback) {
             fallback = {
@@ -842,7 +863,7 @@ const QuestionsPage = {
 
       <div style="display: grid; gap: 14px;">
         ${list.map((q, idx) => {
-          const text = isAr ? q.text_ar : q.text_en;
+          const text = q.text_en || q.text || q.text_ar;
           const subject = isAr ? q.subject_name_ar : q.subject_name_en;
           const optLetters = ['A', 'B', 'C', 'D'];
 
@@ -853,19 +874,34 @@ const QuestionsPage = {
                   <span class="kf-segmented-badge" style="font-weight: 800; color: var(--brand-accent);">#${idx + 1}</span>
                   <span style="font-size: 0.8rem; font-weight: 750; color: var(--text-primary);">${subject}</span>
                 </div>
-                <button type="button" class="btn btn-secondary btn-sm btn-single-test" data-qid="${q.id}" style="font-size: 0.75rem; padding: 5px 12px; gap: 6px;">
-                  <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
-                  <span>${isAr ? 'خوض السؤال' : 'Launch'}</span>
-                </button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  ${q.text_ar ? `
+                    <button type="button" class="btn btn-secondary btn-sm btn-toggle-direct-trans" data-qid="${q.id}" style="font-size: 0.72rem; padding: 4px 9px; gap: 4px;">
+                      <i data-lucide="languages" style="width: 12px; height: 12px;"></i>
+                      <span>${isAr ? 'ترجمة السؤال' : 'Translate'}</span>
+                    </button>
+                  ` : ''}
+                  <button type="button" class="btn btn-secondary btn-sm btn-single-test" data-qid="${q.id}" style="font-size: 0.75rem; padding: 5px 12px; gap: 6px;">
+                    <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+                    <span>${isAr ? 'خوض السؤال' : 'Launch'}</span>
+                  </button>
+                </div>
               </div>
 
-              <h4 style="font-size: 0.98rem; font-weight: 750; color: var(--text-primary); margin: 0 0 14px; line-height: 1.5;">
+              <h4 style="font-size: 0.98rem; font-weight: 750; color: var(--text-primary); margin: 0 0 10px; line-height: 1.5; text-align: start; direction: ltr;">
                 ${text}
               </h4>
 
+              ${q.text_ar ? `
+                <div id="direct-trans-${q.id}" style="display: none; margin-bottom: 14px; padding: 8px 12px; border-radius: 8px; background: rgba(2, 132, 199, 0.06); border: 1px solid rgba(2, 132, 199, 0.18); font-size: 0.85rem; color: var(--text-primary); text-align: start; direction: rtl;">
+                  <span style="font-weight: 750; color: #0284C7; font-size: 0.7rem; display: block; margin-bottom: 2px;">الترجمة:</span>
+                  ${q.text_ar}
+                </div>
+              ` : ''}
+
               <div style="display: grid; gap: 6px;">
-                ${(isAr ? q.options_ar : q.options_en || []).map((opt, oIdx) => `
-                  <div style="display: flex; align-items: center; gap: 10px; font-size: 0.835rem; color: var(--text-secondary); background: var(--bg-surface-subtle); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                ${(q.options_en || q.options || q.options_ar || []).map((opt, oIdx) => `
+                  <div style="display: flex; align-items: center; gap: 10px; font-size: 0.835rem; color: var(--text-secondary); background: var(--bg-surface-subtle); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); text-align: start; direction: ltr;">
                     <span style="font-weight: 800; font-family: monospace; font-size: 0.75rem; color: var(--brand-accent);">${optLetters[oIdx] || oIdx + 1}</span>
                     <span>${opt}</span>
                   </div>
@@ -878,6 +914,20 @@ const QuestionsPage = {
     `;
 
     if (window.lucide) window.lucide.createIcons();
+
+    // Toggle direct translation
+    mainEl.querySelectorAll('.btn-toggle-direct-trans').forEach(b => {
+      b.addEventListener('click', () => {
+        const qid = b.getAttribute('data-qid');
+        const tBox = document.getElementById('direct-trans-' + qid);
+        if (tBox) {
+          const isHidden = tBox.style.display === 'none';
+          tBox.style.display = isHidden ? 'block' : 'none';
+          const label = b.querySelector('span');
+          if (label) label.textContent = isHidden ? (isAr ? 'إخفاء الترجمة' : 'Hide') : (isAr ? 'ترجمة السؤال' : 'Translate');
+        }
+      });
+    });
 
     document.getElementById('btn-launch-all-quiz')?.addEventListener('click', () => {
       QuestionsPage.launchQuizRunner(list, isAr ? 'اختبار البحث السريع' : 'Search Results Quiz');
@@ -934,17 +984,31 @@ const QuestionsPage = {
         <div style="display: grid; gap: 14px;">
           ${saved.map((q, idx) => `
             <div class="kf-panel q-card" style="padding: 18px 20px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
                 <span class="kf-segmented-badge" style="color: var(--brand-accent); font-weight: 800;">#${idx + 1} • ${isAr ? q.subject_name_ar : q.subject_name_en}</span>
-                <button type="button" class="btn btn-secondary btn-sm btn-remove-saved" data-qid="${q.id}" style="color: #EF4444; font-size: 0.75rem; padding: 4px 10px;">
-                  ${isAr ? 'إزالة' : 'Remove'}
-                </button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  ${q.text_ar ? `
+                    <button type="button" class="btn btn-secondary btn-sm btn-toggle-saved-trans" data-qid="${q.id}" style="font-size: 0.72rem; padding: 3px 8px; gap: 4px;">
+                      <i data-lucide="languages" style="width: 12px; height: 12px;"></i>
+                      <span>${isAr ? 'ترجمة السؤال' : 'Translate'}</span>
+                    </button>
+                  ` : ''}
+                  <button type="button" class="btn btn-secondary btn-sm btn-remove-saved" data-qid="${q.id}" style="color: #EF4444; font-size: 0.75rem; padding: 4px 10px;">
+                    ${isAr ? 'إزالة' : 'Remove'}
+                  </button>
+                </div>
               </div>
-              <h4 style="font-size: 0.95rem; font-weight: 750; color: var(--text-primary); margin: 0 0 10px;">
-                ${isAr ? q.text_ar : q.text_en}
+              <h4 style="font-size: 0.95rem; font-weight: 750; color: var(--text-primary); margin: 0 0 10px; text-align: start; direction: ltr;">
+                ${q.text_en || q.text || q.text_ar}
               </h4>
+              ${q.text_ar ? `
+                <div id="saved-trans-${q.id}" style="display: none; margin-bottom: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(2, 132, 199, 0.06); border: 1px solid rgba(2, 132, 199, 0.18); font-size: 0.85rem; color: var(--text-primary); text-align: start; direction: rtl;">
+                  <span style="font-weight: 750; color: #0284C7; font-size: 0.7rem; display: block; margin-bottom: 2px;">الترجمة:</span>
+                  ${q.text_ar}
+                </div>
+              ` : ''}
               <div style="padding: 10px 14px; border-radius: 8px; background: var(--bg-surface-subtle); border-inline-start: 3px solid #10B981; font-size: 0.825rem; color: var(--text-secondary);">
-                <strong>${isAr ? 'الإجابة المعتمدة:' : 'Correct Answer:'}</strong> ${isAr ? q.answer_ar : q.answer_en}
+                <strong>${isAr ? 'الإجابة المعتمدة:' : 'Correct Answer:'}</strong> ${q.answer_ar || q.explanation_ar || q.answer_en}
               </div>
             </div>
           `).join('')}
@@ -953,6 +1017,20 @@ const QuestionsPage = {
     `;
 
     if (window.lucide) window.lucide.createIcons();
+
+    // Toggle saved translation
+    mainEl.querySelectorAll('.btn-toggle-saved-trans').forEach(b => {
+      b.addEventListener('click', () => {
+        const qid = b.getAttribute('data-qid');
+        const tBox = document.getElementById('saved-trans-' + qid);
+        if (tBox) {
+          const isHidden = tBox.style.display === 'none';
+          tBox.style.display = isHidden ? 'block' : 'none';
+          const label = b.querySelector('span');
+          if (label) label.textContent = isHidden ? (isAr ? 'إخفاء الترجمة' : 'Hide') : (isAr ? 'ترجمة السؤال' : 'Translate');
+        }
+      });
+    });
 
     document.getElementById('btn-quiz-all-saved')?.addEventListener('click', () => {
       QuestionsPage.launchQuizRunner(saved, isAr ? 'اختبار الأسئلة المحفوظة' : 'Saved Questions Quiz');
@@ -1082,7 +1160,7 @@ const QuestionsPage = {
 
     const sheetTagEl = document.getElementById('dt-modal-sheet-tag');
     if (sheetTagEl) {
-      const shName = isAr ? (q.sheet_title_ar || 'الشيت 1') : (q.sheet_title_en || 'Sheet 1');
+      const shName = q.sheet_title_en || q.sheet_title || q.sheet_title_ar || 'Sheet 1';
       sheetTagEl.textContent = shName;
     }
 
@@ -1103,14 +1181,37 @@ const QuestionsPage = {
     if (progressEl) progressEl.style.width = `${percent}%`;
 
     const titleEl = document.getElementById('dt-modal-q-title');
-    if (titleEl) titleEl.textContent = isAr ? q.text_ar : q.text_en;
+    if (titleEl) titleEl.textContent = q.text_en || q.text || q.text_ar || '';
+
+    // Translation toggle setup for this question
+    const transBox = document.getElementById('dt-modal-q-translation');
+    const transText = document.getElementById('dt-modal-q-translation-text');
+    const transLabel = document.getElementById('dt-btn-translate-label');
+    const transBtn = document.getElementById('dt-btn-translate-q');
+
+    if (transBox) transBox.style.display = 'none';
+    if (transLabel) transLabel.textContent = isAr ? 'ترجمة السؤال' : 'Translate';
+    if (transText) {
+      transText.textContent = q.text_ar || (isAr ? 'لا تتوفر ترجمة عربية لهذا السؤال حالياً.' : 'No Arabic translation available for this question.');
+    }
+    if (transBtn) {
+      transBtn.onclick = () => {
+        if (!transBox) return;
+        const isHidden = transBox.style.display === 'none';
+        transBox.style.display = isHidden ? 'block' : 'none';
+        if (transLabel) {
+          transLabel.textContent = isHidden ? (isAr ? 'إخفاء الترجمة' : 'Hide') : (isAr ? 'ترجمة السؤال' : 'Translate');
+        }
+        if (window.lucide) window.lucide.createIcons();
+      };
+    }
 
     QuestionsPage.updateStarButton(q);
 
-    // Update Kuro explanation contents
+    // Update Kuro explanation contents (Explanation stays in Arabic with English terms preserved!)
     const expSubtitle = document.getElementById('dt-kuro-exp-ref-subtitle');
     if (expSubtitle) {
-      const shTitle = isAr ? (q.sheet_title_ar || 'الشيت المعتمد') : (q.sheet_title_en || 'Official Sheet');
+      const shTitle = q.sheet_title_en || q.sheet_title || q.sheet_title_ar || 'Official Sheet';
       const pageInfo = q.page_ref ? (isAr ? ` • صفحة ${q.page_ref}` : ` • Page ${q.page_ref}`) : '';
       expSubtitle.textContent = `${shTitle}${pageInfo}`;
     }
@@ -1153,11 +1254,11 @@ const QuestionsPage = {
       if (bubbleText) bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
     }
 
-    // Render options
+    // Render options (Always in English!)
     const optBox = document.getElementById('dt-modal-options-box');
     if (!optBox) return;
 
-    const options = isAr ? (q.options_ar || q.options_en || []) : (q.options_en || q.options_ar || []);
+    const options = q.options_en || q.options || q.options_ar || [];
     const correctIdx = typeof q.correct_index === 'number' ? q.correct_index : 0;
     const optLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -1166,7 +1267,7 @@ const QuestionsPage = {
         <span style="width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); font-size: 0.8rem; font-weight: 800; font-family: monospace; color: var(--text-secondary);">
           ${optLetters[idx] || idx + 1}
         </span>
-        <span style="flex: 1;">${opt}</span>
+        <span style="flex: 1; text-align: start; direction: ltr;">${opt}</span>
         <span class="dt-opt-status-icon" style="font-weight: 900; font-size: 1.1rem; display: none;"></span>
       </button>
     `).join('');
