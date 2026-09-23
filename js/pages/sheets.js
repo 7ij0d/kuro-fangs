@@ -3,6 +3,72 @@
  * 3-Column Card Grid with Dropdown Filter, Search Bar & View Mode Toggle
  */
 
+// ── PDF Thumbnail Service (Renders Page 1 of real PDF via PDF.js with Caching) ──
+window.PdfThumbnailService = window.PdfThumbnailService || {
+  _cache: new Map(),
+  _pending: new Map(),
+
+  async getThumbnail(pdfUrl) {
+    if (!pdfUrl) return null;
+    if (this._cache.has(pdfUrl)) {
+      return this._cache.get(pdfUrl);
+    }
+    try {
+      const cached = sessionStorage.getItem('kf_thumb_' + pdfUrl);
+      if (cached) {
+        this._cache.set(pdfUrl, cached);
+        return cached;
+      }
+    } catch (e) {}
+
+    if (this._pending.has(pdfUrl)) {
+      return this._pending.get(pdfUrl);
+    }
+
+    const promise = (async () => {
+      try {
+        if (!window.pdfjsLib) return null;
+        const loadingTask = window.pdfjsLib.getDocument({
+          url: pdfUrl,
+          withCredentials: false
+        });
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1);
+
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const targetWidth = 320;
+        const scale = Math.min(2.0, targetWidth / unscaledViewport.width);
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+
+        await page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        }).promise;
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        this._cache.set(pdfUrl, dataUrl);
+        try {
+          sessionStorage.setItem('kf_thumb_' + pdfUrl, dataUrl);
+        } catch (e) {}
+        return dataUrl;
+      } catch (err) {
+        console.warn('[PdfThumbnailService] Error rendering thumbnail:', pdfUrl, err);
+        return null;
+      } finally {
+        this._pending.delete(pdfUrl);
+      }
+    })();
+
+    this._pending.set(pdfUrl, promise);
+    return promise;
+  }
+};
+
 const SheetsPage = {
   render(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
@@ -45,10 +111,12 @@ const SheetsPage = {
         doctor_name: item.doctor_name || (isAr ? 'هيئة التدريس' : 'Faculty Board'),
         date: item.date || '2026-09-16',
         type: item.type || (isAr ? 'شيت' : 'Sheet'),
-        pages: item.pages || 12,
+        pages: item.pages || item.pages_count || 12,
         size: item.size || '3.2 MB',
         order_index: typeof item.order_index === 'number' ? item.order_index : null,
-        pdf_source: item.pdf_source || 'none'
+        pdf_source: item.pdf_source || 'none',
+        pdf_url: item.pdf_url || item.download_url || item.url || item.file_url || '',
+        download_url: item.download_url || item.pdf_url || item.url || item.file_url || ''
       })).sort((a, b) => {
         const oa = a.order_index !== null ? a.order_index : 9999;
         const ob = b.order_index !== null ? b.order_index : 9999;
@@ -59,59 +127,76 @@ const SheetsPage = {
 
     let allSheets = getAllSheets();
 
-    // ── Card HTML ──────────────────────────────────────────────────────────
+    // ── Card HTML (3-Column Desktop, 2-Column iPad, 1-Column Mobile) ──
     const renderCardHTML = (item) => {
       const color = getSubjectColor(item.subject_id);
       const orderLabel = item.order_index
-        ? `<span class="sheets-order-pill">${isAr ? `#${item.order_index}` : `#${item.order_index}`}</span>`
+        ? `<span class="sheets-order-pill">#${item.order_index}</span>`
         : '';
       return `
         <div class="sheets-grid-card" data-id="${item.id}">
-          <div class="sgc-header">
-            <span class="sgc-subject-badge" style="background:${color.bg}; color:${color.text}; border-color:${color.border};">
-              ${item.subject_name}
-            </span>
-            ${orderLabel}
+          <!-- Thumbnail Container: Auto Page 1 or Neutral Document Fallback -->
+          <div class="sgc-thumbnail-wrapper" data-thumb-id="${item.id}" data-pdf-url="${item.pdf_url}">
+            <div class="sgc-thumbnail-placeholder" id="thumb-placeholder-${item.id}">
+              <div class="sgc-doc-icon-wrap">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+              </div>
+              <div class="sgc-placeholder-meta">
+                <span class="sgc-placeholder-badge">PDF</span>
+                <span class="sgc-placeholder-pages">${item.pages} ${isAr ? 'صفحة' : 'pages'}</span>
+              </div>
+            </div>
+            <img id="thumb-img-${item.id}" class="sgc-thumbnail-img" alt="${item.title}" style="display:none;" />
           </div>
 
-          <h3 class="sgc-title">${item.title}</h3>
+          <div class="sgc-card-body">
+            <div class="sgc-header">
+              <span class="sgc-subject-badge" style="background:${color.bg}; color:${color.text}; border-color:${color.border};">
+                ${item.subject_name}
+              </span>
+              ${orderLabel}
+            </div>
 
-          <div class="sgc-meta">
-            <span class="sgc-meta-item">
-              <i data-lucide="user-round" class="sgc-meta-icon"></i>
-              ${isAr ? 'د.' : 'Dr.'} ${item.doctor_name}
-            </span>
-            <span class="sgc-meta-sep">·</span>
-            <span class="sgc-meta-item">
-              <i data-lucide="book-open" class="sgc-meta-icon"></i>
-              ${item.pages} ${isAr ? 'صفحة' : 'Pages'}
-            </span>
-            <span class="sgc-meta-sep">·</span>
-            <span class="sgc-meta-item">
-              <i data-lucide="hard-drive" class="sgc-meta-icon"></i>
-              ${item.size}
-            </span>
-            <span class="sgc-meta-sep">·</span>
-            <span class="sgc-meta-item">
-              <i data-lucide="calendar" class="sgc-meta-icon"></i>
-              ${item.date}
-            </span>
-            <span class="sgc-meta-sep">·</span>
-            <span class="sgc-verified-badge">
-              <i data-lucide="badge-check" class="sgc-meta-icon" style="color:#10B981;"></i>
-              ${isAr ? 'معتمد' : 'Verified'}
-            </span>
-          </div>
+            <h3 class="sgc-title">${item.title}</h3>
 
-          <div class="sgc-actions">
-            <button class="sgc-btn-view view-sheet-btn" data-id="${item.id}">
-              <i data-lucide="eye" style="width:14px;height:14px;"></i>
-              <span>${isAr ? 'عرض الشيت' : 'View Sheet'}</span>
-            </button>
-            <button class="sgc-btn-download download-sheet-btn" data-id="${item.id}">
-              <i data-lucide="download" style="width:14px;height:14px;"></i>
-              <span>${isAr ? 'تنزيل' : 'Download'}</span>
-            </button>
+            <div class="sgc-meta">
+              <span class="sgc-meta-item">
+                <i data-lucide="user-round" class="sgc-meta-icon"></i>
+                ${isAr ? 'د.' : 'Dr.'} ${item.doctor_name}
+              </span>
+              <span class="sgc-meta-sep">·</span>
+              <span class="sgc-meta-item">
+                <i data-lucide="book-open" class="sgc-meta-icon"></i>
+                ${item.pages} ${isAr ? 'صفحة' : 'Pages'}
+              </span>
+              <span class="sgc-meta-sep">·</span>
+              <span class="sgc-meta-item">
+                <i data-lucide="hard-drive" class="sgc-meta-icon"></i>
+                ${item.size}
+              </span>
+              <span class="sgc-meta-sep">·</span>
+              <span class="sgc-meta-item">
+                <i data-lucide="calendar" class="sgc-meta-icon"></i>
+                ${item.date}
+              </span>
+            </div>
+
+            <!-- Two Visible Full Action Buttons: Open Sheet + Download Sheet -->
+            <div class="sgc-actions">
+              <button class="sgc-btn-view view-sheet-btn" data-id="${item.id}" title="${isAr ? 'فتح واستعراض الشيت' : 'Open Sheet'}">
+                <i data-lucide="book-open" style="width:15px;height:15px;"></i>
+                <span>${isAr ? 'فتح الشيت' : 'Open Sheet'}</span>
+              </button>
+              <button class="sgc-btn-download download-sheet-btn" data-id="${item.id}" title="${isAr ? 'تنزيل ملف الـ PDF' : 'Download Sheet'}">
+                <i data-lucide="download" style="width:15px;height:15px;"></i>
+                <span>${isAr ? 'تنزيل الشيت' : 'Download Sheet'}</span>
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -123,6 +208,12 @@ const SheetsPage = {
       return `
         <div class="sheets-list-row" data-id="${item.id}">
           <div class="slr-left">
+            <div class="slr-doc-icon-wrap">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
             <span class="sgc-subject-badge" style="background:${color.bg}; color:${color.text}; border-color:${color.border}; flex-shrink:0;">
               ${item.subject_name}
             </span>
@@ -143,25 +234,19 @@ const SheetsPage = {
                   <i data-lucide="calendar" class="sgc-meta-icon"></i>
                   ${item.date}
                 </span>
-                <span class="sgc-meta-sep">·</span>
-                <span class="sgc-verified-badge">
-                  <i data-lucide="badge-check" class="sgc-meta-icon" style="color:#10B981;"></i>
-                  ${isAr ? 'معتمد' : 'Verified'}
-                </span>
               </div>
             </div>
           </div>
           <div class="sgc-actions slr-actions">
             <button class="sgc-btn-view view-sheet-btn" data-id="${item.id}">
-              <i data-lucide="eye" style="width:14px;height:14px;"></i>
-              <span>${isAr ? 'عرض الشيت' : 'View Sheet'}</span>
+              <i data-lucide="book-open" style="width:14px;height:14px;"></i>
+              <span>${isAr ? 'فتح الشيت' : 'Open Sheet'}</span>
             </button>
             <button class="sgc-btn-download download-sheet-btn" data-id="${item.id}">
               <i data-lucide="download" style="width:14px;height:14px;"></i>
-              <span>${isAr ? 'تنزيل' : 'Download'}</span>
+              <span>${isAr ? 'تنزيل الشيت' : 'Download Sheet'}</span>
             </button>
           </div>
-        </div>
       `;
     };
 
@@ -257,6 +342,28 @@ const SheetsPage = {
       const countEl = document.getElementById('sheets-count-label');
       if (countEl) {
         countEl.textContent = isAr ? `${filtered.length} شيت` : `${filtered.length} Sheets`;
+      }
+
+      // ── Asynchronous PDF Thumbnail Hydration ──
+      if (viewMode === 'grid' && window.PdfThumbnailService) {
+        filtered.forEach(item => {
+          const url = item.pdf_url;
+          if (!url) return;
+          const imgEl = document.getElementById(`thumb-img-${item.id}`);
+          const placeholderEl = document.getElementById(`thumb-placeholder-${item.id}`);
+          if (!imgEl) return;
+
+          window.PdfThumbnailService.getThumbnail(url).then(dataUrl => {
+            if (dataUrl && imgEl) {
+              imgEl.src = dataUrl;
+              imgEl.onload = () => {
+                imgEl.style.display = 'block';
+                imgEl.classList.add('loaded');
+                if (placeholderEl) placeholderEl.style.display = 'none';
+              };
+            }
+          }).catch(() => {});
+        });
       }
     };
 

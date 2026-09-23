@@ -59,18 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.NotificationsCenter.updateUI();
     }
 
-    // Update Header Navigation Pill Texts
+    // Update Header Brand
     const isAr = lang === 'ar';
-    const navHome = document.getElementById('nav-item-home');
-    if (navHome) navHome.textContent = isAr ? 'الرئيسية' : 'Home';
-    const navSubj = document.getElementById('nav-item-subjects');
-    if (navSubj) navSubj.textContent = isAr ? 'المواد' : 'Subjects';
-    const navSched = document.getElementById('nav-item-schedule');
-    if (navSched) navSched.textContent = isAr ? 'الجدول' : 'Schedule';
-    const navExams = document.getElementById('nav-item-exams');
-    if (navExams) navExams.textContent = isAr ? 'الامتحانات' : 'Exams';
-    const navMore = document.getElementById('nav-item-more');
-    if (navMore) navMore.textContent = isAr ? 'المزيد' : 'More';
     const headerBrandName = document.getElementById('header-brand-name');
     if (headerBrandName) headerBrandName.textContent = isAr ? 'طالب كورو' : 'Kuro Student';
 
@@ -143,72 +133,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sideUserSub = document.getElementById('sidebar-user-sub');
     if (sideUserSub) sideUserSub.textContent = t('academicYear');
 
-    // Update Mobile Bottom Nav & More Sheet
-    const mobHome = document.getElementById('mob-nav-home');
-    if (mobHome) mobHome.textContent = isAr ? 'الرئيسية' : 'Home';
-    const mobSheets = document.getElementById('mob-nav-sheets');
-    if (mobSheets) mobSheets.textContent = isAr ? 'الشيتات' : 'Sheets';
-    const mobRecordings = document.getElementById('mob-nav-recordings');
-    if (mobRecordings) mobRecordings.textContent = isAr ? 'التسجيلات' : 'Audio';
-    const mobQuestions = document.getElementById('mob-nav-questions');
-    if (mobQuestions) mobQuestions.textContent = isAr ? 'الأسئلة' : 'Questions';
-    const mobMore = document.getElementById('mob-nav-more');
-    if (mobMore) mobMore.textContent = isAr ? 'المزيد' : 'More';
+    // Update Sidebar Quick Language text
+    const sideLangBtnText = document.getElementById('side-lang-btn-text');
+    if (sideLangBtnText) sideLangBtnText.textContent = lang === 'en' ? 'AR' : 'EN';
 
-    // Mobile More Sheet texts
-    const mobMoreTitle = document.getElementById('mobile-more-title');
-    if (mobMoreTitle) mobMoreTitle.textContent = isAr ? 'مركز كورو والأدوات' : 'Kuro Hub & Tools';
-    const mobMoreSub = document.getElementById('mobile-more-sub');
-    if (mobMoreSub) mobMoreSub.textContent = isAr ? 'طب وجراحة الفم والأسنان • السنة الثالثة' : 'Dentistry • Year 3';
+    // Update Top Navigation Center Pills & More Dropdown
+    const navHome = document.getElementById('nav-item-home');
+    if (navHome) navHome.textContent = isAr ? 'الرئيسية' : 'Home';
+    const navSheets = document.getElementById('nav-item-sheets');
+    if (navSheets) navSheets.textContent = isAr ? 'الشيتات' : 'Sheets';
+    const navRecordings = document.getElementById('nav-item-recordings');
+    if (navRecordings) navRecordings.textContent = isAr ? 'التسجيلات' : 'Recordings';
+    const navQuestions = document.getElementById('nav-item-questions');
+    if (navQuestions) navQuestions.textContent = isAr ? 'الأسئلة' : 'Questions';
+    const navMore = document.getElementById('nav-item-more');
+    if (navMore) navMore.textContent = isAr ? 'المزيد' : 'More';
 
-    const mobLangBtnText = document.getElementById('mob-lang-btn-text');
-    if (mobLangBtnText) mobLangBtnText.textContent = lang === 'en' ? 'AR' : 'EN';
-
-    const mobGroupAcademic = document.getElementById('mob-group-academic');
-    if (mobGroupAcademic) mobGroupAcademic.textContent = isAr ? 'الدراسة والأكاديميا' : 'Study & Academic';
-    const mobLinkTheory = document.getElementById('mob-link-theory');
-    if (mobLinkTheory) mobLinkTheory.textContent = isAr ? 'جدول المحاضرات النظري' : 'Theory Schedule';
-    const mobDescTheory = document.getElementById('mob-desc-theory');
-    if (mobDescTheory) mobDescTheory.textContent = isAr ? 'مواعيد المحاضرات والقاعات' : 'Lectures & Auditorium';
-
-    const mobLinkPractical = document.getElementById('mob-link-practical');
-    if (mobLinkPractical) mobLinkPractical.textContent = isAr ? 'جدول المعامل والعيادات' : 'Clinical & Lab Schedule';
-    const mobDescPractical = document.getElementById('mob-desc-practical');
-    if (mobDescPractical) mobDescPractical.textContent = isAr ? 'العيادات ومعامل الفانتوم' : 'Clinics & Phantom Lab';
-
-    const mobLinkExams = document.getElementById('mob-link-exams');
-    if (mobLinkExams) mobLinkExams.textContent = isAr ? 'جداول الامتحانات الرسمية' : 'Official Exam Schedule';
-    const mobDescExams = document.getElementById('mob-desc-exams');
-    if (mobDescExams) mobDescExams.textContent = isAr ? 'امتحانات الجزئي والنهائي' : 'Midterms & Finals';
-
-    const mobGroupKuro = document.getElementById('mob-group-kuro');
-    if (mobGroupKuro) mobGroupKuro.textContent = isAr ? 'كورو الترفيهي' : 'Kuro Mascot';
-    const mobLinkRewards = document.getElementById('mob-link-rewards');
-    if (mobLinkRewards) mobLinkRewards.textContent = isAr ? 'مركز المظهر والجوائز' : 'Mascot Hub';
-    const mobDescRewards = document.getElementById('mob-desc-rewards');
-    if (mobDescRewards) mobDescRewards.textContent = isAr ? 'تخصيص شخصية كورو' : 'Skins & Outfits';
-
-    const mobLinkGames = document.getElementById('mob-link-games');
-    if (mobLinkGames) mobLinkGames.textContent = isAr ? 'ألعاب واستراحة دراسية' : 'Arcade & Games';
-    const mobDescGames = document.getElementById('mob-desc-games');
-    if (mobDescGames) mobDescGames.textContent = isAr ? 'ألعاب تدريب وتسلية' : 'Study Break Minigames';
-
-    const mobGroupAccount = document.getElementById('mob-group-account');
-    if (mobGroupAccount) mobGroupAccount.textContent = isAr ? 'الحساب والإدارة' : 'Account & Administration';
-    const mobLinkProfile = document.getElementById('mob-link-profile');
-    if (mobLinkProfile) mobLinkProfile.textContent = isAr ? 'الملف الشخصي والإعدادات' : 'Profile & Settings';
-    const mobDescProfile = document.getElementById('mob-desc-profile');
-    if (mobDescProfile) mobDescProfile.textContent = isAr ? 'إعدادات الحساب والمظهر' : 'Preferences & Info';
-
-    const mobLinkAdmin = document.getElementById('mob-link-admin');
-    if (mobLinkAdmin) mobLinkAdmin.textContent = isAr ? 'بوابة إدارة الكلية' : 'Faculty Admin Portal';
-    const mobDescAdmin = document.getElementById('mob-desc-admin');
-    if (mobDescAdmin) mobDescAdmin.textContent = isAr ? 'إدارة الشيتات والمحتوى' : 'Sheet & Catalog Management';
-
-    const mobSoonRewards = document.getElementById('mob-soon-rewards');
-    if (mobSoonRewards) mobSoonRewards.textContent = isAr ? 'قريباً' : 'Soon';
-    const mobSoonGames = document.getElementById('mob-soon-games');
-    if (mobSoonGames) mobSoonGames.textContent = isAr ? 'قريباً' : 'Soon';
+    const navSchedule = document.getElementById('nav-item-schedule');
+    if (navSchedule) navSchedule.textContent = isAr ? 'جدول المحاضرات' : 'Lecture Schedule';
+    const navPractical = document.getElementById('nav-item-practical');
+    if (navPractical) navPractical.textContent = isAr ? 'المعامل والعيادات' : 'Practical Labs';
+    const navExams = document.getElementById('nav-item-exams');
+    if (navExams) navExams.textContent = isAr ? 'جداول الامتحانات' : 'Exams Timetables';
+    const navRewards = document.getElementById('nav-item-rewards');
+    if (navRewards) navRewards.textContent = isAr ? 'كورو والتخصيص' : 'Mascot Hub';
+    const navGames = document.getElementById('nav-item-games');
+    if (navGames) navGames.textContent = isAr ? 'ألعاب واستراحة' : 'Games';
+    const navAdmin = document.getElementById('nav-item-admin');
+    if (navAdmin) navAdmin.textContent = isAr ? 'بوابة الإدارة' : 'Admin Portal';
   };
 
   const initialLang = window.I18N.getLang();
@@ -217,161 +169,124 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 4. Setup Initial Theme
   const applyTheme = (theme) => {
     document.documentElement.setAttribute('data-theme', theme);
+    const isDark = (theme === 'kuro-dark' || theme === 'dark');
     const themeIcon = document.getElementById('theme-icon');
     if (themeIcon) {
-      themeIcon.setAttribute('data-lucide', (theme === 'kuro-dark' || theme === 'dark') ? 'sun' : 'moon');
+      themeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
     }
-    const mobThemeIcon = document.getElementById('mob-theme-icon');
-    const mobThemeText = document.getElementById('mob-theme-text');
-    const isDark = (theme === 'kuro-dark' || theme === 'dark');
-    if (mobThemeIcon) mobThemeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-    if (mobThemeText) mobThemeText.textContent = isDark ? (window.I18N?.getLang() === 'ar' ? 'فاتح' : 'Light') : (window.I18N?.getLang() === 'ar' ? 'داكن' : 'Dark');
+    const sideThemeIcon = document.getElementById('side-theme-icon');
+    if (sideThemeIcon) {
+      sideThemeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+    }
     if (window.lucide) window.lucide.createIcons();
   };
 
   const initialTheme = window.STORE.getTheme();
   applyTheme(initialTheme);
 
-  // 5. Setup Language Toggle Event Listener
+  // 5. Setup Language Toggle Event Listeners (Header & Sidebar)
   const langToggleBtn = document.getElementById('lang-toggle-btn');
-  if (langToggleBtn) {
-    langToggleBtn.addEventListener('click', () => {
-      const newLang = window.I18N.toggleLang();
-      applyLanguage(newLang);
-      if (window.SoundFX) window.SoundFX.play('pop');
-      // Re-render current page
-      window.ROUTER.handleRoute();
-      updateGlobalMascotAvatars();
-      if (window.lucide) window.lucide.createIcons();
-    });
-  }
+  const sideLangToggleBtn = document.getElementById('side-lang-toggle-btn');
+  const handleLangToggle = () => {
+    const newLang = window.I18N.toggleLang();
+    applyLanguage(newLang);
+    if (window.SoundFX) window.SoundFX.play('pop');
+    window.ROUTER.handleRoute();
+    updateGlobalMascotAvatars();
+    if (window.lucide) window.lucide.createIcons();
+  };
+  if (langToggleBtn) langToggleBtn.addEventListener('click', handleLangToggle);
+  if (sideLangToggleBtn) sideLangToggleBtn.addEventListener('click', handleLangToggle);
 
-  // 6. Setup Theme Toggle Event Listener
+  // 6. Setup Theme Toggle Event Listeners (Header & Sidebar)
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-      const newTheme = window.STORE.toggleTheme();
-      applyTheme(newTheme);
-      if (window.SoundFX) window.SoundFX.play('switch');
-    });
-  }
+  const sideThemeToggleBtn = document.getElementById('side-theme-toggle-btn');
+  const handleThemeToggle = () => {
+    const newTheme = window.STORE.toggleTheme();
+    applyTheme(newTheme);
+    if (window.SoundFX) window.SoundFX.play('switch');
+  };
+  if (themeToggleBtn) themeToggleBtn.addEventListener('click', handleThemeToggle);
+  if (sideThemeToggleBtn) sideThemeToggleBtn.addEventListener('click', handleThemeToggle);
 
-  // 6.2. Setup Sound Effects Toggle Event Listener
+  // 6.2. Setup Sound Effects Toggle Event Listeners
   const soundToggleBtn = document.getElementById('sound-toggle-btn');
+  const sideSoundToggleBtn = document.getElementById('side-sound-toggle-btn');
   const updateSoundUI = (enabled) => {
     const soundIcon = document.getElementById('sound-icon');
     if (soundIcon) {
       soundIcon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
     }
-    const mobSoundIcon = document.getElementById('mob-sound-icon');
-    const mobSoundText = document.getElementById('mob-sound-text');
-    if (mobSoundIcon) mobSoundIcon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
-    if (mobSoundText) mobSoundText.textContent = enabled ? (window.I18N?.getLang() === 'ar' ? 'مفعّل' : 'On') : (window.I18N?.getLang() === 'ar' ? 'مكتوم' : 'Mute');
+    const sideSoundIcon = document.getElementById('side-sound-icon');
+    if (sideSoundIcon) {
+      sideSoundIcon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
+    }
     if (window.lucide) window.lucide.createIcons();
 
     if (soundToggleBtn) {
       soundToggleBtn.setAttribute('data-sound-active', enabled ? 'true' : 'false');
       soundToggleBtn.style.opacity = enabled ? '1' : '0.55';
     }
+    if (sideSoundToggleBtn) {
+      sideSoundToggleBtn.setAttribute('data-sound-active', enabled ? 'true' : 'false');
+      sideSoundToggleBtn.style.opacity = enabled ? '1' : '0.55';
+    }
+  };
+
+  const handleSoundToggle = () => {
+    if (window.SoundFX) {
+      const newState = window.SoundFX.toggle();
+      updateSoundUI(newState);
+      if (window.Toast) {
+        const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+        window.Toast.show(
+          newState 
+            ? (isAr ? 'تم تفعيل المؤثرات الصوتية 🔊' : 'Sound Effects Enabled 🔊') 
+            : (isAr ? 'تم كتم المؤثرات الصوتية 🔇' : 'Sound Effects Muted 🔇'),
+          'info'
+        );
+      }
+    }
   };
 
   if (soundToggleBtn) {
-    if (window.SoundFX) {
-      updateSoundUI(window.SoundFX.isEnabled());
-    }
-    soundToggleBtn.addEventListener('click', () => {
-      if (window.SoundFX) {
-        const newState = window.SoundFX.toggle();
-        updateSoundUI(newState);
-        if (window.Toast) {
-          const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-          window.Toast.show(
-            newState 
-              ? (isAr ? 'تم تفعيل المؤثرات الصوتية 🔊' : 'Sound Effects Enabled 🔊') 
-              : (isAr ? 'تم كتم المؤثرات الصوتية 🔇' : 'Sound Effects Muted 🔇'),
-            'info'
-          );
-        }
-      }
-    });
+    if (window.SoundFX) updateSoundUI(window.SoundFX.isEnabled());
+    soundToggleBtn.addEventListener('click', handleSoundToggle);
+  }
+  if (sideSoundToggleBtn) {
+    sideSoundToggleBtn.addEventListener('click', handleSoundToggle);
   }
 
   window.addEventListener('kf:sound-toggle', (e) => {
     if (e.detail) updateSoundUI(e.detail.enabled);
   });
 
-  // 6.3. Setup Mobile More Bottom Sheet Controls
-  const moreTrigger = document.getElementById('mobile-more-trigger');
-  const moreBackdrop = document.getElementById('mobile-more-sheet-backdrop');
-  const moreCloseBtn = document.getElementById('mobile-more-close-btn');
-  const moreSheet = document.getElementById('mobile-more-sheet');
+  // 6.3. Setup Header Center More Dropdown Controls
+  const headerMoreWrap = document.getElementById('header-more-dropdown-wrap');
+  const headerMoreBtn = document.getElementById('header-more-btn');
 
-  const openMobileMoreSheet = () => {
-    if (moreBackdrop) moreBackdrop.classList.add('open');
-    if (moreSheet) moreSheet.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    if (window.lucide) window.lucide.createIcons();
-  };
-
-  const closeMobileMoreSheet = () => {
-    if (moreBackdrop) moreBackdrop.classList.remove('open');
-    if (moreSheet) moreSheet.classList.remove('open');
-    document.body.style.overflow = '';
-  };
-
-  if (moreTrigger) moreTrigger.addEventListener('click', openMobileMoreSheet);
-  if (moreCloseBtn) moreCloseBtn.addEventListener('click', closeMobileMoreSheet);
-  if (moreBackdrop) {
-    moreBackdrop.addEventListener('click', (e) => {
-      if (e.target === moreBackdrop) closeMobileMoreSheet();
+  if (headerMoreBtn && headerMoreWrap) {
+    headerMoreBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      headerMoreWrap.classList.toggle('open');
+      const isExpanded = headerMoreWrap.classList.contains('open');
+      headerMoreBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
     });
-  }
 
-  // Mobile More quick setting buttons
-  const mobLangBtn = document.getElementById('mob-lang-toggle-btn');
-  if (mobLangBtn) {
-    mobLangBtn.addEventListener('click', () => {
-      const newLang = window.I18N.toggleLang();
-      applyLanguage(newLang);
-      if (window.SoundFX) window.SoundFX.play('pop');
-      window.ROUTER.handleRoute();
-      updateGlobalMascotAvatars();
-      if (window.lucide) window.lucide.createIcons();
-    });
-  }
-
-  const mobThemeBtn = document.getElementById('mob-theme-toggle-btn');
-  if (mobThemeBtn) {
-    mobThemeBtn.addEventListener('click', () => {
-      const newTheme = window.STORE.toggleTheme();
-      applyTheme(newTheme);
-      if (window.SoundFX) window.SoundFX.play('switch');
-    });
-  }
-
-  const mobSoundBtn = document.getElementById('mob-sound-toggle-btn');
-  if (mobSoundBtn) {
-    mobSoundBtn.addEventListener('click', () => {
-      if (window.SoundFX) {
-        const newState = window.SoundFX.toggle();
-        updateSoundUI(newState);
-        if (window.Toast) {
-          const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-          window.Toast.show(
-            newState 
-              ? (isAr ? 'تم تفعيل المؤثرات الصوتية 🔊' : 'Sound Effects Enabled 🔊') 
-              : (isAr ? 'تم كتم المؤثرات الصوتية 🔇' : 'Sound Effects Muted 🔇'),
-            'info'
-          );
-        }
+    document.addEventListener('click', (e) => {
+      if (!headerMoreWrap.contains(e.target)) {
+        headerMoreWrap.classList.remove('open');
+        headerMoreBtn.setAttribute('aria-expanded', 'false');
       }
     });
-  }
 
-  // Close sheet on any navigation link clicked inside the sheet
-  document.querySelectorAll('.mobile-more-card-link').forEach(link => {
-    link.addEventListener('click', closeMobileMoreSheet);
-  });
+    headerMoreWrap.querySelectorAll('.header-dropdown-item').forEach(link => {
+      link.addEventListener('click', () => {
+        headerMoreWrap.classList.remove('open');
+        headerMoreBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
 
   // 6.5. Setup Global Header Search Bar (works on all pages)
   const globalSearchInput = document.getElementById('header-search-input');

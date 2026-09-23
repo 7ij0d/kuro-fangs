@@ -7,6 +7,7 @@
 const QuestionsPage = {
   currentTab: 'bento', // 'bento' | 'direct' | 'saved'
   selectedSubjectId: null,
+  selectedYear: 'all',
   activeQuizList: [],
   activeQuizIndex: 0,
   searchQuery: '',
@@ -84,65 +85,87 @@ const QuestionsPage = {
     const subjects = window.DATA ? window.DATA.getSubjects() : [];
 
     container.innerHTML = `
-      <!-- Page Title Bar -->
-      <div class="page-title-bar">
-        <div class="page-title-group" style="display:flex;align-items:center;gap:16px;">
-          <div style="width:58px;height:58px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(200,67,67,0.12) 0%,transparent 70%);">
-            <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('thinking') : 'assets/characters/kuro/Kuro-Thinking.png'}" alt="Kuro Thinking" class="kuro-character-img kuro-float" style="width:52px;height:52px;object-fit:contain;" />
+      <!-- Luxury Questions Hero Banner (Reference Design) -->
+      <div class="q-hero-banner">
+        <div class="q-hero-content">
+          <div class="q-hero-badge">
+            <i data-lucide="book-check" class="q-hero-badge-icon"></i>
+            <span>${isAr ? 'بنك الأسئلة والامتحانات السابقة' : 'Practice Bank & Past Exams'}</span>
           </div>
-          <div>
-            <h1 style="font-size:1.55rem;font-weight:850;color:var(--text-primary);margin:0 0 4px;letter-spacing:-0.02em;">
-              ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
-            </h1>
-            <p style="font-size:0.85rem;color:var(--text-secondary);margin:0;">
-              ${isAr ? `${allQuestions.length} سؤال معتمد من مواد السنة الثالثة — استعرض المواد أو ابحث مباشرة` : `${allQuestions.length} verified MCQs across 3rd year dental modules`}
-            </p>
+          <h1 class="q-hero-title">
+            ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
+          </h1>
+          <p class="q-hero-subtitle">
+            ${isAr ? 'كل أسئلتك لطب الأسنان، منظمة وسهلة للتدريب.' : 'All your dental questions, organized and easy to practice.'}
+          </p>
+          <div class="q-hero-stats">
+            <div class="q-hero-stat-pill">
+              <span class="q-hero-stat-num">${allQuestions.length}</span>
+              <span class="q-hero-stat-label">${isAr ? 'سؤال متاح' : 'Available MCQs'}</span>
+            </div>
+            <div class="q-hero-stat-divider"></div>
+            <div class="q-hero-stat-pill">
+              <span class="q-hero-stat-num">${subjects.length}</span>
+              <span class="q-hero-stat-label">${isAr ? 'مواد دراسية' : 'Dental Modules'}</span>
+            </div>
           </div>
+        </div>
+        <div class="q-hero-artwork">
+          <img src="assets/hero/kuro-questions-hero.png" alt="Kuro Questions Hero" class="q-hero-img" />
         </div>
       </div>
 
-      <!-- Control Bar: Subject Dropdown + Search + Mode Tabs -->
-      <div class="sheets-control-bar" style="margin-bottom:20px;">
+      <!-- Control Bar: Subject Dropdown + Year Dropdown + Search + Mode Tabs -->
+      <div class="q-control-bar">
         <!-- Subject Dropdown -->
-        <div class="sheets-dropdown-wrap">
-          <i data-lucide="chevron-down" class="sheets-dropdown-chevron"></i>
-          <select id="q-subject-dropdown" class="sheets-dropdown">
-            <option value="all">${isAr ? 'كل المواد' : 'All Subjects'}</option>
+        <div class="q-dropdown-wrap">
+          <i data-lucide="chevron-down" class="q-dropdown-chevron"></i>
+          <select id="q-subject-dropdown" class="q-select">
+            <option value="all" ${!QuestionsPage.selectedSubjectId || QuestionsPage.selectedSubjectId === 'all' ? 'selected' : ''}>${isAr ? 'كل المواد' : 'All Subjects'}</option>
             ${subjects.map(s => `
-              <option value="${s.id}">
+              <option value="${s.id}" ${QuestionsPage.selectedSubjectId === s.id ? 'selected' : ''}>
                 ${isAr ? s.name_ar : s.name_en}
               </option>
             `).join('')}
           </select>
         </div>
 
+        <!-- Year Dropdown -->
+        <div class="q-dropdown-wrap">
+          <i data-lucide="chevron-down" class="q-dropdown-chevron"></i>
+          <select id="q-year-dropdown" class="q-select">
+            <option value="all" ${QuestionsPage.selectedYear === 'all' ? 'selected' : ''}>${isAr ? 'كل السنوات' : 'All Years'}</option>
+            <option value="3" ${QuestionsPage.selectedYear === '3' ? 'selected' : ''}>${isAr ? 'السنة الثالثة' : 'Year 3 (Dental Surgery)'}</option>
+          </select>
+        </div>
+
         <!-- Search Bar (always visible) -->
-        <div class="sheets-search-wrap">
-          <i data-lucide="search" class="sheets-search-icon"></i>
+        <div class="q-search-wrap">
+          <i data-lucide="search" class="q-search-icon"></i>
           <input
             type="text"
             id="q-search-input"
-            class="sheets-search-input"
-            placeholder="${isAr ? 'ابحث في نصوص الأسئلة، المواد، أو الكلمات المفتاحية...' : 'Search questions, subjects, or clinical tags...'}"
+            class="q-search-input"
+            placeholder="${isAr ? 'ابحث في نصوص الأسئلة، المواد، أو التصنيفات السريرية...' : 'Search questions, subjects, or clinical tags...'}"
+            value="${QuestionsPage.searchQuery || ''}"
             autocomplete="off"
           />
-          <button id="q-search-clear" class="sheets-search-clear" style="display:none;">
+          <button id="q-search-clear" class="q-search-clear" style="${QuestionsPage.searchQuery ? '' : 'display:none;'}">
             <i data-lucide="x" style="width:14px;height:14px;"></i>
           </button>
         </div>
 
-        <!-- Right: count + Mode Tabs -->
-        <div class="sheets-control-right">
-          <span id="q-total-counter" class="sheets-count-label">${allQuestions.length} ${isAr ? 'سؤال' : 'MCQs'}</span>
-          <div class="sheets-view-toggle">
-            <span class="sheets-view-label">${isAr ? 'العرض' : 'View'}</span>
-            <button class="sheets-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'bento' ? 'active' : ''}" data-tab="bento" title="${isAr ? 'المربعات' : 'Bento Grid'}">
+        <!-- Right: Count + Mode Tabs -->
+        <div class="q-control-right">
+          <span id="q-total-counter" class="q-count-badge">${allQuestions.length} ${isAr ? 'سؤال' : 'MCQs'}</span>
+          <div class="q-view-toggle">
+            <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'bento' ? 'active' : ''}" data-tab="bento" title="${isAr ? 'المربعات' : 'Bento Grid'}">
               <i data-lucide="layout-grid" style="width:15px;height:15px;"></i>
             </button>
-            <button class="sheets-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'direct' ? 'active' : ''}" data-tab="direct" title="${isAr ? 'قائمة الأسئلة' : 'All Questions'}">
+            <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'direct' ? 'active' : ''}" data-tab="direct" title="${isAr ? 'قائمة الأسئلة' : 'All Questions'}">
               <i data-lucide="list" style="width:15px;height:15px;"></i>
             </button>
-            <button class="sheets-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'saved' ? 'active' : ''}" data-tab="saved" title="${isAr ? 'المحفوظات' : 'Saved'}">
+            <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'saved' ? 'active' : ''}" data-tab="saved" title="${isAr ? 'المحفوظات' : 'Saved'}">
               <i data-lucide="star" style="width:15px;height:15px;"></i>
             </button>
           </div>
@@ -237,7 +260,7 @@ const QuestionsPage = {
           <!-- SECONDARY STAGE: LARGE KURO COMPANION & NON-OBSCURING EXPLANATION WING -->
           <aside class="dt-kuro-companion-stage" id="dt-kuro-companion-stage" aria-label="Kuro Study Companion">
             <!-- Clickable Large Kuro Character Avatar -->
-            <button type="button" class="dt-kuro-mascot-trigger" id="dt-kuro-mascot-trigger" title="${isAr ? 'انقر على كورو لإظهار أو إخفاء الشرح السريري المعتمد' : 'Click Kuro to toggle verified faculty explanation'}" aria-expanded="false">
+            <button type="button" class="dt-kuro-mascot-trigger" id="dt-kuro-mascot-trigger" title="${isAr ? 'انقر على كورو لإظهار أو إخفاء الشرح السريري' : 'Click Kuro to toggle faculty clinical explanation'}" aria-expanded="false">
               <div class="dt-kuro-avatar-frame">
                 <img id="dt-kuro-mascot-img" class="dt-kuro-mascot-img" src="assets/characters/kuro/Kuro-Thinking.png" alt="Kuro Character Companion" />
                 <span class="dt-kuro-pulse-ring"></span>
@@ -256,7 +279,7 @@ const QuestionsPage = {
                     <i data-lucide="book-open" style="width: 16px; height: 16px; color: var(--brand-accent);"></i>
                   </div>
                   <div>
-                    <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary);">${isAr ? 'شرح كورو والكلية المعتمد' : 'Faculty Explanation'}</div>
+                    <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary);">${isAr ? 'شرح كورو والكلية' : 'Faculty Explanation'}</div>
                     <div id="dt-kuro-exp-ref-subtitle" style="font-size: 0.73rem; color: var(--brand-accent); font-weight: 700;"></div>
                   </div>
                 </div>
@@ -273,7 +296,7 @@ const QuestionsPage = {
                 <div class="dt-kuro-sheet-quote-box" id="dt-kuro-sheet-quote-box" style="display: none;">
                   <div class="dt-kuro-quote-header">
                     <i data-lucide="quote" style="width: 12px; height: 12px; color: var(--brand-accent);"></i>
-                    <span id="dt-kuro-quote-label">${isAr ? 'نص الشيت الرسمي المعتمد:' : 'Official Sheet Quote:'}</span>
+                    <span id="dt-kuro-quote-label">${isAr ? 'نص الشيت الرسمي:' : 'Official Sheet Quote:'}</span>
                   </div>
                   <div class="dt-kuro-quote-text" id="dt-kuro-quote-text"></div>
                 </div>
@@ -376,6 +399,12 @@ const QuestionsPage = {
           QuestionsPage.renderDirectView();
         }
       }
+    });
+
+    // ── Year Dropdown ────────────────────────────────────────────────────────
+    document.getElementById('q-year-dropdown')?.addEventListener('change', (e) => {
+      QuestionsPage.selectedYear = e.target.value;
+      QuestionsPage.renderCurrentView();
     });
 
     // ── Search box (always visible) ──────────────────────────────────────────
@@ -602,11 +631,21 @@ const QuestionsPage = {
             <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 15px; height: 15px;"></i>
             <span>${isAr ? 'الرجوع لكافة المواد' : 'Back to All Subjects'}</span>
           </button>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="kf-segmented-badge" style="font-weight: 800; color: var(--brand-accent); background: rgba(2, 132, 199, 0.08);">
-              ${isAr ? subject.name_ar : subject.name_en}
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            ${subject.code ? `
+              <span class="q-card-code-pill" style="font-weight: 800; color: var(--brand-burgundy, #7E1D2A); background: rgba(126, 29, 42, 0.08); border: 1px solid rgba(126, 29, 42, 0.2);">
+                ${subject.code}
+              </span>
+            ` : ''}
+            <span class="q-card-count-badge ${subjQuestions.length > 0 ? 'active-count' : 'zero-count'}">
+              ${subjQuestions.length} ${isAr ? 'سؤال' : 'MCQs'}
             </span>
-            <span class="kf-segmented-badge">${subjQuestions.length} ${isAr ? 'سؤال' : 'Questions'}</span>
+            ${subjQuestions.length > 0 ? `
+              <button type="button" id="btn-start-all-subj-quiz" class="btn btn-primary btn-sm" style="font-weight: 750; gap: 6px; background: var(--brand-burgundy, #7E1D2A);">
+                <i data-lucide="play" style="width: 13px; height: 13px;"></i>
+                <span>${isAr ? 'بدء تدريب المادة بالكامل' : 'Start Practice All'}</span>
+              </button>
+            ` : ''}
           </div>
         </div>
 
@@ -653,7 +692,7 @@ const QuestionsPage = {
                       <span class="sgc-subject-badge" style="background:${subjectColor.bg};color:${subjectColor.text};border-color:${subjectColor.border};">
                         ${isAr ? subject.name_ar : subject.name_en}
                       </span>
-                      <span class="kf-segmented-badge" style="${!hasQuestions ? 'background:var(--bg-surface-subtle);color:var(--text-muted);' : ''}font-weight:800;">
+                      <span class="q-card-count-badge ${hasQuestions ? 'active-count' : 'zero-count'}">
                         ${qList.length} ${isAr ? 'أسئلة' : 'MCQs'}
                       </span>
                     </div>
@@ -662,7 +701,7 @@ const QuestionsPage = {
                     </h3>
                     <p class="sgc-meta" style="margin-bottom:16px;${!hasQuestions ? 'opacity:0.7;' : ''}">
                       ${hasQuestions
-                        ? (isAr ? `تدرب على ${qList.length} أسئلة امتحانية منتقاة لهذا الشيت مع تعليلات سريرية.` : `Practice ${qList.length} verified faculty questions for this lecture.`)
+                        ? (isAr ? `تدرب على ${qList.length} أسئلة امتحانية لهذا الشيت مع تعليلات سريرية.` : `Practice ${qList.length} faculty questions for this lecture.`)
                         : (isAr ? 'قريباً... جاري تجهيز الأسئلة لهذا الشيت' : 'Coming soon... questions are being prepared for this sheet')
                       }
                     </p>
@@ -673,7 +712,7 @@ const QuestionsPage = {
                       style="flex:1;justify-content:center;"
                       ${!hasQuestions ? 'disabled style="opacity:0.45;cursor:not-allowed;"' : ''}>
                       <i data-lucide="${hasQuestions ? 'play' : 'clock'}" style="width:14px;height:14px;"></i>
-                      <span>${hasQuestions ? (isAr ? 'ابدأ الاختبار السريع' : 'Start Sheet Quiz') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
+                      <span>${hasQuestions ? (isAr ? 'ابدأ التدريب' : 'Start Practice') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
                     </button>
                   </div>
                 </div>
@@ -687,7 +726,16 @@ const QuestionsPage = {
 
       document.getElementById('btn-back-to-subjects')?.addEventListener('click', () => {
         QuestionsPage.selectedSubjectId = null;
+        const dd = document.getElementById('q-subject-dropdown');
+        if (dd) dd.value = 'all';
         QuestionsPage.renderBentoView();
+      });
+
+      document.getElementById('btn-start-all-subj-quiz')?.addEventListener('click', () => {
+        QuestionsPage.launchQuizRunner(
+          subjQuestions,
+          `${isAr ? subject.name_ar : subject.name_en} • ${isAr ? 'بنك الأسئلة الشامل' : 'All Questions'}`
+        );
       });
 
       mainEl.querySelectorAll('.btn-start-sheet-quiz').forEach(btn => {
@@ -743,53 +791,74 @@ const QuestionsPage = {
     };
     const getColor = (id) => SUBJ_COLORS[id] || { bg:'rgba(142,146,168,0.10)', text:'#8E92A8', border:'rgba(142,146,168,0.25)' };
 
+    // Apply Year filter if selected
+    const filteredSubjects = subjects.filter(s => {
+      if (QuestionsPage.selectedYear !== 'all' && String(s.year) !== String(QuestionsPage.selectedYear)) {
+        return false;
+      }
+      return true;
+    });
+
     mainEl.innerHTML = `
-      <div style="margin-bottom: 20px;">
-        <h2 style="font-size:1.25rem;font-weight:850;color:var(--text-primary);margin:0 0 6px;">
-          ${isAr ? 'مواد طب الأسنان (المربعات التعليمية)' : 'Dental Curriculum Subjects'}
+      <div class="q-section-header">
+        <h2 class="q-section-title">
+          ${isAr ? 'مواد طب الأسنان' : 'Dental Curriculum Subjects'}
         </h2>
-        <p style="font-size:0.85rem;color:var(--text-secondary);margin:0;">
-          ${isAr ? 'انقر على أي مادة لاستعراض شيتاتها وخوض اختبارات سريعة على كروت الأسئلة.' : 'Choose a dental module to browse lecture-linked MCQs and test your knowledge.'}
+        <p class="q-section-subtitle">
+          ${isAr ? 'اختر المادة لاستعراض أسئلة المحاضرات واختبار معلوماتك السريرية.' : 'Choose a dental module to browse lecture-linked MCQs and test your knowledge.'}
         </p>
       </div>
 
-      <div class="bento-subject-grid">
-        ${subjects.map(s => {
+      <div class="questions-subject-grid">
+        ${filteredSubjects.map(s => {
           const qCount = subjectStats[s.id] || 0;
           const icon = subjectIcons[s.id] || 'book-open';
           const title = isAr ? s.name_ar : s.name_en;
           const desc = isAr ? s.description_ar : s.description_en;
           const color = getColor(s.id);
+          const hasQuestions = qCount > 0;
+          const code = s.code || '';
 
           return `
-            <div class="bento-subject-box" data-subj-id="${s.id}">
+            <div class="q-subject-card ${hasQuestions ? 'has-mcqs' : 'empty-mcqs'}" data-subj-id="${s.id}">
               <div>
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:8px;">
-                  <span class="sgc-subject-badge" style="background:${color.bg};color:${color.text};border-color:${color.border};font-size:0.7rem;">
-                    ${title}
+                <!-- Topbar: Subject Code & Real MCQ Count -->
+                <div class="q-card-topbar">
+                  <span class="q-card-code-pill" style="background:${color.bg};color:${color.text};border-color:${color.border};">
+                    ${code}
                   </span>
-                  <span class="kf-segmented-badge" style="background:${qCount > 0 ? 'rgba(200,67,67,0.08)' : 'var(--bg-surface-subtle)'};color:${qCount > 0 ? 'var(--brand-burgundy)' : 'var(--text-muted)'};font-weight:800;white-space:nowrap;flex-shrink:0;">
-                    ${qCount} ${isAr ? 'سؤال' : 'MCQs'}
+                  <span class="q-card-count-badge ${hasQuestions ? 'active-count' : 'zero-count'}">
+                    ${qCount} ${isAr ? (qCount === 1 ? 'سؤال' : qCount <= 10 && qCount > 1 ? 'أسئلة' : 'سؤال') : 'MCQs'}
                   </span>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                  <div class="bento-icon-badge" style="background:${color.bg};color:${color.text};border-color:${color.border};">
-                    <i data-lucide="${icon}" style="width:20px;height:20px;"></i>
+
+                <!-- Body: Dental Icon & Subject Title -->
+                <div class="q-card-body">
+                  <div class="q-card-icon-box" style="background:${color.bg};color:${color.text};border-color:${color.border};">
+                    <i data-lucide="${icon}"></i>
                   </div>
-                  <h3 style="font-size:1rem;font-weight:800;color:var(--text-primary);margin:0;line-height:1.4;">
-                    ${title}
-                  </h3>
+                  <div class="q-card-title-group">
+                    <h3 class="q-card-title">
+                      ${title}
+                    </h3>
+                    ${desc ? `<p class="q-card-desc">${desc}</p>` : ''}
+                  </div>
                 </div>
-                <p style="font-size:0.8rem;color:var(--text-secondary);margin:0 0 16px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
-                  ${desc || ''}
-                </p>
               </div>
 
-              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:auto;">
-                <span style="font-size:0.775rem;font-weight:700;color:${color.text};">
-                  ${isAr ? 'استعراض الشيتات والأسئلة' : 'Open Subject Sheets'}
-                </span>
-                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;color:${color.text};"></i>
+              <!-- Footer: Action Button -->
+              <div class="q-card-footer">
+                ${hasQuestions ? `
+                  <button type="button" class="q-action-btn q-action-start" data-subj-id="${s.id}">
+                    <span>${isAr ? 'ابدأ التدريب' : 'Start Practice'}</span>
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;"></i>
+                  </button>
+                ` : `
+                  <button type="button" class="q-action-btn q-action-browse" data-subj-id="${s.id}">
+                    <span>${isAr ? 'استعراض الأسئلة' : 'Browse Questions'}</span>
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;"></i>
+                  </button>
+                `}
               </div>
             </div>
           `;
@@ -799,10 +868,12 @@ const QuestionsPage = {
 
     if (window.lucide) window.lucide.createIcons();
 
-    mainEl.querySelectorAll('.bento-subject-box').forEach(card => {
+    mainEl.querySelectorAll('.q-subject-card').forEach(card => {
       card.addEventListener('click', () => {
         const id = card.getAttribute('data-subj-id');
         QuestionsPage.selectedSubjectId = id;
+        const dd = document.getElementById('q-subject-dropdown');
+        if (dd) dd.value = id;
         QuestionsPage.renderBentoView();
       });
     });
@@ -1008,7 +1079,7 @@ const QuestionsPage = {
                 </div>
               ` : ''}
               <div style="padding: 10px 14px; border-radius: 8px; background: var(--bg-surface-subtle); border-inline-start: 3px solid #10B981; font-size: 0.825rem; color: var(--text-secondary);">
-                <strong>${isAr ? 'الإجابة المعتمدة:' : 'Correct Answer:'}</strong> ${q.answer_ar || q.explanation_ar || q.answer_en}
+                <strong>${isAr ? 'الإجابة الصحيحة:' : 'Correct Answer:'}</strong> ${q.answer_ar || q.explanation_ar || q.answer_en}
               </div>
             </div>
           `).join('')}

@@ -161,6 +161,18 @@
 
       <!-- Sidebar Footer (Student Profile & Equipped Mascot) -->
       <div class="sidebar-footer">
+        <div class="sidebar-quick-settings" style="display: flex; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <button type="button" id="side-lang-toggle-btn" class="side-quick-setting-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #FFF; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+            <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+            <span id="side-lang-btn-text">AR</span>
+          </button>
+          <button type="button" id="side-theme-toggle-btn" class="side-quick-setting-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #FFF; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+            <i data-lucide="moon" id="side-theme-icon" style="width: 14px; height: 14px;"></i>
+          </button>
+          <button type="button" id="side-sound-toggle-btn" class="side-quick-setting-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #FFF; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+            <i data-lucide="volume-2" id="side-sound-icon" style="width: 14px; height: 14px;"></i>
+          </button>
+        </div>
         <a href="#/profile" class="sidebar-user-card" id="sidebar-user-card-link" title="الملف الشخصي وإعدادات الحساب | Student Profile">
           <div class="sidebar-user-avatar">
             <img id="sidebar-user-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" class="mascot-avatar-img sidebar-mascot" width="40" height="40" loading="lazy" />
@@ -200,15 +212,15 @@
           </a>
           <a href="#/sheets" class="header-nav-pill" data-route="/sheets">
             <i data-lucide="book-open"></i>
-            <span id="nav-item-subjects">Subjects</span>
+            <span id="nav-item-sheets">Sheets</span>
           </a>
-          <a href="#/lecture-schedule" class="header-nav-pill" data-route="/lecture-schedule">
-            <i data-lucide="calendar"></i>
-            <span id="nav-item-schedule">Schedule</span>
+          <a href="#/recordings" class="header-nav-pill" data-route="/recordings">
+            <i data-lucide="headphones"></i>
+            <span id="nav-item-recordings">Recordings</span>
           </a>
-          <a href="#/exams" class="header-nav-pill" data-route="/exams">
-            <i data-lucide="file-check-2"></i>
-            <span id="nav-item-exams">Exams</span>
+          <a href="#/questions" class="header-nav-pill" data-route="/questions">
+            <i data-lucide="help-circle"></i>
+            <span id="nav-item-questions">Questions</span>
           </a>
 
           <!-- More Dropdown -->
@@ -218,21 +230,21 @@
               <span id="nav-item-more">More</span>
             </button>
             <div class="header-dropdown-menu" id="header-dropdown-menu">
-              <a href="#/questions" class="header-dropdown-item">
-                <i data-lucide="help-circle"></i>
-                <span id="nav-item-questions">Question Bank</span>
-              </a>
-              <a href="#/recordings" class="header-dropdown-item">
-                <i data-lucide="headphones"></i>
-                <span id="nav-item-recordings">Audio Recordings</span>
+              <a href="#/lecture-schedule" class="header-dropdown-item">
+                <i data-lucide="calendar"></i>
+                <span id="nav-item-schedule">Lecture Schedule</span>
               </a>
               <a href="#/practical-schedule" class="header-dropdown-item">
                 <i data-lucide="microscope"></i>
                 <span id="nav-item-practical">Practical Labs</span>
               </a>
+              <a href="#/exams" class="header-dropdown-item">
+                <i data-lucide="file-check-2"></i>
+                <span id="nav-item-exams">Exams Timetables</span>
+              </a>
               <a href="#/rewards" class="header-dropdown-item">
                 <i data-lucide="sparkles"></i>
-                <span id="nav-item-rewards">Mascot Skins Hub</span>
+                <span id="nav-item-rewards">Mascot Hub</span>
               </a>
               <a href="#/games" class="header-dropdown-item">
                 <i data-lucide="gamepad-2"></i>
@@ -291,175 +303,6 @@
 
       <!-- MAIN ROUTED CONTENT CONTAINER -->
       <main class="main-content" id="app" role="main"></main>
-    </div>
-  </div>
-
-  <!-- ==========================================================================
-       MOBILE FIXED BOTTOM NAVIGATION BAR (Phones: < 768px)
-       Home • Sheets • Audio Recordings • Questions • More
-       ========================================================================== -->
-  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
-    <a href="#/" class="mobile-bottom-nav-item active" data-route="/">
-      <i data-lucide="home"></i>
-      <span class="mobile-nav-label" id="mob-nav-home">Home</span>
-    </a>
-    <a href="#/sheets" class="mobile-bottom-nav-item" data-route="/sheets">
-      <i data-lucide="book-open"></i>
-      <span class="mobile-nav-label" id="mob-nav-sheets">Sheets</span>
-    </a>
-    <a href="#/recordings" class="mobile-bottom-nav-item" data-route="/recordings">
-      <i data-lucide="headphones"></i>
-      <span class="mobile-nav-label" id="mob-nav-recordings">Audio</span>
-    </a>
-    <a href="#/questions" class="mobile-bottom-nav-item" data-route="/questions">
-      <i data-lucide="help-circle"></i>
-      <span class="mobile-nav-label" id="mob-nav-questions">Questions</span>
-    </a>
-    <button type="button" class="mobile-bottom-nav-item" id="mobile-more-trigger" aria-label="Open More Menu">
-      <i data-lucide="more-horizontal"></i>
-      <span class="mobile-nav-label" id="mob-nav-more">More</span>
-    </button>
-  </nav>
-
-  <!-- ==========================================================================
-       MOBILE MORE BOTTOM SHEET / DRAWER (Warm Cream & Burgundy Design System)
-       ========================================================================== -->
-  <div id="mobile-more-sheet-backdrop" class="mobile-more-backdrop" aria-hidden="true">
-    <div id="mobile-more-sheet" class="mobile-more-sheet" role="dialog" aria-modal="true" aria-labelledby="mobile-more-title">
-      <div class="mobile-more-handle-bar">
-        <span class="mobile-more-handle"></span>
-      </div>
-      <div class="mobile-more-header">
-        <div class="mobile-more-brand">
-          <img src="assets/characters/kuro/Kuro-Idle.png" width="30" height="30" alt="Kuro Mascot" class="mobile-more-avatar" />
-          <div>
-            <h3 class="mobile-more-title" id="mobile-more-title">Kuro Hub & Tools</h3>
-            <span class="mobile-more-sub" id="mobile-more-sub">Dentistry • Year 3</span>
-          </div>
-        </div>
-        <button type="button" id="mobile-more-close-btn" class="mobile-more-close" aria-label="Close">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-
-      <div class="mobile-more-body">
-        <!-- Quick Settings Bar (Language, Theme, Sound FX) -->
-        <div class="mobile-more-quick-settings">
-          <button type="button" id="mob-lang-toggle-btn" class="mob-quick-setting-btn">
-            <i data-lucide="globe"></i>
-            <span id="mob-lang-btn-text">AR</span>
-          </button>
-          <button type="button" id="mob-theme-toggle-btn" class="mob-quick-setting-btn">
-            <i data-lucide="moon" id="mob-theme-icon"></i>
-            <span id="mob-theme-text">Dark</span>
-          </button>
-          <button type="button" id="mob-sound-toggle-btn" class="mob-quick-setting-btn">
-            <i data-lucide="volume-2" id="mob-sound-icon"></i>
-            <span id="mob-sound-text">Sound</span>
-          </button>
-        </div>
-
-        <!-- Group 1: Study & Academic -->
-        <div class="mobile-more-group">
-          <div class="mobile-more-group-title" id="mob-group-academic">Study & Academic</div>
-          <div class="mobile-more-links-grid">
-            <a href="#/lecture-schedule" class="mobile-more-card-link">
-              <div class="mobile-more-card-icon" style="background: rgba(126, 29, 42, 0.08); color: #7E1D2A;">
-                <i data-lucide="calendar"></i>
-              </div>
-              <div class="mobile-more-card-meta">
-                <span class="mobile-more-card-name" id="mob-link-theory">Theory Schedule</span>
-                <span class="mobile-more-card-desc" id="mob-desc-theory">Lectures & Auditorium</span>
-              </div>
-              <i data-lucide="chevron-right" class="mobile-more-card-arrow"></i>
-            </a>
-
-            <a href="#/practical-schedule" class="mobile-more-card-link">
-              <div class="mobile-more-card-icon" style="background: rgba(13, 148, 136, 0.08); color: #0D9488;">
-                <i data-lucide="microscope"></i>
-              </div>
-              <div class="mobile-more-card-meta">
-                <span class="mobile-more-card-name" id="mob-link-practical">Clinical & Lab Schedule</span>
-                <span class="mobile-more-card-desc" id="mob-desc-practical">Clinics & Phantom Lab</span>
-              </div>
-              <i data-lucide="chevron-right" class="mobile-more-card-arrow"></i>
-            </a>
-
-            <a href="#/exams" class="mobile-more-card-link">
-              <div class="mobile-more-card-icon" style="background: rgba(2, 132, 199, 0.08); color: #0284C7;">
-                <i data-lucide="file-check-2"></i>
-              </div>
-              <div class="mobile-more-card-meta">
-                <span class="mobile-more-card-name" id="mob-link-exams">Official Exam Schedule</span>
-                <span class="mobile-more-card-desc" id="mob-desc-exams">Midterms & Finals</span>
-              </div>
-              <i data-lucide="chevron-right" class="mobile-more-card-arrow"></i>
-            </a>
-          </div>
-        </div>
-
-        <!-- Group 2: Kuro Mascot & Fun -->
-        <div class="mobile-more-group">
-          <div class="mobile-more-group-title" id="mob-group-kuro">Kuro Mascot</div>
-          <div class="mobile-more-links-grid">
-            <a href="#/rewards" class="mobile-more-card-link">
-              <div class="mobile-more-card-icon" style="background: rgba(245, 158, 11, 0.10); color: #D97706;">
-                <i data-lucide="sparkles"></i>
-              </div>
-              <div class="mobile-more-card-meta">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span class="mobile-more-card-name" id="mob-link-rewards">Mascot Hub</span>
-                  <span class="sidebar-soon-badge" id="mob-soon-rewards">قريباً</span>
-                </div>
-                <span class="mobile-more-card-desc" id="mob-desc-rewards">Skins & Outfits</span>
-              </div>
-              <i data-lucide="chevron-right" class="mobile-more-card-arrow"></i>
-            </a>
-
-            <a href="#/games" class="mobile-more-card-link">
-              <div class="mobile-more-card-icon" style="background: rgba(168, 85, 247, 0.10); color: #A855F7;">
-                <i data-lucide="gamepad-2"></i>
-              </div>
-              <div class="mobile-more-card-meta">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span class="mobile-more-card-name" id="mob-link-games">Arcade & Games</span>
-                  <span class="sidebar-soon-badge" id="mob-soon-games">قريباً</span>
-                </div>
-                <span class="mobile-more-card-desc" id="mob-desc-games">Study Break Minigames</span>
-              </div>
-              <i data-lucide="chevron-right" class="mobile-more-card-arrow"></i>
-            </a>
-          </div>
-        </div>
-
-        <!-- Group 3: Account & Administration -->
-        <div class="mobile-more-group">
-          <div class="mobile-more-group-title" id="mob-group-account">Account & Administration</div>
-          <div class="mobile-more-links-grid">
-            <a href="#/profile" class="mobile-more-card-link">
-              <div class="mobile-more-card-icon" style="background: rgba(99, 102, 241, 0.10); color: #6366F1;">
-                <i data-lucide="user"></i>
-              </div>
-              <div class="mobile-more-card-meta">
-                <span class="mobile-more-card-name" id="mob-link-profile">Profile & Settings</span>
-                <span class="mobile-more-card-desc" id="mob-desc-profile">Preferences & Info</span>
-              </div>
-              <i data-lucide="chevron-right" class="mobile-more-card-arrow"></i>
-            </a>
-
-            <a href="#/admin" class="mobile-more-card-link">
-              <div class="mobile-more-card-icon" style="background: rgba(126, 29, 42, 0.10); color: #7E1D2A;">
-                <i data-lucide="shield-check"></i>
-              </div>
-              <div class="mobile-more-card-meta">
-                <span class="mobile-more-card-name" id="mob-link-admin">Faculty Admin Portal</span>
-                <span class="mobile-more-card-desc" id="mob-desc-admin">Sheet & Catalog Management</span>
-              </div>
-              <i data-lucide="chevron-right" class="mobile-more-card-arrow"></i>
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 

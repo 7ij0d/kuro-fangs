@@ -85,18 +85,18 @@ class Router {
     // Scroll smoothly to top
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    // Close mobile drawer or more sheet if open
-    const sidebar = document.getElementById('sidebar');
+    // Close mobile drawer or dropdown if open
+    const sidebar = document.getElementById('app-sidebar') || document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
     if (sidebar && sidebar.classList.contains('open')) {
       sidebar.classList.remove('open');
       backdrop?.classList.remove('open');
     }
-    const moreSheetBackdrop = document.getElementById('mobile-more-sheet-backdrop');
-    const moreSheet = document.getElementById('mobile-more-sheet');
-    if (moreSheetBackdrop && moreSheetBackdrop.classList.contains('open')) {
-      moreSheetBackdrop.classList.remove('open');
-      moreSheet?.classList.remove('open');
+    const moreWrap = document.getElementById('header-more-dropdown-wrap');
+    if (moreWrap) {
+      moreWrap.classList.remove('open');
+      const moreBtn = document.getElementById('header-more-btn');
+      if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
     }
 
     // Clean up lingering temporary backdrops or fixed overlays from previous views
@@ -178,12 +178,12 @@ class Router {
       }
     });
 
-    // Handle More button state on mobile bottom nav
-    const moreBtn = document.getElementById('mobile-more-trigger');
-    if (moreBtn) {
+    // Handle More button state on top header navigation
+    const headerMoreBtn = document.getElementById('header-more-btn');
+    if (headerMoreBtn) {
       const moreRoutes = ['/lecture-schedule', '/practical-schedule', '/exams', '/rewards', '/games', '/profile', '/admin'];
       const isMoreActive = moreRoutes.some(r => currentPath.startsWith(r));
-      moreBtn.classList.toggle('active', isMoreActive);
+      headerMoreBtn.classList.toggle('active', isMoreActive);
     }
   }
 }

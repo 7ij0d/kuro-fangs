@@ -4104,7 +4104,11 @@ html[dir="rtl"] .fox-skin-cost-badge {
    OFFICIAL THEORETICAL LECTURE MATRIX (Faculty of Dentistry - Auditorium 2)
    ========================================================================== */
 .theory-table-card {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border-card);
   box-shadow: var(--shadow-sm);
 }
