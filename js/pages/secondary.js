@@ -742,6 +742,13 @@ const SecondaryPages = {
         </div>
       ` : ''}
     `;
+  },
+
+  // Student Profile & Account Settings
+  renderProfile(container, queryParams) {
+    if (window.ProfilePage && typeof window.ProfilePage.render === 'function') {
+      window.ProfilePage.render(container, queryParams);
+    }
   }
 };
 

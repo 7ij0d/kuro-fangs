@@ -220,10 +220,18 @@
     const sideUserName = document.querySelector('.sidebar-user-name');
     const sideUserSub = document.getElementById('sidebar-user-sub');
 
+    let localInfo = {};
+    try {
+      localInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
+    } catch (e) {}
+
     if (user) {
-      const name = user.user_metadata?.full_name || user.email.split('@')[0];
+      const name = user.user_metadata?.full_name || localInfo.name || user.email.split('@')[0];
       if (sideUserName) sideUserName.textContent = name;
       if (sideUserSub) sideUserSub.textContent = isAr ? 'حساب سحابي موثق ☁️' : 'Cloud Verified ☁️';
+    } else if (localInfo.name && localInfo.name !== 'طالب أسنان' && localInfo.name !== 'Dental Student') {
+      if (sideUserName) sideUserName.textContent = localInfo.name;
+      if (sideUserSub) sideUserSub.textContent = isAr ? 'السنة الثالثة • طالب مسجل' : 'Year 3 • Student';
     } else {
       if (sideUserName) sideUserName.textContent = isAr ? 'طالب زائر (Guest)' : 'Guest Student';
       if (sideUserSub) sideUserSub.textContent = isAr ? 'السنة الثالثة • حساب محلي' : 'Year 3 • Local Guest';
@@ -233,14 +241,21 @@
     const headerAuthContainer = document.getElementById('header-auth-action-box');
     if (headerAuthContainer) {
       if (user) {
-        const name = user.user_metadata?.full_name || user.email.split('@')[0];
+        const name = user.user_metadata?.full_name || localInfo.name || user.email.split('@')[0];
         headerAuthContainer.innerHTML = `
-          <div class="header-user-badge" id="header-user-menu-btn" title="${user.email}">
+          <div class="header-user-badge" id="header-user-menu-btn" onclick="window.location.hash='#/profile'" style="cursor: pointer;" title="${user.email} — ${isAr ? 'فتح الملف الشخصي' : 'Open Profile'}">
             <span class="user-cloud-icon" title="${isAr ? 'متصل بالسحابة' : 'Cloud Synced'}">☁️</span>
             <span class="user-display-name">${name}</span>
-            <button class="btn-auth-signout" onclick="window.SupabaseAuth.signOut()" title="${isAr ? 'تسجيل الخروج' : 'Sign Out'}">
+            <button class="btn-auth-signout" onclick="event.stopPropagation(); window.SupabaseAuth.signOut()" title="${isAr ? 'تسجيل الخروج' : 'Sign Out'}">
               <i data-lucide="log-out" style="width: 13px; height: 13px;"></i>
             </button>
+          </div>
+        `;
+      } else if (localInfo.name && localInfo.name !== 'طالب أسنان' && localInfo.name !== 'Dental Student') {
+        headerAuthContainer.innerHTML = `
+          <div class="header-user-badge" id="header-user-menu-btn" onclick="window.location.hash='#/profile'" style="cursor: pointer;" title="${localInfo.email || ''} — ${isAr ? 'فتح الملف الشخصي' : 'Open Profile'}">
+            <span class="user-cloud-icon" title="${isAr ? 'حساب مسجل' : 'Account'}">👤</span>
+            <span class="user-display-name">${localInfo.name}</span>
           </div>
         `;
       } else {
