@@ -140,27 +140,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update Top Navigation Center Pills & More Dropdown
     const navHome = document.getElementById('nav-item-home');
     if (navHome) navHome.textContent = isAr ? 'الرئيسية' : 'Home';
-    const navSheets = document.getElementById('nav-item-sheets');
-    if (navSheets) navSheets.textContent = isAr ? 'الشيتات' : 'Sheets';
-    const navRecordings = document.getElementById('nav-item-recordings');
-    if (navRecordings) navRecordings.textContent = isAr ? 'التسجيلات' : 'Recordings';
-    const navQuestions = document.getElementById('nav-item-questions');
-    if (navQuestions) navQuestions.textContent = isAr ? 'الأسئلة' : 'Questions';
+    const navSubjects = document.getElementById('nav-item-subjects');
+    if (navSubjects) navSubjects.textContent = isAr ? 'المواد' : 'Subjects';
+    const navSchedules = document.getElementById('nav-item-schedules');
+    if (navSchedules) navSchedules.textContent = isAr ? 'الجداول' : 'Schedules';
     const navMore = document.getElementById('nav-item-more');
     if (navMore) navMore.textContent = isAr ? 'المزيد' : 'More';
 
-    const navSchedule = document.getElementById('nav-item-schedule');
-    if (navSchedule) navSchedule.textContent = isAr ? 'جدول المحاضرات' : 'Lecture Schedule';
-    const navPractical = document.getElementById('nav-item-practical');
-    if (navPractical) navPractical.textContent = isAr ? 'المعامل والعيادات' : 'Practical Labs';
-    const navExams = document.getElementById('nav-item-exams');
-    if (navExams) navExams.textContent = isAr ? 'جداول الامتحانات' : 'Exams Timetables';
+    const navQuestions = document.getElementById('nav-item-questions');
+    if (navQuestions) navQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Question Bank';
+    const navRecordings = document.getElementById('nav-item-recordings');
+    if (navRecordings) navRecordings.textContent = isAr ? 'التسجيلات الصوتية' : 'Audio Recordings';
     const navRewards = document.getElementById('nav-item-rewards');
     if (navRewards) navRewards.textContent = isAr ? 'كورو والتخصيص' : 'Mascot Hub';
     const navGames = document.getElementById('nav-item-games');
     if (navGames) navGames.textContent = isAr ? 'ألعاب واستراحة' : 'Games';
     const navAdmin = document.getElementById('nav-item-admin');
     if (navAdmin) navAdmin.textContent = isAr ? 'بوابة الإدارة' : 'Admin Portal';
+    const navProfile = document.getElementById('nav-item-profile');
+    if (navProfile) navProfile.textContent = isAr ? 'الملف الشخصي' : 'Profile';
+
+    const sideSchedules = document.getElementById('side-nav-schedules');
+    if (sideSchedules) sideSchedules.textContent = isAr ? 'الجداول الدراسية' : 'Schedules';
   };
 
   const initialLang = window.I18N.getLang();

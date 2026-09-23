@@ -338,8 +338,8 @@ const HomePage = {
               <i data-lucide="calendar"></i>
               <span>${activeTab === 'today' ? todayDateFormatted : tomorrowDateFormatted}</span>
             </span>
-            <a href="#/lecture-schedule" class="kuro-weekly-schedule-btn" title="${isAr ? 'عرض الجدول الأسبوعي الكامل' : 'View Full Timetable'}">
-              <span>${isAr ? 'الجدول الأسبوعي' : 'Weekly Schedule'}</span>
+            <a href="#/schedules" class="kuro-weekly-schedule-btn" title="${isAr ? 'عرض الجداول الدراسية الموحدة' : 'View Academic Schedules'}">
+              <span>${isAr ? 'الجداول الدراسية' : 'All Schedules'}</span>
               <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
             </a>
           </div>
@@ -378,14 +378,14 @@ const HomePage = {
       },
       {
         icon: 'calendar',
-        title: isAr ? 'جدول المحاضرات النظري' : 'Theory Schedule',
-        subtitle: isAr ? 'مدرج 2 — الدفعة 33' : 'All your classes',
-        route: '#/lecture-schedule'
+        title: isAr ? 'الجداول الدراسية' : 'Academic Schedules',
+        subtitle: isAr ? 'مدرج 2 والمعامل A1-E2' : 'Auditorium 2 & Labs',
+        route: '#/schedules'
       },
       {
-        icon: 'file-text',
-        title: isAr ? 'جداول الامتحانات الرسمية' : 'Exam Schedule',
-        subtitle: isAr ? 'الجداول المعتمدة' : 'Upcoming exams',
+        icon: 'calendar-check',
+        title: isAr ? 'جداول الامتحانات' : 'Exam Schedules',
+        subtitle: isAr ? 'النصفي والنهائي المعتمد' : 'Midterm & Final boards',
         route: '#/exams'
       }
     ];

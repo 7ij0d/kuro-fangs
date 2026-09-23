@@ -174,6 +174,191 @@ const ExamsPage = {
   },
 
   // =========================================================================
+  // SECTION 0: UNIFIED ACADEMIC SCHEDULES HUB (#/schedules)
+  // =========================================================================
+  renderSchedulesHub(container, queryParams) {
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+
+    container.innerHTML = `
+      <div class="schedules-hub-container">
+        <!-- 1. Panoramic Top Banner ("الصورة تكون في البار من فوق") -->
+        <section class="schedules-hub-hero" aria-label="Academic Schedules Banner">
+          <div class="schedules-hero-card">
+            <img
+              src="assets/hero/academic-schedules-hero.png"
+              alt="Academic Schedules Hero"
+              class="schedules-hero-bg-img"
+              loading="eager"
+              decoding="sync"
+              fetchpriority="high"
+            />
+            <div class="schedules-hero-overlay" dir="${isAr ? 'rtl' : 'ltr'}">
+              <div class="schedules-hero-badge">
+                <i data-lucide="calendar"></i>
+                <span>${isAr ? 'الجداول الأكاديمية الرسمية 2026 / 2027' : 'Official Academic Timetables 2026 / 2027'}</span>
+              </div>
+              <h1 class="schedules-hero-title">${isAr ? 'الجداول الدراسية المعتمدة' : 'Academic Schedules'}</h1>
+              <p class="schedules-hero-subtitle">${isAr ? 'كلية طب وجراحة الفم والأسنان • جامعة طرابلس • السنة الثالثة' : 'Faculty of Oral & Dental Surgery • University of Tripoli • Year 3'}</p>
+              
+              <div class="schedules-hero-meta-row">
+                <div class="schedules-hero-meta-pill">
+                  <i data-lucide="book-open"></i>
+                  <span>${isAr ? 'مدرج 2 نظري' : 'Auditorium 2'}</span>
+                </div>
+                <div class="schedules-hero-meta-pill">
+                  <i data-lucide="users"></i>
+                  <span>${isAr ? '10 مجموعات عملي' : '10 Subgroups'}</span>
+                </div>
+                <div class="schedules-hero-meta-pill">
+                  <i data-lucide="calendar-check"></i>
+                  <span>${isAr ? 'امتحانات معتمدة' : 'Official Boards'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Three Distinct Schedule Cards Grid -->
+        <section class="schedules-hub-grid-section" aria-label="Schedules Categories">
+          <div class="schedules-cards-grid">
+            
+            <!-- Card 1: Theoretical Lectures -->
+            <div class="sched-card sched-card-theory">
+              <div class="sched-card-top-bar">
+                <span class="sched-card-pill pill-burgundy">
+                  <i data-lucide="book-open"></i>
+                  <span>${isAr ? 'مدرج 2 • السبت – الخميس' : 'Auditorium 2 • Sat–Thu'}</span>
+                </span>
+                <span class="sched-card-code">THEORY</span>
+              </div>
+
+              <div class="sched-card-img-wrap">
+                <img
+                  src="assets/schedules/kuro-theory-lectures.png"
+                  alt="${isAr ? 'المحاضرات النظرية' : 'Theoretical Lectures'}"
+                  class="sched-card-artwork"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="sched-card-content">
+                <h2 class="sched-card-heading">${isAr ? 'جدول المحاضرات النظري' : 'Theoretical Lectures'}</h2>
+                <p class="sched-card-summary">
+                  ${isAr 
+                    ? 'المصفوفة الأسبوعية المعتمدة لجميع المحاضرات النظرية بمدرج 2 بالكلية، مقسمة حسب الفترات الصباحية والمسائية لكامل الدفعة.' 
+                    : 'The official 6-day lecture matrix held in Auditorium 2 Saturday through Thursday, structured into morning & afternoon sessions.'}
+                </p>
+
+                <div class="sched-card-highlights">
+                  <span class="sched-hl-item"><i data-lucide="clock"></i><span>08:00 – 12:00</span></span>
+                  <span class="sched-hl-item"><i data-lucide="map-pin"></i><span>${isAr ? 'مدرج 2' : 'Hall 2'}</span></span>
+                  <span class="sched-hl-item"><i data-lucide="calendar"></i><span>${isAr ? '6 أيام أسبوعياً' : '6 Days/Week'}</span></span>
+                </div>
+
+                <div class="sched-card-footer">
+                  <a href="#/lecture-schedule" class="sched-action-btn btn-burgundy">
+                    <span>${isAr ? 'فتح جدول النظري' : 'Open Schedule'}</span>
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Clinical & Lab Schedule -->
+            <div class="sched-card sched-card-clinical">
+              <div class="sched-card-top-bar">
+                <span class="sched-card-pill pill-emerald">
+                  <i data-lucide="microscope"></i>
+                  <span>${isAr ? 'معامل وعيادات • A1 إلى E2' : 'Labs & Clinics • Groups A1–E2'}</span>
+                </span>
+                <span class="sched-card-code">CLINICAL</span>
+              </div>
+
+              <div class="sched-card-img-wrap">
+                <img
+                  src="assets/schedules/kuro-clinical-lab.png"
+                  alt="${isAr ? 'المعامل والعيادات' : 'Clinical & Lab Schedule'}"
+                  class="sched-card-artwork"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="sched-card-content">
+                <h2 class="sched-card-heading">${isAr ? 'جدول المعامل والعيادات العملي' : 'Clinical & Lab Schedule'}</h2>
+                <p class="sched-card-summary">
+                  ${isAr 
+                    ? 'مواعيد معامل المحاكاة، الفانتوم هيد، والعيادات السريرية المخصصة لجميع المجموعات الفرعية الـ 10 مع حفظ مجموعتك تلقائياً.' 
+                    : 'Practical, phantom head & clinical rotations for all 10 subgroups (A1 to E2), featuring group selector and persistence.'}
+                </p>
+
+                <div class="sched-card-highlights">
+                  <span class="sched-hl-item"><i data-lucide="users"></i><span>${isAr ? '10 مجموعات فرعية' : '10 Subgroups'}</span></span>
+                  <span class="sched-hl-item"><i data-lucide="activity"></i><span>${isAr ? 'فانتوم وعيادات' : 'Phantom & Clinic'}</span></span>
+                  <span class="sched-hl-item"><i data-lucide="bookmark"></i><span>${isAr ? 'حفظ تلقائي' : 'Auto-Saved'}</span></span>
+                </div>
+
+                <div class="sched-card-footer">
+                  <a href="#/practical-schedule" class="sched-action-btn btn-emerald">
+                    <span>${isAr ? 'فتح جدول العملي' : 'Open Schedule'}</span>
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Examination Schedule -->
+            <div class="sched-card sched-card-exams">
+              <div class="sched-card-top-bar">
+                <span class="sched-card-pill pill-amber">
+                  <i data-lucide="calendar-check"></i>
+                  <span>${isAr ? 'النصفي والنهائي • معتمد' : 'Midterm & Final Timetables'}</span>
+                </span>
+                <span class="sched-card-code">EXAMS</span>
+              </div>
+
+              <div class="sched-card-img-wrap">
+                <img
+                  src="assets/schedules/kuro-exams-board.png"
+                  alt="${isAr ? 'جداول الامتحانات' : 'Examination Schedule'}"
+                  class="sched-card-artwork"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="sched-card-content">
+                <h2 class="sched-card-heading">${isAr ? 'جداول الامتحانات الرسمية' : 'Examination Schedule'}</h2>
+                <p class="sched-card-summary">
+                  ${isAr 
+                    ? 'جداول امتحانات النظري النصفي (12 مادة) والنهائي (3 مواد) المعتمدة مع عداد الأيام التنازلي التفاعلي وخيار تصدير وطباعة PDF.' 
+                    : 'Official Midterm (12 subjects) & Final (3 subjects) theory timetables with live days countdown & print/PDF export.'}
+                </p>
+
+                <div class="sched-card-highlights">
+                  <span class="sched-hl-item"><i data-lucide="timer"></i><span>${isAr ? 'عداد تنازلي حي' : 'Live Countdown'}</span></span>
+                  <span class="sched-hl-item"><i data-lucide="printer"></i><span>${isAr ? 'تصدير PDF' : 'PDF Export'}</span></span>
+                  <span class="sched-hl-item"><i data-lucide="check-circle-2"></i><span>12 + 3 ${isAr ? 'مواد' : 'Subjects'}</span></span>
+                </div>
+
+                <div class="sched-card-footer">
+                  <a href="#/exams" class="sched-action-btn btn-amber">
+                    <span>${isAr ? 'فتح جدول الامتحانات' : 'Open Schedule'}</span>
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </div>
+    `;
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  },
+
+  // =========================================================================
   // SECTION 1: WEEKLY ACADEMIC SCHEDULES (Theory + Practical with Group Selector)
   // =========================================================================
   renderAcademicSchedules(container, queryParams) {
@@ -196,6 +381,14 @@ const ExamsPage = {
     }
 
     container.innerHTML = `
+      <!-- Back Navigation Bar -->
+      <div class="schedules-top-back-bar no-print">
+        <a href="#/schedules" class="schedules-back-link">
+          <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
+          <span>${isAr ? 'الرجوع للجداول الدراسية' : 'Back to Academic Schedules'}</span>
+        </a>
+      </div>
+
       <!-- Page Header -->
       <div class="exams-page-header">
         <div class="page-title-group">
@@ -207,10 +400,10 @@ const ExamsPage = {
         </div>
 
         <div class="exams-header-actions no-print">
-          <!-- Link to Section 2: Official Exams Schedule -->
-          <a href="#/exams" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
+          <!-- Link to Schedules Hub -->
+          <a href="#/schedules" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
             <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'جداول الامتحانات الرسمية' : 'Official Exam Schedules'}</span>
+            <span>${isAr ? 'كل الجداول' : 'All Schedules'}</span>
           </a>
 
           <!-- Print / Save as PDF Button -->
@@ -630,6 +823,14 @@ const ExamsPage = {
     }
 
     container.innerHTML = `
+      <!-- Back Navigation Bar -->
+      <div class="schedules-top-back-bar no-print">
+        <a href="#/schedules" class="schedules-back-link">
+          <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
+          <span>${isAr ? 'الرجوع للجداول الدراسية' : 'Back to Academic Schedules'}</span>
+        </a>
+      </div>
+
       <!-- Page Header -->
       <div class="exams-page-header">
         <div class="page-title-group">
@@ -641,10 +842,10 @@ const ExamsPage = {
         </div>
 
         <div class="exams-header-actions no-print">
-          <!-- Link to Section 1: Academic Schedules -->
-          <a href="#/lecture-schedule" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
-            <i data-lucide="book-open" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'الجداول الدراسية (نظري وعملي)' : 'Academic Schedules'}</span>
+          <!-- Link to Schedules Hub -->
+          <a href="#/schedules" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
+            <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'كل الجداول' : 'All Schedules'}</span>
           </a>
 
           <!-- View Toggle -->
@@ -1005,8 +1206,13 @@ const ExamsPage = {
     }
     if (hash.includes('/practical-schedule')) {
       ExamsPage.academicTab = 'practical';
+      return ExamsPage.renderAcademicSchedules(container, queryParams);
     }
-    return ExamsPage.renderAcademicSchedules(container, queryParams);
+    if (hash.includes('/lecture-schedule')) {
+      ExamsPage.academicTab = 'theory';
+      return ExamsPage.renderAcademicSchedules(container, queryParams);
+    }
+    return ExamsPage.renderSchedulesHub(container, queryParams);
   }
 };
 

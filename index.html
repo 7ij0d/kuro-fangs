@@ -50,12 +50,12 @@
   </script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=9.2" />
-  <link rel="stylesheet" href="css/base.css?v=9.2" />
-  <link rel="stylesheet" href="css/layout.css?v=9.2" />
-  <link rel="stylesheet" href="css/components.css?v=9.2" />
+  <link rel="stylesheet" href="css/tokens.css?v=9.3" />
+  <link rel="stylesheet" href="css/base.css?v=9.3" />
+  <link rel="stylesheet" href="css/layout.css?v=9.3" />
+  <link rel="stylesheet" href="css/components.css?v=9.3" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=9.2" />
+  <link rel="stylesheet" href="css/polish.css?v=9.3" />
 </head>
 <body id="app-body" data-layout="dark-sidebar">
   <!-- ==========================================================================
@@ -103,8 +103,18 @@
         </a>
 
         <a href="#/sheets" class="sidebar-menu-item" data-route="/sheets">
-          <span class="sidebar-menu-icon-wrap"><img src="assets/icons/sheets_cat.png" alt="Sheets" class="sidebar-cat-icon" width="20" height="20" loading="lazy" /></span>
-          <span class="sidebar-menu-text" id="side-nav-sheets">Sheets & Lectures</span>
+          <span class="sidebar-menu-icon-wrap"><img src="assets/icons/sheets_cat.png" alt="Subjects" class="sidebar-cat-icon" width="20" height="20" loading="lazy" /></span>
+          <span class="sidebar-menu-text" id="side-nav-subjects">Subjects</span>
+        </a>
+
+        <a href="#/schedules" class="sidebar-menu-item" data-route="/schedules">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="calendar"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-schedules">Schedules</span>
+        </a>
+
+        <a href="#/questions" class="sidebar-menu-item" data-route="/questions">
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="help-circle"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-questions">Questions</span>
         </a>
 
         <a href="#/recordings" class="sidebar-menu-item" data-route="/recordings">
@@ -112,15 +122,8 @@
           <span class="sidebar-menu-text" id="side-nav-videos">Audio</span>
         </a>
 
-        
-
-        <a href="#/questions" class="sidebar-menu-item" data-route="/questions">
-          <span class="sidebar-menu-icon-wrap"><i data-lucide="help-circle"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-questions">Questions</span>
-        </a>
-
-        <!-- MY SPACE Section -->
-        <div class="sidebar-section-title" id="side-sec-myspace">MY SPACE</div>
+        <!-- SCHEDULES Section -->
+        <div class="sidebar-section-title" id="side-sec-myspace">SCHEDULES</div>
 
         <a href="#/lecture-schedule" class="sidebar-menu-item" data-route="/lecture-schedule">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="book-open"></i></span>
@@ -133,7 +136,7 @@
         </a>
 
         <a href="#/exams" class="sidebar-menu-item" data-route="/exams">
-          <span class="sidebar-menu-icon-wrap"><i data-lucide="calendar"></i></span>
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="calendar-check"></i></span>
           <span class="sidebar-menu-text" id="side-nav-exams-schedule">جداول الامتحانات الرسمية</span>
         </a>
 
@@ -204,7 +207,7 @@
           </a>
         </div>
 
-        <!-- Center Desktop Navigation Links (Pills matching mockup) -->
+        <!-- Center Desktop Navigation Links (4-Pill Modern Academic IA) -->
         <nav class="header-nav-center" aria-label="Main Navigation">
           <a href="#/" class="header-nav-pill active" data-route="/">
             <i data-lucide="home"></i>
@@ -212,15 +215,11 @@
           </a>
           <a href="#/sheets" class="header-nav-pill" data-route="/sheets">
             <i data-lucide="book-open"></i>
-            <span id="nav-item-sheets">Sheets</span>
+            <span id="nav-item-subjects">Subjects</span>
           </a>
-          <a href="#/recordings" class="header-nav-pill" data-route="/recordings">
-            <i data-lucide="headphones"></i>
-            <span id="nav-item-recordings">Recordings</span>
-          </a>
-          <a href="#/questions" class="header-nav-pill" data-route="/questions">
-            <i data-lucide="help-circle"></i>
-            <span id="nav-item-questions">Questions</span>
+          <a href="#/schedules" class="header-nav-pill" data-route="/schedules">
+            <i data-lucide="calendar"></i>
+            <span id="nav-item-schedules">Schedules</span>
           </a>
 
           <!-- More Dropdown -->
@@ -230,17 +229,13 @@
               <span id="nav-item-more">More</span>
             </button>
             <div class="header-dropdown-menu" id="header-dropdown-menu">
-              <a href="#/lecture-schedule" class="header-dropdown-item">
-                <i data-lucide="calendar"></i>
-                <span id="nav-item-schedule">Lecture Schedule</span>
+              <a href="#/questions" class="header-dropdown-item">
+                <i data-lucide="help-circle"></i>
+                <span id="nav-item-questions">Question Bank</span>
               </a>
-              <a href="#/practical-schedule" class="header-dropdown-item">
-                <i data-lucide="microscope"></i>
-                <span id="nav-item-practical">Practical Labs</span>
-              </a>
-              <a href="#/exams" class="header-dropdown-item">
-                <i data-lucide="file-check-2"></i>
-                <span id="nav-item-exams">Exams Timetables</span>
+              <a href="#/recordings" class="header-dropdown-item">
+                <i data-lucide="headphones"></i>
+                <span id="nav-item-recordings">Audio Recordings</span>
               </a>
               <a href="#/rewards" class="header-dropdown-item">
                 <i data-lucide="sparkles"></i>
@@ -254,6 +249,10 @@
               <a href="#/admin" class="header-dropdown-item">
                 <i data-lucide="shield-check"></i>
                 <span id="nav-item-admin">Admin Portal</span>
+              </a>
+              <a href="#/profile" class="header-dropdown-item">
+                <i data-lucide="user"></i>
+                <span id="nav-item-profile">Profile</span>
               </a>
             </div>
           </div>
@@ -307,35 +306,35 @@
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=9.2"></script>
-  <script src="js/audio-fx.js?v=9.2"></script>
-  <script src="js/character-theme.js?v=9.2"></script>
-  <script src="js/store.js?v=9.2"></script>
-  <script src="js/components/toast.js?v=9.2"></script>
-  <script src="js/components/auth-modal.js?v=9.2"></script>
-  <script src="js/supabase.js?v=9.2"></script>
-  <script src="js/data.js?v=9.2"></script>
-  <script src="js/data-clinical.js?v=9.2"></script>
-  <script src="js/components/subject-modal.js?v=9.2"></script>
-  <script src="js/components/sheet-edit-modal.js?v=9.2"></script>
-  <script src="js/components/notifications-center.js?v=9.2"></script>
-  <script src="js/components/sheet-copy-engine.js?v=9.2"></script>
-  <script src="js/router.js?v=9.2"></script>
-  <script src="js/pages/home.js?v=9.2"></script>
-  <script src="js/pages/sheets.js?v=9.2"></script>
-  <script src="js/pages/sheet-detail.js?v=9.2"></script>
-  <script src="js/pages/exams.js?v=9.2"></script>
-  <script src="js/pages/quizzes.js?v=9.2"></script>
-  <script src="js/pages/questions.js?v=9.2"></script>
-  <script src="js/pages/flashcards.js?v=9.2"></script>
+  <script src="js/i18n.js?v=9.3"></script>
+  <script src="js/audio-fx.js?v=9.3"></script>
+  <script src="js/character-theme.js?v=9.3"></script>
+  <script src="js/store.js?v=9.3"></script>
+  <script src="js/components/toast.js?v=9.3"></script>
+  <script src="js/components/auth-modal.js?v=9.3"></script>
+  <script src="js/supabase.js?v=9.3"></script>
+  <script src="js/data.js?v=9.3"></script>
+  <script src="js/data-clinical.js?v=9.3"></script>
+  <script src="js/components/subject-modal.js?v=9.3"></script>
+  <script src="js/components/sheet-edit-modal.js?v=9.3"></script>
+  <script src="js/components/notifications-center.js?v=9.3"></script>
+  <script src="js/components/sheet-copy-engine.js?v=9.3"></script>
+  <script src="js/router.js?v=9.3"></script>
+  <script src="js/pages/home.js?v=9.3"></script>
+  <script src="js/pages/sheets.js?v=9.3"></script>
+  <script src="js/pages/sheet-detail.js?v=9.3"></script>
+  <script src="js/pages/exams.js?v=9.3"></script>
+  <script src="js/pages/quizzes.js?v=9.3"></script>
+  <script src="js/pages/questions.js?v=9.3"></script>
+  <script src="js/pages/flashcards.js?v=9.3"></script>
   
-  <script src="js/pages/previous-years.js?v=9.2"></script>
-  <script src="js/pages/rewards.js?v=9.2"></script>
-  <script src="js/pages/games.js?v=9.2"></script>
-  <script src="js/git-sync.js?v=9.2"></script>
-  <script src="js/pages/admin.js?v=9.2"></script>
-  <script src="js/pages/profile.js?v=9.2"></script>
-  <script src="js/pages/secondary.js?v=9.2"></script>
-  <script src="js/app.js?v=9.2"></script>
+  <script src="js/pages/previous-years.js?v=9.3"></script>
+  <script src="js/pages/rewards.js?v=9.3"></script>
+  <script src="js/pages/games.js?v=9.3"></script>
+  <script src="js/git-sync.js?v=9.3"></script>
+  <script src="js/pages/admin.js?v=9.3"></script>
+  <script src="js/pages/profile.js?v=9.3"></script>
+  <script src="js/pages/secondary.js?v=9.3"></script>
+  <script src="js/app.js?v=9.3"></script>
 </body>
 </html>

@@ -25,6 +25,13 @@ class Router {
           }
         }
       },
+      '/schedules': async (container, params) => {
+        if (window.ExamsPage && typeof window.ExamsPage.renderSchedulesHub === 'function') {
+          window.ExamsPage.renderSchedulesHub(container, params);
+        } else if (window.ExamsPage) {
+          window.ExamsPage.render(container, params);
+        }
+      },
       '/lecture-schedule': async (container, params) => {
         if (!params) params = new URLSearchParams();
         params.set('tab', 'theory');
@@ -171,7 +178,14 @@ class Router {
       const target = link.getAttribute('data-route') || link.getAttribute('href')?.replace('#', '');
       if (!target) return;
 
-      if (target === currentPath || (target !== '/' && currentPath.startsWith(target))) {
+      const isSchedulesGroup = target === '/schedules' && (
+        currentPath === '/schedules' ||
+        currentPath === '/lecture-schedule' ||
+        currentPath === '/practical-schedule' ||
+        currentPath === '/exams'
+      );
+
+      if (isSchedulesGroup || target === currentPath || (target !== '/' && currentPath.startsWith(target))) {
         link.classList.add('active');
       } else {
         link.classList.remove('active');
@@ -181,7 +195,7 @@ class Router {
     // Handle More button state on top header navigation
     const headerMoreBtn = document.getElementById('header-more-btn');
     if (headerMoreBtn) {
-      const moreRoutes = ['/lecture-schedule', '/practical-schedule', '/exams', '/rewards', '/games', '/profile', '/admin'];
+      const moreRoutes = ['/questions', '/recordings', '/rewards', '/games', '/profile', '/admin'];
       const isMoreActive = moreRoutes.some(r => currentPath.startsWith(r));
       headerMoreBtn.classList.toggle('active', isMoreActive);
     }
