@@ -93,19 +93,22 @@ class Router {
       backdrop?.classList.remove('open');
     }
 
-    // Clean up lingering backdrops, modals, or fixed overlays from previous views
+    // Clean up lingering temporary backdrops or fixed overlays from previous views
     const backdropsToClean = [
       '#admin-confirm-backdrop',
       '#admin-edit-modal-backdrop',
       '#admin-publish-overlay',
       '#auth-modal-backdrop',
-      '#subject-modal-backdrop',
       '#drawer-backdrop',
       '#jnotes-eraser-cursor'
     ];
     backdropsToClean.forEach(sel => {
       document.querySelectorAll(sel).forEach(el => el.remove());
     });
+    // Safely close persistent interactive modals
+    if (window.SubjectModal && typeof window.SubjectModal.close === 'function') {
+      window.SubjectModal.close();
+    }
     document.body.style.overflow = '';
 
     // Toggle studio fullscreen mode for sheet-detail routes

@@ -7,15 +7,32 @@ const SubjectModal = {
   currentSubject: null,
   activeCategory: null,
 
-  init() {
-    const backdrop = document.getElementById('subject-modal-backdrop');
-    if (backdrop) {
-      backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) {
-          SubjectModal.close();
-        }
-      });
+  ensureDOM() {
+    let backdrop = document.getElementById('subject-modal-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'subject-modal-backdrop';
+      backdrop.className = 'subject-modal-backdrop';
+      backdrop.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(backdrop);
     }
+    let modalBox = document.getElementById('subject-modal-box');
+    if (!modalBox) {
+      modalBox = document.createElement('div');
+      modalBox.id = 'subject-modal-box';
+      modalBox.className = 'subject-modal-box';
+      modalBox.setAttribute('role', 'dialog');
+      modalBox.setAttribute('aria-modal', 'true');
+      backdrop.appendChild(modalBox);
+    }
+    backdrop.onclick = (e) => {
+      if (e.target === backdrop) SubjectModal.close();
+    };
+    return { backdrop, modalBox };
+  },
+
+  init() {
+    SubjectModal.ensureDOM();
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -25,14 +42,20 @@ const SubjectModal = {
   },
 
   open(subjectId) {
-    const subject = window.DATA.getSubjectById(subjectId) || window.DATA.getSubjects()[0];
-    if (!subject) return;
+    const subject = (window.DATA && typeof window.DATA.getSubjectById === 'function' ? window.DATA.getSubjectById(subjectId) : null)
+      || (window.DATA && typeof window.DATA.getSubjects === 'function' ? window.DATA.getSubjects().find(s => s.id === subjectId) : null)
+      || (window.DATA && typeof window.DATA.getSubjects === 'function' ? window.DATA.getSubjects()[0] : null);
+
+    if (!subject) {
+      console.warn('Subject not found:', subjectId);
+      if (window.ROUTER) window.ROUTER.navigate(`/sheets?subject=${subjectId}`);
+      return;
+    }
 
     SubjectModal.currentSubject = subject;
     SubjectModal.activeCategory = null;
 
-    const modalBox = document.getElementById('subject-modal-box');
-    const backdrop = document.getElementById('subject-modal-backdrop');
+    const { backdrop, modalBox } = SubjectModal.ensureDOM();
     if (!modalBox || !backdrop) return;
 
     SubjectModal.renderCategoriesView();
@@ -46,13 +69,13 @@ const SubjectModal = {
     const backdrop = document.getElementById('subject-modal-backdrop');
     if (backdrop) {
       backdrop.classList.remove('active');
-      document.body.style.overflow = '';
     }
+    document.body.style.overflow = '';
   },
 
   renderCategoriesView() {
     const subject = SubjectModal.currentSubject;
-    const modalBox = document.getElementById('subject-modal-box');
+    const { modalBox } = SubjectModal.ensureDOM();
     if (!modalBox || !subject) return;
 
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
@@ -61,31 +84,29 @@ const SubjectModal = {
     const primaryTitle = isAr ? subject.name_ar : subject.name_en;
     const subTitle = isAr ? `${subject.name_en} • ${subject.code}` : `${subject.name_ar} • ${subject.code}`;
 
-      const categories = [
-        {
-          id: 'sheets',
-          title: t('catSheets') || (isAr ? 'الشيتات والمحاضرات' : 'Sheets & Lectures'),
-          desc: t('catSheetsDesc') || (isAr ? 'تصفح الشيتات الرسمية' : 'Browse official sheets'),
-          icon: '<img src="assets/icons/sheets_cat.png" alt="Sheets" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #0284C7;" />'
-        },
-        {
-          id: 'recordings',
-          title: t('catRecordings') || (isAr ? 'التسجيلات الصوتية' : 'Audio Recordings'),
-          desc: t('catRecordingsDesc') || (isAr ? 'تسجيلات دكاترة الكلية' : 'Faculty lecture audio'),
-          icon: '<img src="assets/icons/recordings_icon.png" alt="Recordings" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #10B981;" />'
-        },
-        {
-          id: 'ai-questions',
-          title: t('catQuestions') || (isAr ? 'الأسئلة' : 'Questions'),
-          desc: t('catQuestionsDesc') || (isAr ? 'بنك الأسئلة وأرشيف الامتحانات' : 'Question bank & past exams'),
-          icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
-        },
-        
-        
-        {
-          id: 'files-slides',
-        title: t('catFiles'),
-        desc: t('catFilesDesc'),
+    const categories = [
+      {
+        id: 'sheets',
+        title: isAr ? 'الشيتات والمحاضرات' : 'Sheets & Lectures',
+        desc: isAr ? 'تصفح الشيتات الرسمية' : 'Browse official sheets',
+        icon: '<img src="assets/icons/sheets_cat.png" alt="Sheets" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #0284C7;" />'
+      },
+      {
+        id: 'recordings',
+        title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings',
+        desc: isAr ? 'تسجيلات دكاترة الكلية' : 'Faculty lecture audio',
+        icon: '<img src="assets/icons/recordings_icon.png" alt="Recordings" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #10B981;" />'
+      },
+      {
+        id: 'ai-questions',
+        title: isAr ? 'الأسئلة والاختبارات' : 'Questions & Quizzes',
+        desc: isAr ? 'بنك الأسئلة وأرشيف الامتحانات' : 'Question bank & past exams',
+        icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
+      },
+      {
+        id: 'files-slides',
+        title: isAr ? 'ملفات ومصادر إضافية' : 'Files & Extra Resources',
+        desc: isAr ? 'عروض السلايدات والمراجع العلمية' : 'Slides, references & supplements',
         icon: '<i data-lucide="folder" style="width: 24px; height: 24px; color: #64748B;"></i>'
       }
     ];
@@ -173,7 +194,7 @@ const SubjectModal = {
 
   renderCategoryFiles(categoryId) {
     const subject = SubjectModal.currentSubject;
-    const modalBox = document.getElementById('subject-modal-box');
+    const { modalBox } = SubjectModal.ensureDOM();
     if (!modalBox || !subject) return;
 
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;

@@ -42,15 +42,20 @@ const HomePage = {
   },
 
   handleSubjectClick(subjectId) {
-    if (window.SubjectModal && window.SubjectModal.open) {
-      window.SubjectModal.open(subjectId);
+    try {
+      if (window.SubjectModal && typeof window.SubjectModal.open === 'function') {
+        window.SubjectModal.open(subjectId);
+      } else if (window.ROUTER) {
+        window.ROUTER.navigate(`/sheets?subject=${subjectId}`);
+      }
+    } catch (e) {
+      console.error('Error opening subject modal:', e);
+      if (window.ROUTER) window.ROUTER.navigate(`/sheets?subject=${subjectId}`);
     }
     setTimeout(() => {
       try {
         HomePage.trackSubjectVisit(subjectId);
-      } catch (e) {
-        console.error('Error tracking subject visit', e);
-      }
+      } catch (e) { /* silent */ }
     }, 10);
   },
 
@@ -435,7 +440,7 @@ const HomePage = {
       }
 
       return `
-        <div class="compact-subject-tile subject-card" onclick="window.HomePage.handleSubjectClick('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
+        <div class="compact-subject-tile subject-card" onclick="window.HomePage.handleSubjectClick('${subj.id}');" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.HomePage.handleSubjectClick('${subj.id}');}" role="button" tabindex="0" aria-label="${primaryTitle}">
           <div class="cst-top">
             <div class="cst-icon-badge" style="background-color: ${theme.bg}; color: ${theme.color}; border: 1px solid ${theme.border};">
               <i data-lucide="${theme.icon}"></i>

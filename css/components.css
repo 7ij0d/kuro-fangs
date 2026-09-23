@@ -1503,41 +1503,43 @@ html[dir="rtl"] .subject-code-badge {
 .subject-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--backdrop-color);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 1000;
+  background: var(--backdrop-color, rgba(10, 14, 23, 0.7));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition-base);
+  transition: opacity var(--transition-base, 0.2s cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 .subject-modal-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .subject-modal-box {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-modal);
-  box-shadow: var(--shadow-modal);
+  border-radius: var(--radius-modal, 18px);
+  box-shadow: var(--shadow-modal, 0 24px 60px -15px rgba(0, 0, 0, 0.35));
   width: 100%;
   max-width: 820px;
   max-height: 90vh;
+  max-height: 90dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transform: scale(0.94) translateY(10px);
-  transition: transform var(--transition-smooth);
+  transition: transform var(--transition-smooth, 0.22s cubic-bezier(0.16, 1, 0.3, 1));
+  z-index: 1000000;
 }
 
 .subject-modal-backdrop.active .subject-modal-box {
-  transform: scale(1) translateY(0);
+  transform: scale(1) translateY(0) !important;
 }
 
 /* Modal Header */
@@ -6026,7 +6028,7 @@ html[dir="rtl"] .fox-skin-cost-badge {
   border: 1px solid var(--border-subtle, #E4E6EF);
   border-radius: 14px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  z-index: 1000;
+  z-index: 100050;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -6040,6 +6042,21 @@ html[dir="rtl"] .fox-skin-cost-badge {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0) scale(1);
+}
+
+@media (max-width: 640px) {
+  .notifications-dropdown-panel {
+    position: fixed !important;
+    top: calc(var(--header-height, 56px) + 8px) !important;
+    left: 12px !important;
+    right: 12px !important;
+    inset-inline-start: 12px !important;
+    inset-inline-end: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 75px) !important;
+    margin: 0 auto !important;
+  }
 }
 
 /* Panel Header (Fixed at top) */

@@ -474,6 +474,29 @@ window.NotificationsCenter = (function () {
     });
   }
 
+  // Reposition panel so it never overflows viewport
+  function repositionPanel(panel) {
+    if (!panel) return;
+    if (window.innerWidth <= 640) {
+      panel.style.transform = '';
+      return;
+    }
+    requestAnimationFrame(() => {
+      panel.style.transform = 'translateY(0) scale(1)';
+      const rect = panel.getBoundingClientRect();
+      const margin = 12;
+      let shiftX = 0;
+      if (rect.right > window.innerWidth - margin) {
+        shiftX = -(rect.right - (window.innerWidth - margin));
+      } else if (rect.left < margin) {
+        shiftX = margin - rect.left;
+      }
+      if (shiftX !== 0) {
+        panel.style.transform = `translateY(0) scale(1) translateX(${shiftX}px)`;
+      }
+    });
+  }
+
   // Toggle Dropdown Panel
   function togglePanel(forceOpen) {
     let panel = document.getElementById('notifications-dropdown-panel');
@@ -494,6 +517,8 @@ window.NotificationsCenter = (function () {
       if (bellBtn) bellBtn.classList.add('active');
       if (header) header.style.zIndex = '1050';
       
+      repositionPanel(panel);
+
       // Auto focus search input
       setTimeout(() => {
         const searchInput = panel.querySelector('#notifications-search-input');
@@ -501,6 +526,7 @@ window.NotificationsCenter = (function () {
       }, 120);
     } else {
       panel.classList.remove('open');
+      panel.style.transform = '';
       if (bellBtn) bellBtn.classList.remove('active');
       if (header) header.style.zIndex = '';
     }
@@ -707,6 +733,14 @@ window.NotificationsCenter = (function () {
       if (e.key === STORAGE_KEY || e.key === 'kf_cloud_cached_alerts' || e.key === 'kf_admin_custom_alerts') {
         updateBadge();
         if (isOpen) renderPanel(currentSearchQuery);
+      }
+    });
+
+    // Keep panel properly positioned on screen rotation or resize
+    window.addEventListener('resize', () => {
+      if (isOpen) {
+        const panel = document.getElementById('notifications-dropdown-panel');
+        if (panel) repositionPanel(panel);
       }
     });
   }

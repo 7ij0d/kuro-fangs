@@ -379,11 +379,18 @@ class DataService {
   }
 
   getSubjects() {
+    if (!this.subjects || this.subjects.length === 0) {
+      this.subjects = this.getDefaultSubjects();
+      this.subjects.forEach(s => {
+        s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.webp`;
+      });
+    }
     return this.subjects;
   }
 
   getSubjectById(id) {
-    return this.subjects.find(s => s.id === id);
+    const list = this.getSubjects();
+    return list.find(s => s.id === id);
   }
 
   getSheetsBySubject(subjectId) {

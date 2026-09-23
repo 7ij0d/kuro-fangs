@@ -3218,4 +3218,97 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   transform: scale(0.96);
 }
 
+/* ══════════════════════════════════════════
+   5. POLISHED SUBJECT MODAL & NOTIFICATIONS VIEWPORT SHIELD
+   ══════════════════════════════════════════ */
+.subject-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(10, 14, 23, 0.72) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.subject-modal-backdrop.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.subject-modal-box {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-card) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 60px -15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  max-height: 90vh !important;
+  max-height: 90dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  transform: scale(0.95) translateY(12px) !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  z-index: 1000000 !important;
+}
+
+.subject-modal-backdrop.active .subject-modal-box {
+  transform: scale(1) translateY(0) !important;
+}
+
+/* Polished Category Cards */
+.modal-category-card {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease !important;
+  user-select: none !important;
+}
+
+.modal-category-card:active {
+  transform: scale(0.98) !important;
+}
+
+/* Mobile Subject Modal sizing */
+@media (max-width: 640px) {
+  .subject-modal-box {
+    max-height: 94dvh !important;
+    border-radius: 16px !important;
+  }
+  .modal-header {
+    padding: 14px 16px !important;
+  }
+  .modal-body {
+    padding: 14px 16px !important;
+  }
+  .modal-categories-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+/* Mobile Notifications Dropdown Viewport Shield */
+@media (max-width: 640px) {
+  .notifications-dropdown-panel {
+    position: fixed !important;
+    top: calc(var(--header-height, 56px) + 8px) !important;
+    left: 12px !important;
+    right: 12px !important;
+    inset-inline-start: 12px !important;
+    inset-inline-end: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 75px) !important;
+    margin: 0 auto !important;
+    border-radius: 16px !important;
+    z-index: 100050 !important;
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  }
+}
+
+
 
