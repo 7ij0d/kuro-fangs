@@ -22,45 +22,45 @@
   --sidebar-indicator-glow: 0 0 12px rgba(200, 67, 67, 0.75);
   --sidebar-width: 265px;
 
-  /* Kuro Warm Ivory Surfaces (Light Mode) */
-  --bg-app: #FAF8F5;
+  /* Kuro Warm Ivory Surfaces (Cozy Study Light Mode) */
+  --bg-app: #F8F5EE;
   --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #F4EFEA;
+  --bg-surface-subtle: #F2ECE1;
   --bg-card: #FFFFFF;
   --bg-card-hover: #FFFFFF;
-  --bg-hover: #EFE9E1;
+  --bg-hover: #EFE8DC;
   --bg-input: #FFFFFF;
   --surface-card: #FFFFFF;
 
-  /* Kuro Crimson & Rose Primary */
-  --color-primary: #C84343;
-  --color-primary-hover: #B33636;
-  --color-secondary: #1E1F2B;
-  --color-accent: #F59E0B;
-  --color-accent-hover: #D97706;
+  /* Deep Warm Burgundy Primary (Matches Study Reference) */
+  --color-primary: #7E1D2A;
+  --color-primary-hover: #681320;
+  --color-secondary: #24181B;
+  --color-accent: #C8826F;
+  --color-accent-hover: #B56E5C;
 
   /* System Brand Aliases (Maintains full component compatibility) */
-  --brand-primary: #C84343;
-  --brand-accent: #C84343;
-  --brand-burgundy: #C84343;
-  --brand-burgundy-hover: #B33636;
-  --brand-burgundy-light: rgba(200, 67, 67, 0.08);
-  --brand-burgundy-surface: rgba(200, 67, 67, 0.04);
-  --brand-burgundy-border: rgba(200, 67, 67, 0.25);
-  --brand-burgundy-glow: 0 4px 18px rgba(200, 67, 67, 0.18);
-  --brand-burgundy-gradient: linear-gradient(135deg, #DE5353 0%, #C84343 50%, #A82E2E 100%);
+  --brand-primary: #7E1D2A;
+  --brand-accent: #7E1D2A;
+  --brand-burgundy: #7E1D2A;
+  --brand-burgundy-hover: #681320;
+  --brand-burgundy-light: rgba(126, 29, 42, 0.08);
+  --brand-burgundy-surface: rgba(126, 29, 42, 0.04);
+  --brand-burgundy-border: rgba(126, 29, 42, 0.20);
+  --brand-burgundy-glow: 0 4px 18px rgba(126, 29, 42, 0.18);
+  --brand-burgundy-gradient: linear-gradient(135deg, #962837 0%, #7E1D2A 50%, #5E0E18 100%);
 
-  /* Kuro Typography & Neutrals */
-  --text-primary: #14151E; /* Deep Kuro charcoal */
-  --text-secondary: #5A5D72;
-  --text-muted: #8E92A8;
+  /* Warm Espresso & Clay Typography */
+  --text-primary: #24181B; /* Deep warm espresso */
+  --text-secondary: #756966;
+  --text-muted: #9C8F8C;
   --text-inverted: #FFFFFF;
 
-  /* Crisp Bone & Slate Borders */
-  --border-subtle: #E8E2D8;
-  --border-card: #E8E2D8;
-  --border-card-hover: #C84343;
-  --border-focus: #C84343;
+  /* Crisp Warm Linen Borders */
+  --border-subtle: #EAE3D6;
+  --border-card: #EAE3D6;
+  --border-card-hover: #7E1D2A;
+  --border-focus: #7E1D2A;
 
   /* Semantic Theme Tokens (Requirement 12 Architecture) */
   --background: #FAF8F5;

@@ -1,31 +1,31 @@
-/* Kuro Fangs product polish — a calmer, notebook-inspired study workspace. */
+/* Kuro Fangs official academia palette — warm cream, deep burgundy & academic study surface. */
 :root {
-  --bg-app: #f6f7fb;
-  --bg-surface: #ffffff;
-  --bg-surface-subtle: #f0f3f8;
-  --bg-card: #ffffff;
-  --bg-hover: #f2f4f8;
-  --border-subtle: #e5e9f1;
-  --border-card: #e8ebf2;
-  --text-primary: #1b2130;
-  --text-secondary: #626b7c;
-  --text-muted: #98a1b2;
-  --brand-burgundy: #2357d9;
-  --brand-burgundy-hover: #1747bd;
-  --brand-burgundy-light: #edf3ff;
-  --brand-burgundy-surface: #f4f7ff;
-  --brand-burgundy-border: #bfd0ff;
-  --brand-burgundy-gradient: linear-gradient(135deg, #3268ed, #1747bd);
-  --brand-burgundy-glow: 0 8px 22px rgba(35, 87, 217, .16);
-  --brand-accent: #3268ed;
+  --bg-app: #F8F5EE;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F2ECE1;
+  --bg-card: #FFFFFF;
+  --bg-hover: #EFE8DC;
+  --border-subtle: #EAE3D6;
+  --border-card: #EAE3D6;
+  --text-primary: #24181B;
+  --text-secondary: #756966;
+  --text-muted: #9C8F8C;
+  --brand-burgundy: #7E1D2A;
+  --brand-burgundy-hover: #681320;
+  --brand-burgundy-light: rgba(126, 29, 42, 0.08);
+  --brand-burgundy-surface: rgba(126, 29, 42, 0.04);
+  --brand-burgundy-border: rgba(126, 29, 42, 0.20);
+  --brand-burgundy-gradient: linear-gradient(135deg, #962837 0%, #7E1D2A 50%, #5E0E18 100%);
+  --brand-burgundy-glow: 0 8px 22px rgba(126, 29, 42, 0.16);
+  --brand-accent: #7E1D2A;
   --sidebar-width: 276px;
-  --radius-card: 18px;
-  --radius-modal: 22px;
-  --shadow-card: 0 4px 20px rgba(38, 53, 79, .045);
-  --shadow-card-hover: 0 14px 32px rgba(38, 53, 79, .10);
+  --radius-card: 16px;
+  --radius-modal: 20px;
+  --shadow-card: 0 2px 10px rgba(36, 24, 27, 0.03);
+  --shadow-card-hover: 0 10px 28px rgba(126, 29, 42, 0.08);
 }
 
-body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28rem), var(--bg-app); }
+body { background: var(--bg-app); color: var(--text-primary); }
 .app-sidebar { background: #111827; border-color: rgba(255,255,255,.07); box-shadow: none; }
 .sidebar-header { height: 78px; padding: 0 22px; }
 .sidebar-brand-emblem { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(145deg, #3268ed, #6c8ff6); box-shadow: 0 8px 18px rgba(50,104,237,.34); }
@@ -3309,6 +3309,1167 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
     box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   }
 }
+
+/* ==========================================================================
+   KURO FANGS — COZY ACADEMIC STUDY HOMEPAGE & TOP NAVBAR (PRIMARY DESIGN)
+   Reference Mockup: Warm Cream (#F8F5EE), Deep Burgundy (#7E1D2A), Botanical Motif
+   ========================================================================== */
+
+/* ─── 1. Desktop & Mobile Master Layout ─── */
+@media (min-width: 1025px) {
+  .app-sidebar {
+    display: none !important;
+  }
+  .app-main-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    min-height: 100vh;
+  }
+  .mobile-toggle-btn {
+    display: none !important;
+  }
+  .header-nav-center {
+    display: flex !important;
+  }
+  .main-content {
+    max-width: 1260px !important;
+    margin: 0 auto !important;
+    padding: 24px 32px 64px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .header-nav-center {
+    display: none !important;
+  }
+  .mobile-toggle-btn {
+    display: flex !important;
+  }
+  .main-content {
+    padding: 16px 14px 48px !important;
+  }
+}
+
+/* ─── 2. Top Header / Navbar (Warm Cream & Burgundy Accents) ─── */
+.site-header {
+  height: 68px !important;
+  padding: 0 32px !important;
+  background: #FAF7F2 !important;
+  border-bottom: 1px solid #EAE3D6 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.header-brand-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.header-brand-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(126, 29, 42, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header-brand-identity:hover .header-brand-avatar {
+  transform: scale(1.08);
+  border-color: #7E1D2A;
+}
+
+.header-brand-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.header-brand-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #24181B;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+/* Center Desktop Navigation Pills */
+.header-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(234, 227, 214, 0.45);
+  padding: 4px 6px;
+  border-radius: 9999px;
+  border: 1px solid rgba(234, 227, 214, 0.85);
+}
+
+.header-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #5C5250;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.header-nav-pill svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+
+.header-nav-pill:hover {
+  color: #7E1D2A;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.header-nav-pill.active {
+  background: #7E1D2A !important;
+  color: #FFFFFF !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(126, 29, 42, 0.25);
+}
+
+.header-nav-pill.active svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+.header-nav-dropdown-wrap {
+  position: relative;
+}
+
+.header-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  background: #FFFFFF;
+  border: 1px solid #EAE3D6;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(36, 24, 27, 0.12);
+  padding: 8px;
+  min-width: 210px;
+  display: none;
+  z-index: 1000;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header-nav-dropdown-wrap.open .header-dropdown-menu {
+  display: flex;
+}
+
+.header-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #24181B;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.header-dropdown-item:hover {
+  background: #F8F5EE;
+  color: #7E1D2A;
+}
+
+.header-dropdown-item svg {
+  width: 16px;
+  height: 16px;
+}
+
+.header-dropdown-divider {
+  height: 1px;
+  background: #EAE3D6;
+  margin: 4px 6px;
+}
+
+/* Right Header Tools */
+.header-right-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-right-tools .header-search-box {
+  position: relative;
+  width: auto;
+}
+
+.header-right-tools .header-search-box input {
+  background: #F4EFEA !important;
+  border: 1px solid #EAE3D6 !important;
+  border-radius: 9999px !important;
+  height: 38px !important;
+  width: 210px !important;
+  font-size: 0.82rem !important;
+  color: #24181B !important;
+  padding-inline-start: 36px !important;
+  padding-inline-end: 14px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.header-right-tools .header-search-box input:focus {
+  width: 250px !important;
+  background: #FFFFFF !important;
+  border-color: #7E1D2A !important;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.12) !important;
+}
+
+.header-right-tools .header-search-box .search-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  inset-inline-start: 12px;
+  width: 15px;
+  height: 15px;
+  color: #9C8F8C;
+  pointer-events: none;
+}
+
+.header-toggle-btn {
+  background: #FFFFFF !important;
+  border: 1px solid #EAE3D6 !important;
+  color: #24181B !important;
+  border-radius: 9999px !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.header-toggle-btn:hover {
+  border-color: #7E1D2A !important;
+  color: #7E1D2A !important;
+  background: #FDF7F8 !important;
+}
+
+.notifications-bell-btn {
+  position: relative !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  justify-content: center !important;
+}
+
+.notifications-badge {
+  position: absolute !important;
+  top: -3px !important;
+  inset-inline-end: -3px !important;
+  background: #7E1D2A !important;
+  color: #FFFFFF !important;
+  font-size: 0.65rem !important;
+  font-weight: 800 !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  line-height: 17px !important;
+  text-align: center !important;
+  border-radius: 9999px !important;
+  border: 1.5px solid #FFFFFF !important;
+  padding: 0 3px !important;
+}
+
+.header-profile-avatar-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid #EAE3D6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  text-decoration: none;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.header-profile-avatar-btn:hover {
+  transform: scale(1.06);
+  border-color: #7E1D2A;
+}
+
+.header-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ─── 3. Notifications Safe Anchoring (Never goes off-screen in LTR/RTL) ─── */
+.notifications-dropdown-panel {
+  position: absolute !important;
+  top: calc(100% + 10px) !important;
+  right: 0 !important;
+  left: auto !important;
+  width: min(380px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  z-index: 100050 !important;
+  border: 1px solid #EAE3D6 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 40px -8px rgba(36, 24, 27, 0.16) !important;
+  background: #FFFFFF !important;
+}
+
+html[dir="rtl"] .notifications-dropdown-panel {
+  right: 0 !important;
+  left: auto !important;
+}
+html[dir="ltr"] .notifications-dropdown-panel {
+  right: 0 !important;
+  left: auto !important;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    height: 60px !important;
+    padding: 0 14px !important;
+  }
+  .header-right-tools .header-search-box {
+    display: none !important;
+  }
+  .notifications-dropdown-panel {
+    position: fixed !important;
+    top: 68px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+
+/* ─── 4. Homepage Dashboard Container ─── */
+.kuro-dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ─── 5. Hero Study Scene Banner with Dynamic Left Sunlight Greeting ─── */
+.kuro-hero-workspace {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #FAF7F2;
+  box-shadow: 0 4px 20px rgba(126, 29, 42, 0.06);
+  border: 1px solid #EAE3D6;
+}
+
+.kuro-hero-banner {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.kuro-hero-bg-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 7.2;
+  object-fit: cover;
+  object-position: center right;
+}
+
+/* Dynamic Greeting Strictly Over Left Bright Area */
+.kuro-hero-greeting-overlay {
+  position: absolute;
+  left: 4.5% !important;
+  right: auto !important;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(260px, 36%, 420px);
+  z-index: 5;
+  pointer-events: none;
+}
+
+html[dir="rtl"] .kuro-hero-greeting-overlay {
+  left: 4.5% !important;
+  right: auto !important;
+  text-align: right;
+}
+
+html[dir="ltr"] .kuro-hero-greeting-overlay {
+  left: 4.5% !important;
+  right: auto !important;
+  text-align: left;
+}
+
+.kuro-hero-greeting-title {
+  font-size: clamp(1.35rem, 2.3vw, 2.1rem);
+  font-weight: 800;
+  color: #521019;
+  line-height: 1.25;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.kuro-hero-greeting-sub {
+  font-size: clamp(0.85rem, 1.1vw, 1.02rem);
+  color: #6E2A34;
+  font-weight: 550;
+  line-height: 1.45;
+  margin: 0 0 14px;
+}
+
+.kuro-hero-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 5px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(126, 29, 42, 0.16);
+  color: #7E1D2A;
+  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+  font-weight: 700;
+}
+
+.kuro-hero-date-icon {
+  width: 14px;
+  height: 14px;
+  color: #7E1D2A;
+}
+
+/* ─── 6. Today's Lectures Schedule Section ─── */
+.kuro-schedule-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.kuro-schedule-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.kuro-tabs-segmented {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kuro-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border: 1px solid #EAE3D6;
+  background: #FFFFFF;
+  color: #24181B;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kuro-tab-pill:hover {
+  background: #FAF7F2;
+  border-color: #7E1D2A;
+}
+
+.kuro-tab-pill.active {
+  background: #7E1D2A !important;
+  color: #FFFFFF !important;
+  border-color: #7E1D2A !important;
+  box-shadow: 0 2px 8px rgba(126, 29, 42, 0.22);
+}
+
+.kuro-tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  display: inline-block;
+}
+
+.kuro-schedule-right-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.kuro-schedule-date-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #756966;
+}
+
+.kuro-schedule-date-hint svg {
+  width: 15px;
+  height: 15px;
+  color: #7E1D2A;
+}
+
+.kuro-weekly-schedule-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background: #7E1D2A;
+  color: #FFFFFF;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.kuro-weekly-schedule-btn:hover {
+  background: #681320;
+  transform: translateY(-1px);
+}
+
+.kuro-weekly-schedule-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.kuro-schedule-card {
+  background: #FFFFFF;
+  border: 1px solid #EAE3D6;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(36, 24, 27, 0.03);
+  overflow: hidden;
+}
+
+.kuro-schedule-pane {
+  display: flex;
+  flex-direction: column;
+}
+
+.kuro-lecture-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px 100px 36px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #F5EFEB;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.kuro-lecture-row:last-child {
+  border-bottom: none;
+}
+
+.kuro-lecture-row:hover {
+  background: #FAF7F2;
+}
+
+.kuro-lecture-row:active {
+  transform: scale(0.995);
+}
+
+.klr-time-col {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 550;
+  color: #24181B;
+}
+
+.klr-time-col svg {
+  width: 15px;
+  height: 15px;
+  color: #756966;
+}
+
+.klr-subject-col {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.klr-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.klr-code-badge {
+  background: #F5EFEB;
+  color: #7E1D2A;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.klr-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #24181B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.klr-hall-col {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  color: #756966;
+}
+
+.klr-hall-col svg {
+  width: 14px;
+  height: 14px;
+  color: #9C8F8C;
+}
+
+.klr-status-col {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.klr-status-pill {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+}
+
+.klr-status-pill.live {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.klr-status-pill.upcoming {
+  background: rgba(126, 29, 42, 0.08);
+  color: #7E1D2A;
+}
+
+.klr-status-pill.completed {
+  background: #F4EFEA;
+  color: #756966;
+}
+
+.klr-arrow-col {
+  display: flex;
+  justify-content: flex-end;
+  color: #9C8F8C;
+}
+
+.klr-arrow-col svg {
+  width: 16px;
+  height: 16px;
+}
+
+.kuro-lecture-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px 20px;
+  color: #756966;
+  font-size: 0.88rem;
+}
+
+.kuro-empty-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #7E1D2A;
+  font-weight: 700;
+  text-decoration: none;
+  margin-inline-start: 10px;
+}
+
+/* ─── 7. Quick Access Section (4 Tiles) ─── */
+.kuro-qa-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.kuro-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.kuro-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kuro-section-emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(126, 29, 42, 0.08);
+  color: #7E1D2A;
+}
+
+.kuro-section-emblem svg {
+  width: 17px;
+  height: 17px;
+}
+
+.kuro-section-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #24181B;
+  margin: 0;
+}
+
+.kuro-section-count {
+  font-size: 0.84rem;
+  color: #756966;
+  margin-inline-start: 6px;
+}
+
+.kuro-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #7E1D2A;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.kuro-view-all-link:hover {
+  text-decoration: underline;
+}
+
+.kuro-view-all-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+.kuro-qa-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.kuro-qa-tile {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid #EAE3D6;
+  border-radius: 16px;
+  padding: 20px 18px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(36, 24, 27, 0.02);
+  overflow: hidden;
+}
+
+.kuro-qa-tile:hover {
+  transform: translateY(-3px);
+  border-color: #7E1D2A;
+  box-shadow: 0 8px 24px rgba(126, 29, 42, 0.08);
+}
+
+.kuro-qa-tile:active {
+  transform: scale(0.98);
+}
+
+.kuro-qa-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #7E1D2A;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(126, 29, 42, 0.2);
+  z-index: 2;
+}
+
+.kuro-qa-icon-box svg {
+  width: 22px;
+  height: 22px;
+}
+
+.kuro-qa-content {
+  z-index: 2;
+}
+
+.kuro-qa-title {
+  font-size: 0.98rem;
+  font-weight: 750;
+  color: #24181B;
+  margin: 0 0 4px;
+}
+
+.kuro-qa-subtitle {
+  font-size: 0.8rem;
+  color: #756966;
+  margin: 0;
+}
+
+.kuro-qa-arrow {
+  position: absolute;
+  bottom: 18px;
+  inset-inline-end: 18px;
+  width: 16px;
+  height: 16px;
+  color: #9C8F8C;
+  transition: transform 0.2s ease, color 0.2s ease;
+  z-index: 2;
+}
+
+.kuro-qa-tile:hover .kuro-qa-arrow {
+  color: #7E1D2A;
+  transform: translateX(3px);
+}
+
+/* ─── 8. Your Subjects Section (3-Column Desktop Grid) ─── */
+.kuro-subjects-section-header {
+  margin-top: 6px;
+}
+
+.kuro-subjects-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kuro-subjects-search-box {
+  position: relative;
+}
+
+.kuro-subjects-search-box input {
+  background: #FFFFFF !important;
+  border: 1px solid #EAE3D6 !important;
+  border-radius: 9999px !important;
+  height: 38px !important;
+  width: 220px !important;
+  font-size: 0.84rem !important;
+  color: #24181B !important;
+  padding-inline-start: 36px !important;
+  padding-inline-end: 14px !important;
+  outline: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.kuro-subjects-search-box input:focus {
+  border-color: #7E1D2A !important;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.1) !important;
+  width: 250px !important;
+}
+
+.kuro-search-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  inset-inline-start: 12px;
+  width: 15px;
+  height: 15px;
+  color: #9C8F8C;
+  pointer-events: none;
+}
+
+.kuro-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  border: 1px solid #EAE3D6;
+  color: #24181B;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kuro-filter-pill:hover {
+  border-color: #7E1D2A;
+  color: #7E1D2A;
+}
+
+.kuro-filter-pill svg {
+  width: 14px;
+  height: 14px;
+}
+
+.kuro-subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.kuro-subject-card {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid #EAE3D6;
+  border-radius: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(36, 24, 27, 0.02);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kuro-subject-card:hover {
+  transform: translateY(-3px);
+  border-color: #7E1D2A;
+  box-shadow: 0 10px 28px rgba(126, 29, 42, 0.08);
+}
+
+.kuro-subject-card:active {
+  transform: scale(0.985);
+}
+
+.ksc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  z-index: 2;
+}
+
+.ksc-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ksc-icon-box svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.2;
+}
+
+.ksc-code-badge {
+  background: #F5EFEB;
+  color: #756966;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.ksc-body {
+  flex: 1;
+  margin-bottom: 16px;
+  z-index: 2;
+}
+
+.ksc-title-primary {
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #24181B;
+  margin: 0 0 3px;
+  line-height: 1.35;
+}
+
+.ksc-title-secondary {
+  font-size: 0.84rem;
+  color: #756966;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.ksc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #F5EFEB;
+  z-index: 2;
+}
+
+.ksc-sheet-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: #756966;
+  font-weight: 600;
+}
+
+.ksc-sheet-count svg {
+  width: 14px;
+  height: 14px;
+  color: #9C8F8C;
+}
+
+.ksc-arrow-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9C8F8C;
+  transition: all 0.18s ease;
+}
+
+.ksc-arrow-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.kuro-subject-card:hover .ksc-arrow-btn {
+  color: #7E1D2A;
+  transform: translateX(2px);
+}
+
+/* ─── 9. Botanical Leaf Corner Watermark ─── */
+.kuro-card-leaf-watermark {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 4px;
+  width: 64px;
+  height: 64px;
+  background-image: url('../assets/icons/leaf-branch.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── 10. Responsive Breakpoints ─── */
+@media (max-width: 1024px) {
+  .kuro-qa-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kuro-subjects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kuro-lecture-row {
+    grid-template-columns: 120px 1fr 100px 30px;
+  }
+  .klr-hall-col {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .kuro-hero-greeting-overlay {
+    width: 68% !important;
+    left: 4% !important;
+  }
+  .kuro-hero-greeting-title {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+  .kuro-hero-greeting-sub {
+    font-size: 0.76rem;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .kuro-hero-date-chip {
+    font-size: 0.68rem;
+    padding: 3px 10px;
+  }
+  .kuro-schedule-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .kuro-schedule-right-group {
+    justify-content: space-between;
+  }
+  .kuro-lecture-row {
+    grid-template-columns: 90px 1fr 24px;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .klr-status-col {
+    display: none;
+  }
+  .kuro-qa-grid {
+    grid-template-columns: 1fr;
+  }
+  .kuro-subjects-section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .kuro-subjects-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .kuro-subjects-search-box input {
+    width: 100% !important;
+  }
+  .kuro-subjects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 
 

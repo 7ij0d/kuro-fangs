@@ -1,29 +1,30 @@
 /**
- * KURO FANGS — HOME DASHBOARD (REDESIGNED ACADEMIA v3)
- * Modern Academic Dashboard: Compact Greeting Banner, Tabbed Daily Lectures & Lightweight Subject Tiles
+ * KURO FANGS — HOME DASHBOARD
+ * Modern Academic Study Dashboard (Warm Cream, Deep Burgundy & Botanical Atmosphere)
+ * Visual reference: Cozy Academic Study Scene
  */
 
 const SUBJECT_THEMES = {
-  'gen-med':        { icon: 'stethoscope', color: '#0D9488', bg: 'rgba(13, 148, 136, 0.10)', border: 'rgba(13, 148, 136, 0.22)' },
-  'gen-surgery':    { icon: 'activity',    color: '#EF4444', bg: 'rgba(239, 68, 68, 0.10)',  border: 'rgba(239, 68, 68, 0.22)' },
-  'fixed-pros':     { icon: 'shield',      color: '#D97706', bg: 'rgba(217, 119, 6, 0.10)',  border: 'rgba(217, 119, 6, 0.22)' },
-  'omfs':           { icon: 'scissors',    color: '#C84343', bg: 'rgba(200, 67, 67, 0.10)',  border: 'rgba(200, 67, 67, 0.22)' },
-  'oral-diseases':  { icon: 'microscope',  color: '#EA580C', bg: 'rgba(234, 88, 12, 0.10)',  border: 'rgba(234, 88, 12, 0.22)' },
-  'endo':           { icon: 'zap',         color: '#7C3AED', bg: 'rgba(124, 58, 237, 0.10)', border: 'rgba(124, 58, 237, 0.22)' },
-  'omdr':           { icon: 'scan',        color: '#6366F1', bg: 'rgba(99, 102, 241, 0.10)', border: 'rgba(99, 102, 241, 0.22)' },
-  'preventive':     { icon: 'sparkles',    color: '#0284C7', bg: 'rgba(2, 132, 199, 0.10)',  border: 'rgba(2, 132, 199, 0.22)' },
-  'cons-endo':      { icon: 'heart-pulse', color: '#059669', bg: 'rgba(5, 150, 105, 0.10)',  border: 'rgba(5, 150, 105, 0.22)' },
-  'ortho':          { icon: 'smile',       color: '#0EA5E9', bg: 'rgba(14, 165, 233, 0.10)', border: 'rgba(14, 165, 233, 0.22)' },
-  'pediatric':      { icon: 'baby',        color: '#A855F7', bg: 'rgba(168, 85, 247, 0.10)', border: 'rgba(168, 85, 247, 0.22)' },
-  'pedo':           { icon: 'baby',        color: '#A855F7', bg: 'rgba(168, 85, 247, 0.10)', border: 'rgba(168, 85, 247, 0.22)' },
-  'removable-pros': { icon: 'layers',      color: '#DB2777', bg: 'rgba(219, 39, 119, 0.10)', border: 'rgba(219, 39, 119, 0.22)' }
+  'gen-med':        { icon: 'stethoscope', color: '#0D9488', bg: '#E6F4F2', border: 'rgba(13, 148, 136, 0.22)' },
+  'gen-surgery':    { icon: 'activity',    color: '#EF4444', bg: '#FDE8E8', border: 'rgba(239, 68, 68, 0.22)' },
+  'fixed-pros':     { icon: 'shield',      color: '#D97706', bg: '#FEF3E2', border: 'rgba(217, 119, 6, 0.22)' },
+  'omfs':           { icon: 'scissors',    color: '#C84343', bg: '#FCEAEA', border: 'rgba(200, 67, 67, 0.22)' },
+  'oral-diseases':  { icon: 'microscope',  color: '#EA580C', bg: '#FEEDDE', border: 'rgba(234, 88, 12, 0.22)' },
+  'endo':           { icon: 'zap',         color: '#7C3AED', bg: '#F3E8FF', border: 'rgba(124, 58, 237, 0.22)' },
+  'omdr':           { icon: 'scan',        color: '#6366F1', bg: '#EEF0FF', border: 'rgba(99, 102, 241, 0.22)' },
+  'preventive':     { icon: 'sparkles',    color: '#0284C7', bg: '#E0F2FE', border: 'rgba(2, 132, 199, 0.22)' },
+  'cons-endo':      { icon: 'heart-pulse', color: '#059669', bg: '#E6F7F0', border: 'rgba(5, 150, 105, 0.22)' },
+  'ortho':          { icon: 'smile',       color: '#0EA5E9', bg: '#E0F7FF', border: 'rgba(14, 165, 233, 0.22)' },
+  'pediatric':      { icon: 'baby',        color: '#A855F7', bg: '#F5E8FF', border: 'rgba(168, 85, 247, 0.22)' },
+  'pedo':           { icon: 'baby',        color: '#A855F7', bg: '#F5E8FF', border: 'rgba(168, 85, 247, 0.22)' },
+  'removable-pros': { icon: 'layers',      color: '#DB2777', bg: '#FCE7F3', border: 'rgba(219, 39, 119, 0.22)' }
 };
 
 const DEFAULT_THEME = {
   icon: 'book-open',
-  color: 'var(--brand-burgundy, #2357d9)',
-  bg: 'rgba(35, 87, 217, 0.08)',
-  border: 'rgba(35, 87, 217, 0.20)'
+  color: '#7E1D2A',
+  bg: '#FDF1F2',
+  border: 'rgba(126, 29, 42, 0.20)'
 };
 
 const HomePage = {
@@ -33,12 +34,40 @@ const HomePage = {
   _todayFormatted: '',
   _tomorrowFormatted: '',
 
-  /* ─── Time-based greeting ─── */
-  getGreeting(t) {
-    const h = new Date().getHours();
-    if (h < 12) return t('heroGreetingMorning');
-    if (h < 17) return t('heroGreetingAfternoon');
-    return t('heroGreetingEvening');
+  /* ─── Dynamic time-of-day greeting engine ─── */
+  getHeroGreetingData(isAr) {
+    const now = new Date();
+    const h = now.getHours();
+
+    let title = '';
+    let subtitle = '';
+
+    if (h >= 5 && h < 12) {
+      title = isAr ? 'صباح الخير، طالب كورو 👋' : 'Good Morning, Kuro Student 👋';
+      subtitle = isAr ? 'جاهز ليوم دراسي ممتع ومثمر؟' : 'Ready for a productive day?';
+    } else if (h >= 12 && h < 17) {
+      title = isAr ? 'مساء الخير، طالب كورو 👋' : 'Good Afternoon, Kuro Student 👋';
+      subtitle = isAr ? 'واصل التقدّم، أنت تنجز خطوة بخطوة.' : "Keep going, you're making progress.";
+    } else if (h >= 17 && h < 21) {
+      title = isAr ? 'مساء الخير، طالب كورو 👋' : 'Good Evening, Kuro Student 👋';
+      subtitle = isAr ? 'خذ استراحة قصيرة وراجع إنجازات اليوم.' : "Take a moment to review today's progress.";
+    } else {
+      title = isAr ? 'تصبح على خير، طالب كورو 🌙' : 'Good Night, Kuro Student 🌙';
+      subtitle = isAr ? 'خطوة إضافية واحدة قبل أن تختم يومك.' : 'One more step before you call it a day.';
+    }
+
+    const daysAr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const daysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const monthsEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    const dayName = isAr ? daysAr[now.getDay()] : daysEn[now.getDay()];
+    const monthName = isAr ? monthsAr[now.getMonth()] : monthsEn[now.getMonth()];
+    const dateFormatted = isAr
+      ? `${dayName}، ${now.getDate()} ${monthName} ${now.getFullYear()}`
+      : `${dayName}, ${now.getDate()} ${monthName} ${now.getFullYear()}`;
+
+    return { title, subtitle, dateFormatted };
   },
 
   handleSubjectClick(subjectId) {
@@ -59,7 +88,7 @@ const HomePage = {
     }, 10);
   },
 
-  /* ✨ Track subject visit ✨ */
+  /* Track subject visit */
   trackSubjectVisit(subjectId) {
     try {
       let recent = JSON.parse(localStorage.getItem('kf_recent_subjects') || '[]');
@@ -70,48 +99,48 @@ const HomePage = {
     } catch { /* silent */ }
   },
 
-  /* ─── Quick Access item counts ─── */
+  /* Quick Access item counts */
   getQuickAccessCounts() {
     const questions = window.DATA?.questions || [];
     const exams = window.DATA?.previousExams || [];
-    const flashcards = window.DATA?.flashcards || [];
     return {
       questions: questions.length,
-      exams: exams.length,
-      flashcards: flashcards.length
+      exams: exams.length
     };
   },
 
   /* ══════════════════════════════════════════
-     1. COMPACT GREETING BANNER (Zero Progress / Zero Hero Bloat)
+     1. HERO SECTION (Study Scene with Dynamic Greeting in Left Sunlight Area)
      ══════════════════════════════════════════ */
-  renderHeroSection(isAr, t) {
-    const greeting = HomePage.getGreeting(t);
-    const charImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('idle') : 'assets/characters/kuro/Kuro-Idle.png';
-    const mascotName = isAr ? 'كورو' : 'Kuro';
-    const userName = window.STORE?.getUserInfo?.()?.name || (isAr ? 'طالب' : 'Student');
+  renderHeroSection(isAr) {
+    const { title, subtitle, dateFormatted } = HomePage.getHeroGreetingData(isAr);
 
     return `
-      <section class="home-compact-banner">
-        <div class="home-compact-greeting-wrap">
-          <div class="home-compact-title-row">
-            <h1 class="home-compact-greeting">${greeting}، ${userName} 👋</h1>
-            <span class="home-compact-badge">${isAr ? 'السنة الثالثة — طب وجراحة الفم والأسنان' : '3rd Year — Faculty of Dentistry'}</span>
+      <section class="kuro-hero-workspace" aria-label="Hero Study Workspace">
+        <div class="kuro-hero-banner">
+          <img
+            src="assets/hero/kuro-study-hero.png"
+            alt="Kuro Cozy Study Scene"
+            class="kuro-hero-bg-img"
+            width="1280"
+            height="560"
+            fetchpriority="high"
+          />
+          <div class="kuro-hero-greeting-overlay" dir="${isAr ? 'rtl' : 'ltr'}">
+            <h1 class="kuro-hero-greeting-title">${title}</h1>
+            <p class="kuro-hero-greeting-sub">${subtitle}</p>
+            <div class="kuro-hero-date-chip">
+              <i data-lucide="calendar" class="kuro-hero-date-icon"></i>
+              <span>${dateFormatted}</span>
+            </div>
           </div>
-          <p class="home-compact-subline">${isAr ? 'منصة كورو فودز الأكاديمية للدراسة وتصفح الشيتات والمحاضرات' : (t('heroSubline') || 'Academic portal for dental lectures and handouts')}</p>
-        </div>
-        <div class="home-compact-mascot-wrap">
-          <a href="#/rewards" class="home-compact-mascot-pill" title="${mascotName}">
-            <img src="${charImg}" alt="${mascotName}" class="home-compact-mascot-img kuro-character-img kuro-float" width="30" height="30" loading="lazy" />
-            <span class="home-compact-mascot-name">✨ ${mascotName}</span>
-          </a>
         </div>
       </section>
     `;
   },
 
   /* ══════════════════════════════════════════
-     2. CONDENSED LECTURES SCHEDULE (Tab Switcher + Slim Single-Line Rows)
+     2. TODAY'S SCHEDULE (Tab Switcher + Horizontal Rows)
      ══════════════════════════════════════════ */
   switchDailyTab(tab) {
     this.activeDailyTab = tab;
@@ -132,7 +161,9 @@ const HomePage = {
       todayPane.classList.add('active');
       tomorrowPane.style.display = 'none';
       tomorrowPane.classList.remove('active');
-      if (dateHint && this._todayFormatted) dateHint.textContent = this._todayFormatted;
+      if (dateHint && this._todayFormatted) {
+        dateHint.innerHTML = `<i data-lucide="calendar"></i><span>${this._todayFormatted}</span>`;
+      }
     } else {
       tomorrowBtn.classList.add('active');
       tomorrowBtn.setAttribute('aria-selected', 'true');
@@ -142,15 +173,17 @@ const HomePage = {
       tomorrowPane.classList.add('active');
       todayPane.style.display = 'none';
       todayPane.classList.remove('active');
-      if (dateHint && this._tomorrowFormatted) dateHint.textContent = this._tomorrowFormatted;
+      if (dateHint && this._tomorrowFormatted) {
+        dateHint.innerHTML = `<i data-lucide="calendar"></i><span>${this._tomorrowFormatted}</span>`;
+      }
     }
 
     if (window.lucide) window.lucide.createIcons();
   },
 
-  renderDailyLecturesSection(isAr, t) {
+  renderDailyLecturesSection(isAr) {
     const todayDate = new Date();
-    const todayDayIndex = todayDate.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    const todayDayIndex = todayDate.getDay();
     const tomorrowDate = new Date(todayDate);
     tomorrowDate.setDate(tomorrowDate.getDate() + 1);
     const tomorrowDayIndex = tomorrowDate.getDay();
@@ -196,13 +229,11 @@ const HomePage = {
     const renderRows = (schedule, isToday) => {
       if (schedule.isWeekend || !schedule.slots || schedule.slots.length === 0) {
         return `
-          <div class="compact-lecture-empty">
-            <div class="clr-empty-info">
-              <i data-lucide="coffee" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
-              <span>${isAr ? 'عطلة نهاية الأسبوع — لا توجد محاضرات نظرية مقررة.' : 'Weekend break — No theory lectures scheduled.'}</span>
-            </div>
-            <a href="#/sheets" class="clr-empty-link">
-              <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
+          <div class="kuro-lecture-empty">
+            <i data-lucide="coffee"></i>
+            <span>${isAr ? 'عطلة نهاية الأسبوع — لا توجد محاضرات نظرية مقررة.' : 'Weekend break — No theory lectures scheduled.'}</span>
+            <a href="#/sheets" class="kuro-empty-link">
+              <i data-lucide="book-open"></i>
               <span>${isAr ? 'تصفح شيتات المواد' : 'Browse Handouts'}</span>
             </a>
           </div>
@@ -211,27 +242,29 @@ const HomePage = {
 
       return schedule.slots.map(slot => {
         const status = isToday ? getSlotLiveStatus(slot) : { label: isAr ? 'مجدولة غداً' : 'Tomorrow', badgeClass: 'upcoming' };
-        const dotColor = slot.color || '#0284C7';
+        const dotColor = slot.color || '#C84343';
 
         return `
-          <div class="compact-lecture-row" data-subject="${slot.subject_id}" role="button" tabindex="0" onclick="window.HomePage.handleSubjectClick('${slot.subject_id}')" title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}">
-            <div class="clr-time-col">
+          <div class="kuro-lecture-row" data-subject="${slot.subject_id}" role="button" tabindex="0" onclick="window.HomePage.handleSubjectClick('${slot.subject_id}')" title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}">
+            <div class="klr-time-col">
               <i data-lucide="clock"></i>
               <span>${slot.time}</span>
             </div>
-            <div class="clr-subject-col">
-              <span class="clr-subject-dot" style="background-color: ${dotColor};"></span>
-              <span class="clr-subject-code">${slot.code}</span>
-              <span class="clr-subject-name">${isAr ? slot.subject_ar : slot.subject_en}</span>
+            <div class="klr-subject-col">
+              <span class="klr-dot" style="background-color: ${dotColor};"></span>
+              <span class="klr-code-badge">${slot.code}</span>
+              <span class="klr-title">${isAr ? slot.subject_ar : slot.subject_en}</span>
             </div>
-            <div class="clr-hall-col">
+            <div class="klr-hall-col">
               <i data-lucide="map-pin"></i>
               <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
             </div>
-            <div class="clr-status-col">
-              <span class="clr-status ${status.badgeClass}">${status.label}</span>
+            <div class="klr-status-col">
+              <span class="klr-status-pill ${status.badgeClass}">${status.label}</span>
             </div>
-            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" class="clr-arrow"></i>
+            <div class="klr-arrow-col">
+              <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
+            </div>
           </div>
         `;
       }).join('');
@@ -242,34 +275,36 @@ const HomePage = {
     const activeTab = this.activeDailyTab || 'today';
 
     return `
-      <section class="home-compact-schedule-section">
-        <div class="hcs-header">
-          <div class="hcs-tabs-segmented" role="tablist">
-            <button type="button" class="hcs-tab-btn ${activeTab === 'today' ? 'active' : ''}" id="daily-tab-today-btn" onclick="window.HomePage.switchDailyTab('today')" role="tab" aria-selected="${activeTab === 'today'}">
-              <span class="hcs-tab-dot"></span>
+      <section class="kuro-schedule-section" aria-label="Today's Timetable">
+        <div class="kuro-schedule-controls-bar">
+          <div class="kuro-tabs-segmented" role="tablist">
+            <button type="button" class="kuro-tab-pill ${activeTab === 'today' ? 'active' : ''}" id="daily-tab-today-btn" onclick="window.HomePage.switchDailyTab('today')" role="tab" aria-selected="${activeTab === 'today'}">
+              <span class="kuro-tab-dot"></span>
               <span>${isAr ? `محاضرات اليوم (${todaySlotsCount})` : `Today (${todaySlotsCount})`}</span>
             </button>
-            <button type="button" class="hcs-tab-btn ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-tab-tomorrow-btn" onclick="window.HomePage.switchDailyTab('tomorrow')" role="tab" aria-selected="${activeTab === 'tomorrow'}">
-              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+            <button type="button" class="kuro-tab-pill ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-tab-tomorrow-btn" onclick="window.HomePage.switchDailyTab('tomorrow')" role="tab" aria-selected="${activeTab === 'tomorrow'}">
+              <i data-lucide="clock"></i>
               <span>${isAr ? `محاضرات الغد (${tomorrowSlotsCount})` : `Tomorrow (${tomorrowSlotsCount})`}</span>
             </button>
           </div>
 
-          <div class="hcs-date-and-more">
-            <span class="hcs-current-date-hint" id="hcs-current-date-hint">${activeTab === 'today' ? todayDateFormatted : tomorrowDateFormatted}</span>
-            <a href="#/lecture-schedule" class="hcs-full-schedule-link" title="${isAr ? 'عرض الجدول الأسبوعي الكامل' : 'View Full Timetable'}">
-              <i data-lucide="calendar" style="width: 13px; height: 13px;"></i>
-              <span>${isAr ? 'الجدول الأسبوعي الكامل' : 'Weekly Schedule'}</span>
-              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 12px; height: 12px;"></i>
+          <div class="kuro-schedule-right-group">
+            <span class="kuro-schedule-date-hint" id="hcs-current-date-hint">
+              <i data-lucide="calendar"></i>
+              <span>${activeTab === 'today' ? todayDateFormatted : tomorrowDateFormatted}</span>
+            </span>
+            <a href="#/lecture-schedule" class="kuro-weekly-schedule-btn" title="${isAr ? 'عرض الجدول الأسبوعي الكامل' : 'View Full Timetable'}">
+              <span>${isAr ? 'الجدول الأسبوعي' : 'Weekly Schedule'}</span>
+              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
             </a>
           </div>
         </div>
 
-        <div class="hcs-content-box">
-          <div class="hcs-pane ${activeTab === 'today' ? 'active' : ''}" id="daily-pane-today" style="display: ${activeTab === 'today' ? 'flex' : 'none'}; flex-direction: column; gap: 6px;">
+        <div class="kuro-schedule-card">
+          <div class="kuro-schedule-pane ${activeTab === 'today' ? 'active' : ''}" id="daily-pane-today" style="display: ${activeTab === 'today' ? 'flex' : 'none'};">
             ${renderRows(todaySchedule, true)}
           </div>
-          <div class="hcs-pane ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-pane-tomorrow" style="display: ${activeTab === 'tomorrow' ? 'flex' : 'none'}; flex-direction: column; gap: 6px;">
+          <div class="kuro-schedule-pane ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-pane-tomorrow" style="display: ${activeTab === 'tomorrow' ? 'flex' : 'none'};">
             ${renderRows(tomorrowSchedule, false)}
           </div>
         </div>
@@ -278,34 +313,63 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     3. QUICK ACCESS SECTION
+     3. QUICK ACCESS SECTION (4 Tiles with Leaf Watermark)
      ══════════════════════════════════════════ */
-  renderQuickAccess(isAr, t) {
+  renderQuickAccess(isAr) {
     const counts = HomePage.getQuickAccessCounts();
 
     const items = [
-      { icon: 'help-circle', title: t('qaQuestionBank'), count: counts.questions + counts.exams, unit: t('qaQuestions'), route: '#/questions', color: 'var(--brand-burgundy)' },
-      { icon: 'headphones', img: 'assets/icons/recordings_icon.png', title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings', count: '', unit: '', route: '#/recordings', color: '#0284C7' },
-      { icon: 'calendar',    title: isAr ? 'جدول المحاضرات النظري' : 'Theory Schedule',    count: '',               unit: '',               route: '#/lecture-schedule', color: '#059669' },
-      { icon: 'file-check-2', title: isAr ? 'جداول الامتحانات الرسمية' : 'Exam Schedule', count: '', unit: '', route: '#/exams', color: '#D97706' }
+      {
+        icon: 'help-circle',
+        title: isAr ? 'بنك الأسئلة' : 'Question Bank',
+        subtitle: isAr ? `${counts.questions + counts.exams} سؤالاً متوفراً` : `${counts.questions + counts.exams} questions`,
+        route: '#/questions'
+      },
+      {
+        icon: 'mic',
+        title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings',
+        subtitle: isAr ? 'محاضرات وتفريغات صوتية' : 'Lectures & revisions',
+        route: '#/recordings'
+      },
+      {
+        icon: 'calendar',
+        title: isAr ? 'جدول المحاضرات النظري' : 'Theory Schedule',
+        subtitle: isAr ? 'مدرج 2 — الدفعة 33' : 'All your classes',
+        route: '#/lecture-schedule'
+      },
+      {
+        icon: 'file-text',
+        title: isAr ? 'جداول الامتحانات الرسمية' : 'Exam Schedule',
+        subtitle: isAr ? 'الجداول المعتمدة' : 'Upcoming exams',
+        route: '#/exams'
+      }
     ];
 
     return `
-      <section class="home-quick-access">
-        <div class="home-section-header">
-          <h2 class="home-section-title">${t('quickAccessTitle')}</h2>
+      <section class="kuro-qa-section" aria-label="Quick Access">
+        <div class="kuro-section-header">
+          <div class="kuro-section-title-wrap">
+            <span class="kuro-section-emblem"><i data-lucide="graduation-cap"></i></span>
+            <h2 class="kuro-section-title">${isAr ? 'الوصول السريع' : 'Quick Access'}</h2>
+          </div>
+          <a href="#/sheets" class="kuro-view-all-link">
+            <span>${isAr ? 'عرض الكل' : 'View All'}</span>
+            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+          </a>
         </div>
-        <div class="home-quick-access-grid">
+
+        <div class="kuro-qa-grid">
           ${items.map(item => `
-            <a href="${item.route}" class="home-qa-card">
-              <div class="home-qa-icon" style="color: ${item.color};">
-                ${item.img ? `<img src="${item.img}" alt="${item.title}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid ${item.color};" />` : `<i data-lucide="${item.icon}"></i>`}
+            <a href="${item.route}" class="kuro-qa-tile" title="${item.title}">
+              <div class="kuro-card-leaf-watermark"></div>
+              <div class="kuro-qa-icon-box">
+                <i data-lucide="${item.icon}"></i>
               </div>
-              <div class="home-qa-meta">
-                <span class="home-qa-title">${item.title}</span>
-                ${item.count !== '' ? `<span class="home-qa-count">${item.count} ${item.unit}</span>` : ''}
+              <div class="kuro-qa-content">
+                <h3 class="kuro-qa-title">${item.title}</h3>
+                <p class="kuro-qa-subtitle">${item.subtitle}</p>
               </div>
-              <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="home-qa-arrow"></i>
+              <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="kuro-qa-arrow"></i>
             </a>
           `).join('')}
         </div>
@@ -314,35 +378,61 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     4. SUBJECTS SECTION HEADER
+     4. YOUR SUBJECTS SECTION HEADER & FILTER
      ══════════════════════════════════════════ */
-  renderSubjectsSectionHeader(isAr, t, count) {
+  renderSubjectsSectionHeader(isAr, count) {
     return `
-      <div class="home-subjects-header" style="margin-top: 14px; margin-bottom: 12px;">
-        <div class="home-subjects-header-text">
-          <h2 class="home-section-title">${t('yourSubjects')}</h2>
-          <span class="home-section-count">${count} ${t('subjectsAvailable')}</span>
+      <div class="kuro-section-header kuro-subjects-section-header">
+        <div class="kuro-section-title-wrap">
+          <span class="kuro-section-emblem"><i data-lucide="book-open"></i></span>
+          <h2 class="kuro-section-title">${isAr ? 'المواد الدراسية' : 'Your Subjects'}</h2>
+          <span class="kuro-section-count">${count} ${isAr ? 'مواد متاحة' : 'subjects available'}</span>
+        </div>
+
+        <div class="kuro-subjects-controls">
+          <div class="kuro-subjects-search-box">
+            <i data-lucide="search" class="kuro-search-icon"></i>
+            <input
+              type="text"
+              id="subjects-grid-search-input"
+              placeholder="${isAr ? 'ابحث في المواد...' : 'Search subjects...'}"
+              value="${HomePage.searchQuery || ''}"
+              autocomplete="off"
+            />
+          </div>
+
+          <button class="kuro-filter-pill" id="subjects-filter-btn" type="button" title="${isAr ? 'تصفية حسب السنة' : 'Filter by year'}">
+            <i data-lucide="sliders-horizontal"></i>
+            <span>${isAr ? 'كل السنوات' : 'All Years'}</span>
+            <i data-lucide="chevron-down" style="width: 14px; height: 14px; opacity: 0.7;"></i>
+          </button>
         </div>
       </div>
     `;
   },
 
   /* ══════════════════════════════════════════
-     MAIN RENDER
+     5. MAIN RENDER
      ══════════════════════════════════════════ */
   render(container) {
-    const t = (k) => window.I18N.t(k);
-    const isAr = window.I18N.getLang() === 'ar';
-    const subjects = window.DATA.getSubjects();
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const subjects = window.DATA ? window.DATA.getSubjects() : [];
 
     container.innerHTML = `
-      ${HomePage.renderHeroSection(isAr, t)}
-      ${HomePage.renderDailyLecturesSection(isAr, t)}
-      ${HomePage.renderQuickAccess(isAr, t)}
+      <div class="kuro-dashboard-container">
+        <!-- 1. Hero Study Scene Banner with Dynamic Greeting -->
+        ${HomePage.renderHeroSection(isAr)}
 
-      <!-- Subjects Section -->
-      ${HomePage.renderSubjectsSectionHeader(isAr, t, subjects.length)}
-      <div class="subjects-showcase-grid" id="subjects-container"></div>
+        <!-- 2. Today's Lectures Schedule -->
+        ${HomePage.renderDailyLecturesSection(isAr)}
+
+        <!-- 3. Quick Access 4 Tiles -->
+        ${HomePage.renderQuickAccess(isAr)}
+
+        <!-- 4. Your Subjects Section -->
+        ${HomePage.renderSubjectsSectionHeader(isAr, subjects.length)}
+        <div class="kuro-subjects-grid" id="subjects-container"></div>
+      </div>
     `;
 
     HomePage.renderSubjectsList(subjects, false);
@@ -354,14 +444,14 @@ const HomePage = {
     if (!grid) return;
 
     grid.innerHTML = Array(6).fill(0).map(() => `
-      <div class="skeleton-compact-tile skeleton-card" style="padding: 14px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-card);">
+      <div class="kuro-subject-card skeleton-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div class="skeleton-shimmer" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-          <div class="skeleton-shimmer" style="width: 48px; height: 16px; border-radius: 6px;"></div>
+          <div class="skeleton-shimmer" style="width: 44px; height: 44px; border-radius: 12px;"></div>
+          <div class="skeleton-shimmer" style="width: 58px; height: 22px; border-radius: 9999px;"></div>
         </div>
-        <div class="skeleton-shimmer" style="width: 75%; height: 15px; margin-bottom: 6px; border-radius: 4px;"></div>
-        <div class="skeleton-shimmer" style="width: 45%; height: 11px; margin-bottom: 14px; border-radius: 4px;"></div>
-        <div class="skeleton-shimmer" style="width: 50%; height: 18px; border-radius: 9999px;"></div>
+        <div class="skeleton-shimmer" style="width: 80%; height: 18px; margin-bottom: 8px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer" style="width: 50%; height: 14px; margin-bottom: 20px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer" style="width: 40%; height: 18px; border-radius: 9999px;"></div>
       </div>
     `).join('');
   },
@@ -375,25 +465,23 @@ const HomePage = {
       if (HomePage.loadingTimeout) clearTimeout(HomePage.loadingTimeout);
       HomePage.loadingTimeout = setTimeout(() => {
         HomePage.buildCardsHTML(allSubjects);
-      }, 160);
+      }, 140);
     } else {
       HomePage.buildCardsHTML(allSubjects);
     }
   },
 
   /* ══════════════════════════════════════════
-     5. COMPACT SUBJECT TILES (Linear / Apple Modern UI Style)
+     6. 3-COLUMN SUBJECT TILES (With Leaf Watermark & Pastel Badges)
      ══════════════════════════════════════════ */
   buildCardsHTML(allSubjects) {
     const grid = document.getElementById('subjects-container');
     if (!grid) return;
 
-    const isAr = window.I18N.getLang() === 'ar';
-    const t = (k) => window.I18N.t(k);
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
 
     let filtered = [...allSubjects];
 
-    // Search filtering
     if (HomePage.searchQuery) {
       const q = HomePage.searchQuery.toLowerCase();
       filtered = filtered.filter(s =>
@@ -405,10 +493,14 @@ const HomePage = {
 
     if (filtered.length === 0) {
       grid.innerHTML = `
-        <div class="home-empty-state" style="grid-column: 1 / -1; padding: 36px 16px; text-align: center;">
-          <div class="home-empty-icon" style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
-          <h3 class="home-empty-title" style="font-size: 1rem; font-weight: 750; color: var(--text-primary); margin-bottom: 4px;">${t('searchEmptyTitle')}</h3>
-          <p class="home-empty-sub" style="font-size: 0.8rem; color: var(--text-muted);">${t('searchEmptySub')}</p>
+        <div class="kuro-empty-state" style="grid-column: 1 / -1; padding: 48px 16px; text-align: center;">
+          <div style="font-size: 2.2rem; margin-bottom: 10px;">🔍</div>
+          <h3 style="font-size: 1.05rem; font-weight: 750; color: #24181B; margin-bottom: 6px;">
+            ${isAr ? 'لم نتمكن من العثور على أي مادة' : 'No subjects found'}
+          </h3>
+          <p style="font-size: 0.85rem; color: #756966;">
+            ${isAr ? 'جرب البحث بكلمات أخرى أو تحقق من كتابة الاسم' : 'Try searching with different keywords'}
+          </p>
         </div>
       `;
       return;
@@ -417,7 +509,6 @@ const HomePage = {
     grid.innerHTML = filtered.map(subj => {
       const primaryTitle = isAr ? subj.name_ar : subj.name_en;
       const secondaryTitle = isAr ? subj.name_en : subj.name_ar;
-
       const theme = SUBJECT_THEMES[subj.id] || DEFAULT_THEME;
 
       let sheetsCount = 0;
@@ -440,25 +531,38 @@ const HomePage = {
       }
 
       return `
-        <div class="compact-subject-tile subject-card" onclick="window.HomePage.handleSubjectClick('${subj.id}');" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.HomePage.handleSubjectClick('${subj.id}');}" role="button" tabindex="0" aria-label="${primaryTitle}">
-          <div class="cst-top">
-            <div class="cst-icon-badge" style="background-color: ${theme.bg}; color: ${theme.color}; border: 1px solid ${theme.border};">
+        <div
+          class="kuro-subject-card"
+          data-subject-id="${subj.id}"
+          onclick="window.HomePage.handleSubjectClick('${subj.id}');"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.HomePage.handleSubjectClick('${subj.id}');}"
+          role="button"
+          tabindex="0"
+          aria-label="${primaryTitle}"
+        >
+          <div class="kuro-card-leaf-watermark"></div>
+
+          <!-- Top Row: Pastel Icon Box + Course Code Badge -->
+          <div class="ksc-top">
+            <div class="ksc-icon-box" style="background-color: ${theme.bg}; color: ${theme.color};">
               <i data-lucide="${theme.icon}"></i>
             </div>
-            <span class="cst-code-badge">${subj.code || 'DENT-300'}</span>
+            <span class="ksc-code-badge">${subj.code || 'DENT-300'}</span>
           </div>
 
-          <div class="cst-body">
-            <h3 class="cst-title-primary" title="${primaryTitle}">${primaryTitle}</h3>
-            <div class="cst-title-secondary" title="${secondaryTitle}">${secondaryTitle}</div>
+          <!-- Body: English & Arabic Names -->
+          <div class="ksc-body">
+            <h3 class="ksc-title-primary" title="${primaryTitle}">${primaryTitle}</h3>
+            <p class="ksc-title-secondary" title="${secondaryTitle}">${secondaryTitle}</p>
           </div>
 
-          <div class="cst-footer">
-            <span class="cst-count-pill">
+          <!-- Footer: Sheet count + chevron -->
+          <div class="ksc-footer">
+            <span class="ksc-sheet-count">
               <i data-lucide="file-text"></i>
               <span>${countText}</span>
             </span>
-            <span class="cst-open-hint">
+            <span class="ksc-arrow-btn">
               <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
             </span>
           </div>
@@ -470,10 +574,21 @@ const HomePage = {
   },
 
   setupListeners() {
-    const searchInput = document.getElementById('header-search-input');
-    if (searchInput) {
-      searchInput.oninput = (e) => {
+    // Grid search input
+    const gridSearch = document.getElementById('subjects-grid-search-input');
+    if (gridSearch) {
+      gridSearch.oninput = (e) => {
         HomePage.searchQuery = e.target.value.trim();
+        HomePage.renderSubjectsList(window.DATA.getSubjects(), false);
+      };
+    }
+
+    // Top navbar search input sync
+    const topSearch = document.getElementById('header-search-input');
+    if (topSearch) {
+      topSearch.oninput = (e) => {
+        HomePage.searchQuery = e.target.value.trim();
+        if (gridSearch) gridSearch.value = HomePage.searchQuery;
         HomePage.renderSubjectsList(window.DATA.getSubjects(), false);
       };
     }

@@ -172,23 +172,86 @@
 
     <!-- 2. MAIN APPLICATION CONTENT WRAPPER -->
     <div class="app-main-wrapper">
-      <!-- TOP HEADER (Clean White with Sticky Header) -->
-      <header class="site-header">
-        <div class="header-left">
+      <!-- TOP HEADER / NAVBAR (Warm Cream & Burgundy Matching Study Reference) -->
+      <header class="site-header" id="site-header">
+        <div class="header-left-group">
           <!-- Mobile Menu Toggle Button -->
           <button id="sidebar-toggle-btn" class="header-icon-btn mobile-toggle-btn" aria-label="Toggle Sidebar Menu">
             <i data-lucide="menu"></i>
           </button>
 
+          <!-- Kuro Identity Brand -->
+          <a href="#/" class="header-brand-identity" id="header-brand-identity">
+            <div class="header-brand-avatar">
+              <img id="header-brand-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" width="34" height="34" loading="lazy" />
+            </div>
+            <span class="header-brand-name" id="header-brand-name">Kuro Student</span>
+          </a>
+        </div>
+
+        <!-- Center Desktop Navigation Links (Pills matching mockup) -->
+        <nav class="header-nav-center" aria-label="Main Navigation">
+          <a href="#/" class="header-nav-pill active" data-route="/">
+            <i data-lucide="home"></i>
+            <span id="nav-item-home">Home</span>
+          </a>
+          <a href="#/sheets" class="header-nav-pill" data-route="/sheets">
+            <i data-lucide="book-open"></i>
+            <span id="nav-item-subjects">Subjects</span>
+          </a>
+          <a href="#/lecture-schedule" class="header-nav-pill" data-route="/lecture-schedule">
+            <i data-lucide="calendar"></i>
+            <span id="nav-item-schedule">Schedule</span>
+          </a>
+          <a href="#/exams" class="header-nav-pill" data-route="/exams">
+            <i data-lucide="file-check-2"></i>
+            <span id="nav-item-exams">Exams</span>
+          </a>
+
+          <!-- More Dropdown -->
+          <div class="header-nav-dropdown-wrap" id="header-more-dropdown-wrap">
+            <button class="header-nav-pill header-dropdown-trigger" id="header-more-btn" aria-haspopup="true" aria-expanded="false" onclick="this.parentElement.classList.toggle('open');">
+              <i data-lucide="more-horizontal"></i>
+              <span id="nav-item-more">More</span>
+            </button>
+            <div class="header-dropdown-menu" id="header-dropdown-menu">
+              <a href="#/questions" class="header-dropdown-item">
+                <i data-lucide="help-circle"></i>
+                <span id="nav-item-questions">Question Bank</span>
+              </a>
+              <a href="#/recordings" class="header-dropdown-item">
+                <i data-lucide="headphones"></i>
+                <span id="nav-item-recordings">Audio Recordings</span>
+              </a>
+              <a href="#/practical-schedule" class="header-dropdown-item">
+                <i data-lucide="microscope"></i>
+                <span id="nav-item-practical">Practical Labs</span>
+              </a>
+              <a href="#/rewards" class="header-dropdown-item">
+                <i data-lucide="sparkles"></i>
+                <span id="nav-item-rewards">Mascot Skins Hub</span>
+              </a>
+              <a href="#/games" class="header-dropdown-item">
+                <i data-lucide="gamepad-2"></i>
+                <span id="nav-item-games">Games</span>
+              </a>
+              <div class="header-dropdown-divider"></div>
+              <a href="#/admin" class="header-dropdown-item">
+                <i data-lucide="shield-check"></i>
+                <span id="nav-item-admin">Admin Portal</span>
+              </a>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Right Header Tools: Search, Notifications, Profile & Quick Toggles -->
+        <div class="header-right-tools">
           <!-- Search Box -->
           <div class="header-search-box">
             <i data-lucide="search" class="search-icon"></i>
-            <input type="text" id="header-search-input" placeholder="Search subjects, lectures, or topics..." />
+            <input type="text" id="header-search-input" placeholder="Search subjects, sheets..." autocomplete="off" />
           </div>
-        </div>
 
-        <!-- Header Actions: Notifications, Auth, Language, Theme, Points & Mascot Profile -->
-        <div class="header-actions">
           <!-- Notifications Bell Trigger -->
           <div class="notifications-bell-wrapper" id="notifications-bell-wrapper">
             <button id="header-notifications-btn" class="header-toggle-btn notifications-bell-btn" title="الإشعارات والأخبار | Notifications" aria-label="Notifications">
@@ -212,20 +275,13 @@
           </button>
 
           <!-- Sound Effects Toggle Button (Mute / Unmute) -->
-          <button id="sound-toggle-btn" class="header-toggle-btn" title="المؤثرات الصوتية | Sound Effects (Mute / Unmute)" aria-label="Toggle Sound Effects">
+          <button id="sound-toggle-btn" class="header-toggle-btn" title="المؤثرات الصوتية | Sound Effects" aria-label="Toggle Sound Effects">
             <i data-lucide="volume-2" id="sound-icon"></i>
           </button>
 
-          <!-- Academic Points Pill (Clickable to /rewards) -->
-          <a href="#/rewards" class="points-pill" title="Academic Points — Open Mascot Hub">
-            <i data-lucide="sparkles"></i>
-            <span id="header-points-text">25 pts</span>
-          </a>
-
-          <!-- Top Header Kuro Mascot Profile Avatar Button -->
-          <a href="#/rewards" class="header-mascot-avatar-btn" id="header-mascot-btn" title="Kuro Theme Hub & Rewards">
-            <img id="header-mascot-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" class="header-mascot-img" width="36" height="36" loading="lazy" />
-            <span class="header-mascot-pulse"></span>
+          <!-- User Profile Avatar Pill -->
+          <a href="#/profile" class="header-profile-avatar-btn" id="header-profile-btn" title="Student Profile">
+            <img id="header-mascot-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Profile Avatar" class="header-profile-avatar-img" width="34" height="34" loading="lazy" />
           </a>
         </div>
       </header>

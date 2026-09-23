@@ -59,6 +59,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.NotificationsCenter.updateUI();
     }
 
+    // Update Header Navigation Pill Texts
+    const isAr = lang === 'ar';
+    const navHome = document.getElementById('nav-item-home');
+    if (navHome) navHome.textContent = isAr ? 'الرئيسية' : 'Home';
+    const navSubj = document.getElementById('nav-item-subjects');
+    if (navSubj) navSubj.textContent = isAr ? 'المواد' : 'Subjects';
+    const navSched = document.getElementById('nav-item-schedule');
+    if (navSched) navSched.textContent = isAr ? 'الجدول' : 'Schedule';
+    const navExams = document.getElementById('nav-item-exams');
+    if (navExams) navExams.textContent = isAr ? 'الامتحانات' : 'Exams';
+    const navMore = document.getElementById('nav-item-more');
+    if (navMore) navMore.textContent = isAr ? 'المزيد' : 'More';
+    const headerBrandName = document.getElementById('header-brand-name');
+    if (headerBrandName) headerBrandName.textContent = isAr ? 'طالب كورو' : 'Kuro Student';
+
     // Update Auth header state
     if (window.SupabaseAuth && typeof window.SupabaseAuth.updateUI === 'function') {
       window.SupabaseAuth.updateUI(window.SupabaseAuth.getUser());
@@ -284,6 +299,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Close header More dropdown on click outside
+  document.addEventListener('click', (e) => {
+    const moreWrap = document.getElementById('header-more-dropdown-wrap');
+    if (moreWrap && !moreWrap.contains(e.target)) {
+      moreWrap.classList.remove('open');
+    }
+  });
+
   // 8. Register Routes
   const router = window.ROUTER;
 
@@ -446,7 +469,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 11. Update Active Sidebar Link on route change (Activates Radiant Vertical Light Line)
+  // 11. Update Active Nav Links on route change
   const updateActiveSidebarNav = (path) => {
     document.querySelectorAll('.sidebar-menu-item').forEach(btn => {
       const target = btn.getAttribute('data-route') || btn.getAttribute('href')?.replace('#', '');
@@ -456,6 +479,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.classList.remove('active');
       }
     });
+
+    // Update Top Header Nav Pills
+    document.querySelectorAll('.header-nav-pill').forEach(pill => {
+      const target = pill.getAttribute('data-route') || pill.getAttribute('href')?.replace('#', '');
+      if (target && (target === path || (target === '/' && (path === '' || path === '/')))) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+
     // Also close mobile drawer on navigation
     closeMobileSidebar();
   };

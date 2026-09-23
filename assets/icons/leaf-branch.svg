@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+  <path d="M15 85 C35 70, 60 50, 85 15" stroke="#C8826F" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.45" />
+  <!-- Leaf 1 (top right) -->
+  <path d="M85 15 C75 16, 68 24, 72 32 C78 30, 84 23, 85 15 Z" fill="#D99B87" opacity="0.35" />
+  <!-- Leaf 2 (mid-top left) -->
+  <path d="M68 34 C58 30, 52 35, 55 44 C62 43, 67 39, 68 34 Z" fill="#D99B87" opacity="0.32" />
+  <!-- Leaf 3 (mid right) -->
+  <path d="M56 46 C50 54, 55 62, 64 61 C63 53, 59 48, 56 46 Z" fill="#D99B87" opacity="0.30" />
+  <!-- Leaf 4 (mid-low left) -->
+  <path d="M42 58 C32 56, 28 62, 32 70 C38 69, 41 64, 42 58 Z" fill="#D99B87" opacity="0.28" />
+  <!-- Leaf 5 (bottom right) -->
+  <path d="M30 70 C28 78, 34 84, 42 82 C40 75, 35 71, 30 70 Z" fill="#D99B87" opacity="0.25" />
+</svg>

@@ -478,23 +478,12 @@ window.NotificationsCenter = (function () {
   function repositionPanel(panel) {
     if (!panel) return;
     if (window.innerWidth <= 640) {
-      panel.style.transform = '';
+      panel.style.transform = 'none';
       return;
     }
-    requestAnimationFrame(() => {
-      panel.style.transform = 'translateY(0) scale(1)';
-      const rect = panel.getBoundingClientRect();
-      const margin = 12;
-      let shiftX = 0;
-      if (rect.right > window.innerWidth - margin) {
-        shiftX = -(rect.right - (window.innerWidth - margin));
-      } else if (rect.left < margin) {
-        shiftX = margin - rect.left;
-      }
-      if (shiftX !== 0) {
-        panel.style.transform = `translateY(0) scale(1) translateX(${shiftX}px)`;
-      }
-    });
+    panel.style.right = '0px';
+    panel.style.left = 'auto';
+    panel.style.transform = 'translateY(0) scale(1)';
   }
 
   // Toggle Dropdown Panel

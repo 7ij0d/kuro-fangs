@@ -25,6 +25,7 @@ const SubjectModal = {
       modalBox.setAttribute('aria-modal', 'true');
       backdrop.appendChild(modalBox);
     }
+    modalBox.onclick = (e) => e.stopPropagation();
     backdrop.onclick = (e) => {
       if (e.target === backdrop) SubjectModal.close();
     };
@@ -59,7 +60,12 @@ const SubjectModal = {
     if (!modalBox || !backdrop) return;
 
     SubjectModal.renderCategoriesView();
-    backdrop.classList.add('active');
+    backdrop.style.display = 'flex';
+    backdrop.setAttribute('aria-hidden', 'false');
+    const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+    raf(() => {
+      backdrop.classList.add('active');
+    });
     document.body.style.overflow = 'hidden';
 
     if (window.lucide) window.lucide.createIcons();
@@ -69,6 +75,12 @@ const SubjectModal = {
     const backdrop = document.getElementById('subject-modal-backdrop');
     if (backdrop) {
       backdrop.classList.remove('active');
+      backdrop.setAttribute('aria-hidden', 'true');
+      setTimeout(() => {
+        if (!backdrop.classList.contains('active')) {
+          backdrop.style.display = 'none';
+        }
+      }, 220);
     }
     document.body.style.overflow = '';
   },
