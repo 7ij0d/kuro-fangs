@@ -27,6 +27,48 @@ const DEFAULT_THEME = {
   border: 'rgba(126, 29, 42, 0.20)'
 };
 
+/* ─── Instant Hero Banner In-Memory & LocalStorage Engine ─── */
+const HERO_BANNER_CONFIG = {
+  src: 'assets/hero/kuro-study-hero.jpg',
+  storageKey: 'kf_hero_banner_b64'
+};
+
+let _cachedHeroDataUrl = null;
+try {
+  _cachedHeroDataUrl = localStorage.getItem(HERO_BANNER_CONFIG.storageKey);
+} catch (e) { /* private mode or disabled storage */ }
+
+// Prime memory & GPU bitmap cache immediately so first paint is 0ms
+const _prewarmHero = new Image();
+_prewarmHero.src = _cachedHeroDataUrl || HERO_BANNER_CONFIG.src;
+
+// If image is not yet cached in localStorage as base64, fetch in background and persist
+if (!_cachedHeroDataUrl && typeof window !== 'undefined' && typeof window.fetch === 'function') {
+  setTimeout(() => {
+    fetch(HERO_BANNER_CONFIG.src)
+      .then(res => {
+        if (!res.ok) throw new Error('Hero fetch status ' + res.status);
+        return res.blob();
+      })
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          try {
+            const base64 = reader.result;
+            if (base64 && typeof base64 === 'string') {
+              localStorage.setItem(HERO_BANNER_CONFIG.storageKey, base64);
+              _cachedHeroDataUrl = base64;
+            }
+          } catch (e) {
+            // Storage quota or sandboxed
+          }
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(() => {});
+  }, 50);
+}
+
 const HomePage = {
   searchQuery: '',
   loadingTimeout: null,
@@ -114,16 +156,19 @@ const HomePage = {
      ══════════════════════════════════════════ */
   renderHeroSection(isAr) {
     const { title, subtitle, dateFormatted } = HomePage.getHeroGreetingData(isAr);
+    const heroSrc = _cachedHeroDataUrl || HERO_BANNER_CONFIG.src;
 
     return `
       <section class="kuro-hero-workspace" aria-label="Hero Study Workspace">
         <div class="kuro-hero-banner">
           <img
-            src="assets/hero/kuro-study-hero.png"
+            src="${heroSrc}"
             alt="Kuro Cozy Study Scene"
             class="kuro-hero-bg-img"
             width="1280"
             height="560"
+            loading="eager"
+            decoding="sync"
             fetchpriority="high"
           />
           <div class="kuro-hero-greeting-overlay" dir="${isAr ? 'rtl' : 'ltr'}">
