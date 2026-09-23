@@ -1255,6 +1255,23 @@ class DataService {
         "download_url": "data/sheets/dental-caries-prevention.pdf",
         "pdf_source": "local",
         "date": "2026-09-22"
+    },
+    {
+        "id": "sh_oral_path_pulp_02",
+        "subject_id": "oral-diseases",
+        "title": "Lecture 2: Disorders of the Dental Pulp",
+        "title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Disorders of Dental Pulp)",
+        "title_en": "Lecture 2: Disorders of the Dental Pulp",
+        "doctor_name": "د. عائشة أبوبكر شنان",
+        "doctor": "د. عائشة أبوبكر شنان",
+        "pages": 16,
+        "pages_count": 16,
+        "order_index": 2,
+        "size": "1.19 MB",
+        "pdf_url": "data/sheets/disorders-of-dental-pulp.pdf",
+        "download_url": "data/sheets/disorders-of-dental-pulp.pdf",
+        "pdf_source": "local",
+        "date": "2026-09-21"
     }
 ];
   }

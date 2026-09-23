@@ -80,6 +80,20 @@
       "content_ar": "تم إضافة المحاضرة الثانية في مقرر طب الأسنان الوقائي 1 بعنوان «تسوس الأسنان والنظريات الحديثة للأسباب - Dental Caries & Current Concepts of Etiology» للدكتورة حنان عمران.\nالمحاضرة متوفرة الآن للدراسة والتصفح مع بنك الأسئلة والملخصات.",
       "publisher_ar": "قسم طب الأسنان الوقائي وصحة المجتمع – كلية طب وجراحة الفم والأسنان",
       "url": "#/sheet-detail?id=sh_prev_dental_caries_02"
+    },
+    {
+      "id": "alt_2026_07",
+      "type": "plan",
+      "badge_ar": "محاضرة جديدة • أمراض الفم",
+      "badge_en": "New Lecture • Oral Pathology",
+      "title_ar": "رفع المحاضرة الثانية (Disorders of the Dental Pulp) في مادة أمراض الفم للدكتورة عائشة أبوبكر",
+      "title_en": "Uploaded Lecture 2 (Disorders of the Dental Pulp) for Oral Pathology by Dr. Aisha Abubaker Shanan",
+      "date": "2026-09-21",
+      "time": "09:00 AM",
+      "cover": "assets/covers/oral-diseases.webp",
+      "content_ar": "تم إضافة المحاضرة الثانية في مقرر أمراض الفم بعنوان «أمراض واضطرابات لب الأسنان - Disorders of the Dental Pulp» للدكتورة عائشة أبوبكر شنان.\nتشمل المحاضرة تصنيفات التهاب اللب والبوليب اللبي والتكلسات والارتشاف الداخلي.",
+      "publisher_ar": "قسم أمراض الفم والوجه والفكين – كلية طب وجراحة الفم والأسنان",
+      "url": "#/sheet-detail?id=sh_oral_path_pulp_02"
     }
   ]
 }

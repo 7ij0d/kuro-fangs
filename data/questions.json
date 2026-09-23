@@ -487,6 +487,80 @@
       "answer_ar": "الإجابة المعتمدة: B. المكورات العقدية الطافرة (Mutans Streptococci)\n\nمرجع المحاضرة (صفحة 5):\n«Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid. Lactobacilli (LB): Secondary Continuer.»\nالمكورات العقدية الطافرة هي المبادرة للتسوس، بينما اللاكتوباسيلس مكمل ومستمر للتجويف العميق.",
       "answer_en": "Correct Answer: B. Mutans Streptococci (MS)\n\nLecture Reference (Page 5):\n\"Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid. Lactobacilli (LB): Secondary Continuer.\"",
       "quote_ref": "Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid."
+    },
+    {
+      "id": "q_path_pulp_01",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "أمراض الفم",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Disorders of Dental Pulp)",
+      "sheet_title_en": "Lecture 2: Disorders of the Dental Pulp",
+      "page_ref": 10,
+      "topic_ar": "شروط تكون البوليب اللبي (Pulp Polyp)",
+      "topic_en": "Prerequisites for Chronic Hyperplastic Pulpitis",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Pulp Polyp",
+        "Chronic Hyperplastic Pulpitis",
+        "Apical Foramen"
+      ],
+      "text_ar": "أي من الشروط التالية يُعد ضرورياً وأساسياً لحدوث التهاب اللب المفرط التنسج المزمن (Chronic Hyperplastic Pulpitis / Pulp Polyp) في الأسنان؟",
+      "text_en": "Which of the following prerequisites must be fulfilled for Chronic Hyperplastic Pulpitis (Pulp Polyp) to develop?",
+      "options_ar": [
+        "ثقب قمي ضيق ومغلق تماماً (Constricted closed apical foramen)",
+        "ثقب قمي واسع مع تروية دموية ممتازة وعمر مريض صغير (Wide apical foramen, rich vascularity, young patient)",
+        "تعرض اللب لانغلاق تام وعدم وجود فجوة نخرية واسعة",
+        "حدوث التهاب متقدم في سن كهل أو مسن ضعيف التكاثر الخلوي"
+      ],
+      "options_en": [
+        "Constricted closed apical foramen",
+        "Wide apical foramen, excellent blood supply, and young patient",
+        "Absence of open carious cavity",
+        "Elderly patient with low proliferative capacity"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة المعتمدة: B. ثقب قمي واسع مع تروية دموية ممتازة وعمر مريض صغير\n\nمرجع المحاضرة (صفحة 10):\n«For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) A good sheltered area. 2) A wide apical foramen for good blood supply. 3) A wide pulp exposure. 4) Young aged patient for good proliferative power.»\nالبوليب اللبي يحدث عند صغار السن في الأضراس اللبنية أو الضرس الدائم الأول لاتساع الثقب القمي ووفرة التروية الدموية.",
+      "answer_en": "Correct Answer: B. Wide apical foramen, excellent blood supply, and young patient\n\nLecture Reference (Page 10):\n\"For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) Sheltered area 2) Wide apical foramen for good blood supply 3) Wide pulp exposure 4) Young aged patient for good proliferative power.\"",
+      "quote_ref": "For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) A good sheltered area 2) A wide apical foramen for good blood supply 3) A wide pulp exposure 4) Young aged patient"
+    },
+    {
+      "id": "q_path_pulp_02",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "أمراض الفم",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Disorders of Dental Pulp)",
+      "sheet_title_en": "Lecture 2: Disorders of the Dental Pulp",
+      "page_ref": 15,
+      "topic_ar": "الارتشاف الداخلي للب والسن الوردي",
+      "topic_en": "Internal Resorption / Pink Tooth",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Internal Resorption",
+        "Pink Tooth",
+        "Radiographic Features"
+      ],
+      "text_ar": "ما هو المظهر الإشعاعي (Radiographic feature) المميز لحالات الارتشاف الداخلي للب (Internal Resorption)؟",
+      "text_en": "What is the characteristic radiographic appearance of Internal Resorption in teeth?",
+      "options_ar": [
+        "كتلة بيضاء معتمة متكلسة ومفصولة تماماً عن اللب",
+        "شفافية شعاعية متناظرة ومستديرة ومحددة المعالم متصلة بمسار اللب (Symmetrical, round, well-defined radiolucency continuous with the pulp space)",
+        "تضيق كامل وتلاشي لمسار القناة الجذرية",
+        "تكثف عظمي واسع محيط بذروة السن"
+      ],
+      "options_en": [
+        "Opaque calcified mass completely separated from the pulp",
+        "Symmetrical, round, well-defined radiolucency continuous with the pulp space",
+        "Complete obliteration and narrowing of the root canal",
+        "Diffuse condensing osteitis around the apex"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة المعتمدة: B. شفافية شعاعية متناظرة ومستديرة ومحددة المعالم متصلة بمسار اللب\n\nمرجع المحاضرة (صفحة 15):\n«Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted.»\nتظهر الشفافية الشعاعية متصلة باللب مباشرة وتسبب تضخم مسار اللب وظهور بقعة وردية سريرياً (Pink Tooth) عند تآكل العاج تحت المينا.",
+      "answer_en": "Correct Answer: B. Symmetrical, round, well-defined radiolucency continuous with the pulp space\n\nLecture Reference (Page 15):\n\"Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted.\"",
+      "quote_ref": "Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted."
     }
   ]
 }
