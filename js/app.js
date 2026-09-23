@@ -142,6 +142,73 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const sideUserSub = document.getElementById('sidebar-user-sub');
     if (sideUserSub) sideUserSub.textContent = t('academicYear');
+
+    // Update Mobile Bottom Nav & More Sheet
+    const mobHome = document.getElementById('mob-nav-home');
+    if (mobHome) mobHome.textContent = isAr ? 'الرئيسية' : 'Home';
+    const mobSheets = document.getElementById('mob-nav-sheets');
+    if (mobSheets) mobSheets.textContent = isAr ? 'الشيتات' : 'Sheets';
+    const mobRecordings = document.getElementById('mob-nav-recordings');
+    if (mobRecordings) mobRecordings.textContent = isAr ? 'التسجيلات' : 'Audio';
+    const mobQuestions = document.getElementById('mob-nav-questions');
+    if (mobQuestions) mobQuestions.textContent = isAr ? 'الأسئلة' : 'Questions';
+    const mobMore = document.getElementById('mob-nav-more');
+    if (mobMore) mobMore.textContent = isAr ? 'المزيد' : 'More';
+
+    // Mobile More Sheet texts
+    const mobMoreTitle = document.getElementById('mobile-more-title');
+    if (mobMoreTitle) mobMoreTitle.textContent = isAr ? 'مركز كورو والأدوات' : 'Kuro Hub & Tools';
+    const mobMoreSub = document.getElementById('mobile-more-sub');
+    if (mobMoreSub) mobMoreSub.textContent = isAr ? 'طب وجراحة الفم والأسنان • السنة الثالثة' : 'Dentistry • Year 3';
+
+    const mobLangBtnText = document.getElementById('mob-lang-btn-text');
+    if (mobLangBtnText) mobLangBtnText.textContent = lang === 'en' ? 'AR' : 'EN';
+
+    const mobGroupAcademic = document.getElementById('mob-group-academic');
+    if (mobGroupAcademic) mobGroupAcademic.textContent = isAr ? 'الدراسة والأكاديميا' : 'Study & Academic';
+    const mobLinkTheory = document.getElementById('mob-link-theory');
+    if (mobLinkTheory) mobLinkTheory.textContent = isAr ? 'جدول المحاضرات النظري' : 'Theory Schedule';
+    const mobDescTheory = document.getElementById('mob-desc-theory');
+    if (mobDescTheory) mobDescTheory.textContent = isAr ? 'مواعيد المحاضرات والقاعات' : 'Lectures & Auditorium';
+
+    const mobLinkPractical = document.getElementById('mob-link-practical');
+    if (mobLinkPractical) mobLinkPractical.textContent = isAr ? 'جدول المعامل والعيادات' : 'Clinical & Lab Schedule';
+    const mobDescPractical = document.getElementById('mob-desc-practical');
+    if (mobDescPractical) mobDescPractical.textContent = isAr ? 'العيادات ومعامل الفانتوم' : 'Clinics & Phantom Lab';
+
+    const mobLinkExams = document.getElementById('mob-link-exams');
+    if (mobLinkExams) mobLinkExams.textContent = isAr ? 'جداول الامتحانات الرسمية' : 'Official Exam Schedule';
+    const mobDescExams = document.getElementById('mob-desc-exams');
+    if (mobDescExams) mobDescExams.textContent = isAr ? 'امتحانات الجزئي والنهائي' : 'Midterms & Finals';
+
+    const mobGroupKuro = document.getElementById('mob-group-kuro');
+    if (mobGroupKuro) mobGroupKuro.textContent = isAr ? 'كورو الترفيهي' : 'Kuro Mascot';
+    const mobLinkRewards = document.getElementById('mob-link-rewards');
+    if (mobLinkRewards) mobLinkRewards.textContent = isAr ? 'مركز المظهر والجوائز' : 'Mascot Hub';
+    const mobDescRewards = document.getElementById('mob-desc-rewards');
+    if (mobDescRewards) mobDescRewards.textContent = isAr ? 'تخصيص شخصية كورو' : 'Skins & Outfits';
+
+    const mobLinkGames = document.getElementById('mob-link-games');
+    if (mobLinkGames) mobLinkGames.textContent = isAr ? 'ألعاب واستراحة دراسية' : 'Arcade & Games';
+    const mobDescGames = document.getElementById('mob-desc-games');
+    if (mobDescGames) mobDescGames.textContent = isAr ? 'ألعاب تدريب وتسلية' : 'Study Break Minigames';
+
+    const mobGroupAccount = document.getElementById('mob-group-account');
+    if (mobGroupAccount) mobGroupAccount.textContent = isAr ? 'الحساب والإدارة' : 'Account & Administration';
+    const mobLinkProfile = document.getElementById('mob-link-profile');
+    if (mobLinkProfile) mobLinkProfile.textContent = isAr ? 'الملف الشخصي والإعدادات' : 'Profile & Settings';
+    const mobDescProfile = document.getElementById('mob-desc-profile');
+    if (mobDescProfile) mobDescProfile.textContent = isAr ? 'إعدادات الحساب والمظهر' : 'Preferences & Info';
+
+    const mobLinkAdmin = document.getElementById('mob-link-admin');
+    if (mobLinkAdmin) mobLinkAdmin.textContent = isAr ? 'بوابة إدارة الكلية' : 'Faculty Admin Portal';
+    const mobDescAdmin = document.getElementById('mob-desc-admin');
+    if (mobDescAdmin) mobDescAdmin.textContent = isAr ? 'إدارة الشيتات والمحتوى' : 'Sheet & Catalog Management';
+
+    const mobSoonRewards = document.getElementById('mob-soon-rewards');
+    if (mobSoonRewards) mobSoonRewards.textContent = isAr ? 'قريباً' : 'Soon';
+    const mobSoonGames = document.getElementById('mob-soon-games');
+    if (mobSoonGames) mobSoonGames.textContent = isAr ? 'قريباً' : 'Soon';
   };
 
   const initialLang = window.I18N.getLang();
@@ -153,8 +220,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const themeIcon = document.getElementById('theme-icon');
     if (themeIcon) {
       themeIcon.setAttribute('data-lucide', (theme === 'kuro-dark' || theme === 'dark') ? 'sun' : 'moon');
-      if (window.lucide) window.lucide.createIcons();
     }
+    const mobThemeIcon = document.getElementById('mob-theme-icon');
+    const mobThemeText = document.getElementById('mob-theme-text');
+    const isDark = (theme === 'kuro-dark' || theme === 'dark');
+    if (mobThemeIcon) mobThemeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+    if (mobThemeText) mobThemeText.textContent = isDark ? (window.I18N?.getLang() === 'ar' ? 'فاتح' : 'Light') : (window.I18N?.getLang() === 'ar' ? 'داكن' : 'Dark');
+    if (window.lucide) window.lucide.createIcons();
   };
 
   const initialTheme = window.STORE.getTheme();
@@ -190,8 +262,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const soundIcon = document.getElementById('sound-icon');
     if (soundIcon) {
       soundIcon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
-      if (window.lucide) window.lucide.createIcons();
     }
+    const mobSoundIcon = document.getElementById('mob-sound-icon');
+    const mobSoundText = document.getElementById('mob-sound-text');
+    if (mobSoundIcon) mobSoundIcon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
+    if (mobSoundText) mobSoundText.textContent = enabled ? (window.I18N?.getLang() === 'ar' ? 'مفعّل' : 'On') : (window.I18N?.getLang() === 'ar' ? 'مكتوم' : 'Mute');
+    if (window.lucide) window.lucide.createIcons();
+
     if (soundToggleBtn) {
       soundToggleBtn.setAttribute('data-sound-active', enabled ? 'true' : 'false');
       soundToggleBtn.style.opacity = enabled ? '1' : '0.55';
@@ -221,6 +298,79 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.addEventListener('kf:sound-toggle', (e) => {
     if (e.detail) updateSoundUI(e.detail.enabled);
+  });
+
+  // 6.3. Setup Mobile More Bottom Sheet Controls
+  const moreTrigger = document.getElementById('mobile-more-trigger');
+  const moreBackdrop = document.getElementById('mobile-more-sheet-backdrop');
+  const moreCloseBtn = document.getElementById('mobile-more-close-btn');
+  const moreSheet = document.getElementById('mobile-more-sheet');
+
+  const openMobileMoreSheet = () => {
+    if (moreBackdrop) moreBackdrop.classList.add('open');
+    if (moreSheet) moreSheet.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (window.lucide) window.lucide.createIcons();
+  };
+
+  const closeMobileMoreSheet = () => {
+    if (moreBackdrop) moreBackdrop.classList.remove('open');
+    if (moreSheet) moreSheet.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  if (moreTrigger) moreTrigger.addEventListener('click', openMobileMoreSheet);
+  if (moreCloseBtn) moreCloseBtn.addEventListener('click', closeMobileMoreSheet);
+  if (moreBackdrop) {
+    moreBackdrop.addEventListener('click', (e) => {
+      if (e.target === moreBackdrop) closeMobileMoreSheet();
+    });
+  }
+
+  // Mobile More quick setting buttons
+  const mobLangBtn = document.getElementById('mob-lang-toggle-btn');
+  if (mobLangBtn) {
+    mobLangBtn.addEventListener('click', () => {
+      const newLang = window.I18N.toggleLang();
+      applyLanguage(newLang);
+      if (window.SoundFX) window.SoundFX.play('pop');
+      window.ROUTER.handleRoute();
+      updateGlobalMascotAvatars();
+      if (window.lucide) window.lucide.createIcons();
+    });
+  }
+
+  const mobThemeBtn = document.getElementById('mob-theme-toggle-btn');
+  if (mobThemeBtn) {
+    mobThemeBtn.addEventListener('click', () => {
+      const newTheme = window.STORE.toggleTheme();
+      applyTheme(newTheme);
+      if (window.SoundFX) window.SoundFX.play('switch');
+    });
+  }
+
+  const mobSoundBtn = document.getElementById('mob-sound-toggle-btn');
+  if (mobSoundBtn) {
+    mobSoundBtn.addEventListener('click', () => {
+      if (window.SoundFX) {
+        const newState = window.SoundFX.toggle();
+        updateSoundUI(newState);
+        if (window.Toast) {
+          const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+          window.Toast.show(
+            newState 
+              ? (isAr ? 'تم تفعيل المؤثرات الصوتية 🔊' : 'Sound Effects Enabled 🔊') 
+              : (isAr ? 'تم كتم المؤثرات الصوتية 🔇' : 'Sound Effects Muted 🔇'),
+            'info'
+          );
+        }
+      }
+    });
+  }
+
+  // Close sheet on any navigation link clicked inside the sheet
+  document.querySelectorAll('.mobile-more-card-link').forEach(link => {
+    link.addEventListener('click', closeMobileMoreSheet);
   });
 
   // 6.5. Setup Global Header Search Bar (works on all pages)

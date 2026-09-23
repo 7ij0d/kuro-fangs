@@ -85,12 +85,18 @@ class Router {
     // Scroll smoothly to top
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    // Close mobile drawer if open
+    // Close mobile drawer or more sheet if open
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
     if (sidebar && sidebar.classList.contains('open')) {
       sidebar.classList.remove('open');
       backdrop?.classList.remove('open');
+    }
+    const moreSheetBackdrop = document.getElementById('mobile-more-sheet-backdrop');
+    const moreSheet = document.getElementById('mobile-more-sheet');
+    if (moreSheetBackdrop && moreSheetBackdrop.classList.contains('open')) {
+      moreSheetBackdrop.classList.remove('open');
+      moreSheet?.classList.remove('open');
     }
 
     // Clean up lingering temporary backdrops or fixed overlays from previous views
@@ -161,7 +167,7 @@ class Router {
   }
 
   updateActiveNav(currentPath) {
-    document.querySelectorAll('.nav-item, .sidebar-menu-item').forEach(link => {
+    document.querySelectorAll('.nav-item, .sidebar-menu-item, .header-nav-pill, .mobile-bottom-nav-item').forEach(link => {
       const target = link.getAttribute('data-route') || link.getAttribute('href')?.replace('#', '');
       if (!target) return;
 
@@ -171,6 +177,14 @@ class Router {
         link.classList.remove('active');
       }
     });
+
+    // Handle More button state on mobile bottom nav
+    const moreBtn = document.getElementById('mobile-more-trigger');
+    if (moreBtn) {
+      const moreRoutes = ['/lecture-schedule', '/practical-schedule', '/exams', '/rewards', '/games', '/profile', '/admin'];
+      const isMoreActive = moreRoutes.some(r => currentPath.startsWith(r));
+      moreBtn.classList.toggle('active', isMoreActive);
+    }
   }
 }
 
