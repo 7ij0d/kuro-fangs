@@ -1221,6 +1221,23 @@ class DataService {
         "download_url": "https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/pdf-sheets/sheets/sh_admin_1789462201436_1789687054748.pdf",
         "pdf_source": "cloud",
         "date": "2026-09-15"
+    },
+    {
+        "id": "sh_cons_dentin_pulp",
+        "subject_id": "cons-endo",
+        "title": "Sheet 1: Dentin-Pulp Complex",
+        "title_ar": "الشيت 1: معقد العاج واللب (Dentin-Pulp Complex)",
+        "title_en": "Sheet 1: Dentin-Pulp Complex",
+        "doctor_name": "د. آمال كشلاف",
+        "doctor": "د. آمال كشلاف",
+        "pages": 23,
+        "pages_count": 23,
+        "order_index": 1,
+        "size": "1.7 MB",
+        "pdf_url": "data/sheets/dentin-pulp-complex.pdf",
+        "download_url": "data/sheets/dentin-pulp-complex.pdf",
+        "pdf_source": "local",
+        "date": "2026-09-23"
     }
 ];
   }

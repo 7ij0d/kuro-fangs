@@ -339,6 +339,80 @@
       "answer_ar": "الإجابة المعتمدة: D. جميع ما سبق (All of the above)\n\nمرجع الشيت (صفحة 11):\nمذكورة مباشرة تحت البند: «8. Halitosis — e.g.»:\n• Periodontal disease (الخيار B)\n• Diabetes (الخيار A)\n• Decayed teeth (الخيار C)\nلذا فإن جميع الحالات المذكورة تُعد أسباباً سريرية للبخر الفموي.",
       "answer_en": "Correct Answer: D. All of the above\n\nSheet Reference (Page 11):\nListed directly under \"8. Halitosis — e.g.\":\n• Periodontal disease (Option B)\n• Diabetes (Option A)\n• Decayed teeth (Option C)\nAll listed conditions present with halitosis.",
       "quote_ref": "8. Halitosis — e.g.: • Periodontal disease • Diabetes • Decayed teeth"
+    },
+    {
+      "id": "q_cons_01",
+      "subject_id": "cons-endo",
+      "subject_name_ar": "العلاج التحفظي 2",
+      "subject_name_en": "Cons & Endo II",
+      "sheet_id": "sh_cons_dentin_pulp",
+      "sheet_title_ar": "الشيت 1: معقد العاج واللب (Dentin-Pulp Complex)",
+      "sheet_title_en": "Sheet 1: Dentin-Pulp Complex",
+      "page_ref": 4,
+      "topic_ar": "تركيب العاج والنسبة العضوية",
+      "topic_en": "Dentin Composition & Organic Matrix",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Dentin",
+        "Composition",
+        "Collagen"
+      ],
+      "text_ar": "ما هو المكون العضوي الأساسي الذي يُشكل الجزء الأكبر من المادة العضوية (20%) في نسيج العاج (Dentin)؟",
+      "text_en": "What is the primary organic component forming the bulk of the 20% organic substances in dentin tissue?",
+      "options_ar": [
+        "كولاجين النوع الأول (Type I collagen)",
+        "كولاجين النوع الثاني (Type II collagen)",
+        "أمورفوس فوسفات الكالسيوم (Amorphous calcium phosphate)",
+        "كيراتين صلب (Hard keratin)"
+      ],
+      "options_en": [
+        "Type I collagen",
+        "Type II collagen",
+        "Amorphous calcium phosphate",
+        "Hard keratin"
+      ],
+      "correct_index": 0,
+      "answer_ar": "الإجابة المعتمدة: A. كولاجين النوع الأول (Type I collagen)\n\nمرجع الشيت (صفحة 4):\n«Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water.»\nتتكون المادة العضوية في العاج بنسبة 20% وأغلبها من ألياف كولاجين النوع الأول Type I collagen مما يمنحه مرونة أكثر من المينا.",
+      "answer_en": "Correct Answer: A. Type I collagen\n\nSheet Reference (Page 4):\n\"Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water.\"\nType I collagen provides dentin with high resilience compared to brittle enamel.",
+      "quote_ref": "Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water."
+    },
+    {
+      "id": "q_cons_02",
+      "subject_id": "cons-endo",
+      "subject_name_ar": "العلاج التحفظي 2",
+      "subject_name_en": "Cons & Endo II",
+      "sheet_id": "sh_cons_dentin_pulp",
+      "sheet_title_ar": "الشيت 1: معقد العاج واللب (Dentin-Pulp Complex)",
+      "sheet_title_en": "Sheet 1: Dentin-Pulp Complex",
+      "page_ref": 16,
+      "topic_ar": "الألياف العصبية في اللب ونوع الألم",
+      "topic_en": "Pulpal Nerve Fibers & Pain Types",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Pulp Innervation",
+        "A-delta fibers",
+        "C fibers"
+      ],
+      "text_ar": "أي من الألياف العصبية التالية تقع سطحياً في لب السن وتتميز بسرعة توصيل عالية وتكون مسؤولة عن الألم الحاد الموضعي (Sharp localized dentinal pain)؟",
+      "text_en": "Which pulpal nerve fibers lie superficially, have faster conduction velocity, and are responsible for sharp localized dentinal pain?",
+      "options_ar": [
+        "ألياف C البطيئة (C fibers)",
+        "ألياف A-دلتا (A-delta fibers)",
+        "ألياف بافيني العصبية (Ruffini fibers)",
+        "ألياف كولاجينية غير مايلينية (Non-myelinated collagen fibers)"
+      ],
+      "options_en": [
+        "C fibers",
+        "A-delta fibers",
+        "Ruffini fibers",
+        "Non-myelinated collagen fibers"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة المعتمدة: B. ألياف A-دلتا (A-delta fibers)\n\nمرجع الشيت (صفحة 16):\n«A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain. In contrast, C fibers are slower in conduction and are responsible for dull and throbbing pain.»\nألياف A تقع سطحياً وتوصل الإحساس بالألم الحاد والموضعي سريعاً.",
+      "answer_en": "Correct Answer: B. A-delta fibers\n\nSheet Reference (Page 16):\n\"A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain. C fibers are slower in conduction and are responsible for dull and throbbing pain.\"",
+      "quote_ref": "A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain."
     }
   ]
 }

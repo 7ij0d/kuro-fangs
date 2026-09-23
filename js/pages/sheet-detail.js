@@ -441,9 +441,13 @@ const SheetDetailPage = {
         if (!pdfUrl) {
           pdfUrl = 'pdfjs/web/compressed.tracemonkey-pldi-09.pdf';
         }
+        let finalFileParam = pdfUrl;
+        if (pdfUrl && !pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://') && !pdfUrl.startsWith('/') && !pdfUrl.startsWith('../')) {
+          finalFileParam = '../../' + pdfUrl;
+        }
         const iframe = document.createElement('iframe');
         iframe.id = 'sheet-pdf-iframe';
-        iframe.src = `pdfjs/web/viewer.html?v=2.3.0&file=${encodeURIComponent(pdfUrl)}`;
+        iframe.src = `pdfjs/web/viewer.html?v=2.3.0&file=${encodeURIComponent(finalFileParam)}`;
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';

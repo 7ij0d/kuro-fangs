@@ -235,6 +235,17 @@ const SheetsPage = {
           const doc = filtered.find(s => s.id === id);
           if (window.DocumentViewer) {
             window.DocumentViewer.download(doc || { title: 'Dental Sheet' });
+          } else if (doc && (doc.download_url || doc.pdf_url)) {
+            const url = doc.download_url || doc.pdf_url;
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = (doc.title || 'Sheet') + '.pdf';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            if (window.STORE) window.STORE.addPoints(10);
+            if (window.showToast) window.showToast(isAr ? 'تم بدء التنزيل (+10 نقاط)' : 'Download started (+10 pts)', { type: 'success', points: 10 });
           } else {
             if (window.STORE) window.STORE.addPoints(10);
             if (window.showToast) window.showToast(isAr ? 'تم بدء التنزيل (+10 نقاط)' : 'Download started (+10 pts)', { type: 'success', points: 10 });
