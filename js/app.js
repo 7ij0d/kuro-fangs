@@ -134,10 +134,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Setup Initial Theme
   const applyTheme = (theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
+    const normalized = (theme === 'kuro-dark' || theme === 'dark') ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', normalized);
     const themeIcon = document.getElementById('theme-icon');
     if (themeIcon) {
-      themeIcon.setAttribute('data-lucide', (theme === 'kuro-dark' || theme === 'dark') ? 'sun' : 'moon');
+      themeIcon.setAttribute('data-lucide', normalized === 'dark' ? 'sun' : 'moon');
       if (window.lucide) window.lucide.createIcons();
     }
   };
