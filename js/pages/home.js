@@ -1,11 +1,37 @@
 /**
- * KURO FANGS — HOME DASHBOARD (REDESIGNED ACADEMIA v2)
- * Modern Academic Dashboard with Hero, Quick Access, Continue Learning & Simplified Subject Cards
+ * KURO FANGS — HOME DASHBOARD (REDESIGNED ACADEMIA v3)
+ * Modern Academic Dashboard: Compact Greeting Banner, Tabbed Daily Lectures & Lightweight Subject Tiles
  */
+
+const SUBJECT_THEMES = {
+  'gen-med':        { icon: 'stethoscope', color: '#0D9488', bg: 'rgba(13, 148, 136, 0.10)', border: 'rgba(13, 148, 136, 0.22)' },
+  'gen-surgery':    { icon: 'activity',    color: '#EF4444', bg: 'rgba(239, 68, 68, 0.10)',  border: 'rgba(239, 68, 68, 0.22)' },
+  'fixed-pros':     { icon: 'shield',      color: '#D97706', bg: 'rgba(217, 119, 6, 0.10)',  border: 'rgba(217, 119, 6, 0.22)' },
+  'omfs':           { icon: 'scissors',    color: '#C84343', bg: 'rgba(200, 67, 67, 0.10)',  border: 'rgba(200, 67, 67, 0.22)' },
+  'oral-diseases':  { icon: 'microscope',  color: '#EA580C', bg: 'rgba(234, 88, 12, 0.10)',  border: 'rgba(234, 88, 12, 0.22)' },
+  'endo':           { icon: 'zap',         color: '#7C3AED', bg: 'rgba(124, 58, 237, 0.10)', border: 'rgba(124, 58, 237, 0.22)' },
+  'omdr':           { icon: 'scan',        color: '#6366F1', bg: 'rgba(99, 102, 241, 0.10)', border: 'rgba(99, 102, 241, 0.22)' },
+  'preventive':     { icon: 'sparkles',    color: '#0284C7', bg: 'rgba(2, 132, 199, 0.10)',  border: 'rgba(2, 132, 199, 0.22)' },
+  'cons-endo':      { icon: 'heart-pulse', color: '#059669', bg: 'rgba(5, 150, 105, 0.10)',  border: 'rgba(5, 150, 105, 0.22)' },
+  'ortho':          { icon: 'smile',       color: '#0EA5E9', bg: 'rgba(14, 165, 233, 0.10)', border: 'rgba(14, 165, 233, 0.22)' },
+  'pediatric':      { icon: 'baby',        color: '#A855F7', bg: 'rgba(168, 85, 247, 0.10)', border: 'rgba(168, 85, 247, 0.22)' },
+  'pedo':           { icon: 'baby',        color: '#A855F7', bg: 'rgba(168, 85, 247, 0.10)', border: 'rgba(168, 85, 247, 0.22)' },
+  'removable-pros': { icon: 'layers',      color: '#DB2777', bg: 'rgba(219, 39, 119, 0.10)', border: 'rgba(219, 39, 119, 0.22)' }
+};
+
+const DEFAULT_THEME = {
+  icon: 'book-open',
+  color: 'var(--brand-burgundy, #2357d9)',
+  bg: 'rgba(35, 87, 217, 0.08)',
+  border: 'rgba(35, 87, 217, 0.20)'
+};
 
 const HomePage = {
   searchQuery: '',
   loadingTimeout: null,
+  activeDailyTab: 'today',
+  _todayFormatted: '',
+  _tomorrowFormatted: '',
 
   /* ─── Time-based greeting ─── */
   getGreeting(t) {
@@ -13,61 +39,6 @@ const HomePage = {
     if (h < 12) return t('heroGreetingMorning');
     if (h < 17) return t('heroGreetingAfternoon');
     return t('heroGreetingEvening');
-  },
-
-  /* ─── Aggregate stats across all subjects ─── */
-  getAggregateStats() {
-    const subjects = window.DATA ? window.DATA.getSubjects() : [];
-    let totalLectures = 0;
-    let totalExams = 0;
-    let totalProgress = 0;
-
-    subjects.forEach(subj => {
-      const stats = window.DATA && window.DATA.getSubjectStats
-        ? window.DATA.getSubjectStats(subj.id)
-        : {
-            lecturesCount: (window.DATA?.sheets || []).filter(s => s.subject_id === subj.id).length,
-            examsCount: (window.DATA?.previousExams || []).filter(e => e.subject_id === subj.id).length,
-            progress: 0
-          };
-      totalLectures += stats.lecturesCount || 0;
-      totalExams += stats.examsCount || 0;
-      totalProgress += stats.progress || 0;
-    });
-
-    const avgProgress = subjects.length > 0 ? Math.round(totalProgress / subjects.length) : 0;
-
-    return {
-      subjectsCount: subjects.length,
-      totalLectures,
-      totalExams,
-      avgProgress
-    };
-  },
-
-  /* ─── Get recently visited subjects (from localStorage) ─── */
-  getRecentSubjects(limit = 2) {
-    try {
-      const recentIds = JSON.parse(localStorage.getItem('kf_recent_subjects') || '[]');
-      const subjects = window.DATA ? window.DATA.getSubjects() : [];
-      const recent = [];
-
-      for (const id of recentIds) {
-        const subj = subjects.find(s => s.id === id);
-        if (subj && recent.length < limit) recent.push(subj);
-      }
-
-      // Fallback: if no recent subjects, show first 2 popular ones
-      if (recent.length === 0) {
-        const popular = subjects.filter(s => s.is_popular);
-        return popular.slice(0, limit).length > 0 ? popular.slice(0, limit) : subjects.slice(0, limit);
-      }
-
-      return recent;
-    } catch {
-      const subjects = window.DATA ? window.DATA.getSubjects() : [];
-      return subjects.slice(0, limit);
-    }
   },
 
   handleSubjectClick(subjectId) {
@@ -107,60 +78,71 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     HERO SECTION
+     1. COMPACT GREETING BANNER (Zero Progress / Zero Hero Bloat)
      ══════════════════════════════════════════ */
   renderHeroSection(isAr, t) {
-    const stats = HomePage.getAggregateStats();
     const greeting = HomePage.getGreeting(t);
     const charImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('idle') : 'assets/characters/kuro/Kuro-Idle.png';
     const mascotName = isAr ? 'كورو' : 'Kuro';
     const userName = window.STORE?.getUserInfo?.()?.name || (isAr ? 'طالب' : 'Student');
 
     return `
-      <section class="home-hero">
-        <div class="home-hero-content">
-          <div class="home-hero-text">
-            <h1 class="home-hero-greeting">${greeting}, ${userName} 👋</h1>
-            <p class="home-hero-subline">${t('heroSubline')}</p>
+      <section class="home-compact-banner">
+        <div class="home-compact-greeting-wrap">
+          <div class="home-compact-title-row">
+            <h1 class="home-compact-greeting">${greeting}، ${userName} 👋</h1>
+            <span class="home-compact-badge">${isAr ? 'السنة الثالثة — طب وجراحة الفم والأسنان' : '3rd Year — Faculty of Dentistry'}</span>
           </div>
-          <div class="home-hero-mascot">
-            <a href="#/rewards" class="home-hero-mascot-link" title="${mascotName}">
-              <img src="${charImg}" alt="${mascotName}" class="home-hero-mascot-img kuro-character-img kuro-float" width="52" height="52" loading="lazy" />
-            </a>
-            <div class="home-hero-mascot-meta">
-              <span class="home-hero-mascot-name">✨ ${mascotName}</span>
-              <span class="home-hero-mascot-role">${t('heroMascotLine')}</span>
-            </div>
-          </div>
+          <p class="home-compact-subline">${isAr ? 'منصة كورو فودز الأكاديمية للدراسة وتصفح الشيتات والمحاضرات' : (t('heroSubline') || 'Academic portal for dental lectures and handouts')}</p>
         </div>
-        <div class="home-hero-stats">
-          <div class="home-hero-stat">
-            <span class="home-hero-stat-num">${stats.subjectsCount}</span>
-            <span class="home-hero-stat-label">${t('heroStatSubjects')}</span>
-          </div>
-          <div class="home-hero-stat-divider"></div>
-          <div class="home-hero-stat">
-            <span class="home-hero-stat-num">${stats.avgProgress}%</span>
-            <span class="home-hero-stat-label">${t('heroStatProgress')}</span>
-          </div>
-          <div class="home-hero-stat-divider"></div>
-          <div class="home-hero-stat">
-            <span class="home-hero-stat-num">${stats.totalLectures}</span>
-            <span class="home-hero-stat-label">${t('heroStatLectures')}</span>
-          </div>
-          <div class="home-hero-stat-divider"></div>
-          <div class="home-hero-stat">
-            <span class="home-hero-stat-num">${stats.totalExams}</span>
-            <span class="home-hero-stat-label">${t('heroStatExams')}</span>
-          </div>
+        <div class="home-compact-mascot-wrap">
+          <a href="#/rewards" class="home-compact-mascot-pill" title="${mascotName}">
+            <img src="${charImg}" alt="${mascotName}" class="home-compact-mascot-img kuro-character-img kuro-float" width="30" height="30" loading="lazy" />
+            <span class="home-compact-mascot-name">✨ ${mascotName}</span>
+          </a>
         </div>
       </section>
     `;
   },
 
   /* ══════════════════════════════════════════
-     TODAY & TOMORROW DAILY LECTURES SECTION
+     2. CONDENSED LECTURES SCHEDULE (Tab Switcher + Slim Single-Line Rows)
      ══════════════════════════════════════════ */
+  switchDailyTab(tab) {
+    this.activeDailyTab = tab;
+    const todayBtn = document.getElementById('daily-tab-today-btn');
+    const tomorrowBtn = document.getElementById('daily-tab-tomorrow-btn');
+    const todayPane = document.getElementById('daily-pane-today');
+    const tomorrowPane = document.getElementById('daily-pane-tomorrow');
+    const dateHint = document.getElementById('hcs-current-date-hint');
+
+    if (!todayBtn || !tomorrowBtn || !todayPane || !tomorrowPane) return;
+
+    if (tab === 'today') {
+      todayBtn.classList.add('active');
+      todayBtn.setAttribute('aria-selected', 'true');
+      tomorrowBtn.classList.remove('active');
+      tomorrowBtn.setAttribute('aria-selected', 'false');
+      todayPane.style.display = 'flex';
+      todayPane.classList.add('active');
+      tomorrowPane.style.display = 'none';
+      tomorrowPane.classList.remove('active');
+      if (dateHint && this._todayFormatted) dateHint.textContent = this._todayFormatted;
+    } else {
+      tomorrowBtn.classList.add('active');
+      tomorrowBtn.setAttribute('aria-selected', 'true');
+      todayBtn.classList.remove('active');
+      todayBtn.setAttribute('aria-selected', 'false');
+      tomorrowPane.style.display = 'flex';
+      tomorrowPane.classList.add('active');
+      todayPane.style.display = 'none';
+      todayPane.classList.remove('active');
+      if (dateHint && this._tomorrowFormatted) dateHint.textContent = this._tomorrowFormatted;
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
   renderDailyLecturesSection(isAr, t) {
     const todayDate = new Date();
     const todayDayIndex = todayDate.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
@@ -187,6 +169,9 @@ const HomePage = {
       ? `${tomorrowSchedule.day_ar || ''}، ${tomorrowDate.getDate()} ${arMonths[tomorrowDate.getMonth()]}`
       : `${tomorrowSchedule.day_en || ''}, ${enMonths[tomorrowDate.getMonth()]} ${tomorrowDate.getDate()}`;
 
+    this._todayFormatted = todayDateFormatted;
+    this._tomorrowFormatted = tomorrowDateFormatted;
+
     const nowH = todayDate.getHours();
     const nowM = todayDate.getMinutes();
     const nowTotalMin = nowH * 60 + nowM;
@@ -195,25 +180,23 @@ const HomePage = {
       const startMin = (slot.startHour || 8) * 60;
       const endMin = (slot.endHour || 10) * 60;
       if (nowTotalMin >= startMin && nowTotalMin < endMin) {
-        return { label: isAr ? 'مباشرة الآن' : 'Live Now', badgeClass: 'slot-status-live' };
+        return { label: isAr ? 'مباشرة الآن' : 'Live Now', badgeClass: 'live' };
       } else if (nowTotalMin < startMin) {
-        return { label: isAr ? 'قادمة' : 'Upcoming', badgeClass: 'slot-status-upcoming' };
+        return { label: isAr ? 'قادمة' : 'Upcoming', badgeClass: 'upcoming' };
       } else {
-        return { label: isAr ? 'انتهت' : 'Completed', badgeClass: 'slot-status-completed' };
+        return { label: isAr ? 'انتهت' : 'Done', badgeClass: 'completed' };
       }
     };
 
-    const renderColumnContent = (schedule, isToday) => {
+    const renderRows = (schedule, isToday) => {
       if (schedule.isWeekend || !schedule.slots || schedule.slots.length === 0) {
-        const charImg = window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('reading') : 'assets/characters/kuro/Kuro-Reading.png';
         return `
-          <div class="home-lecture-weekend-card">
-            <div class="weekend-mascot-wrap">
-              <img src="${charImg}" alt="Kuro Relax" class="weekend-mascot-img kuro-float" width="52" height="52" loading="lazy" />
+          <div class="compact-lecture-empty">
+            <div class="clr-empty-info">
+              <i data-lucide="coffee" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+              <span>${isAr ? 'عطلة نهاية الأسبوع — لا توجد محاضرات نظرية مقررة.' : 'Weekend break — No theory lectures scheduled.'}</span>
             </div>
-            <h4 class="weekend-title">${isAr ? 'عطلة نهاية الأسبوع ☕' : 'Weekend Break ☕'}</h4>
-            <p class="weekend-desc">${isAr ? 'لا توجد محاضرات نظرية مقررة. فرصة ممتازة للمراجعة الذاتية أو إنجاز كويزات كورو!' : 'No theoretical lectures scheduled today. A great time to study handouts with Kuro!'}</p>
-            <a href="#/sheets" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; gap: 6px; padding: 5px 14px; margin-top: 4px; display: inline-flex; border-radius: 8px;">
+            <a href="#/sheets" class="clr-empty-link">
               <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
               <span>${isAr ? 'تصفح شيتات المواد' : 'Browse Handouts'}</span>
             </a>
@@ -221,92 +204,68 @@ const HomePage = {
         `;
       }
 
-      return `
-        <div class="home-daily-slots-list">
-          ${schedule.slots.map(slot => {
-            const status = isToday ? getSlotLiveStatus(slot) : null;
-            return `
-              <div class="home-lecture-card" data-subject="${slot.subject_id}" style="--slot-color: ${slot.color || '#0284C7'}; border-inline-start-color: ${slot.color || '#0284C7'};" role="button" tabindex="0" title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}">
-                <div class="home-lecture-top-row">
-                  <div class="home-lecture-code-time">
-                    <span class="home-lecture-code">${slot.code}</span>
-                    <span class="home-lecture-time">
-                      <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-                      <span>${slot.time}</span>
-                    </span>
-                  </div>
-                  ${status ? `<span class="home-lecture-status-pill ${status.badgeClass}">${status.label}</span>` : `
-                    <span class="home-lecture-status-pill slot-status-upcoming">${isAr ? 'مجدولة غداً' : 'Tomorrow'}</span>
-                  `}
-                </div>
-                <h4 class="home-lecture-title">${isAr ? slot.subject_ar : slot.subject_en}</h4>
-                <div class="home-lecture-bottom-row">
-                  <span class="home-lecture-hall">
-                    <i data-lucide="map-pin" style="width: 13px; height: 13px; color: #38BDF8;"></i>
-                    <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
-                  </span>
-                  <span class="home-lecture-action-hint">
-                    <span>${isAr ? 'فتح المادة' : 'Open'}</span>
-                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 12px; height: 12px;"></i>
-                  </span>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
+      return schedule.slots.map(slot => {
+        const status = isToday ? getSlotLiveStatus(slot) : { label: isAr ? 'مجدولة غداً' : 'Tomorrow', badgeClass: 'upcoming' };
+        const dotColor = slot.color || '#0284C7';
+
+        return `
+          <div class="compact-lecture-row" data-subject="${slot.subject_id}" role="button" tabindex="0" onclick="window.HomePage.handleSubjectClick('${slot.subject_id}')" title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}">
+            <div class="clr-time-col">
+              <i data-lucide="clock"></i>
+              <span>${slot.time}</span>
+            </div>
+            <div class="clr-subject-col">
+              <span class="clr-subject-dot" style="background-color: ${dotColor};"></span>
+              <span class="clr-subject-code">${slot.code}</span>
+              <span class="clr-subject-name">${isAr ? slot.subject_ar : slot.subject_en}</span>
+            </div>
+            <div class="clr-hall-col">
+              <i data-lucide="map-pin"></i>
+              <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
+            </div>
+            <div class="clr-status-col">
+              <span class="clr-status ${status.badgeClass}">${status.label}</span>
+            </div>
+            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" class="clr-arrow"></i>
+          </div>
+        `;
+      }).join('');
     };
 
+    const todaySlotsCount = todaySchedule.slots ? todaySchedule.slots.length : 0;
+    const tomorrowSlotsCount = tomorrowSchedule.slots ? tomorrowSchedule.slots.length : 0;
+    const activeTab = this.activeDailyTab || 'today';
+
     return `
-      <section class="home-daily-lectures-section">
-        <div class="home-section-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <h2 class="home-section-title" style="display: inline-flex; align-items: center; gap: 8px;">
-              <i data-lucide="calendar-days" style="width: 20px; height: 20px; color: #38BDF8;"></i>
-              <span>${isAr ? 'محاضرات اليوم ومحاضرات الغد' : "Today & Tomorrow's Lectures"}</span>
-            </h2>
-            <p class="home-section-sub">${isAr ? 'الجدول النظري المعتمد لدفعة طب وجراحة الفم والأسنان — مدرج 2' : 'Official Faculty of Dentistry Lecture Timetable — Auditorium 2'}</p>
+      <section class="home-compact-schedule-section">
+        <div class="hcs-header">
+          <div class="hcs-tabs-segmented" role="tablist">
+            <button type="button" class="hcs-tab-btn ${activeTab === 'today' ? 'active' : ''}" id="daily-tab-today-btn" onclick="window.HomePage.switchDailyTab('today')" role="tab" aria-selected="${activeTab === 'today'}">
+              <span class="hcs-tab-dot"></span>
+              <span>${isAr ? `محاضرات اليوم (${todaySlotsCount})` : `Today (${todaySlotsCount})`}</span>
+            </button>
+            <button type="button" class="hcs-tab-btn ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-tab-tomorrow-btn" onclick="window.HomePage.switchDailyTab('tomorrow')" role="tab" aria-selected="${activeTab === 'tomorrow'}">
+              <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? `محاضرات الغد (${tomorrowSlotsCount})` : `Tomorrow (${tomorrowSlotsCount})`}</span>
+            </button>
           </div>
-          <a href="#/lecture-schedule" class="btn btn-secondary btn-sm" style="font-size: 0.78rem; font-weight: 700; gap: 6px; padding: 6px 12px; display: inline-flex; align-items: center; border-radius: 8px; color: #38BDF8;">
-            <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
-            <span>${isAr ? 'الجدول الأسبوعي الكامل' : 'Weekly Schedule'}</span>
-            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 13px; height: 13px;"></i>
-          </a>
+
+          <div class="hcs-date-and-more">
+            <span class="hcs-current-date-hint" id="hcs-current-date-hint">${activeTab === 'today' ? todayDateFormatted : tomorrowDateFormatted}</span>
+            <a href="#/lecture-schedule" class="hcs-full-schedule-link" title="${isAr ? 'عرض الجدول الأسبوعي الكامل' : 'View Full Timetable'}">
+              <i data-lucide="calendar" style="width: 13px; height: 13px;"></i>
+              <span>${isAr ? 'الجدول الأسبوعي الكامل' : 'Weekly Schedule'}</span>
+              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 12px; height: 12px;"></i>
+            </a>
+          </div>
         </div>
 
-        <div class="home-daily-lectures-grid">
-          <!-- Today's Panel -->
-          <div class="home-daily-column today-column">
-            <div class="home-daily-col-header">
-              <div class="home-daily-col-title-wrap">
-                <span class="home-daily-col-badge today-badge">
-                  <span style="width: 6px; height: 6px; border-radius: 50%; background: #34D399; display: inline-block;"></span>
-                  <span>${isAr ? 'محاضرات اليوم' : "Today's Lectures"}</span>
-                </span>
-                <h3 class="home-daily-day-name">${todayDateFormatted}</h3>
-              </div>
-              <span class="home-daily-count-badge">
-                ${todaySchedule.slots && todaySchedule.slots.length > 0 ? `${todaySchedule.slots.length} ${isAr ? 'محاضرات' : 'slots'}` : (isAr ? 'عطلة' : 'Off')}
-              </span>
-            </div>
-            ${renderColumnContent(todaySchedule, true)}
+        <div class="hcs-content-box">
+          <div class="hcs-pane ${activeTab === 'today' ? 'active' : ''}" id="daily-pane-today" style="display: ${activeTab === 'today' ? 'flex' : 'none'}; flex-direction: column; gap: 6px;">
+            ${renderRows(todaySchedule, true)}
           </div>
-
-          <!-- Tomorrow's Panel -->
-          <div class="home-daily-column tomorrow-column">
-            <div class="home-daily-col-header">
-              <div class="home-daily-col-title-wrap">
-                <span class="home-daily-col-badge tomorrow-badge">
-                  <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
-                  <span>${isAr ? 'محاضرات الغد' : "Tomorrow's Lectures"}</span>
-                </span>
-                <h3 class="home-daily-day-name">${tomorrowDateFormatted}</h3>
-              </div>
-              <span class="home-daily-count-badge">
-                ${tomorrowSchedule.slots && tomorrowSchedule.slots.length > 0 ? `${tomorrowSchedule.slots.length} ${isAr ? 'محاضرات' : 'slots'}` : (isAr ? 'عطلة' : 'Off')}
-              </span>
-            </div>
-            ${renderColumnContent(tomorrowSchedule, false)}
+          <div class="hcs-pane ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-pane-tomorrow" style="display: ${activeTab === 'tomorrow' ? 'flex' : 'none'}; flex-direction: column; gap: 6px;">
+            ${renderRows(tomorrowSchedule, false)}
           </div>
         </div>
       </section>
@@ -314,7 +273,7 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     QUICK ACCESS SECTION
+     3. QUICK ACCESS SECTION
      ══════════════════════════════════════════ */
   renderQuickAccess(isAr, t) {
     const counts = HomePage.getQuickAccessCounts();
@@ -350,68 +309,11 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     CONTINUE LEARNING SECTION
-     ══════════════════════════════════════════ */
-  renderContinueLearning(isAr, t) {
-    const recentSubjects = HomePage.getRecentSubjects(2);
-
-    if (recentSubjects.length === 0) return '';
-
-    const cards = recentSubjects.map(subj => {
-      const name = isAr ? subj.name_ar : subj.name_en;
-      const coverImg = subj.cover_image || window.DATA?.subjectCovers?.[subj.id] || `assets/covers/${subj.id}.webp`;
-
-      const stats = window.DATA && window.DATA.getSubjectStats
-        ? window.DATA.getSubjectStats(subj.id)
-        : { lecturesCount: 0, progress: 0 };
-
-      const progress = stats.progress || 0;
-      const lecturesCount = stats.lecturesCount || 0;
-
-      return `
-        <div class="home-cl-card" onclick="window.SubjectModal.open('${subj.id}');" role="button" tabindex="0">
-          <div class="home-cl-cover">
-            <img src="${coverImg}" alt="${name}" loading="lazy" decoding="async" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp'; this.classList.add('loaded');" />
-            <div class="home-cl-cover-overlay"></div>
-            <span class="home-cl-code">${subj.code || 'DENT-300'}</span>
-          </div>
-          <div class="home-cl-body">
-            <h3 class="home-cl-name">${name}</h3>
-            <span class="home-cl-meta">${lecturesCount} ${t('lectures')}</span>
-            <div class="home-cl-progress-wrap">
-              <div class="home-cl-progress-track">
-                <div class="home-cl-progress-fill" style="width: ${progress}%;"></div>
-              </div>
-              <span class="home-cl-progress-text">${progress}%</span>
-            </div>
-            <button class="home-cl-btn" onclick="event.stopPropagation(); window.SubjectModal.open('${subj.id}');">
-              <span>${t('continueBtn')}</span>
-              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    return `
-      <section class="home-continue-learning">
-        <div class="home-section-header">
-          <h2 class="home-section-title">${t('continueLearnTitle')}</h2>
-          <p class="home-section-sub">${t('continueLearnSub')}</p>
-        </div>
-        <div class="home-cl-grid">
-          ${cards}
-        </div>
-      </section>
-    `;
-  },
-
-  /* ══════════════════════════════════════════
-     SUBJECTS SECTION HEADER
+     4. SUBJECTS SECTION HEADER
      ══════════════════════════════════════════ */
   renderSubjectsSectionHeader(isAr, t, count) {
     return `
-      <div class="home-subjects-header">
+      <div class="home-subjects-header" style="margin-top: 14px; margin-bottom: 12px;">
         <div class="home-subjects-header-text">
           <h2 class="home-section-title">${t('yourSubjects')}</h2>
           <span class="home-section-count">${count} ${t('subjectsAvailable')}</span>
@@ -432,7 +334,6 @@ const HomePage = {
       ${HomePage.renderHeroSection(isAr, t)}
       ${HomePage.renderDailyLecturesSection(isAr, t)}
       ${HomePage.renderQuickAccess(isAr, t)}
-      ${HomePage.renderContinueLearning(isAr, t)}
 
       <!-- Subjects Section -->
       ${HomePage.renderSubjectsSectionHeader(isAr, t, subjects.length)}
@@ -448,14 +349,14 @@ const HomePage = {
     if (!grid) return;
 
     grid.innerHTML = Array(6).fill(0).map(() => `
-      <div class="skeleton-card">
-        <div class="skeleton-banner skeleton-shimmer"></div>
-        <div class="skeleton-body">
-          <div class="skeleton-line title skeleton-shimmer"></div>
-          <div class="skeleton-line sub skeleton-shimmer"></div>
-          <div class="skeleton-line progress skeleton-shimmer"></div>
-          <div class="skeleton-line btn skeleton-shimmer"></div>
+      <div class="skeleton-compact-tile skeleton-card" style="padding: 14px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-card);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="skeleton-shimmer" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+          <div class="skeleton-shimmer" style="width: 48px; height: 16px; border-radius: 6px;"></div>
         </div>
+        <div class="skeleton-shimmer" style="width: 75%; height: 15px; margin-bottom: 6px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer" style="width: 45%; height: 11px; margin-bottom: 14px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer" style="width: 50%; height: 18px; border-radius: 9999px;"></div>
       </div>
     `).join('');
   },
@@ -475,6 +376,9 @@ const HomePage = {
     }
   },
 
+  /* ══════════════════════════════════════════
+     5. COMPACT SUBJECT TILES (Linear / Apple Modern UI Style)
+     ══════════════════════════════════════════ */
   buildCardsHTML(allSubjects) {
     const grid = document.getElementById('subjects-container');
     if (!grid) return;
@@ -496,10 +400,10 @@ const HomePage = {
 
     if (filtered.length === 0) {
       grid.innerHTML = `
-        <div class="home-empty-state">
-          <div class="home-empty-icon">🔍</div>
-          <h3 class="home-empty-title">${t('searchEmptyTitle')}</h3>
-          <p class="home-empty-sub">${t('searchEmptySub')}</p>
+        <div class="home-empty-state" style="grid-column: 1 / -1; padding: 36px 16px; text-align: center;">
+          <div class="home-empty-icon" style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
+          <h3 class="home-empty-title" style="font-size: 1rem; font-weight: 750; color: var(--text-primary); margin-bottom: 4px;">${t('searchEmptyTitle')}</h3>
+          <p class="home-empty-sub" style="font-size: 0.8rem; color: var(--text-muted);">${t('searchEmptySub')}</p>
         </div>
       `;
       return;
@@ -507,75 +411,55 @@ const HomePage = {
 
     grid.innerHTML = filtered.map(subj => {
       const primaryTitle = isAr ? subj.name_ar : subj.name_en;
-      const subTitle = isAr ? subj.name_en : subj.name_ar;
-      const coverImg = subj.cover_image || window.DATA?.subjectCovers?.[subj.id] || `assets/covers/${subj.id}.webp`;
+      const secondaryTitle = isAr ? subj.name_en : subj.name_ar;
 
-      const stats = window.DATA && window.DATA.getSubjectStats
-        ? window.DATA.getSubjectStats(subj.id)
-        : {
-            lecturesCount: (window.DATA?.sheets || []).filter(s => s.subject_id === subj.id).length,
-            examsCount: (window.DATA?.previousExams || []).filter(e => e.subject_id === subj.id).length,
-            progress: 0
-          };
+      const theme = SUBJECT_THEMES[subj.id] || DEFAULT_THEME;
 
-      const progressVal = stats.progress || 0;
-      const lecturesCount = stats.lecturesCount || 0;
-      const examsCount = stats.examsCount || 0;
+      let sheetsCount = 0;
+      if (window.DATA && typeof window.DATA.getSheetsBySubject === 'function') {
+        sheetsCount = window.DATA.getSheetsBySubject(subj.id).length;
+      } else {
+        const deleted = window.DATA?.getDeletedSheetIds?.() || [];
+        sheetsCount = (window.DATA?.sheets || []).filter(s => s.subject_id === subj.id && !deleted.includes(s.id)).length;
+      }
+
+      let countText = '';
+      if (isAr) {
+        if (sheetsCount === 0) countText = 'لا توجد شيتات';
+        else if (sheetsCount === 1) countText = 'شيت واحد';
+        else if (sheetsCount === 2) countText = 'شيتان';
+        else if (sheetsCount <= 10) countText = `${sheetsCount} شيتات`;
+        else countText = `${sheetsCount} شيت`;
+      } else {
+        countText = `${sheetsCount} ${sheetsCount === 1 ? 'sheet' : 'sheets'}`;
+      }
 
       return `
-        <div class="subject-card" onclick="window.HomePage.handleSubjectClick('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
-          <!-- Subject Cover -->
-          <div class="subject-cover-wrap card-banner">
-            <img src="${coverImg}" alt="${primaryTitle}" class="subject-card-cover subject-cover-img" width="600" height="337" loading="lazy" decoding="async" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp'; this.classList.add('loaded');" />
-            <div class="subject-cover-gradient"></div>
-            <span class="subject-code-badge">${subj.code || 'DENT-300'}</span>
+        <div class="compact-subject-tile subject-card" onclick="window.HomePage.handleSubjectClick('${subj.id}');" role="button" tabindex="0" aria-label="${primaryTitle}">
+          <div class="cst-top">
+            <div class="cst-icon-badge" style="background-color: ${theme.bg}; color: ${theme.color}; border: 1px solid ${theme.border};">
+              <i data-lucide="${theme.icon}"></i>
+            </div>
+            <span class="cst-code-badge">${subj.code || 'DENT-300'}</span>
           </div>
 
-          <!-- Card Body -->
-          <div class="subject-card-body card-body">
-            <div>
-              <h3 class="subject-title-primary">${primaryTitle}</h3>
-              <div class="subject-title-sub">${subTitle}</div>
+          <div class="cst-body">
+            <h3 class="cst-title-primary" title="${primaryTitle}">${primaryTitle}</h3>
+            <div class="cst-title-secondary" title="${secondaryTitle}">${secondaryTitle}</div>
+          </div>
 
-              <!-- Progress Bar -->
-              <div class="card-progress-wrap">
-                <div class="card-progress-meta">
-                  <span>${t('studyProgress')}</span>
-                  <span class="card-progress-percent">${progressVal}%</span>
-                </div>
-                <div class="card-progress-track">
-                  <div class="card-progress-fill" style="width: ${progressVal}%;"></div>
-                </div>
-              </div>
-
-              <!-- Compact Stats -->
-              <div class="card-stats-compact">
-                <span class="card-stat-item">
-                  <i data-lucide="file-text"></i>
-                  ${lecturesCount} ${t('lectures')}
-                </span>
-                <span class="card-stat-sep">•</span>
-                <span class="card-stat-item">
-                  <i data-lucide="archive"></i>
-                  ${examsCount} ${t('exams')}
-                </span>
-              </div>
-            </div>
-
-            <!-- Action Button -->
-            <button class="btn-explore-subject" onclick="event.stopPropagation(); window.HomePage.handleSubjectClick('${subj.id}');" aria-label="${t('openSubject')}">
-              <span>${t('openSubject')}</span>
-              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
-            </button>
+          <div class="cst-footer">
+            <span class="cst-count-pill">
+              <i data-lucide="file-text"></i>
+              <span>${countText}</span>
+            </span>
+            <span class="cst-open-hint">
+              <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
+            </span>
           </div>
         </div>
       `;
     }).join('');
-
-    // Mark cached images as loaded
-    grid.querySelectorAll('.subject-cover-img').forEach(img => {
-      if (img.complete) img.classList.add('loaded');
-    });
 
     if (window.lucide) window.lucide.createIcons();
   },
@@ -588,15 +472,6 @@ const HomePage = {
         HomePage.renderSubjectsList(window.DATA.getSubjects(), false);
       };
     }
-
-    document.querySelectorAll('.home-lecture-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const subjId = card.getAttribute('data-subject');
-        if (subjId) {
-          HomePage.handleSubjectClick(subjId);
-        }
-      });
-    });
   }
 };
 

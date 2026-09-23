@@ -2565,3 +2565,634 @@ body { background: radial-gradient(circle at 100% 0, #eef3ff 0, transparent 28re
   color: #DC2626;
   border: 1px solid rgba(239, 68, 68, 0.25);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   HOME DASHBOARD v3: COMPACT GREETING, TABBED LECTURES, COMPACT TILES
+   ══════════════════════════════════════════════════════════════════ */
+
+/* 1. Compact Greeting Banner */
+.home-compact-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  padding: 14px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.home-compact-greeting-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.home-compact-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.home-compact-greeting {
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.home-compact-badge {
+  font-size: 0.7rem;
+  font-weight: 750;
+  color: var(--brand-burgundy, #2357d9);
+  background: var(--brand-burgundy-light, rgba(35, 87, 217, 0.08));
+  border: 1px solid var(--brand-burgundy-border, rgba(35, 87, 217, 0.20));
+  padding: 2px 9px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.home-compact-subline {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.home-compact-mascot-wrap {
+  flex-shrink: 0;
+}
+
+.home-compact-mascot-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 9999px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-compact-mascot-pill:hover {
+  border-color: var(--brand-burgundy-border, #bfd0ff);
+  background: var(--brand-burgundy-light, rgba(35, 87, 217, 0.08));
+  transform: translateY(-1px);
+}
+
+.home-compact-mascot-pill:active {
+  transform: scale(0.96);
+}
+
+.home-compact-mascot-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+.home-compact-mascot-name {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--text-primary);
+}
+
+/* 2. Compact Tabbed Lectures Schedule */
+.home-compact-schedule-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.hcs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.hcs-tabs-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  padding: 3px;
+}
+
+.hcs-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.hcs-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.hcs-tab-btn.active {
+  background: var(--bg-card);
+  color: var(--brand-burgundy, #2357d9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.hcs-tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  display: inline-block;
+}
+
+.hcs-date-and-more {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hcs-current-date-hint {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hcs-full-schedule-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--brand-burgundy, #2357d9);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.hcs-full-schedule-link:hover {
+  background: var(--brand-burgundy-light, rgba(35, 87, 217, 0.08));
+}
+
+.hcs-content-box {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Single-Line Slim Lecture Row */
+.compact-lecture-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px 110px 20px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.compact-lecture-row:hover {
+  background: var(--bg-hover);
+  border-color: var(--brand-burgundy-border, #bfd0ff);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.compact-lecture-row:active {
+  transform: scale(0.99);
+}
+
+.clr-time-col {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.clr-time-col svg {
+  color: var(--text-muted);
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.clr-subject-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.clr-subject-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clr-subject-code {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.clr-subject-name {
+  font-size: 0.825rem;
+  font-weight: 750;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clr-hall-col {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.clr-hall-col svg {
+  color: #0284C7;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.clr-status-col {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.clr-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 750;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.clr-status.live {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.clr-status.upcoming {
+  background: rgba(2, 132, 199, 0.10);
+  color: #0284C7;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+}
+
+.clr-status.completed {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.clr-arrow {
+  color: var(--text-muted);
+  width: 13px;
+  height: 13px;
+  opacity: 0.6;
+  transition: all 0.15s ease;
+  justify-self: end;
+}
+
+.compact-lecture-row:hover .clr-arrow {
+  opacity: 1;
+  color: var(--brand-burgundy, #2357d9);
+}
+
+/* Empty State inside Lectures Tab */
+.compact-lecture-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-surface-subtle);
+  border: 1px dashed var(--border-subtle);
+  border-radius: 9px;
+  gap: 10px;
+}
+
+.clr-empty-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 550;
+}
+
+.clr-empty-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--brand-burgundy, #2357d9);
+  text-decoration: none;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.clr-empty-link:hover {
+  background: var(--brand-burgundy-light, rgba(35, 87, 217, 0.08));
+}
+
+/* 3. Compact Subject Tiles (Linear / Apple Modern UI Style) */
+.subjects-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.compact-subject-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 13px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.compact-subject-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-burgundy, #2357d9);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.compact-subject-tile:active {
+  transform: scale(0.98);
+}
+
+.cst-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cst-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cst-icon-badge svg {
+  width: 17px;
+  height: 17px;
+}
+
+.cst-code-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cst-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cst-title-primary {
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cst-title-secondary {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.85;
+}
+
+.cst-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.cst-count-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.cst-count-pill svg {
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted);
+}
+
+.cst-open-hint {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.compact-subject-tile:hover .cst-open-hint {
+  color: var(--brand-burgundy, #2357d9);
+}
+
+/* Responsive adjustments for mobile phones */
+@media (max-width: 640px) {
+  .home-compact-banner {
+    padding: 10px 14px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .home-compact-subline {
+    display: none;
+  }
+  .home-compact-badge {
+    font-size: 0.62rem;
+    padding: 1px 6px;
+  }
+  .home-compact-mascot-name {
+    display: none;
+  }
+  .home-compact-mascot-pill {
+    padding: 3px;
+  }
+
+  .home-compact-schedule-section {
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .hcs-header {
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+  .hcs-tab-btn {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+  .hcs-current-date-hint {
+    display: none;
+  }
+  .hcs-full-schedule-link {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  .compact-lecture-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 4px 8px;
+    padding: 7px 10px;
+  }
+  .clr-time-col {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 0.7rem;
+  }
+  .clr-status-col {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .clr-subject-col {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .clr-hall-col {
+    display: none;
+  }
+  .clr-arrow {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+  }
+
+  /* 2-column mobile subjects grid: 6-8 cards visible without long scrolling! */
+  .subjects-showcase-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .compact-subject-tile {
+    padding: 9px 10px !important;
+    border-radius: 10px !important;
+  }
+  .cst-top {
+    margin-bottom: 7px !important;
+  }
+  .cst-icon-badge {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 6px !important;
+  }
+  .cst-icon-badge svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .cst-code-badge {
+    font-size: 0.6rem !important;
+    padding: 1px 5px !important;
+  }
+  .cst-title-primary {
+    font-size: 0.8rem !important;
+  }
+  .cst-title-secondary {
+    font-size: 0.62rem !important;
+  }
+  .cst-footer {
+    margin-top: 7px !important;
+    padding-top: 5px !important;
+  }
+  .cst-count-pill {
+    font-size: 0.64rem !important;
+  }
+  .cst-count-pill svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+}
+
