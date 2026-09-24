@@ -103,13 +103,24 @@ const HomePage = {
     const daysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const monthsEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+    const shortDaysAr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const shortMonthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const shortDaysEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const shortMonthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
     const dayName = isAr ? daysAr[now.getDay()] : daysEn[now.getDay()];
     const monthName = isAr ? monthsAr[now.getMonth()] : monthsEn[now.getMonth()];
     const dateFormatted = isAr
       ? `${dayName}، ${now.getDate()} ${monthName} ${now.getFullYear()}`
       : `${dayName}, ${now.getDate()} ${monthName} ${now.getFullYear()}`;
 
-    return { title, subtitle, dateFormatted };
+    const shortDayName = isAr ? shortDaysAr[now.getDay()] : shortDaysEn[now.getDay()];
+    const shortMonthName = isAr ? shortMonthsAr[now.getMonth()] : shortMonthsEn[now.getMonth()];
+    const shortDateFormatted = isAr
+      ? `${shortDayName}، ${now.getDate()} ${shortMonthName}`
+      : `${shortDayName}, ${now.getDate()} ${shortMonthName} ${now.getFullYear()}`;
+
+    return { title, subtitle, dateFormatted, shortDateFormatted };
   },
 
   handleSubjectClick(subjectId) {
@@ -143,19 +154,14 @@ const HomePage = {
 
   /* Quick Access item counts */
   getQuickAccessCounts() {
-    const questions = window.DATA?.questions || [];
-    const exams = window.DATA?.previousExams || [];
-    return {
-      questions: questions.length,
-      exams: exams.length
-    };
+    return { questions: 0, exams: 0 };
   },
 
   /* ══════════════════════════════════════════
      1. HERO SECTION (Study Scene with Dynamic Greeting in Left Sunlight Area)
      ══════════════════════════════════════════ */
   renderHeroSection(isAr) {
-    const { title, subtitle, dateFormatted } = HomePage.getHeroGreetingData(isAr);
+    const { title, subtitle, dateFormatted, shortDateFormatted } = HomePage.getHeroGreetingData(isAr);
     const heroSrc = _cachedHeroDataUrl || HERO_BANNER_CONFIG.src;
 
     return `
@@ -171,12 +177,14 @@ const HomePage = {
             decoding="sync"
             fetchpriority="high"
           />
+          <div class="kuro-hero-vignette"></div>
           <div class="kuro-hero-greeting-overlay" dir="${isAr ? 'rtl' : 'ltr'}">
             <h1 class="kuro-hero-greeting-title">${title}</h1>
             <p class="kuro-hero-greeting-sub">${subtitle}</p>
             <div class="kuro-hero-date-chip">
               <i data-lucide="calendar" class="kuro-hero-date-icon"></i>
-              <span>${dateFormatted}</span>
+              <span class="kuro-hero-date-full">${dateFormatted}</span>
+              <span class="kuro-hero-date-short">${shortDateFormatted}</span>
             </div>
           </div>
         </div>
@@ -358,68 +366,10 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     3. QUICK ACCESS SECTION (4 Tiles with Leaf Watermark)
+     3. QUICK ACCESS SECTION (Removed per UI Simplification Directives)
      ══════════════════════════════════════════ */
-  renderQuickAccess(isAr) {
-    const counts = HomePage.getQuickAccessCounts();
-
-    const items = [
-      {
-        icon: 'help-circle',
-        title: isAr ? 'بنك الأسئلة' : 'Question Bank',
-        subtitle: isAr ? `${counts.questions + counts.exams} سؤالاً متوفراً` : `${counts.questions + counts.exams} questions`,
-        route: '#/questions'
-      },
-      {
-        icon: 'mic',
-        title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings',
-        subtitle: isAr ? 'محاضرات وتفريغات صوتية' : 'Lectures & revisions',
-        route: '#/recordings'
-      },
-      {
-        icon: 'calendar',
-        title: isAr ? 'الجداول الدراسية' : 'Academic Schedules',
-        subtitle: isAr ? 'مدرج 2 والمعامل A1-E2' : 'Auditorium 2 & Labs',
-        route: '#/schedules'
-      },
-      {
-        icon: 'calendar-check',
-        title: isAr ? 'جداول الامتحانات' : 'Exam Schedules',
-        subtitle: isAr ? 'النصفي والنهائي المعتمد' : 'Midterm & Final boards',
-        route: '#/exams'
-      }
-    ];
-
-    return `
-      <section class="kuro-qa-section" aria-label="Quick Access">
-        <div class="kuro-section-header">
-          <div class="kuro-section-title-wrap">
-            <span class="kuro-section-emblem"><i data-lucide="graduation-cap"></i></span>
-            <h2 class="kuro-section-title">${isAr ? 'الوصول السريع' : 'Quick Access'}</h2>
-          </div>
-          <a href="#/sheets" class="kuro-view-all-link">
-            <span>${isAr ? 'عرض الكل' : 'View All'}</span>
-            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
-          </a>
-        </div>
-
-        <div class="kuro-qa-grid">
-          ${items.map(item => `
-            <a href="${item.route}" class="kuro-qa-tile" title="${item.title}">
-              <div class="kuro-card-leaf-watermark"></div>
-              <div class="kuro-qa-icon-box">
-                <i data-lucide="${item.icon}"></i>
-              </div>
-              <div class="kuro-qa-content">
-                <h3 class="kuro-qa-title">${item.title}</h3>
-                <p class="kuro-qa-subtitle">${item.subtitle}</p>
-              </div>
-              <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="kuro-qa-arrow"></i>
-            </a>
-          `).join('')}
-        </div>
-      </section>
-    `;
+  renderQuickAccess() {
+    return '';
   },
 
   /* ══════════════════════════════════════════
@@ -457,7 +407,7 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     5. MAIN RENDER
+     5. MAIN RENDER (Clean, Compact Dashboard: Hero -> Timetable -> Subjects)
      ══════════════════════════════════════════ */
   render(container) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
@@ -465,16 +415,13 @@ const HomePage = {
 
     container.innerHTML = `
       <div class="kuro-dashboard-container">
-        <!-- 1. Hero Study Scene Banner with Dynamic Greeting -->
+        <!-- 1. Compact Hero Study Scene Banner with Dynamic Greeting -->
         ${HomePage.renderHeroSection(isAr)}
 
         <!-- 2. Today's Lectures Schedule -->
         ${HomePage.renderDailyLecturesSection(isAr)}
 
-        <!-- 3. Quick Access 4 Tiles -->
-        ${HomePage.renderQuickAccess(isAr)}
-
-        <!-- 4. Your Subjects Section -->
+        <!-- 3. Your Subjects Section (Direct Subject-Based Access) -->
         ${HomePage.renderSubjectsSectionHeader(isAr, subjects.length)}
         <div class="kuro-subjects-grid" id="subjects-container"></div>
       </div>
