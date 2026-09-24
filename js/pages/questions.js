@@ -85,37 +85,31 @@ const QuestionsPage = {
     const subjects = window.DATA ? window.DATA.getSubjects() : [];
 
     container.innerHTML = `
-      <!-- Luxury Questions Hero Banner (Reference Design) -->
+      <!-- Luxury Questions Hero Banner (Matching Blueprint) -->
       <div class="q-hero-banner">
+        <div class="q-hero-bg-artwork" style="background-image: url('assets/hero/kuro-questions-hero.png');"></div>
+        <div class="q-hero-overlay"></div>
         <div class="q-hero-content">
-          <div class="q-hero-badge">
-            <i data-lucide="book-check" class="q-hero-badge-icon"></i>
-            <span>${isAr ? 'بنك الأسئلة والامتحانات السابقة' : 'Practice Bank & Past Exams'}</span>
+          <div class="q-hero-badge-wrap">
+            <div class="q-hero-badge-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                <path d="m9 14 2 2 4-4"></path>
+              </svg>
+            </div>
+            <span class="q-hero-kicker">${isAr ? 'تدريب وسنوات سابقة' : 'PRACTICE & PAST EXAMS'}</span>
           </div>
           <h1 class="q-hero-title">
             ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
           </h1>
           <p class="q-hero-subtitle">
-            ${isAr ? 'كل أسئلتك لطب الأسنان، منظمة وسهلة للتدريب.' : 'All your dental questions, organized and easy to practice.'}
+            ${isAr ? 'كل أسئلتك لطب الأسنان، منظمة وسهلة للتدريب.' : 'All dental subjects, organized and easy to practice.'}
           </p>
-          <div class="q-hero-stats">
-            <div class="q-hero-stat-pill">
-              <span class="q-hero-stat-num">${allQuestions.length}</span>
-              <span class="q-hero-stat-label">${isAr ? 'سؤال متاح' : 'Available MCQs'}</span>
-            </div>
-            <div class="q-hero-stat-divider"></div>
-            <div class="q-hero-stat-pill">
-              <span class="q-hero-stat-num">${subjects.length}</span>
-              <span class="q-hero-stat-label">${isAr ? 'مواد دراسية' : 'Dental Modules'}</span>
-            </div>
-          </div>
-        </div>
-        <div class="q-hero-artwork">
-          <img src="assets/hero/kuro-questions-hero.png" alt="Kuro Questions Hero" class="q-hero-img" />
         </div>
       </div>
 
-      <!-- Control Bar: Subject Dropdown + Year Dropdown + Search + Mode Tabs -->
+      <!-- Control Bar: Subject Dropdown + Search + Year Dropdown + View Toggle -->
       <div class="q-control-bar">
         <!-- Subject Dropdown -->
         <div class="q-dropdown-wrap">
@@ -130,15 +124,6 @@ const QuestionsPage = {
           </select>
         </div>
 
-        <!-- Year Dropdown -->
-        <div class="q-dropdown-wrap">
-          <i data-lucide="chevron-down" class="q-dropdown-chevron"></i>
-          <select id="q-year-dropdown" class="q-select">
-            <option value="all" ${QuestionsPage.selectedYear === 'all' ? 'selected' : ''}>${isAr ? 'كل السنوات' : 'All Years'}</option>
-            <option value="3" ${QuestionsPage.selectedYear === '3' ? 'selected' : ''}>${isAr ? 'السنة الثالثة' : 'Year 3 (Dental Surgery)'}</option>
-          </select>
-        </div>
-
         <!-- Search Bar (always visible) -->
         <div class="q-search-wrap">
           <i data-lucide="search" class="q-search-icon"></i>
@@ -150,25 +135,31 @@ const QuestionsPage = {
             value="${QuestionsPage.searchQuery || ''}"
             autocomplete="off"
           />
-          <button id="q-search-clear" class="q-search-clear" style="${QuestionsPage.searchQuery ? '' : 'display:none;'}">
+          <button id="q-search-clear" class="q-search-clear" style="${QuestionsPage.searchQuery ? '' : 'display:none;'}" aria-label="Clear search">
             <i data-lucide="x" style="width:14px;height:14px;"></i>
           </button>
         </div>
 
-        <!-- Right: Count + Mode Tabs -->
-        <div class="q-control-right">
-          <span id="q-total-counter" class="q-count-badge">${allQuestions.length} ${isAr ? 'سؤال' : 'MCQs'}</span>
-          <div class="q-view-toggle">
-            <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'bento' ? 'active' : ''}" data-tab="bento" title="${isAr ? 'المربعات' : 'Bento Grid'}">
-              <i data-lucide="layout-grid" style="width:15px;height:15px;"></i>
-            </button>
-            <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'direct' ? 'active' : ''}" data-tab="direct" title="${isAr ? 'قائمة الأسئلة' : 'All Questions'}">
-              <i data-lucide="list" style="width:15px;height:15px;"></i>
-            </button>
-            <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'saved' ? 'active' : ''}" data-tab="saved" title="${isAr ? 'المحفوظات' : 'Saved'}">
-              <i data-lucide="star" style="width:15px;height:15px;"></i>
-            </button>
-          </div>
+        <!-- Year Dropdown -->
+        <div class="q-dropdown-wrap">
+          <i data-lucide="chevron-down" class="q-dropdown-chevron"></i>
+          <select id="q-year-dropdown" class="q-select">
+            <option value="all" ${QuestionsPage.selectedYear === 'all' ? 'selected' : ''}>${isAr ? 'كل السنوات' : 'All Years'}</option>
+            <option value="3" ${QuestionsPage.selectedYear === '3' ? 'selected' : ''}>${isAr ? 'السنة الثالثة' : 'Year 3 (Dental Surgery)'}</option>
+          </select>
+        </div>
+
+        <!-- View Mode Toggle -->
+        <div class="q-view-toggle">
+          <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'bento' ? 'active' : ''}" data-tab="bento" title="${isAr ? 'المربعات' : 'Grid'}">
+            <i data-lucide="layout-grid" style="width:15px;height:15px;"></i>
+          </button>
+          <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'direct' ? 'active' : ''}" data-tab="direct" title="${isAr ? 'قائمة الأسئلة' : 'List'}">
+            <i data-lucide="list" style="width:15px;height:15px;"></i>
+          </button>
+          <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'saved' ? 'active' : ''}" data-tab="saved" title="${isAr ? 'المحفوظات' : 'Saved'}">
+            <i data-lucide="star" style="width:15px;height:15px;"></i>
+          </button>
         </div>
       </div>
 
@@ -800,13 +791,23 @@ const QuestionsPage = {
     });
 
     mainEl.innerHTML = `
-      <div class="q-section-header">
-        <h2 class="q-section-title">
-          ${isAr ? 'مواد طب الأسنان' : 'Dental Curriculum Subjects'}
-        </h2>
-        <p class="q-section-subtitle">
-          ${isAr ? 'اختر المادة لاستعراض أسئلة المحاضرات واختبار معلوماتك السريرية.' : 'Choose a dental module to browse lecture-linked MCQs and test your knowledge.'}
-        </p>
+      <div class="q-curriculum-header">
+        <div class="q-curriculum-title-wrap">
+          <div class="q-curriculum-icon-box">
+            <i data-lucide="book-open"></i>
+          </div>
+          <div class="q-curriculum-text">
+            <h2 class="q-curriculum-title">
+              ${isAr ? 'مواد طب الأسنان' : 'Dental Curriculum Subjects'}
+            </h2>
+            <p class="q-curriculum-desc">
+              ${isAr ? 'اختر المادة لاستعراض أسئلة المحاضرات واختبار معلوماتك السريرية.' : 'Choose a subject to browse lecture-linked MCQs and test your knowledge.'}
+            </p>
+          </div>
+        </div>
+        <div class="q-curriculum-count-badge">
+          <span>${filteredSubjects.length} ${isAr ? (filteredSubjects.length === 1 ? 'مادة' : 'مواد') : 'Subjects'}</span>
+        </div>
       </div>
 
       <div class="questions-subject-grid">
@@ -814,25 +815,24 @@ const QuestionsPage = {
           const qCount = subjectStats[s.id] || 0;
           const icon = subjectIcons[s.id] || 'book-open';
           const title = isAr ? s.name_ar : s.name_en;
-          const desc = isAr ? s.description_ar : s.description_en;
           const color = getColor(s.id);
           const hasQuestions = qCount > 0;
           const code = s.code || '';
 
           return `
             <div class="q-subject-card ${hasQuestions ? 'has-mcqs' : 'empty-mcqs'}" data-subj-id="${s.id}">
-              <div>
-                <!-- Topbar: Subject Code & Real MCQ Count -->
+              <div class="q-card-top-content">
+                <!-- Topbar: Subject Category Pill & Course Code Pill -->
                 <div class="q-card-topbar">
-                  <span class="q-card-code-pill" style="background:${color.bg};color:${color.text};border-color:${color.border};">
-                    ${code}
+                  <span class="q-card-cat-pill" style="background:${color.bg};color:${color.text};border-color:${color.border};">
+                    ${s.name_en}
                   </span>
-                  <span class="q-card-count-badge ${hasQuestions ? 'active-count' : 'zero-count'}">
-                    ${qCount} ${isAr ? (qCount === 1 ? 'سؤال' : qCount <= 10 && qCount > 1 ? 'أسئلة' : 'سؤال') : 'MCQs'}
+                  <span class="q-card-code-pill">
+                    ${code}
                   </span>
                 </div>
 
-                <!-- Body: Dental Icon & Subject Title -->
+                <!-- Body: Dental Icon Box + Title & Real MCQ Count -->
                 <div class="q-card-body">
                   <div class="q-card-icon-box" style="background:${color.bg};color:${color.text};border-color:${color.border};">
                     <i data-lucide="${icon}"></i>
@@ -841,24 +841,22 @@ const QuestionsPage = {
                     <h3 class="q-card-title">
                       ${title}
                     </h3>
-                    ${desc ? `<p class="q-card-desc">${desc}</p>` : ''}
+                    <div class="q-card-mcq-count ${hasQuestions ? 'active-count' : 'zero-count'}">
+                      ${qCount} ${isAr ? (qCount === 1 ? 'سؤال' : qCount <= 10 && qCount > 1 ? 'أسئلة' : 'سؤال') : 'MCQs'}
+                    </div>
+                  </div>
+                  <div class="q-card-arrow-inline">
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:16px;height:16px;"></i>
                   </div>
                 </div>
               </div>
 
-              <!-- Footer: Action Button -->
+              <!-- Footer: Action Button (Desktop full action) -->
               <div class="q-card-footer">
-                ${hasQuestions ? `
-                  <button type="button" class="q-action-btn q-action-start" data-subj-id="${s.id}">
-                    <span>${isAr ? 'ابدأ التدريب' : 'Start Practice'}</span>
-                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;"></i>
-                  </button>
-                ` : `
-                  <button type="button" class="q-action-btn q-action-browse" data-subj-id="${s.id}">
-                    <span>${isAr ? 'استعراض الأسئلة' : 'Browse Questions'}</span>
-                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;"></i>
-                  </button>
-                `}
+                <button type="button" class="q-action-btn ${hasQuestions ? 'q-action-start' : 'q-action-browse'}" data-subj-id="${s.id}">
+                  <span>${hasQuestions ? (isAr ? 'ابدأ التدريب' : 'Start Practice') : (isAr ? 'استعراض الأسئلة' : 'Browse Questions')}</span>
+                  <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;"></i>
+                </button>
               </div>
             </div>
           `;

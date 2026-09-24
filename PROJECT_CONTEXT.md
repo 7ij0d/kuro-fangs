@@ -77,14 +77,44 @@
 
 ---
 
-## 5. Recent Git Commits & State Log
-- `Current`: Sheets & Lectures master redesign matching blueprint (`media_1790204779370.jpg`) with panoramic hero (`assets/hero/sheets-hero-study.png`), 2-column card split, full action buttons, and version bump to `?v=9.4`.
+## 5. Master Questions Bank Architecture (Blueprint Conformance)
+- **Visual Blueprint**: `media_1790209485831.jpg` & `media_1790209635110.png`
+- **Panoramic Header**:
+  - Background: `assets/hero/kuro-questions-hero.png` with warm subtle ivory vignette overlay.
+  - Rounded-square blush badge (`.q-hero-badge-icon-box`) with clipboard SVG (`#7E1D2A`).
+  - Kicker: `PRACTICE & PAST EXAMS` / `تدريب وسنوات سابقة`.
+  - Title: `Questions — Past Exams & Practice Bank` / `الأسئلة — سنوات سابقة وبنك الأسئلة`.
+  - Subtitle: `All dental subjects, organized and easy to practice.` / `كل أسئلتك لطب الأسنان، منظمة وسهلة للتدريب.`.
+- **Search & Filter Control Bar**:
+  - Subject dropdown: `[ All Subjects ▾ ]` + 12 dental subjects.
+  - Search input: `Search questions, subjects, or clinical tags...` with clear button.
+  - Academic Year dropdown: `[ All Years ▾ ]` / `Year 3 (Dental Surgery)`.
+  - View mode toggle: `[ ⊞ Grid ]` (burgundy active) and `[ ☰ List ]`.
+- **Curriculum Section Header**:
+  - Open book icon in rounded blush box (`.q-curriculum-icon-box`).
+  - Title: `Dental Curriculum Subjects` / `مواد طب الأسنان`.
+  - Description: `Choose a subject to browse lecture-linked MCQs and test your knowledge.`.
+  - Count pill: `${filteredSubjects.length} Subjects` (`12 Subjects` / `12 مادة`).
+- **Subject Cards (`.q-subject-card`)**:
+  - **Top Row**: Subject category badge pill (`.q-card-cat-pill`, soft pastel category tint) + Course code pill (`.q-card-code-pill`, e.g. `CD-302`, `MED-301`).
+  - **Middle Row**: Subject icon box (40x40px, rounded, custom dental icon) + Title (`.q-card-title`) + Real MCQ count (`.q-card-mcq-count`, e.g. `42 MCQs`).
+  - **Inline Arrow on iPad & Mobile**: `.q-card-arrow-inline` right-aligned in body for compact ergonomics.
+  - **Footer Action on Desktop**: `Start Practice →` (or `Browse Questions →` if 0 MCQs).
+- **Multi-Device Responsiveness (Zero Horizontal Overflow)**:
+  - Desktop (`>= 1200px`): **4 columns** (`repeat(4, minmax(0, 1fr))`), 3 balanced rows for 12 subjects.
+  - iPad / Tablet (`768px – 1199px`): **2 columns** (`repeat(2, minmax(0, 1fr)) !important`).
+  - Mobile (`< 768px`): **1 column** (`1fr !important`), stacked controls.
+- **Functionality & Data Invariant**:
+  - 100% preservation of real data from `window.DATA.getQuestions()` and `window.DATA.getSubjects()`.
+  - Interactive quiz runner modal, explanation drawer with Kuro mascot, and Arabic translation toggle fully intact.
+
+---
+
+## 6. Recent Git Commits & State Log
+- `Current`: Questions Bank master redesign matching blueprint (`media_1790209485831.jpg`) with 4-column desktop grid, 2-column iPad grid, 1-column mobile stack, ivory cards, and version bump to `?v=9.5`.
+- `73ed2c3`: Synchronize top center navigation pills with master visual reference.
+- `7c3695d`: Sheets & Lectures master redesign matching blueprint (`media_1790204779370.jpg`) with panoramic hero (`assets/hero/sheets-hero-study.png`), 2-column card split, full action buttons, and version bump to `?v=9.4`.
 - `e76315e`: Add master PROJECT_CONTEXT.md for persistent session state & memory.
 - `5261c9c`: Unified Academic Schedules section with panoramic hero banner, 3-card hub, and 4-item navigation IA.
 - `773c3c3`: Cache busting query versions bumped to `?v=9.2`.
 - `332f072`: Responsive overhaul for shell, sheets page, and questions practice bank.
-- `8fe9ece`: Mobile & iPad study workspace overhaul with fixed bottom nav & more sheet.
-- `cc0bbf0`: Embed & cache kuro study hero banner for instant zero-latency loading.
-- `a1beff4`: Cozy academic study scene homepage redesign matching mockup.
-- `a0043ad`: Fix notifications panel right viewport overflow & subject card modal click.
-- `76e487d`: Default questions and sheet names to English with translation toggle.

@@ -16,12 +16,16 @@ const checks = [
     pass: questionsJs.includes('Questions — Past Exams & Practice Bank') && questionsJs.includes('الأسئلة — سنوات سابقة وبنك الأسئلة')
   },
   {
-    name: 'Header Subtitle contains "All your dental questions, organized and easy to practice."',
-    pass: questionsJs.includes('All your dental questions, organized and easy to practice.') && questionsJs.includes('كل أسئلتك لطب الأسنان، منظمة وسهلة للتدريب.')
+    name: 'Header Subtitle contains "All dental subjects, organized and easy to practice."',
+    pass: questionsJs.includes('All dental subjects, organized and easy to practice.') && questionsJs.includes('كل أسئلتك لطب الأسنان، منظمة وسهلة للتدريب.')
   },
   {
     name: 'Hero Artwork references assets/hero/kuro-questions-hero.png',
     pass: questionsJs.includes('assets/hero/kuro-questions-hero.png') && fs.existsSync(path.join(__dirname, '..', 'assets', 'hero', 'kuro-questions-hero.png'))
+  },
+  {
+    name: 'Hero Kicker contains PRACTICE & PAST EXAMS',
+    pass: questionsJs.includes('PRACTICE & PAST EXAMS') && questionsJs.includes('تدريب وسنوات سابقة')
   },
 
   // 2. Verified Removal checks
@@ -48,14 +52,14 @@ const checks = [
     pass: questionsJs.includes('Browse Questions') && questionsJs.includes('استعراض الأسئلة')
   },
 
-  // 4. Subject Code & Card metadata
+  // 4. Subject Code & Card metadata (Matching Blueprint)
   {
-    name: 'Subject cards render official codes (code pill)',
-    pass: questionsJs.includes('q-card-code-pill') && questionsJs.includes('s.code')
+    name: 'Subject cards render category pill and official code pill',
+    pass: questionsJs.includes('q-card-cat-pill') && questionsJs.includes('q-card-code-pill') && questionsJs.includes('s.code')
   },
   {
     name: 'Subject cards render real MCQ counts (not hardcoded)',
-    pass: questionsJs.includes('q-card-count-badge') && questionsJs.includes('${qCount}')
+    pass: (questionsJs.includes('q-card-mcq-count') || questionsJs.includes('q-card-count-badge')) && questionsJs.includes('${qCount}')
   },
 
   // 5. Controls & Filters
@@ -75,11 +79,15 @@ const checks = [
     name: 'Year filter event listener wired in bindEvents',
     pass: questionsJs.includes('q-year-dropdown') && questionsJs.includes('selectedYear')
   },
-
-  // 6. Responsive CSS Grids
   {
-    name: 'polish.css defines .questions-subject-grid with 3-columns for desktop (minmax(0, 1fr))',
-    pass: polishCss.includes('.questions-subject-grid') && polishCss.includes('grid-template-columns: repeat(3, minmax(0, 1fr))')
+    name: 'Curriculum section header contains "Dental Curriculum Subjects" and count',
+    pass: questionsJs.includes('Dental Curriculum Subjects') && (questionsJs.includes('q-curriculum-count') || questionsJs.includes('filteredSubjects.length'))
+  },
+
+  // 6. Responsive CSS Grids (Blueprint: Desktop 4-col, iPad 2-col, Mobile 1-col)
+  {
+    name: 'polish.css defines .questions-subject-grid with 4-columns for desktop (minmax(0, 1fr))',
+    pass: polishCss.includes('.questions-subject-grid') && polishCss.includes('grid-template-columns: repeat(4, minmax(0, 1fr))')
   },
   {
     name: 'polish.css defines 2-column grid for iPad / Tablet (768px-1199px) using minmax(0, 1fr)',
@@ -97,7 +105,7 @@ const checks = [
   // 7. Visual tokens & Card styling
   {
     name: 'polish.css contains .q-hero-banner with ivory/cream card styling & burgundy primary',
-    pass: polishCss.includes('.q-hero-banner') && polishCss.includes('--brand-burgundy') && polishCss.includes('.q-hero-stats')
+    pass: polishCss.includes('.q-hero-banner') && polishCss.includes('--brand-burgundy')
   },
   {
     name: 'Subject cards use word-wrap / natural wrapping for long names',
