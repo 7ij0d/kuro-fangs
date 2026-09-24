@@ -153,8 +153,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const moreQuestions = document.getElementById('more-item-questions');
     if (moreQuestions) moreQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Question Bank';
-    const moreRecordings = document.getElementById('more-item-recordings');
-    if (moreRecordings) moreRecordings.textContent = isAr ? 'التسجيلات الصوتية' : 'Audio Recordings';
     const navRewards = document.getElementById('nav-item-rewards');
     if (navRewards) navRewards.textContent = isAr ? 'كورو والتخصيص' : 'Mascot Hub';
     const navGames = document.getElementById('nav-item-games');
