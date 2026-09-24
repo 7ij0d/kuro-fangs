@@ -1654,8 +1654,39 @@ body { background: var(--bg-app); color: var(--text-primary); }
 }
 
 /* ── 5. Responsive Rules (Desktop / iPad / Mobile) ── */
+/* iPad & Tablet LANDSCAPE (Dedicated 3-Column Layout) */
+@media (min-width: 992px) and (max-width: 1279px),
+       (min-width: 992px) and (max-width: 1366px) and (orientation: landscape) {
+  .questions-subject-grid,
+  .bento-subject-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 14px;
+  }
+
+  .bento-sheet-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 14px;
+  }
+
+  .q-hero-banner {
+    padding: 20px 24px;
+    min-height: 140px;
+  }
+
+  .q-hero-bg-artwork {
+    width: 44%;
+    opacity: 0.85;
+  }
+
+  .q-subject-card {
+    padding: 15px 15px 13px;
+  }
+}
+
 /* iPad / Tablet (768px – 1199px) */
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 768px) and (max-width: 991px),
+       (min-width: 768px) and (max-width: 1024px) and (orientation: portrait),
+       (min-width: 768px) and (max-width: 1199px) {
   .questions-subject-grid,
   .bento-subject-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2978,6 +3009,7 @@ body { background: var(--bg-app); color: var(--text-primary); }
 }
 
 /* ── Responsive Multi-Device Rules ───────────────────────────────────────── */
+/* Tier 1: Desktop (≥ 1200px) */
 @media (min-width: 1200px) {
   .sheets-grid-container {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -2985,7 +3017,148 @@ body { background: var(--bg-app); color: var(--text-primary); }
   }
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
+/* Tier 2: iPad & Tablet LANDSCAPE (Dedicated 3-Column Tablet Grid) */
+@media (min-width: 992px) and (max-width: 1279px),
+       (min-width: 992px) and (max-width: 1366px) and (orientation: landscape) {
+  .sheets-grid-container {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .sheets-grid-card {
+    padding: 14px 14px 12px !important;
+    gap: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .sgc-thumb-col {
+    width: 96px !important;
+  }
+
+  .sgc-title {
+    font-size: 0.92rem !important;
+  }
+
+  .sgc-actions {
+    gap: 8px !important;
+  }
+
+  .sgc-btn-view,
+  .sgc-btn-download {
+    padding: 6px 10px !important;
+    font-size: 0.77rem !important;
+  }
+
+  /* Compact iPad Landscape Hero Banner */
+  .sheets-hero-banner {
+    min-height: 145px !important;
+    max-height: 165px !important;
+    border-radius: 14px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .shb-content-overlay {
+    padding: 18px 24px !important;
+    gap: 14px !important;
+    max-width: 520px !important;
+  }
+
+  .shb-badge-wrap {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 11px !important;
+  }
+
+  .shb-badge-svg {
+    width: 19px !important;
+    height: 19px !important;
+  }
+
+  .shb-title {
+    font-size: 1.35rem !important;
+  }
+
+  .shb-subtitle {
+    font-size: 0.82rem !important;
+  }
+
+  .shb-hero-artwork {
+    object-position: 80% center !important;
+  }
+
+  [dir="rtl"] .shb-hero-artwork {
+    object-position: 20% center !important;
+  }
+
+  /* Streamlined iPad Landscape Filter Bar (Single Row, No Overflow) */
+  .sheets-filter-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    margin-bottom: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .sheets-search-box {
+    flex: 1 1 auto !important;
+    min-width: 160px !important;
+  }
+
+  .sheets-search-input {
+    height: 38px !important;
+    font-size: 0.82rem !important;
+    padding-inline-start: 34px !important;
+    padding-inline-end: 28px !important;
+  }
+
+  .sheets-filters-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .sheets-select-wrap {
+    height: 38px !important;
+  }
+
+  .sheets-select-control {
+    height: 38px !important;
+    font-size: 0.8rem !important;
+    padding-inline-start: 28px !important;
+    padding-inline-end: 24px !important;
+    border-radius: 9px !important;
+  }
+
+  .sheets-year-select-wrap .sheets-select-control {
+    max-width: 110px !important;
+  }
+
+  .sheets-sort-select-wrap .sheets-select-control {
+    max-width: 130px !important;
+  }
+
+  .sheets-view-toggle-bar {
+    height: 38px !important;
+    padding: 2px !important;
+  }
+
+  .sheets-view-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+/* Tier 3: iPad & Tablet PORTRAIT (Dedicated 2-Column Tablet Grid) */
+@media (min-width: 768px) and (max-width: 991px),
+       (min-width: 768px) and (max-width: 1024px) and (orientation: portrait),
+       (min-width: 768px) and (max-width: 1199px) {
   .sheets-grid-container {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
@@ -4298,6 +4471,25 @@ body { background: var(--bg-app); color: var(--text-primary); }
     max-width: 1260px !important;
     margin: 0 auto !important;
     padding: 24px 32px 64px !important;
+  }
+}
+
+/* iPad & Tablet Landscape (Dedicated Breakpoint) */
+@media (min-width: 992px) and (max-width: 1279px),
+       (min-width: 992px) and (max-width: 1366px) and (orientation: landscape) {
+  .header-nav-center {
+    display: flex !important;
+    gap: 2px !important;
+  }
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+  .main-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 18px 22px 48px !important;
+    box-sizing: border-box !important;
   }
 }
 
@@ -5758,8 +5950,173 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
    DEVICE-SPECIFIC VIEWPORT TUNING
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. Tablet / iPad (768px – 1199px) ─── */
-@media (min-width: 768px) and (max-width: 1199px) {
+/* ─── 1. iPad & Tablet LANDSCAPE (Dedicated Tablet Landscape Layout) ─── */
+@media (min-width: 992px) and (max-width: 1279px),
+       (min-width: 992px) and (max-width: 1366px) and (orientation: landscape) {
+  .site-header {
+    height: 62px !important;
+    padding: 0 18px !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: clip !important;
+  }
+
+  /* Priority 1: Brand */
+  .header-left-group {
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-brand-avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .header-brand-name {
+    font-size: 0.94rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Priority 2: Center Navigation (Home, Sheets, Recordings, Questions, Schedules, More) */
+  .header-nav-center {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding: 3px 5px !important;
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .header-nav-pill {
+    padding: 5px 9px !important;
+    font-size: 0.77rem !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+  }
+
+  .header-nav-pill svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* Schedules is VISIBLE in center nav on iPad Landscape */
+  .desktop-only-nav-item {
+    display: inline-flex !important;
+  }
+
+  .tablet-schedules-item {
+    display: none !important;
+  }
+
+  /* Priority 3: Right Tools (Search, Notifications, Profile) */
+  .header-right-tools {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-right-tools .header-search-box {
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .header-right-tools .header-search-box input {
+    width: clamp(88px, 11vw, 130px) !important;
+    height: 34px !important;
+    font-size: 0.76rem !important;
+    padding-inline-start: 28px !important;
+    padding-inline-end: 8px !important;
+  }
+
+  .header-right-tools .header-search-box input:focus {
+    width: clamp(110px, 14vw, 155px) !important;
+  }
+
+  .header-right-tools .header-search-box .search-icon {
+    width: 13px !important;
+    height: 13px !important;
+    inset-inline-start: 9px !important;
+  }
+
+  .notifications-bell-btn {
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-profile-avatar-btn {
+    width: 34px !important;
+    height: 34px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-profile-avatar-btn img {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /* Secondary clutter hidden from top bar on iPad Landscape */
+  .mobile-toggle-btn,
+  #lang-toggle-btn,
+  #theme-toggle-btn,
+  #sound-toggle-btn,
+  #header-auth-action-box {
+    display: none !important;
+  }
+
+  /* Tablet Landscape Grids: 3 Columns */
+  .kuro-qa-grid,
+  .kuro-subjects-grid,
+  .schedules-cards-grid,
+  .audio-recordings-grid,
+  .questions-subject-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .kuro-hero-workspace {
+    border-radius: 16px;
+    margin-bottom: 18px;
+  }
+
+  .kuro-hero-banner {
+    height: 250px !important;
+    aspect-ratio: unset !important;
+  }
+
+  .kuro-hero-bg-img {
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: 70% center !important;
+  }
+
+  .kuro-hero-greeting-overlay {
+    width: 46% !important;
+    left: 4% !important;
+  }
+
+  .kuro-hero-greeting-title {
+    font-size: 1.45rem !important;
+  }
+
+  .kuro-lecture-row {
+    grid-template-columns: 110px 1fr 100px 80px 24px !important;
+    padding: 14px 18px !important;
+  }
+}
+
+/* ─── 2. iPad & Tablet PORTRAIT (768px – 991px / Portrait up to 1024px) ─── */
+@media (min-width: 768px) and (max-width: 991px),
+       (min-width: 768px) and (max-width: 1024px) and (orientation: portrait),
+       (min-width: 768px) and (max-width: 1199px) {
   .site-header {
     height: 62px !important;
     padding: 0 16px !important;
