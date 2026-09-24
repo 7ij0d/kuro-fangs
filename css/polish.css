@@ -7707,6 +7707,792 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   KURO STUDENT — UNIFIED ACADEMIC & EXAM SCHEDULES REDESIGN
+   Visual Reference: media_1790292241824.jpg
+   Palette: Warm Cream (#FAF8F5 / #FAF7F2), Deep Burgundy (#7E1D2A), Soft Neutral Grays
+   Zero rainbow clutters. Double-border elevation, Linear/Raycast-grade micro-interactions.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.schedules-subpage-container {
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 4px 48px;
+  box-sizing: border-box;
+}
+
+/* 1. Back Navigation Pill */
+.sched-back-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-card, #E8E2D9);
+  box-shadow: 0 1px 3px rgba(44, 24, 20, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border-radius: 9999px;
+  color: var(--text-primary, #4A3E3D);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sched-back-pill:hover {
+  background: var(--bg-surface-subtle, #F8F5EE);
+  color: var(--brand-burgundy, #7E1D2A);
+  border-color: rgba(126, 29, 42, 0.25);
+  transform: translateX(-2px);
+}
+
+[dir="rtl"] .sched-back-pill:hover {
+  transform: translateX(2px);
+}
+
+.sched-back-pill:active {
+  transform: scale(0.98);
+}
+
+.sched-back-pill svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 2. Page Header */
+.sched-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.sched-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sched-header-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(126, 29, 42, 0.08);
+  border: 1px solid rgba(126, 29, 42, 0.16);
+  color: var(--brand-burgundy, #7E1D2A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sched-header-icon-box svg {
+  width: 22px;
+  height: 22px;
+}
+
+.sched-header-titles h1 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-primary, #231F20);
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.sched-header-titles p {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary, #706560);
+  margin: 4px 0 0;
+}
+
+.sched-filter-pill {
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-card, #E8E2D9);
+  border-radius: 9999px;
+  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #4A3E3D);
+  box-shadow: 0 1px 3px rgba(44, 24, 20, 0.04);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sched-filter-pill:hover {
+  border-color: rgba(126, 29, 42, 0.25);
+  background: var(--bg-surface-subtle, #F8F5EE);
+}
+
+.sched-filter-pill svg {
+  width: 15px;
+  height: 15px;
+  color: var(--brand-burgundy, #7E1D2A);
+}
+
+/* 3. Academic Tabs Row */
+.sched-tabs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.sched-tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sched-tab-btn {
+  border-radius: 9999px;
+  padding: 9px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid var(--border-card, #E8E2D9);
+  background: var(--bg-card, #FFFFFF);
+  color: var(--text-primary, #4A3E3D);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(44, 24, 20, 0.03);
+}
+
+.sched-tab-btn:hover {
+  background: var(--bg-surface-subtle, #F8F5EE);
+  color: var(--brand-burgundy, #7E1D2A);
+  border-color: rgba(126, 29, 42, 0.25);
+}
+
+.sched-tab-btn.active {
+  background: var(--brand-burgundy, #7E1D2A);
+  color: #FFFFFF !important;
+  border-color: var(--brand-burgundy, #7E1D2A);
+  box-shadow: 0 2px 10px rgba(126, 29, 42, 0.28);
+}
+
+.sched-tab-count-badge {
+  font-size: 0.72rem;
+  padding: 2.5px 8px;
+  border-radius: 9999px;
+  font-weight: 700;
+  background: var(--bg-surface-subtle, #F0EAE1);
+  color: var(--text-secondary, #6B605A);
+}
+
+.sched-tab-btn.active .sched-tab-count-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+}
+
+.sched-print-btn {
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-card, #E8E2D9);
+  border-radius: 9999px;
+  padding: 9px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #4A3E3D);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(44, 24, 20, 0.04);
+  transition: all 0.2s ease;
+}
+
+.sched-print-btn:hover {
+  background: var(--bg-surface-subtle, #F8F5EE);
+  color: var(--brand-burgundy, #7E1D2A);
+  border-color: rgba(126, 29, 42, 0.25);
+}
+
+.sched-print-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 4. Group Selector (Clinical & Lab) */
+.sched-group-selector-wrap {
+  margin-bottom: 22px;
+}
+
+.sched-group-selector-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary, #5C524B);
+  margin-bottom: 10px;
+}
+
+.sched-group-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.sched-group-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.sched-group-pill {
+  min-width: 44px;
+  height: 38px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-card, #E8E2D9);
+  background: var(--bg-card, #FFFFFF);
+  color: var(--text-primary, #4A3E3D);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(44, 24, 20, 0.03);
+}
+
+.sched-group-pill:hover {
+  border-color: rgba(126, 29, 42, 0.35);
+  color: var(--brand-burgundy, #7E1D2A);
+  background: #FCF7F7;
+}
+
+.sched-group-pill.active {
+  background: var(--brand-burgundy, #7E1D2A);
+  border-color: var(--brand-burgundy, #7E1D2A);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(126, 29, 42, 0.25);
+}
+
+/* 5. Clean Unified Table Container */
+.kuro-sched-table-card {
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-card, #ECE6DE);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(44, 24, 20, 0.03);
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.kuro-sched-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+[dir="rtl"] .kuro-sched-table {
+  text-align: right;
+}
+
+.kuro-sched-table thead tr {
+  background: #F8F5EE;
+  border-bottom: 1px solid #ECE6DE;
+}
+
+.kuro-sched-table th {
+  padding: 14px 20px;
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #706560;
+  letter-spacing: 0.01em;
+}
+
+.kuro-sched-table tbody tr {
+  border-bottom: 1px solid #F3EFE9;
+  transition: background-color 0.15s ease;
+}
+
+.kuro-sched-table tbody tr:hover {
+  background-color: #FAF8F5;
+}
+
+.kuro-sched-table tr.sched-day-last-row {
+  border-bottom: 2px solid #E8E1D5;
+}
+
+.kuro-sched-table td {
+  padding: 15px 20px;
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.sched-day-cell {
+  background: #FCFAF7;
+  border-inline-end: 1px solid #ECE6DE;
+  vertical-align: middle;
+  text-align: center;
+  padding: 16px 22px;
+}
+
+.sched-day-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #231F20;
+  display: block;
+}
+
+.sched-day-sub {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #8C827A;
+  margin-top: 3px;
+  display: block;
+}
+
+.sched-subject-cell {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.sched-subject-primary {
+  color: var(--brand-burgundy, #7E1D2A);
+  display: block;
+}
+
+.sched-subject-en-sub {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #8C827A;
+  display: block;
+  margin-top: 2px;
+}
+
+.sched-time-cell {
+  font-weight: 600;
+  color: #2D2224;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sched-code-cell {
+  color: #706560;
+  font-size: 0.825rem;
+  font-weight: 600;
+}
+
+.sched-location-cell {
+  color: #706560;
+  font-size: 0.825rem;
+  font-weight: 500;
+}
+
+.sched-date-cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.sched-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #4A3E3D;
+}
+
+.sched-date-pill svg {
+  width: 14px;
+  height: 14px;
+  color: var(--brand-burgundy, #7E1D2A);
+}
+
+.sched-countdown-badge {
+  background: #FDF2F2;
+  color: #9B2C3B;
+  border: 1px solid rgba(155, 44, 59, 0.15);
+  font-size: 0.775rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* 6. Mobile Layout & Breakpoints */
+.kuro-sched-mobile-list {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .kuro-sched-table-card {
+    display: none !important;
+  }
+
+  .kuro-sched-mobile-list {
+    display: block !important;
+  }
+
+  .sched-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .sched-header-actions {
+    width: 100%;
+  }
+
+  .sched-filter-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sched-tabs-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .sched-tabs-group {
+    width: 100%;
+    display: flex;
+  }
+
+  .sched-tab-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 12px;
+    font-size: 0.825rem;
+  }
+
+  .sched-print-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sched-mobile-day-group {
+    margin-bottom: 20px;
+  }
+
+  .sched-mobile-day-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #231F20;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .sched-mobile-day-title span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8C827A;
+  }
+
+  .sched-mobile-card {
+    background: var(--bg-card, #FFFFFF);
+    border: 1px solid var(--border-card, #ECE6DE);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(44, 24, 20, 0.03);
+  }
+
+  .sched-mobile-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #FDF2F2;
+    color: var(--brand-burgundy, #7E1D2A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .sched-mobile-icon-box svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sched-mobile-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sched-mobile-time {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #7A706B;
+    margin-bottom: 2px;
+  }
+
+  .sched-mobile-subject {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--brand-burgundy, #7E1D2A);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sched-mobile-meta {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #8C827A;
+    margin-top: 2px;
+  }
+
+  .sched-mobile-arrow {
+    color: #C4BAB0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .sched-mobile-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .sched-mobile-group-hint {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--brand-burgundy, #7E1D2A);
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    background: rgba(126, 29, 42, 0.06);
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .sched-mobile-exam-card {
+    background: var(--bg-card, #FFFFFF);
+    border: 1px solid var(--border-card, #ECE6DE);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(44, 24, 20, 0.03);
+  }
+
+  .sched-mobile-date-block {
+    width: 48px;
+    height: 50px;
+    border-radius: 10px;
+    background: #FAF5F5;
+    border: 1px solid #F2E6E6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .date-block-month {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--brand-burgundy, #7E1D2A);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .date-block-day {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #231F20;
+    line-height: 1;
+  }
+
+  .sched-mobile-exam-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .exam-time-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #7A706B;
+    margin-bottom: 2px;
+  }
+
+  .exam-subject-text {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--brand-burgundy, #7E1D2A);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .exam-code-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #8C827A;
+    margin-top: 2px;
+  }
+
+  .sched-mobile-countdown {
+    background: #FDF2F2;
+    color: #9B2C3B;
+    border: 1px solid rgba(155, 44, 59, 0.15);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+/* 7. Dark Mode Architecture */
+[data-theme="dark"] .kuro-sched-table-card,
+[data-theme="kuro-dark"] .kuro-sched-table-card {
+  background: #1C1517;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .kuro-sched-table thead tr,
+[data-theme="kuro-dark"] .kuro-sched-table thead tr {
+  background: #23191B;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .kuro-sched-table th,
+[data-theme="kuro-dark"] .kuro-sched-table th {
+  color: #A8A09B;
+}
+
+[data-theme="dark"] .kuro-sched-table tbody tr,
+[data-theme="kuro-dark"] .kuro-sched-table tbody tr {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .kuro-sched-table tbody tr:hover,
+[data-theme="kuro-dark"] .kuro-sched-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .kuro-sched-table tr.sched-day-last-row,
+[data-theme="kuro-dark"] .kuro-sched-table tr.sched-day-last-row {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .sched-day-cell,
+[data-theme="kuro-dark"] .sched-day-cell {
+  background: #1F1719;
+  border-inline-end-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .sched-day-name,
+[data-theme="kuro-dark"] .sched-day-name {
+  color: #F5F2EB;
+}
+
+[data-theme="dark"] .sched-day-sub,
+[data-theme="kuro-dark"] .sched-day-sub {
+  color: #9E9690;
+}
+
+[data-theme="dark"] .sched-subject-primary,
+[data-theme="kuro-dark"] .sched-subject-primary {
+  color: #F87171;
+}
+
+[data-theme="dark"] .sched-time-cell,
+[data-theme="kuro-dark"] .sched-time-cell {
+  color: #ECE5DC;
+}
+
+[data-theme="dark"] .sched-code-cell,
+[data-theme="dark"] .sched-location-cell,
+[data-theme="kuro-dark"] .sched-code-cell,
+[data-theme="kuro-dark"] .sched-location-cell {
+  color: #B5ACA4;
+}
+
+[data-theme="dark"] .sched-back-pill,
+[data-theme="dark"] .sched-filter-pill,
+[data-theme="dark"] .sched-tab-btn:not(.active),
+[data-theme="dark"] .sched-print-btn,
+[data-theme="dark"] .sched-group-pill:not(.active),
+[data-theme="kuro-dark"] .sched-back-pill,
+[data-theme="kuro-dark"] .sched-filter-pill,
+[data-theme="kuro-dark"] .sched-tab-btn:not(.active),
+[data-theme="kuro-dark"] .sched-print-btn,
+[data-theme="kuro-dark"] .sched-group-pill:not(.active) {
+  background: #1C1517;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ECE5DC;
+}
+
+[data-theme="dark"] .sched-countdown-badge,
+[data-theme="kuro-dark"] .sched-countdown-badge {
+  background: rgba(188, 74, 71, 0.2);
+  color: #FFA3A3;
+  border-color: rgba(188, 74, 71, 0.35);
+}
+
+[data-theme="dark"] .sched-header-titles h1,
+[data-theme="kuro-dark"] .sched-header-titles h1 {
+  color: #F5F2EB;
+}
+
+[data-theme="dark"] .sched-header-titles p,
+[data-theme="kuro-dark"] .sched-header-titles p {
+  color: #A8A09B;
+}
+
+[data-theme="dark"] .sched-mobile-card,
+[data-theme="dark"] .sched-mobile-exam-card,
+[data-theme="kuro-dark"] .sched-mobile-card,
+[data-theme="kuro-dark"] .sched-mobile-exam-card {
+  background: #1C1517;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .sched-mobile-icon-box,
+[data-theme="kuro-dark"] .sched-mobile-icon-box {
+  background: rgba(188, 74, 71, 0.2);
+  color: #FFA3A3;
+}
+
+[data-theme="dark"] .sched-mobile-date-block,
+[data-theme="kuro-dark"] .sched-mobile-date-block {
+  background: #251B1D;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .date-block-month,
+[data-theme="kuro-dark"] .date-block-month {
+  color: #F87171;
+}
+
+[data-theme="dark"] .date-block-day,
+[data-theme="kuro-dark"] .date-block-day {
+  color: #F5F2EB;
+}
+
+[data-theme="dark"] .sched-mobile-countdown,
+[data-theme="kuro-dark"] .sched-mobile-countdown {
+  background: rgba(188, 74, 71, 0.2);
+  color: #FFA3A3;
+  border-color: rgba(188, 74, 71, 0.35);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    KURO STUDENT — AUDIO RECORDINGS LIBRARY MASTER REDESIGN
    3-Level Dental Curriculum Architecture:
      Level 1: Subject Selection (12 Dental Subjects)

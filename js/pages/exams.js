@@ -173,6 +173,20 @@ const ExamsPage = {
     return diffDays;
   },
 
+  // Parse Month and Day for Blueprint Date Blocks
+  getMonthDay(dateStr, isAr) {
+    const parts = (dateStr || '').split('/');
+    if (parts.length < 3) return { month: '', day: dateStr || '' };
+    const monthNum = parseInt(parts[1], 10);
+    const day = parts[2];
+    const monthsEn = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthsAr = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    return {
+      month: isAr ? monthsAr[monthNum] : monthsEn[monthNum],
+      day: day
+    };
+  },
+
   // =========================================================================
   // SECTION 0: UNIFIED ACADEMIC SCHEDULES HUB (#/schedules)
   // =========================================================================
@@ -346,6 +360,7 @@ const ExamsPage = {
 
   // =========================================================================
   // SECTION 1: WEEKLY ACADEMIC SCHEDULES (Theory + Practical with Group Selector)
+  // Visual Reference: media_1790292241824.jpg
   // =========================================================================
   renderAcademicSchedules(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
@@ -366,64 +381,62 @@ const ExamsPage = {
       ExamsPage.setSelectedGroup(queryParams.get('group'));
     }
 
+    const isTheory = ExamsPage.academicTab === 'theory';
+
     container.innerHTML = `
-      <!-- Back Navigation Bar -->
-      <div class="schedules-top-back-bar no-print">
-        <a href="#/schedules" class="schedules-back-link">
-          <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
-          <span>${isAr ? 'الرجوع للجداول الدراسية' : 'Back to Academic Schedules'}</span>
-        </a>
-      </div>
-
-      <!-- Page Header -->
-      <div class="exams-page-header">
-        <div class="page-title-group">
-          <h1>
-            <i data-lucide="book-open" style="color: var(--brand-burgundy); width: 28px; height: 28px;"></i>
-            ${isAr ? 'الجداول الدراسية (نظري وعملي)' : 'Weekly Academic Schedules (Theory & Practical)'}
-          </h1>
-          <p>${isAr ? 'جدول المحاضرات النظرية بمدرج 2 بالكلية وجدول المعامل والعيادات العملي والسريري للمجموعات الفرعية الـ 10 (A1 إلى E2)' : 'Auditorium 2 theoretical lecture matrix and practical/clinical lab schedule for the 10 student subgroups (A1 to E2)'}</p>
-        </div>
-
-        <div class="exams-header-actions no-print">
-          <!-- Link to Schedules Hub -->
-          <a href="#/schedules" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
-            <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'كل الجداول' : 'All Schedules'}</span>
+      <div class="schedules-subpage-container" dir="${isAr ? 'rtl' : 'ltr'}">
+        <!-- Back Navigation Bar -->
+        <div class="schedules-top-back-bar no-print">
+          <a href="#/schedules" class="sched-back-pill" data-title="Back to Academic Schedules">
+            <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
+            <span>${isAr ? 'الرجوع للجداول الدراسية' : 'Back to Schedules'}</span>
           </a>
-
-          <!-- Print / Save as PDF Button -->
-          <button id="btn-print-schedule" class="btn btn-primary btn-print-schedule">
-            <i data-lucide="printer"></i>
-            <span>${isAr ? 'طباعة / حفظ PDF' : 'Print / Save PDF'}</span>
-          </button>
         </div>
+
+        <!-- Page Header -->
+        <div class="sched-page-header">
+          <div class="sched-header-title-wrap">
+            <div class="sched-header-icon-box">
+              <i data-lucide="calendar"></i>
+            </div>
+            <div class="sched-header-titles">
+              <h1 id="sched-dynamic-title">${isTheory ? (isAr ? 'الجدول الأسبوعي' : 'Weekly Schedule') : (isAr ? 'جدول المعامل والعيادات' : 'Clinical & Lab Schedule')}</h1>
+              <p id="sched-dynamic-subtitle">${isTheory ? (isAr ? 'المحاضرات النظرية • السنة الثالثة (2026–2027)' : 'Theory Lectures • Year 3 (2026–2027)') : (isAr ? 'السنة الثالثة (2026–2027)' : 'Year 3 (2026–2027)')}</p>
+            </div>
+          </div>
+
+          <div class="sched-header-actions no-print">
+            <div class="sched-filter-pill">
+              <i data-lucide="calendar"></i>
+              <span>${isAr ? 'جميع الأسابيع ▾' : 'All Weeks ▾'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Tabs Row -->
+        <div class="sched-tabs-row no-print">
+          <div class="sched-tabs-group">
+            <button class="sched-tab-btn ${isTheory ? 'active' : ''}" data-academic-tab="theory" type="button">
+              <span>${isAr ? 'المحاضرات النظرية' : 'Theory Lectures'}</span>
+            </button>
+            <button class="sched-tab-btn ${!isTheory ? 'active' : ''}" data-academic-tab="practical" type="button">
+              <span>${isAr ? 'جدول المعامل والعيادات' : 'Clinical & Lab Schedule'}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Content Container -->
+        <div id="academic-content-area" class="sched-content-area"></div>
       </div>
-
-      <!-- Section 1 Academic Tabs Bar -->
-      <div class="schedule-tabs-bar no-print">
-        <button class="schedule-tab-btn ${ExamsPage.academicTab === 'theory' ? 'active' : ''}" data-academic-tab="theory">
-          <i data-lucide="book-open"></i>
-          <span>${isAr ? 'جدول المحاضرات النظري الأسبوعي' : 'Theoretical Lectures Matrix'}</span>
-          <span class="tab-count-pill" style="background: var(--brand-burgundy); color: #fff;">${isAr ? 'مدرج 2 • السبت-الخميس' : 'Auditorium 2 • Sat-Thu'}</span>
-        </button>
-
-        <button class="schedule-tab-btn ${ExamsPage.academicTab === 'practical' ? 'active' : ''}" data-academic-tab="practical">
-          <i data-lucide="microscope"></i>
-          <span>${isAr ? 'جدول المعامل والعيادات العملي/السريري' : 'Clinical & Lab Schedule'}</span>
-          <span class="tab-count-pill" style="background: #10B981; color: #FFFFFF; font-weight: 800;">A1–E2</span>
-        </button>
-      </div>
-
-      <!-- Active Content Container -->
-      <div id="academic-content-area" class="exams-content-area"></div>
     `;
 
     ExamsPage.renderAcademicTabContent(isAr);
     ExamsPage.setupAcademicTabListeners(container, isAr);
     ExamsPage.attachPrintHandler(container);
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   },
 
   renderAcademicTabContent(isAr) {
@@ -434,23 +447,12 @@ const ExamsPage = {
       contentArea.innerHTML = ExamsPage.renderPracticalView(isAr);
       ExamsPage.setupPracticalListeners(isAr);
     } else {
-      contentArea.innerHTML = `
-        ${ExamsPage.renderTheoryTableView(isAr)}
-        <!-- Attendance & Auditorium Notice -->
-        <div class="card no-print" style="padding: 16px 20px; border-radius: 12px; margin-top: 18px; background: var(--bg-hover); border: 1px dashed var(--border-card); display: flex; align-items: flex-start; gap: 12px;">
-          <i data-lucide="info" style="color: var(--brand-burgundy); width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;"></i>
-          <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
-            <b>${isAr ? 'تنبيه أكاديمي موحد بالمحاضرات النظرية:' : 'Academic Lecture Guidelines:'}</b>
-            ${isAr 
-              ? 'تُعقد كافة المحاضرات النظرية الموحدة في <b>مدرج 2</b> بالكلية من السبت إلى الخميس (8:00 ص – 12:00 م، ومحاضرة أمراض الفم الإضافية الأربعاء 2:00 م – 4:00 م). الحضور إلزامي بنسبة لا تقل عن 75% لدخول الامتحانات النهائية.' 
-              : 'All unified theoretical lectures take place in <b>Auditorium 2</b> Saturday through Thursday (8:00 AM – 12:00 PM, and Wednesday Oral Path at 2:00 PM – 4:00 PM). Minimum 75% attendance is required for exam entry.'}
-          </div>
-        </div>
-      `;
-      ExamsPage.setupTheoryModeListeners(contentArea, isAr);
+      contentArea.innerHTML = ExamsPage.renderTheoryTableView(isAr);
     }
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   },
 
   setupAcademicTabListeners(container, isAr) {
@@ -459,170 +461,108 @@ const ExamsPage = {
         const tab = btn.getAttribute('data-academic-tab');
         ExamsPage.academicTab = tab;
         localStorage.setItem('kf_academic_active_tab', tab);
+
+        // Update URL hash smoothly without reloading
+        if (tab === 'practical') {
+          window.location.hash = '#/practical-schedule';
+        } else {
+          window.location.hash = '#/lecture-schedule';
+        }
+
+        // Update header dynamic title & subtitle
+        const titleEl = document.getElementById('sched-dynamic-title');
+        const subEl = document.getElementById('sched-dynamic-subtitle');
+        if (titleEl && subEl) {
+          if (tab === 'practical') {
+            titleEl.textContent = isAr ? 'جدول المعامل والعيادات' : 'Clinical & Lab Schedule';
+            subEl.textContent = isAr ? 'السنة الثالثة (2026–2027)' : 'Year 3 (2026–2027)';
+          } else {
+            titleEl.textContent = isAr ? 'الجدول الأسبوعي' : 'Weekly Schedule';
+            subEl.textContent = isAr ? 'المحاضرات النظرية • السنة الثالثة (2026–2027)' : 'Theory Lectures • Year 3 (2026–2027)';
+          }
+        }
+
         container.querySelectorAll('[data-academic-tab]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         ExamsPage.renderAcademicTabContent(isAr);
       });
     });
-
-    ExamsPage.setupTheoryModeListeners(container, isAr);
-  },
-
-  setupTheoryModeListeners(container, isAr) {
-    const matrixBtn = container.querySelector('#btn-theory-matrix');
-    const cardsBtn = container.querySelector('#btn-theory-cards');
-
-    if (matrixBtn && cardsBtn) {
-      matrixBtn.addEventListener('click', () => {
-        ExamsPage.theoryViewMode = 'matrix';
-        localStorage.setItem('kf_theory_view_mode', 'matrix');
-        ExamsPage.renderAcademicTabContent(isAr);
-      });
-
-      cardsBtn.addEventListener('click', () => {
-        ExamsPage.theoryViewMode = 'timeline';
-        localStorage.setItem('kf_theory_view_mode', 'timeline');
-        ExamsPage.renderAcademicTabContent(isAr);
-      });
-    }
   },
 
   renderTheoryTableView(isAr) {
-    const title = isAr ? 'جدول المحاضرات النظري الموحد — مدرج 2' : 'Unified Theoretical Lectures Timetable — Auditorium 2';
-    const subtitle = isAr ? 'كلية طب وجراحة الفم والأسنان • جامعة طرابلس • العام الجامعي 2026 / 2027' : 'Faculty of Oral & Dental Surgery • University of Tripoli • Academic Year 2026 - 2027';
-    const isMatrix = ExamsPage.theoryViewMode !== 'timeline';
-    const matrix = ExamsPage.theoryScheduleMatrix;
-    const scheduleDays = ExamsPage.theoryScheduleDays;
-
-    const renderCard = (slot) => {
-      if (!slot) return '';
-      return `
-        <div class="theory-slot-card" style="border-inline-start: 4px solid ${slot.color};">
-          <div class="theory-slot-card-header">
-            <span class="theory-code-badge" style="background: ${slot.color}; color: #FFFFFF;">${slot.code}</span>
-            <span class="theory-hall-badge">
-              <i data-lucide="map-pin" style="width: 12px; height: 12px; color: ${slot.color};"></i>
-              <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
-            </span>
-          </div>
-          <div class="theory-course-title">${isAr ? slot.course_ar : slot.course_en}</div>
-          <div class="theory-course-sub">${isAr ? slot.course_en : slot.course_ar}</div>
-          <div class="theory-time-footer">
-            <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
-            <span>${slot.time}</span>
-          </div>
-        </div>
-      `;
-    };
-
-    const renderEmpty = (label) => {
-      return `
-        <div class="theory-empty-slot">
-          <span class="theory-empty-text">${label}</span>
-        </div>
-      `;
-    };
+    const scheduleDays = ExamsPage.theoryScheduleDays || [];
 
     return `
-      <div class="exams-table-card card theory-table-card">
-        <div class="table-card-header" style="flex-wrap: wrap; gap: 12px;">
-          <div>
-            <h2>📚 ${title}</h2>
-            <p>${subtitle}</p>
-          </div>
-
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <!-- Official Source Portal Link -->
-            <a href="https://tables.dentaluot.com/print.php?year=3&mode=theory" target="_blank" rel="noopener" class="official-source-pill" style="background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border-subtle);" title="${isAr ? 'عرض الجدول في موقع الكلية الرسمي' : 'Open official timetable portal'}">
-              <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
-              <span>${isAr ? '🔗 المصدر الرسمي بالكلية' : '🔗 Faculty Portal'}</span>
-            </a>
-
-            <!-- View Mode Switcher -->
-            <div class="theory-view-toggle no-print">
-              <button type="button" id="btn-theory-matrix" class="theory-toggle-btn ${isMatrix ? 'active' : ''}" title="${isAr ? 'عرض مصفوفة الجدول الأسبوعي' : 'Weekly Matrix View'}">
-                <i data-lucide="grid" style="width: 14px; height: 14px;"></i>
-                <span>${isAr ? 'المصفوفة المعتمدة' : 'Matrix'}</span>
-              </button>
-              <button type="button" id="btn-theory-cards" class="theory-toggle-btn ${!isMatrix ? 'active' : ''}" title="${isAr ? 'عرض بطاقات الأيام' : 'Day Cards View'}">
-                <i data-lucide="list" style="width: 14px; height: 14px;"></i>
-                <span>${isAr ? 'بطاقات الأيام' : 'Cards'}</span>
-              </button>
-            </div>
-
-            <div class="print-watermark">KURO FANGS • THEORETICAL LECTURES • AUDITORIUM 2</div>
-          </div>
-        </div>
-
-        ${isMatrix ? `
-          <!-- Official Matrix Grid View (Matching tables.dentaluot.com) -->
-          <div class="table-responsive" style="margin-top: 14px;">
-            <table class="theory-matrix-table">
-              <thead>
-                <tr>
-                  <th style="width: 120px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
-                  <th style="width: 24%;">${isAr ? 'الفترة الأولى (08:00 ص – 10:00 ص)' : 'Period 1 (08:00 AM – 10:00 AM)'}</th>
-                  <th style="width: 24%;">${isAr ? 'الفترة الثانية (10:00 ص – 12:00 م)' : 'Period 2 (10:00 AM – 12:00 PM)'}</th>
-                  <th style="width: 24%;">${isAr ? 'الفترة الثالثة (12:00 م – 02:00 م)' : 'Period 3 (12:00 PM – 02:00 PM)'}</th>
-                  <th style="width: 24%;">${isAr ? 'الفترة الرابعة (02:00 م – 04:00 م)' : 'Period 4 (02:00 PM – 04:00 PM)'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${matrix.map(row => `
-                  <tr>
-                    <td class="theory-day-cell">
-                      <div class="day-header-content">
-                        <span class="day-name-main">${isAr ? row.day_ar : row.day_en}</span>
-                        <span class="day-name-sub">${isAr ? row.day_en : row.day_ar}</span>
-                      </div>
+      <!-- Desktop & Tablet Landscape View: Clean Unified Table -->
+      <div class="kuro-sched-table-card">
+        <table class="kuro-sched-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">${isAr ? 'اليوم' : 'Day'}</th>
+              <th style="width: 170px;">${isAr ? 'الوقت' : 'Time'}</th>
+              <th>${isAr ? 'المادة' : 'Subject'}</th>
+              <th style="width: 130px;">${isAr ? 'الرمز' : 'Code'}</th>
+              <th style="width: 170px;">${isAr ? 'المكان' : 'Location'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scheduleDays.map(dayObj => {
+              const slots = dayObj.slots || [];
+              if (slots.length === 0) return '';
+              return slots.map((slot, idx) => {
+                const isFirst = idx === 0;
+                const isLast = idx === slots.length - 1;
+                const trClass = isLast ? 'sched-day-last-row' : '';
+                return `
+                  <tr class="${trClass}">
+                    ${isFirst ? `
+                      <td class="sched-day-cell" rowspan="${slots.length}">
+                        <span class="sched-day-name">${isAr ? dayObj.day_ar : dayObj.day_en}</span>
+                        <span class="sched-day-sub">${isAr ? dayObj.day_en : dayObj.day_ar}</span>
+                      </td>
+                    ` : ''}
+                    <td class="sched-time-cell">${slot.time}</td>
+                    <td class="sched-subject-cell">
+                      <span class="sched-subject-primary">${isAr ? slot.subject_ar : slot.subject_en}</span>
+                      ${isAr ? `<span class="sched-subject-en-sub">${slot.subject_en}</span>` : ''}
                     </td>
-                    <td>${row.slots.slot1 ? renderCard(row.slots.slot1) : renderEmpty('—')}</td>
-                    <td>${row.slots.slot2 ? renderCard(row.slots.slot2) : renderEmpty('—')}</td>
-                    <td>${renderEmpty(isAr ? 'استراحة / عيادات ومعامل 🏥' : 'Clinics & Labs 🏥')}</td>
-                    <td>${row.slots.slot4 ? renderCard(row.slots.slot4) : renderEmpty('—')}</td>
+                    <td class="sched-code-cell">${slot.code}</td>
+                    <td class="sched-location-cell">${isAr ? slot.hall_ar : slot.hall_en}</td>
                   </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        ` : `
-          <!-- Day-by-Day Stack View -->
-          <div class="clinical-days-stack" style="margin-top: 14px;">
-            ${scheduleDays.map(dayObj => `
-              <div class="clinical-day-card">
-                <div class="clinical-day-card-header">
-                  <div class="day-badge-title">
-                    <i data-lucide="calendar" style="width: 20px; height: 20px; color: var(--brand-burgundy);"></i>
-                    <span>${isAr ? dayObj.day_ar : dayObj.day_en}</span>
-                    <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">(${isAr ? dayObj.day_en : dayObj.day_ar})</span>
+                `;
+              }).join('');
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Touch View: Compact Day Cards -->
+      <div class="kuro-sched-mobile-list">
+        ${scheduleDays.map(dayObj => `
+          <div class="sched-mobile-day-group">
+            <div class="sched-mobile-day-title">
+              <strong>${isAr ? dayObj.day_ar : dayObj.day_en}</strong>
+              <span>${isAr ? dayObj.day_en : dayObj.day_ar}</span>
+            </div>
+            <div class="sched-mobile-cards-stack">
+              ${(dayObj.slots || []).map(slot => `
+                <div class="sched-mobile-card">
+                  <div class="sched-mobile-icon-box">
+                    <i data-lucide="book-open"></i>
                   </div>
-                  <div class="day-theory-hint">
-                    ${isAr ? 'المدرج: مدرج 2 (الكلية)' : 'Auditorium: Hall 2'}
+                  <div class="sched-mobile-info">
+                    <div class="sched-mobile-time">${slot.time}</div>
+                    <div class="sched-mobile-subject">${isAr ? slot.subject_ar : slot.subject_en}</div>
+                    <div class="sched-mobile-meta">${slot.code} • ${isAr ? slot.hall_ar : slot.hall_en}</div>
+                  </div>
+                  <div class="sched-mobile-arrow">
+                    <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
                   </div>
                 </div>
-                <div class="day-sessions-grid">
-                  ${dayObj.slots.map(s => `
-                    <div class="theory-slot-card" style="border-inline-start: 4px solid ${s.color};">
-                      <div class="theory-slot-card-header">
-                        <span class="theory-code-badge" style="background: ${s.color}; color: #FFFFFF;">${s.code}</span>
-                        <span class="theory-hall-badge">
-                          <i data-lucide="map-pin" style="width: 12px; height: 12px; color: ${s.color};"></i>
-                          <span>${isAr ? s.hall_ar : s.hall_en}</span>
-                        </span>
-                      </div>
-                      <div class="theory-course-title">${isAr ? s.subject_ar : s.subject_en}</div>
-                      <div class="theory-course-sub">${isAr ? s.subject_en : s.subject_ar}</div>
-                      <div class="theory-time-footer">
-                        <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
-                        <span>${s.time}</span>
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            `).join('')}
+              `).join('')}
+            </div>
           </div>
-        `}
+        `).join('')}
       </div>
     `;
   },
@@ -649,124 +589,100 @@ const ExamsPage = {
       }
     });
 
-    const isTableView = ExamsPage.practicalViewMode !== 'timeline';
-
     return `
-      <!-- Quick Subgroup Selector Bar -->
-      <div class="clinical-group-selector-box">
-        <div class="group-selector-header">
-          <div class="group-selector-title">
-            <i data-lucide="users" style="width: 22px; height: 22px; color: var(--brand-primary);"></i>
-            <span>${isAr ? 'شريط الاختيار السريع لمجموعتك (اختر من A1 إلى E2):' : 'Quick Subgroup Selector (Choose from A1 to E2):'}</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <div class="active-group-tag">
-              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
-              <span>${isAr ? `المجموعة المحفوظة: ${selectedGroup}` : `Saved Subgroup: ${selectedGroup}`}</span>
-            </div>
-            <a href="https://tables.dentaluot.com/print.php?year=3&section=A&mode=combined&pdf=1&student=1" target="_blank" rel="noopener" class="official-source-pill" style="background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border-subtle);" title="${isAr ? 'عرض الجدول في موقع الكلية الرسمي' : 'Open official timetable portal'}">
-              <span>${isAr ? '🔗 المصدر الرسمي بالكلية' : '🔗 Official Faculty Portal'}</span>
-              <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
-            </a>
-          </div>
-        </div>
-
-        <!-- 10 Groups Interactive Chips Bar -->
-        <div class="clinical-group-chips-wrap no-print">
+      <!-- Group Selector Pill Bar (A1 to E2) -->
+      <div class="sched-group-selector-wrap no-print">
+        <div class="sched-group-selector-label">${isAr ? 'اختيار المجموعة (من A1 إلى E2)' : 'Group Selector (A1 to E2)'}</div>
+        <div class="sched-group-pills-row">
           ${allGroups.map(g => `
-            <button class="btn-group-chip ${g === selectedGroup ? 'active' : ''}" data-group="${g}" type="button" aria-label="Group ${g}">
-              <span>${g}</span>
-              ${g === selectedGroup ? '<i data-lucide="check" style="width: 14px; height: 14px;"></i>' : ''}
+            <button class="sched-group-pill ${g === selectedGroup ? 'active' : ''}" data-group="${g}" type="button" aria-label="Group ${g}">
+              ${g}
             </button>
           `).join('')}
         </div>
-
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 12px 0 0; line-height: 1.5;">
-          ${isAr 
-            ? `⚡ تم حفظ اختيارك تلقائياً في المتصفح. يعرض الجدول أدناه مواعيد وعيادات مجموعتك (<b>${selectedGroup}</b>) فقط من الأحد إلى الخميس، بواقع جلستين يومياً.`
-            : `⚡ Selection is saved automatically. The schedule below displays only your group's (<b>${selectedGroup}</b>) clinics and practical labs from Sunday to Thursday.`}
-        </p>
       </div>
 
-      <!-- Schedule Table View -->
-      <div class="exams-table-card card clinical-table-card">
-        <div class="table-card-header">
-          <div>
-            <h2>${isAr ? `جدول عيادات ومعامل المجموعة (${selectedGroup}) — السنة الثالثة` : `Clinical & Lab Schedule — Group (${selectedGroup}) • Year 3`}</h2>
-            <p>${isAr ? 'جامعة طرابلس • كلية طب وجراحة الفم والأسنان • العام الجامعي 2026 - 2027' : 'University of Tripoli • Faculty of Dentistry • Academic Year 2026 - 2027'}</p>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="badge badge-primary" style="font-size: 0.8rem; padding: 4px 12px;">${isAr ? `المجموعة: ${selectedGroup}` : `Group: ${selectedGroup}`}</span>
-            <div class="print-watermark" style="font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.9);">
-              KURO FANGS • CLINICAL
-            </div>
-          </div>
+      <!-- Desktop & Tablet Landscape View: Clean Unified Table -->
+      <div class="kuro-sched-table-card">
+        <table class="kuro-sched-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">${isAr ? 'اليوم' : 'Day'}</th>
+              <th style="width: 170px;">${isAr ? 'الوقت' : 'Time'}</th>
+              <th>${isAr ? 'المادة' : 'Subject'}</th>
+              <th style="width: 130px;">${isAr ? 'الرمز' : 'Code'}</th>
+              <th style="width: 170px;">${isAr ? 'المكان' : 'Location'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${weekdays.map(w => {
+              const daySessions = dayMap[w.ar] || [];
+              if (daySessions.length === 0) return '';
+              return daySessions.map((s, idx) => {
+                const isFirst = idx === 0;
+                const isLast = idx === daySessions.length - 1;
+                const trClass = isLast ? 'sched-day-last-row' : '';
+                const displayTime = s.time_en ? s.time_en.replace(/\s*PM\s*/gi, '').replace(/\s*AM\s*/gi, '').trim() : s.time_ar;
+                return `
+                  <tr class="${trClass}">
+                    ${isFirst ? `
+                      <td class="sched-day-cell" rowspan="${daySessions.length}">
+                        <span class="sched-day-name">${isAr ? w.ar : w.en}</span>
+                        <span class="sched-day-sub">${isAr ? w.en : w.ar}</span>
+                      </td>
+                    ` : ''}
+                    <td class="sched-time-cell">${isAr ? s.time_ar : displayTime}</td>
+                    <td class="sched-subject-cell">
+                      <span class="sched-subject-primary">${isAr ? s.course_ar : s.course_en}</span>
+                      ${isAr ? `<span class="sched-subject-en-sub">${s.course_en}</span>` : ''}
+                    </td>
+                    <td class="sched-code-cell">${s.code}</td>
+                    <td class="sched-location-cell">${isAr ? s.place_ar : s.place_en}</td>
+                  </tr>
+                `;
+              }).join('');
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Touch View: Compact Day Cards -->
+      <div class="kuro-sched-mobile-list">
+        <div class="sched-mobile-group-hint">
+          <span>${isAr ? `المجموعة الحالية: ${selectedGroup}` : `Current Group: ${selectedGroup}`}</span>
         </div>
-
-        <div class="table-responsive">
-          <table class="academia-exam-table clinical-grid-table">
-            <thead>
-              <tr>
-                <th style="width: 140px; text-align: center;">${isAr ? 'اليوم' : 'Day'}</th>
-                <th style="width: 43%;">${isAr ? 'الفترة الأولى (12:00 م – 1:00 م)' : 'First Slot (12:00 PM – 1:00 PM)'}</th>
-                <th style="width: 43%;">${isAr ? 'الفترة الثانية (1:00 م – 2:00 م)' : 'Second Slot (1:00 PM – 2:00 PM)'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${weekdays.map(w => {
-                const daySessions = dayMap[w.ar] || [];
-                const s1 = daySessions.find(s => s.time_ar && s.time_ar.includes('12:00')) || daySessions[0];
-                const s2 = daySessions.find(s => s.time_ar && s.time_ar.includes('1:00') && s !== s1) || daySessions[1];
-
-                const renderSlot = (s) => {
-                  if (!s) return `<div style="color: var(--text-muted); font-size: 0.8rem; padding: 12px; text-align: center;">${isAr ? 'فترة راحة' : 'Free Slot'}</div>`;
+        ${weekdays.map(w => {
+          const daySessions = dayMap[w.ar] || [];
+          if (daySessions.length === 0) return '';
+          return `
+            <div class="sched-mobile-day-group">
+              <div class="sched-mobile-day-title">
+                <strong>${isAr ? w.ar : w.en}</strong>
+                <span>${isAr ? w.en : w.ar}</span>
+              </div>
+              <div class="sched-mobile-cards-stack">
+                ${daySessions.map(s => {
+                  const displayTime = s.time_en ? s.time_en.replace(/\s*PM\s*/gi, '').replace(/\s*AM\s*/gi, '').trim() : s.time_ar;
                   return `
-                    <div class="clinical-slot-card" style="border-left: 4px solid ${s.color}; background: ${s.bg};">
-                      <div class="clinical-slot-header">
-                        <span class="clinical-code-badge" style="background: ${s.color}; color: #FFFFFF;">${s.code}</span>
-                        <span class="clinical-time-tag">${isAr ? s.time_ar : s.time_en}</span>
+                    <div class="sched-mobile-card">
+                      <div class="sched-mobile-icon-box">
+                        <i data-lucide="flask-conical"></i>
                       </div>
-                      <div class="clinical-course-title">
-                        ${isAr ? s.course_ar : s.course_en}
+                      <div class="sched-mobile-info">
+                        <div class="sched-mobile-time">${isAr ? s.time_ar : displayTime}</div>
+                        <div class="sched-mobile-subject">${isAr ? s.course_ar : s.course_en}</div>
+                        <div class="sched-mobile-meta">${s.code} • ${isAr ? s.place_ar : s.place_en}</div>
                       </div>
-                      <div class="clinical-course-sub">
-                        ${isAr ? s.course_en : s.course_ar}
-                      </div>
-                      <div class="clinical-place-tag">
-                        <i data-lucide="map-pin" style="width: 13px; height: 13px; color: ${s.color};"></i>
-                        <span>${isAr ? s.place_ar : s.place_en}</span>
+                      <div class="sched-mobile-arrow">
+                        <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
                       </div>
                     </div>
                   `;
-                };
-
-                return `
-                  <tr>
-                    <td class="clinical-day-header-cell">
-                      <div class="day-header-content">
-                        <span class="day-name-main">${isAr ? w.ar : w.en}</span>
-                        <span class="day-name-sub">${isAr ? w.en : w.ar}</span>
-                      </div>
-                    </td>
-                    <td>${renderSlot(s1)}</td>
-                    <td>${renderSlot(s2)}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Bottom Academic Notice -->
-      <div class="card no-print" style="padding: 16px 20px; border-radius: 12px; margin-top: 18px; background: var(--bg-hover); border: 1px dashed var(--border-card); display: flex; align-items: flex-start; gap: 12px;">
-        <i data-lucide="info" style="color: var(--brand-primary); width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;"></i>
-        <div style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
-          <b>${isAr ? 'تنبيه أكاديمي موحد:' : 'Academic Schedule Guidelines:'}</b>
-          ${isAr 
-            ? 'تبدأ المعامل والعيادات العملية الخاصة بمجموعتك فوراً في تمام الساعة 12:00 ظهراً بعد انتهاء المحاضرات النظرية الصباحية بمدرج 2.' 
-            : 'Clinical and lab sessions for your assigned group begin promptly at 12:00 PM following the morning theoretical lectures in Auditorium 2.'}
-        </div>
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')}
       </div>
     `;
   },
@@ -775,28 +691,23 @@ const ExamsPage = {
     const contentArea = document.getElementById('academic-content-area');
     if (!contentArea) return;
 
-    contentArea.querySelectorAll('.btn-group-chip').forEach(btn => {
+    contentArea.querySelectorAll('.sched-group-pill').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const group = btn.getAttribute('data-group');
         ExamsPage.setSelectedGroup(group);
         contentArea.innerHTML = ExamsPage.renderPracticalView(isAr);
         ExamsPage.setupPracticalListeners(isAr);
-        if (window.lucide) window.lucide.createIcons();
-        const msg = isAr 
-          ? `تم اختيار وعرض جدول المجموعة (${group}) وحفظه بنجاح! 🏥` 
-          : `Group (${group}) selected and saved! 🏥`;
-        if (typeof window.showToast === 'function') {
-          window.showToast(msg, { type: 'success' });
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
         }
       });
     });
-
-    if (window.lucide) window.lucide.createIcons();
   },
 
   // =========================================================================
   // SECTION 2: OFFICIAL EXAM SCHEDULES (Midterm & Final)
+  // Visual Reference: media_1790292241824.jpg
   // =========================================================================
   renderExamsSchedule(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
@@ -809,75 +720,61 @@ const ExamsPage = {
     }
 
     container.innerHTML = `
-      <!-- Back Navigation Bar -->
-      <div class="schedules-top-back-bar no-print">
-        <a href="#/schedules" class="schedules-back-link">
-          <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
-          <span>${isAr ? 'الرجوع للجداول الدراسية' : 'Back to Academic Schedules'}</span>
-        </a>
-      </div>
-
-      <!-- Page Header -->
-      <div class="exams-page-header">
-        <div class="page-title-group">
-          <h1>
-            <i data-lucide="calendar" style="color: var(--brand-burgundy); width: 28px; height: 28px;"></i>
-            ${isAr ? 'جداول الامتحانات الرسمية' : 'Official Examination Timetables'}
-          </h1>
-          <p>${isAr ? 'مواعيد امتحانات النظري النصفي (12 مادة) والنهائي (3 مواد) مع عداد الأيام التنازلي وتصدير PDF — السنة الثالثة' : 'Official Midterm (12 subjects) & Final (3 subjects) theory examination timetables with live days countdown & PDF export'}</p>
+      <div class="schedules-subpage-container" dir="${isAr ? 'rtl' : 'ltr'}">
+        <!-- Back Navigation Bar -->
+        <div class="schedules-top-back-bar no-print">
+          <a href="#/schedules" class="sched-back-pill" data-title="Back to Academic Schedules">
+            <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
+            <span>${isAr ? 'الرجوع للجداول الدراسية' : 'Back to Schedules'}</span>
+          </a>
         </div>
 
-        <div class="exams-header-actions no-print">
-          <!-- Link to Schedules Hub -->
-          <a href="#/schedules" class="btn btn-secondary btn-sm" style="gap: 6px; font-weight: 700;">
-            <i data-lucide="calendar" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'كل الجداول' : 'All Schedules'}</span>
-          </a>
+        <!-- Page Header -->
+        <div class="sched-page-header">
+          <div class="sched-header-title-wrap">
+            <div class="sched-header-icon-box">
+              <i data-lucide="calendar"></i>
+            </div>
+            <div class="sched-header-titles">
+              <h1>${isAr ? 'جدول الامتحانات الرسمية' : 'Examination Schedule'}</h1>
+              <p>${isAr ? 'السنة الثالثة (2026 – 2027)' : 'Year 3 (2026 – 2027)'}</p>
+            </div>
+          </div>
+        </div>
 
-          <!-- View Toggle -->
-          <div class="exams-view-toggle">
-            <button id="btn-view-table" class="view-toggle-btn ${ExamsPage.viewMode === 'table' ? 'active' : ''}" title="${isAr ? 'عرض جدول رسمي' : 'Table View'}">
-              <i data-lucide="table"></i>
-              <span>${isAr ? 'جدول' : 'Table'}</span>
+        <!-- Controls Row: Tabs on Left, Print on Right -->
+        <div class="sched-tabs-row no-print">
+          <div class="sched-tabs-group">
+            <button class="sched-tab-btn ${ExamsPage.examTab === 'midterm' ? 'active' : ''}" data-exam-tab="midterm" type="button">
+              <span>${isAr ? 'الامتحانات النصفية' : 'Midterm Exams'}</span>
+              <span class="sched-tab-count-badge">12 ${isAr ? 'مادة' : 'Subjects'}</span>
             </button>
-            <button id="btn-view-timeline" class="view-toggle-btn ${ExamsPage.viewMode === 'timeline' ? 'active' : ''}" title="${isAr ? 'عرض بطاقات زمنية' : 'Timeline View'}">
-              <i data-lucide="clock"></i>
-              <span>${isAr ? 'بطاقات' : 'Timeline'}</span>
+            <button class="sched-tab-btn ${ExamsPage.examTab === 'final' ? 'active' : ''}" data-exam-tab="final" type="button">
+              <span>${isAr ? 'الامتحانات النهائية' : 'Final Exams'}</span>
+              <span class="sched-tab-count-badge">3 ${isAr ? 'مواد' : 'Subjects'}</span>
             </button>
           </div>
 
-          <!-- Print / Save as PDF Button -->
-          <button id="btn-print-schedule" class="btn btn-primary btn-print-schedule">
-            <i data-lucide="printer"></i>
-            <span>${isAr ? 'طباعة / حفظ PDF' : 'Print / Save PDF'}</span>
-          </button>
+          <div class="sched-tabs-actions">
+            <button id="btn-print-schedule" class="sched-print-btn" type="button">
+              <i data-lucide="printer"></i>
+              <span>${isAr ? 'طباعة / حفظ PDF' : 'Print / Save PDF'}</span>
+            </button>
+          </div>
         </div>
+
+        <!-- Active Exam Content Container -->
+        <div id="exams-content-area" class="sched-content-area"></div>
       </div>
-
-      <!-- Exam Sub-Tabs Bar -->
-      <div class="schedule-tabs-bar no-print">
-        <button class="schedule-tab-btn ${ExamsPage.examTab === 'midterm' ? 'active' : ''}" data-exam-tab="midterm">
-          <i data-lucide="file-text"></i>
-          <span>${isAr ? 'جدول الامتحانات النصفي (Midterm)' : 'Midterm Theory Exams'}</span>
-          <span class="tab-count-pill" style="background: var(--brand-burgundy); color: #fff;">12 ${isAr ? 'مادة' : 'Subjects'}</span>
-        </button>
-
-        <button class="schedule-tab-btn ${ExamsPage.examTab === 'final' ? 'active' : ''}" data-exam-tab="final">
-          <i data-lucide="award"></i>
-          <span>${isAr ? 'جدول الامتحانات النهائي (الفاينل)' : 'Final Theory Exams'}</span>
-          <span class="tab-count-pill" style="background: #DC2626; color: #fff;">3 ${isAr ? 'مواد' : 'Subjects'}</span>
-        </button>
-      </div>
-
-      <!-- Active Content Container -->
-      <div id="exams-content-area" class="exams-content-area"></div>
     `;
 
     ExamsPage.renderExamTabContent(isAr);
     ExamsPage.setupExamListeners(container, isAr);
     ExamsPage.attachPrintHandler(container);
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   },
 
   renderExamTabContent(isAr) {
@@ -890,237 +787,178 @@ const ExamsPage = {
       contentArea.innerHTML = ExamsPage.renderMidtermView(isAr);
     }
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   },
 
   renderMidtermView(isAr) {
-    const data = ExamsPage.midtermData;
-    const title = isAr ? 'جدول الامتحانات النصفية — السنة الثالثة 2026 - 2027' : 'Midterm Examination Schedule — Year 3 (2026 - 2027)';
-    const subtitle = isAr ? '12 مادة تخصصية • جميع الامتحانات من الساعة 11:00 صباحاً حتى 12:00 ظهراً' : '12 Core Subjects • All sessions held from 11:00 AM to 12:00 PM';
+    const data = ExamsPage.midtermData || [];
 
-    if (ExamsPage.viewMode === 'timeline') {
-      return `
-        <div class="exams-schedule-banner">
-          <div class="banner-meta">
-            <h2>${title}</h2>
-            <p>${subtitle}</p>
-          </div>
-          <span class="badge badge-primary">${isAr ? '12 مادة معتمدة' : '12 Subjects'}</span>
-        </div>
-        <div class="exams-timeline-grid">
-          ${data.map(item => ExamsPage.renderTimelineCard(item, isAr, 'midterm')).join('')}
-        </div>
-      `;
-    }
-
-    // Default: Academia Official Table View
     return `
-      <div class="exams-table-card card">
-        <div class="table-card-header">
-          <div>
-            <h2>${title}</h2>
-            <p>${subtitle}</p>
-          </div>
-          <div class="print-watermark">KURO FANGS • FACULTY OF DENTISTRY</div>
-        </div>
+      <!-- Desktop & Tablet Landscape View: Clean Exam Table -->
+      <div class="kuro-sched-table-card">
+        <table class="kuro-sched-table">
+          <thead>
+            <tr>
+              <th style="width: 50px; text-align: center;">#</th>
+              <th style="width: 140px;">${isAr ? 'التاريخ' : 'Date'}</th>
+              <th style="width: 120px;">${isAr ? 'اليوم' : 'Day'}</th>
+              <th style="width: 140px;">${isAr ? 'الوقت' : 'Time'}</th>
+              <th>${isAr ? 'المادة' : 'Subject'}</th>
+              <th style="width: 110px;">${isAr ? 'الرمز' : 'Code'}</th>
+              <th style="width: 130px; text-align: center;">${isAr ? 'العد التنازلي' : 'Countdown'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(item => {
+              const daysLeft = ExamsPage.getDaysRemaining(item.date);
+              const countdownText = (daysLeft !== null && daysLeft > 0)
+                ? (isAr ? `${daysLeft} يوم` : `${daysLeft} days`)
+                : (daysLeft === 0 ? (isAr ? 'اليوم ⚡' : 'Today ⚡') : (isAr ? 'اكتمل' : 'Passed'));
 
-        <div class="table-responsive">
-          <table class="academia-exam-table">
-            <thead>
-              <tr>
-                <th style="width: 55px; text-align: center;">م</th>
-                <th>${isAr ? 'اليوم' : 'Day'}</th>
-                <th>${isAr ? 'التاريخ' : 'Date'}</th>
-                <th>${isAr ? 'التوقيت' : 'Time'}</th>
-                <th>${isAr ? 'رمز المقرر' : 'Course Code'}</th>
-                <th>${isAr ? 'اسم المقرر' : 'Subject Name'}</th>
-                <th class="no-print" style="text-align: center;">${isAr ? 'العد التنازلي' : 'Countdown'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.map(item => {
-                const daysLeft = ExamsPage.getDaysRemaining(item.date);
-                const isUrgent = daysLeft !== null && daysLeft > 0 && daysLeft <= 14;
-                const isToday = daysLeft === 0;
-                const countdownText = isToday 
-                  ? (isAr ? 'اليوم ⚡' : 'Today ⚡')
-                  : daysLeft !== null && daysLeft > 0 
-                    ? (isAr ? `متبقي ${daysLeft} يوم` : `${daysLeft} days left`)
-                    : (isAr ? 'اكتمل' : 'Passed');
+              return `
+                <tr>
+                  <td style="text-align: center; color: #8C827A; font-weight: 600;">${item.no}</td>
+                  <td class="sched-date-cell">
+                    <span class="sched-date-pill">
+                      <i data-lucide="calendar"></i>
+                      <span>${item.date}</span>
+                    </span>
+                  </td>
+                  <td style="color: #4A3E3D; font-weight: 600;">${isAr ? item.day_ar : item.day_en}</td>
+                  <td class="sched-time-cell">${item.time}</td>
+                  <td class="sched-subject-cell">
+                    <span class="sched-subject-primary">${isAr ? item.name_ar : item.name_en}</span>
+                    ${isAr ? `<span class="sched-subject-en-sub">${item.name_en}</span>` : ''}
+                  </td>
+                  <td class="sched-code-cell">${item.code}</td>
+                  <td style="text-align: center;">
+                    <span class="sched-countdown-badge">${countdownText}</span>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
 
-                return `
-                  <tr>
-                    <td style="text-align: center; font-weight: 700; color: var(--text-muted);">${item.no}</td>
-                    <td style="font-weight: 700; color: var(--text-primary);">${isAr ? item.day_ar : item.day_en}</td>
-                    <td>
-                      <span class="exam-date-badge">
-                        <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
-                        ${item.date}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="exam-time-badge">
-                        <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
-                        ${item.time}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="course-code-pill">${item.code}</span>
-                    </td>
-                    <td>
-                      <div class="subject-name-cell">
-                        <span class="subject-primary-name">${isAr ? item.name_ar : item.name_en}</span>
-                        <span class="subject-sub-name">${isAr ? item.name_en : item.name_ar}</span>
-                      </div>
-                    </td>
-                    <td class="no-print" style="text-align: center;">
-                      <span class="countdown-pill ${isUrgent ? 'urgent' : ''} ${isToday ? 'today' : ''}">
-                        ${countdownText}
-                      </span>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
+      <!-- Mobile Touch View: Clean Exam Cards Stack -->
+      <div class="kuro-sched-mobile-list">
+        <div class="sched-mobile-exams-stack">
+          ${data.map(item => {
+            const daysLeft = ExamsPage.getDaysRemaining(item.date);
+            const countdownText = (daysLeft !== null && daysLeft > 0)
+              ? (isAr ? `${daysLeft} يوم` : `${daysLeft} days`)
+              : (daysLeft === 0 ? (isAr ? 'اليوم ⚡' : 'Today ⚡') : (isAr ? 'اكتمل' : 'Passed'));
+            const { month, day } = ExamsPage.getMonthDay(item.date, isAr);
+
+            return `
+              <div class="sched-mobile-exam-card">
+                <div class="sched-mobile-date-block">
+                  <span class="date-block-month">${month}</span>
+                  <span class="date-block-day">${day}</span>
+                </div>
+                <div class="sched-mobile-exam-info">
+                  <div class="exam-time-text">${item.time}</div>
+                  <div class="exam-subject-text">${isAr ? item.name_ar : item.name_en}</div>
+                  <div class="exam-code-text">${item.code}</div>
+                </div>
+                <div class="sched-mobile-countdown">
+                  ${countdownText}
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
   },
 
   renderFinalView(isAr) {
-    const data = ExamsPage.finalData;
-    const title = isAr ? 'جدول الامتحانات النهائية — السنة الثالثة 2026 - 2027' : 'Final Examination Schedule — Year 3 (2026 - 2027)';
-    const subtitle = isAr ? 'المقررات الوزارية النهائية • توقيت الامتحانات من الساعة 11:00 صباحاً حتى 13:00 ظهراً (ساعتان)' : 'Final Theory Papers • Sessions from 11:00 AM to 1:00 PM (2 Hours Duration)';
-
-    if (ExamsPage.viewMode === 'timeline') {
-      return `
-        <div class="exams-schedule-banner final-banner">
-          <div class="banner-meta">
-            <h2>${title}</h2>
-            <p>${subtitle}</p>
-          </div>
-          <span class="badge badge-danger">${isAr ? '3 امتحانات نهائية' : '3 Final Exams'}</span>
-        </div>
-        <div class="exams-timeline-grid">
-          ${data.map(item => ExamsPage.renderTimelineCard(item, isAr, 'final')).join('')}
-        </div>
-      `;
-    }
+    const data = ExamsPage.finalData || [];
 
     return `
-      <div class="exams-table-card card final-table-theme">
-        <div class="table-card-header final-header">
-          <div>
-            <h2>${title}</h2>
-            <p>${subtitle}</p>
-          </div>
-          <div class="print-watermark">KURO FANGS • FINAL EXAMINATIONS</div>
-        </div>
+      <!-- Desktop & Tablet Landscape View: Clean Exam Table -->
+      <div class="kuro-sched-table-card">
+        <table class="kuro-sched-table">
+          <thead>
+            <tr>
+              <th style="width: 50px; text-align: center;">#</th>
+              <th style="width: 140px;">${isAr ? 'التاريخ' : 'Date'}</th>
+              <th style="width: 120px;">${isAr ? 'اليوم' : 'Day'}</th>
+              <th style="width: 140px;">${isAr ? 'الوقت' : 'Time'}</th>
+              <th>${isAr ? 'المادة' : 'Subject'}</th>
+              <th style="width: 110px;">${isAr ? 'الرمز' : 'Code'}</th>
+              <th style="width: 130px; text-align: center;">${isAr ? 'العد التنازلي' : 'Countdown'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(item => {
+              const daysLeft = ExamsPage.getDaysRemaining(item.date);
+              const countdownText = (daysLeft !== null && daysLeft > 0)
+                ? (isAr ? `${daysLeft} يوم` : `${daysLeft} days`)
+                : (daysLeft === 0 ? (isAr ? 'اليوم ⚡' : 'Today ⚡') : (isAr ? 'اكتمل' : 'Passed'));
 
-        <div class="table-responsive">
-          <table class="academia-exam-table final-table">
-            <thead>
-              <tr>
-                <th style="width: 55px; text-align: center;">م</th>
-                <th>${isAr ? 'اليوم' : 'Day'}</th>
-                <th>${isAr ? 'التاريخ' : 'Date'}</th>
-                <th>${isAr ? 'التوقيت' : 'Time'}</th>
-                <th>${isAr ? 'رمز المقرر' : 'Course Code'}</th>
-                <th>${isAr ? 'اسم المقرر' : 'Subject Name'}</th>
-                <th class="no-print" style="text-align: center;">${isAr ? 'العد التنازلي' : 'Countdown'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.map(item => {
-                const daysLeft = ExamsPage.getDaysRemaining(item.date);
-                const isUrgent = daysLeft !== null && daysLeft > 0 && daysLeft <= 14;
-                const isToday = daysLeft === 0;
-                const countdownText = isToday 
-                  ? (isAr ? 'اليوم ⚡' : 'Today ⚡')
-                  : daysLeft !== null && daysLeft > 0 
-                    ? (isAr ? `متبقي ${daysLeft} يوم` : `${daysLeft} days left`)
-                    : (isAr ? 'اكتمل' : 'Passed');
-
-                return `
-                  <tr>
-                    <td style="text-align: center; font-weight: 700; color: var(--text-muted);">${item.no}</td>
-                    <td style="font-weight: 700; color: var(--text-primary);">${isAr ? item.day_ar : item.day_en}</td>
-                    <td>
-                      <span class="exam-date-badge final-badge">
-                        <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
-                        ${item.date}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="exam-time-badge final-badge">
-                        <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
-                        ${item.time}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="course-code-pill final-code">${item.code}</span>
-                    </td>
-                    <td>
-                      <div class="subject-name-cell">
-                        <span class="subject-primary-name" style="color: var(--brand-burgundy);">${isAr ? item.name_ar : item.name_en}</span>
-                        <span class="subject-sub-name">${isAr ? item.name_en : item.name_ar}</span>
-                      </div>
-                    </td>
-                    <td class="no-print" style="text-align: center;">
-                      <span class="countdown-pill final-pill ${isUrgent ? 'urgent' : ''} ${isToday ? 'today' : ''}">
-                        ${countdownText}
-                      </span>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
+              return `
+                <tr>
+                  <td style="text-align: center; color: #8C827A; font-weight: 600;">${item.no}</td>
+                  <td class="sched-date-cell">
+                    <span class="sched-date-pill">
+                      <i data-lucide="calendar"></i>
+                      <span>${item.date}</span>
+                    </span>
+                  </td>
+                  <td style="color: #4A3E3D; font-weight: 600;">${isAr ? item.day_ar : item.day_en}</td>
+                  <td class="sched-time-cell">${item.time}</td>
+                  <td class="sched-subject-cell">
+                    <span class="sched-subject-primary">${isAr ? item.name_ar : item.name_en}</span>
+                    ${isAr ? `<span class="sched-subject-en-sub">${item.name_en}</span>` : ''}
+                  </td>
+                  <td class="sched-code-cell">${item.code}</td>
+                  <td style="text-align: center;">
+                    <span class="sched-countdown-badge">${countdownText}</span>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
       </div>
-    `;
-  },
 
-  renderTimelineCard(item, isAr, examType) {
-    const daysLeft = ExamsPage.getDaysRemaining(item.date);
-    const isUrgent = daysLeft !== null && daysLeft > 0 && daysLeft <= 14;
-    const isToday = daysLeft === 0;
-    const countdownText = isToday 
-      ? (isAr ? 'اليوم ⚡' : 'Today ⚡')
-      : daysLeft !== null && daysLeft > 0 
-        ? (isAr ? `متبقي ${daysLeft} يوم` : `${daysLeft} days left`)
-        : (isAr ? 'اكتمل' : 'Passed');
+      <!-- Mobile Touch View: Clean Exam Cards Stack -->
+      <div class="kuro-sched-mobile-list">
+        <div class="sched-mobile-exams-stack">
+          ${data.map(item => {
+            const daysLeft = ExamsPage.getDaysRemaining(item.date);
+            const countdownText = (daysLeft !== null && daysLeft > 0)
+              ? (isAr ? `${daysLeft} يوم` : `${daysLeft} days`)
+              : (daysLeft === 0 ? (isAr ? 'اليوم ⚡' : 'Today ⚡') : (isAr ? 'اكتمل' : 'Passed'));
+            const { month, day } = ExamsPage.getMonthDay(item.date, isAr);
 
-    return `
-      <div class="card exam-timeline-card ${examType === 'final' ? 'final-card' : ''}">
-        <div class="card-timeline-top">
-          <div class="timeline-day-date">
-            <span class="timeline-day">${isAr ? item.day_ar : item.day_en}</span>
-            <span class="timeline-date">${item.date}</span>
-          </div>
-          <span class="countdown-pill ${isUrgent ? 'urgent' : ''} ${isToday ? 'today' : ''}">${countdownText}</span>
-        </div>
-
-        <div class="card-timeline-body">
-          <span class="course-code-pill">${item.code}</span>
-          <h3 class="timeline-subject-title">${isAr ? item.name_ar : item.name_en}</h3>
-          <p class="timeline-subject-sub">${isAr ? item.name_en : item.name_ar}</p>
-        </div>
-
-        <div class="card-timeline-footer">
-          <div class="timeline-time">
-            <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
-            <span>${item.time}</span>
-          </div>
-          <span class="timeline-hall">${isAr ? 'القاعات المركزية' : 'Main Lecture Hall'}</span>
+            return `
+              <div class="sched-mobile-exam-card">
+                <div class="sched-mobile-date-block">
+                  <span class="date-block-month">${month}</span>
+                  <span class="date-block-day">${day}</span>
+                </div>
+                <div class="sched-mobile-exam-info">
+                  <div class="exam-time-text">${item.time}</div>
+                  <div class="exam-subject-text">${isAr ? item.name_ar : item.name_en}</div>
+                  <div class="exam-code-text">${item.code}</div>
+                </div>
+                <div class="sched-mobile-countdown">
+                  ${countdownText}
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
   },
 
   setupExamListeners(container, isAr) {
-    // Exam Sub-tab switching
     container.querySelectorAll('[data-exam-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
         const tab = btn.getAttribute('data-exam-tab');
@@ -1131,32 +969,12 @@ const ExamsPage = {
         ExamsPage.renderExamTabContent(isAr);
       });
     });
-
-    // View mode switching
-    const tableBtn = document.getElementById('btn-view-table');
-    const timelineBtn = document.getElementById('btn-view-timeline');
-
-    if (tableBtn && timelineBtn) {
-      tableBtn.addEventListener('click', () => {
-        ExamsPage.viewMode = 'table';
-        tableBtn.classList.add('active');
-        timelineBtn.classList.remove('active');
-        ExamsPage.renderExamTabContent(isAr);
-      });
-
-      timelineBtn.addEventListener('click', () => {
-        ExamsPage.viewMode = 'timeline';
-        timelineBtn.classList.add('active');
-        tableBtn.classList.remove('active');
-        ExamsPage.renderExamTabContent(isAr);
-      });
-    }
   },
 
   attachPrintHandler(container) {
-    const printBtn = container.querySelector('#btn-print-schedule');
-    if (printBtn) {
-      printBtn.addEventListener('click', () => {
+    const printBtns = container.querySelectorAll('#btn-print-schedule, .sched-print-btn');
+    printBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
         if (typeof window.clearToasts === 'function') {
           window.clearToasts();
         }
@@ -1171,7 +989,7 @@ const ExamsPage = {
           }, 500);
         }, 300);
       });
-    }
+    });
   },
 
   // Aliases for compatibility
