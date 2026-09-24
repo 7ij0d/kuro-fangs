@@ -15,7 +15,7 @@ function assert(condition, message) {
   }
 }
 
-console.log('=== VERIFYING AUDIO RECORDINGS LIBRARY MASTER REDESIGN ===\n');
+console.log('=== VERIFYING AUDIO RECORDINGS 3-LEVEL ARCHITECTURE MASTER REDESIGN ===\n');
 
 // 1. Verify Assets
 console.log('1. Checking required audio recordings artwork assets:');
@@ -46,54 +46,57 @@ const appJs = fs.readFileSync(path.join(rootDir, 'js/app.js'), 'utf8');
 assert(appJs.includes("router.register('/recordings'"), "app.js registers '/recordings' route");
 assert(appJs.includes('RecordingsPage'), "app.js references window.RecordingsPage");
 
-// 4. Verify js/pages/recordings.js Architecture
-console.log('\n4. Checking js/pages/recordings.js:');
+// 4. Verify js/pages/recordings.js Architecture (3-Level Curriculum Hierarchy)
+console.log('\n4. Checking js/pages/recordings.js (Level 1 -> Level 2 -> Level 3):');
 const recordingsJs = fs.readFileSync(path.join(rootDir, 'js/pages/recordings.js'), 'utf8');
 assert(recordingsJs.includes('window.RecordingsPage = RecordingsPage'), 'Exports window.RecordingsPage');
 assert(recordingsJs.includes('assets/hero/audio-recordings-hero.png'), 'References audio-recordings-hero.png');
-assert(recordingsJs.includes('Audio Recordings') || recordingsJs.includes('التسجيلات الصوتية'), 'Contains Audio Recordings title');
-assert(recordingsJs.includes('Faculty lecture audio recordings') || recordingsJs.includes('تسجيلات صوتية لمحاضرات دكاترة الكلية'), 'Contains subtitle');
 
-// Filter & Control Bar
-assert(recordingsJs.includes('audio-subject-filter'), 'Includes subject filter dropdown');
-assert(recordingsJs.includes('audio-search-input'), 'Includes full-text search input');
-assert(recordingsJs.includes('audio-lecturer-filter'), 'Includes lecturer filter dropdown');
-assert(recordingsJs.includes('audio-sort-filter'), 'Includes sort dropdown');
+// Level 1: Subject Selection (12 Dental Subjects)
+assert(recordingsJs.includes('renderLevel1Subjects'), 'Implements renderLevel1Subjects for Level 1');
+assert(recordingsJs.includes('SUBJECT_DEFINITIONS'), 'Defines 12 official dental curriculum subjects');
+assert(recordingsJs.includes('audio-subject-grid') || recordingsJs.includes('audio-subject-card'), 'Contains audio subject grid & card');
+assert(recordingsJs.includes('audio-search-input'), 'Includes search input for subjects');
 assert(recordingsJs.includes('audio-view-btn'), 'Includes view mode toggle');
+assert(recordingsJs.includes('audio-subjects-count-badge'), 'Includes subjects count badge');
 
-// Section Header
-assert(recordingsJs.includes('Lecture Audio Recordings') || recordingsJs.includes('تسجيلات المحاضرات الصوتية'), 'Includes Lecture Audio Recordings section title');
-assert(recordingsJs.includes('audio-section-count-badge'), 'Includes total count badge');
+// Level 2: Sheets of Selected Subject
+assert(recordingsJs.includes('renderLevel2Sheets'), 'Implements renderLevel2Sheets for Level 2');
+assert(recordingsJs.includes('audio-back-to-subjects'), 'Includes Back to Subjects button');
+assert(recordingsJs.includes('audio-sheet-card'), 'Contains audio sheet card component');
+assert(recordingsJs.includes('audio-sheets-grid'), 'Includes sheets grid container');
 
-// Card Structure
-assert(recordingsJs.includes('audio-subject-pill'), 'Card contains subject pill');
-assert(recordingsJs.includes('audio-order-pill'), 'Card contains order pill');
-assert(recordingsJs.includes('audio-waveform-wrap') || recordingsJs.includes('generateWaveformSvg'), 'Card contains waveform visualization');
-assert(recordingsJs.includes('audio-play-btn'), 'Card contains play button');
-assert(recordingsJs.includes('audio-sheet-link'), 'Card links to associated sheet');
-assert(recordingsJs.includes('audio-btn-listen'), 'Card contains Listen action button');
-assert(recordingsJs.includes('audio-btn-sheet'), 'Card contains View Sheet action button');
-assert(recordingsJs.includes('audio-card-unavailable'), 'Implements subtle unavailable card state');
-assert(recordingsJs.includes('audio-btn-unavailable'), 'Implements Not Available disabled action');
+// Level 3: Audio Recordings of Selected Sheet
+assert(recordingsJs.includes('renderLevel3Recordings'), 'Implements renderLevel3Recordings for Level 3');
+assert(recordingsJs.includes('audio-back-to-sheets'), 'Includes Back to Sheets button');
+assert(recordingsJs.includes('audio-recording-card'), 'Contains audio recording card component');
+assert(recordingsJs.includes('audio-play-circle-btn'), 'Contains circular terracotta play button');
+assert(recordingsJs.includes('audio-rec-waveform-container') || recordingsJs.includes('generateWaveformSvg'), 'Contains waveform container & SVG generator');
+assert(recordingsJs.includes('audio-btn-view-sheet'), 'Contains View Sheet action button');
+assert(recordingsJs.includes('audio-btn-more-options'), 'Contains More Options action button');
 
-// No Verified Badges
+// Zero "verified" / "معتمد" badges
 const verifiedMatches = recordingsJs.match(/verified|معتمد/gi);
 assert(!verifiedMatches, 'Zero "verified" / "معتمد" badges in recordings.js');
 
 // 5. Verify css/polish.css
-console.log('\n5. Checking css/polish.css:');
+console.log('\n5. Checking css/polish.css (Warm Terracotta & Responsive Breakpoints):');
 const polishCss = fs.readFileSync(path.join(rootDir, 'css/polish.css'), 'utf8');
 assert(polishCss.includes('.audio-hub-container'), 'Includes .audio-hub-container');
 assert(polishCss.includes('.audio-hero-card'), 'Includes .audio-hero-card');
-assert(polishCss.includes('.audio-controls-bar'), 'Includes .audio-controls-bar');
-assert(polishCss.includes('.audio-recordings-grid'), 'Includes .audio-recordings-grid');
-assert(polishCss.includes('.audio-card'), 'Includes .audio-card styling');
-assert(polishCss.includes('.audio-play-btn'), 'Includes .audio-play-btn');
-assert(polishCss.includes('.audio-btn-listen'), 'Includes .audio-btn-listen');
-assert(polishCss.includes('.audio-btn-sheet'), 'Includes .audio-btn-sheet');
-assert(polishCss.includes('.audio-card-unavailable'), 'Includes .audio-card-unavailable styling');
-assert(polishCss.includes('@media (max-width: 1199px)'), 'Includes iPad responsive media query');
-assert(polishCss.includes('@media (max-width: 767px)'), 'Includes Mobile responsive media query');
+assert(polishCss.includes('--audio-primary: #BC4A47') || polishCss.includes('#BC4A47'), 'Contains warm terracotta primary color token (#BC4A47)');
+assert(polishCss.includes('.audio-subject-grid'), 'Includes .audio-subject-grid');
+assert(polishCss.includes('.audio-subject-card'), 'Includes .audio-subject-card');
+assert(polishCss.includes('.audio-sheet-card'), 'Includes .audio-sheet-card');
+assert(polishCss.includes('.audio-recording-card'), 'Includes .audio-recording-card');
+assert(polishCss.includes('.audio-play-circle-btn'), 'Includes .audio-play-circle-btn');
+assert(polishCss.includes('.audio-btn-view-sheet'), 'Includes .audio-btn-view-sheet');
+assert(polishCss.includes('.audio-back-btn'), 'Includes .audio-back-btn');
+
+// Responsive Breakpoints
+assert(polishCss.includes('@media (min-width: 900px) and (max-width: 1199px)'), 'Includes dedicated iPad Landscape query (3 columns)');
+assert(polishCss.includes('@media (min-width: 600px) and (max-width: 899px)'), 'Includes dedicated iPad Portrait query (2 columns)');
+assert(polishCss.includes('@media (max-width: 599px)'), 'Includes dedicated Mobile query (1 column)');
 
 // 6. Summary
 console.log('\n======================================================');
@@ -103,5 +106,5 @@ console.log('======================================================\n');
 if (failed > 0) {
   process.exit(1);
 } else {
-  console.log('ALL AUDIO RECORDINGS TESTS PASSED SUCCESSFULLY! ✓');
+  console.log('ALL AUDIO RECORDINGS 3-LEVEL TESTS PASSED SUCCESSFULLY! ✓');
 }
