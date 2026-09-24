@@ -2572,6 +2572,241 @@ body { background: var(--bg-app); color: var(--text-primary); }
   display: none;
 }
 
+/* ==========================================================================
+   SHEETS & LECTURES — 2-STEP SUBJECT & SHEETS ARCHITECTURE
+   Level 1: Subject Selection (Desktop 3-Col, iPad 2-Col, Mobile 1-Col)
+   Level 2: Subject Sheets Library (PDF First Page Thumbnails & Action Buttons)
+   ========================================================================== */
+
+.sheets-hub-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sheets-content-stage {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Top Back to Subjects Bar ─────────────────────────────────────────── */
+.sheets-top-back-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 14px;
+}
+
+.sheets-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-card, #EAE3D6);
+  border-radius: 11px;
+  color: #BC4A47;
+  font-size: 0.86rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.sheets-back-btn:hover {
+  background: #BC4A47;
+  color: #FFFFFF !important;
+  border-color: #BC4A47;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(188, 74, 71, 0.22);
+}
+
+.sheets-back-btn:active {
+  transform: scale(0.97);
+}
+
+[data-theme="dark"] .sheets-back-btn {
+  background: #1B1C26;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #FDA4AF;
+}
+
+[data-theme="dark"] .sheets-back-btn:hover {
+  background: #BC4A47;
+  color: #FFFFFF !important;
+}
+
+/* ── Subject Badge Wrap inside Dedicated Hero ────────────────────────── */
+.sheets-sub-badge-wrap {
+  background: rgba(188, 74, 71, 0.08) !important;
+  border-color: rgba(188, 74, 71, 0.2) !important;
+  color: #BC4A47 !important;
+}
+
+[data-theme="dark"] .sheets-sub-badge-wrap {
+  background: rgba(188, 74, 71, 0.2) !important;
+  border-color: rgba(253, 164, 175, 0.25) !important;
+  color: #FDA4AF !important;
+}
+
+/* ── Level 1: Subject Selection Grid ─────────────────────────────────── */
+.sheets-subject-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.sheets-subject-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.sheets-subject-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-card, #EAE3D6);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 6px rgba(44, 24, 20, 0.03);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  outline: none;
+  min-width: 0;
+}
+
+[data-theme="dark"] .sheets-subject-card {
+  background: #1B1C26;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.sheets-subject-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(188, 74, 71, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 20px rgba(188, 74, 71, 0.09);
+}
+
+.sheets-subject-card:hover .sheets-subject-arrow {
+  color: #BC4A47;
+  transform: translateX(3px);
+}
+
+[dir="rtl"] .sheets-subject-card:hover .sheets-subject-arrow {
+  transform: translateX(-3px);
+}
+
+.sheets-subject-card:focus-visible {
+  border-color: #BC4A47;
+  box-shadow: 0 0 0 3px rgba(188, 74, 71, 0.16);
+}
+
+.sheets-subject-card:active {
+  transform: scale(0.985);
+}
+
+.sheets-subject-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sheets-subject-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(188, 74, 71, 0.07);
+  border: 1px solid rgba(188, 74, 71, 0.16);
+  color: #BC4A47;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .sheets-subject-icon-box {
+  background: rgba(188, 74, 71, 0.18);
+  border-color: rgba(253, 164, 175, 0.2);
+  color: #FDA4AF;
+}
+
+.sheets-subject-card:hover .sheets-subject-icon-box {
+  transform: scale(1.06);
+}
+
+.sheets-subject-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sheets-subject-name {
+  font-size: 0.96rem;
+  font-weight: 750;
+  color: var(--text-primary, #24181B);
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] .sheets-subject-name {
+  color: #F8F5EE;
+}
+
+.sheets-subject-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted, #7A7270);
+  font-weight: 600;
+}
+
+.sheets-subject-code {
+  font-weight: 700;
+  color: var(--text-secondary, #6B5E5F);
+}
+
+[data-theme="dark"] .sheets-subject-code {
+  color: #A59B98;
+}
+
+.sheets-subject-meta-dot {
+  color: var(--border-card, #EAE3D6);
+  font-size: 0.85rem;
+}
+
+.sheets-subject-count {
+  font-weight: 650;
+  color: var(--text-muted, #7A7270);
+}
+
+.sheets-subject-arrow {
+  color: var(--text-muted, #A8A19F);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
 /* ── Grid Container ──────────────────────────────────────────────────────── */
 .sheets-grid-container {
   display: grid;
@@ -3159,6 +3394,10 @@ body { background: var(--bg-app); color: var(--text-primary); }
 @media (min-width: 768px) and (max-width: 991px),
        (min-width: 768px) and (max-width: 1024px) and (orientation: portrait),
        (min-width: 768px) and (max-width: 1199px) {
+  .sheets-subject-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
   .sheets-grid-container {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
@@ -3173,6 +3412,13 @@ body { background: var(--bg-app); color: var(--text-primary); }
 }
 
 @media (max-width: 767px) {
+  .sheets-subject-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .sheets-subject-card {
+    padding: 13px 15px !important;
+  }
   .sheets-hero-banner {
     min-height: 130px;
     max-height: 150px;
