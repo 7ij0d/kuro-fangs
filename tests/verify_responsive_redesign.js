@@ -31,11 +31,10 @@ const tests = [
   },
   {
     category: 'Navigation',
-    name: 'Top navigation center pills match exact spec (Home, Sheets, Recordings, Questions, More)',
+    name: 'Top navigation center pills match academic IA (Home, Subjects, Schedules, More)',
     pass: indexHtml.includes('id="nav-item-home"') &&
-          indexHtml.includes('id="nav-item-sheets"') &&
-          indexHtml.includes('id="nav-item-recordings"') &&
-          indexHtml.includes('id="nav-item-questions"') &&
+          indexHtml.includes('id="nav-item-subjects"') &&
+          indexHtml.includes('id="nav-item-schedules"') &&
           indexHtml.includes('id="nav-item-more"')
   },
   {
