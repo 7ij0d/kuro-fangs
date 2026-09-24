@@ -110,8 +110,53 @@
 
 ---
 
-## 6. Recent Git Commits & State Log
-- `Current`: Questions Bank master redesign matching blueprint (`media_1790209485831.jpg`) with 4-column desktop grid, 2-column iPad grid, 1-column mobile stack, ivory cards, and version bump to `?v=9.5`.
+## 6. Master Academic Schedules Restructuring & Redesign (Blueprint Conformance)
+- **Visual Blueprint**: `media_1790209940929.jpg`
+- **Information Architecture Unification**:
+  - Reorganized three previously disparate sections into ONE unified hub (`#/schedules`):
+    1. **Theoretical Lectures** (`#/lecture-schedule`): Auditorium 2, Saturday to Thursday weekly timetable.
+    2. **Clinical & Lab Schedule** (`#/practical-schedule`): Subgroups A1–E2, phantom head, simulation labs, and clinical rotations.
+    3. **Examination Schedule** (`#/exams`): Midterm (12 subjects) & Final (3 subjects) theory timetables.
+  - **Top Navigation IA**:
+    - `[ Home ] [ Subjects ] [ Schedules ] [ More ▾ ]`
+    - Removed "Exams" as a standalone top nav item; consolidated under Academic Schedules.
+- **Hero Banner**:
+  - Background: `assets/hero/academic-schedules-hero.png` with deep warm vignette overlay.
+  - Blush calendar icon badge box (`.schedules-hero-badge-icon-box`).
+  - Title: `Academic Schedules` / `الجداول الدراسية الأكاديمية`.
+  - Subtitle: `All your academic timetables in one place.` / `كل جداولك ومواعيدك الأكاديمية في مكان واحد.`.
+  - Description: `Lecture schedules, clinical & lab schedules, and examination timetables.` / `جداول المحاضرات، المعامل والعيادات، والامتحانات الرسمية.`.
+- **Three Integrated Schedule Cards**:
+  - **Card 1: Theoretical Lectures**:
+    - Burgundy icon box (`book-open`) + Category pill: `Auditorium 2` / `مدرج 2`.
+    - Summary: Weekly lecture timetable for all subjects. Saturday to Thursday.
+    - Official Artwork: Kuro reading book (`assets/schedules/kuro-theory-lectures.png`).
+    - CTA: `Open Schedule →` (`.cta-burgundy`).
+  - **Card 2: Clinical & Lab Schedule**:
+    - Emerald icon box (`flask-conical`) + Category pill: `Groups A1 - E2` / `المجموعات A1 – E2`.
+    - Summary: Practical sessions, clinics and labs for all student subgroups.
+    - Official Artwork: Kuro in dental clinic chair (`assets/schedules/kuro-clinical-lab.png`).
+    - CTA: `Open Schedule →` (`.cta-emerald`).
+  - **Card 3: Examination Schedule**:
+    - Amber icon box (`file-text`) + Category pill: `Midterm & Final` / `النصفي والنهائي`.
+    - Summary: Official theory examination timetables for all subjects.
+    - Official Artwork: Kuro with exam clipboard (`assets/schedules/kuro-exams-board.png`).
+    - CTA: `Open Schedule →` (`.cta-amber`).
+- **Responsive Layout Breakpoints (Zero Horizontal Overflow)**:
+  - **Desktop (>= 1200px)**: 3 columns (`repeat(3, minmax(0, 1fr))`), Kuro positioned at bottom-right (`position: absolute; bottom: 0; right: 12px; max-height: 148px;`).
+  - **iPad & Tablets (768px – 1199px)**: Wide 1-column stacked list matching the middle screen of `media_1790209940929.jpg`, featuring circular arrow button (`.sched-circle-arrow`) and right-aligned Kuro artwork.
+  - **Mobile (< 768px)**: 1-column vertical compact stack with touch targets >= 44px, summary line clamp, bottom-right artwork, and zero horizontal overflow (`overflow-x: clip`).
+- **Data & Feature Invariant**:
+  - 100% preservation of all 10 student subgroups (A1 to E2) with automatic `localStorage` persistence.
+  - Live day countdown calculation for midterm and final exams.
+  - Printable PDF export styling maintained.
+  - Sub-schedule pages include prominent `.schedules-top-back-bar` (`← Back to Academic Schedules` / `الرجوع للجداول الدراسية`).
+
+---
+
+## 7. Recent Git Commits & State Log
+- `Current`: Master restructuring & redesign of Academic Schedules (`#/schedules`) matching blueprint (`media_1790209940929.jpg`) with 3 integrated Kuro cards, responsive desktop/iPad/mobile views, back navigation, and cache busting bump to `?v=9.6`.
+- `92e4382`: Questions Bank master redesign matching blueprint (`media_1790209485831.jpg`) with 4-column desktop grid, 2-column iPad grid, 1-column mobile stack, ivory cards, and version bump to `?v=9.5`.
 - `73ed2c3`: Synchronize top center navigation pills with master visual reference.
 - `7c3695d`: Sheets & Lectures master redesign matching blueprint (`media_1790204779370.jpg`) with panoramic hero (`assets/hero/sheets-hero-study.png`), 2-column card split, full action buttons, and version bump to `?v=9.4`.
 - `e76315e`: Add master PROJECT_CONTEXT.md for persistent session state & memory.

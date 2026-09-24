@@ -72,6 +72,12 @@ assert(examsJs.includes('kuro-exams-board.png'), "Card 3 renders kuro-exams-boar
 assert(examsJs.includes('schedules-top-back-bar'), "Sub-schedule views render schedules-top-back-bar");
 assert(examsJs.includes('Back to Academic Schedules') || examsJs.includes('الرجوع للجداول الدراسية'), "Back button text present in exams.js");
 
+// Card metadata & Blueprint text assertions
+assert(examsJs.includes('Auditorium 2'), "Card 1 contains Auditorium 2 metadata");
+assert(examsJs.includes('Groups A1') || examsJs.includes('A1 – E2'), "Card 2 contains Groups A1 - E2 metadata");
+assert(examsJs.includes('Midterm & Final') || examsJs.includes('النصفي والنهائي'), "Card 3 contains Midterm & Final metadata");
+assert(examsJs.includes('Open Schedule') || examsJs.includes('فتح الجدول'), "Cards contain Open Schedule button");
+
 // 5. Verify css/polish.css
 console.log('\n5. Checking css/polish.css:');
 const polishCss = fs.readFileSync(path.join(rootDir, 'css/polish.css'), 'utf8');

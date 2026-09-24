@@ -181,39 +181,25 @@ const ExamsPage = {
 
     container.innerHTML = `
       <div class="schedules-hub-container">
-        <!-- 1. Panoramic Top Banner ("الصورة تكون في البار من فوق") -->
+        <!-- 1. Panoramic Top Banner (Blueprint Fidelity) -->
         <section class="schedules-hub-hero" aria-label="Academic Schedules Banner">
           <div class="schedules-hero-card">
-            <img
-              src="assets/hero/academic-schedules-hero.png"
-              alt="Academic Schedules Hero"
-              class="schedules-hero-bg-img"
-              loading="eager"
-              decoding="sync"
-              fetchpriority="high"
-            />
-            <div class="schedules-hero-overlay" dir="${isAr ? 'rtl' : 'ltr'}">
-              <div class="schedules-hero-badge">
-                <i data-lucide="calendar"></i>
-                <span>${isAr ? 'الجداول الأكاديمية الرسمية 2026 / 2027' : 'Official Academic Timetables 2026 / 2027'}</span>
-              </div>
-              <h1 class="schedules-hero-title">${isAr ? 'الجداول الدراسية المعتمدة' : 'Academic Schedules'}</h1>
-              <p class="schedules-hero-subtitle">${isAr ? 'كلية طب وجراحة الفم والأسنان • جامعة طرابلس • السنة الثالثة' : 'Faculty of Oral & Dental Surgery • University of Tripoli • Year 3'}</p>
-              
-              <div class="schedules-hero-meta-row">
-                <div class="schedules-hero-meta-pill">
-                  <i data-lucide="book-open"></i>
-                  <span>${isAr ? 'مدرج 2 نظري' : 'Auditorium 2'}</span>
-                </div>
-                <div class="schedules-hero-meta-pill">
-                  <i data-lucide="users"></i>
-                  <span>${isAr ? '10 مجموعات عملي' : '10 Subgroups'}</span>
-                </div>
-                <div class="schedules-hero-meta-pill">
-                  <i data-lucide="calendar-check"></i>
-                  <span>${isAr ? 'امتحانات معتمدة' : 'Official Boards'}</span>
+            <div class="schedules-hero-bg-artwork" style="background-image: url('assets/hero/academic-schedules-hero.png');"></div>
+            <div class="schedules-hero-overlay"></div>
+            <div class="schedules-hero-content" dir="${isAr ? 'rtl' : 'ltr'}">
+              <div class="schedules-hero-badge-wrap">
+                <div class="schedules-hero-badge-icon-box">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
                 </div>
               </div>
+              <h1 class="schedules-hero-title">${isAr ? 'الجداول الدراسية الأكاديمية' : 'Academic Schedules'}</h1>
+              <p class="schedules-hero-subtitle">${isAr ? 'كل جداولك ومواعيدك الأكاديمية في مكان واحد.' : 'All your academic timetables in one place.'}</p>
+              <p class="schedules-hero-desc">${isAr ? 'جداول المحاضرات، المعامل والعيادات، والامتحانات الرسمية.' : 'Lecture schedules, clinical & lab schedules, and examination timetables.'}</p>
             </div>
           </div>
         </section>
@@ -223,128 +209,128 @@ const ExamsPage = {
           <div class="schedules-cards-grid">
             
             <!-- Card 1: Theoretical Lectures -->
-            <div class="sched-card sched-card-theory">
-              <div class="sched-card-top-bar">
-                <span class="sched-card-pill pill-burgundy">
-                  <i data-lucide="book-open"></i>
-                  <span>${isAr ? 'مدرج 2 • السبت – الخميس' : 'Auditorium 2 • Sat–Thu'}</span>
-                </span>
-                <span class="sched-card-code">THEORY</span>
-              </div>
+            <div class="sched-card sched-card-theory" onclick="location.hash='#/lecture-schedule'">
+              <div class="sched-card-main">
+                <div class="sched-card-header">
+                  <div class="sched-card-icon-box icon-theory">
+                    <i data-lucide="book-open"></i>
+                  </div>
+                  <div class="sched-card-title-group">
+                    <h2 class="sched-card-heading">${isAr ? 'المحاضرات النظرية' : 'Theoretical Lectures'}</h2>
+                    <div class="sched-card-pill pill-burgundy">
+                      <span>${isAr ? 'مدرج 2' : 'Auditorium 2'}</span>
+                    </div>
+                  </div>
+                </div>
 
-              <div class="sched-card-img-wrap">
-                <img
-                  src="assets/schedules/kuro-theory-lectures.png"
-                  alt="${isAr ? 'المحاضرات النظرية' : 'Theoretical Lectures'}"
-                  class="sched-card-artwork"
-                  loading="lazy"
-                />
-              </div>
-
-              <div class="sched-card-content">
-                <h2 class="sched-card-heading">${isAr ? 'جدول المحاضرات النظري' : 'Theoretical Lectures'}</h2>
-                <p class="sched-card-summary">
-                  ${isAr 
-                    ? 'المصفوفة الأسبوعية المعتمدة لجميع المحاضرات النظرية بمدرج 2 بالكلية، مقسمة حسب الفترات الصباحية والمسائية لكامل الدفعة.' 
-                    : 'The official 6-day lecture matrix held in Auditorium 2 Saturday through Thursday, structured into morning & afternoon sessions.'}
-                </p>
-
-                <div class="sched-card-highlights">
-                  <span class="sched-hl-item"><i data-lucide="clock"></i><span>08:00 – 12:00</span></span>
-                  <span class="sched-hl-item"><i data-lucide="map-pin"></i><span>${isAr ? 'مدرج 2' : 'Hall 2'}</span></span>
-                  <span class="sched-hl-item"><i data-lucide="calendar"></i><span>${isAr ? '6 أيام أسبوعياً' : '6 Days/Week'}</span></span>
+                <div class="sched-card-body">
+                  <p class="sched-card-summary">
+                    ${isAr ? 'الجدول الأسبوعي للمحاضرات النظرية لكافة المواد.<br>من السبت إلى الخميس.' : 'Weekly lecture timetable for all subjects.<br>Saturday to Thursday.'}
+                  </p>
                 </div>
 
                 <div class="sched-card-footer">
-                  <a href="#/lecture-schedule" class="sched-action-btn btn-burgundy">
-                    <span>${isAr ? 'فتح جدول النظري' : 'Open Schedule'}</span>
+                  <a href="#/lecture-schedule" class="sched-card-cta cta-burgundy">
+                    <span>${isAr ? 'فتح الجدول' : 'Open Schedule'}</span>
                     <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
                   </a>
+                  <div class="sched-circle-arrow circle-burgundy">
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                  </div>
                 </div>
+              </div>
+
+              <div class="sched-card-artwork-box">
+                <img
+                  src="assets/schedules/kuro-theory-lectures.png"
+                  alt="${isAr ? 'المحاضرات النظرية' : 'Theoretical Lectures'}"
+                  class="sched-card-kuro-img kuro-theory"
+                  loading="lazy"
+                />
               </div>
             </div>
 
             <!-- Card 2: Clinical & Lab Schedule -->
-            <div class="sched-card sched-card-clinical">
-              <div class="sched-card-top-bar">
-                <span class="sched-card-pill pill-emerald">
-                  <i data-lucide="microscope"></i>
-                  <span>${isAr ? 'معامل وعيادات • A1 إلى E2' : 'Labs & Clinics • Groups A1–E2'}</span>
-                </span>
-                <span class="sched-card-code">CLINICAL</span>
-              </div>
+            <div class="sched-card sched-card-clinical" onclick="location.hash='#/practical-schedule'">
+              <div class="sched-card-main">
+                <div class="sched-card-header">
+                  <div class="sched-card-icon-box icon-clinical">
+                    <i data-lucide="flask-conical"></i>
+                  </div>
+                  <div class="sched-card-title-group">
+                    <h2 class="sched-card-heading">${isAr ? 'جدول المعامل والعيادات العملي' : 'Clinical & Lab Schedule'}</h2>
+                    <div class="sched-card-pill pill-emerald">
+                      <span>${isAr ? 'المجموعات A1 – E2' : 'Groups A1 - E2'}</span>
+                    </div>
+                  </div>
+                </div>
 
-              <div class="sched-card-img-wrap">
-                <img
-                  src="assets/schedules/kuro-clinical-lab.png"
-                  alt="${isAr ? 'المعامل والعيادات' : 'Clinical & Lab Schedule'}"
-                  class="sched-card-artwork"
-                  loading="lazy"
-                />
-              </div>
-
-              <div class="sched-card-content">
-                <h2 class="sched-card-heading">${isAr ? 'جدول المعامل والعيادات العملي' : 'Clinical & Lab Schedule'}</h2>
-                <p class="sched-card-summary">
-                  ${isAr 
-                    ? 'مواعيد معامل المحاكاة، الفانتوم هيد، والعيادات السريرية المخصصة لجميع المجموعات الفرعية الـ 10 مع حفظ مجموعتك تلقائياً.' 
-                    : 'Practical, phantom head & clinical rotations for all 10 subgroups (A1 to E2), featuring group selector and persistence.'}
-                </p>
-
-                <div class="sched-card-highlights">
-                  <span class="sched-hl-item"><i data-lucide="users"></i><span>${isAr ? '10 مجموعات فرعية' : '10 Subgroups'}</span></span>
-                  <span class="sched-hl-item"><i data-lucide="activity"></i><span>${isAr ? 'فانتوم وعيادات' : 'Phantom & Clinic'}</span></span>
-                  <span class="sched-hl-item"><i data-lucide="bookmark"></i><span>${isAr ? 'حفظ تلقائي' : 'Auto-Saved'}</span></span>
+                <div class="sched-card-body">
+                  <p class="sched-card-summary">
+                    ${isAr ? 'جلسات المعامل، المحاكاة، والعيادات السريرية لجميع المجموعات الفرعية.' : 'Practical sessions, clinics and labs for all student subgroups.'}
+                  </p>
                 </div>
 
                 <div class="sched-card-footer">
-                  <a href="#/practical-schedule" class="sched-action-btn btn-emerald">
-                    <span>${isAr ? 'فتح جدول العملي' : 'Open Schedule'}</span>
+                  <a href="#/practical-schedule" class="sched-card-cta cta-emerald">
+                    <span>${isAr ? 'فتح الجدول' : 'Open Schedule'}</span>
                     <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
                   </a>
+                  <div class="sched-circle-arrow circle-emerald">
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                  </div>
                 </div>
+              </div>
+
+              <div class="sched-card-artwork-box">
+                <img
+                  src="assets/schedules/kuro-clinical-lab.png"
+                  alt="${isAr ? 'المعامل والعيادات' : 'Clinical & Lab Schedule'}"
+                  class="sched-card-kuro-img kuro-clinical"
+                  loading="lazy"
+                />
               </div>
             </div>
 
             <!-- Card 3: Examination Schedule -->
-            <div class="sched-card sched-card-exams">
-              <div class="sched-card-top-bar">
-                <span class="sched-card-pill pill-amber">
-                  <i data-lucide="calendar-check"></i>
-                  <span>${isAr ? 'النصفي والنهائي • معتمد' : 'Midterm & Final Timetables'}</span>
-                </span>
-                <span class="sched-card-code">EXAMS</span>
-              </div>
+            <div class="sched-card sched-card-exams" onclick="location.hash='#/exams'">
+              <div class="sched-card-main">
+                <div class="sched-card-header">
+                  <div class="sched-card-icon-box icon-exams">
+                    <i data-lucide="file-text"></i>
+                  </div>
+                  <div class="sched-card-title-group">
+                    <h2 class="sched-card-heading">${isAr ? 'جداول الامتحانات الرسمية' : 'Examination Schedule'}</h2>
+                    <div class="sched-card-pill pill-amber">
+                      <span>${isAr ? 'النصفي والنهائي' : 'Midterm & Final'}</span>
+                    </div>
+                  </div>
+                </div>
 
-              <div class="sched-card-img-wrap">
-                <img
-                  src="assets/schedules/kuro-exams-board.png"
-                  alt="${isAr ? 'جداول الامتحانات' : 'Examination Schedule'}"
-                  class="sched-card-artwork"
-                  loading="lazy"
-                />
-              </div>
-
-              <div class="sched-card-content">
-                <h2 class="sched-card-heading">${isAr ? 'جداول الامتحانات الرسمية' : 'Examination Schedule'}</h2>
-                <p class="sched-card-summary">
-                  ${isAr 
-                    ? 'جداول امتحانات النظري النصفي (12 مادة) والنهائي (3 مواد) المعتمدة مع عداد الأيام التنازلي التفاعلي وخيار تصدير وطباعة PDF.' 
-                    : 'Official Midterm (12 subjects) & Final (3 subjects) theory timetables with live days countdown & print/PDF export.'}
-                </p>
-
-                <div class="sched-card-highlights">
-                  <span class="sched-hl-item"><i data-lucide="timer"></i><span>${isAr ? 'عداد تنازلي حي' : 'Live Countdown'}</span></span>
-                  <span class="sched-hl-item"><i data-lucide="printer"></i><span>${isAr ? 'تصدير PDF' : 'PDF Export'}</span></span>
-                  <span class="sched-hl-item"><i data-lucide="check-circle-2"></i><span>12 + 3 ${isAr ? 'مواد' : 'Subjects'}</span></span>
+                <div class="sched-card-body">
+                  <p class="sched-card-summary">
+                    ${isAr ? 'جداول الامتحانات النظرية النصفية والنهائية لكافة المواد الدراسية.' : 'Official theory examination timetables for all subjects.'}
+                  </p>
                 </div>
 
                 <div class="sched-card-footer">
-                  <a href="#/exams" class="sched-action-btn btn-amber">
-                    <span>${isAr ? 'فتح جدول الامتحانات' : 'Open Schedule'}</span>
+                  <a href="#/exams" class="sched-card-cta cta-amber">
+                    <span>${isAr ? 'فتح الجدول' : 'Open Schedule'}</span>
                     <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
                   </a>
+                  <div class="sched-circle-arrow circle-amber">
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                  </div>
                 </div>
+              </div>
+
+              <div class="sched-card-artwork-box">
+                <img
+                  src="assets/schedules/kuro-exams-board.png"
+                  alt="${isAr ? 'جداول الامتحانات' : 'Examination Schedule'}"
+                  class="sched-card-kuro-img kuro-exams"
+                  loading="lazy"
+                />
               </div>
             </div>
 
