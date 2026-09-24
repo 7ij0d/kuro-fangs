@@ -37,7 +37,7 @@ console.log('\n2. Checking index.html top nav and IA:');
 const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
 
 assert(indexHtml.includes('data-route="/schedules"'), 'Top nav contains Schedules route [data-route="/schedules"]');
-assert(indexHtml.includes('id="nav-item-subjects"'), 'Top nav contains Subjects pill [id="nav-item-subjects"]');
+assert(indexHtml.includes('id="nav-item-sheets"'), 'Top nav contains Sheets pill [id="nav-item-sheets"]');
 assert(indexHtml.includes('id="nav-item-schedules"'), 'Top nav contains Schedules pill [id="nav-item-schedules"]');
 
 // Ensure Exams is NOT a standalone top navigation pill
@@ -51,8 +51,8 @@ if (navCenterMatch) {
 }
 
 // Check cache busting version
-assert(/css\/polish\.css\?v=9\.[3-9]/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for css');
-assert(/js\/router\.js\?v=9\.[3-9]/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for js');
+assert(/css\/polish\.css\?v=(9\.[3-9]|10\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for css');
+assert(/js\/router\.js\?v=(9\.[3-9]|10\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for js');
 
 // 3. Verify js/router.js
 console.log('\n3. Checking js/router.js:');

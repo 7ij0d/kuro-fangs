@@ -50,12 +50,12 @@
   </script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=9.9" />
-  <link rel="stylesheet" href="css/base.css?v=9.9" />
-  <link rel="stylesheet" href="css/layout.css?v=9.9" />
-  <link rel="stylesheet" href="css/components.css?v=9.9" />
+  <link rel="stylesheet" href="css/tokens.css?v=10.0" />
+  <link rel="stylesheet" href="css/base.css?v=10.0" />
+  <link rel="stylesheet" href="css/layout.css?v=10.0" />
+  <link rel="stylesheet" href="css/components.css?v=10.0" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=9.9" />
+  <link rel="stylesheet" href="css/polish.css?v=10.0" />
 </head>
 <body id="app-body" data-layout="dark-sidebar">
   <!-- ==========================================================================
@@ -103,8 +103,8 @@
         </a>
 
         <a href="#/sheets" class="sidebar-menu-item" data-route="/sheets">
-          <span class="sidebar-menu-icon-wrap"><img src="assets/icons/sheets_cat.png" alt="Subjects" class="sidebar-cat-icon" width="20" height="20" loading="lazy" /></span>
-          <span class="sidebar-menu-text" id="side-nav-subjects">Subjects</span>
+          <span class="sidebar-menu-icon-wrap"><img src="assets/icons/sheets_cat.png" alt="Sheets" class="sidebar-cat-icon" width="20" height="20" loading="lazy" /></span>
+          <span class="sidebar-menu-text" id="side-nav-sheets">Sheets</span>
         </a>
 
         <a href="#/schedules" class="sidebar-menu-item" data-route="/schedules">
@@ -213,10 +213,6 @@
             <i data-lucide="home"></i>
             <span id="nav-item-home">Home</span>
           </a>
-          <a href="#/subjects" class="header-nav-pill" data-route="/subjects">
-            <i data-lucide="layout-grid"></i>
-            <span id="nav-item-subjects">Subjects</span>
-          </a>
           <a href="#/sheets" class="header-nav-pill" data-route="/sheets">
             <i data-lucide="book-open"></i>
             <span id="nav-item-sheets">Sheets</span>
@@ -243,11 +239,11 @@
             <div class="header-dropdown-menu" id="header-dropdown-menu">
               <a href="#/questions" class="header-dropdown-item">
                 <i data-lucide="help-circle"></i>
-                <span id="nav-item-questions">Question Bank</span>
+                <span id="more-item-questions">Question Bank</span>
               </a>
               <a href="#/recordings" class="header-dropdown-item">
                 <i data-lucide="headphones"></i>
-                <span id="nav-item-recordings">Audio Recordings</span>
+                <span id="more-item-recordings">Audio Recordings</span>
               </a>
               <a href="#/rewards" class="header-dropdown-item">
                 <i data-lucide="sparkles"></i>
@@ -318,36 +314,36 @@
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=9.9"></script>
-  <script src="js/audio-fx.js?v=9.9"></script>
-  <script src="js/character-theme.js?v=9.9"></script>
-  <script src="js/store.js?v=9.9"></script>
-  <script src="js/components/toast.js?v=9.9"></script>
-  <script src="js/components/auth-modal.js?v=9.9"></script>
-  <script src="js/supabase.js?v=9.9"></script>
-  <script src="js/data.js?v=9.9"></script>
-  <script src="js/data-clinical.js?v=9.9"></script>
-  <script src="js/components/subject-modal.js?v=9.9"></script>
-  <script src="js/components/sheet-edit-modal.js?v=9.9"></script>
-  <script src="js/components/notifications-center.js?v=9.9"></script>
-  <script src="js/components/sheet-copy-engine.js?v=9.9"></script>
-  <script src="js/router.js?v=9.9"></script>
-  <script src="js/pages/home.js?v=9.9"></script>
-  <script src="js/pages/sheets.js?v=9.9"></script>
-  <script src="js/pages/sheet-detail.js?v=9.9"></script>
-  <script src="js/pages/recordings.js?v=9.9"></script>
-  <script src="js/pages/exams.js?v=9.9"></script>
-  <script src="js/pages/quizzes.js?v=9.9"></script>
-  <script src="js/pages/questions.js?v=9.9"></script>
-  <script src="js/pages/flashcards.js?v=9.9"></script>
+  <script src="js/i18n.js?v=10.0"></script>
+  <script src="js/audio-fx.js?v=10.0"></script>
+  <script src="js/character-theme.js?v=10.0"></script>
+  <script src="js/store.js?v=10.0"></script>
+  <script src="js/components/toast.js?v=10.0"></script>
+  <script src="js/components/auth-modal.js?v=10.0"></script>
+  <script src="js/supabase.js?v=10.0"></script>
+  <script src="js/data.js?v=10.0"></script>
+  <script src="js/data-clinical.js?v=10.0"></script>
+  <script src="js/components/subject-modal.js?v=10.0"></script>
+  <script src="js/components/sheet-edit-modal.js?v=10.0"></script>
+  <script src="js/components/notifications-center.js?v=10.0"></script>
+  <script src="js/components/sheet-copy-engine.js?v=10.0"></script>
+  <script src="js/router.js?v=10.0"></script>
+  <script src="js/pages/home.js?v=10.0"></script>
+  <script src="js/pages/sheets.js?v=10.0"></script>
+  <script src="js/pages/sheet-detail.js?v=10.0"></script>
+  <script src="js/pages/recordings.js?v=10.0"></script>
+  <script src="js/pages/exams.js?v=10.0"></script>
+  <script src="js/pages/quizzes.js?v=10.0"></script>
+  <script src="js/pages/questions.js?v=10.0"></script>
+  <script src="js/pages/flashcards.js?v=10.0"></script>
   
-  <script src="js/pages/previous-years.js?v=9.9"></script>
-  <script src="js/pages/rewards.js?v=9.9"></script>
-  <script src="js/pages/games.js?v=9.9"></script>
-  <script src="js/git-sync.js?v=9.9"></script>
-  <script src="js/pages/admin.js?v=9.9"></script>
-  <script src="js/pages/profile.js?v=9.9"></script>
-  <script src="js/pages/secondary.js?v=9.9"></script>
-  <script src="js/app.js?v=9.9"></script>
+  <script src="js/pages/previous-years.js?v=10.0"></script>
+  <script src="js/pages/rewards.js?v=10.0"></script>
+  <script src="js/pages/games.js?v=10.0"></script>
+  <script src="js/git-sync.js?v=10.0"></script>
+  <script src="js/pages/admin.js?v=10.0"></script>
+  <script src="js/pages/profile.js?v=10.0"></script>
+  <script src="js/pages/secondary.js?v=10.0"></script>
+  <script src="js/app.js?v=10.0"></script>
 </body>
 </html>

@@ -31,9 +31,9 @@ const tests = [
   },
   {
     category: 'Navigation',
-    name: 'Top navigation center pills match academic IA (Home, Subjects, Schedules, More)',
+    name: 'Top navigation center pills match academic IA (Home, Sheets, Schedules, More)',
     pass: indexHtml.includes('id="nav-item-home"') &&
-          indexHtml.includes('id="nav-item-subjects"') &&
+          indexHtml.includes('id="nav-item-sheets"') &&
           indexHtml.includes('id="nav-item-schedules"') &&
           indexHtml.includes('id="nav-item-more"')
   },

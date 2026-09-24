@@ -140,17 +140,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update Top Navigation Center Pills & More Dropdown
     const navHome = document.getElementById('nav-item-home');
     if (navHome) navHome.textContent = isAr ? 'الرئيسية' : 'Home';
-    const navSubjects = document.getElementById('nav-item-subjects');
-    if (navSubjects) navSubjects.textContent = isAr ? 'المواد' : 'Subjects';
+    const navSheets = document.getElementById('nav-item-sheets');
+    if (navSheets) navSheets.textContent = isAr ? 'الشيتات' : 'Sheets';
+    const navRecordings = document.getElementById('nav-item-recordings');
+    if (navRecordings) navRecordings.textContent = isAr ? 'التسجيلات' : 'Recordings';
+    const navQuestions = document.getElementById('nav-item-questions');
+    if (navQuestions) navQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Questions';
     const navSchedules = document.getElementById('nav-item-schedules');
     if (navSchedules) navSchedules.textContent = isAr ? 'الجداول' : 'Schedules';
     const navMore = document.getElementById('nav-item-more');
     if (navMore) navMore.textContent = isAr ? 'المزيد' : 'More';
 
-    const navQuestions = document.getElementById('nav-item-questions');
-    if (navQuestions) navQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Question Bank';
-    const navRecordings = document.getElementById('nav-item-recordings');
-    if (navRecordings) navRecordings.textContent = isAr ? 'التسجيلات الصوتية' : 'Audio Recordings';
+    const moreQuestions = document.getElementById('more-item-questions');
+    if (moreQuestions) moreQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Question Bank';
+    const moreRecordings = document.getElementById('more-item-recordings');
+    if (moreRecordings) moreRecordings.textContent = isAr ? 'التسجيلات الصوتية' : 'Audio Recordings';
     const navRewards = document.getElementById('nav-item-rewards');
     if (navRewards) navRewards.textContent = isAr ? 'كورو والتخصيص' : 'Mascot Hub';
     const navGames = document.getElementById('nav-item-games');
@@ -378,11 +382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   router.register('/', (c, q) => window.HomePage.render(c, q));
   router.register('/subjects', (c, q) => {
-    if (window.SubjectsPage && typeof window.SubjectsPage.render === 'function') {
-      window.SubjectsPage.render(c, q);
-    } else if (window.SheetsPage) {
-      window.SheetsPage.render(c, q);
-    }
+    window.location.hash = '#/sheets';
   });
   router.register('/sheets', (c, q) => window.SheetsPage.render(c, q));
   router.register('/sheet-detail', (c, q) => window.SheetDetailPage.render(c, q));
