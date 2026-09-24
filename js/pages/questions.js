@@ -74,96 +74,86 @@ const QuestionsPage = {
     } catch (e) {}
   },
 
+  // 12 Core Dental Subjects ordered matching exact visual reference
+  SUBJECT_DEFINITIONS: [
+    { id: 'gen-med', code: 'MED-301', name_en: 'General Medicine', name_ar: 'الطب العام (الباطنة)', icon: 'stethoscope' },
+    { id: 'gen-surgery', code: 'GS-301', name_en: 'General Surgery', name_ar: 'الجراحة العامة', icon: 'activity' },
+    { id: 'oral-diseases', code: 'OD-301', name_en: 'Oral Diseases', name_ar: 'علم أمراض الفم', icon: 'microscope' },
+    { id: 'preventive', code: 'PREV-301', name_en: 'Preventive Dentistry', name_ar: 'طب الأسنان الوقائي', icon: 'shield-check' },
+    { id: 'cons-endo', code: 'CONS-302', name_en: 'Conservative Dentistry and Endodontics II', name_ar: 'العلاج التحفظي وعلاج الجذور 2', icon: 'tooth' },
+    { id: 'fixed-pros', code: 'FP-302', name_en: 'Fixed Prosthodontics II', name_ar: 'الاستعاضة السنية الثابتة 2', icon: 'crown' },
+    { id: 'removable-pros', code: 'RP-302', name_en: 'Removable Prosthodontics II', name_ar: 'الاستعاضة السنية المتحركة 2', icon: 'layers' },
+    { id: 'ortho', code: 'ORT-301', name_en: 'Orthodontics I', name_ar: 'تقويم الأسنان 1', icon: 'smile' },
+    { id: 'pediatric', code: 'PED-301', name_en: 'Pediatric Dentistry I', name_ar: 'طب أسنان الأطفال 1', icon: 'heart' },
+    { id: 'omdr', code: 'OMDR-301', name_en: 'Oral Medicine, Diagnosis and Radiology I', name_ar: 'طب الفم والتشخيص والأشعة 1', icon: 'scan' },
+    { id: 'omfs', code: 'OMS-301', name_en: 'Oral and Maxillofacial Surgery I', name_ar: 'جراحة الفم والوجه والفكين 1', icon: 'scissors' },
+    { id: 'endo', code: 'END-301', name_en: 'Diseases and Treatment of the Pulp I', name_ar: 'علاج لب الأسنان 1 (علاج العصب)', icon: 'activity' }
+  ],
+
+  getSubjectIconHtml(iconType) {
+    if (iconType === 'tooth') {
+      return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2C7.5 2 4 4.5 4 8c0 3 1.5 6 3 9 1 2 2 5 3 5s2-3 2-5c0-1.5.5-2 0-3-.5-1-1-1.5-1-2.5 0-1.5 1-2.5 1-2.5s1 1 1 2.5c0 1-.5 1.5-1 2.5-.5 1 0 1.5 0 3 0 2 1 5 2 5s2-3 3-5c1.5-3 3-6 3-9 0-3.5-3.5-6-8-6z" />
+      </svg>`;
+    }
+    return `<i data-lucide="${iconType}"></i>`;
+  },
+
   render(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
     const initialSubject = queryParams?.get('subject') || null;
     if (initialSubject && initialSubject !== 'all') {
       QuestionsPage.selectedSubjectId = initialSubject;
+    } else {
+      QuestionsPage.selectedSubjectId = null;
     }
-    const allQuestions = QuestionsPage.getQuestions();
-
-    const subjects = window.DATA ? window.DATA.getSubjects() : [];
 
     container.innerHTML = `
-      <!-- Luxury Questions Hero Banner (Matching Blueprint) -->
+      <!-- Compact Questions Hero Banner (Exact Visual Reference) -->
       <div class="q-hero-banner">
         <div class="q-hero-bg-artwork" style="background-image: url('assets/hero/kuro-questions-hero.png');"></div>
         <div class="q-hero-overlay"></div>
         <div class="q-hero-content">
-          <div class="q-hero-badge-wrap">
+          <div class="q-hero-title-row">
             <div class="q-hero-badge-icon-box">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                 <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                 <path d="m9 14 2 2 4-4"></path>
               </svg>
             </div>
-            <span class="q-hero-kicker">${isAr ? 'تدريب وسنوات سابقة' : 'PRACTICE & PAST EXAMS'}</span>
+            <h1 class="q-hero-title">
+              ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
+            </h1>
           </div>
-          <h1 class="q-hero-title">
-            ${isAr ? 'الأسئلة — سنوات سابقة وبنك الأسئلة' : 'Questions — Past Exams & Practice Bank'}
-          </h1>
           <p class="q-hero-subtitle">
-            ${isAr ? 'كل أسئلتك لطب الأسنان، منظمة وسهلة للتدريب.' : 'All dental subjects, organized and easy to practice.'}
+            ${isAr ? 'اختر مادة لبدء التدريب على أسئلة الاختيار من متعدد.' : 'Select a subject to start practicing MCQs.'}
           </p>
         </div>
       </div>
 
-      <!-- Control Bar: Subject Dropdown + Search + Year Dropdown + View Toggle -->
-      <div class="q-control-bar">
-        <!-- Subject Dropdown -->
-        <div class="q-dropdown-wrap">
-          <i data-lucide="chevron-down" class="q-dropdown-chevron"></i>
-          <select id="q-subject-dropdown" class="q-select">
-            <option value="all" ${!QuestionsPage.selectedSubjectId || QuestionsPage.selectedSubjectId === 'all' ? 'selected' : ''}>${isAr ? 'كل المواد' : 'All Subjects'}</option>
-            ${subjects.map(s => `
-              <option value="${s.id}" ${QuestionsPage.selectedSubjectId === s.id ? 'selected' : ''}>
-                ${isAr ? s.name_ar : s.name_en}
-              </option>
-            `).join('')}
-          </select>
-        </div>
-
-        <!-- Search Bar (always visible) -->
-        <div class="q-search-wrap">
+      <!-- Minimal Subheader Bar: Simple Search + Total Count Indicator -->
+      <div class="q-sub-bar" id="q-sub-bar">
+        <div class="q-search-box-wrap">
           <i data-lucide="search" class="q-search-icon"></i>
           <input
             type="text"
             id="q-search-input"
-            class="q-search-input"
-            placeholder="${isAr ? 'ابحث في نصوص الأسئلة، المواد، أو التصنيفات السريرية...' : 'Search questions, subjects, or clinical tags...'}"
+            class="q-search-field"
+            placeholder="${isAr ? 'بحث في المواد...' : 'Search subjects...'}"
             value="${QuestionsPage.searchQuery || ''}"
             autocomplete="off"
           />
-          <button id="q-search-clear" class="q-search-clear" style="${QuestionsPage.searchQuery ? '' : 'display:none;'}" aria-label="Clear search">
-            <i data-lucide="x" style="width:14px;height:14px;"></i>
+          <button type="button" id="q-search-clear-btn" class="q-search-clear-btn" style="${QuestionsPage.searchQuery ? '' : 'display: none;'}" aria-label="Clear search">
+            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
           </button>
         </div>
-
-        <!-- Year Dropdown -->
-        <div class="q-dropdown-wrap">
-          <i data-lucide="chevron-down" class="q-dropdown-chevron"></i>
-          <select id="q-year-dropdown" class="q-select">
-            <option value="all" ${QuestionsPage.selectedYear === 'all' ? 'selected' : ''}>${isAr ? 'كل السنوات' : 'All Years'}</option>
-            <option value="3" ${QuestionsPage.selectedYear === '3' ? 'selected' : ''}>${isAr ? 'السنة الثالثة' : 'Year 3 (Dental Surgery)'}</option>
-          </select>
-        </div>
-
-        <!-- View Mode Toggle -->
-        <div class="q-view-toggle">
-          <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'bento' ? 'active' : ''}" data-tab="bento" title="${isAr ? 'المربعات' : 'Grid'}">
-            <i data-lucide="layout-grid" style="width:15px;height:15px;"></i>
-          </button>
-          <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'direct' ? 'active' : ''}" data-tab="direct" title="${isAr ? 'قائمة الأسئلة' : 'List'}">
-            <i data-lucide="list" style="width:15px;height:15px;"></i>
-          </button>
-          <button class="q-view-btn kf-tab-pill ${QuestionsPage.currentTab === 'saved' ? 'active' : ''}" data-tab="saved" title="${isAr ? 'المحفوظات' : 'Saved'}">
-            <i data-lucide="star" style="width:15px;height:15px;"></i>
-          </button>
+        <div class="q-subjects-total-count" id="q-subjects-count-badge">
+          12 ${isAr ? 'مادة' : 'Subjects'}
         </div>
       </div>
 
-      <!-- DYNAMIC CONTENT CONTAINER -->
+      <!-- Main Dynamic Content Container (12 Subject Cards Grid or Level 2 Sheets) -->
       <div id="questions-main-content"></div>
 
       <!-- DENTISTOIRE-GRADE LUXURY MODAL QUIZ RUNNER (OVERLAY) -->
@@ -221,7 +211,7 @@ const QuestionsPage = {
               Question text goes here
             </h2>
 
-            <!-- Collapsible Arabic Translation Box (Independent from Clinical Explanation) -->
+            <!-- Collapsible Arabic Translation Box -->
             <div id="dt-modal-q-translation" style="display: none; margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; background: rgba(2, 132, 199, 0.06); border: 1px solid rgba(2, 132, 199, 0.2); animation: fadeIn 0.2s ease;">
               <div style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; color: #0284C7; margin-bottom: 4px;">
                 <i data-lucide="globe" style="width: 12px; height: 12px;"></i>
@@ -241,16 +231,15 @@ const QuestionsPage = {
                 <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 14px; height: 14px;"></i>
                 <span>${isAr ? 'السابق' : 'Previous'}</span>
               </button>
-              <button type="button" id="dt-btn-next" class="btn btn-primary btn-sm" style="font-weight: 700; gap: 6px; padding: 8px 20px;">
+              <button type="button" id="dt-btn-next" class="btn btn-primary btn-sm" style="font-weight: 750; gap: 6px; padding: 8px 20px; background: var(--brand-burgundy, #7E1D2A); border-color: var(--brand-burgundy, #7E1D2A);">
                 <span>${isAr ? 'التالي' : 'Next'}</span>
                 <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 14px; height: 14px;"></i>
               </button>
             </div>
           </div>
 
-          <!-- SECONDARY STAGE: LARGE KURO COMPANION & NON-OBSCURING EXPLANATION WING -->
+          <!-- SECONDARY STAGE: LARGE KURO COMPANION & EXPLANATION WING -->
           <aside class="dt-kuro-companion-stage" id="dt-kuro-companion-stage" aria-label="Kuro Study Companion">
-            <!-- Clickable Large Kuro Character Avatar -->
             <button type="button" class="dt-kuro-mascot-trigger" id="dt-kuro-mascot-trigger" title="${isAr ? 'انقر على كورو لإظهار أو إخفاء الشرح السريري' : 'Click Kuro to toggle faculty clinical explanation'}" aria-expanded="false">
               <div class="dt-kuro-avatar-frame">
                 <img id="dt-kuro-mascot-img" class="dt-kuro-mascot-img" src="assets/characters/kuro/Kuro-Thinking.png" alt="Kuro Character Companion" />
@@ -262,7 +251,7 @@ const QuestionsPage = {
               </div>
             </button>
 
-            <!-- Slide-out / Expandable Explanation Panel (Sits beside Kuro, NOT covering the question card!) -->
+            <!-- Slide-out Explanation Panel -->
             <div class="dt-kuro-explanation-pane" id="dt-kuro-explanation-pane" style="display: none;">
               <div class="dt-kuro-exp-header">
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -280,10 +269,7 @@ const QuestionsPage = {
               </div>
 
               <div class="dt-kuro-exp-body">
-                <!-- Faculty Model Answer & Detailed Breakdown -->
                 <div class="dt-kuro-answer-highlight" id="dt-kuro-model-answer"></div>
-
-                <!-- Sheet Verbatim Quote Box -->
                 <div class="dt-kuro-sheet-quote-box" id="dt-kuro-sheet-quote-box" style="display: none;">
                   <div class="dt-kuro-quote-header">
                     <i data-lucide="quote" style="width: 12px; height: 12px; color: var(--brand-accent);"></i>
@@ -301,8 +287,8 @@ const QuestionsPage = {
       <div id="qt-type-selector-modal" class="dt-quiz-overlay" style="display: none;">
         <div class="dt-quiz-card" style="max-width: 440px;">
           <div style="text-align: center; margin-bottom: 24px;">
-            <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(2, 132, 199, 0.08); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
-              <i data-lucide="filter" style="width: 24px; height: 24px; color: var(--brand-accent);"></i>
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(126, 29, 42, 0.08); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--brand-burgundy, #7E1D2A);">
+              <i data-lucide="filter" style="width: 24px; height: 24px;"></i>
             </div>
             <h2 style="font-size: 1.2rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
               ${isAr ? 'اختر نوع الأسئلة' : 'Select Question Type'}
@@ -332,8 +318,8 @@ const QuestionsPage = {
             </button>
 
             <button type="button" class="qt-type-option" data-qtype="all" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-subtle); background: var(--bg-card); cursor: pointer; transition: all var(--transition-fast); text-align: start;">
-              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(2, 132, 199, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i data-lucide="layers" style="width: 18px; height: 18px; color: var(--brand-accent);"></i>
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(126, 29, 42, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i data-lucide="layers" style="width: 18px; height: 18px; color: var(--brand-burgundy, #7E1D2A);"></i>
               </div>
               <div>
                 <div style="font-size: 0.9rem; font-weight: 750; color: var(--text-primary);">${isAr ? 'الكل — كلاهما معاً' : 'Both — All Questions'}</div>
@@ -357,77 +343,48 @@ const QuestionsPage = {
   bindEvents(container) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
 
-    // ── Tab (view mode) buttons ──────────────────────────────────────────────
-    container.querySelectorAll('.kf-tab-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        container.querySelectorAll('.kf-tab-pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        QuestionsPage.currentTab = btn.getAttribute('data-tab');
-        // Reset subject filter when going back to bento
-        if (QuestionsPage.currentTab === 'bento') {
-          QuestionsPage.selectedSubjectId = null;
-          const dd = document.getElementById('q-subject-dropdown');
-          if (dd) dd.value = 'all';
-        }
-        QuestionsPage.renderCurrentView();
-      });
-    });
-
-    // ── Subject Dropdown ─────────────────────────────────────────────────────
-    document.getElementById('q-subject-dropdown')?.addEventListener('change', (e) => {
-      const val = e.target.value;
-      if (val === 'all') {
-        QuestionsPage.selectedSubjectId = null;
-        // Stay in current tab
-        QuestionsPage.renderCurrentView();
-      } else {
-        QuestionsPage.selectedSubjectId = val;
-        // Switch to bento (sheet view) when subject selected
-        if (QuestionsPage.currentTab === 'bento') {
-          QuestionsPage.renderBentoView();
-        } else {
-          // In direct mode: re-filter by subject
-          QuestionsPage.renderDirectView();
-        }
-      }
-    });
-
-    // ── Year Dropdown ────────────────────────────────────────────────────────
-    document.getElementById('q-year-dropdown')?.addEventListener('change', (e) => {
-      QuestionsPage.selectedYear = e.target.value;
-      QuestionsPage.renderCurrentView();
-    });
-
-    // ── Search box (always visible) ──────────────────────────────────────────
+    // Search bar event listener
     const searchIn = document.getElementById('q-search-input');
-    const searchClear = document.getElementById('q-search-clear');
+    const searchClear = document.getElementById('q-search-clear-btn');
     let searchDebounce;
 
     searchIn?.addEventListener('input', (e) => {
       QuestionsPage.searchQuery = e.target.value.trim().toLowerCase();
-      if (searchClear) searchClear.style.display = QuestionsPage.searchQuery ? 'flex' : 'none';
+      if (searchClear) searchClear.style.display = QuestionsPage.searchQuery ? 'inline-flex' : 'none';
       clearTimeout(searchDebounce);
       searchDebounce = setTimeout(() => {
-        // If there's a search query and we're in bento mode, auto-switch to direct
-        if (QuestionsPage.searchQuery && QuestionsPage.currentTab === 'bento') {
-          QuestionsPage.currentTab = 'direct';
-          container.querySelectorAll('.kf-tab-pill').forEach(b => {
-            b.classList.toggle('active', b.getAttribute('data-tab') === 'direct');
-          });
+        if (!QuestionsPage.selectedSubjectId) {
+          QuestionsPage.renderSubjectsGrid();
         }
-        if (QuestionsPage.currentTab === 'direct' || QuestionsPage.searchQuery) {
-          QuestionsPage.renderDirectView();
-        }
-      }, 220);
+      }, 180);
     });
 
     searchClear?.addEventListener('click', () => {
       QuestionsPage.searchQuery = '';
       if (searchIn) searchIn.value = '';
       searchClear.style.display = 'none';
-      QuestionsPage.renderCurrentView();
+      if (!QuestionsPage.selectedSubjectId) {
+        QuestionsPage.renderSubjectsGrid();
+      }
       searchIn?.focus();
     });
+
+    // Also sync with main header search box if user types there while on questions page
+    const headerSearchIn = document.getElementById('header-search-input');
+    if (headerSearchIn) {
+      headerSearchIn.addEventListener('input', (e) => {
+        if (!window.location.hash.startsWith('#/questions')) return;
+        QuestionsPage.searchQuery = e.target.value.trim().toLowerCase();
+        if (searchIn) searchIn.value = e.target.value;
+        if (searchClear) searchClear.style.display = QuestionsPage.searchQuery ? 'inline-flex' : 'none';
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+          if (!QuestionsPage.selectedSubjectId) {
+            QuestionsPage.renderSubjectsGrid();
+          }
+        }, 180);
+      });
+    }
 
     // Modal quiz buttons
     document.getElementById('dt-btn-exit')?.addEventListener('click', () => {
@@ -495,7 +452,6 @@ const QuestionsPage = {
         if (filtered.length > 0) {
           QuestionsPage.launchQuizRunner(filtered, QuestionsPage.pendingSubjectTitle);
         } else {
-          // If no questions match the filter, show all and notify
           if (window.Toast) {
             window.Toast.show(
               isAr ? 'لا توجد أسئلة من هذا النوع، سيتم عرض جميع الأسئلة المتاحة.' : 'No questions of this type found. Showing all available questions.',
@@ -511,352 +467,97 @@ const QuestionsPage = {
   },
 
   renderCurrentView() {
-    if (QuestionsPage.currentTab === 'bento') {
-      QuestionsPage.renderBentoView();
-    } else if (QuestionsPage.currentTab === 'direct') {
-      QuestionsPage.renderDirectView();
-    } else if (QuestionsPage.currentTab === 'saved') {
-      QuestionsPage.renderSavedView();
+    if (QuestionsPage.selectedSubjectId) {
+      QuestionsPage.renderSubjectDetailView();
+    } else {
+      QuestionsPage.renderSubjectsGrid();
     }
   },
 
-  // 1. LEVEL 1 & 2: BENTO CURRICULUM ARCHITECTURE
+  // Alias for backward compatibility
   renderBentoView() {
+    QuestionsPage.renderCurrentView();
+  },
+
+  // ── 1. MAIN VIEW: 12 SUBJECT CARDS GRID (EXACT REFERENCE DESIGN) ──
+  renderSubjectsGrid() {
     const mainEl = document.getElementById('questions-main-content');
     if (!mainEl) return;
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
     const allQuestions = QuestionsPage.getQuestions();
-    const subjects = window.DATA ? window.DATA.getSubjects() : [];
 
-    // If a subject is selected, show Level 2 (Sheets & Topics Grid)
-    if (QuestionsPage.selectedSubjectId) {
-      const subject = subjects.find(s => s.id === QuestionsPage.selectedSubjectId) || {
-        id: QuestionsPage.selectedSubjectId,
-        name_ar: 'المقرر الأكاديمي',
-        name_en: 'Academic Subject'
-      };
+    // Ensure sub-bar is visible
+    const subBar = document.getElementById('q-sub-bar');
+    if (subBar) subBar.style.display = 'flex';
 
-      const subjQuestions = allQuestions.filter(q => q.subject_id === QuestionsPage.selectedSubjectId);
-      
-      // Group questions by sheet/topic, initializing with ALL sheets first, with robust deduplication
-      const allSheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(QuestionsPage.selectedSubjectId) : [];
-      
-      const normalizeTitle = (t) => {
-        if (!t) return '';
-        return String(t).toLowerCase()
-          .replace(/sheet\s*\d+\s*[:\-–—]?/gi, '')
-          .replace(/الشيت\s*\d+\s*[:\-–—]?/gi, '')
-          .replace(/[^\w\s\u0600-\u06FF]/gi, '')
-          .trim();
-      };
+    // Calculate real MCQ counts from database
+    const subjectStats = {};
+    allQuestions.forEach(q => {
+      if (q && q.subject_id) {
+        subjectStats[q.subject_id] = (subjectStats[q.subject_id] || 0) + 1;
+      }
+    });
 
-      const sheetEntries = []; // Array of { id, titleAr, titleEn, displayTitle, normTitle, pdf_url, questions: [] }
+    // Filter by search query (English name, Arabic name, or course code)
+    const q = (QuestionsPage.searchQuery || '').trim().toLowerCase();
+    const filtered = QuestionsPage.SUBJECT_DEFINITIONS.filter(s => {
+      if (!q) return true;
+      return s.name_en.toLowerCase().includes(q) ||
+             s.name_ar.toLowerCase().includes(q) ||
+             s.code.toLowerCase().includes(q);
+    });
 
-      allSheets.forEach(sheet => {
-        const titleAr = sheet.title_ar || sheet.title || '';
-        const titleEn = sheet.title_en || sheet.title || '';
-        const displayTitle = titleEn || titleAr;
-        const norm = normalizeTitle(displayTitle) || normalizeTitle(sheet.title_en) || normalizeTitle(sheet.title_ar);
+    // Update count badge
+    const countBadge = document.getElementById('q-subjects-count-badge');
+    if (countBadge) {
+      countBadge.textContent = `${filtered.length} ${isAr ? 'مادة' : 'Subjects'}`;
+    }
 
-        let existing = sheetEntries.find(e => e.id === sheet.id || (norm && e.normTitle === norm));
-        if (existing) {
-          if (sheet.pdf_url) existing.pdf_url = sheet.pdf_url;
-          if (displayTitle.length > existing.displayTitle.length) {
-            existing.displayTitle = displayTitle;
-            existing.titleAr = titleAr;
-            existing.titleEn = titleEn;
-          }
-        } else {
-          sheetEntries.push({
-            id: sheet.id,
-            titleAr,
-            titleEn,
-            displayTitle,
-            normTitle: norm,
-            pdf_url: sheet.pdf_url,
-            questions: []
-          });
-        }
-      });
-
-      subjQuestions.forEach(q => {
-        let qTitle = q.sheet_title_en || q.sheet_title || q.tags?.[0] || '';
-        if (!qTitle) qTitle = q.sheet_title_ar || '';
-        const qNorm = normalizeTitle(qTitle) || normalizeTitle(q.sheet_title_en) || normalizeTitle(q.sheet_title_ar);
-
-        let target = null;
-        if (q.sheet_id) {
-          target = sheetEntries.find(e => e.id === q.sheet_id || (q.sheet_id === 'sh-omdr-01' && e.id === 'sh_admin_1789462201436'));
-        }
-        if (!target && qNorm) {
-          target = sheetEntries.find(e => e.normTitle === qNorm);
-        }
-        if (!target && qTitle) {
-          target = sheetEntries.find(e => e.displayTitle.toLowerCase().includes(qTitle.toLowerCase()) || qTitle.toLowerCase().includes(e.displayTitle.toLowerCase()));
-        }
-
-        if (target) {
-          target.questions.push(q);
-        } else {
-          const fallbackTitle = qTitle || 'General Questions';
-          let fallback = sheetEntries.find(e => e.displayTitle === fallbackTitle);
-          if (!fallback) {
-            fallback = {
-              id: q.sheet_id || null,
-              titleAr: q.sheet_title_ar || fallbackTitle,
-              titleEn: q.sheet_title_en || fallbackTitle,
-              displayTitle: fallbackTitle,
-              normTitle: qNorm,
-              questions: []
-            };
-            sheetEntries.push(fallback);
-          }
-          fallback.questions.push(q);
-        }
-      });
-
+    if (filtered.length === 0) {
       mainEl.innerHTML = `
-        <!-- Breadcrumb back navigation -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap;">
-          <button type="button" id="btn-back-to-subjects" class="btn btn-secondary btn-sm" style="font-weight: 750; gap: 6px;">
-            <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'الرجوع لكافة المواد' : 'Back to All Subjects'}</span>
-          </button>
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            ${subject.code ? `
-              <span class="q-card-code-pill" style="font-weight: 800; color: var(--brand-burgundy, #7E1D2A); background: rgba(126, 29, 42, 0.08); border: 1px solid rgba(126, 29, 42, 0.2);">
-                ${subject.code}
-              </span>
-            ` : ''}
-            <span class="q-card-count-badge ${subjQuestions.length > 0 ? 'active-count' : 'zero-count'}">
-              ${subjQuestions.length} ${isAr ? 'سؤال' : 'MCQs'}
-            </span>
-            ${subjQuestions.length > 0 ? `
-              <button type="button" id="btn-start-all-subj-quiz" class="btn btn-primary btn-sm" style="font-weight: 750; gap: 6px; background: var(--brand-burgundy, #7E1D2A);">
-                <i data-lucide="play" style="width: 13px; height: 13px;"></i>
-                <span>${isAr ? 'بدء تدريب المادة بالكامل' : 'Start Practice All'}</span>
-              </button>
-            ` : ''}
-          </div>
-        </div>
-
-        <div style="margin-bottom: 16px;">
-          <h2 style="font-size: 1.35rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;">
-            ${isAr ? `شيتات ومحاضرات ${subject.name_ar}` : `${subject.name_en} Lecture Sheets`}
-          </h2>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
-            ${isAr ? 'اختر الشيت لبدء محاكاة امتحانية سريعة على كارت السؤال المبوب مع التصحيح الفوري.' : 'Select a sheet or topic to launch an interactive quiz runner.'}
+        <div class="q-empty-results">
+          <p style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+            ${isAr ? 'لم يتم العثور على مادة تطابق بحثك' : 'No subjects match your search'}
           </p>
+          <button type="button" id="q-reset-search-btn" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+            ${isAr ? 'إعادة ضبط البحث' : 'Clear Search'}
+          </button>
         </div>
-
-        ${sheetEntries.length === 0 ? `
-          <div class="kf-panel" style="padding:40px;text-align:center;">
-            <p style="color:var(--text-secondary);font-size:0.9rem;">
-              ${isAr ? 'لا توجد أسئلة أو شيتات مضافة حالياً لهذه المادة.' : 'No questions or sheets available for this subject yet.'}
-            </p>
-          </div>
-        ` : `
-          <div class="bento-sheet-grid">
-            ${sheetEntries.map((entry, idx) => {
-              const qList = entry.questions;
-              const hasQuestions = qList.length > 0;
-              const subjectColor = (() => {
-                const COLORS = {
-                  'preventive':{'bg':'rgba(2,132,199,0.10)','text':'#0284C7','border':'rgba(2,132,199,0.25)'},
-                  'oral-diseases':{'bg':'rgba(234,88,12,0.10)','text':'#EA580C','border':'rgba(234,88,12,0.25)'},
-                  'omdr':{'bg':'rgba(124,58,237,0.10)','text':'#7C3AED','border':'rgba(124,58,237,0.25)'},
-                  'omfs':{'bg':'rgba(200,67,67,0.10)','text':'#C84343','border':'rgba(200,67,67,0.25)'},
-                  'cons-endo':{'bg':'rgba(5,150,105,0.10)','text':'#059669','border':'rgba(5,150,105,0.25)'},
-                  'fixed-pros':{'bg':'rgba(245,158,11,0.10)','text':'#D97706','border':'rgba(245,158,11,0.25)'},
-                  'removable-pros':{'bg':'rgba(219,39,119,0.10)','text':'#DB2777','border':'rgba(219,39,119,0.25)'},
-                  'ortho':{'bg':'rgba(14,165,233,0.10)','text':'#0EA5E9','border':'rgba(14,165,233,0.25)'},
-                  'pedo':{'bg':'rgba(168,85,247,0.10)','text':'#A855F7','border':'rgba(168,85,247,0.25)'},
-                  'gen-med':{'bg':'rgba(20,184,166,0.10)','text':'#0D9488','border':'rgba(20,184,166,0.25)'},
-                  'gen-surgery':{'bg':'rgba(239,68,68,0.10)','text':'#EF4444','border':'rgba(239,68,68,0.25)'},
-                };
-                return COLORS[QuestionsPage.selectedSubjectId] || {'bg':'rgba(142,146,168,0.10)','text':'#8E92A8','border':'rgba(142,146,168,0.25)'};
-              })();
-              return `
-                <div class="bento-sheet-box ${hasQuestions ? '' : 'empty-sheet-box'}">
-                  <div>
-                    <div class="sgc-header" style="margin-bottom:10px;">
-                      <span class="sgc-subject-badge" style="background:${subjectColor.bg};color:${subjectColor.text};border-color:${subjectColor.border};">
-                        ${isAr ? subject.name_ar : subject.name_en}
-                      </span>
-                      <span class="q-card-count-badge ${hasQuestions ? 'active-count' : 'zero-count'}">
-                        ${qList.length} ${isAr ? 'أسئلة' : 'MCQs'}
-                      </span>
-                    </div>
-                    <h3 class="sgc-title" style="${!hasQuestions ? 'color:var(--text-muted);' : ''}margin-bottom:8px;">
-                      ${entry.displayTitle}
-                    </h3>
-                    <p class="sgc-meta" style="margin-bottom:16px;${!hasQuestions ? 'opacity:0.7;' : ''}">
-                      ${hasQuestions
-                        ? (isAr ? `تدرب على ${qList.length} أسئلة امتحانية لهذا الشيت مع تعليلات سريرية.` : `Practice ${qList.length} faculty questions for this lecture.`)
-                        : (isAr ? 'قريباً... جاري تجهيز الأسئلة لهذا الشيت' : 'Coming soon... questions are being prepared for this sheet')
-                      }
-                    </p>
-                  </div>
-                  <div class="sgc-actions">
-                    <button type="button" class="${hasQuestions ? 'sgc-btn-view' : 'sgc-btn-download'} btn-start-sheet-quiz"
-                      data-entry-idx="${idx}"
-                      style="flex:1;justify-content:center;"
-                      ${!hasQuestions ? 'disabled style="opacity:0.45;cursor:not-allowed;"' : ''}>
-                      <i data-lucide="${hasQuestions ? 'play' : 'clock'}" style="width:14px;height:14px;"></i>
-                      <span>${hasQuestions ? (isAr ? 'ابدأ التدريب' : 'Start Practice') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
-                    </button>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `}
       `;
-
-      if (window.lucide) window.lucide.createIcons();
-
-      document.getElementById('btn-back-to-subjects')?.addEventListener('click', () => {
-        QuestionsPage.selectedSubjectId = null;
-        const dd = document.getElementById('q-subject-dropdown');
-        if (dd) dd.value = 'all';
-        QuestionsPage.renderBentoView();
+      document.getElementById('q-reset-search-btn')?.addEventListener('click', () => {
+        QuestionsPage.searchQuery = '';
+        const input = document.getElementById('q-search-input');
+        if (input) input.value = '';
+        const clearBtn = document.getElementById('q-search-clear-btn');
+        if (clearBtn) clearBtn.style.display = 'none';
+        QuestionsPage.renderSubjectsGrid();
       });
-
-      document.getElementById('btn-start-all-subj-quiz')?.addEventListener('click', () => {
-        QuestionsPage.launchQuizRunner(
-          subjQuestions,
-          `${isAr ? subject.name_ar : subject.name_en} • ${isAr ? 'بنك الأسئلة الشامل' : 'All Questions'}`
-        );
-      });
-
-      mainEl.querySelectorAll('.btn-start-sheet-quiz').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (btn.hasAttribute('disabled')) return;
-          const idx = parseInt(btn.getAttribute('data-entry-idx'), 10);
-          const entry = sheetEntries[idx];
-          if (entry && entry.questions.length > 0) {
-            QuestionsPage.showTypeSelector(
-              entry.questions,
-              `${isAr ? subject.name_ar : subject.name_en} • ${entry.displayTitle}`
-            );
-          }
-        });
-      });
-
       return;
     }
 
-    // LEVEL 1: ALL SUBJECTS BENTO GRID
-    const subjectStats = {};
-    allQuestions.forEach(q => {
-      subjectStats[q.subject_id] = (subjectStats[q.subject_id] || 0) + 1;
-    });
-
-    const subjectIcons = {
-      'fixed-pros': 'crown',
-      'oral-diseases': 'microscope',
-      'endo': 'activity',
-      'omfs': 'scissors',
-      'cons-endo': 'sparkles',
-      'gen-med': 'stethoscope',
-      'preventive': 'shield-check',
-      'removable-pros': 'layers',
-      'omdr': 'scan-line',
-      'ortho': 'smile',
-      'pedo': 'heart',
-      'gen-surgery': 'scalpel'
-    };
-
-    const SUBJ_COLORS = {
-      'preventive':     { bg:'rgba(2,132,199,0.10)',  text:'#0284C7', border:'rgba(2,132,199,0.25)' },
-      'oral-diseases':  { bg:'rgba(234,88,12,0.10)',  text:'#EA580C', border:'rgba(234,88,12,0.25)' },
-      'omdr':           { bg:'rgba(124,58,237,0.10)', text:'#7C3AED', border:'rgba(124,58,237,0.25)' },
-      'omfs':           { bg:'rgba(200,67,67,0.10)',  text:'#C84343', border:'rgba(200,67,67,0.25)' },
-      'cons-endo':      { bg:'rgba(5,150,105,0.10)',  text:'#059669', border:'rgba(5,150,105,0.25)' },
-      'fixed-pros':     { bg:'rgba(245,158,11,0.10)', text:'#D97706', border:'rgba(245,158,11,0.25)' },
-      'removable-pros': { bg:'rgba(219,39,119,0.10)', text:'#DB2777', border:'rgba(219,39,119,0.25)' },
-      'ortho':          { bg:'rgba(14,165,233,0.10)', text:'#0EA5E9', border:'rgba(14,165,233,0.25)' },
-      'pedo':           { bg:'rgba(168,85,247,0.10)', text:'#A855F7', border:'rgba(168,85,247,0.25)' },
-      'gen-med':        { bg:'rgba(20,184,166,0.10)', text:'#0D9488', border:'rgba(20,184,166,0.25)' },
-      'gen-surgery':    { bg:'rgba(239,68,68,0.10)',  text:'#EF4444', border:'rgba(239,68,68,0.25)' },
-    };
-    const getColor = (id) => SUBJ_COLORS[id] || { bg:'rgba(142,146,168,0.10)', text:'#8E92A8', border:'rgba(142,146,168,0.25)' };
-
-    // Apply Year filter if selected
-    const filteredSubjects = subjects.filter(s => {
-      if (QuestionsPage.selectedYear !== 'all' && String(s.year) !== String(QuestionsPage.selectedYear)) {
-        return false;
-      }
-      return true;
-    });
-
     mainEl.innerHTML = `
-      <div class="q-curriculum-header">
-        <div class="q-curriculum-title-wrap">
-          <div class="q-curriculum-icon-box">
-            <i data-lucide="book-open"></i>
-          </div>
-          <div class="q-curriculum-text">
-            <h2 class="q-curriculum-title">
-              ${isAr ? 'مواد طب الأسنان' : 'Dental Curriculum Subjects'}
-            </h2>
-            <p class="q-curriculum-desc">
-              ${isAr ? 'اختر المادة لاستعراض أسئلة المحاضرات واختبار معلوماتك السريرية.' : 'Choose a subject to browse lecture-linked MCQs and test your knowledge.'}
-            </p>
-          </div>
-        </div>
-        <div class="q-curriculum-count-badge">
-          <span>${filteredSubjects.length} ${isAr ? (filteredSubjects.length === 1 ? 'مادة' : 'مواد') : 'Subjects'}</span>
-        </div>
-      </div>
-
       <div class="questions-subject-grid">
-        ${filteredSubjects.map(s => {
+        ${filtered.map(s => {
           const qCount = subjectStats[s.id] || 0;
-          const icon = subjectIcons[s.id] || 'book-open';
           const title = isAr ? s.name_ar : s.name_en;
-          const color = getColor(s.id);
-          const hasQuestions = qCount > 0;
-          const code = s.code || '';
+          const iconHtml = QuestionsPage.getSubjectIconHtml(s.icon);
 
           return `
-            <div class="q-subject-card ${hasQuestions ? 'has-mcqs' : 'empty-mcqs'}" data-subj-id="${s.id}">
-              <div class="q-card-top-content">
-                <!-- Topbar: Subject Category Pill & Course Code Pill -->
-                <div class="q-card-topbar">
-                  <span class="q-card-cat-pill" style="background:${color.bg};color:${color.text};border-color:${color.border};">
-                    ${s.name_en}
-                  </span>
-                  <span class="q-card-code-pill">
-                    ${code}
-                  </span>
-                </div>
-
-                <!-- Body: Dental Icon Box + Title & Real MCQ Count -->
-                <div class="q-card-body">
-                  <div class="q-card-icon-box" style="background:${color.bg};color:${color.text};border-color:${color.border};">
-                    <i data-lucide="${icon}"></i>
-                  </div>
-                  <div class="q-card-title-group">
-                    <h3 class="q-card-title">
-                      ${title}
-                    </h3>
-                    <div class="q-card-mcq-count ${hasQuestions ? 'active-count' : 'zero-count'}">
-                      ${qCount} ${isAr ? (qCount === 1 ? 'سؤال' : qCount <= 10 && qCount > 1 ? 'أسئلة' : 'سؤال') : 'MCQs'}
-                    </div>
-                  </div>
-                  <div class="q-card-arrow-inline">
-                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:16px;height:16px;"></i>
-                  </div>
-                </div>
+            <div class="q-subject-card" data-subj-id="${s.id}" role="button" tabindex="0">
+              <div class="q-card-icon-box">
+                ${iconHtml}
               </div>
-
-              <!-- Footer: Action Button (Desktop full action) -->
-              <div class="q-card-footer">
-                <button type="button" class="q-action-btn ${hasQuestions ? 'q-action-start' : 'q-action-browse'}" data-subj-id="${s.id}">
-                  <span>${hasQuestions ? (isAr ? 'ابدأ التدريب' : 'Start Practice') : (isAr ? 'استعراض الأسئلة' : 'Browse Questions')}</span>
-                  <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width:14px;height:14px;"></i>
-                </button>
+              <div class="q-card-info">
+                <div class="q-card-title-row">
+                  <h3 class="q-card-title">${title}</h3>
+                  <span class="q-card-code-badge">${s.code}</span>
+                </div>
+                <div class="q-card-meta-row">
+                  <span class="q-card-mcq-count">${qCount} MCQs</span>
+                  <span class="q-card-arrow-btn" aria-hidden="true">
+                    <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                  </span>
+                </div>
               </div>
             </div>
           `;
@@ -866,13 +567,224 @@ const QuestionsPage = {
 
     if (window.lucide) window.lucide.createIcons();
 
+    // Clicking anywhere on a subject card enters that subject's question bank
     mainEl.querySelectorAll('.q-subject-card').forEach(card => {
       card.addEventListener('click', () => {
         const id = card.getAttribute('data-subj-id');
         QuestionsPage.selectedSubjectId = id;
-        const dd = document.getElementById('q-subject-dropdown');
-        if (dd) dd.value = id;
-        QuestionsPage.renderBentoView();
+        QuestionsPage.renderCurrentView();
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const id = card.getAttribute('data-subj-id');
+          QuestionsPage.selectedSubjectId = id;
+          QuestionsPage.renderCurrentView();
+        }
+      });
+    });
+  },
+
+  // ── 2. LEVEL 2: SUBJECT QUESTION BANK & SHEETS VIEW ──
+  renderSubjectDetailView() {
+    const mainEl = document.getElementById('questions-main-content');
+    if (!mainEl) return;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const allQuestions = QuestionsPage.getQuestions();
+
+    // Hide search sub-bar in Level 2 view
+    const subBar = document.getElementById('q-sub-bar');
+    if (subBar) subBar.style.display = 'none';
+
+    const def = QuestionsPage.SUBJECT_DEFINITIONS.find(s => s.id === QuestionsPage.selectedSubjectId);
+    const subject = def || {
+      id: QuestionsPage.selectedSubjectId,
+      code: 'DEN-300',
+      name_en: 'Academic Subject',
+      name_ar: 'المقرر الأكاديمي'
+    };
+
+    const subjQuestions = allQuestions.filter(q => q.subject_id === QuestionsPage.selectedSubjectId);
+    const allSheets = (window.DATA && typeof window.DATA.getSheetsBySubject === 'function')
+      ? window.DATA.getSheetsBySubject(QuestionsPage.selectedSubjectId)
+      : [];
+
+    const normalizeTitle = (t) => {
+      if (!t) return '';
+      return String(t).toLowerCase()
+        .replace(/sheet\s*\d+\s*[:\-–—]?/gi, '')
+        .replace(/الشيت\s*\d+\s*[:\-–—]?/gi, '')
+        .replace(/[^\w\s\u0600-\u06FF]/gi, '')
+        .trim();
+    };
+
+    const sheetEntries = [];
+
+    allSheets.forEach(sheet => {
+      const titleAr = sheet.title_ar || sheet.title || '';
+      const titleEn = sheet.title_en || sheet.title || '';
+      const displayTitle = titleEn || titleAr;
+      const norm = normalizeTitle(displayTitle) || normalizeTitle(sheet.title_en) || normalizeTitle(sheet.title_ar);
+
+      let existing = sheetEntries.find(e => e.id === sheet.id || (norm && e.normTitle === norm));
+      if (existing) {
+        if (sheet.pdf_url) existing.pdf_url = sheet.pdf_url;
+        if (displayTitle.length > existing.displayTitle.length) {
+          existing.displayTitle = displayTitle;
+          existing.titleAr = titleAr;
+          existing.titleEn = titleEn;
+        }
+      } else {
+        sheetEntries.push({
+          id: sheet.id,
+          titleAr,
+          titleEn,
+          displayTitle,
+          normTitle: norm,
+          pdf_url: sheet.pdf_url,
+          questions: []
+        });
+      }
+    });
+
+    subjQuestions.forEach(q => {
+      let qTitle = q.sheet_title_en || q.sheet_title || q.tags?.[0] || '';
+      if (!qTitle) qTitle = q.sheet_title_ar || '';
+      const qNorm = normalizeTitle(qTitle) || normalizeTitle(q.sheet_title_en) || normalizeTitle(q.sheet_title_ar);
+
+      let target = null;
+      if (q.sheet_id) {
+        target = sheetEntries.find(e => e.id === q.sheet_id || (q.sheet_id === 'sh-omdr-01' && e.id === 'sh_admin_1789462201436'));
+      }
+      if (!target && qNorm) {
+        target = sheetEntries.find(e => e.normTitle === qNorm);
+      }
+      if (!target && qTitle) {
+        target = sheetEntries.find(e => e.displayTitle.toLowerCase().includes(qTitle.toLowerCase()) || qTitle.toLowerCase().includes(e.displayTitle.toLowerCase()));
+      }
+
+      if (target) {
+        target.questions.push(q);
+      } else {
+        const fallbackTitle = qTitle || 'General Questions';
+        let fallback = sheetEntries.find(e => e.displayTitle === fallbackTitle);
+        if (!fallback) {
+          fallback = {
+            id: q.sheet_id || null,
+            titleAr: q.sheet_title_ar || fallbackTitle,
+            titleEn: q.sheet_title_en || fallbackTitle,
+            displayTitle: fallbackTitle,
+            normTitle: qNorm,
+            questions: []
+          };
+          sheetEntries.push(fallback);
+        }
+        fallback.questions.push(q);
+      }
+    });
+
+    mainEl.innerHTML = `
+      <div class="q-level2-container">
+        <!-- Top Back Bar & Quick Actions -->
+        <div class="q-level2-top-bar">
+          <button type="button" id="btn-back-to-subjects" class="q-back-btn">
+            <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'الرجوع لكافة المواد' : 'Back to All Subjects'}</span>
+          </button>
+          <div class="q-level2-meta">
+            <span class="q-card-code-badge">${subject.code}</span>
+            <span class="q-level2-count">${subjQuestions.length} ${isAr ? 'سؤال' : 'MCQs'}</span>
+            ${subjQuestions.length > 0 ? `
+              <button type="button" id="btn-start-all-subj-quiz" class="q-start-all-btn">
+                <i data-lucide="play" style="width: 14px; height: 14px;"></i>
+                <span>${isAr ? 'بدء تدريب المادة بالكامل' : 'Start Practice All'}</span>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Section Title -->
+        <div class="q-level2-heading">
+          <h2 class="q-level2-title">
+            ${isAr ? `محاضرات وشيتات ${subject.name_ar}` : `${subject.name_en} Lecture Sheets`}
+          </h2>
+          <p class="q-level2-desc">
+            ${isAr ? 'اختر الشيت لبدء محاكاة امتحانية سريعة على كارت السؤال المبوب مع التصحيح الفوري.' : 'Select a sheet or topic to launch an interactive quiz runner.'}
+          </p>
+        </div>
+
+        ${sheetEntries.length === 0 ? `
+          <div class="q-empty-results" style="padding: 40px; text-align: center;">
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+              ${isAr ? 'لا توجد أسئلة أو شيتات مضافة حالياً لهذه المادة.' : 'No questions or sheets available for this subject yet.'}
+            </p>
+          </div>
+        ` : `
+          <div class="bento-sheet-grid">
+            ${sheetEntries.map((entry, idx) => {
+              const qList = entry.questions;
+              const hasQuestions = qList.length > 0;
+              return `
+                <div class="bento-sheet-box ${hasQuestions ? '' : 'empty-sheet-box'}">
+                  <div>
+                    <div class="sgc-header" style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                      <span class="q-card-code-badge">${subject.code}</span>
+                      <span class="q-card-mcq-count ${hasQuestions ? 'active-count' : 'zero-count'}">
+                        ${qList.length} ${isAr ? 'أسئلة' : 'MCQs'}
+                      </span>
+                    </div>
+                    <h3 class="sgc-title" style="${!hasQuestions ? 'color: var(--text-muted);' : ''} margin-bottom: 8px;">
+                      ${entry.displayTitle}
+                    </h3>
+                    <p class="sgc-meta" style="margin-bottom: 16px; ${!hasQuestions ? 'opacity: 0.7;' : ''}">
+                      ${hasQuestions
+                        ? (isAr ? `تدرب على ${qList.length} أسئلة امتحانية لهذا الشيت مع تعليلات سريرية.` : `Practice ${qList.length} faculty questions for this lecture.`)
+                        : (isAr ? 'قريباً... جاري تجهيز الأسئلة لهذا الشيت' : 'Coming soon... questions are being prepared for this sheet')
+                      }
+                    </p>
+                  </div>
+                  <div class="sgc-actions">
+                    <button type="button" class="${hasQuestions ? 'sgc-btn-view' : 'sgc-btn-download'} btn-start-sheet-quiz"
+                      data-entry-idx="${idx}"
+                      style="flex: 1; justify-content: center;"
+                      ${!hasQuestions ? 'disabled style="opacity: 0.45; cursor: not-allowed;"' : ''}>
+                      <i data-lucide="${hasQuestions ? 'play' : 'clock'}" style="width: 14px; height: 14px;"></i>
+                      <span>${hasQuestions ? (isAr ? 'ابدأ التدريب' : 'Start Practice') : (isAr ? 'غير متاح حالياً' : 'Not Available')}</span>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+      </div>
+    `;
+
+    if (window.lucide) window.lucide.createIcons();
+
+    document.getElementById('btn-back-to-subjects')?.addEventListener('click', () => {
+      QuestionsPage.selectedSubjectId = null;
+      QuestionsPage.renderCurrentView();
+    });
+
+    document.getElementById('btn-start-all-subj-quiz')?.addEventListener('click', () => {
+      QuestionsPage.launchQuizRunner(
+        subjQuestions,
+        `${isAr ? subject.name_ar : subject.name_en} • ${isAr ? 'بنك الأسئلة الشامل' : 'All Questions'}`
+      );
+    });
+
+    mainEl.querySelectorAll('.btn-start-sheet-quiz').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.hasAttribute('disabled')) return;
+        const idx = parseInt(btn.getAttribute('data-entry-idx'), 10);
+        const entry = sheetEntries[idx];
+        if (entry && entry.questions.length > 0) {
+          QuestionsPage.showTypeSelector(
+            entry.questions,
+            `${isAr ? subject.name_ar : subject.name_en} • ${entry.displayTitle}`
+          );
+        }
       });
     });
   },
