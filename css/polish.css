@@ -10390,7 +10390,14 @@ html[dir="rtl"] .settings-select-ctrl {
   width: 100% !important;
 }
 
-@media (max-width: 1199px) {
+@media (min-width: 992px) and (max-width: 1199px) {
+  .kuro-subjects-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
   .kuro-subjects-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 12px !important;
