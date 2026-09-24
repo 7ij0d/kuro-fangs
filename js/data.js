@@ -429,6 +429,13 @@ class DataService {
     return this.getSheetsBySubject(subjectId);
   }
 
+  getSheetById(sheetId) {
+    if (!sheetId) return null;
+    const deleted = this.getDeletedSheetIds();
+    if (deleted.includes(sheetId)) return null;
+    return (this.sheets || []).find(s => s && s.id === sheetId) || null;
+  }
+
   getRecentSheets(limit = 6) {
     const deleted = this.getDeletedSheetIds();
     return [...(this.sheets || [])].filter(s => !deleted.includes(s.id)).slice(0, limit);
@@ -612,6 +619,14 @@ class DataService {
     }
     if (!subjectId) return this.questions || [];
     return (this.questions || []).filter(q => q.subject_id === subjectId);
+  }
+
+  getQuestionsBySheet(sheetId) {
+    if (!sheetId) return [];
+    if (!this._deferredLoaded && !this._deferredLoading) {
+      this.loadDeferredData();
+    }
+    return (this.questions || []).filter(q => q.sheet_id === sheetId);
   }
 
   getRecordings(subjectId) {

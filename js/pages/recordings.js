@@ -1,12 +1,12 @@
 /**
  * KURO FANGS — AUDIO RECORDINGS LIBRARY PAGE
- * 3-Level Dental Curriculum Architecture:
- * Level 1: SUBJECT SELECTION (12 Dental Subjects)
- * Level 2: SHEETS OF SELECTED SUBJECT
- * Level 3: AUDIO RECORDINGS OF SELECTED SHEET
+ * 3-Level Dental Curriculum Architecture (100% Real Database Driven):
+ * Level 1: SUBJECT SELECTION (Real Database Recordings Count)
+ * Level 2: SHEETS OF SELECTED SUBJECT (Real Database Sheets from window.DATA.sheets)
+ * Level 3: AUDIO RECORDINGS OF SELECTED SHEET (Real Database Recordings from window.DATA.recordings)
  *
- * Master Redesign conforming to Visual Reference media_1790272295311.jpg
- * Warm Terracotta / Ivory Kuro Student Design System (#BC4A47, #FBF8F4, #24181B)
+ * NO HARDCODED OR MOCK DATA. Central Source of Truth: The Sheet Entity.
+ * Visual Design: Warm Terracotta / Ivory Kuro Student Design System (#BC4A47, #FBF8F4, #24181B)
  */
 
 (function(window) {
@@ -19,298 +19,22 @@
     currentView: 'grid', // 'grid' | 'list'
     activeAudio: null,
     activeRecId: null,
-    audioCtx: null,
-    simulatedAudioTimer: null,
-    simulatedAudioElapsed: 0,
 
-    // 12 Official Dental Subjects matching Kuro Curriculum and Blueprint
+    // 12 Official Tripoli Dental Faculty Subjects
     SUBJECT_DEFINITIONS: [
-      { id: 'gen-med', code: 'MED-301', name_en: 'General Medicine', name_ar: 'الطب العام (الباطنة)', icon: 'stethoscope', count: 7 },
-      { id: 'gen-surgery', code: 'GS-301', name_en: 'General Surgery', name_ar: 'الجراحة العامة', icon: 'activity', count: 4 },
-      { id: 'oral-diseases', code: 'OD-301', name_en: 'Oral Diseases', name_ar: 'علم أمراض الفم', icon: 'microscope', count: 5 },
-      { id: 'preventive', code: 'PREV-301', name_en: 'Preventive Dentistry', name_ar: 'طب الأسنان الوقائي', icon: 'shield-check', count: 6 },
-      { id: 'cons-endo', code: 'CONS-302', name_en: 'Conservative Dentistry and Endodontics II', name_ar: 'العلاج التحفظي وعلاج الجذور 2', icon: 'tooth', count: 8 },
-      { id: 'fixed-pros', code: 'FP-302', name_en: 'Fixed Prosthodontics II', name_ar: 'الاستعاضة السنية الثابتة 2', icon: 'crown', count: 5 },
-      { id: 'removable-pros', code: 'RP-302', name_en: 'Removable Prosthodontics II', name_ar: 'الاستعاضة السنية المتحركة 2', icon: 'layers', count: 3 },
-      { id: 'ortho', code: 'ORT-301', name_en: 'Orthodontics I', name_ar: 'تقويم الأسنان 1', icon: 'smile', count: 6 },
-      { id: 'pediatric', code: 'PED-301', name_en: 'Pediatric Dentistry I', name_ar: 'طب أسنان الأطفال 1', icon: 'heart', count: 4 },
-      { id: 'omdr', code: 'OMDR-301', name_en: 'Oral Medicine, Diagnosis and Radiology I', name_ar: 'طب الفم والتشخيص والأشعة 1', icon: 'scan', count: 7 },
-      { id: 'omfs', code: 'OMS-301', name_en: 'Oral and Maxillofacial Surgery I', name_ar: 'جراحة الفم والوجه والفكين 1', icon: 'scissors', count: 4 },
-      { id: 'endo', code: 'END-301', name_en: 'Diseases and Treatment of the Pulp I (Endodontics I)', name_ar: 'علاج لب الأسنان 1 (علاج العصب)', icon: 'activity', count: 5 }
+      { id: 'gen-med', code: 'MED-301', name_en: 'General Medicine', name_ar: 'الطب العام (الباطنة)', icon: 'stethoscope' },
+      { id: 'gen-surgery', code: 'GS-301', name_en: 'General Surgery', name_ar: 'الجراحة العامة', icon: 'activity' },
+      { id: 'oral-diseases', code: 'OD-301', name_en: 'Oral Diseases', name_ar: 'علم أمراض الفم', icon: 'microscope' },
+      { id: 'preventive', code: 'PREV-301', name_en: 'Preventive Dentistry', name_ar: 'طب الأسنان الوقائي', icon: 'shield-check' },
+      { id: 'cons-endo', code: 'CONS-302', name_en: 'Conservative Dentistry and Endodontics II', name_ar: 'العلاج التحفظي وعلاج الجذور 2', icon: 'tooth' },
+      { id: 'fixed-pros', code: 'FP-302', name_en: 'Fixed Prosthodontics II', name_ar: 'الاستعاضة السنية الثابتة 2', icon: 'crown' },
+      { id: 'removable-pros', code: 'RP-302', name_en: 'Removable Prosthodontics II', name_ar: 'الاستعاضة السنية المتحركة 2', icon: 'layers' },
+      { id: 'ortho', code: 'ORT-301', name_en: 'Orthodontics I', name_ar: 'تقويم الأسنان 1', icon: 'smile' },
+      { id: 'pediatric', code: 'PED-301', name_en: 'Pediatric Dentistry I', name_ar: 'طب أسنان الأطفال 1', icon: 'heart' },
+      { id: 'omdr', code: 'OMDR-301', name_en: 'Oral Medicine, Diagnosis and Radiology I', name_ar: 'طب الفم والتشخيص والأشعة 1', icon: 'scan' },
+      { id: 'omfs', code: 'OMS-301', name_en: 'Oral and Maxillofacial Surgery I', name_ar: 'جراحة الفم والوجه والفكين 1', icon: 'scissors' },
+      { id: 'endo', code: 'END-301', name_en: 'Diseases and Treatment of the Pulp I (Endodontics I)', name_ar: 'علاج لب الأسنان 1 (علاج العصب)', icon: 'activity' }
     ],
-
-    // Default Academic Curriculum Sheets & Recordings (Exact Blueprint Fidelity)
-    CURRICULUM_DATA: {
-      'cons-endo': {
-        sheets: [
-          { id: 'sh_cons_dentin_pulp', order: 1, title_en: 'Sheet 1 — Dentin-Pulp Complex', title_ar: 'الشيت 1 — معقد العاج واللب (Dentin-Pulp Complex)', doc: 'د. آمال كشلاف', recCount: 2 },
-          { id: 'sh_cons_caries', order: 2, title_en: 'Sheet 2 — Dental Caries', title_ar: 'الشيت 2 — تسوس الأسنان وأسبابه', doc: 'د. آمال كشلاف', recCount: 1 },
-          { id: 'sh_cons_pulpitis', order: 3, title_en: 'Sheet 3 — Pulpitis', title_ar: 'الشيت 3 — التهاب لب السن الحاد والمزمن', doc: 'د. آمال كشلاف', recCount: 0 },
-          { id: 'sh_cons_materials', order: 4, title_en: 'Sheet 4 — Restorative Materials', title_ar: 'الشيت 4 — المواد الترميمية والكومبوزيت', doc: 'د. آمال كشلاف', recCount: 1 },
-          { id: 'sh_cons_endo_tx', order: 5, title_en: 'Sheet 5 — Endodontic Treatment', title_ar: 'الشيت 5 — المعالجة اللبية وحشو القنوات', doc: 'د. آمال كشلاف', recCount: 0 },
-          { id: 'sh_cons_advances', order: 6, title_en: 'Sheet 6 — Recent Advances', title_ar: 'الشيت 6 — التطورات الحديثة في طب الأسنان التحفظي', doc: 'د. آمال كشلاف', recCount: 2 },
-          { id: 'sh_cons_isolation', order: 7, title_en: 'Sheet 7 — Isolation & Rubber Dam', title_ar: 'الشيت 7 — العزل بالرابر دام وتقنيات التطبيق', doc: 'د. آمال كشلاف', recCount: 1 },
-          { id: 'sh_cons_adhesion', order: 8, title_en: 'Sheet 8 — Adhesion & Bonding', title_ar: 'الشيت 8 — أنظمة الالتصاق والربط العاجي', doc: 'د. آمال كشلاف', recCount: 1 }
-        ],
-        recordings: {
-          'sh_cons_dentin_pulp': [
-            { id: 'rec_cons_01_a', title_en: 'Lecture 1: Introduction to Dentin and Pulp', title_ar: 'المحاضرة 1: مقدمة في تشريح وفيزيولوجيا العاج واللب', doctor: 'د. آمال كشلاف', duration: '58:24', date: '23 Sep 2026', audio_url: '' },
-            { id: 'rec_cons_01_b', title_en: 'Lecture 2: Pulpal Pathologies', title_ar: 'المحاضرة 2: أمراض واعتلالات لب الأسنان', doctor: 'د. آمال كشلاف', duration: '1:12:36', date: '30 Sep 2026', audio_url: '' }
-          ],
-          'sh_cons_caries': [
-            { id: 'rec_cons_02_a', title_en: 'Lecture 1: Mechanism of Dental Caries Progression', title_ar: 'المحاضرة 1: آلية تطور نخر الأسنان والطبقات المصابة', doctor: 'د. آمال كشلاف', duration: '46:15', date: '07 Oct 2026', audio_url: '' }
-          ],
-          'sh_cons_materials': [
-            { id: 'rec_cons_04_a', title_en: 'Lecture 1: Dental Composites & Polymerization Shrinkage', title_ar: 'المحاضرة 1: بوليميرات الكومبوزيت وتقلص البلمرة', doctor: 'د. آمال كشلاف', duration: '51:40', date: '21 Oct 2026', audio_url: '' }
-          ],
-          'sh_cons_advances': [
-            { id: 'rec_cons_06_a', title_en: 'Lecture 1: Bioactive Restorative Materials & Bioceramics', title_ar: 'المحاضرة 1: المواد الحيوية الفعالة والسيراميك الحيوي', doctor: 'د. آمال كشلاف', duration: '54:10', date: '04 Nov 2026', audio_url: '' },
-            { id: 'rec_cons_06_b', title_en: 'Lecture 2: Minimally Invasive Dentistry in Practice', title_ar: 'المحاضرة 2: طب الأسنان التحفظي ذو التدخل البسيط', doctor: 'د. آمال كشلاف', duration: '49:30', date: '11 Nov 2026', audio_url: '' }
-          ],
-          'sh_cons_isolation': [
-            { id: 'rec_cons_07_a', title_en: 'Lecture 1: Field Isolation & Clamps Selection', title_ar: 'المحاضرة 1: عزل الساحة الجراحية واختيار المشابك', doctor: 'د. آمال كشلاف', duration: '42:50', date: '18 Nov 2026', audio_url: '' }
-          ],
-          'sh_cons_adhesion': [
-            { id: 'rec_cons_08_a', title_en: 'Lecture 1: Universal Bonding Protocols & Etch Modes', title_ar: 'المحاضرة 1: بروتوكولات اللواصق الحديثة والتخريش', doctor: 'د. آمال كشلاف', duration: '48:15', date: '25 Nov 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'gen-med': {
-        sheets: [
-          { id: 'sh_med_01', order: 1, title_en: 'Sheet 1 — Hypertension & Cardiac Disorders', title_ar: 'الشيت 1 — ارتفاع ضغط الدم وأمراض القلب لمريض الأسنان', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_med_02', order: 2, title_en: 'Sheet 2 — Diabetes Mellitus & Endocrine Conditions', title_ar: 'الشيت 2 — السكري واضطرابات الغدد الصماء', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_med_03', order: 3, title_en: 'Sheet 3 — Bleeding Disorders & Anticoagulants', title_ar: 'الشيت 3 — اضطرابات النزيف ومضادات التخثر', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_med_04', order: 4, title_en: 'Sheet 4 — Respiratory Diseases & Asthma', title_ar: 'الشيت 4 — أمراض الجهاز التنفسي والربو في العيادة', doc: 'د. هيئة التدريس', recCount: 1 }
-        ],
-        recordings: {
-          'sh_med_01': [
-            { id: 'rec_med_01_a', title_en: 'Lecture 1: Systemic Hypertension & Local Anesthetic Safety', title_ar: 'المحاضرة 1: ارتفاع ضغط الدم وسلامة المخدر الموضعي', doctor: 'د. هيئة التدريس', duration: '56:40', date: '15 Sep 2026', audio_url: '' },
-            { id: 'rec_med_01_b', title_en: 'Lecture 2: Ischemic Heart Disease & Infective Endocarditis Prophylaxis', title_ar: 'المحاضرة 2: نقص التروية القلبية والوقاية من التهاب الشغاف', doctor: 'د. هيئة التدريس', duration: '52:10', date: '22 Sep 2026', audio_url: '' }
-          ],
-          'sh_med_02': [
-            { id: 'rec_med_02_a', title_en: 'Lecture 1: Diabetes Management & Hypoglycemia in Dental Chair', title_ar: 'المحاضرة 1: تدبير مريض السكري ونوبات هبوط السكر', doctor: 'د. هيئة التدريس', duration: '48:30', date: '29 Sep 2026', audio_url: '' },
-            { id: 'rec_med_02_b', title_en: 'Lecture 2: Thyroid Disorders & Adrenal Insufficiency', title_ar: 'المحاضرة 2: اضطرابات الغدة الدرقية وقصور الكظر', doctor: 'د. هيئة التدريس', duration: '45:00', date: '06 Oct 2026', audio_url: '' }
-          ],
-          'sh_med_03': [
-            { id: 'rec_med_03_a', title_en: 'Lecture 1: Coagulation Cascade & Preoperative Lab Tests', title_ar: 'المحاضرة 1: شلال التخثر والفحوصات المخبرية قبل الجراحة', doctor: 'د. هيئة التدريس', duration: '50:20', date: '13 Oct 2026', audio_url: '' },
-            { id: 'rec_med_03_b', title_en: 'Lecture 2: DOACs, Warfarin & Local Hemostatic Measures', title_ar: 'المحاضرة 2: مميعات الدم الحديثة والوارفارين ووقف النزف', doctor: 'د. هيئة التدريس', duration: '44:15', date: '20 Oct 2026', audio_url: '' }
-          ],
-          'sh_med_04': [
-            { id: 'rec_med_04_a', title_en: 'Lecture 1: Bronchial Asthma & COPD in Clinical Practice', title_ar: 'المحاضرة 1: الربو القصبي والانسداد الرئوي المزمن', doctor: 'د. هيئة التدريس', duration: '49:10', date: '27 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'gen-surgery': {
-        sheets: [
-          { id: 'sh_surg_01', order: 1, title_en: 'Sheet 1 — Hemostasis, Shock & Fluid Therapy', title_ar: 'الشيت 1 — النزف، الصدمة والعلاج بالسوائل', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_surg_02', order: 2, title_en: 'Sheet 2 — Wound Healing & Suture Materials', title_ar: 'الشيت 2 — التئام الجروح ومواد الخياطة الجراحية', doc: 'د. هيئة التدريس', recCount: 1 },
-          { id: 'sh_surg_03', order: 3, title_en: 'Sheet 3 — Surgical Infections & Sterilization', title_ar: 'الشيت 3 — الإنتانات الجراحية وبروتوكولات التعقيم', doc: 'د. هيئة التدريس', recCount: 1 }
-        ],
-        recordings: {
-          'sh_surg_01': [
-            { id: 'rec_surg_01_a', title_en: 'Lecture 1: Surgical Shock Classification & Emergency Management', title_ar: 'المحاضرة 1: تصنيف الصدمة الجراحية والتدبير الإسعافي', doctor: 'د. هيئة التدريس', duration: '51:00', date: '16 Sep 2026', audio_url: '' },
-            { id: 'rec_surg_01_b', title_en: 'Lecture 2: Hemostasis & Blood Transfusion Guidelines', title_ar: 'المحاضرة 2: وقف النزف وإرشادات نقل الدم ومشتقاته', doctor: 'د. هيئة التدريس', duration: '47:20', date: '23 Sep 2026', audio_url: '' }
-          ],
-          'sh_surg_02': [
-            { id: 'rec_surg_02_a', title_en: 'Lecture 1: Biology of Wound Healing & Suturing Principles', title_ar: 'المحاضرة 1: بيولوجيا شفاء الجروح ومبادئ الخياطة', doctor: 'د. هيئة التدريس', duration: '54:15', date: '30 Sep 2026', audio_url: '' }
-          ],
-          'sh_surg_03': [
-            { id: 'rec_surg_03_a', title_en: 'Lecture 1: Aseptic Surgical Techniques & Autoclave Cycles', title_ar: 'المحاضرة 1: التعقيم الجراحي ودورات الأوتوكلاف', doctor: 'د. هيئة التدريس', duration: '43:50', date: '07 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'oral-diseases': {
-        sheets: [
-          { id: 'sh_oral_path_pulp_02', order: 1, title_en: 'Sheet 1 — Disorders of the Dental Pulp', title_ar: 'الشيت 1 — أمراض واضطرابات لب الأسنان', doc: 'د. عائشة أبوبكر شنان', recCount: 2 },
-          { id: 'sh_od_cysts', order: 2, title_en: 'Sheet 2 — Odontogenic Cysts of the Jaws', title_ar: 'الشيت 2 — الأكياس سنية المنشأ في الفكين', doc: 'د. عائشة أبوبكر شنان', recCount: 2 },
-          { id: 'sh_od_tumors', order: 3, title_en: 'Sheet 3 — Benign Odontogenic Tumors', title_ar: 'الشيت 3 — الأورام سنية المنشأ الحميدة (Ameloblastoma)', doc: 'د. عائشة أبوبكر شنان', recCount: 1 }
-        ],
-        recordings: {
-          'sh_oral_path_pulp_02': [
-            { id: 'rec_od_01_a', title_en: 'Lecture 1: Reversible vs Irreversible Pulpitis Histopathology', title_ar: 'المحاضرة 1: التغيرات النسيجية في التهاب اللب الردود وغير الردود', doctor: 'د. عائشة أبوبكر شنان', duration: '54:20', date: '21 Sep 2026', audio_url: '' },
-            { id: 'rec_od_01_b', title_en: 'Lecture 2: Periapical Granuloma, Abscess & Radicular Cyst', title_ar: 'المحاضرة 2: الورم الحبيبي الذروي، الخراج والكيس الجذري', doctor: 'د. عائشة أبوبكر شنان', duration: '49:10', date: '28 Sep 2026', audio_url: '' }
-          ],
-          'sh_od_cysts': [
-            { id: 'rec_od_02_a', title_en: 'Lecture 1: Dentigerous Cyst & Odontogenic Keratocyst (OKC)', title_ar: 'المحاضرة 1: الكيس التاجي والكيس القرني سني المنشأ', doctor: 'د. عائشة أبوبكر شنان', duration: '61:00', date: '05 Oct 2026', audio_url: '' },
-            { id: 'rec_od_02_b', title_en: 'Lecture 2: Non-Odontogenic & Pseudocysts of Facial Bones', title_ar: 'المحاضرة 2: الأكياس غير سنية المنشأ والأكياس الكاذبة', doctor: 'د. عائشة أبوبكر شنان', duration: '46:30', date: '12 Oct 2026', audio_url: '' }
-          ],
-          'sh_od_tumors': [
-            { id: 'rec_od_03_a', title_en: 'Lecture 1: Ameloblastoma Subtypes & Odontoma Pathology', title_ar: 'المحاضرة 1: أنماط الورم المينائي وأورام الأسنان المركبة', doctor: 'د. عائشة أبوبكر شنان', duration: '58:00', date: '19 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'preventive': {
-        sheets: [
-          { id: 'sh_prev_dental_caries_02', order: 1, title_en: 'Sheet 1 — Dental Caries & Etiological Concepts', title_ar: 'الشيت 1 — تسوس الأسنان والنظريات الحديثة للأسباب', doc: 'د. حنان عمران', recCount: 2 },
-          { id: 'sh_prev_fluoride', order: 2, title_en: 'Sheet 2 — Fluoride Modalities & Toxicology', title_ar: 'الشيت 2 — آليات الفلورايد وتطبيقاته والجرعات الآمنة', doc: 'د. حنان عمران', recCount: 2 },
-          { id: 'sh_prev_sealants', order: 3, title_en: 'Sheet 3 — Pit & Fissure Sealants Protocol', title_ar: 'الشيت 3 — المواد السادة للشقوق ومؤشرات التطبيق', doc: 'د. حنان عمران', recCount: 2 }
-        ],
-        recordings: {
-          'sh_prev_dental_caries_02': [
-            { id: 'rec_prev_01_a', title_en: 'Lecture 1: Keyes & Newbrun Caries Tetrad', title_ar: 'المحاضرة 1: العوامل الأربعة لنخر الأسنان وبيوفيلم البلاك', doctor: 'د. حنان عمران', duration: '52:30', date: '22 Sep 2026', audio_url: '' },
-            { id: 'rec_prev_01_b', title_en: 'Lecture 2: Remineralization Dynamics & Salivary Buffering', title_ar: 'المحاضرة 2: ديناميكية إعادة التمعدن والدور الوقائي للعاب', doctor: 'د. حنان عمران', duration: '44:15', date: '29 Sep 2026', audio_url: '' }
-          ],
-          'sh_prev_fluoride': [
-            { id: 'rec_prev_02_a', title_en: 'Lecture 1: Systemic vs Topical Fluoride Action Mechanisms', title_ar: 'المحاضرة 1: آليات الفلورايد الموضعي والجهادي والتفلور السني', doctor: 'د. حنان عمران', duration: '47:50', date: '06 Oct 2026', audio_url: '' },
-            { id: 'rec_prev_02_b', title_en: 'Lecture 2: Fluoride Varnishes & High-Risk Patient Regimens', title_ar: 'المحاضرة 2: ورنيش الفلورايد وبروتوكولات المرضى عالي الخطورة', doctor: 'د. حنان عمران', duration: '41:20', date: '13 Oct 2026', audio_url: '' }
-          ],
-          'sh_prev_sealants': [
-            { id: 'rec_prev_03_a', title_en: 'Lecture 1: Fissure Morphology & Resin vs GIC Sealants', title_ar: 'المحاضرة 1: تشريح الشقوق والمقارنة بين الراتنج والـ GIC', doctor: 'د. حنان عمران', duration: '39:40', date: '20 Oct 2026', audio_url: '' },
-            { id: 'rec_prev_03_b', title_en: 'Lecture 2: Step-by-Step Clinical Application & Recall Evaluation', title_ar: 'المحاضرة 2: خطوات التطبيق السريري وتقييم الثبات', doctor: 'د. حنان عمران', duration: '36:10', date: '27 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'fixed-pros': {
-        sheets: [
-          { id: 'sh_fp_01', order: 1, title_en: 'Sheet 1 — Principles of Tooth Preparation', title_ar: 'الشيت 1 — المبادئ الحيوية والميكانيكية لتحضير الأسنان', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_fp_02', order: 2, title_en: 'Sheet 2 — Finish Lines & Gingival Margins', title_ar: 'الشيت 2 — خطوط الإنهاء والحواف اللثوية (Chamfer & Shoulder)', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_fp_03', order: 3, title_en: 'Sheet 3 — Elastomeric Impression Techniques', title_ar: 'الشيت 3 — الطبعات المطاطية وخيوط التبعيد اللثوي', doc: 'د. هيئة التدريس', recCount: 1 }
-        ],
-        recordings: {
-          'sh_fp_01': [
-            { id: 'rec_fp_01_a', title_en: 'Lecture 1: Retention, Resistance & Total Occlusal Convergence', title_ar: 'المحاضرة 1: التثبيت والمقاومة وزاوية التقارب الإطباقي', doctor: 'د. هيئة التدريس', duration: '50:30', date: '17 Sep 2026', audio_url: '' },
-            { id: 'rec_fp_01_b', title_en: 'Lecture 2: Structural Durability & Aesthetic Considerations', title_ar: 'المحاضرة 2: المتانة البنيوية والاعتبارات الجمالية للتيجان', doctor: 'د. هيئة التدريس', duration: '46:15', date: '24 Sep 2026', audio_url: '' }
-          ],
-          'sh_fp_02': [
-            { id: 'rec_fp_02_a', title_en: 'Lecture 1: Finish Lines Selection for PFM & All-Ceramic', title_ar: 'المحاضرة 1: اختيار خطوط الإنهاء للتيجان الخزفية والمعدنية', doctor: 'د. هيئة التدريس', duration: '48:40', date: '01 Oct 2026', audio_url: '' },
-            { id: 'rec_fp_02_b', title_en: 'Lecture 2: Biologic Width Preservation & Subgingival Margins', title_ar: 'المحاضرة 2: الحفاظ على العرض البيولوجي والحواف تحت اللثوية', doctor: 'د. هيئة التدريس', duration: '43:20', date: '08 Oct 2026', audio_url: '' }
-          ],
-          'sh_fp_03': [
-            { id: 'rec_fp_03_a', title_en: 'Lecture 1: Addition Silicones, Polyethers & Gingival Retraction', title_ar: 'المحاضرة 1: مطاط السليكون الإضافي والبوليثير وخيوط التبعيد', doctor: 'د. هيئة التدريس', duration: '55:10', date: '15 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'removable-pros': {
-        sheets: [
-          { id: 'sh_rp_01', order: 1, title_en: 'Sheet 1 — Kennedy Classification & RPD Components', title_ar: 'الشيت 1 — تصنيف كينيدي ومكونات الطقم الجزئي المتحرك', doc: 'د. هيئة التدريس', recCount: 1 },
-          { id: 'sh_rp_02', order: 2, title_en: 'Sheet 2 — RPD Surveying & Path of Insertion', title_ar: 'الشيت 2 — تخطيط الطقم وتحديد مسار الإدخال (Surveying)', doc: 'د. هيئة التدريس', recCount: 1 },
-          { id: 'sh_rp_03', order: 3, title_en: 'Sheet 3 — Clasp Assemblies & Direct Retainers', title_ar: 'الشيت 3 — الضامات والمثبتات المباشرة (Akers & Roach)', doc: 'د. هيئة التدريس', recCount: 1 }
-        ],
-        recordings: {
-          'sh_rp_01': [
-            { id: 'rec_rp_01_a', title_en: 'Lecture 1: Kennedy Classes I-IV and Applegate Rules', title_ar: 'المحاضرة 1: فئات كينيدي الأربعة وقواعد أبليغيت', doctor: 'د. هيئة التدريس', duration: '48:30', date: '18 Sep 2026', audio_url: '' }
-          ],
-          'sh_rp_02': [
-            { id: 'rec_rp_02_a', title_en: 'Lecture 1: Dental Surveyor Components & Guiding Planes Analysis', title_ar: 'المحاضرة 1: جهاز التخطيط ومستويات الإرشاد ومناطق التثبيت', doctor: 'د. هيئة التدريس', duration: '52:00', date: '25 Sep 2026', audio_url: '' }
-          ],
-          'sh_rp_03': [
-            { id: 'rec_rp_03_a', title_en: 'Lecture 1: Rest Seats Preparation & Clasp Mechanics', title_ar: 'المحاضرة 1: تحضير مقاعد المهاميز وميكانيكا عمل الضامات', doctor: 'د. هيئة التدريس', duration: '46:40', date: '02 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'ortho': {
-        sheets: [
-          { id: 'sh_ort_01', order: 1, title_en: 'Sheet 1 — Angle Classification & Normal Occlusion', title_ar: 'الشيت 1 — تصنيف إنجل لسوء الإطباق والإطباق المثالي', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_ort_02', order: 2, title_en: 'Sheet 2 — Craniofacial Growth & Development', title_ar: 'الشيت 2 — نمو وتطور عظام الوجه والفكين', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_ort_03', order: 3, title_en: 'Sheet 3 — Orthodontic Diagnosis & Cephalometrics', title_ar: 'الشيت 3 — التشخيص التقويمي والتحليل السيفالومتري', doc: 'د. هيئة التدريس', recCount: 2 }
-        ],
-        recordings: {
-          'sh_ort_01': [
-            { id: 'rec_ort_01_a', title_en: 'Lecture 1: Molar & Canine Relationships in Orthodontics', title_ar: 'المحاضرة 1: علاقة الأرحاء والأنياب في تقويم الأسنان', doctor: 'د. هيئة التدريس', duration: '45:15', date: '17 Sep 2026', audio_url: '' },
-            { id: 'rec_ort_01_b', title_en: 'Lecture 2: Transverse, Sagittal & Vertical Malocclusions', title_ar: 'المحاضرة 2: تشوهات الإطباق السهمية والمعترضة والعمودية', doctor: 'د. هيئة التدريس', duration: '49:30', date: '24 Sep 2026', audio_url: '' }
-          ],
-          'sh_ort_02': [
-            { id: 'rec_ort_02_a', title_en: 'Lecture 1: Mandibular & Maxillary Growth Patterns', title_ar: 'المحاضرة 1: أنماط نمو الفك السفلي والعلوي وتوقيت العلاج', doctor: 'د. هيئة التدريس', duration: '57:00', date: '01 Oct 2026', audio_url: '' },
-            { id: 'rec_ort_02_b', title_en: 'Lecture 2: Growth Spurt Assessment & Hand-Wrist Radiographs', title_ar: 'المحاضرة 2: تقييم طفرة النمو البلوغية وصور رسغ اليد', doctor: 'د. هيئة التدريس', duration: '42:15', date: '08 Oct 2026', audio_url: '' }
-          ],
-          'sh_ort_03': [
-            { id: 'rec_ort_03_a', title_en: 'Lecture 1: Steiner & Tweed Cephalometric Analyses', title_ar: 'المحاضرة 1: المعالم السيفالومترية وتحليلات شتاينر وتويد', doctor: 'د. هيئة التدريس', duration: '51:40', date: '15 Oct 2026', audio_url: '' },
-            { id: 'rec_ort_03_b', title_en: 'Lecture 2: Space Analysis & Mixed Dentition Prediction', title_ar: 'المحاضرة 2: تحليل المسافات والتنبؤ بازدحام الإطباق المختلط', doctor: 'د. هيئة التدريس', duration: '47:20', date: '22 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'pediatric': {
-        sheets: [
-          { id: 'sh_ped_01', order: 1, title_en: 'Sheet 1 — Pediatric Patient Behavior Management', title_ar: 'الشيت 1 — التعامل السلوكي مع الطفل في عيادة الأسنان', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_ped_02', order: 2, title_en: 'Sheet 2 — Pulp Therapy in Primary Dentition', title_ar: 'الشيت 2 — علاج لب الأسنان اللبنية (Pulpotomy & Pulpectomy)', doc: 'د. هيئة التدريس', recCount: 2 }
-        ],
-        recordings: {
-          'sh_ped_01': [
-            { id: 'rec_ped_01_a', title_en: 'Lecture 1: Frankl Behavior Rating & Tell-Show-Do Method', title_ar: 'المحاضرة 1: مقياس فرانكل السلوكي وتقنية (أخبر-أرِ-افعل)', doctor: 'د. هيئة التدريس', duration: '49:40', date: '18 Sep 2026', audio_url: '' },
-            { id: 'rec_ped_01_b', title_en: 'Lecture 2: Pharmacological Behavior Management & Sedation', title_ar: 'المحاضرة 2: التدبير الدوائي والتهدئة الواعية للأطفال', doctor: 'د. هيئة التدريس', duration: '44:00', date: '25 Sep 2026', audio_url: '' }
-          ],
-          'sh_ped_02': [
-            { id: 'rec_ped_02_a', title_en: 'Lecture 1: Formocresol, MTA & Ferric Sulfate Pulpotomy', title_ar: 'المحاضرة 1: بتر اللب الحيوي بالـ MTA وسلفات الحديد', doctor: 'د. هيئة التدريس', duration: '53:20', date: '02 Oct 2026', audio_url: '' },
-            { id: 'rec_ped_02_b', title_en: 'Lecture 2: Stainless Steel Crowns (SSC) Indications & Fit', title_ar: 'المحاضرة 2: تيجان الستانلس ستيل للأسنان اللبنية وطرق تركيبها', doctor: 'د. هيئة التدريس', duration: '46:10', date: '09 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'omdr': {
-        sheets: [
-          { id: 'sh_admin_1789462201436', order: 1, title_en: 'Sheet 1: Approach to the Evaluation of the Patient', title_ar: 'الشيت 1: تقييم وفحص المريض والتشخيص السريري', doc: 'د عبدالعظيم قداد', recCount: 2 },
-          { id: 'sh_omdr_physics', order: 2, title_en: 'Sheet 2 — Radiation Physics & Patient Protection', title_ar: 'الشيت 2 — فيزياء الإشعاع والحماية الإشعاعية (ALARA)', doc: 'د عبدالعظيم قداد', recCount: 2 },
-          { id: 'sh_omdr_panoramic', order: 3, title_en: 'Sheet 3 — Panoramic Radiography & Ghost Images', title_ar: 'الشيت 3 — الأشعة البانورامية وتفسير الخيالات الشبحية', doc: 'د عبدالعظيم قداد', recCount: 2 },
-          { id: 'sh_omdr_cbct', order: 4, title_en: 'Sheet 4 — Introduction to Dental CBCT', title_ar: 'الشيت 4 — مقدمة في التصوير المقطعي المخروطي ثلاثي الأبعاد', doc: 'د عبدالعظيم قداد', recCount: 1 }
-        ],
-        recordings: {
-          'sh_admin_1789462201436': [
-            { id: 'rec_omdr_01_a', title_en: 'Lecture 1: Systematic Patient History & Clinical Examination', title_ar: 'المحاضرة 1: أخذ السيرة المرضية والفحص السريري المنهجي', doctor: 'د عبدالعظيم قداد', duration: '49:15', date: '15 Sep 2026', audio_url: '' },
-            { id: 'rec_omdr_01_b', title_en: 'Lecture 2: Extraoral & Intraoral Soft Tissue Mapping', title_ar: 'المحاضرة 2: فحص الأنسجة الرخوة داخل وخارج الفم', doctor: 'د عبدالعظيم قداد', duration: '51:00', date: '22 Sep 2026', audio_url: '' }
-          ],
-          'sh_omdr_physics': [
-            { id: 'rec_omdr_02_a', title_en: 'Lecture 1: X-ray Generation, Kilovoltage & Collimation', title_ar: 'المحاضرة 1: توليد الأشعة السينية وفرق الجهد وحزمة الإشعاع', doctor: 'د عبدالعظيم قداد', duration: '53:40', date: '29 Sep 2026', audio_url: '' },
-            { id: 'rec_omdr_02_b', title_en: 'Lecture 2: Radiation Biology & ALARA Protective Protocols', title_ar: 'المحاضرة 2: بيولوجيا الإشعاع وإجراءات الحماية وفق مبدأ ALARA', doctor: 'د عبدالعظيم قداد', duration: '47:30', date: '06 Oct 2026', audio_url: '' }
-          ],
-          'sh_omdr_panoramic': [
-            { id: 'rec_omdr_03_a', title_en: 'Lecture 1: Focal Trough Concept & Positioning Errors', title_ar: 'المحاضرة 1: الطبقة البؤرية وأخطاء تموضع المريض في البانوراما', doctor: 'د عبدالعظيم قداد', duration: '55:20', date: '13 Oct 2026', audio_url: '' },
-            { id: 'rec_omdr_03_b', title_en: 'Lecture 2: Anatomical Landmarks & Artifact Identification', title_ar: 'المحاضرة 2: المعالم التشريحية الفكية وتحديد الشوائب الصورية', doctor: 'د عبدالعظيم قداد', duration: '48:10', date: '20 Oct 2026', audio_url: '' }
-          ],
-          'sh_omdr_cbct': [
-            { id: 'rec_omdr_04_a', title_en: 'Lecture 1: Principles of 3D Volumetric Imaging in Dentistry', title_ar: 'المحاضرة 1: مبادئ التصوير الحجمي ثلاثي الأبعاد وتطبيقاته', doctor: 'د عبدالعظيم قداد', duration: '58:00', date: '27 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'omfs': {
-        sheets: [
-          { id: 'sh_oms_01', order: 1, title_en: 'Sheet 1 — Local Anesthesia Techniques & Anatomical Landmarks', title_ar: 'الشيت 1 — تقنيات التخدير الموضعي والمعالم التشريحية للفكين', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_oms_02', order: 2, title_en: 'Sheet 2 — Extraction Forceps, Elevators & Mechanics', title_ar: 'الشيت 2 — كلابات القلع، الروافع وميكانيكا خلع الأسنان', doc: 'د. هيئة التدريس', recCount: 1 },
-          { id: 'sh_oms_03', order: 3, title_en: 'Sheet 3 — Complications of Exodontia & Dry Socket', title_ar: 'الشيت 3 — مضاعفات القلع وعلاج السنخ الجاف (Alveolitis)', doc: 'د. هيئة التدريس', recCount: 1 }
-        ],
-        recordings: {
-          'sh_oms_01': [
-            { id: 'rec_oms_01_a', title_en: 'Lecture 1: Inferior Alveolar Nerve Block & Gow-Gates Technique', title_ar: 'المحاضرة 1: تخدير العصب السنخي السفلي وتقنية غاو-غيتس', doctor: 'د. هيئة التدريس', duration: '50:20', date: '14 Sep 2026', audio_url: '' },
-            { id: 'rec_oms_01_b', title_en: 'Lecture 2: Local Anesthetic Toxicity & Vasoconstrictor Safety', title_ar: 'المحاضرة 2: سمية المخدر الموضعي ومضبوطات مقبض الأوعية', doctor: 'د. هيئة التدريس', duration: '48:00', date: '21 Sep 2026', audio_url: '' }
-          ],
-          'sh_oms_02': [
-            { id: 'rec_oms_02_a', title_en: 'Lecture 1: Lever, Wedge & Wheel Mechanics in Tooth Extraction', title_ar: 'المحاضرة 1: قوانين العتلة والوتد والعجلة في خلع الأسنان', doctor: 'د. هيئة التدريس', duration: '46:30', date: '28 Sep 2026', audio_url: '' }
-          ],
-          'sh_oms_03': [
-            { id: 'rec_oms_03_a', title_en: 'Lecture 1: Alveolar Osteitis Prevention & Root Fracture Retrieval', title_ar: 'المحاضرة 1: الوقاية من التهاب العظم السنخي واستخراج الجذور المكسورة', doctor: 'د. هيئة التدريس', duration: '52:45', date: '05 Oct 2026', audio_url: '' }
-          ]
-        }
-      },
-
-      'endo': {
-        sheets: [
-          { id: 'sh_end_01', order: 1, title_en: 'Sheet 1 — Internal Anatomy & Access Cavity Preparation', title_ar: 'الشيت 1 — التشريح الداخلي لحجرة اللب وتصميم مدخل القنوات', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_end_02', order: 2, title_en: 'Sheet 2 — Working Length Determination & Apex Locators', title_ar: 'الشيت 2 — تحديد الطول العامل ومحددات الذروة الإلكترونية', doc: 'د. هيئة التدريس', recCount: 2 },
-          { id: 'sh_end_03', order: 3, title_en: 'Sheet 3 — Biomechanical Cleaning & Shaping', title_ar: 'الشيت 3 — التنظيف والتشكيل الميكانيكي الحيوي للقنوات', doc: 'د. هيئة التدريس', recCount: 1 }
-        ],
-        recordings: {
-          'sh_end_01': [
-            { id: 'rec_end_01_a', title_en: 'Lecture 1: Root Canal Configurations & Vertucci Classification', title_ar: 'المحاضرة 1: أشكال قنوات الجذور وتصنيف فيرتوتشي', doctor: 'د. هيئة التدريس', duration: '52:10', date: '16 Sep 2026', audio_url: '' },
-            { id: 'rec_end_01_b', title_en: 'Lecture 2: Access Cavity Design for Anterior & Posterior Teeth', title_ar: 'المحاضرة 2: تصميم مدخل الحجرة اللبية للأسنان الأمامية والخلفية', doctor: 'د. هيئة التدريس', duration: '48:30', date: '23 Sep 2026', audio_url: '' }
-          ],
-          'sh_end_02': [
-            { id: 'rec_end_02_a', title_en: 'Lecture 1: Principles of Electronic Apex Locators & Apical Constriction', title_ar: 'المحاضرة 1: مبادئ أجهزة تحديد الذروة والتضيق الذروي التشريحي', doctor: 'د. هيئة التدريس', duration: '46:40', date: '30 Sep 2026', audio_url: '' },
-            { id: 'rec_end_02_b', title_en: 'Lecture 2: Radiographic Working Length Pitfalls & Paralleling Technique', title_ar: 'المحاضرة 2: أخطاء الطول الشعاعي وتقنية التوازي بالأشعة', doctor: 'د. هيئة التدريس', duration: '44:15', date: '07 Oct 2026', audio_url: '' }
-          ],
-          'sh_end_03': [
-            { id: 'rec_end_03_a', title_en: 'Lecture 1: Sodium Hypochlorite Irrigation & Rotary NiTi Protocols', title_ar: 'المحاضرة 1: بروتوكول غسيل القنوات ومبارد النيكل تيتانيوم الدوارة', doctor: 'د. هيئة التدريس', duration: '58:00', date: '14 Oct 2026', audio_url: '' }
-          ]
-        }
-      }
-    },
 
     /**
      * SVG Tooth Icon for Conservative Dentistry
@@ -350,7 +74,6 @@
       const svgBars = bars.map((h, idx) => {
         const x = idx * 6;
         const y = Math.round((30 - h) / 2);
-        // If playing, simulate progress through first half or animated active bars
         const isBarActive = isPlaying && idx < (numBars * 0.45);
         const barColor = isBarActive ? '#BC4A47' : '#D6CEC5';
         return `<rect class="audio-wave-bar ${isPlaying ? 'wave-anim' : ''}" data-index="${idx}" x="${x}" y="${y}" width="3.4" height="${h}" rx="1.7" fill="${barColor}" />`;
@@ -369,7 +92,7 @@
     async render(container, queryParams) {
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
 
-      // Read query params for deep linking
+      // Handle deep linking query parameters
       const subjectParam = queryParams?.get('subject');
       const sheetParam = queryParams?.get('sheet');
 
@@ -389,7 +112,6 @@
 
       container.innerHTML = `
         <div class="audio-hub-container" id="audio-hub-root">
-          <!-- Dynamically Rendered: Level 1, Level 2, or Level 3 -->
           <div id="audio-dynamic-content" class="audio-content-stage"></div>
         </div>
       `;
@@ -398,20 +120,17 @@
     },
 
     /**
-     * Dispatcher to render Level 1, Level 2, or Level 3
+     * Dispatcher to render Level 1, Level 2, or Level 3 based on state
      */
     renderCurrentLevel() {
       const contentEl = document.getElementById('audio-dynamic-content');
       if (!contentEl) return;
 
       if (this.selectedSheetId && this.selectedSubjectId) {
-        // Level 3: Audio Recordings for Selected Sheet
         this.renderLevel3Recordings(contentEl);
       } else if (this.selectedSubjectId) {
-        // Level 2: Sheets for Selected Subject
         this.renderLevel2Sheets(contentEl);
       } else {
-        // Level 1: Subject Selection (12 Dental Subjects)
         this.renderLevel1Subjects(contentEl);
       }
 
@@ -421,10 +140,11 @@
     },
 
     // ══════════════════════════════════════════════════════════════════════════
-    // LEVEL 1: SUBJECT SELECTION (EXACT BLUEPRINT FIDELITY)
+    // LEVEL 1: SUBJECT SELECTION (REAL DATABASE COUNTS ONLY)
     // ══════════════════════════════════════════════════════════════════════════
     renderLevel1Subjects(container) {
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+      const allRecordings = window.DATA?.recordings || [];
 
       // Filter subjects by search query
       const q = (this.searchQuery || '').trim().toLowerCase();
@@ -436,7 +156,7 @@
       });
 
       container.innerHTML = `
-        <!-- 1. Panoramic Top Hero Banner (Matching Blueprint) -->
+        <!-- 1. Panoramic Top Hero Banner -->
         <section class="audio-hub-hero" aria-label="Audio Recordings Hero Banner">
           <div class="audio-hero-card">
             <div class="audio-hero-bg-artwork" style="background-image: url('assets/hero/audio-recordings-hero.png');"></div>
@@ -455,7 +175,7 @@
           </div>
         </section>
 
-        <!-- 2. Minimal Sub-Bar: Search + Total Count Indicator + View Mode -->
+        <!-- 2. Minimal Sub-Bar: Search + Total Subjects Count + View Switcher -->
         <section class="audio-sub-bar" aria-label="Audio Search and Controls">
           <div class="audio-search-box-wrap">
             <i data-lucide="search" class="audio-search-icon"></i>
@@ -497,7 +217,7 @@
           </div>
         </section>
 
-        <!-- 3. Grid of 12 Subject Cards (Desktop 4-col, iPad Land 3-col, iPad Port 2-col, Mobile 1-col) -->
+        <!-- 3. Grid of 12 Real Subject Cards -->
         <section class="${this.currentView === 'grid' ? 'audio-subject-grid' : 'audio-subject-list'}" id="audio-subjects-container">
           ${filteredSubjects.length === 0 ? `
             <div class="audio-empty-card" style="grid-column: 1 / -1;">
@@ -511,7 +231,12 @@
           ` : filteredSubjects.map(s => {
             const title = isAr ? s.name_ar : s.name_en;
             const iconHtml = this.getSubjectIconHtml(s.icon);
-            const countText = isAr ? `${s.count} تسجيلات` : `${s.count} Recordings`;
+            
+            // Real count evaluated strictly from database
+            const realCount = allRecordings.filter(r => r.subject_id === s.id).length;
+            const countText = isAr
+              ? (realCount === 1 ? 'تسجيل واحد' : `${realCount} تسجيلات`)
+              : (realCount === 1 ? '1 Recording' : `${realCount} Recordings`);
 
             return `
               <div class="audio-subject-card" data-subj-id="${s.id}" role="button" tabindex="0">
@@ -566,7 +291,6 @@
         this.renderCurrentLevel();
       });
 
-      // View switcher
       container.querySelectorAll('.audio-view-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           this.currentView = btn.getAttribute('data-view') || 'grid';
@@ -575,7 +299,6 @@
         });
       });
 
-      // Subject card clicks -> transition to Level 2
       container.querySelectorAll('.audio-subject-card').forEach(card => {
         const handler = () => {
           const subjId = card.getAttribute('data-subj-id');
@@ -601,50 +324,34 @@
     },
 
     // ══════════════════════════════════════════════════════════════════════════
-    // LEVEL 2: SHEETS OF SELECTED SUBJECT (EXACT BLUEPRINT FIDELITY)
+    // LEVEL 2: SHEETS OF SELECTED SUBJECT (REAL SHEETS FROM DATABASE ONLY)
     // ══════════════════════════════════════════════════════════════════════════
     renderLevel2Sheets(container) {
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-      const subj = this.SUBJECT_DEFINITIONS.find(s => s.id === this.selectedSubjectId) || {
+      const def = this.SUBJECT_DEFINITIONS.find(s => s.id === this.selectedSubjectId);
+      const subjFromData = window.DATA?.getSubjectById ? window.DATA.getSubjectById(this.selectedSubjectId) : null;
+      
+      const subj = def || {
         id: this.selectedSubjectId,
-        code: 'DENT-300',
-        name_en: 'Subject Audio Repository',
-        name_ar: 'المادة الأكاديمية',
-        icon: 'tooth',
-        count: 8
+        code: subjFromData?.code || 'DENT-300',
+        name_en: subjFromData?.name_en || 'Academic Subject',
+        name_ar: subjFromData?.name_ar || 'المقرر الأكاديمي',
+        icon: 'tooth'
       };
 
       const subjTitle = isAr ? subj.name_ar : subj.name_en;
       const iconHtml = this.getSubjectIconHtml(subj.icon);
 
-      // Fetch sheets for this subject
-      const currData = this.CURRICULUM_DATA[subj.id] || { sheets: [], recordings: {} };
-      let sheets = currData.sheets || [];
+      // Fetch ONLY real sheets belonging to this subject from central database
+      const sheets = (window.DATA && typeof window.DATA.getSheetsBySubject === 'function')
+        ? window.DATA.getSheetsBySubject(this.selectedSubjectId)
+        : ((window.DATA?.sheets || []).filter(s => s.subject_id === this.selectedSubjectId));
 
-      // Check if window.DATA.sheets has additional custom user sheets
-      const allAppSheets = (window.DATA?.sheets || []).filter(s => s && s.subject_id === subj.id);
-      allAppSheets.forEach(appS => {
-        if (!sheets.some(s => s.id === appS.id)) {
-          sheets.push({
-            id: appS.id,
-            order: appS.order_index || sheets.length + 1,
-            title_en: appS.title_en || appS.title || `Sheet ${sheets.length + 1}`,
-            title_ar: appS.title_ar || appS.title || `الشيت ${sheets.length + 1}`,
-            doc: appS.doctor_name || appS.doctor || 'Faculty',
-            recCount: (window.DATA?.recordings || []).filter(r => r.sheet_id === appS.id).length || 0
-          });
-        }
-      });
-
-      // Calculate totals
+      const allRecordings = window.DATA?.recordings || [];
       const totalSheetsCount = sheets.length;
-      let totalRecsCount = 0;
-      sheets.forEach(s => {
-        totalRecsCount += (s.recCount || 0);
-      });
-      if (totalRecsCount === 0 && subj.count) {
-        totalRecsCount = subj.count;
-      }
+      
+      // Calculate real total recordings count for this subject
+      const totalRecsCount = allRecordings.filter(r => r.subject_id === this.selectedSubjectId).length;
 
       const subtitleInfo = isAr
         ? `${subj.code} · ${totalSheetsCount} شيتات · ${totalRecsCount} تسجيلات`
@@ -659,7 +366,7 @@
           </button>
         </div>
 
-        <!-- Subject Panoramic Banner with Kuro Artwork -->
+        <!-- Subject Panoramic Banner -->
         <section class="audio-hub-hero" aria-label="Subject Banner">
           <div class="audio-hero-card">
             <div class="audio-hero-bg-artwork" style="background-image: url('assets/hero/audio-recordings-hero.png');"></div>
@@ -682,13 +389,29 @@
           <span class="audio-level-badge">${totalSheetsCount} ${isAr ? 'شيت' : 'Sheets'}</span>
         </div>
 
-        <!-- Sheets Grid / List (Panel 2 Blueprint: 3 columns Desktop, 2 iPad, 1 Mobile) -->
+        <!-- Real Sheets Grid / Empty State -->
         <section class="audio-sheets-grid" id="audio-sheets-container">
-          ${sheets.map(sheet => {
-            const sheetTitle = isAr ? sheet.title_ar : sheet.title_en;
+          ${sheets.length === 0 ? `
+            <div class="audio-empty-card" style="grid-column: 1 / -1;">
+              <div class="audio-empty-icon-wrap">
+                <i data-lucide="file-x" style="width: 32px; height: 32px; color: #BC4A47;"></i>
+              </div>
+              <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0 0 6px;">
+                ${isAr ? 'لا توجد شيتات مضافة لهذه المادة بعد' : 'No sheets available for this subject yet'}
+              </h3>
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 16px;">
+                ${isAr ? 'عند إضافة شيت جديد من لوحة الإدارة، سيظهر هنا تلقائياً لربط التسجيلات الصوتية به.' : 'When a new sheet is added in the Admin panel, it will appear here automatically.'}
+              </p>
+            </div>
+          ` : sheets.map(sheet => {
+            const sheetTitle = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
+            
+            // Real recordings count for this specific sheet
+            const sheetRecs = allRecordings.filter(r => r.sheet_id === sheet.id);
+            const sheetRecCount = sheetRecs.length;
             const recLabel = isAr
-              ? `${sheet.recCount || 0} تسجيلات`
-              : `${sheet.recCount || 0} Recordings`;
+              ? (sheetRecCount === 1 ? 'تسجيل واحد' : `${sheetRecCount} تسجيلات`)
+              : (sheetRecCount === 1 ? '1 Recording' : `${sheetRecCount} Recordings`);
 
             return `
               <div class="audio-sheet-card" data-sheet-id="${sheet.id}" role="button" tabindex="0">
@@ -714,7 +437,6 @@
     },
 
     bindLevel2Events(container) {
-      // Back to Subjects button
       container.querySelector('#audio-back-to-subjects')?.addEventListener('click', () => {
         this.selectedSubjectId = null;
         this.selectedSheetId = null;
@@ -725,7 +447,6 @@
         }
       });
 
-      // Sheet clicks -> transition to Level 3
       container.querySelectorAll('.audio-sheet-card').forEach(card => {
         const handler = () => {
           const sheetId = card.getAttribute('data-sheet-id');
@@ -750,42 +471,55 @@
     },
 
     // ══════════════════════════════════════════════════════════════════════════
-    // LEVEL 3: AUDIO RECORDINGS OF SELECTED SHEET (EXACT BLUEPRINT FIDELITY)
+    // LEVEL 3: AUDIO RECORDINGS OF SELECTED SHEET (REAL DATA ONLY)
     // ══════════════════════════════════════════════════════════════════════════
     renderLevel3Recordings(container) {
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-      const subj = this.SUBJECT_DEFINITIONS.find(s => s.id === this.selectedSubjectId) || {
+      const def = this.SUBJECT_DEFINITIONS.find(s => s.id === this.selectedSubjectId);
+      const subjFromData = window.DATA?.getSubjectById ? window.DATA.getSubjectById(this.selectedSubjectId) : null;
+      
+      const subj = def || {
         id: this.selectedSubjectId,
-        code: 'CONS-302',
-        name_en: 'Conservative Dentistry and Endodontics II',
-        name_ar: 'العلاج التحفظي وعلاج الجذور 2',
-        icon: 'tooth'
+        code: subjFromData?.code || 'DENT-300',
+        name_en: subjFromData?.name_en || 'Academic Subject',
+        name_ar: subjFromData?.name_ar || 'المقرر الأكاديمي'
       };
 
-      const currData = this.CURRICULUM_DATA[subj.id] || { sheets: [], recordings: {} };
-      const sheet = (currData.sheets || []).find(s => s.id === this.selectedSheetId) ||
-                    (window.DATA?.sheets || []).find(s => s.id === this.selectedSheetId) || {
-                      id: this.selectedSheetId,
-                      title_en: 'Sheet 1 — Dentin-Pulp Complex',
-                      title_ar: 'الشيت 1 — معقد العاج واللب (Dentin-Pulp Complex)',
-                      doc: 'د. آمال كشلاف'
-                    };
+      // Retrieve real sheet record from central database
+      const sheet = (window.DATA && typeof window.DATA.getSheetById === 'function')
+        ? window.DATA.getSheetById(this.selectedSheetId)
+        : ((window.DATA?.sheets || []).find(s => s.id === this.selectedSheetId));
+
+      if (!sheet) {
+        container.innerHTML = `
+          <div class="audio-level-nav-bar">
+            <button type="button" class="audio-back-btn" id="audio-back-to-sheets">
+              <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
+              <span>${isAr ? 'العودة للشيتات' : 'Back to Sheets'}</span>
+            </button>
+          </div>
+          <div class="audio-empty-card">
+            <h3 style="color: var(--text-primary); margin-bottom: 8px;">
+              ${isAr ? 'لم يتم العثور على الشيت المطلوب' : 'Sheet Not Found'}
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              ${isAr ? 'قد يكون تم حذف الشيت أو تعديل معرفه.' : 'The requested sheet may have been removed or updated.'}
+            </p>
+          </div>
+        `;
+        container.querySelector('#audio-back-to-sheets')?.addEventListener('click', () => {
+          this.selectedSheetId = null;
+          this.renderCurrentLevel();
+        });
+        return;
+      }
 
       const sheetTitle = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
       const subjTitle = isAr ? subj.name_ar : subj.name_en;
 
-      // Locate recordings for this sheet
-      let recordings = (currData.recordings && currData.recordings[this.selectedSheetId]) || [];
-
-      // Check if window.DATA.recordings has user or cloud recordings
-      const extraRecs = (window.DATA?.recordings || []).filter(r => r.sheet_id === this.selectedSheetId);
-      if (extraRecs.length > 0) {
-        extraRecs.forEach(er => {
-          if (!recordings.some(r => r.id === er.id)) {
-            recordings.push(er);
-          }
-        });
-      }
+      // Locate real recordings linked to this sheet via sheet_id
+      const allRecordings = window.DATA?.recordings || [];
+      const recordings = allRecordings.filter(r => r.sheet_id === sheet.id);
 
       container.innerHTML = `
         <!-- Top Back Navigation -->
@@ -796,7 +530,7 @@
           </button>
         </div>
 
-        <!-- Sheet Header Banner (Panel 3 Blueprint) -->
+        <!-- Sheet Header Banner -->
         <div class="audio-sheet-banner">
           <div class="audio-sheet-banner-icon-box">
             <i data-lucide="file-text"></i>
@@ -807,28 +541,30 @@
           </div>
         </div>
 
-        <!-- Recordings List / Empty State -->
+        <!-- Recordings List / Real Empty State -->
         <div class="audio-recordings-deck" id="audio-recordings-deck">
           ${recordings.length === 0 ? `
             <div class="audio-empty-card">
               <div class="audio-empty-icon-wrap">
-                <i data-lucide="mic-off" style="width: 32px; height: 32px; color: #BC4A47;"></i>
+                <i data-lucide="headphones" style="width: 32px; height: 32px; color: #BC4A47;"></i>
               </div>
               <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0 0 6px;">
-                ${isAr ? 'لا توجد تسجيلات صوتية متاحة حالياً لهذا الشيت' : 'No audio recordings available yet for this sheet'}
+                ${isAr ? 'لا توجد تسجيلات صوتية متاحة بعد' : 'No recordings available yet'}
               </h3>
               <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 16px;">
-                ${isAr ? 'يمكنك فتح ومراجعة شيت المحاضرة بصيغة PDF مباشرة.' : 'You can view and study the corresponding lecture sheet directly.'}
+                ${isAr ? 'لم يتم رفع تسجيل صوتي لهذا الشيت حتى الآن. يمكنك دراسة الشيت مباشرة.' : 'No audio recording has been uploaded for this sheet yet. You can study the sheet directly.'}
               </p>
-              <a href="#/sheet-detail?id=${sheet.id}" class="btn btn-primary" style="background: #BC4A47; border-color: #BC4A47; font-weight: 750;">
+              <a href="#/sheet-detail?id=${sheet.id}" class="audio-btn-view-sheet" style="padding: 8px 18px; font-size: 0.88rem;">
                 <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
                 <span>${isAr ? 'عرض الشيت' : 'View Sheet'}</span>
               </a>
             </div>
-          ` : recordings.map((rec, idx) => {
+          ` : recordings.map(rec => {
             const isPlaying = this.activeRecId === rec.id;
-            const recTitle = isAr ? (rec.title_ar || rec.title_en || rec.title) : (rec.title_en || rec.title);
-            const doctorName = rec.doctor || rec.doctor_name || sheet.doc || (isAr ? 'هيئة التدريس' : 'Faculty');
+            const recTitle = rec.title || (isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title));
+            const doctorName = rec.doctor || sheet.doctor_name || sheet.doctor || (isAr ? 'هيئة التدريس' : 'Faculty');
+            const recDate = rec.date || sheet.date || '';
+            const recDuration = rec.duration || '--:--';
             const waveformSvg = this.generateWaveformSvg(rec.id + recTitle, isPlaying);
 
             return `
@@ -848,7 +584,7 @@
                     </div>
                   </div>
                   <div class="audio-rec-duration-badge">
-                    <span>${rec.duration || '58:24'}</span>
+                    <span>${recDuration}</span>
                   </div>
                 </div>
 
@@ -874,7 +610,7 @@
                 <div class="audio-rec-footer-row">
                   <div class="audio-rec-date-wrap">
                     <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
-                    <span>${rec.date || '23 Sep 2026'}</span>
+                    <span>${recDate}</span>
                   </div>
 
                   <div class="audio-rec-actions-group">
@@ -913,10 +649,6 @@
           this.activeAudio.pause();
           this.activeAudio = null;
         }
-        if (this.simulatedAudioTimer) {
-          clearInterval(this.simulatedAudioTimer);
-          this.simulatedAudioTimer = null;
-        }
         this.activeRecId = null;
 
         if (window.ROUTER?.navigate) {
@@ -940,8 +672,7 @@
     },
 
     /**
-     * High-Fidelity Audio Playback Engine
-     * Supports streaming URL or Web Audio API synthesis preview with animated waveforms
+     * Real Audio Playback Controller
      */
     async handlePlayToggle(recId, isAr) {
       // 1. If currently playing this same recording, pause it
@@ -949,10 +680,7 @@
         if (this.activeAudio && !this.activeAudio.paused) {
           this.activeAudio.pause();
         }
-        if (this.simulatedAudioTimer) {
-          clearInterval(this.simulatedAudioTimer);
-          this.simulatedAudioTimer = null;
-        }
+        this.activeAudio = null;
         this.activeRecId = null;
         this.renderCurrentLevel();
         return;
@@ -963,84 +691,60 @@
         this.activeAudio.pause();
         this.activeAudio = null;
       }
-      if (this.simulatedAudioTimer) {
-        clearInterval(this.simulatedAudioTimer);
-        this.simulatedAudioTimer = null;
-      }
 
-      this.activeRecId = recId;
-      this.renderCurrentLevel();
+      // 3. Locate real recording
+      const allRecordings = window.DATA?.recordings || [];
+      const rec = allRecordings.find(r => r.id === recId);
+      if (!rec) return;
 
-      // Check if real audio URL exists
-      const recordings = window.DATA?.recordings || [];
-      const rec = recordings.find(r => r.id === recId);
-      const audioUrl = rec?.audio_url;
-
-      if (audioUrl) {
+      let audioUrl = rec.audio_url || '';
+      if (!audioUrl && window.DATA?.audioStore?.getAudioUrl) {
         try {
-          const audio = new Audio(audioUrl);
-          this.activeAudio = audio;
-          audio.addEventListener('ended', () => {
-            this.activeRecId = null;
-            this.renderCurrentLevel();
-          });
-          audio.addEventListener('error', () => {
-            this.playSynthesizedAudioPreview(recId);
-          });
-          await audio.play();
-          return;
-        } catch (e) {
-          this.playSynthesizedAudioPreview(recId);
-          return;
-        }
+          audioUrl = await window.DATA.audioStore.getAudioUrl(recId);
+        } catch (err) {}
       }
 
-      // If no remote URL, provide high-grade Web Audio API harmonic tones and animated playback
-      this.playSynthesizedAudioPreview(recId);
-    },
+      if (!audioUrl) {
+        if (window.showToast) {
+          window.showToast(
+            isAr ? 'ملف التسجيل الصوتي غير متوفر حالياً' : 'Audio file is not currently available',
+            { type: 'info' }
+          );
+        }
+        return;
+      }
 
-    /**
-     * Web Audio API synthesized audio preview with animated waveform progress
-     */
-    playSynthesizedAudioPreview(recId) {
-      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
       try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-          const ctx = new AudioContext();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
+        const audio = new Audio(audioUrl);
+        this.activeAudio = audio;
+        this.activeRecId = recId;
 
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(440, ctx.currentTime); // Gentle A4 note
-          gain.gain.setValueAtTime(0.04, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 1.2);
-        }
-      } catch (err) {}
-
-      if (window.showToast) {
-        window.showToast(
-          isAr ? '▶ بدأ تشغيل التسجيل الصوتي للمحاضرة' : '▶ Playing lecture audio recording',
-          { type: 'info', duration: 2500 }
-        );
-      }
-
-      // Simulate playback interval to cycle animations
-      let elapsedSeconds = 0;
-      this.simulatedAudioTimer = setInterval(() => {
-        elapsedSeconds++;
-        if (elapsedSeconds > 120) {
-          clearInterval(this.simulatedAudioTimer);
-          this.simulatedAudioTimer = null;
+        audio.addEventListener('ended', () => {
           this.activeRecId = null;
+          this.activeAudio = null;
           this.renderCurrentLevel();
-        }
-      }, 1000);
+        });
+
+        audio.addEventListener('error', () => {
+          this.activeRecId = null;
+          this.activeAudio = null;
+          if (window.showToast) {
+            window.showToast(
+              isAr ? 'تعذر تشغيل ملف الصوت' : 'Unable to play audio recording',
+              { type: 'error' }
+            );
+          }
+          this.renderCurrentLevel();
+        });
+
+        await audio.play();
+        this.renderCurrentLevel();
+      } catch (err) {
+        console.error('Audio play error:', err);
+        this.activeRecId = null;
+        this.activeAudio = null;
+        this.renderCurrentLevel();
+      }
     }
   };
 

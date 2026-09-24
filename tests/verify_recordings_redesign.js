@@ -79,8 +79,20 @@ assert(recordingsJs.includes('audio-btn-more-options'), 'Contains More Options a
 const verifiedMatches = recordingsJs.match(/verified|معتمد/gi);
 assert(!verifiedMatches, 'Zero "verified" / "معتمد" badges in recordings.js');
 
-// 5. Verify css/polish.css
-console.log('\n5. Checking css/polish.css (Warm Terracotta & Responsive Breakpoints):');
+// Real Database & Zero Mock Data verification
+assert(!recordingsJs.includes('CURRICULUM_DATA'), 'Zero mock CURRICULUM_DATA in recordings.js');
+assert(recordingsJs.includes('getSheetsBySubject'), 'Uses real database getSheetsBySubject for Level 2');
+assert(recordingsJs.includes('No recordings available yet'), 'Includes "No recordings available yet" empty state message');
+assert(recordingsJs.includes('لا توجد تسجيلات صوتية متاحة بعد'), 'Includes Arabic empty state message');
+
+// 5. Verify js/data.js relationship helpers
+console.log('\n5. Checking js/data.js relationship helpers:');
+const dataJs = fs.readFileSync(path.join(rootDir, 'js/data.js'), 'utf8');
+assert(dataJs.includes('getSheetById'), 'js/data.js exposes getSheetById helper');
+assert(dataJs.includes('getQuestionsBySheet'), 'js/data.js exposes getQuestionsBySheet helper');
+
+// 6. Verify css/polish.css
+console.log('\n6. Checking css/polish.css (Warm Terracotta & Responsive Breakpoints):');
 const polishCss = fs.readFileSync(path.join(rootDir, 'css/polish.css'), 'utf8');
 assert(polishCss.includes('.audio-hub-container'), 'Includes .audio-hub-container');
 assert(polishCss.includes('.audio-hero-card'), 'Includes .audio-hero-card');
@@ -98,7 +110,7 @@ assert(polishCss.includes('@media (min-width: 900px) and (max-width: 1199px)'), 
 assert(polishCss.includes('@media (min-width: 600px) and (max-width: 899px)'), 'Includes dedicated iPad Portrait query (2 columns)');
 assert(polishCss.includes('@media (max-width: 599px)'), 'Includes dedicated Mobile query (1 column)');
 
-// 6. Summary
+// 7. Summary
 console.log('\n======================================================');
 console.log(`TEST SUMMARY: ${passed} Passed, ${failed} Failed`);
 console.log('======================================================\n');

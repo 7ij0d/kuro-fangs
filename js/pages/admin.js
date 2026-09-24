@@ -2581,11 +2581,36 @@ CREATE POLICY "Allow all delete on sheets"
     // --- RECORDINGS LISTENERS ---
     const addRecSubject = document.getElementById('add-rec-subject');
     const addRecSheet = document.getElementById('add-rec-sheet');
+    const addRecDoctor = document.getElementById('add-rec-doctor');
+    const addRecTitle = document.getElementById('add-rec-title');
+
+    function syncRecSheetDefaults() {
+      if (!addRecSheet) return;
+      const sheetId = addRecSheet.value;
+      const sheet = (window.DATA?.sheets || []).find(s => s && s.id === sheetId);
+      if (sheet) {
+        if (addRecDoctor && !addRecDoctor.value) {
+          addRecDoctor.value = sheet.doctor_name || sheet.doctor || '';
+        }
+        if (addRecTitle && !addRecTitle.value) {
+          addRecTitle.value = sheet.title_en || sheet.title || sheet.title_ar || '';
+        }
+      }
+    }
+
     if (addRecSubject && addRecSheet) {
       addRecSubject.addEventListener('change', () => {
-        const sheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(addRecSubject.value) : window.DATA.sheets.filter(s => s.subject_id === addRecSubject.value);
+        const sheets = window.DATA.getSheetsBySubject ? window.DATA.getSheetsBySubject(addRecSubject.value) : (window.DATA.sheets || []).filter(s => s.subject_id === addRecSubject.value);
         addRecSheet.innerHTML = sheets.map(s => `<option value="${s.id}">${s.title_en || s.title || s.title_ar}</option>`).join('');
-        if (sheets.length === 0) addRecSheet.innerHTML = `<option value="" disabled selected>${isAr ? 'لا توجد شيتات' : 'No sheets'}</option>`;
+        if (sheets.length === 0) {
+          addRecSheet.innerHTML = `<option value="" disabled selected>${isAr ? 'لا توجد شيتات' : 'No sheets'}</option>`;
+        } else {
+          syncRecSheetDefaults();
+        }
+      });
+
+      addRecSheet.addEventListener('change', () => {
+        syncRecSheetDefaults();
       });
     }
 
