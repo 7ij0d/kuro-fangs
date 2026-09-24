@@ -55,7 +55,7 @@
   <link rel="stylesheet" href="css/layout.css?v=10.3" />
   <link rel="stylesheet" href="css/components.css?v=10.3" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=10.8" />
+  <link rel="stylesheet" href="css/polish.css?v=10.9" />
 </head>
 <body id="app-body" data-layout="dark-sidebar">
   <!-- ==========================================================================
@@ -67,6 +67,10 @@
 
   <!-- Mobile Sidebar Backdrop (Blur) -->
   <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+  <!-- Mobile Settings Bottom Sheet & Backdrop -->
+  <div id="settings-mobile-sheet-backdrop" class="settings-mobile-sheet-backdrop"></div>
+  <div id="settings-mobile-sheet" class="settings-mobile-sheet"></div>
 
   <!-- ==========================================================================
        APP MASTER LAYOUT (Academia Dark Sidebar + Content Wrapper)
@@ -283,29 +287,13 @@
             </button>
           </div>
 
-          <!-- Optional Supabase Auth / User Badge -->
-          <div id="header-auth-action-box" class="header-auth-action-box"></div>
-
-          <!-- Language Toggle Button (EN / AR) -->
-          <button id="lang-toggle-btn" class="header-toggle-btn" title="Switch Language (English / العربية)">
-            <i data-lucide="globe"></i>
-            <span id="lang-btn-text">AR</span>
-          </button>
-
-          <!-- Theme Toggle Button (Dark / Light) -->
-          <button id="theme-toggle-btn" class="header-toggle-btn" title="Toggle Dark / Light Theme">
-            <i data-lucide="moon" id="theme-icon"></i>
-          </button>
-
-          <!-- Sound Effects Toggle Button (Mute / Unmute) -->
-          <button id="sound-toggle-btn" class="header-toggle-btn" title="المؤثرات الصوتية | Sound Effects" aria-label="Toggle Sound Effects">
-            <i data-lucide="volume-2" id="sound-icon"></i>
-          </button>
-
-          <!-- User Profile Avatar Pill -->
-          <a href="#/profile" class="header-profile-avatar-btn" id="header-profile-btn" title="Student Profile">
-            <img id="header-mascot-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Profile Avatar" class="header-profile-avatar-img" width="34" height="34" loading="lazy" />
-          </a>
+          <!-- Settings Gear Trigger Button & Anchored Popover -->
+          <div class="settings-trigger-wrapper" id="settings-trigger-wrapper">
+            <button id="header-settings-btn" class="header-toggle-btn settings-gear-btn" title="الإعدادات | Settings" aria-label="Settings" aria-haspopup="true" aria-expanded="false">
+              <i data-lucide="settings"></i>
+            </button>
+            <div id="settings-popover-menu" class="settings-popover-menu" style="display: none;"></div>
+          </div>
         </div>
       </header>
 
@@ -328,7 +316,8 @@
   <script src="js/components/sheet-edit-modal.js?v=10.2"></script>
   <script src="js/components/notifications-center.js?v=10.2"></script>
   <script src="js/components/sheet-copy-engine.js?v=10.2"></script>
-  <script src="js/router.js?v=10.2"></script>
+  <script src="js/components/settings-menu.js?v=10.9"></script>
+  <script src="js/router.js?v=10.9"></script>
   <script src="js/pages/home.js?v=10.2"></script>
   <script src="js/pages/sheets.js?v=10.8"></script>
   <script src="js/pages/sheet-detail.js?v=10.2"></script>
@@ -344,7 +333,8 @@
   <script src="js/git-sync.js?v=10.2"></script>
   <script src="js/pages/admin.js?v=10.7"></script>
   <script src="js/pages/profile.js?v=10.2"></script>
+  <script src="js/pages/settings.js?v=10.9"></script>
   <script src="js/pages/secondary.js?v=10.2"></script>
-  <script src="js/app.js?v=10.2"></script>
+  <script src="js/app.js?v=10.9"></script>
 </body>
 </html>

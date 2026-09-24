@@ -83,6 +83,11 @@ class Router {
         if (window.AdminPage && typeof window.AdminPage.render === 'function') {
           window.AdminPage.render(container, params);
         }
+      },
+      '/settings': async (container, params) => {
+        if (window.SettingsPage && typeof window.SettingsPage.render === 'function') {
+          window.SettingsPage.render(container, params);
+        }
       }
     };
     this.currentPath = '';

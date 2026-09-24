@@ -59,6 +59,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.NotificationsCenter.updateUI();
     }
 
+    // Update Settings Menu texts & state
+    if (window.SettingsMenu && typeof window.SettingsMenu.updateUI === 'function') {
+      window.SettingsMenu.updateUI();
+    }
+
     // Update Header Brand
     const isAr = lang === 'ar';
     const headerBrandName = document.getElementById('header-brand-name');
@@ -437,6 +442,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.SecondaryPages.renderProfile(c, q);
     }
   });
+  router.register('/settings', (c, q) => {
+    if (window.SettingsPage && typeof window.SettingsPage.render === 'function') {
+      window.SettingsPage.render(c, q);
+    }
+  });
   router.register('/rewards', (c, q) => window.SecondaryPages.renderRewards(c, q));
   router.register('/alerts', (c, q) => window.SecondaryPages.renderAlerts(c, q));
   router.register('/search', (c, q) => window.SecondaryPages.renderSearch(c, q));
@@ -577,6 +587,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateGlobalMascotAvatars();
   if (window.NotificationsCenter && typeof window.NotificationsCenter.init === 'function') {
     window.NotificationsCenter.init();
+  }
+  if (window.SettingsMenu && typeof window.SettingsMenu.init === 'function') {
+    window.SettingsMenu.init();
   }
   router.handleRoute();
   updateActiveSidebarNav(window.location.hash.slice(1).split('?')[0] || '/');
