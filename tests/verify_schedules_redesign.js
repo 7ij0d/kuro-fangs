@@ -51,8 +51,8 @@ if (navCenterMatch) {
 }
 
 // Check cache busting version
-assert(/css\/polish\.css\?v=(9\.[3-9]|10\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for css');
-assert(/js\/router\.js\?v=(9\.[3-9]|10\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for js');
+assert(/css\/polish\.css\?v=(9\.[3-9]|1[0-9]\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for css');
+assert(/js\/router\.js\?v=(9\.[3-9]|1[0-9]\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.3 for js');
 
 // 3. Verify js/router.js
 console.log('\n3. Checking js/router.js:');
