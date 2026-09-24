@@ -158,16 +158,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const moreSchedules = document.getElementById('more-item-schedules');
     if (moreSchedules) moreSchedules.textContent = isAr ? 'الجداول الدراسية' : 'Schedules';
-    const moreQuestions = document.getElementById('more-item-questions');
-    if (moreQuestions) moreQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Question Bank';
     const navRewards = document.getElementById('nav-item-rewards');
     if (navRewards) navRewards.textContent = isAr ? 'كورو والتخصيص' : 'Mascot Hub';
     const navGames = document.getElementById('nav-item-games');
     if (navGames) navGames.textContent = isAr ? 'ألعاب واستراحة' : 'Games';
     const navAdmin = document.getElementById('nav-item-admin');
     if (navAdmin) navAdmin.textContent = isAr ? 'بوابة الإدارة' : 'Admin Portal';
-    const navProfile = document.getElementById('nav-item-profile');
-    if (navProfile) navProfile.textContent = isAr ? 'الملف الشخصي' : 'Profile';
 
     const sideSchedules = document.getElementById('side-nav-schedules');
     if (sideSchedules) sideSchedules.textContent = isAr ? 'الجداول الدراسية' : 'Schedules';
