@@ -86,8 +86,13 @@ const SheetDetailPage = {
       } catch (e) {
         comments = [];
       }
-    // Ensure fullscreen studio isolation and blur any open search inputs
+    }
+
+    // Ensure fullscreen studio isolation and blur any open search inputs / dismiss virtual keyboard
     document.body.classList.add('studio-fullscreen-active');
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
     const headerSearchInput = document.getElementById('header-search-input');
     if (headerSearchInput) headerSearchInput.blur();
     const sheetsSearchInput = document.getElementById('sheets-search-input');

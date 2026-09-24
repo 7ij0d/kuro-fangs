@@ -24,6 +24,7 @@ class Router {
             await window.GamesPage.render(container, params);
           }
         }
+      },
       '/recordings': async (container, params) => {
         if (window.RecordingsPage && typeof window.RecordingsPage.render === 'function') {
           await window.RecordingsPage.render(container, params);
@@ -141,8 +142,13 @@ class Router {
     const isStudioRoute = path === '/sheet-detail' || path.startsWith('/sheet-detail') || path.startsWith('/sheet/');
     if (isStudioRoute) {
       document.body.classList.add('studio-fullscreen-active');
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
       const hSearch = document.getElementById('header-search-input');
       if (hSearch) hSearch.blur();
+      const sSearch = document.getElementById('sheets-search-input');
+      if (sSearch) sSearch.blur();
     } else {
       document.body.classList.remove('studio-fullscreen-active');
     }
