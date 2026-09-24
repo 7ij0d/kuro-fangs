@@ -410,8 +410,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   router.register('/schedules', (c, q) => {
-    if (window.ExamsPage && typeof window.ExamsPage.renderAcademicSchedules === 'function') {
-      window.ExamsPage.renderAcademicSchedules(c, q);
+    if (window.ExamsPage && typeof window.ExamsPage.renderSchedulesHub === 'function') {
+      window.ExamsPage.renderSchedulesHub(c, q);
     } else if (window.ExamsPage) {
       window.ExamsPage.render(c, q);
     }
