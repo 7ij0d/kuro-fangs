@@ -613,9 +613,9 @@ html[dir="rtl"] .header-search-box .search-icon {
 }
 
 /* ==========================================================================
-   5. RESPONSIVE BREAKPOINTS (Tablets / iPads <= 1024px & touch devices)
+   5. RESPONSIVE BREAKPOINTS (Tablets / iPads / Mobile <= 1199px)
    ========================================================================== */
-@media (max-width: 1024px), (max-width: 1199px) and (pointer: coarse) {
+@media (max-width: 1199px) {
   .app-sidebar {
     width: 280px;
     transform: translateX(-100%);
@@ -643,6 +643,8 @@ html[dir="rtl"] .header-search-box .search-icon {
   html[dir="rtl"] .app-main-wrapper {
     margin-left: 0 !important;
     margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .mobile-toggle-btn {

@@ -216,8 +216,11 @@ class Router {
     // Handle More button state on top header navigation
     const headerMoreBtn = document.getElementById('header-more-btn');
     if (headerMoreBtn) {
-      const moreRoutes = ['/rewards', '/games', '/profile', '/admin', '/recordings', '/videos'];
-      const isMoreActive = moreRoutes.some(r => currentPath.startsWith(r));
+      const isTablet = window.innerWidth < 1200;
+      const baseMoreRoutes = ['/rewards', '/games', '/profile', '/admin'];
+      const scheduleRoutes = ['/schedules', '/lecture-schedule', '/practical-schedule', '/exams'];
+      const isMoreActive = baseMoreRoutes.some(r => currentPath.startsWith(r)) ||
+        (isTablet && scheduleRoutes.some(r => currentPath.startsWith(r)));
       headerMoreBtn.classList.toggle('active', isMoreActive);
     }
   }

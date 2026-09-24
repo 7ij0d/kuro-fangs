@@ -151,6 +151,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const navMore = document.getElementById('nav-item-more');
     if (navMore) navMore.textContent = isAr ? 'المزيد' : 'More';
 
+    const moreSchedules = document.getElementById('more-item-schedules');
+    if (moreSchedules) moreSchedules.textContent = isAr ? 'الجداول الدراسية' : 'Schedules';
     const moreQuestions = document.getElementById('more-item-questions');
     if (moreQuestions) moreQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Question Bank';
     const navRewards = document.getElementById('nav-item-rewards');

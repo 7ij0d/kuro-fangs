@@ -50,12 +50,12 @@
   </script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=10.2" />
-  <link rel="stylesheet" href="css/base.css?v=10.2" />
-  <link rel="stylesheet" href="css/layout.css?v=10.2" />
-  <link rel="stylesheet" href="css/components.css?v=10.2" />
+  <link rel="stylesheet" href="css/tokens.css?v=10.3" />
+  <link rel="stylesheet" href="css/base.css?v=10.3" />
+  <link rel="stylesheet" href="css/layout.css?v=10.3" />
+  <link rel="stylesheet" href="css/components.css?v=10.3" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=10.2" />
+  <link rel="stylesheet" href="css/polish.css?v=10.3" />
 </head>
 <body id="app-body" data-layout="dark-sidebar">
   <!-- ==========================================================================
@@ -225,7 +225,7 @@
             <i data-lucide="help-circle"></i>
             <span id="nav-item-questions">Questions</span>
           </a>
-          <a href="#/schedules" class="header-nav-pill" data-route="/schedules">
+          <a href="#/schedules" class="header-nav-pill desktop-only-nav-item" data-route="/schedules">
             <i data-lucide="calendar"></i>
             <span id="nav-item-schedules">Schedules</span>
           </a>
@@ -237,6 +237,11 @@
               <span id="nav-item-more">More</span>
             </button>
             <div class="header-dropdown-menu" id="header-dropdown-menu">
+              <!-- Tablet only: Schedules collapsed into More dropdown on iPad -->
+              <a href="#/schedules" class="header-dropdown-item tablet-schedules-item">
+                <i data-lucide="calendar"></i>
+                <span id="more-item-schedules">Schedules</span>
+              </a>
               <a href="#/questions" class="header-dropdown-item">
                 <i data-lucide="help-circle"></i>
                 <span id="more-item-questions">Question Bank</span>
