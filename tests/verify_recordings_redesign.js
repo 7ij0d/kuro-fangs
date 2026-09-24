@@ -33,8 +33,8 @@ requiredAssets.forEach(assetPath => {
 console.log('\n2. Checking index.html script tag & version:');
 const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
 assert(indexHtml.includes('js/pages/recordings.js'), 'index.html includes js/pages/recordings.js script');
-assert(/css\/polish\.css\?v=(9\.[7-9]|10\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.7 for css');
-assert(/js\/pages\/recordings\.js\?v=(9\.[7-9]|10\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.7 for recordings.js');
+assert(/css\/polish\.css\?v=(9\.[7-9]|1\d\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.7 for css');
+assert(/js\/pages\/recordings\.js\?v=(9\.[7-9]|1\d\.\d+)/.test(indexHtml), 'Cache busting bumped to ?v>=9.7 for recordings.js');
 
 // 3. Verify js/router.js & app.js
 console.log('\n3. Checking js/router.js & js/app.js:');

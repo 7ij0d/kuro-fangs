@@ -519,6 +519,31 @@ const HomePage = {
   /* ══════════════════════════════════════════
      6. 3-COLUMN SUBJECT TILES (With Leaf Watermark & Pastel Badges)
      ══════════════════════════════════════════ */
+  getSubjectIconHtml(subjId) {
+    const icons = {
+      'gen-med': 'stethoscope',
+      'gen-surgery': 'activity',
+      'oral-diseases': 'microscope',
+      'preventive': 'shield-check',
+      'cons-endo': 'tooth',
+      'fixed-pros': 'crown',
+      'removable-pros': 'layers',
+      'ortho': 'smile',
+      'pediatric': 'heart',
+      'pedo': 'heart',
+      'omdr': 'scan',
+      'omfs': 'scissors',
+      'endo': 'activity'
+    };
+    const icon = icons[subjId] || 'book-open';
+    if (icon === 'tooth') {
+      return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ksc-icon-svg">
+        <path d="M12 2C7.5 2 4 4.5 4 8c0 3 1.5 6 3 9 1 2 2 5 3 5s2-3 2-5c0-1.5.5-2 0-3-.5-1-1-1.5-1-2.5 0-1.5 1-2.5 1-2.5s1 1 1 2.5c0 1-.5 1.5-1 2.5-.5 1 0 1.5 0 3 0 2 1 5 2 5s2-3 3-5c1.5-3 3-6 3-9 0-3.5-3.5-6-8-6z" />
+      </svg>`;
+    }
+    return `<i data-lucide="${icon}" class="ksc-icon-svg"></i>`;
+  },
+
   buildCardsHTML(allSubjects) {
     const grid = document.getElementById('subjects-container');
     if (!grid) return;
@@ -553,8 +578,6 @@ const HomePage = {
 
     grid.innerHTML = filtered.map(subj => {
       const primaryTitle = isAr ? subj.name_ar : subj.name_en;
-      const secondaryTitle = isAr ? subj.name_en : subj.name_ar;
-      const theme = SUBJECT_THEMES[subj.id] || DEFAULT_THEME;
 
       let sheetsCount = 0;
       if (window.DATA && typeof window.DATA.getSheetsBySubject === 'function') {
@@ -566,11 +589,10 @@ const HomePage = {
 
       let countText = '';
       if (isAr) {
-        if (sheetsCount === 0) countText = 'لا توجد شيتات';
+        if (sheetsCount === 0) countText = '0 شيت';
         else if (sheetsCount === 1) countText = 'شيت واحد';
-        else if (sheetsCount === 2) countText = 'شيتان';
-        else if (sheetsCount <= 10) countText = `${sheetsCount} شيتات`;
-        else countText = `${sheetsCount} شيت`;
+        else if (sheetsCount === 2) countText = '2 شيت';
+        else countText = `${sheetsCount} شيتات`;
       } else {
         countText = `${sheetsCount} ${sheetsCount === 1 ? 'sheet' : 'sheets'}`;
       }
@@ -585,31 +607,21 @@ const HomePage = {
           tabindex="0"
           aria-label="${primaryTitle}"
         >
-          <div class="kuro-card-leaf-watermark"></div>
-
-          <!-- Top Row: Pastel Icon Box + Course Code Badge -->
-          <div class="ksc-top">
-            <div class="ksc-icon-box" style="background-color: ${theme.bg}; color: ${theme.color};">
-              <i data-lucide="${theme.icon}"></i>
-            </div>
-            <span class="ksc-code-badge">${subj.code || 'DENT-300'}</span>
+          <!-- Left Icon Box with rounded red outline -->
+          <div class="ksc-icon-wrap">
+            ${HomePage.getSubjectIconHtml(subj.id)}
           </div>
 
-          <!-- Body: English & Arabic Names -->
-          <div class="ksc-body">
-            <h3 class="ksc-title-primary" title="${primaryTitle}">${primaryTitle}</h3>
-            <p class="ksc-title-secondary" title="${secondaryTitle}">${secondaryTitle}</p>
+          <!-- Center: Subject Name, Code & Count -->
+          <div class="ksc-info-col">
+            <h3 class="ksc-title" title="${primaryTitle}">${primaryTitle}</h3>
+            <span class="ksc-code">${subj.code || 'DENT-300'}</span>
+            <span class="ksc-count">${countText}</span>
           </div>
 
-          <!-- Footer: Sheet count + chevron -->
-          <div class="ksc-footer">
-            <span class="ksc-sheet-count">
-              <i data-lucide="file-text"></i>
-              <span>${countText}</span>
-            </span>
-            <span class="ksc-arrow-btn">
-              <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
-            </span>
+          <!-- Right: Chevron indicator -->
+          <div class="ksc-arrow-wrap">
+            <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
           </div>
         </div>
       `;

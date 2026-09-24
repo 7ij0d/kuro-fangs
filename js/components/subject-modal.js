@@ -1,380 +1,997 @@
 /**
- * KURO FANGS — FLOATING INTERACTIVE SUBJECT MODAL (i18n SUPPORTED)
- * Centered Hub with Direct In-App PDF Previewer (<iframe />) & Modern 16px Cards
+ * KURO FANGS — 4-STEP SUBJECT QUICK-ACCESS MODAL & NAVIGATION SYSTEM
+ * Exact implementation of media_1790283083887.jpg
+ * 
+ * Flow:
+ * 1. Select Subject: Floating quick-access menu (Sheets, Recordings, Questions, Notes, Other)
+ * 2. Select Sheets: Real sheets list with live search
+ * 3. Sheet Options: Open Sheet, Download Sheet, Recordings, Questions, Notes
+ * 4. Question Options: Previous Years (AR), Previous Years (EN), AI Questions, Other, Notes
+ * 3b. Recordings: Sheet-linked recordings only (or clean empty state)
+ * 3c. Notes: Sheet-linked study notes
  */
 
-const SubjectModal = {
-  currentSubject: null,
-  activeCategory: null,
+(function (window) {
+  'use strict';
 
-  ensureDOM() {
-    let backdrop = document.getElementById('subject-modal-backdrop');
-    if (!backdrop) {
-      backdrop = document.createElement('div');
-      backdrop.id = 'subject-modal-backdrop';
-      backdrop.className = 'subject-modal-backdrop';
-      backdrop.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(backdrop);
-    }
-    let modalBox = document.getElementById('subject-modal-box');
-    if (!modalBox) {
-      modalBox = document.createElement('div');
-      modalBox.id = 'subject-modal-box';
-      modalBox.className = 'subject-modal-box';
-      modalBox.setAttribute('role', 'dialog');
-      modalBox.setAttribute('aria-modal', 'true');
-      backdrop.appendChild(modalBox);
-    }
-    modalBox.onclick = (e) => e.stopPropagation();
-    backdrop.onclick = (e) => {
-      if (e.target === backdrop) SubjectModal.close();
-    };
-    return { backdrop, modalBox };
-  },
+  const SubjectModal = {
+    currentSubject: null,
+    currentSheet: null,
+    currentStep: 'step1',
+    stepMode: 'sheets', // 'sheets' | 'recordings' | 'questions' | 'notes'
+    historyStack: [],
+    sheetSearchQuery: '',
 
-  init() {
-    SubjectModal.ensureDOM();
+    SUBJECT_ICONS: {
+      'gen-med': 'stethoscope',
+      'gen-surgery': 'activity',
+      'oral-diseases': 'microscope',
+      'preventive': 'shield-check',
+      'cons-endo': 'tooth',
+      'fixed-pros': 'crown',
+      'removable-pros': 'layers',
+      'ortho': 'smile',
+      'pediatric': 'heart',
+      'pedo': 'heart',
+      'omdr': 'scan',
+      'omfs': 'scissors',
+      'endo': 'activity'
+    },
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
+    getSubjectIconHtml(subjectId) {
+      const iconType = this.SUBJECT_ICONS[subjectId] || 'book-open';
+      if (iconType === 'tooth') {
+        return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sqm-icon-svg">
+          <path d="M12 2C7.5 2 4 4.5 4 8c0 3 1.5 6 3 9 1 2 2 5 3 5s2-3 2-5c0-1.5.5-2 0-3-.5-1-1-1.5-1-2.5 0-1.5 1-2.5 1-2.5s1 1 1 2.5c0 1-.5 1.5-1 2.5-.5 1 0 1.5 0 3 0 2 1 5 2 5s2-3 3-5c1.5-3 3-6 3-9 0-3.5-3.5-6-8-6z" />
+        </svg>`;
+      }
+      return `<i data-lucide="${iconType}" class="sqm-icon-svg"></i>`;
+    },
+
+    ensureDOM() {
+      let backdrop = document.getElementById('subject-modal-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'subject-modal-backdrop';
+        backdrop.className = 'subject-modal-backdrop';
+        backdrop.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(backdrop);
+      }
+      let modalBox = document.getElementById('subject-modal-box');
+      if (!modalBox) {
+        modalBox = document.createElement('div');
+        modalBox.id = 'subject-modal-box';
+        modalBox.className = 'subject-modal-box sqm-modal-box';
+        modalBox.setAttribute('role', 'dialog');
+        modalBox.setAttribute('aria-modal', 'true');
+        backdrop.appendChild(modalBox);
+      } else {
+        modalBox.classList.add('sqm-modal-box');
+      }
+
+      modalBox.onclick = (e) => e.stopPropagation();
+      backdrop.onclick = (e) => {
+        if (e.target === backdrop) SubjectModal.close();
+      };
+      return { backdrop, modalBox };
+    },
+
+    init() {
+      SubjectModal.ensureDOM();
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          SubjectModal.close();
+        }
+      });
+    },
+
+    open(subjectId, initialStep = 'step1', initialSheet = null) {
+      const subject = (window.DATA && typeof window.DATA.getSubjectById === 'function' ? window.DATA.getSubjectById(subjectId) : null)
+        || (window.DATA && typeof window.DATA.getSubjects === 'function' ? window.DATA.getSubjects().find(s => s.id === subjectId) : null)
+        || (window.DATA && typeof window.DATA.getSubjects === 'function' ? window.DATA.getSubjects()[0] : null);
+
+      if (!subject) {
+        console.warn('Subject not found:', subjectId);
+        if (window.ROUTER) window.ROUTER.navigate(`/sheets?subject=${subjectId}`);
+        return;
+      }
+
+      SubjectModal.currentSubject = subject;
+      SubjectModal.currentSheet = initialSheet;
+      SubjectModal.currentStep = initialStep;
+      SubjectModal.stepMode = 'sheets';
+      SubjectModal.historyStack = [];
+      SubjectModal.sheetSearchQuery = '';
+
+      const { backdrop, modalBox } = SubjectModal.ensureDOM();
+      if (!modalBox || !backdrop) return;
+
+      SubjectModal.render();
+
+      backdrop.style.display = 'flex';
+      backdrop.setAttribute('aria-hidden', 'false');
+      const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+      raf(() => {
+        backdrop.classList.add('active');
+      });
+      document.body.style.overflow = 'hidden';
+    },
+
+    close() {
+      const backdrop = document.getElementById('subject-modal-backdrop');
+      if (backdrop) {
+        backdrop.classList.remove('active');
+        backdrop.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+          if (!backdrop.classList.contains('active')) {
+            backdrop.style.display = 'none';
+          }
+        }, 220);
+      }
+      document.body.style.overflow = '';
+      SubjectModal.historyStack = [];
+    },
+
+    pushStep(nextStep, sheet = null, mode = null) {
+      SubjectModal.historyStack.push({
+        step: SubjectModal.currentStep,
+        sheet: SubjectModal.currentSheet,
+        mode: SubjectModal.stepMode
+      });
+      SubjectModal.currentStep = nextStep;
+      if (sheet) SubjectModal.currentSheet = sheet;
+      if (mode) SubjectModal.stepMode = mode;
+      SubjectModal.render();
+    },
+
+    popStep() {
+      if (SubjectModal.historyStack.length > 0) {
+        const prev = SubjectModal.historyStack.pop();
+        SubjectModal.currentStep = prev.step;
+        SubjectModal.currentSheet = prev.sheet;
+        SubjectModal.stepMode = prev.mode;
+        SubjectModal.render();
+      } else {
         SubjectModal.close();
       }
-    });
-  },
+    },
 
-  open(subjectId) {
-    const subject = (window.DATA && typeof window.DATA.getSubjectById === 'function' ? window.DATA.getSubjectById(subjectId) : null)
-      || (window.DATA && typeof window.DATA.getSubjects === 'function' ? window.DATA.getSubjects().find(s => s.id === subjectId) : null)
-      || (window.DATA && typeof window.DATA.getSubjects === 'function' ? window.DATA.getSubjects()[0] : null);
+    render() {
+      const { modalBox } = SubjectModal.ensureDOM();
+      if (!modalBox || !SubjectModal.currentSubject) return;
 
-    if (!subject) {
-      console.warn('Subject not found:', subjectId);
-      if (window.ROUTER) window.ROUTER.navigate(`/sheets?subject=${subjectId}`);
-      return;
-    }
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
 
-    SubjectModal.currentSubject = subject;
-    SubjectModal.activeCategory = null;
-
-    const { backdrop, modalBox } = SubjectModal.ensureDOM();
-    if (!modalBox || !backdrop) return;
-
-    SubjectModal.renderCategoriesView();
-    backdrop.style.display = 'flex';
-    backdrop.setAttribute('aria-hidden', 'false');
-    const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
-    raf(() => {
-      backdrop.classList.add('active');
-    });
-    document.body.style.overflow = 'hidden';
-
-    if (window.lucide) window.lucide.createIcons();
-  },
-
-  close() {
-    const backdrop = document.getElementById('subject-modal-backdrop');
-    if (backdrop) {
-      backdrop.classList.remove('active');
-      backdrop.setAttribute('aria-hidden', 'true');
-      setTimeout(() => {
-        if (!backdrop.classList.contains('active')) {
-          backdrop.style.display = 'none';
-        }
-      }, 220);
-    }
-    document.body.style.overflow = '';
-  },
-
-  renderCategoriesView() {
-    const subject = SubjectModal.currentSubject;
-    const { modalBox } = SubjectModal.ensureDOM();
-    if (!modalBox || !subject) return;
-
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-    const t = (k) => window.I18N ? window.I18N.t(k) : k;
-
-    const primaryTitle = isAr ? subject.name_ar : subject.name_en;
-    const subTitle = isAr ? `${subject.name_en} • ${subject.code}` : `${subject.name_ar} • ${subject.code}`;
-
-    const categories = [
-      {
-        id: 'sheets',
-        title: isAr ? 'الشيتات والمحاضرات' : 'Sheets & Lectures',
-        desc: isAr ? 'تصفح الشيتات الرسمية' : 'Browse official sheets',
-        icon: '<img src="assets/icons/sheets_cat.png" alt="Sheets" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #0284C7;" />'
-      },
-      {
-        id: 'recordings',
-        title: isAr ? 'التسجيلات الصوتية' : 'Audio Recordings',
-        desc: isAr ? 'تسجيلات دكاترة الكلية' : 'Faculty lecture audio',
-        icon: '<img src="assets/icons/recordings_icon.png" alt="Recordings" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #10B981;" />'
-      },
-      {
-        id: 'ai-questions',
-        title: isAr ? 'الأسئلة والاختبارات' : 'Questions & Quizzes',
-        desc: isAr ? 'بنك الأسئلة وأرشيف الامتحانات' : 'Question bank & past exams',
-        icon: '<i data-lucide="help-circle" style="width: 24px; height: 24px; color: #8B5CF6;"></i>'
-      },
-      {
-        id: 'files-slides',
-        title: isAr ? 'ملفات ومصادر إضافية' : 'Files & Extra Resources',
-        desc: isAr ? 'عروض السلايدات والمراجع العلمية' : 'Slides, references & supplements',
-        icon: '<i data-lucide="folder" style="width: 24px; height: 24px; color: #64748B;"></i>'
+      switch (SubjectModal.currentStep) {
+        case 'step1':
+          modalBox.innerHTML = SubjectModal.renderStep1HTML(isAr);
+          break;
+        case 'step2':
+          modalBox.innerHTML = SubjectModal.renderStep2HTML(isAr);
+          break;
+        case 'step3':
+          modalBox.innerHTML = SubjectModal.renderStep3HTML(isAr);
+          break;
+        case 'step4':
+          modalBox.innerHTML = SubjectModal.renderStep4HTML(isAr);
+          break;
+        case 'recordings':
+          modalBox.innerHTML = SubjectModal.renderRecordingsHTML(isAr);
+          break;
+        case 'notes':
+          modalBox.innerHTML = SubjectModal.renderNotesHTML(isAr);
+          break;
+        case 'other':
+          modalBox.innerHTML = SubjectModal.renderOtherHTML(isAr);
+          break;
+        default:
+          modalBox.innerHTML = SubjectModal.renderStep1HTML(isAr);
+          break;
       }
-    ];
 
-    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || `assets/covers/${subject.id}.webp`;
-    const arrowIcon = isAr ? 'arrow-left' : 'arrow-right';
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
 
-    modalBox.innerHTML = `
-      <!-- Header -->
-      <div class="modal-header">
-        <div class="modal-header-meta">
-          <div class="modal-subject-banner-thumb">
-            <img src="${coverImg}" alt="${primaryTitle}" width="600" height="337" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
-          </div>
-          <div class="modal-title-wrap">
-            <h2>${primaryTitle}</h2>
-            <p>${subTitle}</p>
-          </div>
-        </div>
-        <button class="modal-close-btn" onclick="SubjectModal.close();" aria-label="${t('closeBtn')}">
-          ✕
-        </button>
-      </div>
+      SubjectModal.bindEvents(isAr);
+    },
 
-      <!-- Body: 8 Options -->
-      <div class="modal-body">
-        <div class="modal-prompt-title">
-          <i data-lucide="sparkles" style="color: var(--brand-burgundy); width: 18px; height: 18px;"></i>
-          ${t('modalPrompt')}
-        </div>
+    /* ══════════════════════════════════════════════════════════════════════════
+       STEP 1: SELECT SUBJECT (Quick-Access Menu)
+       Contains ONLY: Sheets, Recordings, Questions, Notes, Other
+       ══════════════════════════════════════════════════════════════════════════ */
+    renderStep1HTML(isAr) {
+      const subject = SubjectModal.currentSubject;
+      const primaryTitle = isAr ? subject.name_ar : subject.name_en;
+      const code = subject.code || 'DENT-300';
+      const iconHtml = SubjectModal.getSubjectIconHtml(subject.id);
 
-        <div class="modal-categories-grid">
-          ${categories.map(cat => `
-            <div class="modal-category-card" onclick="SubjectModal.openCategory('${cat.id}');">
-              <div class="category-card-left">
-                <div class="category-icon-pill">
-                  ${cat.icon}
-                </div>
-                <div class="category-text-wrap">
-                  <h3>${cat.title}</h3>
-                  <p>${cat.desc}</p>
-                </div>
+      return `
+        <div class="sqm-inner sqm-step1-pane">
+          <!-- Header -->
+          <div class="sqm-header">
+            <div class="sqm-header-left">
+              <div class="sqm-icon-box">
+                ${iconHtml}
               </div>
-              <div class="category-arrow-icon">
-                <i data-lucide="${arrowIcon}" style="width: 17px; height: 17px;"></i>
+              <div class="sqm-title-meta">
+                <h2 class="sqm-main-title">${primaryTitle}</h2>
+                <span class="sqm-sub-code">${code}</span>
               </div>
             </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-
-    if (window.lucide) window.lucide.createIcons();
-  },
-
-  openCategory(categoryId) {
-    const subject = SubjectModal.currentSubject;
-    if (!subject) return;
-    const subjectId = subject.id;
-
-    // For file-based categories (sheets, files-slides):
-    // Provide instant in-modal explorer with 16px modern cards and dual action buttons!
-    if (categoryId === 'sheets' || categoryId === 'files-slides') {
-      SubjectModal.renderCategoryFiles(categoryId);
-      return;
-    }
-
-    // Direct page navigation for tools
-    SubjectModal.close();
-    switch (categoryId) {
-      case 'recordings':
-        window.ROUTER.navigate(`/recordings?subject=${subjectId}`);
-        break;
-      case 'ai-questions':
-      case 'past-exams':
-      case 'flashcards-atlas':
-        window.ROUTER.navigate(`/questions?subject=${subjectId}`);
-        break;
-      
-      default:
-        window.ROUTER.navigate(`/sheets?subject=${subjectId}`);
-        break;
-    }
-  },
-
-  renderCategoryFiles(categoryId) {
-    const subject = SubjectModal.currentSubject;
-    const { modalBox } = SubjectModal.ensureDOM();
-    if (!modalBox || !subject) return;
-
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-    const t = (k) => window.I18N ? window.I18N.t(k) : k;
-
-    const primaryTitle = isAr ? subject.name_ar : subject.name_en;
-    const subTitle = isAr ? `${subject.name_en} • ${subject.code}` : `${subject.name_ar} • ${subject.code}`;
-    const coverImg = subject.cover_image || window.DATA?.subjectCovers?.[subject.id] || `assets/covers/${subject.id}.webp`;
-    const backArrow = isAr ? 'arrow-right' : 'arrow-left';
-
-    // Get files for this category
-    const files = window.DATA.getSheetsForSubject 
-      ? window.DATA.getSheetsForSubject(subject.id)
-      : [];
-
-    let categoryLabel = isAr ? 'شيتات ومحاضرات المادة' : 'Subject Handouts & Lectures';
-    if (categoryId === 'past-exams') categoryLabel = isAr ? 'أرشيف امتحانات السنوات السابقة' : 'Past Exams Archive';
-    if (categoryId === 'files-slides') categoryLabel = isAr ? 'عروض السلايدات والمراجع' : 'Slides & Supplementary Files';
-
-    modalBox.innerHTML = `
-      <!-- Header -->
-      <div class="modal-header">
-        <div class="modal-header-meta">
-          <div class="modal-subject-banner-thumb">
-            <img src="${coverImg}" alt="${primaryTitle}" width="600" height="337" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='assets/covers/gen-med.webp';" />
+            <button type="button" class="sqm-close-btn" id="sqm-btn-close" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
           </div>
-          <div class="modal-title-wrap">
-            <h2>${primaryTitle}</h2>
-            <p>${subTitle} • ${categoryLabel}</p>
+
+          <!-- Body: 5 Action Cards Grid -->
+          <div class="sqm-body sqm-step1-body">
+            <div class="sqm-actions-grid">
+              <!-- Row 1: Sheets, Recordings, Questions -->
+              <button type="button" class="sqm-action-card" id="sqm-action-sheets" data-action="sheets">
+                <div class="sqm-card-icon-box">
+                  <i data-lucide="file-text"></i>
+                </div>
+                <span class="sqm-card-label">${isAr ? 'الشيتات' : 'Sheets'}</span>
+              </button>
+
+              <button type="button" class="sqm-action-card" id="sqm-action-recordings" data-action="recordings">
+                <div class="sqm-card-icon-box">
+                  <i data-lucide="mic"></i>
+                </div>
+                <span class="sqm-card-label">${isAr ? 'التسجيلات' : 'Recordings'}</span>
+              </button>
+
+              <button type="button" class="sqm-action-card" id="sqm-action-questions" data-action="questions">
+                <div class="sqm-card-icon-box">
+                  <i data-lucide="help-circle"></i>
+                </div>
+                <span class="sqm-card-label">${isAr ? 'الأسئلة' : 'Questions'}</span>
+              </button>
+
+              <!-- Row 2: Notes, Other -->
+              <button type="button" class="sqm-action-card sqm-card-secondary" id="sqm-action-notes" data-action="notes">
+                <div class="sqm-card-icon-box">
+                  <i data-lucide="file-edit"></i>
+                </div>
+                <span class="sqm-card-label">${isAr ? 'الملاحظات' : 'Notes'}</span>
+              </button>
+
+              <button type="button" class="sqm-action-card sqm-card-secondary" id="sqm-action-other" data-action="other">
+                <div class="sqm-card-icon-box">
+                  <i data-lucide="more-horizontal"></i>
+                </div>
+                <span class="sqm-card-label">${isAr ? 'أخرى' : 'Other'}</span>
+              </button>
+            </div>
           </div>
         </div>
-        <button class="modal-close-btn" onclick="SubjectModal.close();" aria-label="${t('closeBtn')}">
-          ✕
-        </button>
-      </div>
+      `;
+    },
 
-      <!-- Explorer View -->
-      <div class="modal-body modal-explorer-view">
-        <!-- Sub Navigation Bar -->
-        <div class="explorer-top-nav">
-          <button class="btn-back-categories" onclick="SubjectModal.renderCategoriesView();">
-            <i data-lucide="${backArrow}" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'العودة للأقسام' : 'Back to Hubs'}</span>
-          </button>
+    /* ══════════════════════════════════════════════════════════════════════════
+       STEP 2: SELECT SHEETS (Real Database Records & Live Search)
+       ══════════════════════════════════════════════════════════════════════════ */
+    renderStep2HTML(isAr) {
+      const subject = SubjectModal.currentSubject;
+      const primaryTitle = isAr ? subject.name_ar : subject.name_en;
+      const code = subject.code || 'DENT-300';
+      const iconHtml = SubjectModal.getSubjectIconHtml(subject.id);
+      const backIcon = isAr ? 'arrow-right' : 'arrow-left';
+      const chevronIcon = isAr ? 'chevron-left' : 'chevron-right';
 
-          <button class="btn btn-secondary btn-sm" onclick="SubjectModal.close(); window.ROUTER.navigate('/sheets?subject=${subject.id}');">
-            <span>${isAr ? 'الانتقال للصفحة الكاملة' : 'Full Page View'}</span>
-            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}" style="width: 14px; height: 14px;"></i>
-          </button>
+      let allSheets = window.DATA ? window.DATA.getSheetsBySubject(subject.id) : [];
+
+      if (SubjectModal.sheetSearchQuery) {
+        const q = SubjectModal.sheetSearchQuery.toLowerCase();
+        allSheets = allSheets.filter(s => {
+          const tEn = (s.title_en || s.title || '').toLowerCase();
+          const tAr = (s.title_ar || '').toLowerCase();
+          const doc = (s.doctor_name || '').toLowerCase();
+          return tEn.includes(q) || tAr.includes(q) || doc.includes(q);
+        });
+      }
+
+      let modeSubtitle = isAr ? 'الشيتات' : 'Sheets';
+      if (SubjectModal.stepMode === 'recordings') modeSubtitle = isAr ? 'اختر شيت لعرض تسجيلاته' : 'Select Sheet for Recordings';
+      if (SubjectModal.stepMode === 'questions') modeSubtitle = isAr ? 'اختر شيت لعرض بنك الأسئلة' : 'Select Sheet for Questions';
+      if (SubjectModal.stepMode === 'notes') modeSubtitle = isAr ? 'اختر شيت لعرض الملاحظات' : 'Select Sheet for Notes';
+
+      return `
+        <div class="sqm-inner sqm-step2-pane">
+          <!-- Header with Back Button -->
+          <div class="sqm-header">
+            <div class="sqm-header-left">
+              <button type="button" class="sqm-back-btn" id="sqm-btn-back" aria-label="Back">
+                <i data-lucide="${backIcon}"></i>
+              </button>
+              <div class="sqm-icon-box">
+                ${iconHtml}
+              </div>
+              <div class="sqm-title-meta">
+                <h2 class="sqm-main-title">${primaryTitle}</h2>
+                <span class="sqm-sub-code">${code} • ${modeSubtitle}</span>
+              </div>
+            </div>
+            <button type="button" class="sqm-close-btn" id="sqm-btn-close" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="sqm-search-wrap">
+            <i data-lucide="search" class="sqm-search-icon"></i>
+            <input
+              type="text"
+              id="sqm-sheets-search"
+              class="sqm-search-input"
+              placeholder="${isAr ? 'ابحث في الشيتات...' : 'Search sheets...'}"
+              value="${SubjectModal.sheetSearchQuery || ''}"
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- Sheets List -->
+          <div class="sqm-body sqm-sheets-scroll-body">
+            ${allSheets.length === 0 ? `
+              <div class="sqm-empty-state">
+                <div class="sqm-empty-icon"><i data-lucide="file-question"></i></div>
+                <h3 class="sqm-empty-title">${isAr ? 'لا توجد شيتات متاحة حالياً' : 'No sheets available yet'}</h3>
+                <p class="sqm-empty-desc">${isAr ? 'سيتم رفع واستكمال الملازم الخاصة بهذه المادة قريباً.' : 'Lecture handouts for this subject will be uploaded soon.'}</p>
+              </div>
+            ` : `
+              <div class="sqm-sheets-list">
+                ${allSheets.map((sheet, idx) => {
+                  const sTitle = isAr ? (sheet.title_ar || sheet.title_en || sheet.title) : (sheet.title_en || sheet.title || sheet.title_ar);
+                  const orderNum = sheet.order_index || (idx + 1);
+                  const pages = sheet.pages || (sheet.page_count || 1);
+                  const size = sheet.size || '2.0 MB';
+
+                  return `
+                    <div class="sqm-sheet-row" data-sheet-id="${sheet.id}" role="button" tabindex="0">
+                      <div class="sqm-sheet-row-left">
+                        <div class="sqm-sheet-icon-pill">
+                          <i data-lucide="file-text"></i>
+                        </div>
+                        <div class="sqm-sheet-info">
+                          <h4 class="sqm-sheet-title">${sTitle.includes('Sheet') || sTitle.includes('الشيت') ? sTitle : `${isAr ? 'الشيت' : 'Sheet'} ${orderNum}: ${sTitle}`}</h4>
+                          <span class="sqm-sheet-specs">${pages} ${isAr ? 'صفحة' : 'pages'} • ${size}</span>
+                        </div>
+                      </div>
+                      <div class="sqm-sheet-row-right">
+                        <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
         </div>
+      `;
+    },
 
-        <!-- Modern 16px Cards List or Empty State -->
-        <div class="modal-files-cards-list">
-          ${files.length === 0 ? (
-            window.renderEmptyState
-              ? window.renderEmptyState()
-              : `
-                <div class="empty-state-card">
-                  <div class="empty-state-icon-wrap">
-                    <i data-lucide="folder-open"></i>
+    /* ══════════════════════════════════════════════════════════════════════════
+       STEP 3: SHEET OPTIONS
+       Show: Open Sheet, Download Sheet, Recordings, Questions, Notes
+       ══════════════════════════════════════════════════════════════════════════ */
+    renderStep3HTML(isAr) {
+      const sheet = SubjectModal.currentSheet;
+      const subject = SubjectModal.currentSubject;
+      if (!sheet) return SubjectModal.renderStep2HTML(isAr);
+
+      const sTitle = isAr ? (sheet.title_ar || sheet.title_en || sheet.title) : (sheet.title_en || sheet.title || sheet.title_ar);
+      const subTitle = isAr ? subject.name_ar : subject.name_en;
+      const pages = sheet.pages || (sheet.page_count || 1);
+      const size = sheet.size || '2.0 MB';
+      const backIcon = isAr ? 'arrow-right' : 'arrow-left';
+      const chevronIcon = isAr ? 'chevron-left' : 'chevron-right';
+
+      return `
+        <div class="sqm-inner sqm-step3-pane">
+          <!-- Header -->
+          <div class="sqm-header">
+            <div class="sqm-header-left">
+              <button type="button" class="sqm-back-btn" id="sqm-btn-back" aria-label="Back">
+                <i data-lucide="${backIcon}"></i>
+              </button>
+              <div class="sqm-icon-box sqm-icon-sheet">
+                <i data-lucide="file-text"></i>
+              </div>
+              <div class="sqm-title-meta">
+                <h2 class="sqm-main-title">${sTitle}</h2>
+                <span class="sqm-sub-code">${subTitle} • ${pages} ${isAr ? 'صفحة' : 'pages'} • ${size}</span>
+              </div>
+            </div>
+            <button type="button" class="sqm-close-btn" id="sqm-btn-close" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <!-- Body: Sheet Actions List -->
+          <div class="sqm-body sqm-options-body">
+            <div class="sqm-options-list">
+              <!-- 1. Open Sheet -->
+              <button type="button" class="sqm-option-row" id="sqm-opt-open">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="eye"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'فتح الشيت' : 'Open Sheet'}</span>
                   </div>
-                  <h3 class="empty-state-title">${isAr ? 'لا توجد محتويات مضافة حالياً' : 'No contents available yet'}</h3>
-                  <p class="empty-state-subtitle">${isAr ? 'جاري رفع واستكمال الملازم والمحتوى الأكاديمي قريباً' : 'Handouts and academic curriculum materials will be uploaded soon.'}</p>
                 </div>
-              `
-          ) : files.map(item => `
-            <div class="modal-file-card" onclick="SubjectModal.previewDoc('${item.id}');" style="cursor: pointer;">
-              <!-- Top: Type Badge + Lecture Title -->
-              <div class="modal-file-top" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                ${item.order_index ? `
-                  <span class="sheet-order-pill" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px;">
-                    ${isAr ? `الشيت #${item.order_index}` : `Sheet #${item.order_index}`}
-                  </span>
-                ` : ''}
-                <span class="sheet-type-pill">
-                  <img src="assets/icons/sheets_cat.png" alt="Sheet" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 4px;" />
-                  ${item.type || 'PDF Sheet'}
-                </span>
-                <h3 class="modal-file-title">${item.title_en || item.title || item.title_ar}</h3>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 2. Download Sheet -->
+              <button type="button" class="sqm-option-row" id="sqm-opt-download">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="download"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'تنزيل الشيت' : 'Download Sheet'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 3. Recordings -->
+              <button type="button" class="sqm-option-row" id="sqm-opt-recordings">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="mic"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'التسجيلات' : 'Recordings'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'تسجيلات هذا الشيت' : 'Lectures for this sheet'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 4. Questions -->
+              <button type="button" class="sqm-option-row" id="sqm-opt-questions">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="help-circle"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'الأسئلة' : 'Questions'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'عرض خيارات الأسئلة' : 'View question options'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 5. Notes -->
+              <button type="button" class="sqm-option-row" id="sqm-opt-notes">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="file-edit"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'الملاحظات' : 'Notes'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'عرض ملاحظات هذا الشيت' : 'View notes for this sheet'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       STEP 4: QUESTION OPTIONS
+       Options:
+       - Questions (This Sheet)
+       - Previous Years Questions (Arabic)
+       - Previous Years Questions (English)
+       - AI Generated Questions
+       - Other Questions
+       - Notes
+       ══════════════════════════════════════════════════════════════════════════ */
+    renderStep4HTML(isAr) {
+      const sheet = SubjectModal.currentSheet;
+      if (!sheet) return SubjectModal.renderStep2HTML(isAr);
+
+      const sTitle = isAr ? (sheet.title_ar || sheet.title_en || sheet.title) : (sheet.title_en || sheet.title || sheet.title_ar);
+      const backIcon = isAr ? 'arrow-right' : 'arrow-left';
+      const chevronIcon = isAr ? 'chevron-left' : 'chevron-right';
+
+      return `
+        <div class="sqm-inner sqm-step4-pane">
+          <!-- Header -->
+          <div class="sqm-header">
+            <div class="sqm-header-left">
+              <button type="button" class="sqm-back-btn" id="sqm-btn-back" aria-label="Back">
+                <i data-lucide="${backIcon}"></i>
+              </button>
+              <div class="sqm-icon-box sqm-icon-question">
+                <i data-lucide="help-circle"></i>
               </div>
-
-              <!-- Information Row: Pages • Size • Doctor • Date -->
-              <div class="modal-file-meta-row">
-                <div class="modal-meta-item" title="${isAr ? 'عدد الصفحات' : 'Pages'}">
-                  <i data-lucide="book-open"></i>
-                  <span><strong>${item.pages || 18}</strong> ${isAr ? 'صفحة' : 'pages'}</span>
-                </div>
-
-                <div class="modal-meta-item" title="${isAr ? 'حجم الملف' : 'Size'}">
-                  <i data-lucide="hard-drive"></i>
-                  <span><strong>${item.size || '3.2 MB'}</strong></span>
-                </div>
-
-                ${item.doctor_name ? `
-                <div class="modal-meta-item" title="${isAr ? 'الأستاذ' : 'Doctor'}">
-                  <i data-lucide="user-check"></i>
-                  <span>${item.doctor_name}</span>
-                </div>
-                ` : ''}
-
-                <div class="modal-meta-item" title="${isAr ? 'التاريخ' : 'Date'}">
-                  <i data-lucide="calendar"></i>
-                  <span>${item.date || '2026-09-12'}</span>
-                </div>
-              </div>
-
-              <!-- Bottom: Dual Action Buttons -->
-              <div class="modal-file-actions-row">
-                <button class="btn btn-primary btn-sm btn-action-view" onclick="event.stopPropagation(); SubjectModal.previewDoc('${item.id}');">
-                  <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
-                  <span>${isAr ? 'قراءة / معاينة' : 'Read / View'}</span>
-                </button>
-
-                <button class="btn btn-secondary btn-sm btn-action-download" onclick="event.stopPropagation(); SubjectModal.downloadDoc('${item.id}');">
-                  <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-                  <span>${isAr ? 'تنزيل PDF' : 'Download'}</span>
-                </button>
+              <div class="sqm-title-meta">
+                <h2 class="sqm-main-title">${sTitle}</h2>
+                <span class="sqm-sub-code">${isAr ? 'الأسئلة والاختبارات' : 'Questions'}</span>
               </div>
             </div>
-          `).join('')}
+            <button type="button" class="sqm-close-btn" id="sqm-btn-close" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <!-- Body: 6 Question Options -->
+          <div class="sqm-body sqm-options-body">
+            <div class="sqm-options-list">
+              <!-- 1. Questions (This Sheet) -->
+              <button type="button" class="sqm-option-row" data-qtype="this-sheet">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="file-question"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'أسئلة هذا الشيت' : 'Questions (This Sheet)'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'أسئلة معدة خصيصاً لهذا الشيت' : 'Questions prepared for this sheet'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 2. Previous Years Questions (Arabic) -->
+              <button type="button" class="sqm-option-row" data-qtype="past-ar">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="archive"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'أسئلة السنوات السابقة (عربي)' : 'Previous Years Questions (Arabic)'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'أسئلة الامتحانات السابقة المعتمدة' : 'Official past exams questions'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 3. Previous Years Questions (English) -->
+              <button type="button" class="sqm-option-row" data-qtype="past-en">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="book-marked"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'أسئلة السنوات السابقة (إنجليزي)' : 'Previous Years Questions (English)'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'نماذج امتحانات السنوات السابقة باللغة الإنجليزية' : 'Past papers (English)'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 4. AI Generated Questions -->
+              <button type="button" class="sqm-option-row" data-qtype="ai">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="sparkles"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'أسئلة الذكاء الاصطناعي' : 'AI Generated Questions'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'تدرب على أسئلة ذكية مولدة ومطابقة للشيت' : 'Practice with AI questions'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 5. Other Questions -->
+              <button type="button" class="sqm-option-row" data-qtype="other">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="help-circle"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'أسئلة أخرى' : 'Other Questions'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'تمارين وتدريبات إضافية' : 'Additional questions'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+
+              <!-- 6. Notes -->
+              <button type="button" class="sqm-option-row" data-qtype="notes">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="file-edit"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'الملاحظات' : 'Notes'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'عرض ملاحظات هذا الشيت' : 'View notes for this sheet'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right">
+                  <i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    },
 
-    if (window.lucide) window.lucide.createIcons();
-  },
+    /* ══════════════════════════════════════════════════════════════════════════
+       STEP 3b: SHEET-LINKED RECORDINGS
+       ══════════════════════════════════════════════════════════════════════════ */
+    renderRecordingsHTML(isAr) {
+      const sheet = SubjectModal.currentSheet;
+      if (!sheet) return SubjectModal.renderStep2HTML(isAr);
 
-  previewDoc(docId) {
-    const subject = SubjectModal.currentSubject;
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-    const files = window.DATA.getSheetsForSubject 
-      ? window.DATA.getSheetsForSubject(subject ? subject.id : '')
-      : [];
-    const doc = files.find(f => f.id === docId) || {
-      id: docId,
-      title: subject ? (isAr ? subject.name_ar : subject.name_en) : (isAr ? 'ملزمة دراسية' : 'Study Handout'),
-      subject_name: subject ? (isAr ? subject.name_ar : subject.name_en) : (isAr ? 'طب الأسنان' : 'Dentistry'),
-      doctor_name: isAr ? (subject?.doctor_name_ar || '') : (subject?.doctor_name_en || ''),
-      pages: 18,
-      size: '3.2 MB',
-      date: '2026-09-12'
-    };
+      const sTitle = isAr ? (sheet.title_ar || sheet.title_en || sheet.title) : (sheet.title_en || sheet.title || sheet.title_ar);
+      const backIcon = isAr ? 'arrow-right' : 'arrow-left';
 
-    SubjectModal.close();
-    window.location.hash = '#/sheet-detail?id=' + docId;
-  },
+      // Query ONLY real recordings linked to this sheet
+      const recordings = window.DATA ? window.DATA.getRecordingsBySheet(sheet.id) : [];
 
-  downloadDoc(docId) {
-    const subject = SubjectModal.currentSubject;
-    const files = window.DATA.getSheetsForSubject 
-      ? window.DATA.getSheetsForSubject(subject ? subject.id : '')
-      : [];
-    const doc = files.find(f => f.id === docId);
-    if (window.DocumentViewer) {
-      window.DocumentViewer.download(doc || { title: 'Dental Sheet' });
-    } else {
-      SubjectModal.downloadItem(doc?.title || 'Dental Sheet');
+      return `
+        <div class="sqm-inner sqm-recordings-pane">
+          <!-- Header -->
+          <div class="sqm-header">
+            <div class="sqm-header-left">
+              <button type="button" class="sqm-back-btn" id="sqm-btn-back" aria-label="Back">
+                <i data-lucide="${backIcon}"></i>
+              </button>
+              <div class="sqm-icon-box sqm-icon-audio">
+                <i data-lucide="mic"></i>
+              </div>
+              <div class="sqm-title-meta">
+                <h2 class="sqm-main-title">${sTitle}</h2>
+                <span class="sqm-sub-code">${isAr ? 'التسجيلات الصوتية للشيت' : 'Recordings • Lectures for this sheet'}</span>
+              </div>
+            </div>
+            <button type="button" class="sqm-close-btn" id="sqm-btn-close" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="sqm-body sqm-recordings-body">
+            ${recordings.length === 0 ? `
+              <div class="sqm-empty-state">
+                <div class="sqm-empty-icon"><i data-lucide="mic-off"></i></div>
+                <h3 class="sqm-empty-title">${isAr ? 'لا توجد تسجيلات صوتية لهذا الشيت حالياً' : 'No recordings available yet'}</h3>
+                <p class="sqm-empty-desc">${isAr ? 'سيتم إدراج التسجيلات الصوتية فور اعتمادها من الكلية.' : 'Audio lectures for this sheet will be added once available.'}</p>
+              </div>
+            ` : `
+              <div class="sqm-recordings-list">
+                ${recordings.map((rec) => `
+                  <div class="sqm-recording-card">
+                    <div class="sqm-rec-header">
+                      <h4 class="sqm-rec-title">${isAr ? (rec.title_ar || rec.title) : (rec.title || rec.title_ar)}</h4>
+                      <span class="sqm-rec-duration">${rec.duration || '40:00'}</span>
+                    </div>
+                    <div class="sqm-rec-meta">
+                      <span class="sqm-rec-lecturer"><i data-lucide="user"></i> ${rec.lecturer || rec.doctor_name || sheet.doctor_name || 'Dr. Faculty'}</span>
+                      <span class="sqm-rec-date"><i data-lucide="calendar"></i> ${rec.date || sheet.date || '2026-09-24'}</span>
+                    </div>
+                    <div class="sqm-player-row">
+                      <button type="button" class="sqm-play-btn" data-audio-url="${rec.audio_url || ''}">
+                        <i data-lucide="play"></i>
+                      </button>
+                      <div class="sqm-player-bar-track">
+                        <div class="sqm-player-bar-fill" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    },
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       STEP 3c: SHEET-LINKED NOTES
+       ══════════════════════════════════════════════════════════════════════════ */
+    renderNotesHTML(isAr) {
+      const sheet = SubjectModal.currentSheet;
+      if (!sheet) return SubjectModal.renderStep2HTML(isAr);
+
+      const sTitle = isAr ? (sheet.title_ar || sheet.title_en || sheet.title) : (sheet.title_en || sheet.title || sheet.title_ar);
+      const backIcon = isAr ? 'arrow-right' : 'arrow-left';
+      const existingNotes = window.DATA?.getNotesBySheet ? window.DATA.getNotesBySheet(sheet.id) : (localStorage.getItem('kf_sheet_notes_' + sheet.id) || '');
+
+      return `
+        <div class="sqm-inner sqm-notes-pane">
+          <!-- Header -->
+          <div class="sqm-header">
+            <div class="sqm-header-left">
+              <button type="button" class="sqm-back-btn" id="sqm-btn-back" aria-label="Back">
+                <i data-lucide="${backIcon}"></i>
+              </button>
+              <div class="sqm-icon-box sqm-icon-notes">
+                <i data-lucide="file-edit"></i>
+              </div>
+              <div class="sqm-title-meta">
+                <h2 class="sqm-main-title">${sTitle}</h2>
+                <span class="sqm-sub-code">${isAr ? 'ملاحظات المذاكرة الشخصية' : 'Personal Study Notes'}</span>
+              </div>
+            </div>
+            <button type="button" class="sqm-close-btn" id="sqm-btn-close" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="sqm-body sqm-notes-body">
+            <p class="sqm-notes-hint">${isAr ? 'اكتب ملاحظاتك ونقاط المذاكرة الهامة لهذا الشيت. يتم الحفظ تلقائياً في جهازك.' : 'Write your study notes and key clinical pearls for this sheet. Saved locally on your device.'}</p>
+            <textarea
+              id="sqm-notes-textarea"
+              class="sqm-notes-textarea"
+              placeholder="${isAr ? 'ابدأ بكتابة ملاحظاتك هنا...' : 'Start typing your clinical notes here...'}"
+            >${existingNotes}</textarea>
+
+            <div class="sqm-notes-actions">
+              <span id="sqm-notes-status" class="sqm-notes-status"></span>
+              <button type="button" class="sqm-notes-save-btn" id="sqm-btn-save-notes">
+                <i data-lucide="check"></i>
+                <span>${isAr ? 'حفظ الملاحظات' : 'Save Notes'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       OTHER ACADEMIC RESOURCES (From Step 1)
+       ══════════════════════════════════════════════════════════════════════════ */
+    renderOtherHTML(isAr) {
+      const subject = SubjectModal.currentSubject;
+      const primaryTitle = isAr ? subject.name_ar : subject.name_en;
+      const backIcon = isAr ? 'arrow-right' : 'arrow-left';
+      const chevronIcon = isAr ? 'chevron-left' : 'chevron-right';
+
+      return `
+        <div class="sqm-inner sqm-other-pane">
+          <!-- Header -->
+          <div class="sqm-header">
+            <div class="sqm-header-left">
+              <button type="button" class="sqm-back-btn" id="sqm-btn-back" aria-label="Back">
+                <i data-lucide="${backIcon}"></i>
+              </button>
+              <div class="sqm-icon-box">
+                <i data-lucide="more-horizontal"></i>
+              </div>
+              <div class="sqm-title-meta">
+                <h2 class="sqm-main-title">${primaryTitle}</h2>
+                <span class="sqm-sub-code">${isAr ? 'مصادر ومراجع إضافية' : 'Additional Resources'}</span>
+              </div>
+            </div>
+            <button type="button" class="sqm-close-btn" id="sqm-btn-close" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <div class="sqm-body sqm-options-body">
+            <div class="sqm-options-list">
+              <button type="button" class="sqm-option-row" id="sqm-other-flashcards">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="layers"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'البطاقات التعليمية والأطلس' : 'Flashcards & Atlas'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'مراجعة بصرية سريعة' : 'Quick visual flashcards'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right"><i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i></div>
+              </button>
+
+              <button type="button" class="sqm-option-row" id="sqm-other-exams">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="calendar-check"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'أرشيف امتحانات المادة' : 'Subject Exams Archive'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'امتحانات الدور الأول والثاني' : 'Midterm and final papers'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right"><i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i></div>
+              </button>
+
+              <button type="button" class="sqm-option-row" id="sqm-other-practical">
+                <div class="sqm-option-left">
+                  <div class="sqm-option-icon"><i data-lucide="microscope"></i></div>
+                  <div class="sqm-option-texts">
+                    <span class="sqm-option-title">${isAr ? 'جدول المعامل والعملي' : 'Practical & Lab Schedule'}</span>
+                    <span class="sqm-option-sub">${isAr ? 'مواعيد وتجهيزات المعامل' : 'Dental lab schedule'}</span>
+                  </div>
+                </div>
+                <div class="sqm-option-right"><i data-lucide="${chevronIcon}" class="sqm-row-chevron"></i></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       EVENT BINDINGS & ACTIONS
+       ══════════════════════════════════════════════════════════════════════════ */
+    bindEvents(isAr) {
+      // Close button
+      document.getElementById('sqm-btn-close')?.addEventListener('click', () => {
+        SubjectModal.close();
+      });
+
+      // Back button
+      document.getElementById('sqm-btn-back')?.addEventListener('click', () => {
+        SubjectModal.popStep();
+      });
+
+      // Step 1: 5 Action buttons
+      document.getElementById('sqm-action-sheets')?.addEventListener('click', () => {
+        SubjectModal.pushStep('step2', null, 'sheets');
+      });
+
+      document.getElementById('sqm-action-recordings')?.addEventListener('click', () => {
+        SubjectModal.pushStep('step2', null, 'recordings');
+      });
+
+      document.getElementById('sqm-action-questions')?.addEventListener('click', () => {
+        SubjectModal.pushStep('step2', null, 'questions');
+      });
+
+      document.getElementById('sqm-action-notes')?.addEventListener('click', () => {
+        SubjectModal.pushStep('step2', null, 'notes');
+      });
+
+      document.getElementById('sqm-action-other')?.addEventListener('click', () => {
+        SubjectModal.pushStep('other');
+      });
+
+      // Step 2: Search Input
+      const searchInput = document.getElementById('sqm-sheets-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          SubjectModal.sheetSearchQuery = e.target.value;
+          SubjectModal.render();
+          const freshInput = document.getElementById('sqm-sheets-search');
+          if (freshInput) {
+            freshInput.focus();
+            freshInput.setSelectionRange(freshInput.value.length, freshInput.value.length);
+          }
+        });
+      }
+
+      // Step 2: Sheet row clicks
+      document.querySelectorAll('.sqm-sheet-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const sheetId = row.getAttribute('data-sheet-id');
+          const sheet = window.DATA ? window.DATA.getSheetById(sheetId) : null;
+          if (!sheet) return;
+
+          if (SubjectModal.stepMode === 'recordings') {
+            SubjectModal.pushStep('recordings', sheet);
+          } else if (SubjectModal.stepMode === 'questions') {
+            SubjectModal.pushStep('step4', sheet);
+          } else if (SubjectModal.stepMode === 'notes') {
+            SubjectModal.pushStep('notes', sheet);
+          } else {
+            // Default: Sheet Options
+            SubjectModal.pushStep('step3', sheet);
+          }
+        });
+      });
+
+      // Step 3: Sheet Options Actions
+      document.getElementById('sqm-opt-open')?.addEventListener('click', () => {
+        const sheet = SubjectModal.currentSheet;
+        if (!sheet) return;
+        SubjectModal.close();
+        window.location.hash = `#/sheet-detail?id=${sheet.id}`;
+      });
+
+      document.getElementById('sqm-opt-download')?.addEventListener('click', () => {
+        const sheet = SubjectModal.currentSheet;
+        if (!sheet) return;
+        SubjectModal.downloadSheet(sheet, isAr);
+      });
+
+      document.getElementById('sqm-opt-recordings')?.addEventListener('click', () => {
+        SubjectModal.pushStep('recordings', SubjectModal.currentSheet);
+      });
+
+      document.getElementById('sqm-opt-questions')?.addEventListener('click', () => {
+        SubjectModal.pushStep('step4', SubjectModal.currentSheet);
+      });
+
+      document.getElementById('sqm-opt-notes')?.addEventListener('click', () => {
+        SubjectModal.pushStep('notes', SubjectModal.currentSheet);
+      });
+
+      // Step 4: Question Options Actions
+      document.querySelectorAll('.sqm-step4-pane [data-qtype]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qtype = btn.getAttribute('data-qtype');
+          const sheet = SubjectModal.currentSheet;
+          if (qtype === 'notes') {
+            SubjectModal.pushStep('notes', sheet);
+            return;
+          }
+          SubjectModal.launchQuizForSheet(sheet, qtype, isAr);
+        });
+      });
+
+      // Notes Save Action
+      document.getElementById('sqm-btn-save-notes')?.addEventListener('click', () => {
+        const textarea = document.getElementById('sqm-notes-textarea');
+        const sheet = SubjectModal.currentSheet;
+        const statusEl = document.getElementById('sqm-notes-status');
+        if (!sheet || !textarea) return;
+
+        const content = textarea.value.trim();
+        if (window.DATA && typeof window.DATA.saveNotesForSheet === 'function') {
+          window.DATA.saveNotesForSheet(sheet.id, content);
+        } else {
+          localStorage.setItem('kf_sheet_notes_' + sheet.id, content);
+        }
+
+        if (statusEl) {
+          statusEl.textContent = isAr ? '✓ تم الحفظ بنجاح' : '✓ Saved successfully';
+          statusEl.style.color = '#059669';
+          setTimeout(() => {
+            if (statusEl) statusEl.textContent = '';
+          }, 2400);
+        }
+
+        if (window.Toast && typeof window.Toast.show === 'function') {
+          window.Toast.show(isAr ? 'تم حفظ ملاحظاتك للشيت' : 'Notes saved successfully', 'success');
+        }
+      });
+
+      // Other Resources Links
+      document.getElementById('sqm-other-flashcards')?.addEventListener('click', () => {
+        const subject = SubjectModal.currentSubject;
+        SubjectModal.close();
+        window.location.hash = `#/flashcards?subject=${subject.id}`;
+      });
+
+      document.getElementById('sqm-other-exams')?.addEventListener('click', () => {
+        const subject = SubjectModal.currentSubject;
+        SubjectModal.close();
+        window.location.hash = `#/exams?subject=${subject.id}`;
+      });
+
+      document.getElementById('sqm-other-practical')?.addEventListener('click', () => {
+        SubjectModal.close();
+        window.location.hash = `#/practical-schedule`;
+      });
+    },
+
+    downloadSheet(sheet, isAr) {
+      if (window.STORE && typeof window.STORE.addPoints === 'function') {
+        window.STORE.addPoints(10);
+      }
+      const title = sheet.title_en || sheet.title || sheet.title_ar || 'Dental Sheet';
+      const toastMsg = isAr ? `تم بدء تنزيل: ${title}` : `Downloading: ${title}`;
+      if (window.Toast && typeof window.Toast.show === 'function') {
+        window.Toast.show(toastMsg, 'success');
+      }
+
+      if (sheet.pdf_url) {
+        const a = document.createElement('a');
+        a.href = sheet.pdf_url;
+        a.download = `${title}.pdf`;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    },
+
+    launchQuizForSheet(sheet, qtype, isAr) {
+      SubjectModal.close();
+      const subject = SubjectModal.currentSubject;
+
+      // Navigate to questions page with query parameters
+      window.location.hash = `#/questions?subject=${subject.id}&sheet=${sheet.id}&type=${qtype}`;
     }
-  },
+  };
 
-  downloadItem(title) {
-    window.STORE.addPoints(10);
-    const cleanTitle = (title && title !== 'undefined' && title !== 'null') ? String(title).trim() : '';
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-    const mainMsg = isAr ? 'تم بدء التحميل بنجاح!' : 'Downloaded successfully!';
-    const fullMsg = cleanTitle ? `${mainMsg} (${cleanTitle})` : mainMsg;
-    window.showToast(fullMsg, { type: 'success', points: 10 });
-  }
-};
-
-window.SubjectModal = SubjectModal;
+  window.SubjectModal = SubjectModal;
+})(window);

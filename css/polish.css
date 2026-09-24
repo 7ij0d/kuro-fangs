@@ -9526,6 +9526,802 @@ html[dir="rtl"] .settings-select-ctrl {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   4-STEP SUBJECT QUICK-ACCESS MODAL & HOME SUBJECT CARDS
+   Reference: media_1790283083887.jpg
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Home Page Subjects Grid & Horizontal Subject Cards */
+.kuro-subjects-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
+}
+
+@media (max-width: 1199px) {
+  .kuro-subjects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .kuro-subjects-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+.kuro-subject-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 14px 16px !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #EAE3D6 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  cursor: pointer !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
+  gap: 12px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.kuro-subject-card:hover {
+  border-color: #BC4A47 !important;
+  box-shadow: 0 6px 18px rgba(188, 74, 71, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+.kuro-subject-card:active {
+  transform: scale(0.98) !important;
+}
+
+.ksc-icon-wrap {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+  background: #FAF5F5 !important;
+  border: 1.5px solid #F0D5D5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: #BC4A47 !important;
+}
+
+.ksc-icon-wrap svg,
+.ksc-icon-wrap i {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.ksc-info-col {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  gap: 2px !important;
+}
+
+.ksc-title {
+  font-size: 0.95rem !important;
+  font-weight: 750 !important;
+  color: #1E1E2D !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.3 !important;
+}
+
+.ksc-code {
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: #8C827A !important;
+}
+
+.ksc-count {
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: #A69E96 !important;
+}
+
+.ksc-arrow-wrap {
+  color: #A69E96 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.ksc-arrow-wrap i,
+.ksc-arrow-wrap svg {
+  width: 16px !important;
+  height: 16px !important;
+  transition: transform 0.15s ease !important;
+}
+
+.kuro-subject-card:hover .ksc-arrow-wrap i {
+  transform: translateX(2px);
+  color: #BC4A47;
+}
+
+html[dir="rtl"] .kuro-subject-card:hover .ksc-arrow-wrap i {
+  transform: translateX(-2px);
+}
+
+/* 2. Floating Quick-Access Modal Box (sqm-modal-box) */
+.subject-modal-box.sqm-modal-box {
+  width: min(460px, calc(100vw - 28px)) !important;
+  max-width: 460px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #EAE3D6 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.16), 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden !important;
+}
+
+.sqm-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+.sqm-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 20px 14px !important;
+  border-bottom: 1px solid #F0ECE4 !important;
+  gap: 12px !important;
+}
+
+.sqm-header-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+.sqm-icon-box {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  background: #FAF5F5 !important;
+  border: 1.5px solid #F0D5D5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: #BC4A47 !important;
+}
+
+.sqm-icon-box i,
+.sqm-icon-box svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.sqm-icon-sheet {
+  background: #FAF8F5 !important;
+  border-color: #EAE3D6 !important;
+  color: #BC4A47 !important;
+}
+
+.sqm-icon-question {
+  border-radius: 50% !important;
+  background: #FAF5F5 !important;
+  border-color: #F0D5D5 !important;
+  color: #BC4A47 !important;
+}
+
+.sqm-icon-audio {
+  background: #FAF5F5 !important;
+  border-color: #F0D5D5 !important;
+  color: #BC4A47 !important;
+}
+
+.sqm-icon-notes {
+  background: #FAF8F5 !important;
+  border-color: #EAE3D6 !important;
+  color: #BC4A47 !important;
+}
+
+.sqm-title-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  gap: 2px !important;
+}
+
+.sqm-main-title {
+  font-size: 1.05rem !important;
+  font-weight: 750 !important;
+  color: #1E1E2D !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.sqm-sub-code {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  color: #8C827A !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.sqm-close-btn,
+.sqm-back-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  border: 1px solid #EAE3D6 !important;
+  background: #FAF8F5 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  color: #524B43 !important;
+  flex-shrink: 0 !important;
+  transition: all 0.16s ease !important;
+}
+
+.sqm-close-btn:hover,
+.sqm-back-btn:hover {
+  background: #FFFFFF !important;
+  border-color: #BC4A47 !important;
+  color: #BC4A47 !important;
+}
+
+/* 3. Step 1: 5 Action Cards Grid */
+.sqm-actions-grid {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 12px !important;
+  padding: 18px 20px 24px !important;
+}
+
+.sqm-action-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 18px 10px 16px !important;
+  border-radius: 16px !important;
+  border: 1.5px solid #EAE3D6 !important;
+  background: #FAF8F5 !important;
+  cursor: pointer !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
+  grid-column: span 2 !important;
+}
+
+/* Row 2: 2 cards centered under Row 1 */
+#sqm-action-notes {
+  grid-column: 2 / span 2 !important;
+}
+
+#sqm-action-other {
+  grid-column: 4 / span 2 !important;
+}
+
+.sqm-action-card:hover {
+  border-color: #BC4A47 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 6px 18px rgba(188, 74, 71, 0.12) !important;
+  transform: translateY(-2px) !important;
+}
+
+.sqm-action-card:active {
+  transform: scale(0.97) !important;
+}
+
+.sqm-card-icon-box {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 11px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #EAE3D6 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #BC4A47 !important;
+}
+
+.sqm-card-icon-box i,
+.sqm-card-icon-box svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.sqm-card-label {
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  color: #1E1E2D !important;
+}
+
+/* 4. Step 2: Search Input & Sheets List */
+.sqm-search-wrap {
+  padding: 12px 20px 6px !important;
+  position: relative !important;
+}
+
+.sqm-search-input {
+  width: 100% !important;
+  padding: 9px 14px 9px 38px !important;
+  border-radius: 12px !important;
+  border: 1.5px solid #EAE3D6 !important;
+  background: #FAF8F5 !important;
+  font-family: inherit !important;
+  font-size: 0.88rem !important;
+  color: #1E1E2D !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.15s ease !important;
+}
+
+.sqm-search-input:focus {
+  border-color: #BC4A47 !important;
+  background: #FFFFFF !important;
+}
+
+html[dir="rtl"] .sqm-search-input {
+  padding: 9px 38px 9px 14px !important;
+}
+
+.sqm-search-icon {
+  position: absolute !important;
+  inset-inline-start: 32px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: #8C827A !important;
+  pointer-events: none !important;
+}
+
+.sqm-sheets-scroll-body {
+  max-height: 380px !important;
+  overflow-y: auto !important;
+  padding: 8px 20px 20px !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.sqm-sheets-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.sqm-sheet-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  border: 1.5px solid #EAE3D6 !important;
+  background: #FAF8F5 !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+  box-sizing: border-box !important;
+}
+
+.sqm-sheet-row:hover {
+  background: #FFFFFF !important;
+  border-color: #BC4A47 !important;
+  box-shadow: 0 4px 14px rgba(188, 74, 71, 0.08) !important;
+}
+
+.sqm-sheet-row:active {
+  transform: scale(0.99) !important;
+}
+
+.sqm-sheet-row-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+.sqm-sheet-icon-pill {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  background: #FAF5F5 !important;
+  border: 1px solid #F0D5D5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #BC4A47 !important;
+  flex-shrink: 0 !important;
+}
+
+.sqm-sheet-icon-pill i,
+.sqm-sheet-icon-pill svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.sqm-sheet-info {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  gap: 2px !important;
+}
+
+.sqm-sheet-title {
+  font-size: 0.92rem !important;
+  font-weight: 750 !important;
+  color: #1E1E2D !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.3 !important;
+}
+
+.sqm-sheet-specs {
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: #8C827A !important;
+}
+
+.sqm-row-chevron {
+  width: 16px !important;
+  height: 16px !important;
+  color: #A69E96 !important;
+  flex-shrink: 0 !important;
+}
+
+/* 5. Steps 3 & 4: Options Lists */
+.sqm-options-body {
+  padding: 14px 20px 24px !important;
+  max-height: 420px !important;
+  overflow-y: auto !important;
+}
+
+.sqm-options-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.sqm-option-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  border-radius: 14px !important;
+  border: 1.5px solid #EAE3D6 !important;
+  background: #FAF8F5 !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  text-align: start !important;
+  font-family: inherit !important;
+  transition: all 0.16s ease !important;
+  box-sizing: border-box !important;
+}
+
+.sqm-option-row:hover {
+  background: #FFFFFF !important;
+  border-color: #BC4A47 !important;
+  box-shadow: 0 4px 14px rgba(188, 74, 71, 0.08) !important;
+}
+
+.sqm-option-row:active {
+  transform: scale(0.99) !important;
+}
+
+.sqm-option-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+.sqm-option-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  background: #FAF5F5 !important;
+  border: 1px solid #F0D5D5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #BC4A47 !important;
+  flex-shrink: 0 !important;
+}
+
+.sqm-option-icon i,
+.sqm-option-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.sqm-option-texts {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  gap: 2px !important;
+}
+
+.sqm-option-title {
+  font-size: 0.92rem !important;
+  font-weight: 750 !important;
+  color: #1E1E2D !important;
+  line-height: 1.3 !important;
+}
+
+.sqm-option-sub {
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  color: #8C827A !important;
+  line-height: 1.2 !important;
+}
+
+/* 6. Empty States */
+.sqm-empty-state {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 36px 16px !important;
+  text-align: center !important;
+  gap: 10px !important;
+}
+
+.sqm-empty-icon {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  background: #FAF8F5 !important;
+  border: 1.5px solid #EAE3D6 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #8C827A !important;
+}
+
+.sqm-empty-icon i {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.sqm-empty-title {
+  font-size: 0.98rem !important;
+  font-weight: 750 !important;
+  color: #1E1E2D !important;
+  margin: 0 !important;
+}
+
+.sqm-empty-desc {
+  font-size: 0.82rem !important;
+  color: #8C827A !important;
+  margin: 0 !important;
+  max-width: 300px !important;
+  line-height: 1.4 !important;
+}
+
+/* 7. Recordings & Notes Panes */
+.sqm-recordings-body,
+.sqm-notes-body {
+  padding: 14px 20px 24px !important;
+  max-height: 420px !important;
+  overflow-y: auto !important;
+}
+
+.sqm-recordings-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.sqm-recording-card {
+  padding: 14px !important;
+  border-radius: 14px !important;
+  border: 1.5px solid #EAE3D6 !important;
+  background: #FAF8F5 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.sqm-rec-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.sqm-rec-title {
+  font-size: 0.92rem !important;
+  font-weight: 750 !important;
+  color: #1E1E2D !important;
+  margin: 0 !important;
+}
+
+.sqm-rec-duration {
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: #BC4A47 !important;
+  background: #FAF5F5 !important;
+  border: 1px solid #F0D5D5 !important;
+  padding: 2px 8px !important;
+  border-radius: 9999px !important;
+}
+
+.sqm-rec-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  font-size: 0.78rem !important;
+  color: #8C827A !important;
+}
+
+.sqm-rec-meta span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.sqm-player-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-top: 4px !important;
+}
+
+.sqm-play-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: #BC4A47 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.sqm-player-bar-track {
+  flex: 1 !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+  background: #EAE3D6 !important;
+  overflow: hidden !important;
+}
+
+.sqm-player-bar-fill {
+  height: 100% !important;
+  background: #BC4A47 !important;
+}
+
+.sqm-notes-hint {
+  font-size: 0.82rem !important;
+  color: #8C827A !important;
+  margin: 0 0 10px 0 !important;
+  line-height: 1.4 !important;
+}
+
+.sqm-notes-textarea {
+  width: 100% !important;
+  min-height: 160px !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  border: 1.5px solid #EAE3D6 !important;
+  background: #FAF8F5 !important;
+  font-family: inherit !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5 !important;
+  color: #1E1E2D !important;
+  resize: vertical !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+.sqm-notes-textarea:focus {
+  border-color: #BC4A47 !important;
+  background: #FFFFFF !important;
+}
+
+.sqm-notes-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-top: 10px !important;
+}
+
+.sqm-notes-save-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 18px !important;
+  border-radius: 11px !important;
+  background: #7E1D2A !important;
+  color: #FFFFFF !important;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+}
+
+.sqm-notes-save-btn:hover {
+  background: #63141F !important;
+}
+
+/* 8. Dark Mode Overrides for Quick-Access Modal & Cards */
+[data-theme="dark"] .kuro-subject-card,
+[data-theme="dark"] .subject-modal-box.sqm-modal-box {
+  background: #1E1E2D !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .ksc-title,
+[data-theme="dark"] .sqm-main-title,
+[data-theme="dark"] .sqm-card-label,
+[data-theme="dark"] .sqm-sheet-title,
+[data-theme="dark"] .sqm-option-title,
+[data-theme="dark"] .sqm-empty-title,
+[data-theme="dark"] .sqm-rec-title {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .ksc-icon-wrap,
+[data-theme="dark"] .sqm-icon-box,
+[data-theme="dark"] .sqm-card-icon-box,
+[data-theme="dark"] .sqm-sheet-icon-pill,
+[data-theme="dark"] .sqm-option-icon {
+  background: rgba(188, 74, 71, 0.15) !important;
+  border-color: rgba(188, 74, 71, 0.3) !important;
+  color: #E66A67 !important;
+}
+
+[data-theme="dark"] .sqm-action-card,
+[data-theme="dark"] .sqm-sheet-row,
+[data-theme="dark"] .sqm-option-row,
+[data-theme="dark"] .sqm-recording-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .sqm-action-card:hover,
+[data-theme="dark"] .sqm-sheet-row:hover,
+[data-theme="dark"] .sqm-option-row:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: #E66A67 !important;
+}
+
+[data-theme="dark"] .sqm-header {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .sqm-close-btn,
+[data-theme="dark"] .sqm-back-btn,
+[data-theme="dark"] .sqm-empty-icon {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .sqm-search-input,
+[data-theme="dark"] .sqm-notes-textarea {
+  background: #161622 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
 
 
 

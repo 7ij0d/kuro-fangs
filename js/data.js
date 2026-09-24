@@ -639,7 +639,38 @@ class DataService {
 
   getRecordingsBySheet(sheetId) {
     if (!sheetId) return [];
+    const deleted = this.getDeletedSheetIds();
+    if (deleted.includes(sheetId)) return [];
     return (this.recordings || []).filter(r => r.sheet_id === sheetId);
+  }
+
+  getQuestionsBySheet(sheetId) {
+    if (!sheetId) return [];
+    const deleted = this.getDeletedSheetIds();
+    if (deleted.includes(sheetId)) return [];
+    if (!this._deferredLoaded && !this._deferredLoading) {
+      this.loadDeferredData();
+    }
+    return (this.questions || []).filter(q => q.sheet_id === sheetId);
+  }
+
+  getNotesBySheet(sheetId) {
+    if (!sheetId) return '';
+    try {
+      return localStorage.getItem(`kf_sheet_notes_${sheetId}`) || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  saveNotesForSheet(sheetId, content) {
+    if (!sheetId) return false;
+    try {
+      localStorage.setItem(`kf_sheet_notes_${sheetId}`, content || '');
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   addRecording(recording) {
