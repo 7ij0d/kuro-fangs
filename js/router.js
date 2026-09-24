@@ -195,7 +195,7 @@ class Router {
     // Handle More button state on top header navigation
     const headerMoreBtn = document.getElementById('header-more-btn');
     if (headerMoreBtn) {
-      const moreRoutes = ['/questions', '/recordings', '/rewards', '/games', '/profile', '/admin'];
+      const moreRoutes = ['/rewards', '/games', '/profile', '/admin'];
       const isMoreActive = moreRoutes.some(r => currentPath.startsWith(r));
       headerMoreBtn.classList.toggle('active', isMoreActive);
     }

@@ -377,6 +377,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const router = window.ROUTER;
 
   router.register('/', (c, q) => window.HomePage.render(c, q));
+  router.register('/subjects', (c, q) => {
+    if (window.SubjectsPage && typeof window.SubjectsPage.render === 'function') {
+      window.SubjectsPage.render(c, q);
+    } else if (window.SheetsPage) {
+      window.SheetsPage.render(c, q);
+    }
+  });
   router.register('/sheets', (c, q) => window.SheetsPage.render(c, q));
   router.register('/sheet-detail', (c, q) => window.SheetDetailPage.render(c, q));
   router.register('/sheet/:id', (c, id, q) => window.SheetDetailPage.render(c, id, q));
