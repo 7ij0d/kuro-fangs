@@ -141,6 +141,8 @@ class Router {
     const isStudioRoute = path === '/sheet-detail' || path.startsWith('/sheet-detail') || path.startsWith('/sheet/');
     if (isStudioRoute) {
       document.body.classList.add('studio-fullscreen-active');
+      const hSearch = document.getElementById('header-search-input');
+      if (hSearch) hSearch.blur();
     } else {
       document.body.classList.remove('studio-fullscreen-active');
     }

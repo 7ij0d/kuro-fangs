@@ -7965,6 +7965,35 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   STUDIO FULLSCREEN ISOLATION (Hides any navbar, search box, or overlays)
+   ══════════════════════════════════════════════════════════════════════════ */
+body.studio-fullscreen-active #site-header,
+body.studio-fullscreen-active .site-header,
+body.studio-fullscreen-active #app-header,
+body.studio-fullscreen-active .app-header,
+body.studio-fullscreen-active .header-search-box,
+body.studio-fullscreen-active #header-search-input,
+body.studio-fullscreen-active .header-right-tools,
+body.studio-fullscreen-active #app-sidebar,
+body.studio-fullscreen-active .app-sidebar,
+body.studio-fullscreen-active .mobile-bottom-nav,
+body.studio-fullscreen-active .sidebar-backdrop {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.studio-fullscreen-active #sheet-studio-fullscreen-root {
+  z-index: 999999 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+}
+
+
 
 
 

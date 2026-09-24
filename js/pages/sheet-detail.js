@@ -86,12 +86,17 @@ const SheetDetailPage = {
       } catch (e) {
         comments = [];
       }
-    }
+    // Ensure fullscreen studio isolation and blur any open search inputs
+    document.body.classList.add('studio-fullscreen-active');
+    const headerSearchInput = document.getElementById('header-search-input');
+    if (headerSearchInput) headerSearchInput.blur();
+    const sheetsSearchInput = document.getElementById('sheets-search-input');
+    if (sheetsSearchInput) sheetsSearchInput.blur();
 
     container.innerHTML = `
-      <div id="sheet-studio-fullscreen-root" class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; max-height: 100dvh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 99990; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+      <div id="sheet-studio-fullscreen-root" class="sheet-studio-fullscreen" style="width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; max-height: 100dvh; background: #12131F; position: fixed; top: 0; left: 0; z-index: 999999; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
         <!-- Clean Dedicated Kuro Fangs Header (Docked, never covers PDF tools) -->
-        <header id="sheet-studio-header" style="height: 48px; min-height: 48px; background: #0E101A; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; flex-shrink: 0; z-index: 100000; direction: ${isAr ? 'rtl' : 'ltr'}; font-family: inherit; user-select: none;">
+        <header id="sheet-studio-header" style="height: 48px; min-height: 48px; background: #0E101A; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; flex-shrink: 0; z-index: 1000000; direction: ${isAr ? 'rtl' : 'ltr'}; font-family: inherit; user-select: none;">
           <!-- Back Button -->
           <button id="btn-back-from-studio" style="background: rgba(255,255,255,0.07); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.15s ease;">
             <span style="font-size: 1.1rem; line-height: 1;">${isAr ? '➔' : '←'}</span>
@@ -496,12 +501,13 @@ const SheetDetailPage = {
     const btnBackStudio = document.getElementById('btn-back-from-studio');
     if (btnBackStudio) {
       btnBackStudio.addEventListener('click', () => {
+        document.body.classList.remove('studio-fullscreen-active');
         if (sheet && sheet.subject_id) {
-          window.location.hash = '#/subject/' + sheet.subject_id;
+          window.location.hash = '#/sheets?subject=' + sheet.subject_id;
         } else if (window.history.length > 1) {
           window.history.back();
         } else {
-          window.location.hash = '#/home';
+          window.location.hash = '#/sheets';
         }
       });
     }
