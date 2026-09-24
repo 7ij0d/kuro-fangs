@@ -24,6 +24,19 @@ class Router {
             await window.GamesPage.render(container, params);
           }
         }
+      '/recordings': async (container, params) => {
+        if (window.RecordingsPage && typeof window.RecordingsPage.render === 'function') {
+          await window.RecordingsPage.render(container, params);
+        } else if (window.SecondaryPages && typeof window.SecondaryPages.renderAudioRecordings === 'function') {
+          window.SecondaryPages.renderAudioRecordings(container, params);
+        }
+      },
+      '/videos': async (container, params) => {
+        if (window.RecordingsPage && typeof window.RecordingsPage.render === 'function') {
+          await window.RecordingsPage.render(container, params);
+        } else if (window.SecondaryPages && typeof window.SecondaryPages.renderAudioRecordings === 'function') {
+          window.SecondaryPages.renderAudioRecordings(container, params);
+        }
       },
       '/schedules': async (container, params) => {
         if (window.ExamsPage && typeof window.ExamsPage.renderSchedulesHub === 'function') {
@@ -195,7 +208,7 @@ class Router {
     // Handle More button state on top header navigation
     const headerMoreBtn = document.getElementById('header-more-btn');
     if (headerMoreBtn) {
-      const moreRoutes = ['/rewards', '/games', '/profile', '/admin'];
+      const moreRoutes = ['/rewards', '/games', '/profile', '/admin', '/recordings', '/videos'];
       const isMoreActive = moreRoutes.some(r => currentPath.startsWith(r));
       headerMoreBtn.classList.toggle('active', isMoreActive);
     }

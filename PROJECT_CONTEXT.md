@@ -154,8 +154,48 @@
 
 ---
 
-## 7. Recent Git Commits & State Log
-- `Current`: Master restructuring & redesign of Academic Schedules (`#/schedules`) matching blueprint (`media_1790209940929.jpg`) with 3 integrated Kuro cards, responsive desktop/iPad/mobile views, back navigation, and cache busting bump to `?v=9.6`.
+## 7. Master Audio Recordings Library Architecture (Blueprint Conformance)
+- **Visual Blueprint**: `media_1790210375688.jpg` & `media_1790210419688.jpg`
+- **Panoramic Header**:
+  - Background: `assets/hero/audio-recordings-hero.png` (Kuro with headphones studying at desk with laptop in warm morning light) with dark warm vignette overlay.
+  - Rounded-square blush badge with headphones SVG (`.audio-hero-badge-icon-box`).
+  - Title: `Audio Recordings` / `التسجيلات الصوتية`.
+  - Subtitle: `Faculty lecture audio recordings linked to lecture sheets.` / `تسجيلات صوتية لمحاضرات دكاترة الكلية مرتبطة بالشيتات.`.
+- **Search & Filter Control Bar**:
+  - Subject dropdown: `[ 📖 All Subjects ▾ ]` + 12 dental curriculum subjects.
+  - Search input: `Search recordings, sheets, or topics...` with clear button.
+  - Lecturer dropdown: `[ 👤 All Lecturers ▾ ]` dynamically populated from available sheets & recordings.
+  - Sort dropdown: `[ ⇅ Newest First ▾ ]` (`Newest First`, `Oldest First`, `Title (A-Z)`).
+  - View mode toggle: `[ ⊞ Grid ]` (burgundy active) and `[ ☰ List ]`.
+- **Page Section Header**:
+  - Burgundy headphones icon box.
+  - Title: `Lecture Audio Recordings` / `تسجيلات المحاضرات الصوتية`.
+  - Subtitle: `Listen to faculty lectures linked to their respective lecture sheets.`.
+  - Total count badge: `${count} Recordings` / `${count} تسجيلات`.
+- **Audio Recording Card Anatomy (`.audio-card`)**:
+  - **Top Row**: Pastel subject badge pill (`.audio-subject-pill`) + Order pill (`#1`, `#2`) + 3-dot menu button.
+  - **Body Row**: Custom dental subject icon box (44x44px rounded, colored background & Lucide icon) + bold lecture title + lecturer with user icon (`Dr. د. آمال كشلاف`).
+  - **Waveform Row**: Play button (`[ ▶ ]` 36px circular button in burgundy `#7E1D2A`) + realistic audio waveform visualization (bars matching subject accent color) + duration (`58:24`).
+  - **Metadata Row**: Recording date with calendar icon (`📅 23 Sep 2026`) + linked sheet pill (`🔗 Sheet 1`).
+  - **Action Buttons**: Two full-width touch-friendly buttons side by side:
+    - `[ ▶ Listen ]` (burgundy fill `#7E1D2A`, toggles playback).
+    - `[ 📄 View Sheet ]` (warm ivory outline, opens linked PDF sheet viewer at `#/sheet-detail?id=...`).
+- **Recordings Without Audio (Unavailable State — Blueprint Rule 9)**:
+  - Clean, subtle, muted aesthetic communicating: `No recording available yet` / `لا يوجد تسجيل صوتي متاح حالياً`.
+  - Muted disabled button: `[ 🔇 Not Available ]` + ACTIVE `[ 📄 View Sheet ]` to allow studying the PDF sheet directly.
+  - Zero invented recordings or audio files.
+- **Strict Anti-AI-Slop & Quality Directives**:
+  - **Zero "Verified" / "معتمد" badges** anywhere on the page.
+- **Multi-Device Responsiveness (Zero Horizontal Overflow)**:
+  - **Desktop (>= 1200px)**: 3-column grid (`repeat(3, minmax(0, 1fr))`).
+  - **iPad & Tablets (768px – 1199px)**: 2-column or 1-column layout (`repeat(2, minmax(0, 1fr))`), single top navbar, zero sidebar ("فالايباد لا يوجد شريط جانبي بل انه نفس اللابتوب كله فوق").
+  - **Mobile (< 768px)**: 1-column vertical compact stack (`1fr !important`), touch targets >= 44px, strictly no horizontal scrolling.
+
+---
+
+## 8. Recent Git Commits & State Log
+- `Current`: Audio Recordings page master redesign matching blueprint (`media_1790210375688.jpg` & `media_1790210419688.jpg`) with panoramic hero banner, filter bar, audio cards with waveforms, sheet linking, unavailable state handling, and version bump to `?v=9.7`.
+- `7d016c9`: Master restructuring & redesign of Academic Schedules (`#/schedules`) matching blueprint (`media_1790209940929.jpg`) with 3 integrated Kuro cards, responsive desktop/iPad/mobile views, back navigation, and cache busting bump to `?v=9.6`.
 - `92e4382`: Questions Bank master redesign matching blueprint (`media_1790209485831.jpg`) with 4-column desktop grid, 2-column iPad grid, 1-column mobile stack, ivory cards, and version bump to `?v=9.5`.
 - `73ed2c3`: Synchronize top center navigation pills with master visual reference.
 - `7c3695d`: Sheets & Lectures master redesign matching blueprint (`media_1790204779370.jpg`) with panoramic hero (`assets/hero/sheets-hero-study.png`), 2-column card split, full action buttons, and version bump to `?v=9.4`.

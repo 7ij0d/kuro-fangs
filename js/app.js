@@ -387,8 +387,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/sheets', (c, q) => window.SheetsPage.render(c, q));
   router.register('/sheet-detail', (c, q) => window.SheetDetailPage.render(c, q));
   router.register('/sheet/:id', (c, id, q) => window.SheetDetailPage.render(c, id, q));
-  router.register('/recordings', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
-  router.register('/videos', (c, q) => window.SecondaryPages.renderAudioRecordings(c, q));
+  router.register('/recordings', (c, q) => window.RecordingsPage ? window.RecordingsPage.render(c, q) : window.SecondaryPages.renderAudioRecordings(c, q));
+  router.register('/videos', (c, q) => window.RecordingsPage ? window.RecordingsPage.render(c, q) : window.SecondaryPages.renderAudioRecordings(c, q));
   router.register('/lecture-schedule', (c, q) => {
     if (window.ExamsPage) {
       window.ExamsPage.academicTab = 'theory';
