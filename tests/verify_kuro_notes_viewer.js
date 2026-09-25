@@ -37,32 +37,41 @@ const tests = [
       sheetDetailCode.includes('kn-btn-header-more'),
   },
 
-  // 2. Fixed Top Toolbar & Exact Tool Order
+  // 1. Unified Header Hierarchy (Back, Kuro Notes, Undo/Redo, Sheet Name, Page Nav, Zoom 50%..300%, Search, Bookmark, Share, More)
   {
-    category: 'Fixed Top Toolbar',
-    name: 'Toolbar contains all 5 semantic groups with vertical dividers',
+    category: 'Unified Header Hierarchy',
+    name: 'Header contains Back, Sidebar toggle, Kuro Notes brand, Undo/Redo, Sheet Name pill, Page Nav, Zoom (50%..300%), Search, Bookmark, Share, and More',
     pass:
-      sheetDetailCode.includes('kn-group-history') &&
+      sheetDetailCode.includes('kn-btn-back') &&
+      sheetDetailCode.includes('kn-btn-left-sidebar') &&
+      sheetDetailCode.includes('Kuro Notes') &&
+      sheetDetailCode.includes('kn-btn-undo') &&
+      sheetDetailCode.includes('kn-btn-redo') &&
+      sheetDetailCode.includes('kn-doc-title-pill') &&
       sheetDetailCode.includes('kn-group-pagenav') &&
       sheetDetailCode.includes('kn-group-zoom') &&
-      sheetDetailCode.includes('kn-group-annotations') &&
-      sheetDetailCode.includes('kn-group-extra') &&
-      sheetDetailCode.includes('kn-toolbar-divider'),
+      sheetDetailCode.includes('data-zoom="1.3"') &&
+      sheetDetailCode.includes('data-zoom="3.0"') &&
+      sheetDetailCode.includes('kn-btn-search') &&
+      sheetDetailCode.includes('kn-btn-bookmark') &&
+      sheetDetailCode.includes('kn-btn-share') &&
+      sheetDetailCode.includes('kn-btn-header-more'),
   },
+
+  // 2. Clean Centered Top Toolbar & Exact Tool Order (No Horizontal Scroll Strip)
   {
-    category: 'Fixed Top Toolbar',
-    name: 'Annotation tools follow exact order: Select, Highlighter, Pen, Eraser, Shapes, Image, Text, Notes, AI, More',
+    category: 'Clean Centered Top Toolbar',
+    name: 'Toolbar follows exact order: Select, Pen, Highlighter, Eraser, Text, Image, Note, Bookmark, More (no AI, Outline, or Shapes clutter)',
     pass: (() => {
       const order = [
         'data-tool="select"',
-        'data-tool="highlighter"',
         'data-tool="pen"',
+        'data-tool="highlighter"',
         'data-tool="eraser"',
-        'data-tool="shapes"',
-        'data-tool="image"',
         'data-tool="text"',
+        'data-tool="image"',
         'data-tool="notes"',
-        'data-tool="ai"',
+        'id="kn-toolbar-bookmark"',
         'id="kn-toolbar-more"',
       ];
       let lastIdx = -1;
@@ -80,16 +89,17 @@ const tests = [
     pass: sheetDetailCode.includes('activeTool: null'),
   },
 
-  // 3. 5-Layer Page Stack & Under-Text Highlighter
+  // 3. 5-Layer Page Stack, Layer z-index & Under-Text Highlighter
   {
     category: '5-Layer Page Stack',
-    name: 'Page card contains PDF canvas, Under-Text Highlight canvas, Text layer, Annotation canvas, and Objects layer',
+    name: 'Page card contains PDF canvas, Under-Text Highlight canvas, Text layer, Annotation canvas, and Objects layer with proper z-index',
     pass:
       sheetDetailCode.includes('kn-pdf-canvas') &&
       sheetDetailCode.includes('kn-highlight-canvas') &&
       sheetDetailCode.includes('kn-text-layer') &&
       sheetDetailCode.includes('kn-annotation-layer') &&
-      sheetDetailCode.includes('kn-objects-layer'),
+      sheetDetailCode.includes('kn-objects-layer') &&
+      polishCss.includes('.kn-interaction-layer.kn-drawing-active'),
   },
   {
     category: 'Under-Text Highlighter',
@@ -99,16 +109,19 @@ const tests = [
       polishCss.includes('mix-blend-mode: multiply'),
   },
 
-  // 4. Unified 9 Tool Engines
+  // 4. Universal Selection, Smooth Move, 8-Handle Resize & Zoom Coordinate Lock
   {
-    category: 'Selection & Lasso Tool',
-    name: 'Supports Rectangle & Freehand Lasso modes, Target Filters, 8 resize handles + rotation handle, and Contextual Action Bar',
+    category: 'Universal Selection, Move & Resize Engine',
+    name: 'Supports Dashed Rectangular Bounding Box, 8 square resize handles + top rotation handle, Contextual Action Bar, and 60fps in-place Move/Resize across all zoom levels (50%..300%)',
     pass:
-      sheetDetailCode.includes('selectionMode') &&
-      sheetDetailCode.includes('selectionFilter') &&
-      sheetDetailCode.includes('pointInPolygon') &&
-      sheetDetailCode.includes('kn-selection-box') &&
-      sheetDetailCode.includes('kn-context-bar'),
+      polishCss.includes('border: 1.5px dashed #7E1D2A') &&
+      polishCss.includes('.kn-selection-box.is-text-sel') &&
+      sheetDetailCode.includes('getCardScale') &&
+      sheetDetailCode.includes('getCanvasScale') &&
+      sheetDetailCode.includes('redrawPageCanvasesOnly') &&
+      sheetDetailCode.includes('data-ctx="edit"') &&
+      sheetDetailCode.includes('data-ctx="duplicate"') &&
+      sheetDetailCode.includes('Math.min(3.0, newZoom)'),
   },
   {
     category: 'Highlighter & Pen Tools',
@@ -162,14 +175,13 @@ const tests = [
       sheetDetailCode.includes('kn-search-mark'),
   },
 
-  // 5. 3-Tier Responsive Layouts & Zero Browser Blue
+  // 5. Responsive Layouts Across ALL Devices (Desktop, Tablet/iPad, Mobile)
   {
-    category: 'Responsive & Zero Blue',
-    name: 'Defines Desktop (>1100px), iPad (<=1100px with corner FABs), and Mobile (<=767px with bottom bar & bottom sheets)',
+    category: 'Responsive All-Device Layouts',
+    name: 'Defines Desktop (>1024px), Tablet/iPad (<=1024px), and Mobile (<=767px) adaptive Header & Toolbar without horizontal scrolling',
     pass:
-      polishCss.includes('@media (max-width: 1100px)') &&
+      polishCss.includes('@media (max-width: 1024px)') &&
       polishCss.includes('@media (max-width: 767px)') &&
-      polishCss.includes('.kn-ipad-fab') &&
       polishCss.includes('.kn-mobile-bottom-bar') &&
       polishCss.includes('-webkit-tap-highlight-color: transparent'),
   },

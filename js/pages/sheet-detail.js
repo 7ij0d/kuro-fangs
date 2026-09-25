@@ -430,7 +430,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <button id="kn-exit-reading-btn" title="Exit Focus Mode (Esc)">✕ Exit</button>
       </div>
 
-      <!-- 1. TOP HEADER (56px Desktop) -->
+      <!-- 1. TOP HEADER (Responsive across Desktop, Tablet/iPad, and Mobile) -->
       <header class="kn-header" id="kn-header">
         <div class="kn-header-left">
           <button class="kn-btn kn-btn-back" id="kn-btn-back" title="${t('رجوع', 'Back to Sheets')}">
@@ -447,11 +447,64 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             <span class="kn-app-title">Kuro Notes</span>
           </div>
 
-          <div class="kn-header-sep"></div>
-
+          <!-- Sheet Name Pill -->
           <div class="kn-doc-title-pill" id="kn-doc-title-pill" title="${escapeHtml(docTitle)}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7E1D2A" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span class="kn-doc-title-text">${escapeHtml(docTitle)}</span>
+          </div>
+
+          <!-- Undo / Redo Pill in Header -->
+          <div class="kn-header-pill-group kn-tool-group kn-group-history" id="kn-header-history">
+            <button class="kn-tool-btn" id="kn-btn-undo" title="Undo (Ctrl+Z)" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+            </button>
+            <button class="kn-tool-btn" id="kn-btn-redo" title="Redo (Ctrl+Y)" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center / Right Header Controls: Page Navigation + Zoom + Search + Bookmark + Share + More -->
+        <div class="kn-header-controls">
+          <!-- Page Navigation Pill -->
+          <div class="kn-header-pill-group kn-tool-group kn-group-pagenav" id="kn-header-pagenav">
+            <button class="kn-tool-btn" id="kn-btn-prev" title="Previous Page">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="kn-page-input-wrap" title="Jump to Page">
+              <input type="number" class="kn-page-input" id="kn-page-input" value="${state.currentPage}" min="1" max="${state.totalPages}" />
+              <span style="color:var(--kn-text-muted);font-weight:700;">/</span>
+              <span id="kn-total-pages">${state.totalPages}</span>
+            </div>
+            <button class="kn-tool-btn" id="kn-btn-next" title="Next Page">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+
+          <!-- Zoom Controls Pill (50%, 75%, 100%, 130%, 150%, 200%, 300%) -->
+          <div class="kn-header-pill-group kn-tool-group kn-group-zoom" id="kn-header-zoom">
+            <button class="kn-tool-btn" id="kn-btn-zoom-out" title="Zoom Out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <div class="kn-dropdown-wrap">
+              <button class="kn-zoom-btn" id="kn-btn-zoom-menu" title="Zoom Presets (50% - 300%)">
+                <span id="kn-zoom-label">${Math.round(state.zoom * 100)}%</span>
+              </button>
+              <div class="kn-dropdown-menu" id="kn-zoom-dropdown">
+                <button class="kn-dropdown-item" data-zoom="fit-page"><span>Fit Page</span></button>
+                <button class="kn-dropdown-item" data-zoom="fit-width"><span>Fit Width</span></button>
+                <button class="kn-dropdown-item" data-zoom="0.5"><span>50%</span></button>
+                <button class="kn-dropdown-item" data-zoom="0.75"><span>75%</span></button>
+                <button class="kn-dropdown-item" data-zoom="1.0"><span>100%</span></button>
+                <button class="kn-dropdown-item" data-zoom="1.3"><span>130%</span></button>
+                <button class="kn-dropdown-item" data-zoom="1.5"><span>150%</span></button>
+                <button class="kn-dropdown-item" data-zoom="2.0"><span>200%</span></button>
+                <button class="kn-dropdown-item" data-zoom="3.0"><span>300%</span></button>
+              </div>
+            </div>
+            <button class="kn-tool-btn" id="kn-btn-zoom-in" title="Zoom In">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
           </div>
         </div>
 
@@ -460,7 +513,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </button>
 
-          <button class="kn-icon-btn" id="kn-btn-bookmark" title="Bookmark Current Page">
+          <button class="kn-icon-btn ${state.bookmarks.includes(state.currentPage) ? 'active' : ''}" id="kn-btn-bookmark" title="Bookmark Current Page">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
           </button>
 
@@ -474,7 +527,6 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
             </button>
             <div class="kn-dropdown-menu" id="kn-header-more-menu">
-              <button class="kn-dropdown-item" data-doc-action="info"><span>Document Info</span></button>
               <button class="kn-dropdown-item" data-doc-action="fit-page"><span>Fit Page</span></button>
               <button class="kn-dropdown-item" data-doc-action="fit-width"><span>Fit Width</span></button>
               <button class="kn-dropdown-item" data-doc-action="actual-size"><span>Actual Size (100%)</span></button>
@@ -485,149 +537,86 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
               <button class="kn-dropdown-item" data-doc-action="export"><span>Export with Annotations</span></button>
               <button class="kn-dropdown-item" data-doc-action="focus"><span>Focus Mode</span></button>
               <button class="kn-dropdown-item" data-doc-action="dark-mode"><span>Toggle Dark Mode</span></button>
-              <button class="kn-dropdown-item" data-doc-action="discussion"><span>Academic Discussion</span></button>
             </div>
           </div>
         </div>
       </header>
 
-      <!-- 2. FIXED TOP TOOLBAR (Exact Group & Tool Order 1..10) -->
+      <!-- 2. FIXED TOP TOOLBAR (Responsive, No Horizontal Scrollbar, Core Study Tools Only) -->
       <div class="kn-toolbar" id="kn-toolbar" role="toolbar" aria-label="Kuro Notes Study Toolbar">
-        <!-- GROUP 01: History -->
-        <div class="kn-tool-group kn-group-history">
-          <button class="kn-tool-btn" id="kn-btn-undo" title="Undo (Ctrl+Z)" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-          </button>
-          <button class="kn-tool-btn" id="kn-btn-redo" title="Redo (Ctrl+Y)" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
-          </button>
-        </div>
-
-        <div class="kn-toolbar-divider"></div>
-
-        <!-- GROUP 02: Page Navigation -->
-        <div class="kn-tool-group kn-group-pagenav">
-          <button class="kn-tool-btn" id="kn-btn-prev" title="Previous Page">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <div class="kn-page-input-wrap" title="Jump to Page">
-            <input type="number" class="kn-page-input" id="kn-page-input" value="${state.currentPage}" min="1" max="${state.totalPages}" />
-            <span style="color:var(--kn-text-muted);">/</span>
-            <span id="kn-total-pages">${state.totalPages}</span>
-          </div>
-          <button class="kn-tool-btn" id="kn-btn-next" title="Next Page">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-
-        <div class="kn-toolbar-divider kn-group-pagenav"></div>
-
-        <!-- GROUP 03: Zoom Controls -->
-        <div class="kn-tool-group kn-group-zoom">
-          <button class="kn-tool-btn" id="kn-btn-zoom-out" title="Zoom Out">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <div class="kn-dropdown-wrap">
-            <button class="kn-zoom-btn" id="kn-btn-zoom-menu" title="Zoom Presets">
-              <span id="kn-zoom-label">${Math.round(state.zoom * 100)}%</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="kn-dropdown-menu" id="kn-zoom-dropdown">
-              <button class="kn-dropdown-item" data-zoom="fit-page"><span>Fit Page</span></button>
-              <button class="kn-dropdown-item" data-zoom="fit-width"><span>Fit Width</span></button>
-              <button class="kn-dropdown-item" data-zoom="0.5"><span>50%</span></button>
-              <button class="kn-dropdown-item" data-zoom="0.75"><span>75%</span></button>
-              <button class="kn-dropdown-item" data-zoom="1.0"><span>100%</span></button>
-              <button class="kn-dropdown-item" data-zoom="1.2"><span>120%</span></button>
-              <button class="kn-dropdown-item" data-zoom="1.25"><span>125%</span></button>
-              <button class="kn-dropdown-item" data-zoom="1.5"><span>150%</span></button>
-              <button class="kn-dropdown-item" data-zoom="2.0"><span>200%</span></button>
-            </div>
-          </div>
-          <button class="kn-tool-btn" id="kn-btn-zoom-in" title="Zoom In">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-        </div>
-
-        <div class="kn-toolbar-divider kn-group-zoom"></div>
-
-        <!-- GROUP 04: Annotation Tools (Fixed Exact Order 1..8) -->
         <div class="kn-tool-group kn-group-annotations">
-          <!-- 1. Selection / Lasso -->
-          <button class="kn-tool-btn" data-tool="select" title="1. Selection / Lasso Tool (V)">
+          <!-- 1. Select -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="select" title="Select & Transform Tool (V)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
+            <span class="kn-tool-label">Select</span>
           </button>
 
-          <!-- 2. Highlighter -->
-          <button class="kn-tool-btn kn-tool-highlighter" data-tool="highlighter" title="2. Highlighter Tool — Under-Text (H)">
+          <!-- 2. Pen -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="pen" title="Pen Tool (P)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+            <span class="kn-tool-label">Pen</span>
+            <span class="kn-tool-color-dot" id="kn-pen-dot" style="background:${state.pen.color};"></span>
+            <span class="kn-tool-chevron">⌄</span>
+          </button>
+
+          <!-- 3. Highlighter -->
+          <button class="kn-tool-btn kn-pill-tool kn-tool-highlighter" data-tool="highlighter" title="Highlighter Tool — Under-Text (H)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>
             <span class="kn-tool-label">Highlighter</span>
             <span class="kn-tool-color-dot" id="kn-hl-dot" style="background:${state.highlighter.color};"></span>
-          </button>
-
-          <!-- 3. Pen -->
-          <button class="kn-tool-btn" data-tool="pen" title="3. Pen Tool (P)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-            <span class="kn-tool-color-dot" id="kn-pen-dot" style="background:${state.pen.color};"></span>
+            <span class="kn-tool-chevron">⌄</span>
           </button>
 
           <!-- 4. Eraser -->
-          <button class="kn-tool-btn" data-tool="eraser" title="4. Eraser Tool (E)">
+          <button class="kn-tool-btn kn-pill-tool" data-tool="eraser" title="Eraser Tool (E)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+            <span class="kn-tool-label">Eraser</span>
+            <span class="kn-tool-chevron">⌄</span>
           </button>
 
-          <!-- 5. Shapes -->
-          <button class="kn-tool-btn" data-tool="shapes" title="5. Shapes Tool (S)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          </button>
-
-          <!-- 6. Images -->
-          <button class="kn-tool-btn" data-tool="image" title="6. Insert Image (I)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </button>
-
-          <!-- 7. Text -->
-          <button class="kn-tool-btn" data-tool="text" title="7. Text Box Tool (T)">
+          <!-- 5. Text -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="text" title="Text Tool (T)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="kn-tool-label">Text</span>
           </button>
 
-          <!-- 8. Notes -->
-          <button class="kn-tool-btn" data-tool="notes" title="8. Study Note Card (N)">
+          <!-- 6. Image -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="image" title="Insert Image (I)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="kn-tool-label">Image</span>
+          </button>
+
+          <!-- 7. Note -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="notes" title="Study Note Card (N)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/></svg>
-          </button>
-        </div>
-
-        <div class="kn-toolbar-divider"></div>
-
-        <!-- GROUP 05: Intelligent / Extra Tools (9..10) -->
-        <div class="kn-tool-group kn-group-extra">
-          <!-- 9. AI Assistant -->
-          <button class="kn-tool-btn" data-tool="ai" id="kn-btn-ai" title="9. Kuro AI Study Assistant">
-            <span class="kn-ai-badge">AI</span>
+            <span class="kn-tool-label">Note</span>
           </button>
 
-          <!-- 10. More / Secondary Toolbar Options -->
-          <div class="kn-dropdown-wrap">
-            <button class="kn-tool-btn" id="kn-toolbar-more" title="10. More Tool Options">
+          <!-- 8. Bookmark -->
+          <button class="kn-tool-btn kn-pill-tool ${state.bookmarks.includes(state.currentPage) ? 'active' : ''}" id="kn-toolbar-bookmark" title="Bookmark Current Page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7E1D2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            <span class="kn-tool-label">Bookmark</span>
+          </button>
+
+          <!-- 9. More / Secondary Actions -->
+          <div class="kn-dropdown-wrap kn-group-extra">
+            <button class="kn-tool-btn kn-pill-tool" id="kn-toolbar-more" title="More Tool Options">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+              <span class="kn-tool-label kn-more-label">More</span>
             </button>
             <div class="kn-dropdown-menu" id="kn-toolbar-more-menu">
-              <button class="kn-dropdown-item" data-more-action="clear-page"><span>Clear Page Annotations</span></button>
               <button class="kn-dropdown-item" data-more-action="select-all"><span>Select All on Page (Ctrl+A)</span></button>
+              <button class="kn-dropdown-item" data-more-action="clear-page"><span>Clear Page Annotations</span></button>
               <button class="kn-dropdown-item" data-more-action="rotate-right"><span>Rotate Page 90°</span></button>
-              <button class="kn-dropdown-item" data-more-action="export-json"><span>Backup Notes (JSON)</span></button>
+              <button class="kn-dropdown-item" data-more-action="focus-mode"><span>Focus Reading Mode</span></button>
             </div>
           </div>
         </div>
 
-        <!-- Right-aligned Focus Mode & Smart Panel Toggle -->
-        <div class="kn-toolbar-end">
-          <button class="kn-tool-btn" id="kn-btn-reading-mode" title="Distraction-Free Focus Mode">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-          </button>
-          <button class="kn-tool-btn ${state.rightSidebarOpen ? 'active' : ''}" id="kn-btn-right-sidebar" title="Toggle Smart Study Panel">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-          </button>
+        <!-- Hidden legacy buttons preserved for backwards-compatible hooks -->
+        <div class="kn-toolbar-end" style="display:none;">
+          <button class="kn-tool-btn" id="kn-btn-reading-mode" title="Focus Mode"></button>
+          <button class="kn-tool-btn" id="kn-btn-right-sidebar" title="Notes Panel"></button>
         </div>
       </div>
 
@@ -655,49 +644,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <div class="kn-search-results-list" id="kn-search-results"></div>
       </div>
 
-      <!-- 3. MAIN WORKSPACE BODY (Left Sidebar + Central Document + Right Smart Panel) -->
+      <!-- 3. MAIN WORKSPACE BODY (Left Pages Sidebar + Central Document Workspace) -->
       <div class="kn-workspace-body">
-        <!-- LEFT NAVIGATION SIDEBAR -->
+        <!-- LEFT PAGES SIDEBAR (Matching Reference Image: Pages header + « Collapse button + vertical page thumbnails) -->
         <aside class="kn-sidebar-left ${state.leftSidebarOpen ? '' : 'kn-sidebar-collapsed'}" id="kn-sidebar-left">
-          <nav class="kn-left-nav-list" id="kn-left-tabs" aria-label="Sheet Navigation">
-            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'pages' ? 'active' : ''}" data-left-tab="pages">
-              <span class="kn-left-nav-item-main">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          <div class="kn-sidebar-pages-header" id="kn-left-tabs">
+            <div class="kn-sidebar-pages-tabs">
+              <button class="kn-pages-header-btn kn-tab-pill ${state.leftTab === 'pages' ? 'active' : ''}" data-left-tab="pages">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7E1D2A" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
                 <span>Pages</span>
-              </span>
-              <span class="kn-left-nav-chevron">›</span>
-            </button>
-            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'bookmarks' ? 'active' : ''}" data-left-tab="bookmarks">
-              <span class="kn-left-nav-item-main">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                <span>Bookmarks</span>
-              </span>
-            </button>
-            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'outline' ? 'active' : ''}" data-left-tab="outline">
-              <span class="kn-left-nav-item-main">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                <span>Outline</span>
-              </span>
-            </button>
-            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'notes' ? 'active' : ''}" data-left-tab="notes">
-              <span class="kn-left-nav-item-main">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span id="kn-left-notes-label">Notes (${state.annotations.filter((a) => a.type === 'note').length})</span>
-              </span>
-            </button>
-            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'ai' ? 'active' : ''}" data-left-tab="ai">
-              <span class="kn-left-nav-item-main">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span>AI Help</span>
-              </span>
-            </button>
-            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'annotations' ? 'active' : ''}" data-left-tab="annotations">
-              <span class="kn-left-nav-item-main">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
-                <span>Annotations</span>
-              </span>
-            </button>
-          </nav>
+              </button>
+              <button class="kn-pages-header-btn kn-tab-pill ${state.leftTab === 'bookmarks' ? 'active' : ''}" data-left-tab="bookmarks" title="Bookmarked Pages">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+              </button>
+              <button class="kn-pages-header-btn kn-tab-pill ${state.leftTab === 'annotations' ? 'active' : ''}" data-left-tab="annotations" title="Annotations List">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+              </button>
+            </div>
+            <button class="kn-sidebar-collapse-btn" id="kn-sidebar-collapse-btn" title="Collapse Pages Sidebar">«</button>
+          </div>
           <div class="kn-sidebar-content" id="kn-left-content"></div>
         </aside>
 
@@ -728,28 +693,23 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           <div class="kn-pages-container" id="kn-pages-container"></div>
         </main>
 
-        <!-- RIGHT SMART PANEL -->
-        <aside class="kn-sidebar-right ${state.rightSidebarOpen ? '' : 'kn-sidebar-collapsed'}" id="kn-sidebar-right">
+        <!-- RIGHT SIDEBAR (Collapsed by default; no AI or Outline clutter) -->
+        <aside class="kn-sidebar-right kn-sidebar-collapsed" id="kn-sidebar-right" style="display:none;">
           <div class="kn-sidebar-tab-bar" id="kn-right-tabs">
-            <button class="kn-tab-pill ${state.rightTab === 'outline' ? 'active' : ''}" data-right-tab="outline">Outline</button>
-            <button class="kn-tab-pill ${state.rightTab === 'notes' ? 'active' : ''}" data-right-tab="notes">Notes (${state.annotations.filter((a) => a.type === 'note').length})</button>
-            <button class="kn-tab-pill ${state.rightTab === 'ai' ? 'active' : ''}" data-right-tab="ai">AI Help</button>
+            <button class="kn-tab-pill active" data-right-tab="notes">Notes (${state.annotations.filter((a) => a.type === 'note').length})</button>
           </div>
           <div id="kn-right-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden;"></div>
         </aside>
       </div>
 
-      <!-- iPad Quick-Toggle Floating Corner Buttons -->
+      <!-- Tablet / iPad Quick-Toggle Floating Corner Button for Pages -->
       <button class="kn-ipad-fab kn-ipad-fab-left" id="kn-ipad-fab-left">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
         <span>Pages</span>
       </button>
-      <button class="kn-ipad-fab kn-ipad-fab-right" id="kn-ipad-fab-right">
-        <span>Smart Panel</span>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-      </button>
+      <button class="kn-ipad-fab kn-ipad-fab-right" id="kn-ipad-fab-right" style="display:none;"></button>
 
-      <!-- Mobile Compact Bottom Navigation Bar (<768px) -->
+      <!-- Mobile Compact Bottom Bar (<768px) -->
       <div class="kn-mobile-bottom-bar" id="kn-mobile-bottom-bar">
         <button class="kn-btn" id="kn-mob-pages-btn" style="font-weight:700;gap:5px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -761,9 +721,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           <button class="kn-icon-btn" id="kn-mob-next" style="width:28px;height:28px;">›</button>
         </div>
         <button class="kn-zoom-btn" id="kn-mob-zoom-btn">${Math.round(state.zoom * 100)}%</button>
-        <button class="kn-btn" id="kn-mob-panel-btn" style="font-weight:700;gap:5px;color:var(--kn-primary);">
-          <span>Smart Panel</span>
-        </button>
+        <button class="kn-btn" id="kn-mob-panel-btn" style="display:none;"></button>
       </div>
     </div>
   `;
@@ -796,7 +754,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <div class="kn-text-layer" id="kn-text-layer-${p}"></div>
         <canvas class="kn-annotation-layer" id="kn-annot-canvas-${p}" width="${width}" height="${height}"></canvas>
         <div class="kn-objects-layer" id="kn-objects-layer-${p}"></div>
-        <div class="kn-interaction-layer ${state.activeTool ? 'tool-active' : ''}" id="kn-interact-layer-${p}" data-page="${p}"></div>
+        <div class="kn-interaction-layer ${state.activeTool ? 'tool-active' : ''} ${['pen', 'highlighter', 'eraser', 'shapes'].includes(state.activeTool) ? 'kn-drawing-active' : ''}" id="kn-interact-layer-${p}" data-page="${p}"></div>
       `;
       pagesContainer.appendChild(card);
       drawFallbackSheetPage(p, document.getElementById(`kn-pdf-canvas-${p}`));
@@ -903,21 +861,44 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // RENDER ALL ANNOTATIONS ON A PAGE (5-Layer Stack)
+  // RENDER ALL ANNOTATIONS ON A PAGE (5-Layer Stack + Zoom-Locked Scale Helpers)
   // ══════════════════════════════════════════════════════════════════════════
-  function renderPageAnnotations(pageNum) {
+  function getPageLogicalSize(pageNum) {
+    const isSideways = state.rotation === 90 || state.rotation === 270;
+    return {
+      w: isSideways ? BASE_H : BASE_W,
+      h: isSideways ? BASE_W : BASE_H,
+    };
+  }
+
+  function getCardScale(pageNum) {
+    const card = pagesContainer.querySelector(`.kn-page-card[data-page="${pageNum}"]`);
+    const { w: logicalW } = getPageLogicalSize(pageNum);
+    if (card) {
+      const rect = card.getBoundingClientRect();
+      if (rect.width > 10) return rect.width / logicalW;
+    }
+    return state.zoom;
+  }
+
+  function getCanvasScale(pageNum) {
+    const hlCanvas = document.getElementById(`kn-hl-canvas-${pageNum}`);
+    const { w: logicalW } = getPageLogicalSize(pageNum);
+    if (hlCanvas && hlCanvas.width > 10) {
+      return hlCanvas.width / logicalW;
+    }
+    return state.zoom;
+  }
+
+  function redrawPageCanvasesOnly(pageNum, s) {
     const hlCanvas = document.getElementById(`kn-hl-canvas-${pageNum}`);
     const penCanvas = document.getElementById(`kn-annot-canvas-${pageNum}`);
-    const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
-    if (!hlCanvas || !penCanvas || !objLayer) return;
-
+    if (!hlCanvas || !penCanvas) return;
     const hlCtx = hlCanvas.getContext('2d');
     const penCtx = penCanvas.getContext('2d');
     hlCtx.clearRect(0, 0, hlCanvas.width, hlCanvas.height);
     penCtx.clearRect(0, 0, penCanvas.width, penCanvas.height);
-    objLayer.innerHTML = '';
 
-    const s = state.zoom;
     const pageAnnots = state.annotations
       .filter((a) => a.page === pageNum)
       .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
@@ -929,7 +910,26 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         drawStrokeOnCanvas(penCtx, ann, s);
       } else if (ann.type === 'shape') {
         drawShapeOnCanvas(penCtx, ann, s);
-      } else if (ann.type === 'text') {
+      }
+    });
+  }
+
+  function renderPageAnnotations(pageNum) {
+    const hlCanvas = document.getElementById(`kn-hl-canvas-${pageNum}`);
+    const penCanvas = document.getElementById(`kn-annot-canvas-${pageNum}`);
+    const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+    if (!hlCanvas || !penCanvas || !objLayer) return;
+
+    const s = getCanvasScale(pageNum);
+    redrawPageCanvasesOnly(pageNum, s);
+    objLayer.innerHTML = '';
+
+    const pageAnnots = state.annotations
+      .filter((a) => a.page === pageNum)
+      .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+
+    pageAnnots.forEach((ann) => {
+      if (ann.type === 'text') {
         renderTextObject(objLayer, ann, s);
       } else if (ann.type === 'image') {
         renderImageObject(objLayer, ann, s);
@@ -943,7 +943,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   function drawStrokeOnCanvas(ctx, ann, s) {
-    if (!ann.points || ann.points.length === 0) return;
+    if ((!ann.points || ann.points.length === 0) && (!ann.rects || ann.rects.length === 0)) return;
     ctx.save();
     ctx.globalAlpha = ann.opacity !== undefined ? ann.opacity : 1.0;
     ctx.strokeStyle = ann.color || '#7E1D2A';
@@ -1040,7 +1040,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     const editor = document.createElement('div');
     editor.className = 'kn-textbox-editor';
-    editor.contentEditable = 'true';
+    editor.contentEditable = state.activeTool === 'text' ? 'true' : 'false';
     editor.dir = ann.dir || 'auto';
     editor.style.fontFamily = ann.fontFamily || state.text.fontFamily;
     editor.style.fontSize = `${(ann.fontSize || 16) * s}px`;
@@ -1054,6 +1054,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     editor.style.lineHeight = ann.lineHeight || 1.45;
     editor.innerText = ann.text || '';
 
+    // Double-click enables inline text editing even when in Select mode
+    el.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      editor.contentEditable = 'true';
+      el.classList.add('editing');
+      editor.focus();
+    });
+
     editor.addEventListener('focus', () => {
       el.classList.add('editing');
       if (!state.selectedIds.includes(ann.id)) {
@@ -1063,6 +1071,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     editor.addEventListener('blur', () => {
       el.classList.remove('editing');
+      if (state.activeTool !== 'text') {
+        editor.contentEditable = 'false';
+      }
       const val = editor.innerText.trim();
       if (!val) {
         // Cancel/delete empty text box cleanly
@@ -1096,6 +1107,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const img = document.createElement('img');
     img.src = ann.displaySrc || ann.src;
     img.alt = 'Study Image';
+    img.draggable = false;
     el.appendChild(img);
 
     // Interactive Crop Mode Overlay
@@ -1128,6 +1140,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     el.style.width = `${(ann.w || 210) * s}px`;
     el.style.height = `${(ann.h || 145) * s}px`;
     el.style.background = ann.color || '#FEF3C7';
+    if (ann.rotation) el.style.transform = `rotate(${ann.rotation}deg)`;
 
     if (ann.collapsed) {
       el.title = `${ann.category || 'Note'}: ${ann.title || ann.text || ''}`;
@@ -1198,10 +1211,22 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
   function makeObjectDraggable(el, ann) {
     el.addEventListener('pointerdown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable || e.target.tagName === 'BUTTON') {
+      if (
+        e.target.tagName === 'INPUT' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.isContentEditable ||
+        e.target.tagName === 'BUTTON' ||
+        el.classList.contains('editing')
+      ) {
         return;
       }
+      // If an active drawing/eraser tool is selected, let the stroke/eraser layer handle it
+      if (state.activeTool && state.activeTool !== 'select') {
+        return;
+      }
+      e.preventDefault();
       e.stopPropagation();
+
       if (e.shiftKey) {
         if (state.selectedIds.includes(ann.id)) {
           state.selectedIds = state.selectedIds.filter((id) => id !== ann.id);
@@ -1209,38 +1234,92 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           state.selectedIds.push(ann.id);
         }
       } else if (!state.selectedIds.includes(ann.id)) {
-        state.selectedIds = [ann.id];
+        if (ann.groupId) {
+          state.selectedIds = state.annotations
+            .filter((a) => a.page === ann.page && a.groupId === ann.groupId)
+            .map((a) => a.id);
+        } else {
+          state.selectedIds = [ann.id];
+        }
       }
+
+      // Render selection overlay once on pointerdown so handles & context bar appear immediately
       renderPageAnnotations(ann.page);
+
+      const pageNum = ann.page;
+      const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+      const selBox = objLayer?.querySelector('.kn-selection-box');
+      const ctxBar = objLayer?.querySelector('.kn-context-bar');
+      const selectedOnPage = state.annotations.filter(
+        (a) => a.page === pageNum && state.selectedIds.includes(a.id)
+      );
+      const snapshots = JSON.parse(JSON.stringify(selectedOnPage));
+      const initBounds = selectedOnPage.map(getAnnotationBounds);
+      const initMinX = Math.min(...initBounds.map((b) => b.x));
+      const initMinY = Math.min(...initBounds.map((b) => b.y));
+      const initMaxX = Math.max(...initBounds.map((b) => b.x + b.w));
+      const initMaxY = Math.max(...initBounds.map((b) => b.y + b.h));
+      const boxW = Math.max(24, initMaxX - initMinX);
+      const boxH = Math.max(24, initMaxY - initMinY);
 
       const startX = e.clientX;
       const startY = e.clientY;
-      const origX = ann.x;
-      const origY = ann.y;
+      const pointerScale = getCardScale(pageNum);
+      const canvasScale = getCanvasScale(pageNum);
+      const { w: logicalW, h: logicalH } = getPageLogicalSize(pageNum);
       let moved = false;
 
       const onMove = (me) => {
-        const dx = (me.clientX - startX) / state.zoom;
-        const dy = (me.clientY - startY) / state.zoom;
-        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
-        ann.x = Math.max(0, Math.min(BASE_W - 20, origX + dx));
-        ann.y = Math.max(0, Math.min(BASE_H - 20, origY + dy));
-        el.style.left = `${ann.x * state.zoom}px`;
-        el.style.top = `${ann.y * state.zoom}px`;
+        const dx = (me.clientX - startX) / pointerScale;
+        const dy = (me.clientY - startY) / pointerScale;
+        if (Math.abs(dx) > 1.5 || Math.abs(dy) > 1.5) moved = true;
+        if (!moved) return;
+
+        selectedOnPage.forEach((item, idx) => {
+          const snap = snapshots[idx];
+          if (snap.points && snap.points.length > 0) {
+            item.points = snap.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }));
+          } else if (snap.rects && snap.rects.length > 0) {
+            item.rects = snap.rects.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
+          } else {
+            item.x = Math.max(0, Math.min(logicalW - 20, (snap.x || 0) + dx));
+            item.y = Math.max(0, Math.min(logicalH - 20, (snap.y || 0) + dy));
+            const domNode = objLayer?.querySelector(`.kn-page-object[data-id="${item.id}"]`);
+            if (domNode) {
+              domNode.style.left = `${item.x * canvasScale}px`;
+              domNode.style.top = `${item.y * canvasScale}px`;
+            }
+          }
+        });
+
+        redrawPageCanvasesOnly(pageNum, canvasScale);
+
+        if (selBox) {
+          const nextMinX = Math.max(0, Math.min(logicalW - 20, initMinX + dx));
+          const nextMinY = Math.max(0, Math.min(logicalH - 20, initMinY + dy));
+          selBox.style.left = `${nextMinX * canvasScale}px`;
+          selBox.style.top = `${nextMinY * canvasScale}px`;
+          if (ctxBar) {
+            ctxBar.style.left = `${(nextMinX + boxW / 2) * canvasScale}px`;
+            ctxBar.style.top = `${Math.max(8, nextMinY * canvasScale - 44)}px`;
+          }
+        }
       };
 
       const onUp = () => {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
         if (moved) {
           pushHistory();
           saveAnnotations();
-          renderPageAnnotations(ann.page);
+          renderPageAnnotations(pageNum);
         }
       };
 
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
     });
   }
 
@@ -1248,6 +1327,13 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   // SELECTION BOUNDING BOX, RESIZE/ROTATE HANDLES & CONTEXTUAL ACTION BAR
   // ══════════════════════════════════════════════════════════════════════════
   function getAnnotationBounds(ann) {
+    if (ann.rects && ann.rects.length > 0) {
+      const minX = Math.min(...ann.rects.map((r) => r.x));
+      const minY = Math.min(...ann.rects.map((r) => r.y));
+      const maxX = Math.max(...ann.rects.map((r) => r.x + r.w));
+      const maxY = Math.max(...ann.rects.map((r) => r.y + r.h));
+      return { x: minX - 4, y: minY - 4, w: Math.max(16, maxX - minX + 8), h: Math.max(16, maxY - minY + 8) };
+    }
     if (ann.points && ann.points.length > 0) {
       const xs = ann.points.map((p) => p.x);
       const ys = ann.points.map((p) => p.y);
@@ -1255,7 +1341,13 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const minY = Math.min(...ys);
       const maxX = Math.max(...xs);
       const maxY = Math.max(...ys);
-      return { x: minX - 4, y: minY - 4, w: Math.max(16, maxX - minX + 8), h: Math.max(16, maxY - minY + 8) };
+      const pad = Math.max(6, (ann.size || 4) / 2 + 4);
+      return {
+        x: minX - pad,
+        y: minY - pad,
+        w: Math.max(20, maxX - minX + pad * 2),
+        h: Math.max(20, maxY - minY + pad * 2),
+      };
     }
     return { x: ann.x || 0, y: ann.y || 0, w: ann.w || 160, h: ann.h || 90 };
   }
@@ -1274,55 +1366,98 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const boxW = Math.max(24, maxX - minX);
     const boxH = Math.max(24, maxY - minY);
 
+    const isSingleText = selectedOnPage.length === 1 && selectedOnPage[0].type === 'text';
+
     const selBox = document.createElement('div');
-    selBox.className = 'kn-selection-box';
+    selBox.className = `kn-selection-box ${isSingleText ? 'is-text-sel' : ''}`;
     selBox.style.left = `${minX * s}px`;
     selBox.style.top = `${minY * s}px`;
     selBox.style.width = `${boxW * s}px`;
     selBox.style.height = `${boxH * s}px`;
+    if (selectedOnPage.length === 1 && selectedOnPage[0].rotation) {
+      selBox.style.transform = `rotate(${selectedOnPage[0].rotation}deg)`;
+    }
 
-    // 8 Resize Handles + 1 Rotation Handle
+    // 8 Square Resize Handles (nw, n, ne, e, se, s, sw, w) + 1 Top Circular Rotation Handle (rot)
     ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'rot'].forEach((dir) => {
       const h = document.createElement('div');
       h.className = `kn-sel-handle ${dir}`;
       h.dataset.handle = dir;
       h.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         startResizeOrRotateSelection(e, dir, selectedOnPage, { x: minX, y: minY, w: boxW, h: boxH }, pageNum);
       });
       selBox.appendChild(h);
     });
 
-    // Dragging inside selection box moves all selected items together
+    // Dragging inside selection box moves all selected items together smoothly without DOM rebuilds
     selBox.addEventListener('pointerdown', (e) => {
       if (e.target.dataset.handle) return;
+      e.preventDefault();
       e.stopPropagation();
+      try {
+        selBox.setPointerCapture(e.pointerId);
+      } catch (_) {}
+
       const startX = e.clientX;
       const startY = e.clientY;
+      const pointerScale = getCardScale(pageNum);
+      const canvasScale = getCanvasScale(pageNum);
+      const { w: logicalW, h: logicalH } = getPageLogicalSize(pageNum);
       const snapshots = JSON.parse(JSON.stringify(selectedOnPage));
-      pushHistory();
+      const ctxBarEl = objLayer.querySelector('.kn-context-bar');
+      let moved = false;
 
       const onMove = (me) => {
-        const dx = (me.clientX - startX) / s;
-        const dy = (me.clientY - startY) / s;
+        const dx = (me.clientX - startX) / pointerScale;
+        const dy = (me.clientY - startY) / pointerScale;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) moved = true;
+        if (!moved) return;
+
         selectedOnPage.forEach((ann, idx) => {
           const snap = snapshots[idx];
-          if (snap.points) {
+          if (snap.points && snap.points.length > 0) {
             ann.points = snap.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }));
+          } else if (snap.rects && snap.rects.length > 0) {
+            ann.rects = snap.rects.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
           } else {
-            ann.x = (snap.x || 0) + dx;
-            ann.y = (snap.y || 0) + dy;
+            ann.x = Math.max(0, Math.min(logicalW - 20, (snap.x || 0) + dx));
+            ann.y = Math.max(0, Math.min(logicalH - 20, (snap.y || 0) + dy));
+            const domNode = objLayer.querySelector(`.kn-page-object[data-id="${ann.id}"]`);
+            if (domNode) {
+              domNode.style.left = `${ann.x * canvasScale}px`;
+              domNode.style.top = `${ann.y * canvasScale}px`;
+            }
           }
         });
-        renderPageAnnotations(pageNum);
+
+        redrawPageCanvasesOnly(pageNum, canvasScale);
+
+        const nextMinX = minX + dx;
+        const nextMinY = minY + dy;
+        selBox.style.left = `${nextMinX * canvasScale}px`;
+        selBox.style.top = `${nextMinY * canvasScale}px`;
+        if (ctxBarEl) {
+          ctxBarEl.style.left = `${(nextMinX + boxW / 2) * canvasScale}px`;
+          ctxBarEl.style.top = `${Math.max(8, nextMinY * canvasScale - 44)}px`;
+        }
       };
+
       const onUp = () => {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
-        saveAnnotations();
+        window.removeEventListener('pointercancel', onUp);
+        if (moved) {
+          pushHistory();
+          saveAnnotations();
+          renderPageAnnotations(pageNum);
+        }
       };
+
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
     });
 
     objLayer.appendChild(selBox);
@@ -1331,7 +1466,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const ctxBar = document.createElement('div');
     ctxBar.className = 'kn-context-bar open';
     ctxBar.style.left = `${(minX + boxW / 2) * s}px`;
-    ctxBar.style.top = `${Math.max(8, minY * s - 42)}px`;
+    ctxBar.style.top = `${minY * s > 52 ? minY * s - 44 : (minY + boxH) * s + 12}px`;
 
     const singleImg = selectedOnPage.length === 1 && selectedOnPage[0].type === 'image' ? selectedOnPage[0] : null;
     const hasGrouped = selectedOnPage.some((a) => Boolean(a.groupId));
@@ -1341,24 +1476,54 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <button class="kn-ctx-btn" data-ctx="apply-crop" style="color:#15803D;">✓ Apply Crop</button>
         <button class="kn-ctx-btn danger" data-ctx="cancel-crop">✕ Cancel</button>
       `;
+    } else if (isSingleText) {
+      ctxBar.innerHTML = `
+        <button class="kn-ctx-btn" data-ctx="edit">Edit</button>
+        <span class="kn-ctx-sep"></span>
+        <button class="kn-ctx-btn" data-ctx="copy">Copy</button>
+        <span class="kn-ctx-sep"></span>
+        <button class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
+        <span class="kn-ctx-sep"></span>
+        <button class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
+        <span class="kn-ctx-sep"></span>
+        <button class="kn-ctx-btn" data-ctx="more" title="More Actions">•••</button>
+      `;
     } else {
       ctxBar.innerHTML = `
-        ${singleImg ? `<button class="kn-ctx-btn" data-ctx="crop">Crop</button><button class="kn-ctx-btn" data-ctx="rot-left">↺</button><button class="kn-ctx-btn" data-ctx="rot-right">↻</button>` : ''}
+        ${singleImg ? `<button class="kn-ctx-btn" data-ctx="crop">Crop</button><span class="kn-ctx-sep"></span><button class="kn-ctx-btn" data-ctx="rot-left">↺</button><button class="kn-ctx-btn" data-ctx="rot-right">↻</button><span class="kn-ctx-sep"></span>` : ''}
         <button class="kn-ctx-btn" data-ctx="copy">Copy</button>
-        <button class="kn-ctx-btn" data-ctx="cut">Cut</button>
+        <span class="kn-ctx-sep"></span>
         <button class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
-        ${selectedOnPage.length > 1 ? `<button class="kn-ctx-btn" data-ctx="group">Group</button>` : ''}
-        ${hasGrouped ? `<button class="kn-ctx-btn" data-ctx="ungroup">Ungroup</button>` : ''}
-        <button class="kn-ctx-btn" data-ctx="front">↑ Front</button>
-        <button class="kn-ctx-btn" data-ctx="back">↓ Back</button>
+        <span class="kn-ctx-sep"></span>
         <button class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
+        ${selectedOnPage.length > 1 ? `<span class="kn-ctx-sep"></span><button class="kn-ctx-btn" data-ctx="group">Group</button>` : ''}
+        ${hasGrouped ? `<span class="kn-ctx-sep"></span><button class="kn-ctx-btn" data-ctx="ungroup">Ungroup</button>` : ''}
+        <span class="kn-ctx-sep"></span>
+        <button class="kn-ctx-btn" data-ctx="more" title="More Options">•••</button>
       `;
     }
 
+    ctxBar.addEventListener('pointerdown', (e) => e.stopPropagation());
     ctxBar.addEventListener('click', (e) => {
       e.stopPropagation();
       const btn = e.target.closest('[data-ctx]');
       if (!btn) return;
+      if (btn.dataset.ctx === 'more') {
+        // Expand layer & cut controls inline inside the context bar
+        ctxBar.innerHTML = `
+          <button class="kn-ctx-btn" data-ctx="cut">Cut</button>
+          <span class="kn-ctx-sep"></span>
+          <button class="kn-ctx-btn" data-ctx="front">↑ Front</button>
+          <span class="kn-ctx-sep"></span>
+          <button class="kn-ctx-btn" data-ctx="back">↓ Back</button>
+          <span class="kn-ctx-sep"></span>
+          <button class="kn-ctx-btn" data-ctx="rot-left">↺</button>
+          <button class="kn-ctx-btn" data-ctx="rot-right">↻</button>
+          <span class="kn-ctx-sep"></span>
+          <button class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
+        `;
+        return;
+      }
       handleContextAction(btn.dataset.ctx, selectedOnPage, pageNum);
     });
 
@@ -1366,55 +1531,160 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   function startResizeOrRotateSelection(e, handle, selectedItems, initBox, pageNum) {
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch (_) {}
+
     const startX = e.clientX;
     const startY = e.clientY;
-    const s = state.zoom;
+    const pointerScale = getCardScale(pageNum);
+    const canvasScale = getCanvasScale(pageNum);
+    const card = pagesContainer.querySelector(`.kn-page-card[data-page="${pageNum}"]`);
+    const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+    const selBox = objLayer?.querySelector('.kn-selection-box');
+    const ctxBar = objLayer?.querySelector('.kn-context-bar');
+
     const snapshots = JSON.parse(JSON.stringify(selectedItems));
-    pushHistory();
+    const snapBounds = snapshots.map(getAnnotationBounds);
+    const MIN_SIZE = 24;
+    let changed = false;
 
     const onMove = (me) => {
-      const dx = (me.clientX - startX) / s;
-      const dy = (me.clientY - startY) / s;
+      const dx = (me.clientX - startX) / pointerScale;
+      const dy = (me.clientY - startY) / pointerScale;
+      changed = true;
 
       if (handle === 'rot') {
+        const cardRect = card ? card.getBoundingClientRect() : { left: 0, top: 0 };
         const cx = initBox.x + initBox.w / 2;
         const cy = initBox.y + initBox.h / 2;
-        const angle = Math.round((Math.atan2(me.clientY / s - cy, me.clientX / s - cx) * 180) / Math.PI);
+        const ptX = (me.clientX - cardRect.left) / pointerScale;
+        const ptY = (me.clientY - cardRect.top) / pointerScale;
+        const angle = Math.round(((Math.atan2(ptY - cy, ptX - cx) * 180) / Math.PI) + 90);
         selectedItems.forEach((ann) => {
           ann.rotation = angle;
+          const domNode = objLayer?.querySelector(`.kn-page-object[data-id="${ann.id}"]`);
+          if (domNode) domNode.style.transform = `rotate(${angle}deg)`;
         });
-      } else {
-        const scaleX = Math.max(0.25, (initBox.w + (handle.includes('e') ? dx : handle.includes('w') ? -dx : 0)) / initBox.w);
-        const scaleY = Math.max(0.25, (initBox.h + (handle.includes('s') ? dy : handle.includes('n') ? -dy : 0)) / initBox.h);
-        selectedItems.forEach((ann, idx) => {
-          const snap = snapshots[idx];
-          if (snap.points) {
-            ann.points = snap.points.map((pt) => ({
-              x: initBox.x + (pt.x - initBox.x) * scaleX,
-              y: initBox.y + (pt.y - initBox.y) * scaleY,
-            }));
-          } else {
-            ann.w = Math.max(30, (snap.w || 160) * scaleX);
-            ann.h = Math.max(24, (snap.h || 90) * scaleY);
-          }
-        });
+        if (selBox) selBox.style.transform = `rotate(${angle}deg)`;
+        return;
       }
-      renderPageAnnotations(pageNum);
+
+      // Compute new bounding box anchored on the opposite edge/corner
+      let newX = initBox.x;
+      let newY = initBox.y;
+      let newW = initBox.w;
+      let newH = initBox.h;
+      const initRight = initBox.x + initBox.w;
+      const initBottom = initBox.y + initBox.h;
+
+      if (handle.includes('e')) {
+        newW = Math.max(MIN_SIZE, initBox.w + dx);
+      }
+      if (handle.includes('w')) {
+        newW = Math.max(MIN_SIZE, initBox.w - dx);
+        newX = initRight - newW;
+      }
+      if (handle.includes('s')) {
+        newH = Math.max(MIN_SIZE, initBox.h + dy);
+      }
+      if (handle.includes('n')) {
+        newH = Math.max(MIN_SIZE, initBox.h - dy);
+        newY = initBottom - newH;
+      }
+
+      const scaleX = newW / Math.max(1, initBox.w);
+      const scaleY = newH / Math.max(1, initBox.h);
+
+      selectedItems.forEach((ann, idx) => {
+        const snap = snapshots[idx];
+        const sb = snapBounds[idx];
+        if (snap.points && snap.points.length > 0) {
+          ann.points = snap.points.map((pt) => ({
+            x: newX + (pt.x - initBox.x) * scaleX,
+            y: newY + (pt.y - initBox.y) * scaleY,
+          }));
+        } else if (snap.rects && snap.rects.length > 0) {
+          ann.rects = snap.rects.map((r) => ({
+            x: newX + (r.x - initBox.x) * scaleX,
+            y: newY + (r.y - initBox.y) * scaleY,
+            w: Math.max(4, r.w * scaleX),
+            h: Math.max(4, r.h * scaleY),
+          }));
+        } else {
+          const relX = ((snap.x !== undefined ? snap.x : sb.x) - initBox.x) / Math.max(1, initBox.w);
+          const relY = ((snap.y !== undefined ? snap.y : sb.y) - initBox.y) / Math.max(1, initBox.h);
+          ann.x = newX + relX * newW;
+          ann.y = newY + relY * newH;
+          ann.w = Math.max(MIN_SIZE, (snap.w || sb.w || 160) * scaleX);
+          ann.h = Math.max(MIN_SIZE, (snap.h || sb.h || 90) * scaleY);
+
+          if (ann.type === 'text' && handle.length === 2) {
+            // Corner drag proportionally scales text font size as well
+            const avgScale = (scaleX + scaleY) / 2;
+            ann.fontSize = Math.max(10, Math.min(72, Math.round((snap.fontSize || 16) * avgScale)));
+          }
+
+          const domNode = objLayer?.querySelector(`.kn-page-object[data-id="${ann.id}"]`);
+          if (domNode) {
+            domNode.style.left = `${ann.x * canvasScale}px`;
+            domNode.style.top = `${ann.y * canvasScale}px`;
+            domNode.style.width = `${ann.w * canvasScale}px`;
+            if (ann.type === 'text') {
+              domNode.style.minHeight = `${ann.h * canvasScale}px`;
+              const ed = domNode.querySelector('.kn-textbox-editor');
+              if (ed && ann.fontSize) ed.style.fontSize = `${ann.fontSize * canvasScale}px`;
+            } else {
+              domNode.style.height = `${ann.h * canvasScale}px`;
+            }
+          }
+        }
+      });
+
+      redrawPageCanvasesOnly(pageNum, canvasScale);
+
+      if (selBox) {
+        selBox.style.left = `${newX * canvasScale}px`;
+        selBox.style.top = `${newY * canvasScale}px`;
+        selBox.style.width = `${newW * canvasScale}px`;
+        selBox.style.height = `${newH * canvasScale}px`;
+      }
+      if (ctxBar) {
+        ctxBar.style.left = `${(newX + newW / 2) * canvasScale}px`;
+        ctxBar.style.top = `${newY * canvasScale > 52 ? newY * canvasScale - 44 : (newY + newH) * canvasScale + 12}px`;
+      }
     };
 
     const onUp = () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
-      saveAnnotations();
+      window.removeEventListener('pointercancel', onUp);
+      if (changed) {
+        pushHistory();
+        saveAnnotations();
+        renderPageAnnotations(pageNum);
+      }
     };
 
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
   }
 
   function handleContextAction(action, selectedItems, pageNum) {
-    if (action === 'copy') {
+    if (action === 'edit' && selectedItems[0]?.type === 'text') {
+      const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+      const domEl = objLayer?.querySelector(`.kn-page-object[data-id="${selectedItems[0].id}"]`);
+      const editor = domEl?.querySelector('.kn-textbox-editor');
+      if (domEl && editor) {
+        editor.contentEditable = 'true';
+        domEl.classList.add('editing');
+        editor.focus();
+      }
+      return;
+    } else if (action === 'copy') {
       state.clipboard = JSON.parse(JSON.stringify(selectedItems));
+      if (typeof UI !== 'undefined' && UI.showToast) UI.showToast('Copied selection', 'success');
     } else if (action === 'cut') {
       pushHistory();
       state.clipboard = JSON.parse(JSON.stringify(selectedItems));
@@ -1427,6 +1697,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         copy.id = `kn_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         if (copy.points) {
           copy.points = copy.points.map((pt) => ({ x: pt.x + 18, y: pt.y + 18 }));
+        } else if (copy.rects) {
+          copy.rects = copy.rects.map((r) => ({ ...r, x: r.x + 18, y: r.y + 18 }));
         } else {
           copy.x = (copy.x || 0) + 18;
           copy.y = (copy.y || 0) + 18;
@@ -1513,18 +1785,39 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     const toPageCoords = (e) => {
       const rect = card.getBoundingClientRect();
+      const s = getCardScale(pageNum);
       return {
-        x: (e.clientX - rect.left) / state.zoom,
-        y: (e.clientY - rect.top) / state.zoom,
+        x: (e.clientX - rect.left) / s,
+        y: (e.clientY - rect.top) / s,
       };
     };
 
     interactLayer.addEventListener('pointerdown', (e) => {
-      if (!state.activeTool) return;
+      // Close any open tool popover when interacting with the page canvas
+      if (state.toolPopoverOpen) {
+        state.toolPopoverOpen = false;
+        renderToolPopover();
+      }
+
+      // If no tool is active, allow clicking any stroke/object on the page to select it, or deselect on empty space
+      if (!state.activeTool) {
+        const pt = toPageCoords(e);
+        const hit = findAnnotationAtPoint(pageNum, pt);
+        if (hit) {
+          state.selectedIds = [hit.id];
+          renderPageAnnotations(pageNum);
+        } else if (state.selectedIds.length > 0) {
+          state.selectedIds = [];
+          renderPageAnnotations(pageNum);
+        }
+        return;
+      }
+
       // Palm rejection: if stylus is active or multi-touch, ignore stray palm touches
       if (e.pointerType === 'touch' && !e.isPrimary) return;
 
       const startPt = toPageCoords(e);
+      const { w: logicalW, h: logicalH } = getPageLogicalSize(pageNum);
 
       // 1. TEXT TOOL: Click on page to create inline editable text box
       if (state.activeTool === 'text') {
@@ -1533,8 +1826,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           id: `kn_txt_${Date.now()}`,
           type: 'text',
           page: pageNum,
-          x: Math.max(20, Math.min(BASE_W - 220, startPt.x)),
-          y: Math.max(20, Math.min(BASE_H - 60, startPt.y)),
+          x: Math.max(20, Math.min(logicalW - 220, startPt.x)),
+          y: Math.max(20, Math.min(logicalH - 60, startPt.y)),
           w: 220,
           h: 40,
           text: '',
@@ -1546,7 +1839,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         renderPageAnnotations(pageNum);
         setTimeout(() => {
           const domEl = card.querySelector(`[data-id="${newText.id}"] .kn-textbox-editor`);
-          if (domEl) domEl.focus();
+          if (domEl) {
+            domEl.contentEditable = 'true';
+            domEl.focus();
+          }
         }, 20);
         return;
       }
@@ -1558,8 +1854,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           id: `kn_note_${Date.now()}`,
           type: 'note',
           page: pageNum,
-          x: Math.max(20, Math.min(BASE_W - 220, startPt.x)),
-          y: Math.max(20, Math.min(BASE_H - 160, startPt.y)),
+          x: Math.max(20, Math.min(logicalW - 220, startPt.x)),
+          y: Math.max(20, Math.min(logicalH - 160, startPt.y)),
           w: 215,
           h: 150,
           title: '',
@@ -1594,6 +1890,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
       // 4. HIGHLIGHTER / PEN TOOL
       if (state.activeTool === 'highlighter' || state.activeTool === 'pen') {
+        e.preventDefault();
         pushHistory();
         const cfg = state.activeTool === 'highlighter' ? state.highlighter : state.pen;
         const stroke = {
@@ -1608,6 +1905,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           createdAt: Date.now(),
         };
         state.annotations.push(stroke);
+        const canvasScale = getCanvasScale(pageNum);
 
         const onMove = (me) => {
           const pt = toPageCoords(me);
@@ -1616,21 +1914,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           } else {
             stroke.points.push(pt);
           }
-          renderPageAnnotations(pageNum);
+          redrawPageCanvasesOnly(pageNum, canvasScale);
         };
         const onUp = () => {
           window.removeEventListener('pointermove', onMove);
           window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onUp);
           saveAnnotations();
+          renderPageAnnotations(pageNum);
           renderLeftSidebarContent();
         };
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
         return;
       }
 
       // 5. SHAPES TOOL
       if (state.activeTool === 'shapes') {
+        e.preventDefault();
         pushHistory();
         const shape = {
           id: `kn_shape_${Date.now()}`,
@@ -1651,6 +1953,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           createdAt: Date.now(),
         };
         state.annotations.push(shape);
+        const canvasScale = getCanvasScale(pageNum);
 
         const onMove = (me) => {
           const pt = toPageCoords(me);
@@ -1660,21 +1963,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           shape.h = Math.abs(pt.y - startPt.y);
           shape.x2 = pt.x;
           shape.y2 = pt.y;
-          renderPageAnnotations(pageNum);
+          redrawPageCanvasesOnly(pageNum, canvasScale);
         };
         const onUp = () => {
           window.removeEventListener('pointermove', onMove);
           window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onUp);
           saveAnnotations();
+          renderPageAnnotations(pageNum);
           renderLeftSidebarContent();
         };
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
         return;
       }
 
       // 6. ERASER TOOL (Stroke, Object, and Partial Path-Splitting Eraser)
       if (state.activeTool === 'eraser') {
+        e.preventDefault();
         pushHistory();
         eraseAtPoint(pageNum, startPt);
 
@@ -1685,6 +1992,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         const onUp = () => {
           window.removeEventListener('pointermove', onMove);
           window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onUp);
           const cur = document.getElementById('kn-eraser-cursor');
           if (cur) cur.style.display = 'none';
           saveAnnotations();
@@ -1692,34 +2000,116 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         };
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
         return;
       }
 
-      // 7. SELECTION / LASSO TOOL (Click, Rectangle Marquee, Freehand Lasso)
+      // 7. SELECTION / LASSO TOOL (Click, Immediate Drag-Move, Rectangle Marquee, Freehand Lasso)
       if (state.activeTool === 'select') {
+        e.preventDefault();
         const hit = findAnnotationAtPoint(pageNum, startPt);
         if (hit) {
           if (e.shiftKey) {
             state.selectedIds = state.selectedIds.includes(hit.id)
               ? state.selectedIds.filter((id) => id !== hit.id)
               : [...state.selectedIds, hit.id];
-          } else {
-            state.selectedIds = [hit.id];
+          } else if (!state.selectedIds.includes(hit.id)) {
+            if (hit.groupId) {
+              state.selectedIds = state.annotations
+                .filter((a) => a.page === pageNum && a.groupId === hit.groupId)
+                .map((a) => a.id);
+            } else {
+              state.selectedIds = [hit.id];
+            }
           }
           renderPageAnnotations(pageNum);
+
+          // Allow immediate click-and-drag movement of the newly selected stroke/object in one fluid motion
+          const selectedOnPage = state.annotations.filter(
+            (a) => a.page === pageNum && state.selectedIds.includes(a.id)
+          );
+          const snapshots = JSON.parse(JSON.stringify(selectedOnPage));
+          const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+          const selBox = objLayer?.querySelector('.kn-selection-box');
+          const ctxBar = objLayer?.querySelector('.kn-context-bar');
+          const boundsList = selectedOnPage.map(getAnnotationBounds);
+          const initMinX = Math.min(...boundsList.map((b) => b.x));
+          const initMinY = Math.min(...boundsList.map((b) => b.y));
+          const initMaxX = Math.max(...boundsList.map((b) => b.x + b.w));
+          const initMaxY = Math.max(...boundsList.map((b) => b.y + b.h));
+          const boxW = Math.max(24, initMaxX - initMinX);
+          const boxH = Math.max(24, initMaxY - initMinY);
+          const startClientX = e.clientX;
+          const startClientY = e.clientY;
+          const pointerScale = getCardScale(pageNum);
+          const canvasScale = getCanvasScale(pageNum);
+          let moved = false;
+
+          const onDragHit = (me) => {
+            const dx = (me.clientX - startClientX) / pointerScale;
+            const dy = (me.clientY - startClientY) / pointerScale;
+            if (Math.abs(dx) > 1.5 || Math.abs(dy) > 1.5) moved = true;
+            if (!moved) return;
+
+            selectedOnPage.forEach((ann, idx) => {
+              const snap = snapshots[idx];
+              if (snap.points && snap.points.length > 0) {
+                ann.points = snap.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }));
+              } else if (snap.rects && snap.rects.length > 0) {
+                ann.rects = snap.rects.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
+              } else {
+                ann.x = (snap.x || 0) + dx;
+                ann.y = (snap.y || 0) + dy;
+                const domNode = objLayer?.querySelector(`.kn-page-object[data-id="${ann.id}"]`);
+                if (domNode) {
+                  domNode.style.left = `${ann.x * canvasScale}px`;
+                  domNode.style.top = `${ann.y * canvasScale}px`;
+                }
+              }
+            });
+
+            redrawPageCanvasesOnly(pageNum, canvasScale);
+            if (selBox) {
+              selBox.style.left = `${(initMinX + dx) * canvasScale}px`;
+              selBox.style.top = `${(initMinY + dy) * canvasScale}px`;
+            }
+            if (ctxBar) {
+              ctxBar.style.left = `${(initMinX + dx + boxW / 2) * canvasScale}px`;
+              ctxBar.style.top = `${Math.max(8, (initMinY + dy) * canvasScale - 44)}px`;
+            }
+          };
+
+          const onUpHit = () => {
+            window.removeEventListener('pointermove', onDragHit);
+            window.removeEventListener('pointerup', onUpHit);
+            window.removeEventListener('pointercancel', onUpHit);
+            if (moved) {
+              pushHistory();
+              saveAnnotations();
+              renderPageAnnotations(pageNum);
+            }
+          };
+
+          window.addEventListener('pointermove', onDragHit);
+          window.addEventListener('pointerup', onUpHit);
+          window.addEventListener('pointercancel', onUpHit);
           return;
         }
 
         // Deselect if clicking empty space without Shift
-        if (!e.shiftKey) state.selectedIds = [];
+        if (!e.shiftKey) {
+          state.selectedIds = [];
+          renderPageAnnotations(pageNum);
+        }
         const lassoPts = [startPt];
         const penCanvas = document.getElementById(`kn-annot-canvas-${pageNum}`);
         const ctx = penCanvas.getContext('2d');
+        const canvasScale = getCanvasScale(pageNum);
 
         const onMove = (me) => {
           const pt = toPageCoords(me);
           lassoPts.push(pt);
-          renderPageAnnotations(pageNum);
+          redrawPageCanvasesOnly(pageNum, canvasScale);
           ctx.save();
           ctx.strokeStyle = '#7E1D2A';
           ctx.fillStyle = 'rgba(126, 29, 42, 0.06)';
@@ -1727,16 +2117,16 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           ctx.lineWidth = 1.5;
           if (state.selectionMode === 'lasso') {
             ctx.beginPath();
-            ctx.moveTo(lassoPts[0].x * state.zoom, lassoPts[0].y * state.zoom);
-            lassoPts.forEach((p) => ctx.lineTo(p.x * state.zoom, p.y * state.zoom));
+            ctx.moveTo(lassoPts[0].x * canvasScale, lassoPts[0].y * canvasScale);
+            lassoPts.forEach((p) => ctx.lineTo(p.x * canvasScale, p.y * canvasScale));
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
           } else {
-            const rx = Math.min(startPt.x, pt.x) * state.zoom;
-            const ry = Math.min(startPt.y, pt.y) * state.zoom;
-            const rw = Math.abs(pt.x - startPt.x) * state.zoom;
-            const rh = Math.abs(pt.y - startPt.y) * state.zoom;
+            const rx = Math.min(startPt.x, pt.x) * canvasScale;
+            const ry = Math.min(startPt.y, pt.y) * canvasScale;
+            const rw = Math.abs(pt.x - startPt.x) * canvasScale;
+            const rh = Math.abs(pt.y - startPt.y) * canvasScale;
             ctx.fillRect(rx, ry, rw, rh);
             ctx.strokeRect(rx, ry, rw, rh);
           }
@@ -1746,12 +2136,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         const onUp = () => {
           window.removeEventListener('pointermove', onMove);
           window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onUp);
           selectAnnotationsInRegion(pageNum, lassoPts);
           renderPageAnnotations(pageNum);
         };
 
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
       }
     });
   }
@@ -3111,6 +3503,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     const bmBtn = document.getElementById('kn-btn-bookmark');
     if (bmBtn) bmBtn.classList.toggle('active', state.bookmarks.includes(clamped));
+    const tbBmBtn = document.getElementById('kn-toolbar-bookmark');
+    if (tbBmBtn) tbBmBtn.classList.toggle('active', state.bookmarks.includes(clamped));
 
     const targetCard = pagesContainer.querySelector(`.kn-page-card[data-page="${clamped}"]`);
     if (targetCard && scrollSmooth) {
@@ -3132,7 +3526,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const availH = viewport.clientHeight - 64;
       newZoom = availH / BASE_H;
     }
-    state.zoom = Math.max(0.5, Math.min(2.5, newZoom));
+    state.zoom = Math.max(0.5, Math.min(3.0, newZoom));
     state.zoomMode = mode;
 
     const lbl = document.getElementById('kn-zoom-label');
@@ -3155,26 +3549,41 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       return;
     }
 
+    const toolsWithPopover = ['pen', 'highlighter', 'eraser', 'text', 'notes', 'shapes'];
     if (state.activeTool === toolName) {
-      if (state.toolPopoverOpen) {
+      if (toolsWithPopover.includes(toolName)) {
+        if (state.toolPopoverOpen) {
+          state.activeTool = null;
+          state.toolPopoverOpen = false;
+        } else {
+          state.toolPopoverOpen = true;
+        }
+      } else {
         state.activeTool = null;
         state.toolPopoverOpen = false;
-      } else {
-        state.toolPopoverOpen = true;
       }
     } else {
       state.activeTool = toolName;
-      state.toolPopoverOpen = Boolean(toolName);
+      state.toolPopoverOpen = toolsWithPopover.includes(toolName);
     }
 
-    document.querySelectorAll('.kn-group-annotations .kn-tool-btn').forEach((btn) => {
+    document.querySelectorAll('#kn-toolbar .kn-tool-btn[data-tool]').forEach((btn) => {
       const isAct = btn.dataset.tool === state.activeTool;
       btn.classList.toggle('active', isAct);
       btn.setAttribute('aria-checked', isAct ? 'true' : 'false');
     });
 
+    const isDrawingTool = ['pen', 'highlighter', 'eraser', 'shapes'].includes(state.activeTool);
     document.querySelectorAll('.kn-interaction-layer').forEach((layer) => {
       layer.classList.toggle('tool-active', Boolean(state.activeTool));
+      layer.classList.toggle('kn-drawing-active', isDrawingTool);
+    });
+
+    // Update text editors' contentEditable state when switching to/from text tool
+    document.querySelectorAll('.kn-textbox-editor').forEach((ed) => {
+      if (!ed.closest('.kn-textbox-obj')?.classList.contains('editing')) {
+        ed.contentEditable = state.activeTool === 'text' ? 'true' : 'false';
+      }
     });
 
     renderToolPopover();
@@ -3292,7 +3701,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   };
 
   document.getElementById('kn-btn-left-sidebar').onclick = toggleLeftSidebar;
-  document.getElementById('kn-btn-right-sidebar').onclick = toggleRightSidebar;
+  const collapseSidebarBtn = document.getElementById('kn-sidebar-collapse-btn');
+  if (collapseSidebarBtn) collapseSidebarBtn.onclick = toggleLeftSidebar;
+  const rightSidebarBtn = document.getElementById('kn-btn-right-sidebar');
+  if (rightSidebarBtn) rightSidebarBtn.onclick = toggleRightSidebar;
   document.getElementById('kn-ipad-fab-left').onclick = toggleLeftSidebar;
   document.getElementById('kn-ipad-fab-right').onclick = toggleRightSidebar;
   document.getElementById('kn-mob-pages-btn').onclick = toggleLeftSidebar;
@@ -3329,8 +3741,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   document.getElementById('kn-search-prev').onclick = () => focusSearchMatch(state.search.currentIndex - 1);
   document.getElementById('kn-search-next').onclick = () => focusSearchMatch(state.search.currentIndex + 1);
 
-  // Bookmark Toggle
-  document.getElementById('kn-btn-bookmark').onclick = () => {
+  // Bookmark Toggle (both Header & Toolbar Bookmark buttons)
+  const toggleCurrentPageBookmark = () => {
     const p = state.currentPage;
     if (state.bookmarks.includes(p)) {
       state.bookmarks = state.bookmarks.filter((b) => b !== p);
@@ -3338,9 +3750,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       state.bookmarks.push(p);
     }
     localStorage.setItem(KEY_BM, JSON.stringify(state.bookmarks));
-    document.getElementById('kn-btn-bookmark')?.classList.toggle('active', state.bookmarks.includes(p));
+    const isBm = state.bookmarks.includes(p);
+    document.getElementById('kn-btn-bookmark')?.classList.toggle('active', isBm);
+    document.getElementById('kn-toolbar-bookmark')?.classList.toggle('active', isBm);
     renderLeftSidebarContent();
   };
+  document.getElementById('kn-btn-bookmark').onclick = toggleCurrentPageBookmark;
+  const tbBmEl = document.getElementById('kn-toolbar-bookmark');
+  if (tbBmEl) tbBmEl.onclick = toggleCurrentPageBookmark;
 
   // Share Button
   document.getElementById('kn-btn-share').onclick = () => {

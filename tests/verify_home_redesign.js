@@ -102,11 +102,11 @@ check('polish.css provides dark mode overrides for split cards and continue card
 
 // 7. Cache Busting in index.html
 console.log('\n--- 7. Cache Busting in index.html ---');
-check('index.html loads polish.css with v>=11.4', /css\/polish\.css\?v=11\.[4-9]/.test(indexHtml));
-check('index.html loads home.js with v>=11.4', /js\/pages\/home\.js\?v=11\.[4-9]/.test(indexHtml));
-check('index.html loads sheet-detail.js with v>=11.4', /js\/pages\/sheet-detail\.js\?v=11\.[4-9]/.test(indexHtml));
-check('index.html loads recordings.js with v>=11.4', /js\/pages\/recordings\.js\?v=11\.[4-9]/.test(indexHtml));
-check('index.html loads questions.js with v>=11.4', /js\/pages\/questions\.js\?v=11\.[4-9]/.test(indexHtml));
+check('index.html loads polish.css with v>=11.4', /css\/polish\.css\?v=(11\.[4-9]|1[2-9]\.)/.test(indexHtml));
+check('index.html loads home.js with v>=11.4', /js\/pages\/home\.js\?v=(11\.[4-9]|1[2-9]\.)/.test(indexHtml));
+check('index.html loads sheet-detail.js with v>=11.4', /js\/pages\/sheet-detail\.js\?v=(11\.[4-9]|1[2-9]\.)/.test(indexHtml));
+check('index.html loads recordings.js with v>=11.4', /js\/pages\/recordings\.js\?v=(11\.[4-9]|1[2-9]\.)/.test(indexHtml));
+check('index.html loads questions.js with v>=11.4', /js\/pages\/questions\.js\?v=(11\.[4-9]|1[2-9]\.)/.test(indexHtml));
 
 console.log('\n' + '='.repeat(75));
 console.log(`TOTAL CHECKS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
