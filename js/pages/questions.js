@@ -1136,6 +1136,24 @@ const QuestionsPage = {
     const current = QuestionsPage.activeQuizIndex + 1;
     const percent = Math.round((current / total) * 100);
 
+    // Track active question session for Home dashboard Continue Studying
+    try {
+      const shName = q.sheet_title_en || q.sheet_title || q.sheet_title_ar || 'Sheet 1';
+      const subjName = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en) || '';
+      const sessionRecord = {
+        sheet_id: q.sheet_id || '',
+        sheet_title: shName,
+        sheet_title_ar: q.sheet_title_ar || q.sheet_title || shName,
+        sheet_title_en: q.sheet_title_en || q.sheet_title || shName,
+        subject_title: subjName,
+        total: total,
+        answered: QuestionsPage.activeQuizIndex,
+        percent: Math.round((QuestionsPage.activeQuizIndex / total) * 100),
+        timestamp: Date.now()
+      };
+      localStorage.setItem('kf_active_question_session', JSON.stringify(sessionRecord));
+    } catch (e) {}
+
     const tagEl = document.getElementById('dt-modal-subject-tag');
     if (tagEl) tagEl.textContent = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en);
 
@@ -1261,6 +1279,25 @@ const QuestionsPage = {
         
         QuestionsPage.hasCurrentQuestionBeenAnswered = true;
         QuestionsPage.isCurrentQuestionAnswerCorrect = isCorrect;
+
+        try {
+          const total = QuestionsPage.activeQuizList ? QuestionsPage.activeQuizList.length : 0;
+          const answered = QuestionsPage.activeQuizIndex + 1;
+          const shName = q.sheet_title_en || q.sheet_title || q.sheet_title_ar || 'Sheet 1';
+          const subjName = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en) || '';
+          const sessionRecord = {
+            sheet_id: q.sheet_id || '',
+            sheet_title: shName,
+            sheet_title_ar: q.sheet_title_ar || q.sheet_title || shName,
+            sheet_title_en: q.sheet_title_en || q.sheet_title || shName,
+            subject_title: subjName,
+            total: total,
+            answered: answered,
+            percent: Math.round((answered / total) * 100),
+            timestamp: Date.now()
+          };
+          localStorage.setItem('kf_active_question_session', JSON.stringify(sessionRecord));
+        } catch (e) {}
 
         if (window.SoundFX) {
           if (isCorrect) {

@@ -58,7 +58,25 @@ const SheetDetailPage = {
     const size = sheet.size || '2.8 MB';
     const date = sheet.date || '2026-09-11';
     const fileType = sheet.type || 'PDF Sheet';
-        const isAdmin = Boolean(sessionStorage.getItem('kf_admin_auth') === 'true' || (window.AdminPage && window.AdminPage.checkAuth && window.AdminPage.checkAuth()));
+    const isAdmin = Boolean(sessionStorage.getItem('kf_admin_auth') === 'true' || (window.AdminPage && window.AdminPage.checkAuth && window.AdminPage.checkAuth()));
+
+    // Track last opened sheet in localStorage for Home dashboard Continue Studying
+    try {
+      const subj = window.DATA && typeof window.DATA.getSubjectById === 'function'
+        ? window.DATA.getSubjectById(sheet.subject_id)
+        : null;
+      const sheetRecord = {
+        id: sheet.id,
+        title: sheet.title || sheet.title_en || sheet.title_ar,
+        title_ar: sheet.title_ar || sheet.title || sheet.title_en,
+        title_en: sheet.title_en || sheet.title || sheet.title_ar,
+        subject_id: sheet.subject_id,
+        subject_name_ar: subj ? subj.name_ar : (sheet.subject_name || ''),
+        subject_name_en: subj ? subj.name_en : (sheet.subject_name || ''),
+        timestamp: Date.now()
+      };
+      localStorage.setItem('kf_last_opened_sheet', JSON.stringify(sheetRecord));
+    } catch (e) {}
 
     // Load saved comments for this sheet
     const commentsKey = 'kf_sheet_comments_' + sheet.id;

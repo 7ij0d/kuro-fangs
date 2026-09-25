@@ -193,47 +193,102 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     2. TODAY'S SCHEDULE (Tab Switcher + Horizontal Rows)
+     STUDY ACTIVITY TRACKING (Real Database & LocalStorage)
      ══════════════════════════════════════════ */
-  switchDailyTab(tab) {
-    this.activeDailyTab = tab;
-    const todayBtn = document.getElementById('daily-tab-today-btn');
-    const tomorrowBtn = document.getElementById('daily-tab-tomorrow-btn');
-    const todayPane = document.getElementById('daily-pane-today');
-    const tomorrowPane = document.getElementById('daily-pane-tomorrow');
-    const dateHint = document.getElementById('hcs-current-date-hint');
-
-    if (!todayBtn || !tomorrowBtn || !todayPane || !tomorrowPane) return;
-
-    if (tab === 'today') {
-      todayBtn.classList.add('active');
-      todayBtn.setAttribute('aria-selected', 'true');
-      tomorrowBtn.classList.remove('active');
-      tomorrowBtn.setAttribute('aria-selected', 'false');
-      todayPane.style.display = 'flex';
-      todayPane.classList.add('active');
-      tomorrowPane.style.display = 'none';
-      tomorrowPane.classList.remove('active');
-      if (dateHint && this._todayFormatted) {
-        dateHint.innerHTML = `<i data-lucide="calendar"></i><span>${this._todayFormatted}</span>`;
-      }
-    } else {
-      tomorrowBtn.classList.add('active');
-      tomorrowBtn.setAttribute('aria-selected', 'true');
-      todayBtn.classList.remove('active');
-      todayBtn.setAttribute('aria-selected', 'false');
-      tomorrowPane.style.display = 'flex';
-      tomorrowPane.classList.add('active');
-      todayPane.style.display = 'none';
-      todayPane.classList.remove('active');
-      if (dateHint && this._tomorrowFormatted) {
-        dateHint.innerHTML = `<i data-lucide="calendar"></i><span>${this._tomorrowFormatted}</span>`;
-      }
+  getLastOpenedSheet() {
+    try {
+      const raw = localStorage.getItem('kf_last_opened_sheet');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.id) return null;
+      const deletedIds = (window.DATA && typeof window.DATA.getDeletedSheetIds === 'function')
+        ? window.DATA.getDeletedSheetIds()
+        : [];
+      if (deletedIds.includes(parsed.id)) return null;
+      return parsed;
+    } catch {
+      return null;
     }
-
-    if (window.lucide) window.lucide.createIcons();
   },
 
+  getLastListenedAudio() {
+    try {
+      const raw = localStorage.getItem('kf_last_listened_audio');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.id) return null;
+      if (parsed.sheet_id) {
+        const deletedIds = (window.DATA && typeof window.DATA.getDeletedSheetIds === 'function')
+          ? window.DATA.getDeletedSheetIds()
+          : [];
+        if (deletedIds.includes(parsed.sheet_id)) return null;
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  },
+
+  getActiveQuestionSession() {
+    try {
+      const raw = localStorage.getItem('kf_active_question_session');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.total) return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  },
+
+  formatRelativeTime(timestamp, isAr) {
+    if (!timestamp) return '—';
+    const d = new Date(timestamp);
+    if (isNaN(d.getTime())) return '—';
+
+    const now = new Date();
+    const isToday = now.toDateString() === d.toDateString();
+
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const ampm = isAr
+      ? (hours >= 12 ? 'م' : 'ص')
+      : (hours >= 12 ? 'PM' : 'AM');
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const timeStr = `${hours}:${minutes} ${ampm}`;
+
+    if (isToday) {
+      return isAr ? `اليوم، ${timeStr}` : `Today, ${timeStr}`;
+    }
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday = yesterday.toDateString() === d.toDateString();
+    if (isYesterday) {
+      return isAr ? `أمس، ${timeStr}` : `Yesterday, ${timeStr}`;
+    }
+
+    const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays > 0 && diffDays < 7) {
+      return isAr ? `منذ ${diffDays} ${diffDays === 2 ? 'يومين' : 'أيام'}` : `${diffDays} days ago`;
+    }
+
+    const arMonths = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const enMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return isAr
+      ? `${d.getDate()} ${arMonths[d.getMonth()]}`
+      : `${enMonths[d.getMonth()]} ${d.getDate()}`;
+  },
+
+  /* Legacy tab switcher preserved for compatibility */
+  switchDailyTab(tab) {
+    this.activeDailyTab = tab;
+  },
+
+  /* ══════════════════════════════════════════
+     2. TODAY & TOMORROW SCHEDULE (Split 2-Column Cards)
+     ══════════════════════════════════════════ */
   renderDailyLecturesSection(isAr) {
     const todayDate = new Date();
     const todayDayIndex = todayDate.getDay();
@@ -251,114 +306,96 @@ const HomePage = {
 
     const arMonths = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
     const enMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const daysAr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const daysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    const todayDayName = isAr ? daysAr[todayDayIndex] : daysEn[todayDayIndex];
+    const tomorrowDayName = isAr ? daysAr[tomorrowDayIndex] : daysEn[tomorrowDayIndex];
 
     const todayDateFormatted = isAr
-      ? `${todaySchedule.day_ar || ''}، ${todayDate.getDate()} ${arMonths[todayDate.getMonth()]}`
-      : `${todaySchedule.day_en || ''}, ${enMonths[todayDate.getMonth()]} ${todayDate.getDate()}`;
+      ? `${todayDayName}، ${todayDate.getDate()} ${arMonths[todayDate.getMonth()]}`
+      : `${todayDayName}, ${enMonths[todayDate.getMonth()]} ${todayDate.getDate()}`;
 
     const tomorrowDateFormatted = isAr
-      ? `${tomorrowSchedule.day_ar || ''}، ${tomorrowDate.getDate()} ${arMonths[tomorrowDate.getMonth()]}`
-      : `${tomorrowSchedule.day_en || ''}, ${enMonths[tomorrowDate.getMonth()]} ${tomorrowDate.getDate()}`;
+      ? `${tomorrowDayName}، ${tomorrowDate.getDate()} ${arMonths[tomorrowDate.getMonth()]}`
+      : `${tomorrowDayName}, ${enMonths[tomorrowDate.getMonth()]} ${tomorrowDate.getDate()}`;
 
-    this._todayFormatted = todayDateFormatted;
-    this._tomorrowFormatted = tomorrowDateFormatted;
+    const todaySlots = (todaySchedule && Array.isArray(todaySchedule.slots)) ? todaySchedule.slots : [];
+    const tomorrowSlots = (tomorrowSchedule && Array.isArray(tomorrowSchedule.slots)) ? tomorrowSchedule.slots : [];
 
-    const nowH = todayDate.getHours();
-    const nowM = todayDate.getMinutes();
-    const nowTotalMin = nowH * 60 + nowM;
-
-    const getSlotLiveStatus = (slot) => {
-      const startMin = (slot.startHour || 8) * 60;
-      const endMin = (slot.endHour || 10) * 60;
-      if (nowTotalMin >= startMin && nowTotalMin < endMin) {
-        return { label: isAr ? 'مباشرة الآن' : 'Live Now', badgeClass: 'live' };
-      } else if (nowTotalMin < startMin) {
-        return { label: isAr ? 'قادمة' : 'Upcoming', badgeClass: 'upcoming' };
-      } else {
-        return { label: isAr ? 'انتهت' : 'Done', badgeClass: 'completed' };
-      }
-    };
-
-    const renderRows = (schedule, isToday) => {
-      if (schedule.isWeekend || !schedule.slots || schedule.slots.length === 0) {
+    const renderCardBody = (slots, isToday) => {
+      if (!slots || slots.length === 0) {
         return `
-          <div class="kuro-lecture-empty">
-            <i data-lucide="coffee"></i>
-            <span>${isAr ? 'عطلة نهاية الأسبوع — لا توجد محاضرات نظرية مقررة.' : 'Weekend break — No theory lectures scheduled.'}</span>
-            <a href="#/sheets" class="kuro-empty-link">
-              <i data-lucide="book-open"></i>
-              <span>${isAr ? 'تصفح شيتات المواد' : 'Browse Handouts'}</span>
-            </a>
+          <div class="kuro-empty-day-state">
+            <span class="keds-icon">☕</span>
+            <h4 class="keds-title">${isAr ? (isToday ? 'لا توجد محاضرات اليوم' : 'لا توجد محاضرات غداً') : (isToday ? 'No classes today' : 'No classes tomorrow')}</h4>
+            <p class="keds-desc">${isAr ? 'استغل هذا الوقت للدراسة ومراجعة الدروس!' : 'Take this time to study or catch up!'}</p>
           </div>
         `;
       }
 
-      return schedule.slots.map(slot => {
-        const status = isToday ? getSlotLiveStatus(slot) : { label: isAr ? 'مجدولة غداً' : 'Tomorrow', badgeClass: 'upcoming' };
-        const dotColor = slot.color || '#C84343';
-
-        return `
-          <div class="kuro-lecture-row" data-subject="${slot.subject_id}" role="button" tabindex="0" onclick="window.HomePage.handleSubjectClick('${slot.subject_id}')" title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}">
-            <div class="klr-time-col">
-              <i data-lucide="clock"></i>
-              <span>${slot.time}</span>
+      return `
+        <div class="kuro-mini-lecture-list">
+          ${slots.map(slot => `
+            <div
+              class="kuro-schedule-row-card"
+              role="button"
+              tabindex="0"
+              onclick="window.HomePage.handleSubjectClick('${slot.subject_id}')"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.HomePage.handleSubjectClick('${slot.subject_id}');}"
+              title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}"
+            >
+              <div class="ksrc-accent-bar" style="background-color: ${slot.color || '#7E1D2A'};"></div>
+              <div class="ksrc-content">
+                <div class="ksrc-top">
+                  <span class="ksrc-time">${slot.time}</span>
+                  <span class="ksrc-location">
+                    <i data-lucide="map-pin"></i>
+                    <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
+                  </span>
+                </div>
+                <div class="ksrc-subject">${isAr ? slot.subject_ar : slot.subject_en}</div>
+              </div>
+              <div class="ksrc-arrow">
+                <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
+              </div>
             </div>
-            <div class="klr-subject-col">
-              <span class="klr-dot" style="background-color: ${dotColor};"></span>
-              <span class="klr-code-badge">${slot.code}</span>
-              <span class="klr-title">${isAr ? slot.subject_ar : slot.subject_en}</span>
-            </div>
-            <div class="klr-hall-col">
-              <i data-lucide="map-pin"></i>
-              <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
-            </div>
-            <div class="klr-status-col">
-              <span class="klr-status-pill ${status.badgeClass}">${status.label}</span>
-            </div>
-            <div class="klr-arrow-col">
-              <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
-            </div>
-          </div>
-        `;
-      }).join('');
+          `).join('')}
+        </div>
+      `;
     };
-
-    const todaySlotsCount = todaySchedule.slots ? todaySchedule.slots.length : 0;
-    const tomorrowSlotsCount = tomorrowSchedule.slots ? tomorrowSchedule.slots.length : 0;
-    const activeTab = this.activeDailyTab || 'today';
 
     return `
-      <section class="kuro-schedule-section" aria-label="Today's Timetable">
-        <div class="kuro-schedule-controls-bar">
-          <div class="kuro-tabs-segmented" role="tablist">
-            <button type="button" class="kuro-tab-pill ${activeTab === 'today' ? 'active' : ''}" id="daily-tab-today-btn" onclick="window.HomePage.switchDailyTab('today')" role="tab" aria-selected="${activeTab === 'today'}">
-              <span class="kuro-tab-dot"></span>
-              <span>${isAr ? `محاضرات اليوم (${todaySlotsCount})` : `Today (${todaySlotsCount})`}</span>
-            </button>
-            <button type="button" class="kuro-tab-pill ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-tab-tomorrow-btn" onclick="window.HomePage.switchDailyTab('tomorrow')" role="tab" aria-selected="${activeTab === 'tomorrow'}">
-              <i data-lucide="clock"></i>
-              <span>${isAr ? `محاضرات الغد (${tomorrowSlotsCount})` : `Tomorrow (${tomorrowSlotsCount})`}</span>
-            </button>
+      <section class="kuro-schedule-split-section" aria-label="Today and Tomorrow Schedule">
+        <div class="kuro-schedule-split-grid">
+          <!-- 1. Today Card -->
+          <div class="kuro-split-card" id="kuro-card-today">
+            <div class="kuro-split-card-header">
+              <div class="kuro-split-card-title-group">
+                <h3 class="kuro-split-card-title">${isAr ? `محاضرات اليوم (${todaySlots.length})` : `Today (${todaySlots.length})`}</h3>
+                <span class="kuro-split-card-date">${todayDateFormatted}</span>
+              </div>
+            </div>
+            <div class="kuro-split-card-body">
+              ${renderCardBody(todaySlots, true)}
+            </div>
           </div>
 
-          <div class="kuro-schedule-right-group">
-            <span class="kuro-schedule-date-hint" id="hcs-current-date-hint">
-              <i data-lucide="calendar"></i>
-              <span>${activeTab === 'today' ? todayDateFormatted : tomorrowDateFormatted}</span>
-            </span>
-            <a href="#/schedules" class="kuro-weekly-schedule-btn" title="${isAr ? 'عرض الجداول الدراسية الموحدة' : 'View Academic Schedules'}">
-              <span>${isAr ? 'الجداول الدراسية' : 'All Schedules'}</span>
-              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
-            </a>
-          </div>
-        </div>
-
-        <div class="kuro-schedule-card">
-          <div class="kuro-schedule-pane ${activeTab === 'today' ? 'active' : ''}" id="daily-pane-today" style="display: ${activeTab === 'today' ? 'flex' : 'none'};">
-            ${renderRows(todaySchedule, true)}
-          </div>
-          <div class="kuro-schedule-pane ${activeTab === 'tomorrow' ? 'active' : ''}" id="daily-pane-tomorrow" style="display: ${activeTab === 'tomorrow' ? 'flex' : 'none'};">
-            ${renderRows(tomorrowSchedule, false)}
+          <!-- 2. Tomorrow Card -->
+          <div class="kuro-split-card" id="kuro-card-tomorrow">
+            <div class="kuro-split-card-header">
+              <div class="kuro-split-card-title-group">
+                <h3 class="kuro-split-card-title">${isAr ? `محاضرات الغد (${tomorrowSlots.length})` : `Tomorrow (${tomorrowSlots.length})`}</h3>
+                <span class="kuro-split-card-date">${tomorrowDateFormatted}</span>
+              </div>
+              <a href="#/schedules" class="kuro-view-full-schedule-btn" title="${isAr ? 'عرض جدول المحاضرات كاملاً' : 'View Full Academic Schedule'}">
+                <span>${isAr ? 'عرض الجدول كاملاً' : 'View Full Schedule'}</span>
+                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+              </a>
+            </div>
+            <div class="kuro-split-card-body">
+              ${renderCardBody(tomorrowSlots, false)}
+            </div>
           </div>
         </div>
       </section>
@@ -366,14 +403,152 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     3. QUICK ACCESS SECTION (Removed per UI Simplification Directives)
+     3. CONTINUE STUDYING (3 Core Activity Cards)
+     ══════════════════════════════════════════ */
+  renderContinueStudyingSection(isAr) {
+    // 1. Last Opened Sheet
+    const sheetData = HomePage.getLastOpenedSheet();
+    const hasSheet = Boolean(sheetData && sheetData.id);
+    const sheetTitle = hasSheet
+      ? (isAr ? (sheetData.title_ar || sheetData.title) : (sheetData.title_en || sheetData.title))
+      : (isAr ? 'لم تفتح أي شيت بعد' : 'No sheets opened yet');
+    const sheetSub = hasSheet
+      ? (isAr ? (sheetData.subject_name_ar || sheetData.subject_name) : (sheetData.subject_name_en || sheetData.subject_name))
+      : (isAr ? 'ابدأ دراسة محاضراتك الأكاديمية' : 'Start studying your dental lectures');
+    const sheetMeta = hasSheet
+      ? `${isAr ? 'آخر فتح:' : 'Last opened:'} ${HomePage.formatRelativeTime(sheetData.timestamp, isAr)}`
+      : '—';
+    const sheetUrl = hasSheet ? `#/sheet-detail?id=${sheetData.id}` : '#/sheets';
+    const sheetBtnText = hasSheet
+      ? (isAr ? 'متابعة الدراسة' : 'Continue Studying')
+      : (isAr ? 'تصفح الشيتات' : 'Browse Sheets');
+
+    // 2. Last Listened Recording
+    const audioData = HomePage.getLastListenedAudio();
+    const hasAudio = Boolean(audioData && audioData.id);
+    const audioTitle = hasAudio
+      ? (isAr ? (audioData.title_ar || audioData.title) : (audioData.title_en || audioData.title))
+      : (isAr ? 'لا توجد تسجيلات بعد' : 'No recordings played yet');
+    const audioSub = hasAudio
+      ? (isAr ? (audioData.subject_name_ar || audioData.subject_name) : (audioData.subject_name_en || audioData.subject_name))
+      : (isAr ? 'استمع للتسجيلات الصوتية لشيتاتك' : 'Listen to audio lectures synced with sheets');
+    const audioMeta = hasAudio
+      ? `${isAr ? 'آخر استماع:' : 'Last listened:'} ${HomePage.formatRelativeTime(audioData.timestamp, isAr)}`
+      : '—';
+    const audioUrl = '#/recordings';
+    const audioBtnText = hasAudio
+      ? (isAr ? 'متابعة الاستماع' : 'Continue Listening')
+      : (isAr ? 'تصفح التسجيلات' : 'Browse Recordings');
+
+    // 3. Continue Questions
+    const qData = HomePage.getActiveQuestionSession();
+    const hasQ = Boolean(qData && qData.total > 0);
+    const qTitle = hasQ
+      ? (isAr ? (qData.sheet_title_ar || qData.sheet_title) : (qData.sheet_title_en || qData.sheet_title))
+      : (isAr ? 'لا توجد جلسة أسئلة نشطة' : 'No active question session');
+    const qSub = hasQ
+      ? (qData.subject_title || (isAr ? 'بنك الأسئلة' : 'Question Bank'))
+      : (isAr ? 'اختبر معلوماتك مع بنك الأسئلة' : 'Practice questions and test your readiness');
+    const qAnswered = hasQ ? (qData.answered || 0) : 0;
+    const qTotal = hasQ ? qData.total : 0;
+    const qPercent = hasQ ? (qData.percent || Math.round((qAnswered / qTotal) * 100)) : 0;
+    const qUrl = '#/questions';
+    const qBtnText = hasQ
+      ? (isAr ? 'متابعة الحل' : 'Continue Solving')
+      : (isAr ? 'بدء حل الأسئلة' : 'Practice Questions');
+
+    return `
+      <section class="continue-studying-section" aria-label="Continue Studying">
+        <div class="continue-studying-header">
+          <h2 class="kuro-section-title">
+            <i data-lucide="book-open"></i>
+            <span>${isAr ? 'متابعة الدراسة' : 'Continue Studying'}</span>
+          </h2>
+        </div>
+
+        <div class="kuro-continue-studying-grid">
+          <!-- Card A: Last Opened Sheet -->
+          <div class="continue-study-card" id="continue-card-sheet" role="region" aria-label="${sheetTitle}">
+            <div class="continue-card-top">
+              <span class="continue-tag-badge sheet">
+                <i data-lucide="file-text"></i>
+                <span>${isAr ? 'آخر شيت تم فتحه' : 'Last Opened Sheet'}</span>
+              </span>
+              <h3 class="continue-card-title" title="${sheetTitle}">${sheetTitle}</h3>
+              <p class="continue-card-subject" title="${sheetSub}">${sheetSub}</p>
+              <span class="continue-card-meta">${sheetMeta}</span>
+            </div>
+            <div class="continue-card-bottom">
+              <a href="${sheetUrl}" class="continue-action-btn ${hasSheet ? '' : 'secondary'}">
+                <span>${sheetBtnText}</span>
+                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Card B: Last Listening -->
+          <div class="continue-study-card" id="continue-card-recording" role="region" aria-label="${audioTitle}">
+            <div class="continue-card-top">
+              <span class="continue-tag-badge recording">
+                <i data-lucide="headphones"></i>
+                <span>${isAr ? 'آخر تسجيل صوتي' : 'Last Listening'}</span>
+              </span>
+              <h3 class="continue-card-title" title="${audioTitle}">${audioTitle}</h3>
+              <p class="continue-card-subject" title="${audioSub}">${audioSub}</p>
+              <span class="continue-card-meta">${audioMeta}</span>
+            </div>
+            <div class="continue-card-bottom">
+              <a href="${audioUrl}" class="continue-action-btn ${hasAudio ? '' : 'secondary'}">
+                <span>${audioBtnText}</span>
+                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Card C: Continue Questions -->
+          <div class="continue-study-card" id="continue-card-questions" role="region" aria-label="${qTitle}">
+            <div class="continue-card-top">
+              <span class="continue-tag-badge questions">
+                <i data-lucide="help-circle"></i>
+                <span>${isAr ? 'متابعة الأسئلة' : 'Continue Questions'}</span>
+              </span>
+              <h3 class="continue-card-title" title="${qTitle}">${qTitle}</h3>
+              <p class="continue-card-subject" title="${qSub}">${qSub}</p>
+              <div class="continue-progress-wrap ${hasQ ? '' : 'empty'}">
+                ${hasQ ? `
+                  <div class="continue-progress-label">
+                    <span>${qAnswered} / ${qTotal} ${isAr ? 'سؤال' : 'questions'}</span>
+                    <span>${qPercent}%</span>
+                  </div>
+                  <div class="continue-progress-track">
+                    <div class="continue-progress-fill" style="width: ${qPercent}%;"></div>
+                  </div>
+                ` : `
+                  <span class="continue-empty-hint">${isAr ? 'جاهز لاختبار معلوماتك؟' : 'Ready to test your readiness?'}</span>
+                `}
+              </div>
+            </div>
+            <div class="continue-card-bottom">
+              <a href="${qUrl}" class="continue-action-btn ${hasQ ? '' : 'secondary'}">
+                <span>${qBtnText}</span>
+                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  },
+
+  /* ══════════════════════════════════════════
+     4. QUICK ACCESS SECTION (Removed per Directives)
      ══════════════════════════════════════════ */
   renderQuickAccess() {
     return '';
   },
 
   /* ══════════════════════════════════════════
-     4. YOUR SUBJECTS SECTION HEADER & FILTER
+     5. YOUR SUBJECTS SECTION HEADER & FILTER (Retained for component compatibility)
      ══════════════════════════════════════════ */
   renderSubjectsSectionHeader(isAr, count) {
     return `
@@ -407,27 +582,25 @@ const HomePage = {
   },
 
   /* ══════════════════════════════════════════
-     5. MAIN RENDER (Clean, Compact Dashboard: Hero -> Timetable -> Subjects)
+     6. MAIN RENDER (Compact Dashboard: Hero -> Today/Tomorrow Schedule -> Continue Studying)
      ══════════════════════════════════════════ */
   render(container) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-    const subjects = window.DATA ? window.DATA.getSubjects() : [];
 
     container.innerHTML = `
       <div class="kuro-dashboard-container">
         <!-- 1. Compact Hero Study Scene Banner with Dynamic Greeting -->
         ${HomePage.renderHeroSection(isAr)}
 
-        <!-- 2. Today's Lectures Schedule -->
+        <!-- 2. Today & Tomorrow Schedule (Split 2-Column Cards) -->
         ${HomePage.renderDailyLecturesSection(isAr)}
 
-        <!-- 3. Your Subjects Section (Direct Subject-Based Access) -->
-        ${HomePage.renderSubjectsSectionHeader(isAr, subjects.length)}
-        <div class="kuro-subjects-grid" id="subjects-container"></div>
+        <!-- 3. Continue Studying (3 Core Activity Cards) -->
+        ${HomePage.renderContinueStudyingSection(isAr)}
       </div>
     `;
 
-    HomePage.renderSubjectsList(subjects, false);
+    if (window.lucide) window.lucide.createIcons();
     HomePage.setupListeners();
   },
 

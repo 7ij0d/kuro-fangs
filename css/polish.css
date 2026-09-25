@@ -5487,6 +5487,468 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
   margin-inline-start: 10px;
 }
 
+/* ─── 6b. Today & Tomorrow Split Schedule Section ─── */
+.kuro-schedule-split-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+  margin-bottom: 22px;
+}
+
+.kuro-schedule-split-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.kuro-split-card {
+  background: #FFFFFF;
+  border: 1px solid #EAE3D6;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 10px rgba(36, 24, 27, 0.03);
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 220px;
+}
+
+.kuro-split-card:hover {
+  border-color: #D6C7B8;
+  box-shadow: 0 4px 14px rgba(36, 24, 27, 0.05);
+}
+
+.kuro-split-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F5EFEB;
+}
+
+.kuro-split-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.kuro-split-card-title {
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #24181B;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.kuro-split-card-date {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #756966;
+}
+
+.kuro-view-full-schedule-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: #7E1D2A;
+  color: #FFFFFF;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kuro-view-full-schedule-btn:hover {
+  background: #681320;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(126, 29, 42, 0.22);
+}
+
+.kuro-view-full-schedule-btn:active {
+  transform: scale(0.98);
+}
+
+.kuro-view-full-schedule-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.kuro-split-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.kuro-mini-lecture-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kuro-schedule-row-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #FAF7F2;
+  border: 1px solid #EFE8E0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kuro-schedule-row-card:hover {
+  background: #F5EFEB;
+  border-color: #E2D7CD;
+  transform: translateY(-1px);
+}
+
+.kuro-schedule-row-card:active {
+  transform: scale(0.99);
+}
+
+.ksrc-accent-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  width: 3.5px;
+  background: #7E1D2A;
+}
+
+.ksrc-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-inline-start: 4px;
+}
+
+.ksrc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #756966;
+}
+
+.ksrc-time {
+  color: #7E1D2A;
+  font-weight: 700;
+}
+
+.ksrc-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ksrc-location svg {
+  width: 12px;
+  height: 12px;
+  color: #9C8F8C;
+}
+
+.ksrc-subject {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #24181B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ksrc-arrow {
+  display: flex;
+  align-items: center;
+  color: #9C8F8C;
+  flex-shrink: 0;
+}
+
+.ksrc-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.kuro-empty-day-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px 16px;
+  background: #FAF7F2;
+  border-radius: 12px;
+  border: 1px dashed #E5DBD0;
+  flex: 1;
+}
+
+.keds-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.keds-title {
+  font-size: 0.98rem;
+  font-weight: 750;
+  color: #24181B;
+  margin: 0 0 4px;
+}
+
+.keds-desc {
+  font-size: 0.8125rem;
+  color: #756966;
+  margin: 0;
+}
+
+/* ─── 6c. Continue Studying Section (3-Card Activity Grid) ─── */
+.continue-studying-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-bottom: 36px;
+}
+
+.continue-studying-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.continue-studying-header .kuro-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: #24181B;
+  margin: 0;
+}
+
+.continue-studying-header .kuro-section-title svg {
+  width: 20px;
+  height: 20px;
+  color: #7E1D2A;
+}
+
+.kuro-continue-studying-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.continue-study-card {
+  background: #FFFFFF;
+  border: 1px solid #EAE3D6;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(36, 24, 27, 0.03);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+  min-height: 195px;
+}
+
+.continue-study-card:hover {
+  border-color: #D6C7B8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(36, 24, 27, 0.06);
+}
+
+.continue-card-top {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.continue-tag-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(126, 29, 42, 0.08);
+  color: #7E1D2A;
+  border: 1px solid rgba(126, 29, 42, 0.14);
+}
+
+.continue-tag-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.continue-tag-badge.recording {
+  background: rgba(124, 58, 237, 0.08);
+  color: #7C3AED;
+  border-color: rgba(124, 58, 237, 0.16);
+}
+
+.continue-tag-badge.questions {
+  background: rgba(217, 119, 6, 0.09);
+  color: #B45309;
+  border-color: rgba(217, 119, 6, 0.18);
+}
+
+.continue-card-title {
+  font-size: 1.02rem;
+  font-weight: 750;
+  color: #24181B;
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.continue-card-subject {
+  font-size: 0.8125rem;
+  color: #756966;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.continue-card-meta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9C8F8C;
+  margin-top: 2px;
+}
+
+.continue-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.continue-progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: #756966;
+}
+
+.continue-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #EFE8E0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.continue-progress-fill {
+  height: 100%;
+  background: #7E1D2A;
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.continue-empty-hint {
+  font-size: 0.76rem;
+  color: #9C8F8C;
+}
+
+.continue-card-bottom {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.continue-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 16px;
+  border-radius: 10px;
+  background: #7E1D2A;
+  color: #FFFFFF;
+  font-size: 0.84rem;
+  font-weight: 650;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.continue-action-btn:hover {
+  background: #681320;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(126, 29, 42, 0.22);
+}
+
+.continue-action-btn:active {
+  transform: scale(0.98);
+}
+
+.continue-action-btn.secondary {
+  background: #FAF7F2;
+  color: #24181B;
+  border: 1px solid #EAE3D6;
+}
+
+.continue-action-btn.secondary:hover {
+  background: #F3ECE2;
+  border-color: #D6C7B8;
+  color: #7E1D2A;
+}
+
+.continue-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Responsive queries */
+@media (max-width: 991px) {
+  .kuro-continue-studying-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .kuro-schedule-split-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .kuro-continue-studying-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .kuro-split-card {
+    padding: 16px;
+  }
+
+  .continue-study-card {
+    padding: 16px;
+  }
+}
+
 /* ─── 7. Quick Access Section (4 Tiles) ─── */
 .kuro-qa-section {
   display: flex;
@@ -11252,6 +11714,60 @@ body.dark-mode .kuro-hero-date-chip {
 body.dark-mode .kuro-hero-date-icon {
   color: #F87171 !important;
 }
+
+/* 10. Dark Mode Overrides for Split Schedule & Continue Studying */
+[data-theme="dark"] .kuro-split-card,
+body.dark-mode .kuro-split-card,
+[data-theme="dark"] .continue-study-card,
+body.dark-mode .continue-study-card {
+  background: var(--bg-surface, #1E1B1D) !important;
+  border-color: var(--border-subtle, rgba(255, 255, 255, 0.08)) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .kuro-split-card-title,
+body.dark-mode .kuro-split-card-title,
+[data-theme="dark"] .continue-card-title,
+body.dark-mode .continue-card-title,
+[data-theme="dark"] .continue-studying-header .kuro-section-title,
+body.dark-mode .continue-studying-header .kuro-section-title,
+[data-theme="dark"] .keds-title,
+body.dark-mode .keds-title,
+[data-theme="dark"] .ksrc-subject,
+body.dark-mode .ksrc-subject {
+  color: var(--text-primary, #F5F0EB) !important;
+}
+
+[data-theme="dark"] .kuro-split-card-header,
+body.dark-mode .kuro-split-card-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .kuro-schedule-row-card,
+body.dark-mode .kuro-schedule-row-card,
+[data-theme="dark"] .kuro-empty-day-state,
+body.dark-mode .kuro-empty-day-state {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] .kuro-schedule-row-card:hover,
+body.dark-mode .kuro-schedule-row-card:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .continue-action-btn.secondary,
+body.dark-mode .continue-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-primary, #F5F0EB) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .continue-progress-track,
+body.dark-mode .continue-progress-track {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
 
 
 

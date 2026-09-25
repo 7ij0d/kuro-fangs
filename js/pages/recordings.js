@@ -719,6 +719,25 @@
         this.activeAudio = audio;
         this.activeRecId = recId;
 
+        // Track last listened recording for Home dashboard Continue Studying
+        try {
+          const subj = window.DATA && typeof window.DATA.getSubjectById === 'function'
+            ? window.DATA.getSubjectById(rec.subject_id)
+            : null;
+          const audioRecord = {
+            id: rec.id,
+            sheet_id: rec.sheet_id || '',
+            title: rec.title || rec.title_en || rec.title_ar,
+            title_ar: rec.title_ar || rec.title || rec.title_en,
+            title_en: rec.title_en || rec.title || rec.title_ar,
+            subject_id: rec.subject_id,
+            subject_name_ar: subj ? subj.name_ar : '',
+            subject_name_en: subj ? subj.name_en : '',
+            timestamp: Date.now()
+          };
+          localStorage.setItem('kf_last_listened_audio', JSON.stringify(audioRecord));
+        } catch (e) {}
+
         audio.addEventListener('ended', () => {
           this.activeRecId = null;
           this.activeAudio = null;
