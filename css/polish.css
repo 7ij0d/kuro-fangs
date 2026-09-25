@@ -28,14 +28,14 @@
 body { background: var(--bg-app); color: var(--text-primary); }
 .app-sidebar { background: #111827; border-color: rgba(255,255,255,.07); box-shadow: none; }
 .sidebar-header { height: 78px; padding: 0 22px; }
-.sidebar-brand-emblem { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(145deg, #3268ed, #6c8ff6); box-shadow: 0 8px 18px rgba(50,104,237,.34); }
+.sidebar-brand-emblem { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(145deg, #7E1D2A, #A32838); box-shadow: 0 8px 18px rgba(126, 29, 42, 0.28); }
 .sidebar-brand-title { font-size: 1.08rem; letter-spacing: -.02em; }
-.sidebar-brand-sub { color: #92b1ff; }
+.sidebar-brand-sub { color: #E5A8B0; }
 .sidebar-nav { padding: 16px 12px; gap: 5px; }
 .sidebar-section-title { padding: 17px 12px 7px; color: #69758d; font-size: .64rem; }
 .sidebar-menu-item { padding: 11px 13px; border-radius: 12px; color: #aeb8ca; }
-.sidebar-menu-item.active { background: rgba(72, 116, 239, .18); color: #fff; }
-.sidebar-menu-item.active::before { background: #79a1ff; box-shadow: 0 0 12px rgba(121,161,255,.75); }
+.sidebar-menu-item.active { background: rgba(126, 29, 42, 0.22); color: #fff; }
+.sidebar-menu-item.active::before { background: #7E1D2A; box-shadow: 0 0 12px rgba(126, 29, 42, 0.7); }
 .sidebar-soon-badge {
   margin-inline-start: auto;
   font-size: 0.65rem;
@@ -56,7 +56,7 @@ body { background: var(--bg-app); color: var(--text-primary); }
 }
 .site-header { height: 76px; padding: 0 34px; background: rgba(255,255,255,.84); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .header-search-box input { min-height: 42px; background: #f4f6fa; border-color: transparent; }
-.header-search-box input:focus { background: #fff; box-shadow: 0 0 0 4px rgba(50,104,237,.12); border-color: #9db8ff; }
+.header-search-box input:focus { background: #fff; box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.14); border-color: #7E1D2A; outline: none !important; }
 .header-toggle-btn, .points-pill { min-height: 38px; border-color: #e4e9f2; }
 .main-content { padding-top: 30px; }
 .btn { min-height: 40px; border-radius: 11px; }
@@ -11767,6 +11767,256 @@ body.dark-mode .continue-action-btn.secondary {
 body.dark-mode .continue-progress-track {
   background: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* ==========================================================================
+   11. KURO STUDENT — GLOBAL TACTILE PRESS & ZERO-BLUE-OUTLINE SYSTEM
+   Universal Apple / Linear-grade interaction physics (120-180ms spring transitions)
+   Total elimination of default browser blue selection & focus outlines
+   Supported seamlessly across Desktop, Laptop, iPad, Android & iPhone
+   ========================================================================== */
+
+/* Universal tap-highlight removal across all DOM elements */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Custom themed text selection highlight (zero bright cyan/blue highlight rectangle) */
+::selection {
+  background: rgba(126, 29, 42, 0.22) !important;
+  color: inherit !important;
+}
+
+::-moz-selection {
+  background: rgba(126, 29, 42, 0.22) !important;
+  color: inherit !important;
+}
+
+/* Eliminate default browser blue rectangular outline on mouse & touch clicks */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none;
+}
+
+/* Refined Kuro Student keyboard accessibility focus state (Zero Blue Outline) */
+:focus-visible {
+  outline: 2px solid #7E1D2A !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.16) !important;
+  border-radius: inherit;
+}
+
+[data-theme="dark"] :focus-visible,
+body.dark-mode :focus-visible {
+  outline: 2px solid #E27B88 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(226, 123, 136, 0.22) !important;
+}
+
+/* Form input focus styling (warm burgundy glow, zero browser blue) */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: #7E1D2A !important;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.14) !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus,
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+  border-color: #C84343 !important;
+  box-shadow: 0 0 0 3px rgba(200, 67, 67, 0.2) !important;
+}
+
+/* ─── A. BUTTONS & INTERACTIVE ACTION TRIGGERS ─── */
+button,
+.btn,
+.continue-action-btn,
+.kuro-view-full-schedule-btn,
+.kuro-weekly-schedule-btn,
+.audio-btn-view-sheet,
+.audio-back-btn,
+.schedules-back-btn,
+.sched-card-btn,
+.shb-action-btn,
+.sgc-btn-view,
+.sgc-btn-download,
+.sqm-back-btn,
+.sqm-close-btn,
+.mobile-toggle-btn,
+.header-settings-btn,
+.settings-gear-btn,
+.dt-modal-nav-btn,
+.dt-modal-tool-btn,
+.dt-quiz-option,
+.q-btn-action,
+.sheets-view-btn,
+.sheets-back-btn,
+.profile-save-btn,
+.auth-avatar-btn,
+.mob-quick-setting-btn {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 140ms ease,
+              background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tactile press down state on click/tap */
+button:active:not(:disabled),
+.btn:active:not(:disabled),
+.continue-action-btn:active,
+.kuro-view-full-schedule-btn:active,
+.kuro-weekly-schedule-btn:active,
+.audio-btn-view-sheet:active,
+.audio-back-btn:active,
+.schedules-back-btn:active,
+.sched-card-btn:active,
+.shb-action-btn:active,
+.sgc-btn-view:active,
+.sgc-btn-download:active,
+.sqm-back-btn:active,
+.sqm-close-btn:active,
+.mobile-toggle-btn:active,
+.header-settings-btn:active,
+.settings-gear-btn:active,
+.dt-modal-nav-btn:active,
+.dt-modal-tool-btn:active,
+.dt-quiz-option:active,
+.q-btn-action:active,
+.sheets-view-btn:active,
+.sheets-back-btn:active,
+.profile-save-btn:active,
+.auth-avatar-btn:active,
+.mob-quick-setting-btn:active {
+  transform: scale(0.98) !important;
+  opacity: 0.94;
+}
+
+/* ─── B. CARDS & INTERACTIVE STUDY TILES ─── */
+.continue-study-card,
+.kuro-split-card,
+.kuro-schedule-row-card,
+.kuro-subject-card,
+.sheets-subject-card,
+.sheet-grid-card,
+.audio-subject-card,
+.audio-sheet-card,
+.audio-recording-card,
+.questions-subject-card,
+.sched-card,
+.sqm-recording-card,
+.settings-card,
+.sqm-sheet-row,
+.sqm-option-row,
+.subject-card,
+.sheet-card,
+.content-card,
+.faculty-news-card {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Card tactile press state */
+.continue-study-card:active,
+.kuro-schedule-row-card:active,
+.kuro-subject-card:active,
+.sheets-subject-card:active,
+.sheet-grid-card:active,
+.audio-subject-card:active,
+.audio-sheet-card:active,
+.audio-recording-card:active,
+.questions-subject-card:active,
+.sched-card:active,
+.sqm-recording-card:active,
+.settings-card:active,
+.sqm-sheet-row:active,
+.sqm-option-row:active,
+.subject-card:active,
+.sheet-card:active,
+.faculty-news-card:active {
+  transform: scale(0.985) !important;
+}
+
+/* ─── C. NAVIGATION ITEMS, TABS & SEGMENTED PILLS ─── */
+.site-nav-pill,
+.nav-pill,
+.kuro-tab-pill,
+.kf-segmented-btn,
+.exams-segmented-btn,
+.schedules-tab-btn,
+.filter-pill,
+.kuro-filter-pill,
+.sqm-action-item,
+.more-dropdown-item,
+.settings-popover-item,
+.settings-menu-item,
+.sidebar-menu-item {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              color 140ms ease,
+              border-color 160ms ease,
+              box-shadow 160ms ease;
+}
+
+/* Active navigation tap/press */
+.site-nav-pill:active,
+.nav-pill:active,
+.kuro-tab-pill:active,
+.kf-segmented-btn:active,
+.exams-segmented-btn:active,
+.schedules-tab-btn:active,
+.filter-pill:active,
+.kuro-filter-pill:active,
+.sqm-action-item:active,
+.more-dropdown-item:active,
+.settings-popover-item:active,
+.settings-menu-item:active,
+.sidebar-menu-item:active {
+  transform: scale(0.97) !important;
+}
+
+/* ─── D. CIRCULAR AUDIO PLAY CONTROLS ─── */
+.audio-play-circle-btn,
+.sqm-play-btn {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 160ms ease,
+              box-shadow 160ms ease;
+}
+
+.audio-play-circle-btn:active,
+.sqm-play-btn:active {
+  transform: scale(0.93) !important;
+}
+
+/* ─── E. GENERAL LINKS & INTERACTIVE PROSE ─── */
+a {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+a:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
 
 
 

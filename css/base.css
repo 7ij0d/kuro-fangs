@@ -10,6 +10,38 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Kuro Student Themed Selection (Zero Default Blue Highlight Rectangle) */
+::selection {
+  background: rgba(126, 29, 42, 0.22) !important;
+  color: inherit !important;
+}
+
+::-moz-selection {
+  background: rgba(126, 29, 42, 0.22) !important;
+  color: inherit !important;
+}
+
+/* Eliminate default browser blue focus outline on click / tap across all elements */
+:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+/* Keyboard accessibility: subtle Kuro burgundy / cream focus ring */
+:focus-visible {
+  outline: 2px solid #7E1D2A !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.16) !important;
+  border-radius: inherit;
+}
+
+[data-theme="dark"] :focus-visible,
+body.dark-mode :focus-visible {
+  outline: 2px solid #E27B88 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(226, 123, 136, 0.22) !important;
 }
 
 html {
@@ -83,7 +115,12 @@ p {
 a {
   color: inherit;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent !important;
   transition: all var(--transition-fast);
+}
+
+a:focus:not(:focus-visible) {
+  outline: none !important;
 }
 
 img, svg {
@@ -96,7 +133,19 @@ button {
   cursor: pointer;
   border: none;
   background: none;
-  outline: none;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 140ms ease,
+              background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.93;
 }
 
 input, select, textarea {
@@ -106,13 +155,15 @@ input, select, textarea {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background-color: var(--bg-input);
-  outline: none;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-base);
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: var(--brand-burgundy);
-  box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.15);
+  border-color: #7E1D2A !important;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.14) !important;
+  outline: none !important;
 }
 
 /* ==========================================================================
@@ -127,9 +178,21 @@ input:focus, select:focus, textarea:focus {
   font-weight: 700;
   padding: 9px 18px;
   border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
   text-decoration: none;
   white-space: nowrap;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 140ms ease,
+              background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.93;
 }
 
 .btn-burgundy {
