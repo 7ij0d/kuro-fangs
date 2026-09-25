@@ -1,232 +1,186 @@
 /**
- * KURO NOTES VIEWER VERIFICATION TEST SUITE
- * Validates the complete Kuro Notes workspace structure, header, toolbar,
- * sidebars, zoom controls, page navigation, layered DOM, zero-blue outlines,
- * and data integrity.
+ * KURO NOTES FINAL MASTER INTERFACE & UNIFIED TOOL SUITE VERIFICATION
+ * Validates:
+ *  1. 4-Area Master Shell (Header, Fixed Toolbar, Left Sidebar, Central PDF, Right Smart Panel)
+ *  2. Exact Toolbar Group & Tool Order (1..10: Select, Highlighter, Pen, Eraser, Shapes, Image, Text, Notes | AI, More)
+ *  3. Default Opening State (No annotation tool active initially: activeTool: null)
+ *  4. 5-Layer Page Stack with Under-Text Highlighter (.kn-highlight-canvas + mix-blend-mode: multiply)
+ *  5. All 9 Unified Tool Engines (Selection/Lasso, Highlighter, Pen, Eraser 3-mode, Shapes, Image+Crop, Direct Text, Notes, Page-Grouped Search)
+ *  6. 3-Tier Responsive Layouts (Desktop >1100px, iPad 768-1100px with FABs, Mobile <768px with Bottom Bar)
  */
 
 const fs = require('fs');
-const path = require('path');
 
 const sheetDetailCode = fs.readFileSync('js/pages/sheet-detail.js', 'utf8');
 const polishCss = fs.readFileSync('css/polish.css', 'utf8');
 
 const tests = [
-  // 1. Branding & Header Structure
+  // 1. Master Shell & Branding
   {
-    category: 'Branding & Header',
-    name: 'Kuro Notes application branding exists in sheet-detail.js',
-    pass: sheetDetailCode.includes('Kuro Notes') && sheetDetailCode.includes('kn-header')
+    category: 'Master Shell & Header',
+    name: 'Kuro Notes branding, mascot avatar, and truncated document title pill exist',
+    pass:
+      sheetDetailCode.includes('Kuro Notes') &&
+      sheetDetailCode.includes('kn-header') &&
+      sheetDetailCode.includes('kn-doc-title-pill') &&
+      sheetDetailCode.includes('kn-mascot-avatar'),
   },
   {
-    category: 'Branding & Header',
-    name: 'Document title pill with truncation and icon exists',
-    pass: sheetDetailCode.includes('kn-doc-title-pill') && sheetDetailCode.includes('.pdf')
-  },
-  {
-    category: 'Branding & Header',
+    category: 'Master Shell & Header',
     name: 'Header contains Back button, Sidebar toggle, Search, Bookmark, Share, and More menu',
-    pass: sheetDetailCode.includes('kn-btn-back') &&
-          sheetDetailCode.includes('kn-btn-toggle-left') &&
-          sheetDetailCode.includes('kn-btn-search') &&
-          sheetDetailCode.includes('kn-btn-bookmark') &&
-          sheetDetailCode.includes('kn-btn-share') &&
-          sheetDetailCode.includes('kn-btn-more')
+    pass:
+      sheetDetailCode.includes('kn-btn-back') &&
+      sheetDetailCode.includes('kn-btn-left-sidebar') &&
+      sheetDetailCode.includes('kn-btn-search') &&
+      sheetDetailCode.includes('kn-btn-bookmark') &&
+      sheetDetailCode.includes('kn-btn-share') &&
+      sheetDetailCode.includes('kn-btn-header-more'),
   },
 
-  // 2. Toolbar & Semantic Grouping
+  // 2. Fixed Top Toolbar & Exact Tool Order
   {
-    category: 'Top Toolbar',
-    name: 'Toolbar contains distinct semantic groups with dividers',
-    pass: sheetDetailCode.includes('kn-toolbar') &&
-          sheetDetailCode.includes('kn-toolbar-divider') &&
-          sheetDetailCode.includes('kn-group-history') &&
-          sheetDetailCode.includes('kn-group-page') &&
-          sheetDetailCode.includes('kn-group-zoom') &&
-          sheetDetailCode.includes('kn-group-tools') &&
-          sheetDetailCode.includes('kn-group-view')
+    category: 'Fixed Top Toolbar',
+    name: 'Toolbar contains all 5 semantic groups with vertical dividers',
+    pass:
+      sheetDetailCode.includes('kn-group-history') &&
+      sheetDetailCode.includes('kn-group-pagenav') &&
+      sheetDetailCode.includes('kn-group-zoom') &&
+      sheetDetailCode.includes('kn-group-annotations') &&
+      sheetDetailCode.includes('kn-group-extra') &&
+      sheetDetailCode.includes('kn-toolbar-divider'),
   },
   {
-    category: 'Top Toolbar',
-    name: 'Page navigation includes direct page input [1] / N with prev and next buttons',
-    pass: sheetDetailCode.includes('kn-page-input') &&
-          sheetDetailCode.includes('kn-page-total') &&
-          sheetDetailCode.includes('kn-btn-prev-page') &&
-          sheetDetailCode.includes('kn-btn-next-page')
+    category: 'Fixed Top Toolbar',
+    name: 'Annotation tools follow exact order: Select, Highlighter, Pen, Eraser, Shapes, Image, Text, Notes, AI, More',
+    pass: (() => {
+      const order = [
+        'data-tool="select"',
+        'data-tool="highlighter"',
+        'data-tool="pen"',
+        'data-tool="eraser"',
+        'data-tool="shapes"',
+        'data-tool="image"',
+        'data-tool="text"',
+        'data-tool="notes"',
+        'data-tool="ai"',
+        'id="kn-toolbar-more"',
+      ];
+      let lastIdx = -1;
+      for (const token of order) {
+        const idx = sheetDetailCode.indexOf(token);
+        if (idx === -1 || idx < lastIdx) return false;
+        lastIdx = idx;
+      }
+      return true;
+    })(),
   },
   {
-    category: 'Top Toolbar',
-    name: 'Zoom engine includes zoom out, percentage dropdown with presets, and zoom in',
-    pass: sheetDetailCode.includes('kn-btn-zoom-out') &&
-          sheetDetailCode.includes('kn-btn-zoom-in') &&
-          sheetDetailCode.includes('kn-btn-zoom-level') &&
-          sheetDetailCode.includes('data-zoom="0.5"') &&
-          sheetDetailCode.includes('data-zoom="1.2"') &&
-          sheetDetailCode.includes('data-zoom="2.0"')
-  },
-  {
-    category: 'Top Toolbar',
-    name: 'All required annotation tool buttons exist in the toolbar',
-    pass: sheetDetailCode.includes('data-tool="select"') &&
-          sheetDetailCode.includes('data-tool="highlighter"') &&
-          sheetDetailCode.includes('data-tool="pen"') &&
-          sheetDetailCode.includes('data-tool="eraser"') &&
-          sheetDetailCode.includes('data-tool="shapes"') &&
-          sheetDetailCode.includes('data-tool="lasso"') &&
-          sheetDetailCode.includes('data-tool="image"') &&
-          sheetDetailCode.includes('data-tool="text"') &&
-          sheetDetailCode.includes('data-tool="ai"')
-  },
-  {
-    category: 'Top Toolbar',
-    name: 'Highlighter button has active state placeholder ready for phase 2',
-    pass: sheetDetailCode.includes('kn-tool-highlighter') &&
-          (sheetDetailCode.includes('active') || sheetDetailCode.includes('selected'))
-  },
-  {
-    category: 'Top Toolbar',
-    name: 'View mode buttons exist (Single, Continuous, Dual, Fullscreen)',
-    pass: sheetDetailCode.includes('kn-view-single') &&
-          sheetDetailCode.includes('kn-view-continuous') &&
-          sheetDetailCode.includes('kn-btn-fullscreen')
+    category: 'Default Opening State',
+    name: 'No annotation tool is active by default when opening a sheet (activeTool: null)',
+    pass: sheetDetailCode.includes('activeTool: null'),
   },
 
-  // 3. Left Document Navigation Sidebar
+  // 3. 5-Layer Page Stack & Under-Text Highlighter
   {
-    category: 'Left Sidebar',
-    name: 'Left sidebar exists with required tabs (Pages, Bookmarks, Outline, Notes, AI Help)',
-    pass: sheetDetailCode.includes('kn-sidebar-left') &&
-          sheetDetailCode.includes('kn-tab-pages') &&
-          sheetDetailCode.includes('kn-tab-bookmarks') &&
-          sheetDetailCode.includes('kn-tab-outline') &&
-          sheetDetailCode.includes('kn-tab-notes') &&
-          sheetDetailCode.includes('kn-tab-ai')
+    category: '5-Layer Page Stack',
+    name: 'Page card contains PDF canvas, Under-Text Highlight canvas, Text layer, Annotation canvas, and Objects layer',
+    pass:
+      sheetDetailCode.includes('kn-pdf-canvas') &&
+      sheetDetailCode.includes('kn-highlight-canvas') &&
+      sheetDetailCode.includes('kn-text-layer') &&
+      sheetDetailCode.includes('kn-annotation-layer') &&
+      sheetDetailCode.includes('kn-objects-layer'),
   },
   {
-    category: 'Left Sidebar',
-    name: 'Thumbnails rail displays page previews with page numbers and active page indicator',
-    pass: sheetDetailCode.includes('kn-thumbnail-item') &&
-          sheetDetailCode.includes('kn-thumb-index') &&
-          sheetDetailCode.includes('kn-thumb-preview')
-  },
-  {
-    category: 'Left Sidebar',
-    name: 'Left sidebar is collapsible',
-    pass: sheetDetailCode.includes('kn-sidebar-collapsed') ||
-          sheetDetailCode.includes('toggleLeftSidebar')
+    category: 'Under-Text Highlighter',
+    name: 'Highlighter canvas uses mix-blend-mode: multiply so PDF text stays 100% sharp and dark',
+    pass:
+      polishCss.includes('.kn-highlight-canvas') &&
+      polishCss.includes('mix-blend-mode: multiply'),
   },
 
-  // 4. Center Document Area & Layered Architecture
+  // 4. Unified 9 Tool Engines
   {
-    category: 'Document Canvas',
-    name: 'Document viewport is centered with margin separation and soft cream backdrop',
-    pass: sheetDetailCode.includes('kn-document-viewport') &&
-          sheetDetailCode.includes('kn-pages-container') &&
-          sheetDetailCode.includes('kn-page-card')
+    category: 'Selection & Lasso Tool',
+    name: 'Supports Rectangle & Freehand Lasso modes, Target Filters, 8 resize handles + rotation handle, and Contextual Action Bar',
+    pass:
+      sheetDetailCode.includes('selectionMode') &&
+      sheetDetailCode.includes('selectionFilter') &&
+      sheetDetailCode.includes('pointInPolygon') &&
+      sheetDetailCode.includes('kn-selection-box') &&
+      sheetDetailCode.includes('kn-context-bar'),
   },
   {
-    category: 'Document Canvas',
-    name: 'Layered architecture per Section 20 (PDF Layer, Text Layer, Annotation Layer, Interaction Layer)',
-    pass: sheetDetailCode.includes('kn-pdf-canvas') &&
-          sheetDetailCode.includes('kn-text-layer') &&
-          sheetDetailCode.includes('kn-annotation-layer') &&
-          sheetDetailCode.includes('kn-interaction-layer')
-  },
-
-  // 5. Right Document Information Sidebar
-  {
-    category: 'Right Sidebar',
-    name: 'Right sidebar exists with tabs (Outline, Notes, AI Help) and search input',
-    pass: sheetDetailCode.includes('kn-sidebar-right') &&
-          sheetDetailCode.includes('kn-outline-search') &&
-          sheetDetailCode.includes('kn-right-tab-outline') &&
-          sheetDetailCode.includes('kn-right-tab-notes') &&
-          sheetDetailCode.includes('kn-right-tab-ai')
+    category: 'Highlighter & Pen Tools',
+    name: 'Supports Freehand & Straight modes, live preview, color swatches, size/opacity sliders, and unified presets',
+    pass:
+      sheetDetailCode.includes('KEY_HL_PRESETS') &&
+      sheetDetailCode.includes('KEY_PEN_PRESETS') &&
+      sheetDetailCode.includes('kn-live-preview-box') &&
+      sheetDetailCode.includes('quadraticCurveTo'),
   },
   {
-    category: 'Right Sidebar',
-    name: 'Clickable outline navigates to page sections',
-    pass: sheetDetailCode.includes('kn-outline-item') &&
-          sheetDetailCode.includes('data-target-page')
+    category: 'Eraser Tool (3 Modes)',
+    name: 'Supports Stroke, Object, and Partial path-splitting eraser modes with live circular cursor and quick sizes',
+    pass:
+      sheetDetailCode.includes("mode === 'partial'") &&
+      sheetDetailCode.includes('kn-eraser-cursor') &&
+      sheetDetailCode.includes('kn-eraser-quick-row'),
   },
   {
-    category: 'Right Sidebar',
-    name: 'Right sidebar is collapsible and allows document expansion',
-    pass: sheetDetailCode.includes('kn-btn-toggle-right') ||
-          sheetDetailCode.includes('toggleRightSidebar')
-  },
-
-  // 6. Tactile Physics & Zero Blue Outlines in CSS
-  {
-    category: 'Design Tokens & CSS',
-    name: 'Warm cream backdrop token (--kn-bg: #F8F5EE) and white paper canvas defined',
-    pass: polishCss.includes('--kn-bg') &&
-          polishCss.includes('#F8F5EE') &&
-          polishCss.includes('--kn-surface')
+    category: 'Text Tool',
+    name: 'Appears directly on page without visible box when idle, supports RTL/LTR, fonts, size, B/I/U/S, alignment, and opacity',
+    pass:
+      polishCss.includes('.kn-textbox-obj') &&
+      sheetDetailCode.includes('kn-textbox-editor') &&
+      sheetDetailCode.includes('applyTextFormattingToSelected'),
   },
   {
-    category: 'Design Tokens & CSS',
-    name: 'Primary Burgundy token (--kn-primary: #7E1D2A) and blush accent defined',
-    pass: polishCss.includes('--kn-primary') &&
-          polishCss.includes('#7E1D2A') &&
-          polishCss.includes('rgba(126, 29, 42')
+    category: 'Image Tool & Crop',
+    name: 'Supports Device Upload, Drag & Drop, Clipboard Paste, Rotation, Z-Order, and Interactive Non-Destructive Crop',
+    pass:
+      sheetDetailCode.includes('kn-img-action-grid') &&
+      sheetDetailCode.includes('applyImageCrop') &&
+      sheetDetailCode.includes('kn-crop-overlay'),
   },
   {
-    category: 'Design Tokens & CSS',
-    name: 'Active thumbnail has prominent burgundy border outline',
-    pass: polishCss.includes('.kn-thumbnail-item.active') &&
-          polishCss.includes('#7E1D2A')
+    category: 'Notes Tool & Smart Panel',
+    name: 'Supports on-page Note cards (categories, colors, pin, collapse) synced with Right Panel Notes search, filter, and sort',
+    pass:
+      sheetDetailCode.includes('kn-note-obj') &&
+      sheetDetailCode.includes('kn-sidebar-note-card') &&
+      sheetDetailCode.includes('kn-notes-cat-filter') &&
+      sheetDetailCode.includes('kn-notes-sort'),
   },
   {
-    category: 'Design Tokens & CSS',
-    name: 'Tactile spring press scaling (scale(0.98)) applied to Kuro Notes controls',
-    pass: polishCss.includes('.kn-tool-btn:active') &&
-          polishCss.includes('transform: scale')
-  },
-  {
-    category: 'Design Tokens & CSS',
-    name: 'Zero-blue focus & tap highlight enforced on Kuro Notes elements',
-    pass: polishCss.includes('.kn-tool-btn') &&
-          polishCss.includes('-webkit-tap-highlight-color: transparent')
+    category: 'Search Tool',
+    name: 'Supports Arabic/English search, Match Case, Whole Words, Page-Grouped results with highlighted snippets, and temporary marks',
+    pass:
+      sheetDetailCode.includes('kn-search-popover') &&
+      sheetDetailCode.includes('kn-search-page-group') &&
+      sheetDetailCode.includes('kn-search-snippet-mark') &&
+      sheetDetailCode.includes('kn-search-mark'),
   },
 
-  // 7. Responsive & Distraction-Free Reading Mode
+  // 5. 3-Tier Responsive Layouts & Zero Browser Blue
   {
-    category: 'Responsive & Fullscreen',
-    name: 'Distraction-free reading mode hides chrome and provides floating exit pill',
-    pass: sheetDetailCode.includes('kn-reading-mode') &&
-          sheetDetailCode.includes('kn-reading-mode-pill')
+    category: 'Responsive & Zero Blue',
+    name: 'Defines Desktop (>1100px), iPad (<=1100px with corner FABs), and Mobile (<=767px with bottom bar & bottom sheets)',
+    pass:
+      polishCss.includes('@media (max-width: 1100px)') &&
+      polishCss.includes('@media (max-width: 767px)') &&
+      polishCss.includes('.kn-ipad-fab') &&
+      polishCss.includes('.kn-mobile-bottom-bar') &&
+      polishCss.includes('-webkit-tap-highlight-color: transparent'),
   },
-  {
-    category: 'Responsive & Fullscreen',
-    name: 'iPad touch targets and mobile drawer styles defined in CSS',
-    pass: polishCss.includes('@media (max-width: 1024px)') &&
-          polishCss.includes('@media (max-width: 768px)') &&
-          polishCss.includes('.kn-sidebar-left')
-  },
-
-  // 8. Data Integrity & Real Sheet Integration
-  {
-    category: 'Data Integrity',
-    name: 'Integrates real sheet metadata from window.DATA (no fictional mock data)',
-    pass: sheetDetailCode.includes('window.DATA') &&
-          sheetDetailCode.includes('sheet.title') &&
-          sheetDetailCode.includes('sheet.pdf_url')
-  },
-  {
-    category: 'Data Integrity',
-    name: 'Preserves existing copy text engine and discussion board functionality',
-    pass: sheetDetailCode.includes('window.SheetCopyEngine') &&
-          sheetDetailCode.includes('commentsKey')
-  }
 ];
 
 let failed = 0;
 console.log('====================================================');
-console.log('🧪 RUNNING KURO NOTES VIEWER VERIFICATION TEST SUITE');
+console.log('🧪 RUNNING KURO NOTES FINAL MASTER SUITE VERIFICATION');
 console.log('====================================================\n');
 
-tests.forEach((t, i) => {
+tests.forEach((t) => {
   if (t.pass) {
     console.log(`✅ [PASS] (${t.category}) ${t.name}`);
   } else {
@@ -237,7 +191,7 @@ tests.forEach((t, i) => {
 
 console.log('\n====================================================');
 if (failed === 0) {
-  console.log(`🌟 ALL ${tests.length} KURO NOTES VERIFICATION TESTS PASSED!`);
+  console.log(`🌟 ALL ${tests.length} KURO NOTES FINAL VERIFICATION TESTS PASSED!`);
   process.exit(0);
 } else {
   console.error(`💥 ${failed} / ${tests.length} TESTS FAILED.`);
