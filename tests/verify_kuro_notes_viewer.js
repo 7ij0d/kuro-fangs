@@ -173,6 +173,36 @@ const tests = [
       polishCss.includes('.kn-mobile-bottom-bar') &&
       polishCss.includes('-webkit-tap-highlight-color: transparent'),
   },
+
+  // 6. Open Sheet Route Pipeline, Multi-Source Lookup & Real PDF.js Loader
+  {
+    category: 'Open Sheet Route Pipeline',
+    name: 'Exports both window.SheetDetailPage.render(container, queryParams) and window.Pages.sheetDetail',
+    pass:
+      sheetDetailCode.includes('window.SheetDetailPage =') &&
+      sheetDetailCode.includes('render(container, sheetIdOrQuery, maybeQuery)') &&
+      sheetDetailCode.includes('window.Pages.sheetDetail = renderKuroNotesSheet'),
+  },
+  {
+    category: 'Open Sheet Route Pipeline',
+    name: 'Resolves sheet from window.DATA.getSheetById, window.DATA.sheets, kf_cloud_cached_sheets, kf_admin_custom_sheets, and syncCloudSheets',
+    pass:
+      sheetDetailCode.includes('window.DATA.getSheetById') &&
+      sheetDetailCode.includes('kf_cloud_cached_sheets') &&
+      sheetDetailCode.includes('kf_admin_custom_sheets') &&
+      sheetDetailCode.includes('syncCloudSheets'),
+  },
+  {
+    category: 'Real PDF.js & Error/Loading States',
+    name: 'Resolves real PDF URL from sheet.pdf_url, sheet.download_url, sheet.fileUrl, and IndexedDB pdfStore with #kn-doc-loader and #kn-doc-error Retry UI',
+    pass:
+      sheetDetailCode.includes('sheet.pdf_url') &&
+      sheetDetailCode.includes('sheet.download_url') &&
+      sheetDetailCode.includes('pdfStore.getPdfUrl') &&
+      sheetDetailCode.includes('id="kn-doc-loader"') &&
+      sheetDetailCode.includes('id="kn-doc-error"') &&
+      sheetDetailCode.includes('id="kn-pdf-retry-btn"'),
+  },
 ];
 
 let failed = 0;

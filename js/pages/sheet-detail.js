@@ -16,53 +16,57 @@
 
 window.Pages = window.Pages || {};
 
-Pages.sheetDetail = async function (sheetId) {
-  const container = document.getElementById('page-content');
-  if (!container) return;
+async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
+  let container = null;
+  let targetId = null;
 
-  const isAr = typeof I18n !== 'undefined' && I18n.currentLang === 'ar';
-  const t = (ar, en) => (isAr ? ar : en);
+  if (typeof containerOrId === 'string') {
+    targetId = containerOrId.trim();
+    container = document.getElementById('page-content') || document.getElementById('app');
+  } else if (containerOrId && containerOrId.nodeType === 1) {
+    container = containerOrId;
+    if (typeof sheetIdOrQuery === 'string' && sheetIdOrQuery.trim()) {
+      targetId = sheetIdOrQuery.trim();
+    } else if (sheetIdOrQuery && typeof sheetIdOrQuery.get === 'function') {
+      targetId = sheetIdOrQuery.get('id') || sheetIdOrQuery.get('sheetId');
+    } else if (sheetIdOrQuery && typeof sheetIdOrQuery === 'object') {
+      targetId = sheetIdOrQuery.id || sheetIdOrQuery.sheetId;
+    }
+    if (!targetId && maybeQuery) {
+      if (typeof maybeQuery.get === 'function') {
+        targetId = maybeQuery.get('id') || maybeQuery.get('sheetId');
+      } else if (typeof maybeQuery === 'object') {
+        targetId = maybeQuery.id || maybeQuery.sheetId;
+      }
+    }
+  } else {
+    container = document.getElementById('app') || document.getElementById('page-content');
+  }
 
-  let sheet = Store.getById('sheets', sheetId);
-  if (!sheet && window.CloudSync && CloudSync.isConfigured()) {
+  if (!targetId) {
     try {
-      await CloudSync.pullAll();
-      sheet = Store.getById('sheets', sheetId);
+      const hash = window.location.hash || '';
+      const qIdx = hash.indexOf('?');
+      if (qIdx !== -1) {
+        const params = new URLSearchParams(hash.slice(qIdx + 1));
+        targetId = params.get('id') || params.get('sheetId');
+      } else {
+        const m = hash.match(/\/sheet(?:s|-detail)?\/([^/?#]+)/i);
+        if (m && m[1]) targetId = decodeURIComponent(m[1]);
+      }
     } catch (e) {}
   }
 
-  if (!sheet) {
-    container.innerHTML = `
-      <div class="empty-state" style="padding:80px 20px;text-align:center;">
-        <h3>${t('الشيت غير موجود', 'Sheet Not Found')}</h3>
-        <button class="btn btn-primary" onclick="Router.navigate('/sheets')">${t('العودة للشيتات', 'Back to Sheets')}</button>
-      </div>`;
-    return;
-  }
+  if (!container) return;
 
-  Store.addRecent({
-    type: 'sheet',
-    id: sheet.id,
-    title: sheet.title || sheet.name,
-    subjectId: sheet.subjectId,
-    url: `/sheets/${sheet.id}`,
-  });
+  const isAr =
+    (typeof window.I18N !== 'undefined' && typeof window.I18N.getLang === 'function' && window.I18N.getLang() === 'ar') ||
+    (typeof I18n !== 'undefined' && I18n.currentLang === 'ar');
+  const t = (ar, en) => (isAr ? ar : en);
 
-  try {
-    localStorage.setItem(
-      'kf_last_opened_sheet',
-      JSON.stringify({
-        id: sheet.id,
-        title: sheet.title || sheet.name,
-        subjectId: sheet.subjectId,
-        openedAt: Date.now(),
-      })
-    );
-  } catch (e) {}
-
-  // Hide global chrome so Kuro Notes owns 100% of the viewport
-  const appSidebar = document.getElementById('sidebar');
-  const appHeader = document.getElementById('top-header');
+  // Helper: Hide global chrome so Kuro Notes owns 100% of the viewport
+  const appSidebar = document.getElementById('app-sidebar') || document.getElementById('sidebar');
+  const appHeader = document.getElementById('site-header') || document.getElementById('top-header');
   const mobileNav = document.querySelector('.mobile-bottom-nav');
   if (appSidebar) appSidebar.style.display = 'none';
   if (appHeader) appHeader.style.display = 'none';
@@ -73,12 +77,169 @@ Pages.sheetDetail = async function (sheetId) {
     if (appSidebar) appSidebar.style.display = '';
     if (appHeader) appHeader.style.display = '';
     if (mobileNav) mobileNav.style.display = '';
+    document.body.classList.remove('studio-fullscreen-active');
     document.body.style.overflow = '';
     if (window._knKeyHandler) {
       window.removeEventListener('keydown', window._knKeyHandler);
       window._knKeyHandler = null;
     }
   };
+
+  const navigateBackToSheets = (subjectId) => {
+    restoreGlobalUI();
+    const targetRoute = subjectId ? `/sheets?subject=${encodeURIComponent(subjectId)}` : '/sheets';
+    if (window.router && typeof window.router.navigate === 'function') {
+      window.router.navigate(targetRoute);
+    } else if (typeof Router !== 'undefined' && typeof Router.navigate === 'function') {
+      Router.navigate(targetRoute);
+    } else {
+      window.location.hash = `#${targetRoute}`;
+    }
+  };
+
+  // Multi-source lookup across window.DATA, cached cloud sheets, custom admin sheets, and legacy Store
+  const findSheetById = (id) => {
+    if (!id) return null;
+    const cleanId = String(id).trim();
+    if (window.DATA) {
+      if (typeof window.DATA.getSheetById === 'function') {
+        const found = window.DATA.getSheetById(cleanId);
+        if (found) return found;
+      }
+      if (Array.isArray(window.DATA.sheets)) {
+        const found = window.DATA.sheets.find((s) => s && String(s.id) === cleanId);
+        if (found) return found;
+      }
+    }
+    const storageKeys = ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets', 'kf_sheets'];
+    for (const k of storageKeys) {
+      try {
+        const arr = JSON.parse(localStorage.getItem(k) || '[]');
+        if (Array.isArray(arr)) {
+          const found = arr.find((s) => s && String(s.id) === cleanId);
+          if (found) return found;
+        }
+      } catch (e) {}
+    }
+    if (typeof Store !== 'undefined' && typeof Store.getById === 'function') {
+      try {
+        const found = Store.getById('sheets', cleanId);
+        if (found) return found;
+      } catch (e) {}
+    }
+    return null;
+  };
+
+  let sheet = findSheetById(targetId);
+
+  // If sheet is not yet in memory/localStorage, show a branded Kuro Notes loading state while syncing cloud data
+  if (!sheet && targetId) {
+    container.innerHTML = `
+      <div class="kuro-notes-workspace" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F6F1E8;color:#1F1A17;font-family:'IBM Plex Sans Arabic','Inter',sans-serif;">
+        <div style="background:#FFFFFF;border:1px solid #E8E2D5;border-radius:16px;padding:36px 42px;text-align:center;box-shadow:0 16px 40px rgba(31,26,23,0.08);max-width:420px;width:90%;">
+          <div style="width:44px;height:44px;margin:0 auto 16px;border-radius:50%;border:3.5px solid #F3ECE3;border-top-color:#7E1D2A;animation:knSpin 0.8s linear infinite;"></div>
+          <div style="font-size:1.05rem;font-weight:800;color:#7E1D2A;margin-bottom:6px;">Kuro Notes</div>
+          <div style="font-size:0.9rem;font-weight:700;color:#1F1A17;">${t('جاري تحميل الشيت...', 'Loading sheet...')}</div>
+          <div style="font-size:0.78rem;color:#7C736B;margin-top:4px;">${t('يرجى الانتظار لحظات بينما يتم تجهيز ملف المحاضرة', 'Fetching lecture sheet data and preparing workspace')}</div>
+        </div>
+        <style>@keyframes knSpin { to { transform: rotate(360deg); } }</style>
+      </div>
+    `;
+
+    try {
+      if (window.DATA && !window.DATA.loaded && typeof window.DATA.init === 'function') {
+        await window.DATA.init();
+      }
+      sheet = findSheetById(targetId);
+      if (!sheet && window.DATA && typeof window.DATA.syncCloudSheets === 'function') {
+        await window.DATA.syncCloudSheets();
+        sheet = findSheetById(targetId);
+      }
+      if (!sheet) {
+        try {
+          const res = await fetch('data/sheets.json');
+          if (res.ok) {
+            const json = await res.json();
+            if (Array.isArray(json?.sheets)) {
+              sheet = json.sheets.find((s) => s && String(s.id) === String(targetId)) || null;
+            }
+          }
+        } catch (e) {}
+      }
+      if (!sheet && window.CloudSync && typeof CloudSync.isConfigured === 'function' && CloudSync.isConfigured()) {
+        await CloudSync.pullAll();
+        sheet = findSheetById(targetId);
+      }
+    } catch (syncErr) {
+      console.error('[KuroNotes] Error syncing sheet data:', syncErr);
+    }
+  }
+
+  if (!sheet) {
+    console.error('[KuroNotes] Unable to open sheet — Sheet ID not found in local or cloud stores:', targetId);
+    container.innerHTML = `
+      <div class="kuro-notes-workspace" style="display:flex;flex-direction:column;min-height:100vh;background:#F6F1E8;color:#1F1A17;font-family:'IBM Plex Sans Arabic','Inter',sans-serif;">
+        <header class="kn-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#FBF8F3;border-bottom:1px solid #E8E2D5;">
+          <button class="kn-btn kn-btn-back" id="kn-notfound-back" style="cursor:pointer;">
+            <span>← ${t('العودة للشيتات', 'Back to Sheets')}</span>
+          </button>
+          <div style="font-weight:800;color:#7E1D2A;">Kuro Notes</div>
+          <div></div>
+        </header>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
+          <div class="empty-state" style="background:#FFFFFF;border:1px solid #E8E2D5;border-radius:16px;padding:40px 32px;text-align:center;max-width:460px;width:100%;box-shadow:0 16px 40px rgba(31,26,23,0.08);">
+            <div style="width:52px;height:52px;margin:0 auto 16px;border-radius:14px;background:rgba(126,29,42,0.08);color:#7E1D2A;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;">!</div>
+            <h3 style="font-size:1.15rem;font-weight:800;color:#1F1A17;margin-bottom:8px;">${t('تعذر فتح هذا الشيت • الشيت غير موجود', 'Unable to open this sheet • Sheet Not Found')}</h3>
+            <p style="font-size:0.84rem;color:#7C736B;line-height:1.6;margin-bottom:22px;">
+              ${t('لم نتمكن من العثور على بيانات هذا الشيت أو ربما تم حذفه.', 'The requested lecture sheet could not be found or failed to load.')}
+              ${targetId ? `<br/><code style="font-size:0.74rem;color:#7E1D2A;">ID: ${escapeHtml(targetId)}</code>` : ''}
+            </p>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+              <button class="kn-btn kn-btn-primary" id="kn-notfound-retry" style="padding:8px 18px;font-weight:700;cursor:pointer;">
+                ${t('إعادة المحاولة (Retry)', 'Retry')}
+              </button>
+              <button class="kn-btn" id="kn-notfound-sheets" style="padding:8px 18px;font-weight:700;cursor:pointer;">
+                ${t('العودة للشيتات (Back to Sheets)', 'Back to Sheets')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('kn-notfound-back')?.addEventListener('click', () => navigateBackToSheets());
+    document.getElementById('kn-notfound-sheets')?.addEventListener('click', () => navigateBackToSheets());
+    document.getElementById('kn-notfound-retry')?.addEventListener('click', () => {
+      renderKuroNotesSheet(container, targetId);
+    });
+    return;
+  }
+
+  // Record recent sheet view in both Store APIs
+  try {
+    if (typeof Store !== 'undefined' && typeof Store.addRecent === 'function') {
+      Store.addRecent({
+        type: 'sheet',
+        id: sheet.id,
+        title: sheet.title_en || sheet.title || sheet.title_ar || sheet.name,
+        subjectId: sheet.subject_id || sheet.subjectId,
+        url: `/sheet-detail?id=${sheet.id}`,
+      });
+    }
+    if (window.Store && typeof window.Store.recordSheetView === 'function') {
+      window.Store.recordSheetView(sheet.id);
+    }
+  } catch (e) {}
+
+  try {
+    localStorage.setItem(
+      'kf_last_opened_sheet',
+      JSON.stringify({
+        id: sheet.id,
+        title: sheet.title_en || sheet.title || sheet.title_ar || sheet.name,
+        subjectId: sheet.subject_id || sheet.subjectId,
+        openedAt: Date.now(),
+      })
+    );
+  } catch (e) {}
 
   // Logical coordinate system per page (scales cleanly with zoom & rotation)
   const BASE_W = 720;
@@ -107,7 +268,8 @@ Pages.sheetDetail = async function (sheetId) {
   // Unified State
   const state = {
     pdfDoc: null,
-    totalPages: Math.max(1, parseInt(sheet.pages, 10) || 12),
+    pdfBaseRatio: null,
+    totalPages: Math.max(1, parseInt(sheet.pages || sheet.pages_count, 10) || 12),
     currentPage: savedView.currentPage || 1,
     zoom: savedView.zoom || 1.0,
     zoomMode: savedView.zoomMode || 'custom', // 'custom' | 'fit-width' | 'fit-page'
@@ -541,6 +703,28 @@ Pages.sheetDetail = async function (sheetId) {
 
         <!-- CENTRAL DOCUMENT VIEWPORT -->
         <main class="kn-document-viewport" id="kn-viewport" tabindex="0">
+          <!-- Loading State Banner inside Kuro Notes while PDF is fetched & rendered -->
+          <div id="kn-doc-loader" style="display:none;align-items:center;justify-content:center;gap:12px;background:#FFFFFF;border:1px solid #E8E2D5;border-radius:12px;padding:14px 22px;margin:8px auto 14px;box-shadow:0 8px 24px rgba(31,26,23,0.08);max-width:440px;width:92%;">
+            <div style="width:22px;height:22px;border-radius:50%;border:3px solid #F3ECE3;border-top-color:#7E1D2A;animation:knSpin 0.8s linear infinite;flex-shrink:0;"></div>
+            <div style="text-align:start;">
+              <div style="font-size:0.84rem;font-weight:800;color:#1F1A17;">${t('جاري تحميل ملف الشيت...', 'Loading sheet...')}</div>
+              <div style="font-size:0.72rem;color:#7C736B;" id="kn-doc-loader-sub">${escapeHtml(docTitle)}</div>
+            </div>
+            <style>@keyframes knSpin { to { transform: rotate(360deg); } }</style>
+          </div>
+
+          <!-- Error State Banner inside Kuro Notes if PDF fails to load -->
+          <div id="kn-doc-error" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#FFFFFF;border:1px solid #FECACA;border-radius:14px;padding:24px 28px;margin:12px auto 18px;box-shadow:0 12px 32px rgba(126,29,42,0.1);max-width:520px;width:92%;text-align:center;">
+            <div style="width:42px;height:42px;border-radius:12px;background:rgba(220,38,38,0.1);color:#DC2626;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;">!</div>
+            <div style="font-size:1rem;font-weight:800;color:#1F1A17;">${t('تعذر فتح ملف الـ PDF الأصلي لهذا الشيت', 'Unable to open this sheet PDF')}</div>
+            <div id="kn-doc-error-msg" style="font-size:0.78rem;color:#7C736B;line-height:1.5;"></div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:6px;">
+              <button class="kn-btn kn-btn-primary" id="kn-pdf-retry-btn" style="padding:6px 14px;font-weight:700;cursor:pointer;">${t('إعادة المحاولة (Retry)', 'Retry')}</button>
+              <a class="kn-btn" id="kn-pdf-direct-link" href="#" target="_blank" rel="noopener" style="padding:6px 14px;font-weight:700;text-decoration:none;display:none;">${t('فتح الملف مباشرة', 'Open PDF Directly')}</a>
+              <button class="kn-btn" id="kn-pdf-error-back-btn" style="padding:6px 14px;font-weight:700;cursor:pointer;">${t('العودة للشيتات (Back to Sheets)', 'Back to Sheets')}</button>
+            </div>
+          </div>
+
           <div class="kn-pages-container" id="kn-pages-container"></div>
         </main>
 
@@ -590,9 +774,10 @@ Pages.sheetDetail = async function (sheetId) {
   const pagesContainer = document.getElementById('kn-pages-container');
 
   function getPageDimensions() {
+    const baseHeight = state.pdfBaseRatio ? Math.round(BASE_W * state.pdfBaseRatio) : BASE_H;
     const swapped = state.rotation === 90 || state.rotation === 270;
-    const w = (swapped ? BASE_H : BASE_W) * state.zoom;
-    const h = (swapped ? BASE_W : BASE_H) * state.zoom;
+    const w = (swapped ? baseHeight : BASE_W) * state.zoom;
+    const h = (swapped ? BASE_W : baseHeight) * state.zoom;
     return { width: Math.round(w), height: Math.round(h) };
   }
 
@@ -2504,6 +2689,10 @@ Pages.sheetDetail = async function (sheetId) {
         }
       }
 
+      if (state.pdfDoc && typeof renderSidebarPdfThumbnails === 'function') {
+        renderSidebarPdfThumbnails();
+      }
+
       leftContent.querySelectorAll('.kn-thumbnail-item').forEach((item) => {
         item.onclick = () => {
           goToPage(parseInt(item.dataset.thumbPage, 10));
@@ -3085,9 +3274,7 @@ Pages.sheetDetail = async function (sheetId) {
 
   // Wire Header & Toolbar Buttons
   document.getElementById('kn-btn-back').onclick = () => {
-    restoreGlobalUI();
-    if (window.history.length > 1) window.history.back();
-    else Router.navigate('/sheets');
+    navigateBackToSheets(sheet.subject_id || sheet.subjectId);
   };
 
   const toggleLeftSidebar = () => {
@@ -3246,6 +3433,7 @@ Pages.sheetDetail = async function (sheetId) {
     btn.onclick = () => {
       const act = btn.dataset.docAction;
       document.getElementById('kn-header-more-menu')?.classList.remove('open');
+      const dlUrl = sheet.pdf_url || sheet.download_url || sheet.fileUrl || sheet.file_url || sheet.url;
       if (act === 'fit-page') setZoom(1.0, 'fit-page');
       else if (act === 'fit-width') setZoom(1.0, 'fit-width');
       else if (act === 'actual-size') setZoom(1.0, 'custom');
@@ -3256,7 +3444,7 @@ Pages.sheetDetail = async function (sheetId) {
         state.rotation = (state.rotation + 90) % 360;
         setZoom(state.zoom, state.zoomMode);
       } else if (act === 'print' || act === 'export') window.print();
-      else if (act === 'download' && sheet.fileUrl) window.open(sheet.fileUrl, '_blank');
+      else if (act === 'download' && dlUrl && dlUrl !== '#') window.open(dlUrl, '_blank');
       else if (act === 'focus') toggleReadingMode(true);
       else if (act === 'dark-mode') {
         const nextTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -3347,39 +3535,239 @@ Pages.sheetDetail = async function (sheetId) {
   };
   window.addEventListener('keydown', window._knKeyHandler);
 
-  // Initial Build & Real PDF.js Loader (when sheet.fileUrl is available)
+  // ══════════════════════════════════════════════════════════════════════════
+  // REAL PDF.JS DOCUMENT LOADER, RETINA RENDERER & THUMBNAIL PIPELINE
+  // ══════════════════════════════════════════════════════════════════════════
+  async function renderSidebarPdfThumbnails() {
+    if (!state.pdfDoc) return;
+    for (let p = 1; p <= state.totalPages; p++) {
+      try {
+        const tc = document.getElementById(`kn-thumb-canvas-${p}`);
+        if (!tc) continue;
+        const page = await state.pdfDoc.getPage(p);
+        const unscaledVp = page.getViewport({ scale: 1.0, rotation: state.rotation });
+        const thumbScale = 150 / (unscaledVp.width || BASE_W);
+        const thumbVp = page.getViewport({ scale: thumbScale, rotation: state.rotation });
+        tc.width = Math.max(1, Math.round(thumbVp.width));
+        tc.height = Math.max(1, Math.round(thumbVp.height));
+        const tCtx = tc.getContext('2d');
+        tCtx.fillStyle = '#FFFFFF';
+        tCtx.fillRect(0, 0, tc.width, tc.height);
+        await page.render({ canvasContext: tCtx, viewport: thumbVp }).promise;
+      } catch (e) {}
+    }
+  }
+
+  async function renderVisiblePdfPages() {
+    if (!state.pdfDoc) return;
+    const loaderEl = document.getElementById('kn-doc-loader');
+    const dpr = Math.min(window.devicePixelRatio || 1.5, 2.0);
+
+    for (let p = 1; p <= state.totalPages; p++) {
+      try {
+        const page = await state.pdfDoc.getPage(p);
+        const unscaledVp = page.getViewport({ scale: 1.0, rotation: state.rotation });
+        const cssWidth = Math.round(BASE_W * state.zoom);
+        const cssScale = cssWidth / (unscaledVp.width || BASE_W);
+        const cssViewport = page.getViewport({ scale: cssScale, rotation: state.rotation });
+        const cssW = Math.max(1, Math.round(cssViewport.width));
+        const cssH = Math.max(1, Math.round(cssViewport.height));
+
+        const card = pagesContainer.querySelector(`.kn-page-card[data-page="${p}"]`);
+        if (card) {
+          card.style.width = `${cssW}px`;
+          card.style.height = `${cssH}px`;
+        }
+
+        const hlCanvas = document.getElementById(`kn-hl-canvas-${p}`);
+        const annotCanvas = document.getElementById(`kn-annot-canvas-${p}`);
+        if (hlCanvas && (hlCanvas.width !== cssW || hlCanvas.height !== cssH)) {
+          hlCanvas.width = cssW;
+          hlCanvas.height = cssH;
+        }
+        if (annotCanvas && (annotCanvas.width !== cssW || annotCanvas.height !== cssH)) {
+          annotCanvas.width = cssW;
+          annotCanvas.height = cssH;
+        }
+
+        const canvas = document.getElementById(`kn-pdf-canvas-${p}`);
+        if (canvas) {
+          const renderViewport = page.getViewport({ scale: cssScale * dpr, rotation: state.rotation });
+          canvas.width = Math.max(1, Math.round(renderViewport.width));
+          canvas.height = Math.max(1, Math.round(renderViewport.height));
+          canvas.style.width = `${cssW}px`;
+          canvas.style.height = `${cssH}px`;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
+        }
+
+        renderPageAnnotations(p);
+
+        if (p === 1 && loaderEl) {
+          loaderEl.style.display = 'none';
+        }
+
+        // Extract real PDF text items for Search & Text-Aware Highlighting
+        if (!state.pageTexts[p]?.fromPdf && typeof page.getTextContent === 'function') {
+          try {
+            const textContent = await page.getTextContent();
+            const baseScale = BASE_W / (unscaledVp.width || BASE_W);
+            const baseVp = page.getViewport({ scale: baseScale, rotation: state.rotation });
+            const items = [];
+            for (const item of textContent.items || []) {
+              const str = (item.str || '').trim();
+              if (!str) continue;
+              const tx =
+                window.pdfjsLib?.Util && typeof window.pdfjsLib.Util.transform === 'function'
+                  ? window.pdfjsLib.Util.transform(baseVp.transform, item.transform)
+                  : item.transform || [12, 0, 0, 12, 40, 100];
+              const fontH = Math.max(10, Math.hypot(tx[2] || 0, tx[3] || 0) || item.height || 12);
+              const x = Math.max(0, tx[4] || 0);
+              const y = Math.max(0, (tx[5] || 0) - fontH);
+              const w = Math.max(16, (item.width || str.length * 6) * baseScale);
+              items.push({ str, x, y, w, h: fontH + 3 });
+            }
+            if (items.length > 0) {
+              state.pageTexts[p] = {
+                fromPdf: true,
+                fullText: items.map((i) => i.str).join(' '),
+                items,
+              };
+              populateSelectableTextLayer(p);
+            }
+          } catch (txtErr) {}
+        }
+      } catch (pageErr) {
+        console.warn(`[KuroNotes] Error rendering PDF page ${p}:`, pageErr);
+      }
+    }
+    if (loaderEl) loaderEl.style.display = 'none';
+  }
+
+  // Initial Build of Kuro Notes Shell
   buildPageCards();
   renderLeftSidebarContent();
   renderRightSidebarContent();
   updateHistoryButtons();
 
-  async function renderVisiblePdfPages() {
-    if (!state.pdfDoc) return;
-    for (let p = 1; p <= state.totalPages; p++) {
+  // Resolve PDF URL from all possible sheet properties & IndexedDB pdfStore
+  async function resolvePdfUrl() {
+    let url = sheet.pdf_url || sheet.download_url || sheet.fileUrl || sheet.file_url || sheet.url || null;
+    if (url === '#') url = null;
+    if (!url && window.DATA?.pdfStore && typeof window.DATA.pdfStore.getPdfUrl === 'function') {
       try {
-        const page = await state.pdfDoc.getPage(p);
-        const vp = page.getViewport({ scale: state.zoom * 1.2, rotation: state.rotation });
-        const canvas = document.getElementById(`kn-pdf-canvas-${p}`);
-        if (canvas) {
-          canvas.width = vp.width;
-          canvas.height = vp.height;
-          await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-        }
+        url = await window.DATA.pdfStore.getPdfUrl(sheet.id);
       } catch (e) {}
     }
+    return url;
   }
 
-  if (sheet.fileUrl && window.pdfjsLib) {
+  async function loadRealPdfDocument() {
+    const loaderEl = document.getElementById('kn-doc-loader');
+    const errorEl = document.getElementById('kn-doc-error');
+    const errorMsgEl = document.getElementById('kn-doc-error-msg');
+    const directLinkEl = document.getElementById('kn-pdf-direct-link');
+
+    if (errorEl) errorEl.style.display = 'none';
+
+    let pdfUrl = await resolvePdfUrl();
+    if (!pdfUrl || !window.pdfjsLib) {
+      return;
+    }
+
+    if (loaderEl) loaderEl.style.display = 'flex';
+
     try {
-      const loadingTask = window.pdfjsLib.getDocument(sheet.fileUrl);
-      state.pdfDoc = await loadingTask.promise;
-      state.totalPages = state.pdfDoc.numPages;
-      document.getElementById('kn-total-pages').textContent = state.totalPages;
+      if (window.pdfjsLib.GlobalWorkerOptions && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+
+      const docParam =
+        typeof pdfUrl === 'string' && !pdfUrl.startsWith('blob:') && !pdfUrl.startsWith('data:')
+          ? {
+              url: pdfUrl,
+              cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+              cMapPacked: true,
+            }
+          : pdfUrl;
+
+      let loadingTask = window.pdfjsLib.getDocument(docParam);
+      try {
+        state.pdfDoc = await loadingTask.promise;
+      } catch (firstErr) {
+        // Fallback: check if an offline copy exists in IndexedDB pdfStore
+        let fallbackBlobUrl = null;
+        if (window.DATA?.pdfStore && typeof window.DATA.pdfStore.getPdfUrl === 'function') {
+          try {
+            fallbackBlobUrl = await window.DATA.pdfStore.getPdfUrl(sheet.id);
+          } catch (e) {}
+        }
+        if (fallbackBlobUrl && fallbackBlobUrl !== pdfUrl) {
+          pdfUrl = fallbackBlobUrl;
+          loadingTask = window.pdfjsLib.getDocument(fallbackBlobUrl);
+          state.pdfDoc = await loadingTask.promise;
+        } else {
+          throw firstErr;
+        }
+      }
+
+      state.totalPages = Math.max(1, state.pdfDoc.numPages || state.totalPages);
+      if (state.currentPage > state.totalPages) state.currentPage = 1;
+
+      // Measure Page 1 aspect ratio so slide decks (16:9 / 4:3) and A4 sheets render in true aspect ratio
+      try {
+        const firstPage = await state.pdfDoc.getPage(1);
+        const vp1 = firstPage.getViewport({ scale: 1.0, rotation: 0 });
+        if (vp1 && vp1.width > 0 && vp1.height > 0) {
+          state.pdfBaseRatio = vp1.height / vp1.width;
+        }
+      } catch (e) {}
+
+      const totalPagesEl = document.getElementById('kn-total-pages');
+      if (totalPagesEl) totalPagesEl.textContent = state.totalPages;
+      const pageInputEl = document.getElementById('kn-page-input');
+      if (pageInputEl) pageInputEl.max = state.totalPages;
+      const mobIndEl = document.getElementById('kn-mob-page-indicator');
+      if (mobIndEl) mobIndEl.textContent = `${state.currentPage} / ${state.totalPages}`;
+
       buildPageCards();
       renderLeftSidebarContent();
       await renderVisiblePdfPages();
-    } catch (e) {}
+      await renderSidebarPdfThumbnails();
+    } catch (err) {
+      console.error('[KuroNotes] Failed to load PDF document:', pdfUrl, err);
+      if (loaderEl) loaderEl.style.display = 'none';
+      if (errorEl) {
+        errorEl.style.display = 'flex';
+        if (errorMsgEl) {
+          errorMsgEl.textContent = `${t('تعذر جلب أو قراءة ملف الـ PDF:', 'Failed to load PDF file:')} ${err?.message || String(err)}`;
+        }
+        if (directLinkEl && pdfUrl) {
+          directLinkEl.href = pdfUrl;
+          directLinkEl.style.display = 'inline-flex';
+        }
+      }
+    }
   }
+
+  document.getElementById('kn-pdf-retry-btn')?.addEventListener('click', () => {
+    loadRealPdfDocument();
+  });
+  document.getElementById('kn-pdf-error-back-btn')?.addEventListener('click', () => {
+    navigateBackToSheets(sheet.subject_id || sheet.subjectId);
+  });
+
+  await loadRealPdfDocument();
+}
+
+window.Pages.sheetDetail = renderKuroNotesSheet;
+window.SheetDetailPage = {
+  render(container, sheetIdOrQuery, maybeQuery) {
+    return renderKuroNotesSheet(container, sheetIdOrQuery, maybeQuery);
+  },
 };
 
 function hexToRgba(hex, alpha) {
