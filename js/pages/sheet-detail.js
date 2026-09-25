@@ -140,30 +140,35 @@ Pages.sheetDetail = async function (sheetId) {
     highlighter: {
       mode: 'freehand', // 'freehand' | 'straight'
       color: '#FACC15',
-      size: 22,
+      size: 20,
       opacity: 0.42,
       presets: safeJSON(KEY_HL_PRESETS, [
-        { id: 'hl-p1', name: 'Key Concept', color: '#FACC15', size: 22, opacity: 0.42, mode: 'freehand' },
-        { id: 'hl-p2', name: 'Definition', color: '#4ADE80', size: 20, opacity: 0.38, mode: 'straight' },
-        { id: 'hl-p3', name: 'Exam Alert', color: '#F472B6', size: 24, opacity: 0.45, mode: 'freehand' },
+        { id: 'hl-p1', name: 'مهم Important', color: '#FACC15', size: 20, opacity: 0.42, mode: 'straight' },
+        { id: 'hl-p2', name: 'تعريف Definition', color: '#F472B6', size: 20, opacity: 0.40, mode: 'straight' },
+        { id: 'hl-p3', name: 'مثال Example', color: '#38BDF8', size: 20, opacity: 0.38, mode: 'freehand' },
+        { id: 'hl-p4', name: 'مراجعة Review', color: '#4ADE80', size: 22, opacity: 0.40, mode: 'freehand' },
       ]),
       activePresetId: 'hl-p1',
     },
     pen: {
       mode: 'freehand', // 'freehand' | 'straight'
       color: '#7E1D2A',
-      size: 3,
+      size: 4,
       opacity: 1.0,
       presets: safeJSON(KEY_PEN_PRESETS, [
-        { id: 'pen-p1', name: 'Burgundy Ink', color: '#7E1D2A', size: 3, opacity: 1.0, mode: 'freehand' },
-        { id: 'pen-p2', name: 'Fine Black', color: '#1F1A17', size: 2, opacity: 1.0, mode: 'freehand' },
-        { id: 'pen-p3', name: 'Blue Diagram', color: '#1D4ED8', size: 4, opacity: 0.95, mode: 'straight' },
+        { id: 'pen-p1', name: 'مهم Important', color: '#7E1D2A', size: 4, opacity: 1.0, mode: 'freehand' },
+        { id: 'pen-p2', name: 'ملاحظات Notes', color: '#1D4ED8', size: 3, opacity: 1.0, mode: 'freehand' },
+        { id: 'pen-p3', name: 'شرح Explanation', color: '#15803D', size: 3, opacity: 0.95, mode: 'freehand' },
+        { id: 'pen-p4', name: 'رسم Diagram', color: '#EA580C', size: 4, opacity: 0.95, mode: 'straight' },
       ]),
       activePresetId: 'pen-p1',
     },
     eraser: {
       mode: 'stroke', // 'stroke' | 'object' | 'partial'
       size: 24,
+      showCursor: true,
+      smoothEdges: true,
+      fixedSize: false,
     },
     shapes: {
       shapeType: 'rect', // 'rect' | 'ellipse' | 'line' | 'arrow'
@@ -492,11 +497,45 @@ Pages.sheetDetail = async function (sheetId) {
       <div class="kn-workspace-body">
         <!-- LEFT NAVIGATION SIDEBAR -->
         <aside class="kn-sidebar-left ${state.leftSidebarOpen ? '' : 'kn-sidebar-collapsed'}" id="kn-sidebar-left">
-          <div class="kn-sidebar-tab-bar" id="kn-left-tabs">
-            <button class="kn-tab-pill ${state.leftTab === 'pages' ? 'active' : ''}" data-left-tab="pages">Pages</button>
-            <button class="kn-tab-pill ${state.leftTab === 'bookmarks' ? 'active' : ''}" data-left-tab="bookmarks">Bookmarks</button>
-            <button class="kn-tab-pill ${state.leftTab === 'annotations' ? 'active' : ''}" data-left-tab="annotations">Annotations</button>
-          </div>
+          <nav class="kn-left-nav-list" id="kn-left-tabs" aria-label="Sheet Navigation">
+            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'pages' ? 'active' : ''}" data-left-tab="pages">
+              <span class="kn-left-nav-item-main">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                <span>Pages</span>
+              </span>
+              <span class="kn-left-nav-chevron">›</span>
+            </button>
+            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'bookmarks' ? 'active' : ''}" data-left-tab="bookmarks">
+              <span class="kn-left-nav-item-main">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                <span>Bookmarks</span>
+              </span>
+            </button>
+            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'outline' ? 'active' : ''}" data-left-tab="outline">
+              <span class="kn-left-nav-item-main">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <span>Outline</span>
+              </span>
+            </button>
+            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'notes' ? 'active' : ''}" data-left-tab="notes">
+              <span class="kn-left-nav-item-main">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span id="kn-left-notes-label">Notes (${state.annotations.filter((a) => a.type === 'note').length})</span>
+              </span>
+            </button>
+            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'ai' ? 'active' : ''}" data-left-tab="ai">
+              <span class="kn-left-nav-item-main">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>AI Help</span>
+              </span>
+            </button>
+            <button class="kn-left-nav-item kn-tab-pill ${state.leftTab === 'annotations' ? 'active' : ''}" data-left-tab="annotations">
+              <span class="kn-left-nav-item-main">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+                <span>Annotations</span>
+              </span>
+            </button>
+          </nav>
           <div class="kn-sidebar-content" id="kn-left-content"></div>
         </aside>
 
@@ -509,8 +548,8 @@ Pages.sheetDetail = async function (sheetId) {
         <aside class="kn-sidebar-right ${state.rightSidebarOpen ? '' : 'kn-sidebar-collapsed'}" id="kn-sidebar-right">
           <div class="kn-sidebar-tab-bar" id="kn-right-tabs">
             <button class="kn-tab-pill ${state.rightTab === 'outline' ? 'active' : ''}" data-right-tab="outline">Outline</button>
-            <button class="kn-tab-pill ${state.rightTab === 'notes' ? 'active' : ''}" data-right-tab="notes">Notes</button>
-            <button class="kn-tab-pill ${state.rightTab === 'ai' ? 'active' : ''}" data-right-tab="ai">AI</button>
+            <button class="kn-tab-pill ${state.rightTab === 'notes' ? 'active' : ''}" data-right-tab="notes">Notes (${state.annotations.filter((a) => a.type === 'note').length})</button>
+            <button class="kn-tab-pill ${state.rightTab === 'ai' ? 'active' : ''}" data-right-tab="ai">AI Help</button>
           </div>
           <div id="kn-right-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden;"></div>
         </aside>
@@ -1110,6 +1149,7 @@ Pages.sheetDetail = async function (sheetId) {
     ctxBar.style.top = `${Math.max(8, minY * s - 42)}px`;
 
     const singleImg = selectedOnPage.length === 1 && selectedOnPage[0].type === 'image' ? selectedOnPage[0] : null;
+    const hasGrouped = selectedOnPage.some((a) => Boolean(a.groupId));
 
     if (singleImg && state.croppingId === singleImg.id) {
       ctxBar.innerHTML = `
@@ -1123,6 +1163,7 @@ Pages.sheetDetail = async function (sheetId) {
         <button class="kn-ctx-btn" data-ctx="cut">Cut</button>
         <button class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
         ${selectedOnPage.length > 1 ? `<button class="kn-ctx-btn" data-ctx="group">Group</button>` : ''}
+        ${hasGrouped ? `<button class="kn-ctx-btn" data-ctx="ungroup">Ungroup</button>` : ''}
         <button class="kn-ctx-btn" data-ctx="front">↑ Front</button>
         <button class="kn-ctx-btn" data-ctx="back">↓ Back</button>
         <button class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
@@ -1209,6 +1250,17 @@ Pages.sheetDetail = async function (sheetId) {
       });
       state.annotations.push(...clones);
       state.selectedIds = clones.map((c) => c.id);
+    } else if (action === 'group') {
+      pushHistory();
+      const gid = `kn_grp_${Date.now()}`;
+      selectedItems.forEach((a) => {
+        a.groupId = gid;
+      });
+    } else if (action === 'ungroup') {
+      pushHistory();
+      selectedItems.forEach((a) => {
+        delete a.groupId;
+      });
     } else if (action === 'delete') {
       pushHistory();
       state.annotations = state.annotations.filter((a) => !state.selectedIds.includes(a.id));
@@ -1716,26 +1768,29 @@ Pages.sheetDetail = async function (sheetId) {
       const colors = ['#FACC15', '#4ADE80', '#38BDF8', '#F472B6', '#FB923C', '#C084FC'];
       toolPopover.innerHTML = `
         <div class="kn-popover-header">
-          <span>Highlighter — Under-Text Multiply</span>
+          <span>Highlighter — Under-Text Multiply (أداة الهايلايتر)</span>
           <button class="kn-icon-btn" id="kn-close-popover" style="width:22px;height:22px;">✕</button>
         </div>
         <div class="kn-live-preview-box">
-          <span class="kn-hl-preview-sample" style="background:${hexToRgba(hl.color, hl.opacity)};">Oral Pathology Study Highlight</span>
+          <span class="kn-hl-preview-sample" style="background:${hexToRgba(hl.color, hl.opacity)};">A localized post-eruptive process of chemical origin</span>
         </div>
         <div class="kn-segmented-control">
-          <button class="kn-seg-btn ${hl.mode === 'freehand' ? 'active' : ''}" data-hl-mode="freehand">Freehand</button>
-          <button class="kn-seg-btn ${hl.mode === 'straight' ? 'active' : ''}" data-hl-mode="straight">Straight Line</button>
+          <button class="kn-seg-btn ${hl.mode === 'freehand' ? 'active' : ''}" data-hl-mode="freehand">تحديد حر (Freehand)</button>
+          <button class="kn-seg-btn ${hl.mode === 'straight' ? 'active' : ''}" data-hl-mode="straight">خط مستقيم (Straight)</button>
         </div>
         <div class="kn-popover-row">
           <span class="kn-popover-label">Color</span>
           <div class="kn-swatch-row">
-            ${colors.map((c) => `<button class="kn-color-swatch ${hl.color === c ? 'active' : ''}" data-hl-color="${c}" style="background:${c};"></button>`).join('')}
+            ${colors.map((c) => `<button class="kn-color-swatch ${hl.color.toUpperCase() === c ? 'active' : ''}" data-hl-color="${c}" style="background:${c};"></button>`).join('')}
+            <label class="kn-color-swatch kn-custom-color-label" title="Custom Color (لون مخصص)" style="background:conic-gradient(#f43f5e,#eab308,#22c55e,#3b82f6,#a855f7,#f43f5e);position:relative;overflow:hidden;cursor:pointer;">
+              <input type="color" id="kn-hl-custom-color" value="${hl.color}" style="opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;" />
+            </label>
           </div>
         </div>
         <div class="kn-slider-row">
           <span class="kn-popover-label">Size</span>
           <input type="range" id="kn-hl-size" min="10" max="44" value="${hl.size}" />
-          <span class="kn-slider-val">${hl.size}px</span>
+          <span class="kn-slider-val">${hl.size} px</span>
         </div>
         <div class="kn-slider-row">
           <span class="kn-popover-label">Opacity</span>
@@ -1743,8 +1798,8 @@ Pages.sheetDetail = async function (sheetId) {
           <span class="kn-slider-val">${Math.round(hl.opacity * 100)}%</span>
         </div>
         <div class="kn-popover-row" style="border-top:1px solid var(--kn-border-subtle);padding-top:6px;">
-          <span class="kn-popover-label">Presets</span>
-          <button class="kn-ctx-btn" id="kn-hl-add-preset" style="color:var(--kn-primary);">+ Save Preset</button>
+          <span class="kn-popover-label">Presets (الاختصارات)</span>
+          <button class="kn-btn kn-btn-primary" id="kn-hl-add-preset" style="height:26px;padding:0 10px;font-size:0.72rem;">+ حفظ كاختصار جديد</button>
         </div>
         <div class="kn-presets-strip">
           ${hl.presets
@@ -1753,7 +1808,9 @@ Pages.sheetDetail = async function (sheetId) {
             <div class="kn-preset-chip ${hl.activePresetId === p.id ? 'active' : ''}" data-hl-preset="${p.id}">
               <span class="kn-tool-color-dot" style="background:${p.color};"></span>
               <span>${escapeHtml(p.name)}</span>
-              <span class="kn-preset-del" data-hl-del-preset="${p.id}" title="Delete Preset">×</span>
+              <span class="kn-preset-action" data-hl-rename-preset="${p.id}" title="Rename Preset (تعديل)">✎</span>
+              <span class="kn-preset-action" data-hl-move-preset="${p.id}" title="Reorder Preset (إعادة الترتيب)">⇅</span>
+              <span class="kn-preset-del" data-hl-del-preset="${p.id}" title="Delete Preset (حذف)">×</span>
             </div>`
             )
             .join('')}
@@ -1764,23 +1821,32 @@ Pages.sheetDetail = async function (sheetId) {
       const colors = ['#1F1A17', '#7E1D2A', '#DC2626', '#1D4ED8', '#15803D', '#7E22CE', '#EA580C'];
       toolPopover.innerHTML = `
         <div class="kn-popover-header">
-          <span>Pen Tool — Smooth Academic Ink</span>
+          <span>Pen Tool — Smooth Ink (أداة القلم)</span>
           <button class="kn-icon-btn" id="kn-close-popover" style="width:22px;height:22px;">✕</button>
         </div>
+        <div class="kn-live-preview-box" style="flex-direction:column;gap:4px;padding:8px 12px;">
+          <svg width="100%" height="30" viewBox="0 0 240 30" fill="none">
+            <path d="M 12 18 Q 65 4, 120 16 T 228 14" stroke="${pen.color}" stroke-width="${Math.max(1.5, pen.size)}" stroke-linecap="round" stroke-opacity="${pen.opacity}" fill="none"/>
+          </svg>
+          <span style="font-size:0.68rem;color:var(--kn-text-muted);font-weight:700;">معاينة مباشرة • ${pen.size}px • ${Math.round(pen.opacity * 100)}%</span>
+        </div>
         <div class="kn-segmented-control">
-          <button class="kn-seg-btn ${pen.mode === 'freehand' ? 'active' : ''}" data-pen-mode="freehand">Freehand</button>
-          <button class="kn-seg-btn ${pen.mode === 'straight' ? 'active' : ''}" data-pen-mode="straight">Straight Line</button>
+          <button class="kn-seg-btn ${pen.mode === 'freehand' ? 'active' : ''}" data-pen-mode="freehand">تحديد حر (Freehand)</button>
+          <button class="kn-seg-btn ${pen.mode === 'straight' ? 'active' : ''}" data-pen-mode="straight">خط مستقيم (Straight)</button>
         </div>
         <div class="kn-popover-row">
           <span class="kn-popover-label">Ink</span>
           <div class="kn-swatch-row">
-            ${colors.map((c) => `<button class="kn-color-swatch ${pen.color === c ? 'active' : ''}" data-pen-color="${c}" style="background:${c};"></button>`).join('')}
+            ${colors.map((c) => `<button class="kn-color-swatch ${pen.color.toUpperCase() === c ? 'active' : ''}" data-pen-color="${c}" style="background:${c};"></button>`).join('')}
+            <label class="kn-color-swatch kn-custom-color-label" title="Custom Color (لون مخصص)" style="background:conic-gradient(#f43f5e,#eab308,#22c55e,#3b82f6,#a855f7,#f43f5e);position:relative;overflow:hidden;cursor:pointer;">
+              <input type="color" id="kn-pen-custom-color" value="${pen.color}" style="opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;" />
+            </label>
           </div>
         </div>
         <div class="kn-slider-row">
           <span class="kn-popover-label">Width</span>
           <input type="range" id="kn-pen-size" min="1" max="18" value="${pen.size}" />
-          <span class="kn-slider-val">${pen.size}px</span>
+          <span class="kn-slider-val">${pen.size} px</span>
         </div>
         <div class="kn-slider-row">
           <span class="kn-popover-label">Opacity</span>
@@ -1788,8 +1854,8 @@ Pages.sheetDetail = async function (sheetId) {
           <span class="kn-slider-val">${Math.round(pen.opacity * 100)}%</span>
         </div>
         <div class="kn-popover-row" style="border-top:1px solid var(--kn-border-subtle);padding-top:6px;">
-          <span class="kn-popover-label">Presets</span>
-          <button class="kn-ctx-btn" id="kn-pen-add-preset" style="color:var(--kn-primary);">+ Save Preset</button>
+          <span class="kn-popover-label">Presets (الاختصارات)</span>
+          <button class="kn-btn kn-btn-primary" id="kn-pen-add-preset" style="height:26px;padding:0 10px;font-size:0.72rem;">+ إضافة اختصار</button>
         </div>
         <div class="kn-presets-strip">
           ${pen.presets
@@ -1798,7 +1864,9 @@ Pages.sheetDetail = async function (sheetId) {
             <div class="kn-preset-chip ${pen.activePresetId === p.id ? 'active' : ''}" data-pen-preset="${p.id}">
               <span class="kn-tool-color-dot" style="background:${p.color};"></span>
               <span>${escapeHtml(p.name)} (${p.size}px)</span>
-              <span class="kn-preset-del" data-pen-del-preset="${p.id}">×</span>
+              <span class="kn-preset-action" data-pen-rename-preset="${p.id}" title="Rename Preset">✎</span>
+              <span class="kn-preset-action" data-pen-move-preset="${p.id}" title="Reorder Preset">⇅</span>
+              <span class="kn-preset-del" data-pen-del-preset="${p.id}" title="Delete Preset">×</span>
             </div>`
             )
             .join('')}
@@ -1808,7 +1876,7 @@ Pages.sheetDetail = async function (sheetId) {
       const er = state.eraser;
       toolPopover.innerHTML = `
         <div class="kn-popover-header">
-          <span>Eraser — Annotations Only (PDF Safe)</span>
+          <span>Eraser — Annotations Only (أداة الممحاة)</span>
           <button class="kn-icon-btn" id="kn-close-popover" style="width:22px;height:22px;">✕</button>
         </div>
         <div class="kn-segmented-control">
@@ -1835,12 +1903,22 @@ Pages.sheetDetail = async function (sheetId) {
             <span>Large (كبير)</span>
           </button>
         </div>
+        <div style="border-top:1px solid var(--kn-border-subtle);padding-top:6px;display:flex;flex-direction:column;gap:5px;font-size:0.73rem;color:var(--kn-text-muted);">
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+            <span>إظهار مؤشر الممحاة (Show Eraser Cursor)</span>
+            <input type="checkbox" id="kn-er-show-cursor" ${er.showCursor !== false ? 'checked' : ''} />
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+            <span>تنعيم الحواف (Smooth Edges)</span>
+            <input type="checkbox" id="kn-er-smooth" ${er.smoothEdges !== false ? 'checked' : ''} />
+          </label>
+        </div>
       `;
     } else if (tool === 'select') {
       const filters = ['all', 'handwriting', 'pen', 'highlighter', 'shape', 'image', 'text', 'note'];
       toolPopover.innerHTML = `
         <div class="kn-popover-header">
-          <span>Selection & Lasso Tool</span>
+          <span>Selection & Lasso Tool (أداة التحديد)</span>
           <button class="kn-icon-btn" id="kn-close-popover" style="width:22px;height:22px;">✕</button>
         </div>
         <div class="kn-segmented-control">
@@ -2035,6 +2113,15 @@ Pages.sheetDetail = async function (sheetId) {
         renderToolPopover();
       };
     });
+    const hlCustomColor = document.getElementById('kn-hl-custom-color');
+    if (hlCustomColor) {
+      hlCustomColor.oninput = () => {
+        state.highlighter.color = hlCustomColor.value;
+        const dot = document.getElementById('kn-hl-dot');
+        if (dot) dot.style.background = state.highlighter.color;
+        renderToolPopover();
+      };
+    }
     const hlSize = document.getElementById('kn-hl-size');
     if (hlSize) {
       hlSize.oninput = () => {
@@ -2075,6 +2162,31 @@ Pages.sheetDetail = async function (sheetId) {
           renderToolPopover();
           return;
         }
+        const renameId = e.target.dataset?.hlRenamePreset;
+        if (renameId) {
+          const target = state.highlighter.presets.find((p) => p.id === renameId);
+          if (target) {
+            const nextName = window.prompt('Rename Highlighter Preset:', target.name);
+            if (nextName && nextName.trim()) {
+              target.name = nextName.trim();
+              localStorage.setItem(KEY_HL_PRESETS, JSON.stringify(state.highlighter.presets));
+              renderToolPopover();
+            }
+          }
+          return;
+        }
+        const moveId = e.target.dataset?.hlMovePreset;
+        if (moveId) {
+          const idx = state.highlighter.presets.findIndex((p) => p.id === moveId);
+          if (idx !== -1 && state.highlighter.presets.length > 1) {
+            const nextIdx = (idx + 1) % state.highlighter.presets.length;
+            const [item] = state.highlighter.presets.splice(idx, 1);
+            state.highlighter.presets.splice(nextIdx, 0, item);
+            localStorage.setItem(KEY_HL_PRESETS, JSON.stringify(state.highlighter.presets));
+            renderToolPopover();
+          }
+          return;
+        }
         const preset = state.highlighter.presets.find((p) => p.id === chip.dataset.hlPreset);
         if (preset) {
           state.highlighter.color = preset.color;
@@ -2104,6 +2216,15 @@ Pages.sheetDetail = async function (sheetId) {
         renderToolPopover();
       };
     });
+    const penCustomColor = document.getElementById('kn-pen-custom-color');
+    if (penCustomColor) {
+      penCustomColor.oninput = () => {
+        state.pen.color = penCustomColor.value;
+        const dot = document.getElementById('kn-pen-dot');
+        if (dot) dot.style.background = state.pen.color;
+        renderToolPopover();
+      };
+    }
     const penSize = document.getElementById('kn-pen-size');
     if (penSize) {
       penSize.oninput = () => {
@@ -2144,6 +2265,31 @@ Pages.sheetDetail = async function (sheetId) {
           renderToolPopover();
           return;
         }
+        const renameId = e.target.dataset?.penRenamePreset;
+        if (renameId) {
+          const target = state.pen.presets.find((p) => p.id === renameId);
+          if (target) {
+            const nextName = window.prompt('Rename Pen Preset:', target.name);
+            if (nextName && nextName.trim()) {
+              target.name = nextName.trim();
+              localStorage.setItem(KEY_PEN_PRESETS, JSON.stringify(state.pen.presets));
+              renderToolPopover();
+            }
+          }
+          return;
+        }
+        const moveId = e.target.dataset?.penMovePreset;
+        if (moveId) {
+          const idx = state.pen.presets.findIndex((p) => p.id === moveId);
+          if (idx !== -1 && state.pen.presets.length > 1) {
+            const nextIdx = (idx + 1) % state.pen.presets.length;
+            const [item] = state.pen.presets.splice(idx, 1);
+            state.pen.presets.splice(nextIdx, 0, item);
+            localStorage.setItem(KEY_PEN_PRESETS, JSON.stringify(state.pen.presets));
+            renderToolPopover();
+          }
+          return;
+        }
         const preset = state.pen.presets.find((p) => p.id === chip.dataset.penPreset);
         if (preset) {
           state.pen.color = preset.color;
@@ -2178,6 +2324,18 @@ Pages.sheetDetail = async function (sheetId) {
         renderToolPopover();
       };
     });
+    const erShowCur = document.getElementById('kn-er-show-cursor');
+    if (erShowCur) {
+      erShowCur.onchange = () => {
+        state.eraser.showCursor = erShowCur.checked;
+      };
+    }
+    const erSmooth = document.getElementById('kn-er-smooth');
+    if (erSmooth) {
+      erSmooth.onchange = () => {
+        state.eraser.smoothEdges = erSmooth.checked;
+      };
+    }
 
     // Selection bindings
     toolPopover.querySelectorAll('[data-sel-mode]').forEach((b) => {
@@ -2292,28 +2450,40 @@ Pages.sheetDetail = async function (sheetId) {
     const leftContent = document.getElementById('kn-left-content');
     if (!leftContent) return;
 
-    // Update Notes count badge in Right Panel tab
+    // Update Notes count badge in both Left & Right Panel tabs
     const totalNotesCount = state.annotations.filter((a) => a.type === 'note').length;
     const notesTabBtn = document.querySelector('[data-right-tab="notes"]');
     if (notesTabBtn) {
-      notesTabBtn.textContent = totalNotesCount > 0 ? `Notes (${totalNotesCount})` : 'Notes';
+      notesTabBtn.textContent = `Notes (${totalNotesCount})`;
+    }
+    const leftNotesLbl = document.getElementById('kn-left-notes-label');
+    if (leftNotesLbl) {
+      leftNotesLbl.textContent = `Notes (${totalNotesCount})`;
     }
 
-    if (state.leftTab === 'pages') {
+    if (state.leftTab === 'outline' || state.leftTab === 'notes' || state.leftTab === 'ai') {
+      state.rightSidebarOpen = true;
+      state.rightTab = state.leftTab;
+      document.getElementById('kn-sidebar-right')?.classList.remove('kn-sidebar-collapsed');
+      document.querySelectorAll('[data-right-tab]').forEach((b) => b.classList.toggle('active', b.dataset.rightTab === state.rightTab));
+      renderRightSidebarContent();
+    }
+
+    if (state.leftTab === 'pages' || state.leftTab === 'outline' || state.leftTab === 'notes' || state.leftTab === 'ai') {
       let html = '';
       for (let p = 1; p <= state.totalPages; p++) {
         const hasAnnot = state.annotations.some((a) => a.page === p);
         const hasBm = state.bookmarks.includes(p);
         html += `
           <div class="kn-thumbnail-item ${p === state.currentPage ? 'active' : ''}" data-thumb-page="${p}">
-            <div class="kn-thumb-badges">
-              ${hasBm ? '<span class="kn-thumb-badge" title="Bookmarked"></span>' : ''}
-              ${hasAnnot ? '<span class="kn-thumb-badge" style="background:#FACC15;" title="Has Annotations"></span>' : ''}
-            </div>
+            <span class="kn-thumb-index">${p}</span>
             <div class="kn-thumb-preview">
+              <div class="kn-thumb-badges">
+                ${hasBm ? '<span class="kn-thumb-badge" title="Bookmarked"></span>' : ''}
+                ${hasAnnot ? '<span class="kn-thumb-badge" style="background:#FACC15;" title="Has Annotations"></span>' : ''}
+              </div>
               <canvas id="kn-thumb-canvas-${p}" width="150" height="200"></canvas>
             </div>
-            <span class="kn-thumb-index">${p}</span>
           </div>
         `;
       }

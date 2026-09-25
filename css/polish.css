@@ -12569,10 +12569,17 @@ a:focus:not(:focus-visible) {
   background: var(--kn-sidebar-tab-active-bg);
   color: var(--kn-primary);
 }
+.kn-preset-action,
 .kn-preset-del {
   opacity: 0.55;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   padding-inline-start: 2px;
+  cursor: pointer;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+.kn-preset-action:hover {
+  opacity: 1;
+  color: var(--kn-primary);
 }
 .kn-preset-del:hover {
   opacity: 1;
@@ -12655,7 +12662,7 @@ a:focus:not(:focus-visible) {
   position: relative;
 }
 
-/* 7. Left Navigation Sidebar (190-230px Desktop) */
+/* 7. Left Navigation Sidebar (195-225px Desktop) */
 .kn-sidebar-left {
   width: 215px;
   min-width: 215px;
@@ -12675,6 +12682,42 @@ a:focus:not(:focus-visible) {
   border-inline-end-color: transparent !important;
   visibility: hidden;
   pointer-events: none;
+}
+
+.kn-left-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border-bottom: 1px solid var(--kn-border);
+  flex-shrink: 0;
+}
+
+.kn-left-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--kn-text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.kn-left-nav-item-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kn-left-nav-chevron {
+  font-size: 0.95rem;
+  opacity: 0.65;
 }
 
 .kn-sidebar-tab-bar {
@@ -12720,64 +12763,67 @@ a:focus:not(:focus-visible) {
   gap: 10px;
 }
 
-/* Thumbnail Item */
+/* Thumbnail Item (Page Number Left + Preview Card Right matching reference image) */
 .kn-thumbnail-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 10px;
   cursor: pointer;
-  padding: 6px;
+  padding: 4px 6px;
   border-radius: 8px;
   transition: all 150ms ease;
-  border: 2px solid transparent;
   position: relative;
 }
 .kn-thumbnail-item:hover {
   background: var(--kn-bg);
 }
-.kn-thumbnail-item.active {
-  border-color: #7E1D2A !important;
-  background: rgba(126, 29, 42, 0.05);
-  box-shadow: 0 0 0 2px rgba(126, 29, 42, 0.12);
-}
 
 .kn-thumb-badges {
   position: absolute;
-  top: 10px;
-  inset-inline-end: 10px;
+  top: 6px;
+  inset-inline-end: 6px;
   display: flex;
   gap: 3px;
   z-index: 2;
 }
 .kn-thumb-badge {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #7E1D2A;
   box-shadow: 0 0 0 1.5px #FFF;
 }
 
 .kn-thumb-index {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: var(--kn-text-muted);
+  min-width: 18px;
+  text-align: center;
 }
 .kn-thumbnail-item.active .kn-thumb-index {
   color: #7E1D2A;
 }
 
 .kn-thumb-preview {
-  width: 100%;
+  width: 112px;
   aspect-ratio: 1 / 1.33;
   background: #FFFFFF;
-  border: 1px solid var(--kn-border);
-  border-radius: 4px;
+  border: 2px solid var(--kn-border);
+  border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.kn-thumbnail-item.active .kn-thumb-preview {
+  border-color: #7E1D2A !important;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.14);
 }
 .kn-thumb-preview canvas {
   width: 100%;
