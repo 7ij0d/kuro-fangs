@@ -73,7 +73,7 @@ check('polish.css contains completed-badge and completed-fill styling',
 );
 
 check('index.html references cache-busted v>=12.6 scripts',
-  indexHtml.includes('home.js?v=12.6') && indexHtml.includes('questions.js?v=12.6') && /polish\.css\?v=12\.[6-9]/.test(indexHtml)
+  /home\.js\?v=12\.[6-9]/.test(indexHtml) && /questions\.js\?v=12\.[6-9]/.test(indexHtml) && /polish\.css\?v=12\.[6-9]/.test(indexHtml)
 );
 
 // ─── 2. RUNTIME SIMULATION ENVIRONMENT SETUP ───

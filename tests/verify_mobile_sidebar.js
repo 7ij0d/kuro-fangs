@@ -137,9 +137,9 @@ const tests = [
   },
   {
     category: 'Markup & Accessibility',
-    name: 'Stylesheets and app.js bumped to v=12.8 cache busters',
+    name: 'Stylesheets and app.js bumped to v=12.8+ cache busters',
     pass: indexHtml.includes('css/layout.css?v=12.8') &&
-          indexHtml.includes('css/polish.css?v=12.8') &&
+          indexHtml.includes('css/polish.css?v=12.9') &&
           indexHtml.includes('js/app.js?v=12.8')
   },
 

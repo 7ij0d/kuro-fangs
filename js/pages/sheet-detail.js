@@ -230,12 +230,35 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   } catch (e) {}
 
   try {
+    const subjId = sheet.subject_id || sheet.subjectId;
+    let sNameAr = sheet.subject_name_ar || (sheet.subject && sheet.subject.name_ar) || '';
+    let sNameEn = sheet.subject_name_en || (sheet.subject && sheet.subject.name_en) || '';
+    let sName = sheet.subject_name || (sheet.subject && sheet.subject.name) || '';
+    if ((!sNameAr || !sNameEn) && subjId && window.DATA && typeof window.DATA.getSubjects === 'function') {
+      try {
+        const subjs = window.DATA.getSubjects();
+        const found = subjs.find(s => String(s.id) === String(subjId) || String(s.code) === String(subjId));
+        if (found) {
+          if (!sNameAr) sNameAr = found.name_ar || found.name;
+          if (!sNameEn) sNameEn = found.name_en || found.name;
+          if (!sName) sName = found.name;
+        }
+      } catch (err) {}
+    }
+
     localStorage.setItem(
       'kf_last_opened_sheet',
       JSON.stringify({
         id: sheet.id,
         title: sheet.title_en || sheet.title || sheet.title_ar || sheet.name,
-        subjectId: sheet.subject_id || sheet.subjectId,
+        title_ar: sheet.title_ar || sheet.title,
+        title_en: sheet.title_en || sheet.title,
+        subjectId: subjId,
+        subject_id: subjId,
+        subject_name: sName,
+        subject_name_ar: sNameAr,
+        subject_name_en: sNameEn,
+        timestamp: Date.now(),
         openedAt: Date.now(),
       })
     );

@@ -474,12 +474,29 @@ const HomePage = {
     const sheetTitle = hasSheet
       ? (isAr ? (sheetData.title_ar || sheetData.title) : (sheetData.title_en || sheetData.title))
       : (isAr ? 'لم تفتح أي شيت بعد' : 'No sheets opened yet');
-    const sheetSub = hasSheet
+
+    let resolvedSheetSubj = '';
+    const sheetSubjId = sheetData && (sheetData.subject_id || sheetData.subjectId);
+    if (sheetSubjId && window.DATA && typeof window.DATA.getSubjects === 'function') {
+      try {
+        const subjs = window.DATA.getSubjects();
+        const found = subjs.find(s => String(s.id) === String(sheetSubjId) || String(s.code) === String(sheetSubjId));
+        if (found) {
+          resolvedSheetSubj = isAr ? (found.name_ar || found.name) : (found.name_en || found.name);
+        }
+      } catch (e) {}
+    }
+    const rawSheetSub = hasSheet
       ? (isAr ? (sheetData.subject_name_ar || sheetData.subject_name) : (sheetData.subject_name_en || sheetData.subject_name))
-      : (isAr ? 'ابدأ دراسة محاضراتك الأكاديمية' : 'Start studying your dental lectures');
-    const sheetMeta = hasSheet
-      ? `${isAr ? 'آخر فتح:' : 'Last opened:'} ${HomePage.formatRelativeTime(sheetData.timestamp, isAr)}`
-      : '—';
+      : '';
+    const sheetSub = (rawSheetSub && rawSheetSub !== 'undefined')
+      ? rawSheetSub
+      : (resolvedSheetSubj || (hasSheet ? (isAr ? 'المواد الأكاديمية — طب الأسنان' : 'Academic Dental Lectures') : (isAr ? 'ابدأ دراسة محاضراتك الأكاديمية' : 'Start studying your dental lectures')));
+
+    const sheetTimestamp = sheetData ? (sheetData.timestamp || sheetData.openedAt) : null;
+    const sheetMeta = (hasSheet && sheetTimestamp)
+      ? `${isAr ? 'آخر فتح:' : 'Last opened:'} ${HomePage.formatRelativeTime(sheetTimestamp, isAr)}`
+      : (hasSheet ? (isAr ? 'آخر فتح: اليوم' : 'Last opened: Today') : '—');
     const sheetUrl = hasSheet ? `#/sheet-detail?id=${sheetData.id}` : '#/sheets';
     const sheetBtnText = hasSheet
       ? (isAr ? 'متابعة الدراسة' : 'Continue Studying')
@@ -491,12 +508,29 @@ const HomePage = {
     const audioTitle = hasAudio
       ? (isAr ? (audioData.title_ar || audioData.title) : (audioData.title_en || audioData.title))
       : (isAr ? 'لا توجد تسجيلات بعد' : 'No recordings played yet');
-    const audioSub = hasAudio
+
+    let resolvedAudioSubj = '';
+    const audioSubjId = audioData && (audioData.subject_id || audioData.subjectId);
+    if (audioSubjId && window.DATA && typeof window.DATA.getSubjects === 'function') {
+      try {
+        const subjs = window.DATA.getSubjects();
+        const found = subjs.find(s => String(s.id) === String(audioSubjId) || String(s.code) === String(audioSubjId));
+        if (found) {
+          resolvedAudioSubj = isAr ? (found.name_ar || found.name) : (found.name_en || found.name);
+        }
+      } catch (e) {}
+    }
+    const rawAudioSub = hasAudio
       ? (isAr ? (audioData.subject_name_ar || audioData.subject_name) : (audioData.subject_name_en || audioData.subject_name))
-      : (isAr ? 'استمع للتسجيلات الصوتية لشيتاتك' : 'Listen to audio lectures synced with sheets');
-    const audioMeta = hasAudio
-      ? `${isAr ? 'آخر استماع:' : 'Last listened:'} ${HomePage.formatRelativeTime(audioData.timestamp, isAr)}`
-      : '—';
+      : '';
+    const audioSub = (rawAudioSub && rawAudioSub !== 'undefined')
+      ? rawAudioSub
+      : (resolvedAudioSubj || (hasAudio ? (isAr ? 'تسجيلات المحاضرات الأكاديمية' : 'Academic Audio Lectures') : (isAr ? 'استمع للتسجيلات الصوتية لشيتاتك' : 'Listen to audio lectures synced with sheets')));
+
+    const audioTimestamp = audioData ? (audioData.timestamp || audioData.listenedAt || audioData.openedAt) : null;
+    const audioMeta = (hasAudio && audioTimestamp)
+      ? `${isAr ? 'آخر استماع:' : 'Last listened:'} ${HomePage.formatRelativeTime(audioTimestamp, isAr)}`
+      : (hasAudio ? (isAr ? 'آخر استماع: مؤخراً' : 'Last listened: Recently') : '—');
     const audioUrl = '#/recordings';
     const audioBtnText = hasAudio
       ? (isAr ? 'متابعة الاستماع' : 'Continue Listening')
@@ -509,9 +543,10 @@ const HomePage = {
     const qTitle = hasQ
       ? (isAr ? (qData.sheet_title_ar || qData.sheet_title) : (qData.sheet_title_en || qData.sheet_title))
       : (isAr ? 'لا توجد جلسة أسئلة نشطة' : 'No active question session');
-    const qSub = hasQ
-      ? (qData.subject_title || (isAr ? 'بنك الأسئلة' : 'Question Bank'))
-      : (isAr ? 'اختبر معلوماتك مع بنك الأسئلة' : 'Practice questions and test your readiness');
+    const rawQSub = hasQ ? qData.subject_title : '';
+    const qSub = (rawQSub && rawQSub !== 'undefined')
+      ? rawQSub
+      : (hasQ ? (isAr ? 'بنك الأسئلة الأكاديمي' : 'Question Bank') : (isAr ? 'اختبر معلوماتك مع بنك الأسئلة' : 'Practice questions and test your readiness'));
     const qAnswered = hasQ ? (qData.answered || (qData.answers ? Object.keys(qData.answers).length : 0)) : 0;
     const qTotal = hasQ ? qData.total : 0;
     const qPercent = hasQ ? (qData.percent || Math.round((qAnswered / qTotal) * 100)) : 0;
