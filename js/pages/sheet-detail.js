@@ -1518,13 +1518,21 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const canvasScale = getCanvasScale(pageNum);
       const { w: logicalW, h: logicalH } = getPageLogicalSize(pageNum);
       let moved = false;
+      let historyRecorded = false;
 
       const onMove = (me) => {
         if (state.interactionMode !== 'edit') return;
         const dx = (me.clientX - startX) / pointerScale;
         const dy = (me.clientY - startY) / pointerScale;
-        if (Math.abs(dx) > 1.5 || Math.abs(dy) > 1.5) moved = true;
+        if (!moved && Math.hypot(dx, dy) > 1.5) {
+          moved = true;
+        }
         if (!moved) return;
+
+        if (!historyRecorded) {
+          pushHistory();
+          historyRecorded = true;
+        }
 
         selectedOnPage.forEach((item, idx) => {
           const snap = snapshots[idx];
@@ -1532,6 +1540,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             item.points = snap.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }));
           } else if (snap.rects && snap.rects.length > 0) {
             item.rects = snap.rects.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
+          } else if (snap.type === 'shape' && (snap.shapeType === 'line' || snap.shapeType === 'arrow')) {
+            item.x1 = (snap.x1 !== undefined ? snap.x1 : snap.x) + dx;
+            item.y1 = (snap.y1 !== undefined ? snap.y1 : snap.y) + dy;
+            item.x2 = (snap.x2 !== undefined ? snap.x2 : (snap.x + (snap.w || 0))) + dx;
+            item.y2 = (snap.y2 !== undefined ? snap.y2 : (snap.y + (snap.h || 0))) + dy;
+            item.x = Math.min(item.x1, item.x2);
+            item.y = Math.min(item.y1, item.y2);
+            item.w = Math.abs(item.x2 - item.x1);
+            item.h = Math.abs(item.y2 - item.y1);
           } else {
             item.x = Math.max(0, Math.min(logicalW - 20, (snap.x || 0) + dx));
             item.y = Math.max(0, Math.min(logicalH - 20, (snap.y || 0) + dy));
@@ -1552,7 +1569,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           selBox.style.top = `${nextMinY * canvasScale}px`;
           if (ctxBar) {
             ctxBar.style.left = `${(nextMinX + boxW / 2) * canvasScale}px`;
-            ctxBar.style.top = `${Math.max(8, nextMinY * canvasScale - 44)}px`;
+            const barTop = nextMinY * canvasScale > 52 ? nextMinY * canvasScale - 44 : (nextMinY + boxH) * canvasScale + 12;
+            ctxBar.style.top = `${Math.max(8, barTop)}px`;
           }
         }
       };
@@ -1562,7 +1580,6 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         window.removeEventListener('pointerup', onUp);
         window.removeEventListener('pointercancel', onUp);
         if (moved && state.interactionMode === 'edit') {
-          pushHistory();
           saveAnnotations();
           renderPageAnnotations(pageNum);
         }
@@ -1583,7 +1600,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const minY = Math.min(...ann.rects.map((r) => r.y));
       const maxX = Math.max(...ann.rects.map((r) => r.x + r.w));
       const maxY = Math.max(...ann.rects.map((r) => r.y + r.h));
-      return { x: minX - 4, y: minY - 4, w: Math.max(16, maxX - minX + 8), h: Math.max(16, maxY - minY + 8) };
+      return { x: minX - 4, y: minY - 4, w: Math.max(20, maxX - minX + 8), h: Math.max(20, maxY - minY + 8) };
     }
     if (ann.points && ann.points.length > 0) {
       const xs = ann.points.map((p) => p.x);
@@ -1596,11 +1613,33 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       return {
         x: minX - pad,
         y: minY - pad,
-        w: Math.max(20, maxX - minX + pad * 2),
-        h: Math.max(20, maxY - minY + pad * 2),
+        w: Math.max(24, maxX - minX + pad * 2),
+        h: Math.max(24, maxY - minY + pad * 2),
       };
     }
-    return { x: ann.x || 0, y: ann.y || 0, w: ann.w || 160, h: ann.h || 90 };
+    if (ann.type === 'shape' && (ann.shapeType === 'line' || ann.shapeType === 'arrow')) {
+      const x1 = ann.x1 !== undefined ? ann.x1 : (ann.x || 0);
+      const y1 = ann.y1 !== undefined ? ann.y1 : (ann.y || 0);
+      const x2 = ann.x2 !== undefined ? ann.x2 : (ann.x !== undefined ? ann.x + (ann.w || 40) : 40);
+      const y2 = ann.y2 !== undefined ? ann.y2 : (ann.y !== undefined ? ann.y + (ann.h || 40) : 40);
+      const minX = Math.min(x1, x2);
+      const minY = Math.min(y1, y2);
+      const maxX = Math.max(x1, x2);
+      const maxY = Math.max(y1, y2);
+      const pad = Math.max(8, (ann.size || 3) + 6);
+      return {
+        x: minX - pad,
+        y: minY - pad,
+        w: Math.max(24, maxX - minX + pad * 2),
+        h: Math.max(24, maxY - minY + pad * 2),
+      };
+    }
+    if (ann.type === 'note') {
+      const w = ann.collapsed ? 38 : (ann.w || 240);
+      const h = ann.collapsed ? 38 : (ann.h || 160);
+      return { x: ann.x || 0, y: ann.y || 0, w: Math.max(38, w), h: Math.max(38, h) };
+    }
+    return { x: ann.x || 0, y: ann.y || 0, w: Math.max(24, ann.w || 160), h: Math.max(24, ann.h || 90) };
   }
 
   function renderSelectionOverlay(pageNum, objLayer, s) {
@@ -1622,6 +1661,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const boxH = Math.max(24, maxY - minY);
 
     const isSingleText = selectedOnPage.length === 1 && selectedOnPage[0].type === 'text';
+    const isSingleNote = selectedOnPage.length === 1 && selectedOnPage[0].type === 'note';
     const hasNoteSelected = selectedOnPage.some((a) => a.type === 'note');
 
     const selBox = document.createElement('div');
@@ -1634,12 +1674,18 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       selBox.style.transform = `rotate(${selectedOnPage[0].rotation}deg)`;
     }
 
-    // Double-clicking a selected text box opens inline editing immediately
+    // Double-clicking opens inline editing
     if (isSingleText) {
       selBox.addEventListener('dblclick', (e) => {
         e.preventDefault();
         e.stopPropagation();
         handleContextAction('edit', selectedOnPage, pageNum);
+      });
+    } else if (isSingleNote) {
+      selBox.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleContextAction('edit-note', selectedOnPage, pageNum);
       });
     }
 
@@ -1664,6 +1710,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       try {
         selBox.setPointerCapture(e.pointerId);
       } catch (_) {}
+      selBox.classList.add('is-dragging');
 
       const startX = e.clientX;
       const startY = e.clientY;
@@ -1673,12 +1720,21 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const snapshots = JSON.parse(JSON.stringify(selectedOnPage));
       const ctxBarEl = objLayer.querySelector('.kn-context-bar');
       let moved = false;
+      let historyRecorded = false;
 
       const onMove = (me) => {
+        if (state.interactionMode !== 'edit') return;
         const dx = (me.clientX - startX) / pointerScale;
         const dy = (me.clientY - startY) / pointerScale;
-        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) moved = true;
+        if (!moved && Math.hypot(dx, dy) > 1.5) {
+          moved = true;
+        }
         if (!moved) return;
+
+        if (!historyRecorded) {
+          pushHistory();
+          historyRecorded = true;
+        }
 
         selectedOnPage.forEach((ann, idx) => {
           const snap = snapshots[idx];
@@ -1686,6 +1742,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             ann.points = snap.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }));
           } else if (snap.rects && snap.rects.length > 0) {
             ann.rects = snap.rects.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
+          } else if (snap.type === 'shape' && (snap.shapeType === 'line' || snap.shapeType === 'arrow')) {
+            ann.x1 = (snap.x1 !== undefined ? snap.x1 : snap.x) + dx;
+            ann.y1 = (snap.y1 !== undefined ? snap.y1 : snap.y) + dy;
+            ann.x2 = (snap.x2 !== undefined ? snap.x2 : (snap.x + (snap.w || 0))) + dx;
+            ann.y2 = (snap.y2 !== undefined ? snap.y2 : (snap.y + (snap.h || 0))) + dy;
+            ann.x = Math.min(ann.x1, ann.x2);
+            ann.y = Math.min(ann.y1, ann.y2);
+            ann.w = Math.abs(ann.x2 - ann.x1);
+            ann.h = Math.abs(ann.y2 - ann.y1);
           } else {
             ann.x = Math.max(0, Math.min(logicalW - 20, (snap.x || 0) + dx));
             ann.y = Math.max(0, Math.min(logicalH - 20, (snap.y || 0) + dy));
@@ -1705,16 +1770,20 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         selBox.style.top = `${nextMinY * canvasScale}px`;
         if (ctxBarEl) {
           ctxBarEl.style.left = `${(nextMinX + boxW / 2) * canvasScale}px`;
-          ctxBarEl.style.top = `${Math.max(8, nextMinY * canvasScale - 44)}px`;
+          const barTop = nextMinY * canvasScale > 52 ? nextMinY * canvasScale - 44 : (nextMinY + boxH) * canvasScale + 12;
+          ctxBarEl.style.top = `${Math.max(8, barTop)}px`;
         }
       };
 
-      const onUp = () => {
+      const onUp = (ue) => {
+        try {
+          selBox.releasePointerCapture(ue.pointerId);
+        } catch (_) {}
+        selBox.classList.remove('is-dragging');
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
         window.removeEventListener('pointercancel', onUp);
-        if (moved) {
-          pushHistory();
+        if (moved && state.interactionMode === 'edit') {
           saveAnnotations();
           renderPageAnnotations(pageNum);
         }
@@ -1738,56 +1807,70 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     if (singleImg && state.croppingId === singleImg.id) {
       ctxBar.innerHTML = `
-        <button class="kn-ctx-btn" data-ctx="apply-crop" style="color:#15803D;">✓ Apply Crop</button>
-        <button class="kn-ctx-btn danger" data-ctx="cancel-crop">✕ Cancel</button>
+        <button type="button" class="kn-ctx-btn" data-ctx="apply-crop" style="color:#15803D;">✓ Apply Crop</button>
+        <button type="button" class="kn-ctx-btn danger" data-ctx="cancel-crop">✕ Cancel</button>
       `;
     } else if (isSingleText) {
       ctxBar.innerHTML = `
-        <button class="kn-ctx-btn" data-ctx="edit">Edit</button>
+        <button type="button" class="kn-ctx-btn" data-ctx="edit">Edit</button>
         <span class="kn-ctx-sep"></span>
-        <button class="kn-ctx-btn" data-ctx="copy">Copy</button>
+        <button type="button" class="kn-ctx-btn" data-ctx="copy">Copy</button>
         <span class="kn-ctx-sep"></span>
-        <button class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
+        <button type="button" class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
         <span class="kn-ctx-sep"></span>
-        <button class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
+        <button type="button" class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
         <span class="kn-ctx-sep"></span>
-        <button class="kn-ctx-btn" data-ctx="more" title="More Actions">•••</button>
+        <button type="button" class="kn-ctx-btn" data-ctx="more" title="More Actions">•••</button>
+      `;
+    } else if (isSingleNote) {
+      ctxBar.innerHTML = `
+        <button type="button" class="kn-ctx-btn" data-ctx="edit-note">Edit</button>
+        <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="copy">Copy</button>
+        <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
+        <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
+        <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="more" title="More Actions">•••</button>
       `;
     } else {
       ctxBar.innerHTML = `
-        ${singleImg ? `<button class="kn-ctx-btn" data-ctx="crop">Crop</button><span class="kn-ctx-sep"></span><button class="kn-ctx-btn" data-ctx="rot-left">↺</button><button class="kn-ctx-btn" data-ctx="rot-right">↻</button><span class="kn-ctx-sep"></span>` : ''}
-        <button class="kn-ctx-btn" data-ctx="copy">Copy</button>
+        ${singleImg ? `<button type="button" class="kn-ctx-btn" data-ctx="crop">Crop</button><span class="kn-ctx-sep"></span><button type="button" class="kn-ctx-btn" data-ctx="rot-left">↺</button><button type="button" class="kn-ctx-btn" data-ctx="rot-right">↻</button><span class="kn-ctx-sep"></span>` : ''}
+        <button type="button" class="kn-ctx-btn" data-ctx="copy">Copy</button>
         <span class="kn-ctx-sep"></span>
-        <button class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
+        <button type="button" class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
         <span class="kn-ctx-sep"></span>
-        <button class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
-        ${selectedOnPage.length > 1 ? `<span class="kn-ctx-sep"></span><button class="kn-ctx-btn" data-ctx="group">Group</button>` : ''}
-        ${hasGrouped ? `<span class="kn-ctx-sep"></span><button class="kn-ctx-btn" data-ctx="ungroup">Ungroup</button>` : ''}
+        <button type="button" class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
+        ${selectedOnPage.length > 1 ? `<span class="kn-ctx-sep"></span><button type="button" class="kn-ctx-btn" data-ctx="group">Group</button>` : ''}
+        ${hasGrouped ? `<span class="kn-ctx-sep"></span><button type="button" class="kn-ctx-btn" data-ctx="ungroup">Ungroup</button>` : ''}
         <span class="kn-ctx-sep"></span>
-        <button class="kn-ctx-btn" data-ctx="more" title="More Options">•••</button>
+        <button type="button" class="kn-ctx-btn" data-ctx="more" title="More Options">•••</button>
       `;
     }
 
-    ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'click'].forEach((evName) => {
-      ctxBar.addEventListener(evName, (e) => e.stopPropagation());
+    ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend'].forEach((evName) => {
+      ctxBar.addEventListener(evName, (e) => {
+        e.stopPropagation();
+      });
     });
     ctxBar.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       const btn = e.target.closest('[data-ctx]');
       if (!btn) return;
       if (btn.dataset.ctx === 'more') {
-        // Expand layer & cut controls inline inside the context bar
         ctxBar.innerHTML = `
-          <button class="kn-ctx-btn" data-ctx="cut">Cut</button>
+          <button type="button" class="kn-ctx-btn" data-ctx="cut">Cut</button>
           <span class="kn-ctx-sep"></span>
-          <button class="kn-ctx-btn" data-ctx="front">↑ Front</button>
+          <button type="button" class="kn-ctx-btn" data-ctx="front">↑ Front</button>
           <span class="kn-ctx-sep"></span>
-          <button class="kn-ctx-btn" data-ctx="back">↓ Back</button>
+          <button type="button" class="kn-ctx-btn" data-ctx="back">↓ Back</button>
           <span class="kn-ctx-sep"></span>
-          <button class="kn-ctx-btn" data-ctx="rot-left">↺</button>
-          <button class="kn-ctx-btn" data-ctx="rot-right">↻</button>
+          <button type="button" class="kn-ctx-btn" data-ctx="rot-left">↺</button>
+          <button type="button" class="kn-ctx-btn" data-ctx="rot-right">↻</button>
           <span class="kn-ctx-sep"></span>
-          <button class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
+          <button type="button" class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
         `;
         return;
       }
@@ -1815,11 +1898,20 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const snapBounds = snapshots.map(getAnnotationBounds);
     const MIN_SIZE = 24;
     let changed = false;
+    let historyRecorded = false;
 
     const onMove = (me) => {
       const dx = (me.clientX - startX) / pointerScale;
       const dy = (me.clientY - startY) / pointerScale;
-      changed = true;
+      if (!changed && Math.hypot(dx, dy) > 1.5) {
+        changed = true;
+      }
+      if (!changed) return;
+
+      if (!historyRecorded) {
+        pushHistory();
+        historyRecorded = true;
+      }
 
       if (handle === 'rot') {
         const cardRect = card ? card.getBoundingClientRect() : { left: 0, top: 0 };
@@ -1878,6 +1970,19 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             w: Math.max(4, r.w * scaleX),
             h: Math.max(4, r.h * scaleY),
           }));
+        } else if (snap.type === 'shape' && (snap.shapeType === 'line' || snap.shapeType === 'arrow')) {
+          const sX1 = snap.x1 !== undefined ? snap.x1 : snap.x;
+          const sY1 = snap.y1 !== undefined ? snap.y1 : snap.y;
+          const sX2 = snap.x2 !== undefined ? snap.x2 : (snap.x + (snap.w || 0));
+          const sY2 = snap.y2 !== undefined ? snap.y2 : (snap.y + (snap.h || 0));
+          ann.x1 = newX + (sX1 - initBox.x) * scaleX;
+          ann.y1 = newY + (sY1 - initBox.y) * scaleY;
+          ann.x2 = newX + (sX2 - initBox.x) * scaleX;
+          ann.y2 = newY + (sY2 - initBox.y) * scaleY;
+          ann.x = Math.min(ann.x1, ann.x2);
+          ann.y = Math.min(ann.y1, ann.y2);
+          ann.w = Math.abs(ann.x2 - ann.x1);
+          ann.h = Math.abs(ann.y2 - ann.y1);
         } else {
           const relX = ((snap.x !== undefined ? snap.x : sb.x) - initBox.x) / Math.max(1, initBox.w);
           const relY = ((snap.y !== undefined ? snap.y : sb.y) - initBox.y) / Math.max(1, initBox.h);
@@ -1887,7 +1992,6 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           ann.h = Math.max(MIN_SIZE, (snap.h || sb.h || 90) * scaleY);
 
           if (ann.type === 'text' && handle.length === 2) {
-            // Corner drag proportionally scales text font size as well
             const avgScale = (scaleX + scaleY) / 2;
             ann.fontSize = Math.max(10, Math.min(72, Math.round((snap.fontSize || 16) * avgScale)));
           }
@@ -1918,16 +2022,19 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       }
       if (ctxBar) {
         ctxBar.style.left = `${(newX + newW / 2) * canvasScale}px`;
-        ctxBar.style.top = `${newY * canvasScale > 52 ? newY * canvasScale - 44 : (newY + newH) * canvasScale + 12}px`;
+        const barTop = newY * canvasScale > 52 ? newY * canvasScale - 44 : (newY + newH) * canvasScale + 12;
+        ctxBar.style.top = `${Math.max(8, barTop)}px`;
       }
     };
 
-    const onUp = () => {
+    const onUp = (ue) => {
+      try {
+        e.target.releasePointerCapture(ue.pointerId);
+      } catch (_) {}
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onUp);
       if (changed) {
-        pushHistory();
         saveAnnotations();
         renderPageAnnotations(pageNum);
       }
@@ -1951,16 +2058,38 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         focusTextEditor(editor);
       }
       return;
+    } else if (action === 'edit-note' && selectedItems[0]?.type === 'note') {
+      const noteId = selectedItems[0].id;
+      state.selectedIds = [];
+      updateSelectionOverlayOnly(pageNum);
+      const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+      const domEl = objLayer?.querySelector(`.kn-page-object[data-id="${noteId}"]`);
+      const noteInput = domEl?.querySelector('.kn-note-body-input') || domEl?.querySelector('.kn-note-title-input');
+      if (noteInput) {
+        try { noteInput.focus({ preventScroll: true }); } catch (_) { noteInput.focus(); }
+      }
+      return;
     } else if (action === 'copy') {
       state.clipboard = JSON.parse(JSON.stringify(selectedItems));
       if (typeof UI !== 'undefined' && UI.showToast) UI.showToast('Copied selection', 'success');
+      return;
     } else if (action === 'cut') {
       pushHistory();
       state.clipboard = JSON.parse(JSON.stringify(selectedItems));
-      state.annotations = state.annotations.filter((a) => !state.selectedIds.includes(a.id));
+      const targetIds = new Set([
+        ...(state.selectedIds || []),
+        ...((selectedItems || []).map((a) => a.id)),
+      ]);
+      state.annotations = state.annotations.filter((a) => !targetIds.has(a.id));
       state.selectedIds = [];
       state.editingTextId = null;
       state.editingNoteId = null;
+      state.croppingId = null;
+      state.cropRect = null;
+      const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+      if (objLayer) {
+        objLayer.querySelectorAll('.kn-selection-box, .kn-context-bar').forEach((n) => n.remove());
+      }
     } else if (action === 'duplicate') {
       pushHistory();
       const clones = selectedItems.map((item) => {
@@ -1970,6 +2099,13 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           copy.points = copy.points.map((pt) => ({ x: pt.x + 18, y: pt.y + 18 }));
         } else if (copy.rects) {
           copy.rects = copy.rects.map((r) => ({ ...r, x: r.x + 18, y: r.y + 18 }));
+        } else if (copy.type === 'shape' && (copy.shapeType === 'line' || copy.shapeType === 'arrow')) {
+          copy.x1 = (copy.x1 !== undefined ? copy.x1 : copy.x) + 18;
+          copy.y1 = (copy.y1 !== undefined ? copy.y1 : copy.y) + 18;
+          copy.x2 = (copy.x2 !== undefined ? copy.x2 : (copy.x + (copy.w || 0))) + 18;
+          copy.y2 = (copy.y2 !== undefined ? copy.y2 : (copy.y + (copy.h || 0))) + 18;
+          copy.x = Math.min(copy.x1, copy.x2);
+          copy.y = Math.min(copy.y1, copy.y2);
         } else {
           copy.x = (copy.x || 0) + 18;
           copy.y = (copy.y || 0) + 18;
@@ -1991,10 +2127,20 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       });
     } else if (action === 'delete') {
       pushHistory();
-      state.annotations = state.annotations.filter((a) => !state.selectedIds.includes(a.id));
+      const targetIds = new Set([
+        ...(state.selectedIds || []),
+        ...((selectedItems || []).map((a) => a.id)),
+      ]);
+      state.annotations = state.annotations.filter((a) => !targetIds.has(a.id));
       state.selectedIds = [];
       state.editingTextId = null;
       state.editingNoteId = null;
+      state.croppingId = null;
+      state.cropRect = null;
+      const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+      if (objLayer) {
+        objLayer.querySelectorAll('.kn-selection-box, .kn-context-bar').forEach((n) => n.remove());
+      }
     } else if (action === 'front') {
       pushHistory();
       const maxZ = Math.max(0, ...state.annotations.map((a) => a.zIndex || 0));
@@ -2421,13 +2567,21 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           const pointerScale = getCardScale(pageNum);
           const canvasScale = getCanvasScale(pageNum);
           let moved = false;
+          let historyRecorded = false;
 
           const onDragHit = (me) => {
             if (state.interactionMode !== 'edit') return;
             const dx = (me.clientX - startClientX) / pointerScale;
             const dy = (me.clientY - startClientY) / pointerScale;
-            if (Math.abs(dx) > 1.5 || Math.abs(dy) > 1.5) moved = true;
+            if (!moved && Math.hypot(dx, dy) > 1.5) {
+              moved = true;
+            }
             if (!moved) return;
+
+            if (!historyRecorded) {
+              pushHistory();
+              historyRecorded = true;
+            }
 
             selectedOnPage.forEach((ann, idx) => {
               const snap = snapshots[idx];
@@ -2435,6 +2589,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
                 ann.points = snap.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }));
               } else if (snap.rects && snap.rects.length > 0) {
                 ann.rects = snap.rects.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
+              } else if (snap.type === 'shape' && (snap.shapeType === 'line' || snap.shapeType === 'arrow')) {
+                ann.x1 = (snap.x1 !== undefined ? snap.x1 : snap.x) + dx;
+                ann.y1 = (snap.y1 !== undefined ? snap.y1 : snap.y) + dy;
+                ann.x2 = (snap.x2 !== undefined ? snap.x2 : (snap.x + (snap.w || 0))) + dx;
+                ann.y2 = (snap.y2 !== undefined ? snap.y2 : (snap.y + (snap.h || 0))) + dy;
+                ann.x = Math.min(ann.x1, ann.x2);
+                ann.y = Math.min(ann.y1, ann.y2);
+                ann.w = Math.abs(ann.x2 - ann.x1);
+                ann.h = Math.abs(ann.y2 - ann.y1);
               } else {
                 ann.x = (snap.x || 0) + dx;
                 ann.y = (snap.y || 0) + dy;
@@ -2453,7 +2616,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             }
             if (ctxBar) {
               ctxBar.style.left = `${(initMinX + dx + boxW / 2) * canvasScale}px`;
-              ctxBar.style.top = `${Math.max(8, (initMinY + dy) * canvasScale - 44)}px`;
+              const barTop = (initMinY + dy) * canvasScale > 52 ? (initMinY + dy) * canvasScale - 44 : (initMinY + dy + boxH) * canvasScale + 12;
+              ctxBar.style.top = `${Math.max(8, barTop)}px`;
             }
           };
 
@@ -2462,7 +2626,6 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             window.removeEventListener('pointerup', onUpHit);
             window.removeEventListener('pointercancel', onUpHit);
             if (moved && state.interactionMode === 'edit') {
-              pushHistory();
               saveAnnotations();
               renderPageAnnotations(pageNum);
             }
@@ -4631,12 +4794,31 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     } else if (e.key === 'Delete' || e.key === 'Backspace') {
       if (state.interactionMode !== 'edit') return;
       if (state.selectedIds.length > 0) {
+        e.preventDefault();
         pushHistory();
-        state.annotations = state.annotations.filter((a) => !state.selectedIds.includes(a.id));
+        const targetIds = new Set(state.selectedIds);
+        const affectedPages = new Set(
+          state.annotations.filter((a) => targetIds.has(a.id)).map((a) => a.page)
+        );
+        affectedPages.add(state.currentPage);
+
+        state.annotations = state.annotations.filter((a) => !targetIds.has(a.id));
         state.selectedIds = [];
+        state.editingTextId = null;
+        state.editingNoteId = null;
+        state.croppingId = null;
+        state.cropRect = null;
+
         saveAnnotations();
-        renderPageAnnotations(state.currentPage);
+        affectedPages.forEach((p) => {
+          const objLayer = document.getElementById(`kn-objects-layer-${p}`);
+          if (objLayer) {
+            objLayer.querySelectorAll('.kn-selection-box, .kn-context-bar').forEach((n) => n.remove());
+          }
+          renderPageAnnotations(p);
+        });
         renderLeftSidebarContent();
+        if (state.rightTab === 'notes') renderRightSidebarContent();
       }
     } else if (e.key === 'Escape') {
       if (state.readingMode) toggleReadingMode(false);

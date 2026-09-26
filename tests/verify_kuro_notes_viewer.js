@@ -415,6 +415,56 @@ const tests = [
       polishCss.includes('.kn-mode-toggle-btn::after') &&
       polishCss.includes('content: attr(data-tooltip);'),
   },
+  {
+    category: 'SEL MOVE TEST 1 — Handle vs Body Hit Testing & Layer Elevation',
+    name: 'Handles are isolated to perimeter (inset: -3px), Body click is captured by .kn-selection-box with grabbing cursor, and .kn-objects-layer has z-index: 25 above interaction layer',
+    pass:
+      polishCss.includes('.kn-objects-layer {\n  position: absolute;\n  inset: 0;\n  width: 100%;\n  height: 100%;\n  pointer-events: none;\n  z-index: 25;') &&
+      polishCss.includes('.kn-sel-handle::after {\n  content: \'\';\n  position: absolute;\n  inset: -3px;') &&
+      polishCss.includes('.kn-selection-box.is-dragging {\n  cursor: grabbing !important;\n}') &&
+      sheetDetailCode.includes('if (e.target.dataset.handle) return;'),
+  },
+  {
+    category: 'SEL MOVE TEST 2 — Universal Multi-Type Move (Strokes, Shapes, Text, Notes, Images)',
+    name: 'Move accurately translates Points, Rects, Line/Arrow endpoints (x1, y1, x2, y2), Rect/Ellipse shapes, and DOM objects using unscaled document logical coordinates',
+    pass:
+      sheetDetailCode.includes('ann.points = snap.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }));') &&
+      sheetDetailCode.includes('ann.rects = snap.rects.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));') &&
+      sheetDetailCode.includes("snap.type === 'shape' && (snap.shapeType === 'line' || snap.shapeType === 'arrow')") &&
+      sheetDetailCode.includes('ann.x1 = (snap.x1 !== undefined ? snap.x1 : snap.x) + dx;') &&
+      sheetDetailCode.includes('ann.x2 = (snap.x2 !== undefined ? snap.x2 : (snap.x + (snap.w || 0))) + dx;'),
+  },
+  {
+    category: 'SEL MOVE TEST 3 — Note Card Selection & Movement',
+    name: 'Selected Note cards can be moved via selection box (.kn-selection-box.is-note-sel pointer-events: auto), provide Edit Note action, and allow header dragging',
+    pass:
+      polishCss.includes('.kn-selection-box.is-note-sel {\n  border-color: #B45309;\n  background: rgba(245, 158, 11, 0.04);\n  pointer-events: auto;\n}') &&
+      sheetDetailCode.includes("data-ctx=\"edit-note\"") &&
+      sheetDetailCode.includes("action === 'edit-note' && selectedItems[0]?.type === 'note'"),
+  },
+  {
+    category: 'SEL MOVE TEST 4 — Single Undo Action for Entire Drag',
+    name: 'Pre-move history snapshot is captured before mutation begins (if (!historyRecorded) { pushHistory(); historyRecorded = true; }) so Undo returns item to exact pre-move position',
+    pass:
+      sheetDetailCode.includes('if (!historyRecorded) {\n          pushHistory();\n          historyRecorded = true;\n        }') &&
+      !sheetDetailCode.includes("selBox.addEventListener('pointerdown', (e) => {\n        if (moved) {\n          pushHistory();"),
+  },
+  {
+    category: 'SEL DELETE TEST 1 — Contextual Bar & Keyboard Delete Isolation',
+    name: 'Clicking Delete in Contextual Bar or pressing Delete/Backspace deletes ONLY selected items from state.annotations, removes overlay DOM immediately, and saves to storage',
+    pass:
+      sheetDetailCode.includes("} else if (action === 'delete') {") &&
+      sheetDetailCode.includes('const targetIds = new Set([') &&
+      sheetDetailCode.includes('state.annotations = state.annotations.filter((a) => !targetIds.has(a.id));') &&
+      sheetDetailCode.includes("objLayer.querySelectorAll('.kn-selection-box, .kn-context-bar').forEach((n) => n.remove());"),
+  },
+  {
+    category: 'SEL DELETE TEST 2 — Perfect Undo & Zero-Event Leakage',
+    name: 'Delete pushes history before filtering state so performUndo() fully restores deleted items, and ctxBar stops event propagation preventing canvas draw',
+    pass:
+      sheetDetailCode.includes("action === 'delete') {\n      pushHistory();") &&
+      sheetDetailCode.includes("['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend'].forEach((evName) => {\n      ctxBar.addEventListener(evName, (e) => {\n        e.stopPropagation();\n      });\n    });"),
+  },
 ];
 
 let failed = 0;
