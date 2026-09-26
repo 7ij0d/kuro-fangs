@@ -465,6 +465,66 @@ const tests = [
       sheetDetailCode.includes("action === 'delete') {\n      pushHistory();") &&
       sheetDetailCode.includes("['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend'].forEach((evName) => {\n      ctxBar.addEventListener(evName, (e) => {\n        e.stopPropagation();\n      });\n    });"),
   },
+  {
+    category: 'JNOTES LASSO TEST 1 — Toolbar Button & Icon',
+    name: 'Toolbar features Lasso tool with dashed loop icon and label "Lasso", with popover enabled in toolsWithPopover',
+    pass:
+      sheetDetailCode.includes('<!-- 1. Select / Lasso -->') &&
+      sheetDetailCode.includes('<span class="kn-tool-label">Lasso</span>') &&
+      sheetDetailCode.includes('stroke-dasharray="3 2"') &&
+      sheetDetailCode.includes("toolsWithPopover = ['select', 'pen'"),
+  },
+  {
+    category: 'JNOTES LASSO TEST 2 — Freehand & Rectangle Mode Cards',
+    name: 'Lasso Popover includes 2 prominent mode cards (Freehand Lasso & Rectangle) with SVG previews and active styling',
+    pass:
+      sheetDetailCode.includes('kn-lasso-mode-grid') &&
+      sheetDetailCode.includes('data-sel-mode="lasso"') &&
+      sheetDetailCode.includes('Freehand Lasso') &&
+      sheetDetailCode.includes('data-sel-mode="rect"') &&
+      sheetDetailCode.includes('Rectangle') &&
+      polishCss.includes('.kn-lasso-mode-card.active {'),
+  },
+  {
+    category: 'JNOTES LASSO TEST 3 — 8 Target Filter Chips with Bespoke Icons',
+    name: 'Lasso Popover includes "Select the target" section with all 8 chips (All, Handwriting, Pen, Highlighter, Graphics, Image, Text, Note)',
+    pass: (() => {
+      const targets = ['all', 'handwriting', 'pen', 'highlighter', 'graphics', 'image', 'text', 'note'];
+      return (
+        targets.every((tgt) => sheetDetailCode.includes(`id: '${tgt}'`)) &&
+        sheetDetailCode.includes('data-sel-filter="${item.id}"') &&
+        sheetDetailCode.includes('kn-lasso-section-title') &&
+        sheetDetailCode.includes('Select the target')
+      );
+    })(),
+  },
+  {
+    category: 'JNOTES LASSO TEST 4 — Multi-Target Filter Logic & Graphics Mapping',
+    name: 'matchesSelectionFilter accurately filters each target type (handwriting -> pen/highlighter, graphics/shape -> shape, etc.)',
+    pass:
+      sheetDetailCode.includes("if (f === 'all') return true;") &&
+      sheetDetailCode.includes("if (f === 'handwriting') return ann.type === 'pen' || ann.type === 'highlighter';") &&
+      sheetDetailCode.includes("if (f === 'graphics' || f === 'shape') return ann.type === 'shape';"),
+  },
+  {
+    category: 'JNOTES LASSO TEST 5 — Auto-Dismiss on Select & Outside-Click Handling',
+    name: 'Lasso popover automatically closes upon gesture completion on page, and outside pointerdown dismisses popover without clearing selection',
+    pass:
+      sheetDetailCode.includes("if (state.toolPopoverOpen) {\n            state.toolPopoverOpen = false;\n            renderToolPopover();\n          }") &&
+      sheetDetailCode.includes('_knDocPopoverDismissBound') &&
+      sheetDetailCode.includes("state.toolPopoverOpen = false;\n        toolPopover.classList.remove('open');"),
+  },
+  {
+    category: 'JNOTES LASSO TEST 6 — Full Contextual Action Toolbar',
+    name: 'Selected elements expose Copy, Cut, Duplicate, Front, Back, and Delete directly in the contextual bar',
+    pass:
+      sheetDetailCode.includes('data-ctx="copy"') &&
+      sheetDetailCode.includes('data-ctx="cut"') &&
+      sheetDetailCode.includes('data-ctx="duplicate"') &&
+      sheetDetailCode.includes('data-ctx="front"') &&
+      sheetDetailCode.includes('data-ctx="back"') &&
+      sheetDetailCode.includes('data-ctx="delete"'),
+  },
 ];
 
 let failed = 0;

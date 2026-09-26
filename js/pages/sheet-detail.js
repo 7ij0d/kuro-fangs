@@ -293,8 +293,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     redoStack: [],
 
     // Selection / Lasso & Active Editing State Machine
-    selectionMode: 'rect', // 'rect' | 'lasso'
-    selectionFilter: 'all', // 'all' | 'handwriting' | 'pen' | 'highlighter' | 'shape' | 'image' | 'text' | 'note'
+    selectionMode: 'lasso', // 'lasso' | 'rect'
+    selectionFilter: 'all', // 'all' | 'handwriting' | 'pen' | 'highlighter' | 'graphics'/'shape' | 'image' | 'text' | 'note'
     selectedIds: [],
     editingTextId: null,
     editingNoteId: null,
@@ -574,10 +574,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       <!-- 2. FIXED TOP TOOLBAR (Responsive, No Horizontal Scrollbar, Core Study Tools Only) -->
       <div class="kn-toolbar" id="kn-toolbar" role="toolbar" aria-label="Kuro Notes Study Toolbar">
         <div class="kn-tool-group kn-group-annotations">
-          <!-- 1. Select -->
-          <button class="kn-tool-btn kn-pill-tool" data-tool="select" title="Select & Transform Tool (V)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
-            <span class="kn-tool-label">Select</span>
+          <!-- 1. Select / Lasso -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="select" title="Lasso & Selection Tool (V)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke-dasharray="3 2" d="M12 3.5c-4.5 0-8 2.8-8 6.5 0 3 2.2 5.5 5.5 6.2.8.2 1.5.8 1.8 1.6.4 1.2 1.2 2.2 2.2 2.2s1.8-1 2.2-2.2c.3-.8 1-1.4 1.8-1.6 3.3-.7 5.5-3.2 5.5-6.2 0-3.7-3.5-6.5-8-6.5z"/>
+              <circle cx="13.5" cy="18.5" r="1.5" fill="currentColor"/>
+            </svg>
+            <span class="kn-tool-label">Lasso</span>
+            <span class="kn-tool-chevron">⌄</span>
           </button>
 
           <!-- 2. Pen -->
@@ -1816,6 +1820,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn" data-ctx="copy">Copy</button>
         <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="cut">Cut</button>
+        <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
         <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
@@ -1828,6 +1834,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn" data-ctx="copy">Copy</button>
         <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="cut">Cut</button>
+        <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
         <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
@@ -1836,16 +1844,20 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       `;
     } else {
       ctxBar.innerHTML = `
-        ${singleImg ? `<button type="button" class="kn-ctx-btn" data-ctx="crop">Crop</button><span class="kn-ctx-sep"></span><button type="button" class="kn-ctx-btn" data-ctx="rot-left">↺</button><button type="button" class="kn-ctx-btn" data-ctx="rot-right">↻</button><span class="kn-ctx-sep"></span>` : ''}
+        ${singleImg ? `<button type="button" class="kn-ctx-btn" data-ctx="crop">Crop</button><span class="kn-ctx-sep"></span>` : ''}
         <button type="button" class="kn-ctx-btn" data-ctx="copy">Copy</button>
         <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="cut">Cut</button>
+        <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn" data-ctx="duplicate">Duplicate</button>
+        <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="front" title="Bring to Front">Front</button>
+        <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="back" title="Send to Back">Back</button>
         <span class="kn-ctx-sep"></span>
         <button type="button" class="kn-ctx-btn danger" data-ctx="delete">Delete</button>
         ${selectedOnPage.length > 1 ? `<span class="kn-ctx-sep"></span><button type="button" class="kn-ctx-btn" data-ctx="group">Group</button>` : ''}
         ${hasGrouped ? `<span class="kn-ctx-sep"></span><button type="button" class="kn-ctx-btn" data-ctx="ungroup">Ungroup</button>` : ''}
-        <span class="kn-ctx-sep"></span>
-        <button type="button" class="kn-ctx-btn" data-ctx="more" title="More Options">•••</button>
       `;
     }
 
@@ -2681,6 +2693,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           window.removeEventListener('pointercancel', onUp);
           if (state.interactionMode !== 'edit') return;
           selectAnnotationsInRegion(pageNum, lassoPts);
+          if (state.toolPopoverOpen) {
+            state.toolPopoverOpen = false;
+            renderToolPopover();
+          }
           renderPageAnnotations(pageNum);
         };
 
@@ -2695,6 +2711,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const f = state.selectionFilter;
     if (f === 'all') return true;
     if (f === 'handwriting') return ann.type === 'pen' || ann.type === 'highlighter';
+    if (f === 'graphics' || f === 'shape') return ann.type === 'shape';
     return ann.type === f;
   }
 
@@ -2723,7 +2740,16 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const cx = b.x + b.w / 2;
       const cy = b.y + b.h / 2;
       if (state.selectionMode === 'lasso' && pts.length > 3) {
-        return pointInPolygon({ x: cx, y: cy }, pts);
+        if (pointInPolygon({ x: cx, y: cy }, pts)) return true;
+        if (Array.isArray(a.points) && a.points.length > 0) {
+          return a.points.some((p) => pointInPolygon(p, pts));
+        }
+        return (
+          pointInPolygon({ x: b.x, y: b.y }, pts) ||
+          pointInPolygon({ x: b.x + b.w, y: b.y }, pts) ||
+          pointInPolygon({ x: b.x, y: b.y + b.h }, pts) ||
+          pointInPolygon({ x: b.x + b.w, y: b.y + b.h }, pts)
+        );
       }
       return b.x < maxX && b.x + b.w > minX && b.y < maxY && b.y + b.h > minY;
     });
@@ -3125,21 +3151,89 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         </div>
       `;
     } else if (tool === 'select') {
-      const filters = ['all', 'handwriting', 'pen', 'highlighter', 'shape', 'image', 'text', 'note'];
+      const targetItems = [
+        {
+          id: 'all',
+          label: 'All',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5.5" height="5.5" rx="1.5"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1.5"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1.5"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1.5"/></svg>`,
+        },
+        {
+          id: 'handwriting',
+          label: 'Handwriting',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m13 3 4 4L7 17H3v-4L13 3z"/><path d="M15 15c-1.2 0-2.3.8-3.5.8s-2.3-.8-3.5-.8-2.3.8-3.5.8"/></svg>`,
+        },
+        {
+          id: 'pen',
+          label: 'Pen',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15.5l5.5-5.5 2.5 2.5-5.5 5.5-2.5-2.5z"/><path d="M15 10.5L13.8 4.2 2 2l2.2 11.8L10 15"/><circle cx="9" cy="9" r="1.5"/></svg>`,
+        },
+        {
+          id: 'highlighter',
+          label: 'Highlighter',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 9-5 5v2.5h2.5l5-5"/><path d="m18 10-3.8 3.8a2 2 0 0 1-2.8 0L7.1 9.5a2 2 0 0 1 0-2.8L11.5 3"/></svg>`,
+        },
+        {
+          id: 'graphics',
+          label: 'Graphics',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7.5" r="4.5"/><rect x="8.5" y="8.5" width="8" height="8" rx="1.5"/></svg>`,
+        },
+        {
+          id: 'image',
+          label: 'Image',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="3" y="3" rx="2.5"/><circle cx="7.5" cy="7.5" r="1.5"/><path d="m17 12.5-2.5-2.5a2 2 0 0 0-2.8 0L5 17"/></svg>`,
+        },
+        {
+          id: 'text',
+          label: 'Text',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3.5 6 3.5 3.5 16.5 3.5 16.5 6"/><line x1="10" x2="10" y1="3.5" y2="16.5"/><line x1="7.5" x2="12.5" y1="16.5" y2="16.5"/></svg>`,
+        },
+        {
+          id: 'note',
+          label: 'Note',
+          icon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 2.5H4.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V6.5l-4-4z"/><polyline points="13.5 2.5 13.5 6.5 17.5 6.5"/><line x1="6.5" x2="13.5" y1="10" y2="10"/><line x1="6.5" x2="11.5" y1="13.5" y2="13.5"/></svg>`,
+        },
+      ];
+
+      const currentMode = state.selectionMode || 'lasso';
+      const currentFilter = state.selectionFilter || 'all';
+
       toolPopover.innerHTML = `
-        <div class="kn-popover-header">
-          <span>Selection & Lasso Tool (أداة التحديد)</span>
-          <button class="kn-icon-btn" id="kn-close-popover" style="width:22px;height:22px;">✕</button>
+        <div class="kn-popover-header kn-lasso-popover-header">
+          <span class="kn-lasso-title">Lasso</span>
+          <button class="kn-icon-btn kn-close-popover-btn" id="kn-close-popover" title="Close" aria-label="Close Lasso Settings">✕</button>
         </div>
-        <div class="kn-segmented-control">
-          <button class="kn-seg-btn ${state.selectionMode === 'rect' ? 'active' : ''}" data-sel-mode="rect">Rectangle</button>
-          <button class="kn-seg-btn ${state.selectionMode === 'lasso' ? 'active' : ''}" data-sel-mode="lasso">Freehand Lasso</button>
+
+        <div class="kn-lasso-mode-grid" role="group" aria-label="Lasso Selection Mode">
+          <button class="kn-lasso-mode-card ${currentMode === 'lasso' ? 'active' : ''}" data-sel-mode="lasso" type="button" title="Freehand Lasso (Draw loop around targets)">
+            <div class="kn-lasso-mode-preview">
+              <svg viewBox="0 0 48 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke-dasharray="4 3" d="M24 7C14 7 6 12 6 18c0 5 4 8 9 9 3 .6 6 2 9 1 5-1.5 8-5 11-5 5 0 7-3 7-6 0-5.5-7-10-18-10z"/>
+              </svg>
+            </div>
+            <span class="kn-lasso-mode-name">Freehand Lasso</span>
+          </button>
+
+          <button class="kn-lasso-mode-card ${currentMode === 'rect' ? 'active' : ''}" data-sel-mode="rect" type="button" title="Rectangle (Drag marquee box around targets)">
+            <div class="kn-lasso-mode-preview">
+              <svg viewBox="0 0 48 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="7" y="6" width="34" height="24" rx="3" stroke-dasharray="4 3"/>
+              </svg>
+            </div>
+            <span class="kn-lasso-mode-name">Rectangle</span>
+          </button>
         </div>
-        <div class="kn-popover-label">Select Target Filter</div>
-        <div class="kn-presets-strip" style="flex-wrap:wrap;">
-          ${filters
+
+        <div class="kn-lasso-section-title">Select the target</div>
+
+        <div class="kn-lasso-targets-grid" role="group" aria-label="Select Target Filter">
+          ${targetItems
             .map(
-              (f) => `<button class="kn-preset-chip ${state.selectionFilter === f ? 'active' : ''}" data-sel-filter="${f}">${f.charAt(0).toUpperCase() + f.slice(1)}</button>`
+              (item) => `
+            <button class="kn-lasso-target-chip ${currentFilter === item.id ? 'active' : ''}" data-sel-filter="${item.id}" type="button" title="Filter target: ${item.label}">
+              <span class="kn-lasso-chip-icon">${item.icon}</span>
+              <span class="kn-lasso-chip-text">${item.label}</span>
+            </button>
+          `
             )
             .join('')}
         </div>
@@ -3298,6 +3392,16 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         state.toolPopoverOpen = false;
         toolPopover.classList.remove('open');
       };
+    }
+
+    if (!window._knDocPopoverDismissBound) {
+      window._knDocPopoverDismissBound = true;
+      document.addEventListener('pointerdown', (e) => {
+        if (!state.toolPopoverOpen || !toolPopover || !toolPopover.classList.contains('open')) return;
+        if (toolPopover.contains(e.target) || e.target.closest('#kn-toolbar .kn-tool-btn')) return;
+        state.toolPopoverOpen = false;
+        toolPopover.classList.remove('open');
+      });
     }
 
     // Image Upload button inside Image Popover
@@ -4295,7 +4399,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       return;
     }
 
-    const toolsWithPopover = ['pen', 'highlighter', 'eraser', 'text', 'notes', 'shapes'];
+    const toolsWithPopover = ['select', 'pen', 'highlighter', 'eraser', 'text', 'notes', 'shapes'];
     if (state.activeTool === toolName) {
       if (toolsWithPopover.includes(toolName) && state.interactionMode === 'edit') {
         if (state.toolPopoverOpen) {
