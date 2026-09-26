@@ -13880,6 +13880,95 @@ a:focus:not(:focus-visible) {
   background: var(--kn-sidebar-tab-active-bg);
   color: var(--kn-primary);
 }
+/* Kuro Notes Redesigned 2-Mode Eraser (Select Object & Partial Erase) */
+.kn-eraser-modes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 6px 0 12px;
+}
+.kn-eraser-mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  border-radius: 12px;
+  border: 1.5px solid var(--kn-border, #E5E7EB);
+  background: var(--kn-bg, #FFFFFF);
+  color: var(--kn-text, #1F2937);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  position: relative;
+  outline: none;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.kn-eraser-mode-card:hover {
+  border-color: #B91C1C;
+  transform: translateY(-1px);
+}
+.kn-eraser-mode-card:active {
+  transform: scale(0.98);
+}
+.kn-eraser-mode-card.active {
+  background: #FDF2F4 !important;
+  border-color: #7E1D2A !important;
+  box-shadow: 0 2px 6px rgba(126, 29, 42, 0.08);
+}
+.kn-eraser-card-icon {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4B5563;
+  transition: color 0.18s ease;
+}
+.kn-eraser-mode-card.active .kn-eraser-card-icon {
+  color: #7E1D2A !important;
+}
+.kn-eraser-card-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--kn-text, #1F2937);
+  transition: color 0.18s ease;
+}
+.kn-eraser-mode-card.active .kn-eraser-card-title {
+  color: #7E1D2A !important;
+}
+.kn-eraser-card-sub {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6B7280;
+  margin-top: 3px;
+  font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+  transition: color 0.18s ease;
+}
+.kn-eraser-mode-card.active .kn-eraser-card-sub {
+  color: #9E3B49 !important;
+}
+[data-theme="dark"] .kn-eraser-mode-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #F3F4F6;
+}
+[data-theme="dark"] .kn-eraser-mode-card .kn-eraser-card-icon {
+  color: #9CA3AF;
+}
+[data-theme="dark"] .kn-eraser-mode-card.active {
+  background: rgba(126, 29, 42, 0.3) !important;
+  border-color: #E11D48 !important;
+}
+[data-theme="dark"] .kn-eraser-mode-card.active .kn-eraser-card-icon,
+[data-theme="dark"] .kn-eraser-mode-card.active .kn-eraser-card-title {
+  color: #FDA4AF !important;
+}
+[data-theme="dark"] .kn-eraser-mode-card.active .kn-eraser-card-sub {
+  color: #FECDD3 !important;
+}
+
 .kn-eraser-quick-row {
   display: flex;
   align-items: center;
@@ -13901,11 +13990,56 @@ a:focus:not(:focus-visible) {
   font-weight: 700;
   color: var(--kn-text-muted);
   flex: 1;
+  transition: all 0.15s ease;
+}
+.kn-eraser-size-btn:hover {
+  border-color: var(--kn-primary);
+  color: var(--kn-primary);
 }
 .kn-eraser-size-btn.active {
-  border-color: var(--kn-primary);
-  background: var(--kn-sidebar-tab-active-bg);
-  color: var(--kn-primary);
+  border-color: #7E1D2A;
+  background: #FDF2F4;
+  color: #7E1D2A;
+}
+[data-theme="dark"] .kn-eraser-size-btn.active {
+  border-color: #E11D48;
+  background: rgba(126, 29, 42, 0.3);
+  color: #FDA4AF;
+}
+
+/* Eraser Selection Overlay & Floating Delete Action */
+.kn-selection-box.is-eraser-sel {
+  border: 2px dashed #7E1D2A !important;
+  background: rgba(126, 29, 42, 0.08) !important;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 4px 14px rgba(126, 29, 42, 0.15);
+  animation: knPulseEraserSel 1.8s infinite ease-in-out;
+}
+.kn-selection-box.is-eraser-sel:hover {
+  background: rgba(126, 29, 42, 0.14) !important;
+}
+@keyframes knPulseEraserSel {
+  0%, 100% { border-color: #7E1D2A; }
+  50% { border-color: #B91C1C; }
+}
+[data-theme="dark"] .kn-selection-box.is-eraser-sel {
+  border-color: #F87171 !important;
+  background: rgba(248, 113, 113, 0.15) !important;
+}
+.kn-ctx-btn.danger.kn-ctx-eraser-del {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  padding: 5px 12px;
+  background: #7E1D2A;
+  color: #FFFFFF !important;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.kn-ctx-btn.danger.kn-ctx-eraser-del:hover {
+  background: #9B2C3B !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
 }
 
 /* On-Page Image Object & Crop Frame */

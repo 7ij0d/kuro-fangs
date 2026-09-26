@@ -355,8 +355,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       activePresetId: 'pen-p1',
     },
     eraser: {
-      mode: 'stroke', // 'stroke' | 'object' | 'partial'
-      size: 24,
+      mode: 'object', // 'object' | 'partial'
+      size: 28,
       showCursor: true,
       smoothEdges: true,
       fixedSize: false,
@@ -1690,9 +1690,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const isSingleText = selectedOnPage.length === 1 && selectedOnPage[0].type === 'text';
     const isSingleNote = selectedOnPage.length === 1 && selectedOnPage[0].type === 'note';
     const hasNoteSelected = selectedOnPage.some((a) => a.type === 'note');
+    const isEraserMode = state.activeTool === 'eraser';
 
     const selBox = document.createElement('div');
-    selBox.className = `kn-selection-box ${isSingleText ? 'is-text-sel' : ''} ${hasNoteSelected ? 'is-note-sel' : ''}`;
+    selBox.className = `kn-selection-box ${isEraserMode ? 'is-eraser-sel' : ''} ${isSingleText ? 'is-text-sel' : ''} ${hasNoteSelected ? 'is-note-sel' : ''}`;
     selBox.style.left = `${minX * s}px`;
     selBox.style.top = `${minY * s}px`;
     selBox.style.width = `${boxW * s}px`;
@@ -1702,13 +1703,13 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     }
 
     // Double-clicking opens inline editing
-    if (isSingleText) {
+    if (!isEraserMode && isSingleText) {
       selBox.addEventListener('dblclick', (e) => {
         e.preventDefault();
         e.stopPropagation();
         handleContextAction('edit', selectedOnPage, pageNum);
       });
-    } else if (isSingleNote) {
+    } else if (!isEraserMode && isSingleNote) {
       selBox.addEventListener('dblclick', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -1717,20 +1718,30 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     }
 
     // 8 Square Resize Handles (nw, n, ne, e, se, s, sw, w) + 1 Top Circular Rotation Handle (rot)
-    ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'rot'].forEach((dir) => {
-      const h = document.createElement('div');
-      h.className = `kn-sel-handle ${dir}`;
-      h.dataset.handle = dir;
-      h.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        startResizeOrRotateSelection(e, dir, selectedOnPage, { x: minX, y: minY, w: boxW, h: boxH }, pageNum);
+    if (!isEraserMode) {
+      ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'rot'].forEach((dir) => {
+        const h = document.createElement('div');
+        h.className = `kn-sel-handle ${dir}`;
+        h.dataset.handle = dir;
+        h.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          startResizeOrRotateSelection(e, dir, selectedOnPage, { x: minX, y: minY, w: boxW, h: boxH }, pageNum);
+        });
+        selBox.appendChild(h);
       });
-      selBox.appendChild(h);
-    });
+    }
 
     // Dragging inside selection box moves all selected items together smoothly without DOM rebuilds
     selBox.addEventListener('pointerdown', (e) => {
+      // In Eraser Select-Object mode, tapping the selected object again deletes it directly!
+      if (isEraserMode) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleContextAction('delete', selectedOnPage, pageNum);
+        return;
+      }
+
       if (e.target.dataset.handle) return;
       e.preventDefault();
       e.stopPropagation();
@@ -1832,7 +1843,21 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const singleImg = selectedOnPage.length === 1 && selectedOnPage[0].type === 'image' ? selectedOnPage[0] : null;
     const hasGrouped = selectedOnPage.some((a) => Boolean(a.groupId));
 
-    if (singleImg && state.croppingId === singleImg.id) {
+    if (isEraserMode) {
+      ctxBar.innerHTML = `
+        <button type="button" class="kn-ctx-btn danger kn-ctx-eraser-del" data-ctx="delete" title="Delete selected object (حذف العنصر)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-inline-end: 6px; vertical-align: -2px;">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+          Delete Object (حذف)
+        </button>
+        <span class="kn-ctx-sep"></span>
+        <button type="button" class="kn-ctx-btn" data-ctx="dismiss" title="Cancel selection (إلغاء التحديد)">✕</button>
+      `;
+    } else if (singleImg && state.croppingId === singleImg.id) {
       ctxBar.innerHTML = `
         <button type="button" class="kn-ctx-btn" data-ctx="apply-crop" style="color:#15803D;">✓ Apply Crop</button>
         <button type="button" class="kn-ctx-btn danger" data-ctx="cancel-crop">✕ Cancel</button>
@@ -2176,6 +2201,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       if (objLayer) {
         objLayer.querySelectorAll('.kn-selection-box, .kn-context-bar').forEach((n) => n.remove());
       }
+    } else if (action === 'dismiss') {
+      state.selectedIds = [];
+      updateSelectionOverlayOnly(pageNum);
+      return;
     } else if (action === 'front') {
       pushHistory();
       const maxZ = Math.max(0, ...state.annotations.map((a) => a.zIndex || 0));
@@ -2519,9 +2548,40 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         return;
       }
 
-      // 6. ERASER TOOL (Stroke, Partial Path-Splitting, and Object Eraser)
+      // 6. ERASER TOOL (Select Object & Partial Erase)
       if (state.activeTool === 'eraser') {
         e.preventDefault();
+
+        // ── MODE 1: SELECT OBJECT ──────────────────────────────────────────
+        if (state.eraser.mode === 'object') {
+          const hit = findAnnotationForEraser(pageNum, startPt);
+          if (hit) {
+            // Tapping the already selected object directly deletes it!
+            if (state.selectedIds.includes(hit.id)) {
+              pushHistory();
+              state.annotations = state.annotations.filter((a) => a.id !== hit.id);
+              state.selectedIds = [];
+              saveAnnotations();
+              renderPageAnnotations(pageNum);
+              renderLeftSidebarContent();
+              if (state.rightTab === 'notes') renderRightSidebarContent();
+              return;
+            }
+            // Otherwise, select it cleanly and display the Delete bounding box
+            state.selectedIds = [hit.id];
+            renderPageAnnotations(pageNum);
+          } else {
+            // Tapped empty space -> clear selection
+            if (state.selectedIds.length > 0) {
+              state.selectedIds = [];
+              renderPageAnnotations(pageNum);
+            }
+          }
+          // In Select Object mode, dragging across the screen does NOT erase items by accident
+          return;
+        }
+
+        // ── MODE 2: PARTIAL ERASE (Vector Path Splitting) ───────────────────
         const beforeEraseSnapshot = JSON.stringify(state.annotations);
         let didErase = false;
 
@@ -2791,11 +2851,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // ERASER ENGINE (Stroke, Partial Path-Splitting, and Object Eraser)
+  // ERASER ENGINE (Select Object & Partial Path-Splitting Eraser)
   // ══════════════════════════════════════════════════════════════════════════
   function updateEraserCursor(e) {
     const cur = document.getElementById('kn-eraser-cursor');
-    if (!cur || state.eraser.showCursor === false) return;
+    if (!cur || state.eraser.showCursor === false || state.eraser.mode !== 'partial') {
+      if (cur) cur.style.display = 'none';
+      return;
+    }
     const d = state.eraser.size * state.zoom;
     cur.style.width = `${d}px`;
     cur.style.height = `${d}px`;
@@ -2830,6 +2893,45 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     return false;
   }
 
+  // Finds topmost annotation under point for Select Object mode (strokes, text, notes, shapes, images)
+  function findAnnotationForEraser(pageNum, pt) {
+    const candidates = state.annotations.filter((a) => a.page === pageNum);
+    for (let i = candidates.length - 1; i >= 0; i--) {
+      const ann = candidates[i];
+      // 1. Pen or Highlighter freehand/straight strokes
+      if ((ann.type === 'pen' || ann.type === 'highlighter') && Array.isArray(ann.points) && ann.points.length > 0) {
+        const strokeWidth = ann.size || (ann.type === 'highlighter' ? 22 : 4);
+        const hitRadius = Math.max(14, strokeWidth * 1.25);
+        if (isStrokeHitByCircle(ann.points, pt, hitRadius)) {
+          return ann;
+        }
+      }
+      // 2. Text-anchored highlighter rects
+      if (ann.type === 'highlighter' && Array.isArray(ann.rects) && ann.rects.length > 0) {
+        const hit = ann.rects.some((r) => pt.x >= r.x - 8 && pt.x <= r.x + r.w + 8 && pt.y >= r.y - 8 && pt.y <= r.y + r.h + 8);
+        if (hit) return ann;
+      }
+      // 3. Line or Arrow Shapes
+      if (ann.type === 'shape' && (ann.shapeType === 'line' || ann.shapeType === 'arrow')) {
+        const x1 = ann.x1 !== undefined ? ann.x1 : (ann.x || 0);
+        const y1 = ann.y1 !== undefined ? ann.y1 : (ann.y || 0);
+        const x2 = ann.x2 !== undefined ? ann.x2 : (ann.x !== undefined ? ann.x + (ann.w || 40) : 40);
+        const y2 = ann.y2 !== undefined ? ann.y2 : (ann.y !== undefined ? ann.y + (ann.h || 40) : 40);
+        const d = distToSegment(pt, { x: x1, y: y1 }, { x: x2, y: y2 });
+        if (d <= Math.max(14, (ann.size || 3) + 8)) {
+          return ann;
+        }
+      }
+      // 4. Rect/Ellipse Shapes, Text boxes, Sticky Notes, Images
+      const b = getAnnotationBounds(ann);
+      const pad = 8;
+      if (pt.x >= b.x - pad && pt.x <= b.x + b.w + pad && pt.y >= b.y - pad && pt.y <= b.y + b.h + pad) {
+        return ann;
+      }
+    }
+    return null;
+  }
+
   // Subdivides long stroke segments so Partial Eraser cleanly splits both freehand and straight strokes
   function densifyStrokePoints(points, stepPx = 3) {
     if (!points || points.length < 2) return points ? [...points] : [];
@@ -2856,7 +2958,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   function eraseAtPoint(pageNum, pt) {
     if (state.interactionMode !== 'edit') return false;
     const radius = Math.max(4, state.eraser.size / 2);
-    const mode = state.eraser.mode; // 'stroke' | 'partial' | 'object'
+    const mode = state.eraser.mode; // 'partial' | 'object'
     const nextAnnots = [];
     const removedIds = new Set();
     let changed = false;
@@ -2873,7 +2975,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
       // Check text-anchored highlighter rects if present
       if (ann.type === 'highlighter' && Array.isArray(ann.rects) && ann.rects.length > 0 && (!ann.points || ann.points.length <= 1)) {
-        if (mode === 'stroke' || mode === 'object' || mode === 'partial') {
+        if (mode === 'partial' || mode === 'object') {
           const hitRect = ann.rects.some(
             (r) => pt.x >= r.x - radius && pt.x <= r.x + r.w + radius && pt.y >= r.y - radius && pt.y <= r.y + r.h + radius
           );
@@ -2889,7 +2991,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
       if (isStroke) {
         if (mode === 'partial') {
-          // Partial Eraser: erase only the sub-section of the stroke inside effectiveRadius
+          // Partial Eraser: cleanly split and erase only the sub-section of the stroke inside effectiveRadius
           if (!isStrokeHitByCircle(ann.points, pt, effectiveRadius)) {
             nextAnnots.push(ann);
             continue;
@@ -2930,7 +3032,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             nextAnnots.push(ann);
           }
         } else {
-          // Stroke Eraser or Object Eraser: delete entire stroke when touched anywhere along its path
+          // Object mode: delete entire stroke if touched
           if (isStrokeHitByCircle(ann.points, pt, effectiveRadius)) {
             changed = true;
             removedIds.add(ann.id);
@@ -2939,7 +3041,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           }
         }
       } else if (mode === 'object') {
-        // Object Eraser: delete complete object (text, note, image, shape) when touched
+        // Select Object / Object Eraser: delete complete object (text, note, image, shape) when touched
         const b = getAnnotationBounds(ann);
         const hit =
           pt.x >= b.x - radius &&
@@ -2953,7 +3055,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           nextAnnots.push(ann);
         }
       } else {
-        // Stroke or Partial mode does not delete non-stroke objects (text, note, image, shape)
+        // Partial mode does not delete non-stroke objects (text, note, image, shape)
         nextAnnots.push(ann);
       }
     }
@@ -3136,39 +3238,51 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       `;
     } else if (tool === 'eraser') {
       const er = state.eraser;
-      const modeDesc =
-        er.mode === 'stroke'
-          ? 'يمسح الضربة (Pen / Highlighter) بالكامل عند لمسها'
-          : er.mode === 'partial'
-            ? 'يمسح فقط الجزء الذي تمر عليه الممحاة ويقسم الخط'
-            : 'يمسح أي عنصر كامل (Text, Note, Image, Stroke)';
       toolPopover.innerHTML = `
         <div class="kn-popover-header">
-          <span>Eraser — Annotations Only (الممحاة)</span>
+          <span>Eraser (الممحاة)</span>
           <button class="kn-icon-btn" id="kn-close-popover" style="width:22px;height:22px;">✕</button>
         </div>
-        <div class="kn-segmented-control">
-          <button class="kn-seg-btn ${er.mode === 'stroke' ? 'active' : ''}" data-er-mode="stroke">Stroke</button>
-          <button class="kn-seg-btn ${er.mode === 'partial' ? 'active' : ''}" data-er-mode="partial">Partial</button>
-          <button class="kn-seg-btn ${er.mode === 'object' ? 'active' : ''}" data-er-mode="object">Object</button>
+        <div class="kn-eraser-modes-grid">
+          <button type="button" class="kn-eraser-mode-card ${er.mode === 'object' ? 'active' : ''}" data-er-mode="object">
+            <div class="kn-eraser-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3.5 2.5">
+                <rect x="4" y="4" width="16" height="16" rx="3"></rect>
+              </svg>
+            </div>
+            <div class="kn-eraser-card-title">Select Object</div>
+            <div class="kn-eraser-card-sub" dir="rtl">تحديد العنصر بالكامل</div>
+          </button>
+
+          <button type="button" class="kn-eraser-mode-card ${er.mode === 'partial' ? 'active' : ''}" data-er-mode="partial">
+            <div class="kn-eraser-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-dasharray="3.5 2.5"></path>
+                <line x1="2" y1="22" x2="22" y2="22" stroke-width="2" stroke-linecap="round"></line>
+              </svg>
+            </div>
+            <div class="kn-eraser-card-title">Partial Erase</div>
+            <div class="kn-eraser-card-sub" dir="rtl">ممحاة جزئية</div>
+          </button>
         </div>
-        <div style="font-size:0.72rem;color:var(--kn-text-secondary);padding:2px 4px;font-weight:600;" dir="rtl">${modeDesc}</div>
-        <div class="kn-slider-row">
-          <span class="kn-popover-label">Size</span>
+
+        <div class="kn-slider-row kn-eraser-size-row">
+          <span class="kn-popover-label" style="font-weight:700;letter-spacing:0.04em;">SIZE</span>
           <input type="range" id="kn-er-size" min="8" max="64" value="${er.size}" />
-          <span class="kn-slider-val">${er.size} px</span>
+          <span class="kn-slider-val" id="kn-er-size-val" style="font-weight:700;min-width:44px;text-align:end;">${er.size} px</span>
         </div>
+
         <div class="kn-eraser-quick-row">
-          <button class="kn-eraser-size-btn ${er.size <= 14 ? 'active' : ''}" data-er-quick="12">
-            <span style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+          <button type="button" class="kn-eraser-size-btn ${er.size <= 16 ? 'active' : ''}" data-er-quick="12">
+            <span style="width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block;"></span>
             <span>Small</span>
           </button>
-          <button class="kn-eraser-size-btn ${er.size > 14 && er.size < 34 ? 'active' : ''}" data-er-quick="24">
-            <span style="width:14px;height:14px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+          <button type="button" class="kn-eraser-size-btn ${er.size > 16 && er.size < 36 ? 'active' : ''}" data-er-quick="28">
+            <span style="width:13px;height:13px;border-radius:50%;background:currentColor;display:inline-block;"></span>
             <span>Medium</span>
           </button>
-          <button class="kn-eraser-size-btn ${er.size >= 34 ? 'active' : ''}" data-er-quick="42">
-            <span style="width:20px;height:20px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+          <button type="button" class="kn-eraser-size-btn ${er.size >= 36 ? 'active' : ''}" data-er-quick="44">
+            <span style="width:19px;height:19px;border-radius:50%;background:currentColor;display:inline-block;"></span>
             <span>Large</span>
           </button>
         </div>
@@ -3647,14 +3761,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     toolPopover.querySelectorAll('[data-er-mode]').forEach((b) => {
       b.onclick = () => {
         state.eraser.mode = b.dataset.erMode;
+        const cur = document.getElementById('kn-eraser-cursor');
+        if (cur) cur.style.display = 'none';
         renderToolPopover();
       };
     });
     const erSize = document.getElementById('kn-er-size');
+    const erSizeVal = document.getElementById('kn-er-size-val');
     if (erSize) {
       erSize.oninput = () => {
         state.eraser.size = parseInt(erSize.value, 10);
-        renderToolPopover();
+        if (erSizeVal) erSizeVal.textContent = `${state.eraser.size} px`;
+        toolPopover.querySelectorAll('[data-er-quick]').forEach((btn) => {
+          const sz = parseInt(btn.dataset.erQuick, 10);
+          const isAct =
+            (sz === 12 && state.eraser.size <= 16) ||
+            (sz === 28 && state.eraser.size > 16 && state.eraser.size < 36) ||
+            (sz === 44 && state.eraser.size >= 36);
+          btn.classList.toggle('active', isAct);
+        });
       };
     }
     toolPopover.querySelectorAll('[data-er-quick]').forEach((b) => {
