@@ -5808,6 +5808,18 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
   border-color: rgba(217, 119, 6, 0.18);
 }
 
+.continue-tag-badge.questions.completed-badge {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+[data-theme="dark"] .continue-tag-badge.questions.completed-badge {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.32);
+}
+
 .continue-card-title {
   font-size: 1.02rem;
   font-weight: 750;
@@ -5864,6 +5876,10 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
   background: #7E1D2A;
   border-radius: 9999px;
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.continue-progress-fill.completed-fill {
+  background: #10B981;
 }
 
 .continue-empty-hint {

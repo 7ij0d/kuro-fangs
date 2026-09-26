@@ -89,10 +89,10 @@ check('polish.css provides dark mode overrides for sqm-modal-box', polishCss.inc
 
 // 9. Cache Busters
 console.log('\n--- 9. Cache Busting in index.html ---');
-check('index.html loads polish.css with v>=11.0', /css\/polish\.css\?v=11\.\d+/.test(indexHtml));
-check('index.html loads data.js with v>=11.0', /js\/data\.js\?v=11\.\d+/.test(indexHtml));
-check('index.html loads subject-modal.js with v>=11.0', /js\/components\/subject-modal\.js\?v=11\.\d+/.test(indexHtml));
-check('index.html loads home.js with v>=11.0', /js\/pages\/home\.js\?v=11\.\d+/.test(indexHtml));
+check('index.html loads polish.css with v>=11.0', /css\/polish\.css\?v=(?:1[1-9]|\d{2,})\.\d+/.test(indexHtml));
+check('index.html loads data.js with v>=11.0', /js\/data\.js\?v=(?:1[1-9]|\d{2,})\.\d+/.test(indexHtml));
+check('index.html loads subject-modal.js with v>=11.0', /js\/components\/subject-modal\.js\?v=(?:1[1-9]|\d{2,})\.\d+/.test(indexHtml));
+check('index.html loads home.js with v>=11.0', /js\/pages\/home\.js\?v=(?:1[1-9]|\d{2,})\.\d+/.test(indexHtml));
 
 console.log('\n' + '='.repeat(75));
 console.log(`TOTAL CHECKS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);

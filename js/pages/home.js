@@ -231,11 +231,73 @@ const HomePage = {
 
   getActiveQuestionSession() {
     try {
-      const raw = localStorage.getItem('kf_active_question_session');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || !parsed.total) return null;
-      return parsed;
+      // 1. Check all sessions list first to find the most relevant active/incomplete session
+      const allRaw = localStorage.getItem('kf_all_question_sessions');
+      let allSessions = [];
+      if (allRaw) {
+        try {
+          const parsed = JSON.parse(allRaw);
+          if (Array.isArray(parsed)) allSessions = parsed;
+        } catch (e) {}
+      }
+
+      // Look for the most recent incomplete session with progress (answered > 0)
+      let active = allSessions.find(s =>
+        s && s.total > 0 && !s.completed &&
+        (s.answered > 0 || (s.answers && Object.keys(s.answers).length > 0))
+      );
+
+      // If no active incomplete session found in allSessions, check kf_active_question_session
+      if (!active) {
+        const raw = localStorage.getItem('kf_active_question_session');
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.total > 0) {
+              active = parsed;
+            }
+          } catch (e) {}
+        }
+      }
+
+      // If still no incomplete session with progress, fallback to the latest completed session
+      if ((!active || active.completed) && allSessions.length > 0) {
+        const completedSession = allSessions.find(s => s && (s.completed || s.answered >= s.total));
+        if (completedSession) {
+          active = completedSession;
+        } else if (allSessions[0] && allSessions[0].total > 0) {
+          active = allSessions[0];
+        }
+      }
+
+      if (!active || !active.total) return null;
+
+      // Ensure subject_id is populated
+      if (!active.subject_id && active.sheet_id) {
+        if (window.DATA && typeof window.DATA.getSheets === 'function') {
+          const sheet = window.DATA.getSheets().find(s => s.id === active.sheet_id);
+          if (sheet) active.subject_id = sheet.subject_id;
+        }
+        if (!active.subject_id && typeof active.sheet_id === 'string' && active.sheet_id.includes('omdr')) {
+          active.subject_id = 'omdr';
+        }
+      }
+
+      // Recalculate answered count from answers object if available
+      if (active.answers && typeof active.answers === 'object') {
+        const count = Object.keys(active.answers).length;
+        if (count > (active.answered || 0)) {
+          active.answered = count;
+          active.percent = Math.round((active.answered / active.total) * 100);
+        }
+      }
+
+      // Mark completed if answered >= total
+      if (active.answered >= active.total) {
+        active.completed = true;
+      }
+
+      return active;
     } catch {
       return null;
     }
@@ -443,19 +505,34 @@ const HomePage = {
     // 3. Continue Questions
     const qData = HomePage.getActiveQuestionSession();
     const hasQ = Boolean(qData && qData.total > 0);
+    const isCompleted = Boolean(hasQ && (qData.completed || qData.answered >= qData.total));
     const qTitle = hasQ
       ? (isAr ? (qData.sheet_title_ar || qData.sheet_title) : (qData.sheet_title_en || qData.sheet_title))
       : (isAr ? 'لا توجد جلسة أسئلة نشطة' : 'No active question session');
     const qSub = hasQ
       ? (qData.subject_title || (isAr ? 'بنك الأسئلة' : 'Question Bank'))
       : (isAr ? 'اختبر معلوماتك مع بنك الأسئلة' : 'Practice questions and test your readiness');
-    const qAnswered = hasQ ? (qData.answered || 0) : 0;
+    const qAnswered = hasQ ? (qData.answered || (qData.answers ? Object.keys(qData.answers).length : 0)) : 0;
     const qTotal = hasQ ? qData.total : 0;
     const qPercent = hasQ ? (qData.percent || Math.round((qAnswered / qTotal) * 100)) : 0;
-    const qUrl = '#/questions';
-    const qBtnText = hasQ
-      ? (isAr ? 'متابعة الحل' : 'Continue Solving')
-      : (isAr ? 'بدء حل الأسئلة' : 'Practice Questions');
+
+    // Deep link directly to resume quiz
+    let qUrl = '#/questions';
+    if (hasQ && qData.sheet_id) {
+      const subjParam = qData.subject_id ? `subject=${encodeURIComponent(qData.subject_id)}&` : '';
+      qUrl = `#/questions?${subjParam}sheet=${encodeURIComponent(qData.sheet_id)}&resume=true`;
+    }
+
+    let qBadgeText = isAr ? 'متابعة الأسئلة' : 'Continue Questions';
+    let qBtnText = isAr ? 'بدء حل الأسئلة' : 'Practice Questions';
+    if (hasQ) {
+      if (isCompleted) {
+        qBadgeText = isAr ? 'تم إنهاء الاختبار' : 'Quiz Completed';
+        qBtnText = isAr ? 'مراجعة الأسئلة' : 'Review Questions';
+      } else {
+        qBtnText = isAr ? 'متابعة الحل' : 'Continue Solving';
+      }
+    }
 
     return `
       <section class="continue-studying-section" aria-label="Continue Studying">
@@ -506,11 +583,11 @@ const HomePage = {
           </div>
 
           <!-- Card C: Continue Questions -->
-          <div class="continue-study-card" id="continue-card-questions" role="region" aria-label="${qTitle}">
+          <div class="continue-study-card ${isCompleted ? 'quiz-completed' : ''}" id="continue-card-questions" role="region" aria-label="${qTitle}">
             <div class="continue-card-top">
-              <span class="continue-tag-badge questions">
-                <i data-lucide="help-circle"></i>
-                <span>${isAr ? 'متابعة الأسئلة' : 'Continue Questions'}</span>
+              <span class="continue-tag-badge questions ${isCompleted ? 'completed-badge' : ''}">
+                <i data-lucide="${isCompleted ? 'check-circle' : 'help-circle'}"></i>
+                <span>${qBadgeText}</span>
               </span>
               <h3 class="continue-card-title" title="${qTitle}">${qTitle}</h3>
               <p class="continue-card-subject" title="${qSub}">${qSub}</p>
@@ -521,7 +598,7 @@ const HomePage = {
                     <span>${qPercent}%</span>
                   </div>
                   <div class="continue-progress-track">
-                    <div class="continue-progress-fill" style="width: ${qPercent}%;"></div>
+                    <div class="continue-progress-fill ${isCompleted ? 'completed-fill' : ''}" style="width: ${qPercent}%;"></div>
                   </div>
                 ` : `
                   <span class="continue-empty-hint">${isAr ? 'جاهز لاختبار معلوماتك؟' : 'Ready to test your readiness?'}</span>

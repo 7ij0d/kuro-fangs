@@ -16,6 +16,187 @@ const QuestionsPage = {
   kuroExplanationOpen: false,  // Interactive mascot explanation pane state
   hasCurrentQuestionBeenAnswered: false,
   isCurrentQuestionAnswerCorrect: false,
+  activeSession: null,
+
+  saveSession(session) {
+    if (!session) return;
+    session.last_updated = Date.now();
+    QuestionsPage.activeSession = session;
+    try {
+      localStorage.setItem('kf_active_question_session', JSON.stringify(session));
+      if (session.sheet_id) {
+        localStorage.setItem('kf_q_session_' + session.sheet_id, JSON.stringify(session));
+      }
+      const allRaw = localStorage.getItem('kf_all_question_sessions');
+      let allSessions = [];
+      if (allRaw) {
+        try {
+          const parsed = JSON.parse(allRaw);
+          if (Array.isArray(parsed)) allSessions = parsed;
+        } catch (e) {}
+      }
+      allSessions = allSessions.filter(s => s && s.sheet_id !== session.sheet_id && s.id !== session.id);
+      allSessions.unshift(session);
+      if (allSessions.length > 20) allSessions = allSessions.slice(0, 20);
+      localStorage.setItem('kf_all_question_sessions', JSON.stringify(allSessions));
+    } catch (e) {
+      console.warn('[QuestionsPage] Failed to save session:', e);
+    }
+  },
+
+  getSessionForSheet(sheetId, subjectId) {
+    try {
+      if (sheetId) {
+        const raw = localStorage.getItem('kf_q_session_' + sheetId);
+        if (raw) return JSON.parse(raw);
+      }
+      const activeRaw = localStorage.getItem('kf_active_question_session');
+      if (activeRaw) {
+        const active = JSON.parse(activeRaw);
+        if (active && (!sheetId || active.sheet_id === sheetId || (sheetId === 'sh_admin_1789462201436' && active.sheet_id === 'sh-omdr-01'))) {
+          return active;
+        }
+      }
+      const allRaw = localStorage.getItem('kf_all_question_sessions');
+      if (allRaw) {
+        const all = JSON.parse(allRaw) || [];
+        const match = all.find(s => s && (
+          (sheetId && (s.sheet_id === sheetId || (sheetId === 'sh_admin_1789462201436' && s.sheet_id === 'sh-omdr-01'))) ||
+          (!sheetId && subjectId && s.subject_id === subjectId)
+        ));
+        if (match) return match;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  createSession(questionsList, subjectTitle, sheetId, subjectId) {
+    const firstQ = questionsList?.[0] || {};
+    const total = questionsList?.length || 0;
+    const finalSheetId = sheetId || firstQ.sheet_id || '';
+    const finalSubjId = subjectId || firstQ.subject_id || '';
+    const shName = firstQ.sheet_title_en || firstQ.sheet_title || firstQ.sheet_title_ar || 'Sheet Questions';
+
+    return {
+      id: 'qs_' + (finalSubjId || 'subj') + '_' + (finalSheetId || 'sh') + '_' + Date.now(),
+      subject_id: finalSubjId,
+      sheet_id: finalSheetId,
+      sheet_title: shName,
+      sheet_title_ar: firstQ.sheet_title_ar || firstQ.sheet_title || shName,
+      sheet_title_en: firstQ.sheet_title_en || firstQ.sheet_title || shName,
+      subject_title: subjectTitle || firstQ.subject_name_en || firstQ.subject_name_ar || '',
+      question_ids: (questionsList || []).map(q => q.id),
+      current_index: 0,
+      answered: 0,
+      total: total,
+      percent: 0,
+      score: 0,
+      answers: {},
+      completed: false,
+      timestamp: Date.now(),
+      last_updated: Date.now()
+    };
+  },
+
+  getQuestionsForSheet(sheetId, subjectId) {
+    const allQuestions = QuestionsPage.getQuestions();
+    if (!Array.isArray(allQuestions) || allQuestions.length === 0) return [];
+
+    let matches = [];
+    if (sheetId) {
+      matches = allQuestions.filter(q =>
+        q.sheet_id === sheetId ||
+        (sheetId === 'sh_admin_1789462201436' && (q.sheet_id === 'sh-omdr-01' || q.sheet_id === 'sh_admin_1789462201436')) ||
+        (sheetId === 'sh-omdr-01' && (q.sheet_id === 'sh_admin_1789462201436' || q.sheet_id === 'sh-omdr-01'))
+      );
+    }
+
+    if (matches.length === 0 && subjectId) {
+      const subjQuestions = allQuestions.filter(q => q.subject_id === subjectId);
+      if (sheetId && window.DATA && typeof window.DATA.getSheetsBySubject === 'function') {
+        const sheets = window.DATA.getSheetsBySubject(subjectId) || [];
+        const targetSheet = sheets.find(s => s.id === sheetId);
+        if (targetSheet) {
+          const normTarget = (targetSheet.title_en || targetSheet.title || targetSheet.title_ar || '').toLowerCase().trim();
+          matches = subjQuestions.filter(q => {
+            const qTitle = (q.sheet_title_en || q.sheet_title || q.sheet_title_ar || '').toLowerCase().trim();
+            return qTitle && normTarget && (qTitle.includes(normTarget) || normTarget.includes(qTitle));
+          });
+        }
+      }
+      if (matches.length === 0) {
+        matches = subjQuestions;
+      }
+    }
+
+    return matches;
+  },
+
+  resumeQuizSession(sheetId, subjectId) {
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+
+    // 1. Look for existing session
+    let session = QuestionsPage.getSessionForSheet(sheetId, subjectId);
+    if (!sheetId && session?.sheet_id) sheetId = session.sheet_id;
+    if (!subjectId && session?.subject_id) subjectId = session.subject_id;
+
+    // 2. Fetch questions
+    let questions = QuestionsPage.getQuestionsForSheet(sheetId, subjectId);
+    if ((!questions || questions.length === 0) && subjectId) {
+      questions = QuestionsPage.getQuestions().filter(q => q.subject_id === subjectId);
+    }
+
+    if (!questions || questions.length === 0) {
+      if (window.Toast) {
+        window.Toast.show(isAr ? 'لم يتم العثور على أسئلة لهذا الشيت' : 'No questions found for this sheet', 'info');
+      }
+      return;
+    }
+
+    // 3. Resolve subject & sheet titles
+    const firstQ = questions[0];
+    if (!subjectId && firstQ.subject_id) {
+      subjectId = firstQ.subject_id;
+      QuestionsPage.selectedSubjectId = subjectId;
+      QuestionsPage.renderCurrentView();
+    }
+
+    let subjectTitle = session?.subject_title;
+    if (!subjectTitle) {
+      let subjName = '';
+      if (window.DATA && typeof window.DATA.getSubjects === 'function') {
+        const subjObj = window.DATA.getSubjects().find(s => s.id === subjectId);
+        if (subjObj) subjName = isAr ? subjObj.name_ar : subjObj.name_en;
+      }
+      if (!subjName) subjName = isAr ? firstQ.subject_name_ar : firstQ.subject_name_en;
+      const shTitle = isAr ? (firstQ.sheet_title_ar || firstQ.sheet_title) : (firstQ.sheet_title_en || firstQ.sheet_title);
+      subjectTitle = `${subjName || 'Questions'} • ${shTitle || 'Sheet'}`;
+    }
+
+    // 4. Create session if it doesn't exist
+    if (!session) {
+      session = QuestionsPage.createSession(questions, subjectTitle, sheetId, subjectId);
+      QuestionsPage.saveSession(session);
+    }
+
+    // 5. Calculate resume index
+    let resumeIndex = 0;
+    if (session.completed) {
+      resumeIndex = 0;
+    } else {
+      const firstUnanswered = questions.findIndex(q => !session.answers || !session.answers[q.id]);
+      if (firstUnanswered !== -1) {
+        resumeIndex = firstUnanswered;
+      } else if (typeof session.current_index === 'number') {
+        resumeIndex = Math.min(Math.max(session.current_index, 0), questions.length - 1);
+      }
+    }
+
+    // 6. Launch Runner directly
+    QuestionsPage.launchQuizRunner(questions, subjectTitle, { session, resumeIndex });
+  },
 
   getQuestions() {
     if (window.DATA && Array.isArray(window.DATA.questions) && window.DATA.questions.length > 0) {
@@ -102,6 +283,9 @@ const QuestionsPage = {
   render(container, queryParams) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
     const initialSubject = queryParams?.get('subject') || null;
+    const sheetId = queryParams?.get('sheet') || null;
+    const isResume = queryParams?.get('resume') === 'true';
+
     if (initialSubject && initialSubject !== 'all') {
       QuestionsPage.selectedSubjectId = initialSubject;
     } else {
@@ -338,6 +522,11 @@ const QuestionsPage = {
 
     QuestionsPage.bindEvents(container);
     QuestionsPage.renderCurrentView();
+
+    // Deep-link Resume Check
+    if (isResume || sheetId) {
+      QuestionsPage.resumeQuizSession(sheetId, QuestionsPage.selectedSubjectId);
+    }
   },
 
   bindEvents(container) {
@@ -403,9 +592,21 @@ const QuestionsPage = {
     document.getElementById('dt-btn-next')?.addEventListener('click', () => {
       if (QuestionsPage.activeQuizIndex < QuestionsPage.activeQuizList.length - 1) {
         QuestionsPage.activeQuizIndex++;
+        if (QuestionsPage.activeSession) {
+          QuestionsPage.activeSession.current_index = QuestionsPage.activeQuizIndex;
+          QuestionsPage.saveSession(QuestionsPage.activeSession);
+        }
         QuestionsPage.renderModalQuestion();
         if (window.SoundFX) window.SoundFX.play('tap');
       } else {
+        if (QuestionsPage.activeSession) {
+          const total = QuestionsPage.activeQuizList.length;
+          const answeredCount = Object.keys(QuestionsPage.activeSession.answers || {}).length;
+          if (answeredCount >= total) {
+            QuestionsPage.activeSession.completed = true;
+          }
+          QuestionsPage.saveSession(QuestionsPage.activeSession);
+        }
         if (window.SoundFX) window.SoundFX.play('victory');
         if (window.Toast) window.Toast.show(isAr ? '🎉 أكملت جميع أسئلة هذا الاختبار بنجاح!' : 'You completed all questions!', 'success');
         QuestionsPage.closeQuizModal();
@@ -415,6 +616,10 @@ const QuestionsPage = {
     document.getElementById('dt-btn-prev')?.addEventListener('click', () => {
       if (QuestionsPage.activeQuizIndex > 0) {
         QuestionsPage.activeQuizIndex--;
+        if (QuestionsPage.activeSession) {
+          QuestionsPage.activeSession.current_index = QuestionsPage.activeQuizIndex;
+          QuestionsPage.saveSession(QuestionsPage.activeSession);
+        }
         QuestionsPage.renderModalQuestion();
       }
     });
@@ -1101,12 +1306,39 @@ const QuestionsPage = {
   },
 
   // 4. LEVEL 3: DENTISTOIRE-STYLE FOCUSED MODAL QUIZ RUNNER
-  launchQuizRunner(questionsList, subjectTitle) {
+  launchQuizRunner(questionsList, subjectTitle, options = {}) {
     if (!Array.isArray(questionsList) || questionsList.length === 0) return;
     QuestionsPage.activeQuizList = questionsList;
-    QuestionsPage.activeQuizIndex = 0;
     QuestionsPage.activeSubjectTitle = subjectTitle;
     QuestionsPage.kuroExplanationOpen = false;
+
+    // Resolve or initialize session
+    if (options.session) {
+      QuestionsPage.activeSession = options.session;
+    } else {
+      const firstQ = questionsList[0];
+      const existing = firstQ ? QuestionsPage.getSessionForSheet(firstQ.sheet_id, firstQ.subject_id) : null;
+      if (existing) {
+        QuestionsPage.activeSession = existing;
+      } else {
+        QuestionsPage.activeSession = QuestionsPage.createSession(
+          questionsList,
+          subjectTitle,
+          firstQ?.sheet_id,
+          firstQ?.subject_id
+        );
+        QuestionsPage.saveSession(QuestionsPage.activeSession);
+      }
+    }
+
+    if (typeof options.resumeIndex === 'number') {
+      QuestionsPage.activeQuizIndex = Math.min(Math.max(options.resumeIndex, 0), questionsList.length - 1);
+    } else if (QuestionsPage.activeSession && !QuestionsPage.activeSession.completed) {
+      const firstUnanswered = questionsList.findIndex(q => !QuestionsPage.activeSession.answers || !QuestionsPage.activeSession.answers[q.id]);
+      QuestionsPage.activeQuizIndex = (firstUnanswered !== -1) ? firstUnanswered : (QuestionsPage.activeSession.current_index || 0);
+    } else {
+      QuestionsPage.activeQuizIndex = 0;
+    }
 
     const overlay = document.getElementById('dt-quiz-runner-modal');
     if (overlay) {
@@ -1122,6 +1354,18 @@ const QuestionsPage = {
       overlay.style.display = 'none';
       document.body.style.overflow = '';
     }
+
+    // Clean up URL hash if it was a deep-link
+    try {
+      const rawHash = window.location.hash.slice(1) || '';
+      if (rawHash.includes('resume=true') || rawHash.includes('sheet=')) {
+        const subj = QuestionsPage.selectedSubjectId;
+        const newHash = subj ? `#/questions?subject=${encodeURIComponent(subj)}` : '#/questions';
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', newHash);
+        }
+      }
+    } catch (e) {}
   },
 
   renderModalQuestion() {
@@ -1129,30 +1373,21 @@ const QuestionsPage = {
     const q = QuestionsPage.activeQuizList[QuestionsPage.activeQuizIndex];
     if (!q) return;
 
-    QuestionsPage.hasCurrentQuestionBeenAnswered = false;
-    QuestionsPage.isCurrentQuestionAnswerCorrect = false;
+    const session = QuestionsPage.activeSession;
+    const existingAns = session?.answers?.[q.id];
+
+    QuestionsPage.hasCurrentQuestionBeenAnswered = Boolean(existingAns);
+    QuestionsPage.isCurrentQuestionAnswerCorrect = Boolean(existingAns?.is_correct);
 
     const total = QuestionsPage.activeQuizList.length;
     const current = QuestionsPage.activeQuizIndex + 1;
     const percent = Math.round((current / total) * 100);
 
-    // Track active question session for Home dashboard Continue Studying
-    try {
-      const shName = q.sheet_title_en || q.sheet_title || q.sheet_title_ar || 'Sheet 1';
-      const subjName = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en) || '';
-      const sessionRecord = {
-        sheet_id: q.sheet_id || '',
-        sheet_title: shName,
-        sheet_title_ar: q.sheet_title_ar || q.sheet_title || shName,
-        sheet_title_en: q.sheet_title_en || q.sheet_title || shName,
-        subject_title: subjName,
-        total: total,
-        answered: QuestionsPage.activeQuizIndex,
-        percent: Math.round((QuestionsPage.activeQuizIndex / total) * 100),
-        timestamp: Date.now()
-      };
-      localStorage.setItem('kf_active_question_session', JSON.stringify(sessionRecord));
-    } catch (e) {}
+    // Sync session current_index
+    if (session) {
+      session.current_index = QuestionsPage.activeQuizIndex;
+      QuestionsPage.saveSession(session);
+    }
 
     const tagEl = document.getElementById('dt-modal-subject-tag');
     if (tagEl) tagEl.textContent = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en);
@@ -1181,6 +1416,24 @@ const QuestionsPage = {
 
     const titleEl = document.getElementById('dt-modal-q-title');
     if (titleEl) titleEl.textContent = q.text_en || q.text || q.text_ar || '';
+
+    // Next button label update
+    const nextBtn = document.getElementById('dt-btn-next');
+    if (nextBtn) {
+      const nextBtnSpan = nextBtn.querySelector('span');
+      const isLast = (QuestionsPage.activeQuizIndex === total - 1);
+      if (nextBtnSpan) {
+        nextBtnSpan.textContent = isLast ? (isAr ? 'إنهاء الاختبار' : 'Finish Quiz') : (isAr ? 'التالي' : 'Next');
+      }
+    }
+
+    // Prev button state
+    const prevBtn = document.getElementById('dt-btn-prev');
+    if (prevBtn) {
+      prevBtn.disabled = (QuestionsPage.activeQuizIndex === 0);
+      prevBtn.style.opacity = (QuestionsPage.activeQuizIndex === 0) ? '0.5' : '1';
+      prevBtn.style.cursor = (QuestionsPage.activeQuizIndex === 0) ? 'not-allowed' : 'pointer';
+    }
 
     // Translation toggle setup for this question
     const transBox = document.getElementById('dt-modal-q-translation');
@@ -1247,10 +1500,21 @@ const QuestionsPage = {
     } else {
       if (expPane) expPane.style.display = 'none';
       if (trigger) trigger.setAttribute('aria-expanded', 'false');
-      if (mascotImg) {
-        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
+
+      if (existingAns) {
+        if (existingAns.is_correct) {
+          if (mascotImg) mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('happy')) || 'assets/characters/kuro/Kuro-Happy.png';
+          if (bubbleText) bubbleText.textContent = isAr ? '🎉 إجابة صحيحة! انقر للشرح والصفحة' : '🎉 Correct! Click for explanation';
+        } else {
+          if (mascotImg) mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
+          if (bubbleText) bubbleText.textContent = isAr ? '💡 انقر على كورو لمراجعة الشرح والصفحة' : '💡 Click Kuro to review explanation';
+        }
+      } else {
+        if (mascotImg) {
+          mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
+        }
+        if (bubbleText) bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
       }
-      if (bubbleText) bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
     }
 
     // Render options (Always in English!)
@@ -1261,43 +1525,70 @@ const QuestionsPage = {
     const correctIdx = typeof q.correct_index === 'number' ? q.correct_index : 0;
     const optLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-    optBox.innerHTML = options.map((opt, idx) => `
-      <button type="button" class="dt-quiz-option" data-opt-idx="${idx}">
-        <span style="width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); font-size: 0.8rem; font-weight: 800; font-family: monospace; color: var(--text-secondary);">
-          ${optLetters[idx] || idx + 1}
-        </span>
-        <span style="flex: 1; text-align: start; direction: ltr;">${opt}</span>
-        <span class="dt-opt-status-icon" style="font-weight: 900; font-size: 1.1rem; display: none;"></span>
-      </button>
-    `).join('');
+    optBox.innerHTML = options.map((opt, idx) => {
+      let extraClass = '';
+      let statusIconHtml = '<span class="dt-opt-status-icon" style="font-weight: 900; font-size: 1.1rem; display: none;"></span>';
+      let disabledAttr = '';
+
+      if (existingAns) {
+        disabledAttr = 'disabled';
+        if (idx === correctIdx) {
+          extraClass = 'correct';
+          statusIconHtml = `<span class="dt-opt-status-icon" style="font-weight: 900; font-size: 1.1rem; display: inline-block; color: #10B981;">✓</span>`;
+        } else if (idx === existingAns.selected_index && !existingAns.is_correct) {
+          extraClass = 'incorrect';
+          statusIconHtml = `<span class="dt-opt-status-icon" style="font-weight: 900; font-size: 1.1rem; display: inline-block; color: #EF4444;">✕</span>`;
+        }
+      }
+
+      return `
+        <button type="button" class="dt-quiz-option ${extraClass}" data-opt-idx="${idx}" ${disabledAttr}>
+          <span style="width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); font-size: 0.8rem; font-weight: 800; font-family: monospace; color: var(--text-secondary);">
+            ${optLetters[idx] || idx + 1}
+          </span>
+          <span style="flex: 1; text-align: start; direction: ltr;">${opt}</span>
+          ${statusIconHtml}
+        </button>
+      `;
+    }).join('');
 
     // Option click handler
     optBox.querySelectorAll('.dt-quiz-option').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (btn.disabled || QuestionsPage.hasCurrentQuestionBeenAnswered) return;
+
         const selectedIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
         const isCorrect = (selectedIdx === correctIdx);
-        
+
         QuestionsPage.hasCurrentQuestionBeenAnswered = true;
         QuestionsPage.isCurrentQuestionAnswerCorrect = isCorrect;
 
-        try {
-          const total = QuestionsPage.activeQuizList ? QuestionsPage.activeQuizList.length : 0;
-          const answered = QuestionsPage.activeQuizIndex + 1;
-          const shName = q.sheet_title_en || q.sheet_title || q.sheet_title_ar || 'Sheet 1';
-          const subjName = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en) || '';
-          const sessionRecord = {
-            sheet_id: q.sheet_id || '',
-            sheet_title: shName,
-            sheet_title_ar: q.sheet_title_ar || q.sheet_title || shName,
-            sheet_title_en: q.sheet_title_en || q.sheet_title || shName,
-            subject_title: subjName,
-            total: total,
-            answered: answered,
-            percent: Math.round((answered / total) * 100),
-            timestamp: Date.now()
-          };
-          localStorage.setItem('kf_active_question_session', JSON.stringify(sessionRecord));
-        } catch (e) {}
+        // Record in activeSession
+        let sess = QuestionsPage.activeSession;
+        if (!sess) {
+          sess = QuestionsPage.createSession(QuestionsPage.activeQuizList, QuestionsPage.activeSubjectTitle, q.sheet_id, q.subject_id);
+        }
+        if (!sess.answers) sess.answers = {};
+        sess.answers[q.id] = {
+          selected_index: selectedIdx,
+          is_correct: isCorrect,
+          correct_index: correctIdx,
+          timestamp: Date.now()
+        };
+
+        const totalQuestions = QuestionsPage.activeQuizList ? QuestionsPage.activeQuizList.length : 0;
+        const answeredCount = Object.keys(sess.answers).length;
+        const scoreCount = Object.values(sess.answers).filter(a => a.is_correct).length;
+        const isFinished = answeredCount >= totalQuestions;
+
+        sess.total = totalQuestions;
+        sess.answered = answeredCount;
+        sess.score = scoreCount;
+        sess.percent = Math.round((answeredCount / totalQuestions) * 100);
+        sess.completed = isFinished;
+        sess.current_index = QuestionsPage.activeQuizIndex;
+
+        QuestionsPage.saveSession(sess);
 
         if (window.SoundFX) {
           if (isCorrect) {
