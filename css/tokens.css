@@ -10,17 +10,17 @@
 :root,
 [data-theme="kuro"],
 [data-theme="light"] {
-  /* Kuro Obsidian Persistent Sidebar */
-  --bg-sidebar: #14151E;
-  --bg-sidebar-hover: #1E1F2B;
-  --bg-sidebar-active: #242636;
-  --sidebar-text: #A6ADC8;
-  --sidebar-text-muted: #6C7086;
-  --sidebar-text-active: #FFFFFF;
-  --sidebar-border: #242636;
-  --sidebar-indicator: #C84343; /* Kuro Crimson indicator line */
-  --sidebar-indicator-glow: 0 0 12px rgba(200, 67, 67, 0.75);
-  --sidebar-width: 265px;
+  /* Kuro Warm Ivory Persistent Sidebar (Light Mode) */
+  --bg-sidebar: #FAF7F2;
+  --bg-sidebar-hover: #F2ECE1;
+  --bg-sidebar-active: #F8EDEF;
+  --sidebar-text: #24181B;
+  --sidebar-text-muted: #756966;
+  --sidebar-text-active: #7E1D2A;
+  --sidebar-border: #EAE3D6;
+  --sidebar-indicator: #7E1D2A;
+  --sidebar-indicator-glow: 0 0 10px rgba(126, 29, 42, 0.25);
+  --sidebar-width: 280px;
 
   /* Kuro Warm Ivory Surfaces (Cozy Study Light Mode) */
   --bg-app: #F8F5EE;

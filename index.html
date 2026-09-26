@@ -52,12 +52,12 @@
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/tokens.css?v=10.3" />
   <link rel="stylesheet" href="css/base.css?v=11.5" />
-  <link rel="stylesheet" href="css/layout.css?v=12.7" />
+  <link rel="stylesheet" href="css/layout.css?v=12.8" />
   <link rel="stylesheet" href="css/components.css?v=10.3" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=12.7" />
+  <link rel="stylesheet" href="css/polish.css?v=12.8" />
 </head>
-<body id="app-body" data-layout="dark-sidebar">
+<body id="app-body">
   <!-- ==========================================================================
        THE FLOATING INTERACTIVE SUBJECT MODAL (Backdrop & Container with Blur)
        ========================================================================== -->
@@ -76,23 +76,21 @@
        APP MASTER LAYOUT (Academia Dark Sidebar + Content Wrapper)
        ========================================================================== -->
   <div class="app-layout">
-    <!-- 1. ACADEMIA DARK SIDEBAR (#1E1E2D) -->
+    <!-- 1. ACADEMIA WARM IVORY SIDEBAR -->
     <aside id="app-sidebar" class="app-sidebar" aria-label="Main Navigation" aria-hidden="true">
       <!-- Sidebar Brand Header -->
       <div class="sidebar-header">
         <a href="#/" class="sidebar-brand">
-          <div class="sidebar-brand-emblem" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0284C7, #0369A1); box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); border-radius: 11px;">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #FFFFFF;">
-              <path d="M12 2C7.5 2 4 4.5 4 8c0 3 1.5 6 3 9 1 2 2 5 3 5s2-3 2-5c0-1.5.5-2 0-3-.5-1-1-1.5-1-2.5 0-1.5 1-2.5 1-2.5s1 1 1 2.5c0 1-.5 1.5-1 2.5-.5 1 0 1.5 0 3 0 2 1 5 2 5s2-3 3-5c1.5-3 3-6 3-9 0-3.5-3.5-6-8-6z" fill="rgba(255,255,255,0.18)"/>
-            </svg>
+          <div class="sidebar-brand-emblem">
+            <img id="sidebar-brand-avatar-img" class="sidebar-brand-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" width="34" height="34" loading="lazy" />
           </div>
           <div class="sidebar-brand-meta">
             <span class="sidebar-brand-title">Kuro Fangs</span>
-            <span class="sidebar-brand-sub" id="sidebar-brand-sub">Dentistry • Year 3</span>
+            <span class="sidebar-brand-sub" id="sidebar-brand-sub">Faculty of Dentistry — Year 3</span>
           </div>
         </a>
         <button id="sidebar-close-btn" class="sidebar-close-btn" aria-label="Close menu">
-          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          <i data-lucide="x" style="width: 17px; height: 17px;"></i>
         </button>
       </div>
 
@@ -107,8 +105,8 @@
         </a>
 
         <a href="#/sheets" class="sidebar-menu-item" data-route="/sheets">
-          <span class="sidebar-menu-icon-wrap"><img src="assets/icons/sheets_cat.png" alt="Sheets" class="sidebar-cat-icon" width="20" height="20" loading="lazy" /></span>
-          <span class="sidebar-menu-text" id="side-nav-sheets">Sheets</span>
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="book-open"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-sheets">Sheets & Lectures</span>
         </a>
 
         <a href="#/schedules" class="sidebar-menu-item" data-route="/schedules">
@@ -118,30 +116,30 @@
 
         <a href="#/questions" class="sidebar-menu-item" data-route="/questions">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="help-circle"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-questions">Questions</span>
+          <span class="sidebar-menu-text" id="side-nav-questions">Question Bank</span>
         </a>
 
         <a href="#/recordings" class="sidebar-menu-item" data-route="/recordings">
-          <span class="sidebar-menu-icon-wrap"><img src="assets/icons/recordings_icon.png" alt="Recordings" class="sidebar-cat-icon" width="20" height="20" loading="lazy" /></span>
-          <span class="sidebar-menu-text" id="side-nav-videos">Audio</span>
+          <span class="sidebar-menu-icon-wrap"><i data-lucide="headphones"></i></span>
+          <span class="sidebar-menu-text" id="side-nav-videos">Audio Recordings</span>
         </a>
 
-        <!-- SCHEDULES Section -->
-        <div class="sidebar-section-title" id="side-sec-myspace">SCHEDULES</div>
+        <!-- MY SPACE Section -->
+        <div class="sidebar-section-title" id="side-sec-myspace">MY SPACE</div>
 
         <a href="#/lecture-schedule" class="sidebar-menu-item" data-route="/lecture-schedule">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="book-open"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-lecture-schedule">جدول المحاضرات النظري</span>
+          <span class="sidebar-menu-text" id="side-nav-lecture-schedule">Theory Lectures Schedule</span>
         </a>
 
         <a href="#/practical-schedule" class="sidebar-menu-item" data-route="/practical-schedule">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="microscope"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-practical-schedule">جدول المعامل والعملي</span>
+          <span class="sidebar-menu-text" id="side-nav-practical-schedule">Clinical & Lab Schedule</span>
         </a>
 
         <a href="#/exams" class="sidebar-menu-item" data-route="/exams">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="calendar-check"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-exams-schedule">جداول الامتحانات الرسمية</span>
+          <span class="sidebar-menu-text" id="side-nav-exams-schedule">Official Exam Schedules</span>
         </a>
 
         <!-- MORE Section -->
@@ -149,44 +147,44 @@
 
         <a href="#/rewards" class="sidebar-menu-item" data-route="/rewards">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="sparkles"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-rewards">Mascot Hub</span>
-          <span class="sidebar-soon-badge" id="side-soon-rewards">قريباً</span>
+          <span class="sidebar-menu-text" id="side-nav-rewards">Fox Mascot Hub</span>
+          <span class="sidebar-soon-badge" id="side-soon-rewards">Soon</span>
         </a>
 
         <a href="#/games" class="nav-item sidebar-menu-item" data-route="/games">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="gamepad-2"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-games">Games</span>
-          <span class="sidebar-soon-badge" id="side-soon-games">قريباً</span>
+          <span class="sidebar-menu-text" id="side-nav-games">Arcade & Games</span>
+          <span class="sidebar-soon-badge" id="side-soon-games">Soon</span>
         </a>
 
         <!-- Admin Portal -->
         <a href="#/admin" class="sidebar-menu-item sidebar-admin-link" data-route="/admin">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="shield-check"></i></span>
-          <span class="sidebar-menu-text" id="side-nav-admin">Admin Portal</span>
+          <span class="sidebar-menu-text" id="side-nav-admin">Faculty Admin Portal</span>
         </a>
       </nav>
 
-      <!-- Sidebar Footer (Student Profile & Equipped Mascot) -->
+      <!-- Sidebar Footer (Student Profile & Controls) -->
       <div class="sidebar-footer">
-        <div class="sidebar-quick-settings" style="display: flex; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08);">
-          <button type="button" id="side-lang-toggle-btn" class="side-quick-setting-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #FFF; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+        <div class="sidebar-quick-settings">
+          <button type="button" id="side-lang-toggle-btn" class="side-quick-setting-btn" aria-label="Toggle language">
             <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
             <span id="side-lang-btn-text">AR</span>
           </button>
-          <button type="button" id="side-theme-toggle-btn" class="side-quick-setting-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #FFF; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+          <button type="button" id="side-theme-toggle-btn" class="side-quick-setting-btn" aria-label="Toggle theme">
             <i data-lucide="moon" id="side-theme-icon" style="width: 14px; height: 14px;"></i>
           </button>
-          <button type="button" id="side-sound-toggle-btn" class="side-quick-setting-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #FFF; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+          <button type="button" id="side-sound-toggle-btn" class="side-quick-setting-btn" aria-label="Toggle sound">
             <i data-lucide="volume-2" id="side-sound-icon" style="width: 14px; height: 14px;"></i>
           </button>
         </div>
         <a href="#/profile" class="sidebar-user-card" id="sidebar-user-card-link" title="الملف الشخصي وإعدادات الحساب | Student Profile">
           <div class="sidebar-user-avatar">
-            <img id="sidebar-user-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" class="mascot-avatar-img sidebar-mascot" width="40" height="40" loading="lazy" />
+            <img id="sidebar-user-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" class="mascot-avatar-img sidebar-mascot" width="38" height="38" loading="lazy" />
           </div>
           <div class="sidebar-user-meta">
-            <span class="sidebar-user-name">Dental Student</span>
-            <span class="sidebar-user-sub" id="sidebar-user-sub">Year 3 Dentistry</span>
+            <span class="sidebar-user-name">Kuro Student</span>
+            <span class="sidebar-user-sub" id="sidebar-user-sub">Year 3 — Faculty of Dentistry</span>
           </div>
         </a>
       </div>
@@ -327,6 +325,6 @@
   <script src="js/pages/profile.js?v=10.2"></script>
   <script src="js/pages/settings.js?v=10.9"></script>
   <script src="js/pages/secondary.js?v=10.2"></script>
-  <script src="js/app.js?v=12.7"></script>
+  <script src="js/app.js?v=12.8"></script>
 </body>
 </html>

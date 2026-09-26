@@ -17,9 +17,20 @@ const rootDir = path.resolve(__dirname, '..');
 const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
 const polishCss = fs.readFileSync(path.join(rootDir, 'css', 'polish.css'), 'utf8');
 const layoutCss = fs.readFileSync(path.join(rootDir, 'css', 'layout.css'), 'utf8');
+const tokensCss = fs.readFileSync(path.join(rootDir, 'css', 'tokens.css'), 'utf8');
 const appJs = fs.readFileSync(path.join(rootDir, 'js', 'app.js'), 'utf8');
 
 const tests = [
+  // ─── 0. Design System Alignment (Warm Cream & Burgundy) ───
+  {
+    category: 'Design System Alignment',
+    name: 'Sidebar tokens use warm ivory (#FAF7F2), warm border (#EAE3D6), and burgundy accent (#7E1D2A)',
+    pass: tokensCss.includes('--bg-sidebar: #FAF7F2;') &&
+          tokensCss.includes('--sidebar-border: #EAE3D6;') &&
+          tokensCss.includes('--sidebar-text-active: #7E1D2A;') &&
+          polishCss.includes('background: #FAF7F2 !important')
+  },
+
   // ─── 1. Z-Index Hierarchy & Blur Isolation ───
   {
     category: 'Z-Index & Blur Isolation',
@@ -43,7 +54,7 @@ const tests = [
     name: 'Backdrop applies subtle 4px blur without affecting sidebar drawer',
     pass: polishCss.includes('backdrop-filter: blur(4px) !important') &&
           polishCss.includes('-webkit-backdrop-filter: blur(4px) !important') &&
-          polishCss.includes('background: rgba(15, 23, 42, 0.45) !important')
+          polishCss.includes('background: rgba(15, 23, 42, 0.28) !important')
   },
 
   // ─── 2. Responsive Drawer Architecture (< 1200px) ───
@@ -82,7 +93,7 @@ const tests = [
     pass: polishCss.includes('html[dir="rtl"] .app-sidebar') &&
           polishCss.includes('right: 0 !important') &&
           polishCss.includes('transform: translateX(100%) !important') &&
-          polishCss.includes('border-left: 1px solid rgba(255, 255, 255, 0.08) !important')
+          polishCss.includes('border-left: 1px solid #EAE3D6 !important')
   },
   {
     category: 'Responsive Drawer Architecture',
@@ -126,10 +137,10 @@ const tests = [
   },
   {
     category: 'Markup & Accessibility',
-    name: 'Stylesheets and app.js bumped to v=12.7 cache busters',
-    pass: indexHtml.includes('css/layout.css?v=12.7') &&
-          indexHtml.includes('css/polish.css?v=12.7') &&
-          indexHtml.includes('js/app.js?v=12.7')
+    name: 'Stylesheets and app.js bumped to v=12.8 cache busters',
+    pass: indexHtml.includes('css/layout.css?v=12.8') &&
+          indexHtml.includes('css/polish.css?v=12.8') &&
+          indexHtml.includes('js/app.js?v=12.8')
   },
 
   // ─── 4. JavaScript Controls & Event Handling ───

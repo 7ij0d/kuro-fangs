@@ -526,6 +526,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (e) {}
 
+    // 1.0 Sidebar Brand Emblem Avatar
+    const sideBrandAvatar = document.getElementById('sidebar-brand-avatar-img');
+    if (sideBrandAvatar) {
+      sideBrandAvatar.src = charImg;
+      sideBrandAvatar.alt = charName;
+    }
+
     // 1. Sidebar user avatar
     const sideAvatar = document.getElementById('sidebar-user-avatar-img');
     if (sideAvatar) {
