@@ -58,10 +58,10 @@ const tests = [
       sheetDetailCode.includes('kn-btn-header-more'),
   },
 
-  // 2. Clean Centered Top Toolbar & Exact Tool Order (No Horizontal Scroll Strip)
+  // 2. Clean Centered Top Toolbar & Exact Tool Order (Bookmark -> Fullscreen at end)
   {
     category: 'Clean Centered Top Toolbar',
-    name: 'Toolbar follows exact order: Select, Pen, Highlighter, Eraser, Text, Image, Note, Bookmark, More (no AI, Outline, or Shapes clutter)',
+    name: 'Toolbar follows exact order: Select, Pen, Highlighter, Eraser, Text, Image, Note, Bookmark, Fullscreen (AI, More, and extra panel icon completely removed, Fullscreen is last)',
     pass: (() => {
       const order = [
         'data-tool="select"',
@@ -72,7 +72,7 @@ const tests = [
         'data-tool="image"',
         'data-tool="notes"',
         'id="kn-toolbar-bookmark"',
-        'id="kn-toolbar-more"',
+        'id="kn-btn-reading-mode"',
       ];
       let lastIdx = -1;
       for (const token of order) {
@@ -80,7 +80,15 @@ const tests = [
         if (idx === -1 || idx < lastIdx) return false;
         lastIdx = idx;
       }
-      return true;
+      const toolbarSlice = sheetDetailCode.slice(
+        sheetDetailCode.indexOf('id="kn-toolbar"'),
+        sheetDetailCode.indexOf('id="kn-tool-popover"')
+      );
+      const noAiInToolbar = !toolbarSlice.includes('data-tool="ai"') && !toolbarSlice.includes('id="kn-btn-ai"');
+      const noMoreInToolbar = !toolbarSlice.includes('id="kn-toolbar-more"');
+      const noSidebarInToolbar = !toolbarSlice.includes('id="kn-btn-right-sidebar"');
+      const fsIsLast = toolbarSlice.indexOf('id="kn-btn-reading-mode"') > toolbarSlice.indexOf('id="kn-toolbar-bookmark"');
+      return noAiInToolbar && noMoreInToolbar && noSidebarInToolbar && fsIsLast;
     })(),
   },
   {

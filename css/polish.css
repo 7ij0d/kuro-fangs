@@ -12351,6 +12351,20 @@ a:focus:not(:focus-visible) {
   cursor: not-allowed;
 }
 
+.kn-fullscreen-btn {
+  width: 34px;
+  min-width: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.kn-fullscreen-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
 .kn-tool-color-dot {
   width: 7px;
   height: 7px;

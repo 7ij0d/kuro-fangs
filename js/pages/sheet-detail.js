@@ -627,25 +627,12 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             <span class="kn-tool-label">Bookmark</span>
           </button>
 
-          <!-- 9. More / Secondary Actions -->
-          <div class="kn-dropdown-wrap kn-group-extra">
-            <button class="kn-tool-btn kn-pill-tool" id="kn-toolbar-more" title="More Tool Options">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
-              <span class="kn-tool-label kn-more-label">More</span>
-            </button>
-            <div class="kn-dropdown-menu" id="kn-toolbar-more-menu">
-              <button class="kn-dropdown-item" data-more-action="select-all"><span>Select All on Page (Ctrl+A)</span></button>
-              <button class="kn-dropdown-item" data-more-action="clear-page"><span>Clear Page Annotations</span></button>
-              <button class="kn-dropdown-item" data-more-action="rotate-right"><span>Rotate Page 90°</span></button>
-              <button class="kn-dropdown-item" data-more-action="focus-mode"><span>Focus Reading Mode</span></button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Hidden legacy buttons preserved for backwards-compatible hooks -->
-        <div class="kn-toolbar-end" style="display:none;">
-          <button class="kn-tool-btn" id="kn-btn-reading-mode" title="Focus Mode"></button>
-          <button class="kn-tool-btn" id="kn-btn-right-sidebar" title="Notes Panel"></button>
+          <!-- 9. Fullscreen / Expand (Final button at the end of toolbar) -->
+          <button class="kn-tool-btn kn-pill-tool kn-fullscreen-btn" id="kn-btn-reading-mode" title="Fullscreen / Focus Reading Mode" aria-label="Fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -4499,25 +4486,56 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     };
   });
 
-  // Focus / Distraction-Free Reading Mode
+  // Fullscreen / Distraction-Free Reading Mode
   const toggleReadingMode = (force) => {
     state.readingMode = force !== undefined ? force : !state.readingMode;
-    document.getElementById('kuro-notes-workspace')?.classList.toggle('kn-reading-mode', state.readingMode);
+    const ws = document.getElementById('kuro-notes-workspace');
+    ws?.classList.toggle('kn-reading-mode', state.readingMode);
     const pill = document.getElementById('kn-reading-pill');
     if (pill) pill.style.display = state.readingMode ? 'flex' : 'none';
+
+    const fsBtn = document.getElementById('kn-btn-reading-mode');
+    if (fsBtn) {
+      fsBtn.classList.toggle('active', state.readingMode);
+      fsBtn.setAttribute('aria-pressed', state.readingMode ? 'true' : 'false');
+    }
+
+    try {
+      if (state.readingMode) {
+        if (!document.fullscreenElement && ws && ws.requestFullscreen) {
+          ws.requestFullscreen().catch(() => {});
+        }
+      } else {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    } catch (e) {}
   };
-  document.getElementById('kn-btn-reading-mode').onclick = () => toggleReadingMode();
-  document.getElementById('kn-exit-reading-btn').onclick = () => toggleReadingMode(false);
+
+  const readingModeBtn = document.getElementById('kn-btn-reading-mode');
+  if (readingModeBtn) readingModeBtn.onclick = () => toggleReadingMode();
+  const exitReadingBtn = document.getElementById('kn-exit-reading-btn');
+  if (exitReadingBtn) exitReadingBtn.onclick = () => toggleReadingMode(false);
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && state.readingMode) {
+      toggleReadingMode(false);
+    }
+  });
 
   // Header More Menu & Toolbar More Menu
   document.getElementById('kn-btn-header-more').onclick = (e) => {
     e.stopPropagation();
     document.getElementById('kn-header-more-menu')?.classList.toggle('open');
   };
-  document.getElementById('kn-toolbar-more').onclick = (e) => {
-    e.stopPropagation();
-    document.getElementById('kn-toolbar-more-menu')?.classList.toggle('open');
-  };
+  const tbMoreBtn = document.getElementById('kn-toolbar-more');
+  if (tbMoreBtn) {
+    tbMoreBtn.onclick = (e) => {
+      e.stopPropagation();
+      document.getElementById('kn-toolbar-more-menu')?.classList.toggle('open');
+    };
+  }
 
   document.querySelectorAll('[data-doc-action]').forEach((btn) => {
     btn.onclick = () => {
