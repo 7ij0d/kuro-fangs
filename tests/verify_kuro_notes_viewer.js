@@ -354,6 +354,59 @@ const tests = [
       sheetDetailCode.includes('[titleInp, bodyInp, pinBtn, collapseBtn, delBtn].forEach') &&
       sheetDetailCode.includes("['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'dblclick', 'touchstart', 'touchend']"),
   },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // GLOBAL INTERACTION MODE TESTS (BROWSE MODE 👁 <-> EDIT MODE ✎)
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    category: 'MODE TEST 1 — Default Mode (NEW SHEET = BROWSE MODE)',
+    name: 'Opening any sheet starts in Browse Mode (interactionMode: "browse", .kn-is-browse-mode, #kn-btn-mode-toggle.kn-mode-browse) with Scroll, Zoom, Pinch-Zoom, Page Navigation, Search, and Bookmark active',
+    pass:
+      sheetDetailCode.includes("interactionMode: 'browse'") &&
+      sheetDetailCode.includes('class="kuro-notes-workspace kn-is-browse-mode" id="kuro-notes-workspace" data-interaction-mode="browse"') &&
+      sheetDetailCode.includes('id="kn-btn-mode-toggle"') &&
+      sheetDetailCode.includes('kn-mode-toggle-btn kn-mode-browse') &&
+      sheetDetailCode.includes('pinchStartDist') &&
+      sheetDetailCode.includes("'wheel'"),
+  },
+  {
+    category: 'MODE TEST 2 — Browse Mode Protection & Decoupled Tool State',
+    name: 'In Browse Mode, all drawing, erasing, text/note creation, selection, move/resize, image drop/paste, and undo/redo are strictly blocked, and selecting Pen in the toolbar does NOT auto-enable Edit Mode',
+    pass:
+      sheetDetailCode.includes("if (state.interactionMode !== 'edit') return;") &&
+      sheetDetailCode.includes('function syncInteractionLayersWithMode()') &&
+      sheetDetailCode.includes('const isDrawingTool = isEdit &&') &&
+      polishCss.includes('.kuro-notes-workspace.kn-is-browse-mode .kn-interaction-layer') &&
+      polishCss.includes('pointer-events: none !important;'),
+  },
+  {
+    category: 'MODE TEST 3 — Edit Mode Activation (✎ Burgundy #7E1D2A)',
+    name: 'Clicking #kn-btn-mode-toggle switches to Edit Mode (.kn-mode-edit, #7E1D2A), unlocks on-page text/note editors, and enables Pen, Highlighter, Eraser, Text, Image, Note, Select, and Undo/Redo',
+    pass:
+      sheetDetailCode.includes('function setInteractionMode(nextMode)') &&
+      sheetDetailCode.includes("setInteractionMode(state.interactionMode === 'edit' ? 'browse' : 'edit')") &&
+      polishCss.includes('.kn-mode-toggle-btn.kn-mode-edit') &&
+      polishCss.includes('background: #7E1D2A !important;'),
+  },
+  {
+    category: 'MODE TEST 4 — Switch Back to Browse Mode (Zero-Reload Instant Lock)',
+    name: 'Switching Edit Mode -> Browse Mode immediately cancels active pointers, blurs & locks text/note editors, closes tool popovers, and clears selection overlays without reloading the PDF',
+    pass:
+      sheetDetailCode.includes("window.dispatchEvent(new PointerEvent('pointercancel'))") &&
+      sheetDetailCode.includes("el.contentEditable = 'false'") &&
+      sheetDetailCode.includes('el.readOnly = true') &&
+      sheetDetailCode.includes('updateSelectionOverlayOnly(p)'),
+  },
+  {
+    category: 'MODE TEST 5 — Compact Icon-Only UI Across Desktop, Tablet/iPad & Mobile',
+    name: 'Mode Toggle is a compact Icon Button (👁 / ✎) with floating data-tooltip badge (no large text toggle) visible in Header across Desktop, Tablet/iPad (38px), and Mobile (34px)',
+    pass:
+      sheetDetailCode.includes('kn-mode-icon-browse') &&
+      sheetDetailCode.includes('kn-mode-icon-edit') &&
+      sheetDetailCode.includes('data-tooltip="Browse Mode"') &&
+      polishCss.includes('.kn-mode-toggle-btn::after') &&
+      polishCss.includes('content: attr(data-tooltip);'),
+  },
 ];
 
 let failed = 0;

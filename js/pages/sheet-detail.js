@@ -274,7 +274,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     zoom: savedView.zoom || 1.0,
     zoomMode: savedView.zoomMode || 'custom', // 'custom' | 'fit-width' | 'fit-page'
     rotation: savedView.rotation || 0, // 0, 90, 180, 270
-    // IMPORTANT: Default opening state has NO active annotation tool (pure reading mode)
+    // IMPORTANT: Global Interaction Mode defaults to 'browse' (Safe Reading & Navigation Only) on every sheet open
+    interactionMode: 'browse', // 'browse' | 'edit'
+    // Active tool is decoupled from interactionMode (selecting a tool does NOT auto-enable Edit Mode)
     activeTool: null,
     toolPopoverOpen: false,
     leftSidebarOpen: savedView.leftSidebarOpen !== undefined ? savedView.leftSidebarOpen : (isDesktop || isTablet),
@@ -412,15 +414,17 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   const updateHistoryButtons = () => {
     const uBtn = document.getElementById('kn-btn-undo');
     const rBtn = document.getElementById('kn-btn-redo');
-    if (uBtn) uBtn.disabled = state.undoStack.length === 0;
-    if (rBtn) rBtn.disabled = state.redoStack.length === 0;
+    const isEdit = state.interactionMode === 'edit';
+    if (uBtn) uBtn.disabled = !isEdit || state.undoStack.length === 0;
+    if (rBtn) rBtn.disabled = !isEdit || state.redoStack.length === 0;
   };
+  const updateUndoRedoButtons = updateHistoryButtons;
 
   // ══════════════════════════════════════════════════════════════════════════
   // RENDER MASTER SHELL HTML
   // ══════════════════════════════════════════════════════════════════════════
   container.innerHTML = `
-    <div class="kuro-notes-workspace" id="kuro-notes-workspace" dir="ltr">
+    <div class="kuro-notes-workspace kn-is-browse-mode" id="kuro-notes-workspace" data-interaction-mode="browse" dir="ltr">
       <!-- Hidden File Input for Image Tool -->
       <input type="file" id="kn-image-file-input" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" />
 
@@ -468,7 +472,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           </div>
         </div>
 
-        <!-- Center / Right Header Controls: Page Navigation + Zoom + Search + Bookmark + Share + More -->
+        <!-- Center / Right Header Controls: Page Navigation + Zoom + Search + Bookmark + Mode Toggle + Share + More -->
         <div class="kn-header-controls">
           <!-- Page Navigation Pill -->
           <div class="kn-header-pill-group kn-tool-group kn-group-pagenav" id="kn-header-pagenav">
@@ -519,6 +523,27 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
           <button class="kn-icon-btn ${state.bookmarks.includes(state.currentPage) ? 'active' : ''}" id="kn-btn-bookmark" title="Bookmark Current Page">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+          </button>
+
+          <!-- Global Interaction Mode Toggle (👁 Browse Mode ↔ ✎ Edit Mode) -->
+          <button
+            type="button"
+            class="kn-icon-btn kn-mode-toggle-btn kn-mode-browse"
+            id="kn-btn-mode-toggle"
+            data-mode="browse"
+            aria-label="Browse Mode"
+            aria-pressed="false"
+            data-tooltip="Browse Mode"
+            title="Browse Mode — Reading & Navigation"
+          >
+            <svg class="kn-mode-icon kn-mode-icon-browse" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="kn-mode-icon kn-mode-icon-edit" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+              <path d="m15 5 4 4"/>
+            </svg>
           </button>
 
           <button class="kn-btn kn-btn-primary" id="kn-btn-share" title="Share Sheet">
@@ -752,13 +777,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       card.dataset.page = p;
       card.style.width = `${width}px`;
       card.style.height = `${height}px`;
+      const isEditActive = state.interactionMode === 'edit';
       card.innerHTML = `
         <canvas class="kn-pdf-canvas" id="kn-pdf-canvas-${p}" width="${width}" height="${height}"></canvas>
         <canvas class="kn-highlight-canvas" id="kn-hl-canvas-${p}" width="${width}" height="${height}"></canvas>
         <div class="kn-text-layer" id="kn-text-layer-${p}"></div>
         <canvas class="kn-annotation-layer" id="kn-annot-canvas-${p}" width="${width}" height="${height}"></canvas>
         <div class="kn-objects-layer" id="kn-objects-layer-${p}"></div>
-        <div class="kn-interaction-layer ${state.activeTool ? 'tool-active' : ''} ${['pen', 'highlighter', 'eraser', 'shapes'].includes(state.activeTool) ? 'kn-drawing-active' : ''}" id="kn-interact-layer-${p}" data-page="${p}"></div>
+        <div class="kn-interaction-layer ${isEditActive && state.activeTool ? 'tool-active' : ''} ${isEditActive && ['pen', 'highlighter', 'eraser', 'shapes'].includes(state.activeTool) ? 'kn-drawing-active' : ''}" id="kn-interact-layer-${p}" data-page="${p}"></div>
       `;
       pagesContainer.appendChild(card);
       drawFallbackSheetPage(p, document.getElementById(`kn-pdf-canvas-${p}`));
@@ -1068,17 +1094,20 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
     if (!objLayer) return;
     objLayer.querySelectorAll('.kn-selection-box, .kn-context-bar').forEach((node) => node.remove());
+    const isEdit = state.interactionMode === 'edit';
     objLayer.querySelectorAll('.kn-page-object').forEach((node) => {
-      node.classList.toggle('selected', state.selectedIds.includes(node.dataset.id));
+      node.classList.toggle('selected', isEdit && state.selectedIds.includes(node.dataset.id));
     });
+    if (!isEdit) return;
     const s = getCanvasScale(pageNum);
     renderSelectionOverlay(pageNum, objLayer, s);
   }
 
   function renderTextObject(objLayer, ann, s) {
     const el = document.createElement('div');
-    const isSelected = state.selectedIds.includes(ann.id);
-    const isEditing = state.editingTextId === ann.id;
+    const isEditMode = state.interactionMode === 'edit';
+    const isSelected = isEditMode && state.selectedIds.includes(ann.id);
+    const isEditing = isEditMode && state.editingTextId === ann.id;
     el.className = `kn-page-object kn-textbox-obj ${isSelected ? 'selected' : ''} ${isEditing ? 'editing' : ''}`;
     el.dataset.id = ann.id;
     el.style.left = `${ann.x * s}px`;
@@ -1112,6 +1141,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     let pushedHistoryForSession = false;
 
     const startInlineTextEditing = (e) => {
+      if (state.interactionMode !== 'edit') return;
       if (e) e.stopPropagation();
       state.editingTextId = ann.id;
       state.textCreationGuardUntil = Date.now() + 450;
@@ -1125,15 +1155,16 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       focusTextEditor(editor);
     };
 
-    // Double-click (or single-click when Text Tool is active) enables inline text editing
+    // Double-click (or single-click when Text Tool is active in Edit Mode) enables inline text editing
     el.addEventListener('dblclick', startInlineTextEditing);
     el.addEventListener('click', (e) => {
-      if (state.activeTool === 'text' && state.editingTextId !== ann.id) {
+      if (state.interactionMode === 'edit' && state.activeTool === 'text' && state.editingTextId !== ann.id) {
         startInlineTextEditing(e);
       }
     });
 
     editor.addEventListener('pointerdown', (e) => {
+      if (state.interactionMode !== 'edit') return;
       if (state.editingTextId === ann.id || editor.contentEditable === 'true') {
         e.stopPropagation();
       }
@@ -1141,6 +1172,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     editor.addEventListener(
       'touchstart',
       (e) => {
+        if (state.interactionMode !== 'edit') return;
         if (state.editingTextId === ann.id || editor.contentEditable === 'true') {
           e.stopPropagation();
         }
@@ -1149,6 +1181,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     );
 
     editor.addEventListener('focus', () => {
+      if (state.interactionMode !== 'edit') {
+        editor.blur();
+        return;
+      }
       state.editingTextId = ann.id;
       el.classList.add('editing');
       if (!state.selectedIds.includes(ann.id)) {
@@ -1165,6 +1201,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     // Live in-place persistence on every keystroke without DOM remounting (keeps mobile keyboard open!)
     editor.addEventListener('input', () => {
+      if (state.interactionMode !== 'edit') return;
       const currentRaw = editor.innerText;
       if (!pushedHistoryForSession && currentRaw.trim().length > 0 && beforeEditSnapshot) {
         state.undoStack.push(beforeEditSnapshot);
@@ -1187,7 +1224,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     editor.addEventListener('blur', () => {
       // Guard against synthetic mobile/tablet blur during finger-release or virtual keyboard slide-up
-      if (state.editingTextId === ann.id && Date.now() < state.textCreationGuardUntil) {
+      if (state.interactionMode === 'edit' && state.editingTextId === ann.id && Date.now() < state.textCreationGuardUntil) {
         requestAnimationFrame(() => focusTextEditor(editor));
         return;
       }
@@ -1233,7 +1270,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
   function renderImageObject(objLayer, ann, s) {
     const el = document.createElement('div');
-    const isSelected = state.selectedIds.includes(ann.id);
+    const isSelected = state.interactionMode === 'edit' && state.selectedIds.includes(ann.id);
     el.className = `kn-page-object kn-image-obj ${isSelected ? 'selected' : ''}`;
     el.dataset.id = ann.id;
     el.style.left = `${ann.x * s}px`;
@@ -1248,8 +1285,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     img.draggable = false;
     el.appendChild(img);
 
-    // Interactive Crop Mode Overlay
-    if (state.croppingId === ann.id) {
+    // Interactive Crop Mode Overlay (Edit Mode only)
+    if (state.interactionMode === 'edit' && state.croppingId === ann.id) {
       const cropRect = state.cropRect || { x: 0.1, y: 0.1, w: 0.8, h: 0.8 };
       state.cropRect = cropRect;
       const overlay = document.createElement('div');
@@ -1271,7 +1308,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
   function renderNoteObject(objLayer, ann, s) {
     const el = document.createElement('div');
-    const isSelected = state.selectedIds.includes(ann.id);
+    const isEditMode = state.interactionMode === 'edit';
+    const isSelected = isEditMode && state.selectedIds.includes(ann.id);
     el.className = `kn-page-object kn-note-obj ${ann.collapsed ? 'collapsed' : ''} ${isSelected ? 'selected' : ''}`;
     el.dataset.id = ann.id;
     el.style.left = `${ann.x * s}px`;
@@ -1285,6 +1323,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       el.title = `${ann.category || 'Note'}: ${ann.title || ann.text || ''}`;
       el.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7E1D2A" stroke-width="2.2"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/></svg>`;
       el.addEventListener('dblclick', (e) => {
+        if (state.interactionMode !== 'edit') return;
         e.preventDefault();
         e.stopPropagation();
         ann.collapsed = false;
@@ -1301,8 +1340,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             <button type="button" class="kn-note-del-btn" title="Delete Note" style="border:none;background:transparent;cursor:pointer;font-size:0.78rem;font-weight:800;padding:2px 5px;color:#DC2626;">✕</button>
           </div>
         </div>
-        <input type="text" class="kn-note-title-input" dir="auto" placeholder="Note Title (optional)..." value="${escapeHtml(ann.title || '')}" />
-        <textarea class="kn-note-body-input" dir="auto" placeholder="Write study note...">${escapeHtml(ann.text || '')}</textarea>
+        <input type="text" class="kn-note-title-input" dir="auto" placeholder="Note Title (optional)..." value="${escapeHtml(ann.title || '')}" ${!isEditMode ? 'readonly' : ''} />
+        <textarea class="kn-note-body-input" dir="auto" placeholder="Write study note..." ${!isEditMode ? 'readonly' : ''}>${escapeHtml(ann.text || '')}</textarea>
       `;
 
       const titleInp = el.querySelector('.kn-note-title-input');
@@ -1324,6 +1363,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       let noteEditSnap = null;
       let noteHistoryPushed = false;
       const captureNoteSnapOnFocus = () => {
+        if (state.interactionMode !== 'edit') return;
         state.editingNoteId = ann.id;
         noteEditSnap = JSON.stringify(state.annotations);
         noteHistoryPushed = false;
@@ -1342,6 +1382,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       bodyInp.addEventListener('focus', captureNoteSnapOnFocus);
 
       titleInp.addEventListener('input', () => {
+        if (state.interactionMode !== 'edit') return;
         recordNoteHistoryOnce();
         ann.title = titleInp.value;
         ann.updatedAt = Date.now();
@@ -1349,6 +1390,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         if (state.rightTab === 'notes') renderRightSidebarContent();
       });
       bodyInp.addEventListener('input', () => {
+        if (state.interactionMode !== 'edit') return;
         recordNoteHistoryOnce();
         ann.text = bodyInp.value;
         ann.updatedAt = Date.now();
@@ -1363,6 +1405,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       pinBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (state.interactionMode !== 'edit') return;
         ann.pinned = !ann.pinned;
         saveAnnotations();
         renderPageAnnotations(ann.page);
@@ -1376,6 +1419,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       collapseBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (state.interactionMode !== 'edit') return;
         ann.collapsed = true;
         saveAnnotations();
         renderPageAnnotations(ann.page);
@@ -1388,6 +1432,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       delBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (state.interactionMode !== 'edit') return;
         pushHistory();
         state.annotations = state.annotations.filter((a) => a.id !== ann.id);
         state.selectedIds = state.selectedIds.filter((id) => id !== ann.id);
@@ -1408,6 +1453,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     el.addEventListener(
       'touchstart',
       (e) => {
+        if (state.interactionMode !== 'edit') return;
         if (state.activeTool !== 'eraser') {
           e.stopPropagation();
         }
@@ -1416,6 +1462,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     );
 
     el.addEventListener('pointerdown', (e) => {
+      // In Browse Mode, objects cannot be selected, dragged, or modified
+      if (state.interactionMode !== 'edit') {
+        return;
+      }
+
       // Always stop propagation on existing page objects (unless Eraser is active) so tapping inside an object NEVER triggers page creation!
       if (state.activeTool !== 'eraser') {
         e.stopPropagation();
@@ -1482,6 +1533,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       let moved = false;
 
       const onMove = (me) => {
+        if (state.interactionMode !== 'edit') return;
         const dx = (me.clientX - startX) / pointerScale;
         const dy = (me.clientY - startY) / pointerScale;
         if (Math.abs(dx) > 1.5 || Math.abs(dy) > 1.5) moved = true;
@@ -1522,7 +1574,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
         window.removeEventListener('pointercancel', onUp);
-        if (moved) {
+        if (moved && state.interactionMode === 'edit') {
           pushHistory();
           saveAnnotations();
           renderPageAnnotations(pageNum);
@@ -1565,6 +1617,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   function renderSelectionOverlay(pageNum, objLayer, s) {
+    // Selection editing is strictly disabled in Browse Mode
+    if (state.interactionMode !== 'edit') return;
+
     // Do not cover a text box with a selection drag box while the user is actively typing inside it
     const selectedOnPage = state.annotations.filter(
       (a) => a.page === pageNum && state.selectedIds.includes(a.id) && a.id !== state.editingTextId
@@ -2050,6 +2105,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         renderToolPopover();
       }
 
+      // GLOBAL INTERACTION MODE GUARD: Browse Mode is strictly Read / Navigate / Zoom / Pan only
+      if (state.interactionMode !== 'edit') {
+        return;
+      }
+
       // If no tool is active, allow clicking any stroke/object on the page to select it, or deselect on empty space
       if (!state.activeTool) {
         // If user was editing a text box and intentionally tapped empty page canvas, commit & exit edit mode
@@ -2117,7 +2177,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           const reinforceFocus = () => {
             window.removeEventListener('pointerup', reinforceFocus, true);
             window.removeEventListener('touchend', reinforceFocus, true);
-            if (state.editingTextId === newText.id && domEl.isConnected) {
+            if (state.interactionMode === 'edit' && state.editingTextId === newText.id && domEl.isConnected) {
               focusTextEditor(domEl);
             }
           };
@@ -2176,7 +2236,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           const reinforceNoteFocus = () => {
             window.removeEventListener('pointerup', reinforceNoteFocus, true);
             window.removeEventListener('touchend', reinforceNoteFocus, true);
-            if (inp.isConnected && document.activeElement !== inp) {
+            if (state.interactionMode === 'edit' && inp.isConnected && document.activeElement !== inp) {
               try {
                 inp.focus({ preventScroll: true });
               } catch (_) {
@@ -2218,6 +2278,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         const canvasScale = getCanvasScale(pageNum);
 
         const onMove = (me) => {
+          if (state.interactionMode !== 'edit') return;
           const pt = toPageCoords(me);
           if (cfg.mode === 'straight') {
             stroke.points = [startPt, pt];
@@ -2266,6 +2327,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         const canvasScale = getCanvasScale(pageNum);
 
         const onMove = (me) => {
+          if (state.interactionMode !== 'edit') return;
           const pt = toPageCoords(me);
           shape.x = Math.min(startPt.x, pt.x);
           shape.y = Math.min(startPt.y, pt.y);
@@ -2309,6 +2371,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         recordEraseIfNeeded(eraseAtPoint(pageNum, startPt));
 
         const onMove = (me) => {
+          if (state.interactionMode !== 'edit') return;
           updateEraserCursor(me);
           recordEraseIfNeeded(eraseAtPoint(pageNum, toPageCoords(me)));
         };
@@ -2373,6 +2436,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           let moved = false;
 
           const onDragHit = (me) => {
+            if (state.interactionMode !== 'edit') return;
             const dx = (me.clientX - startClientX) / pointerScale;
             const dy = (me.clientY - startClientY) / pointerScale;
             if (Math.abs(dx) > 1.5 || Math.abs(dy) > 1.5) moved = true;
@@ -2410,7 +2474,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             window.removeEventListener('pointermove', onDragHit);
             window.removeEventListener('pointerup', onUpHit);
             window.removeEventListener('pointercancel', onUpHit);
-            if (moved) {
+            if (moved && state.interactionMode === 'edit') {
               pushHistory();
               saveAnnotations();
               renderPageAnnotations(pageNum);
@@ -2434,6 +2498,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         const canvasScale = getCanvasScale(pageNum);
 
         const onMove = (me) => {
+          if (state.interactionMode !== 'edit') return;
           const pt = toPageCoords(me);
           lassoPts.push(pt);
           redrawPageCanvasesOnly(pageNum, canvasScale);
@@ -2464,6 +2529,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           window.removeEventListener('pointermove', onMove);
           window.removeEventListener('pointerup', onUp);
           window.removeEventListener('pointercancel', onUp);
+          if (state.interactionMode !== 'edit') return;
           selectAnnotationsInRegion(pageNum, lassoPts);
           renderPageAnnotations(pageNum);
         };
@@ -2589,6 +2655,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   function eraseAtPoint(pageNum, pt) {
+    if (state.interactionMode !== 'edit') return false;
     const radius = Math.max(4, state.eraser.size / 2);
     const mode = state.eraser.mode; // 'stroke' | 'partial' | 'object'
     const nextAnnots = [];
@@ -2704,10 +2771,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     return changed;
   }
 
-  // Text-Selection Auto-Highlighting when Highlighter tool is active
+  // Text-Selection Auto-Highlighting when Highlighter tool is active (Edit Mode only)
   document.addEventListener('selectionchange', () => {});
   pagesContainer.addEventListener('pointerup', () => {
-    if (state.activeTool !== 'highlighter') return;
+    if (state.interactionMode !== 'edit' || state.activeTool !== 'highlighter') return;
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0);
@@ -3049,6 +3116,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   function applyTextFormattingToSelected() {
+    if (state.interactionMode !== 'edit') return;
     let updated = false;
     state.annotations.forEach((a) => {
       if (a.type === 'text' && state.selectedIds.includes(a.id)) {
@@ -3086,6 +3154,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const imgUpBtn = document.getElementById('kn-img-upload-btn');
     if (imgUpBtn) {
       imgUpBtn.onclick = () => {
+        if (state.interactionMode !== 'edit') return;
         state._pendingImageTarget = { page: state.currentPage, x: 180, y: 200 };
         document.getElementById('kn-image-file-input')?.click();
       };
@@ -3541,7 +3610,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         .join('');
       leftContent.querySelectorAll('[data-ann-jump]').forEach((el) => {
         el.onclick = () => {
-          state.selectedIds = [el.dataset.annId];
+          if (state.interactionMode === 'edit') {
+            state.selectedIds = [el.dataset.annId];
+          }
           goToPage(parseInt(el.dataset.annJump, 10));
         };
       });
@@ -3628,7 +3699,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <div style="padding:10px;border-bottom:1px solid var(--kn-border);display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;gap:6px;">
             <input type="text" id="kn-notes-search" class="kn-outline-search" style="margin:0;flex:1;" placeholder="Search study notes..." value="${escapeHtml(nc.searchQuery)}" />
-            <button class="kn-btn kn-btn-primary" id="kn-add-note-sidebar" style="padding:4px 10px;">+ Note</button>
+            <button class="kn-btn kn-btn-primary" id="kn-add-note-sidebar" style="padding:4px 10px;" ${state.interactionMode !== 'edit' ? 'disabled title="Switch to Edit Mode to add notes"' : ''}>+ Note</button>
           </div>
           <div style="display:flex;gap:6px;align-items:center;justify-content:space-between;">
             <select id="kn-notes-cat-filter" style="flex:1;padding:4px 6px;border-radius:6px;border:1px solid var(--kn-border);background:var(--kn-bg);color:var(--kn-text);font-size:0.74rem;font-weight:600;">
@@ -3697,6 +3768,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const addBtn = document.getElementById('kn-add-note-sidebar');
       if (addBtn) {
         addBtn.onclick = () => {
+          if (state.interactionMode !== 'edit') return;
           pushHistory();
           const newNote = {
             id: `kn_note_${Date.now()}`,
@@ -3728,10 +3800,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           const nid = cardEl.dataset.noteJump;
           const npage = parseInt(cardEl.dataset.notePage, 10);
           const target = state.annotations.find((a) => a.id === nid);
-          if (target) target.collapsed = false;
-          state.selectedIds = [nid];
+          if (target && state.interactionMode === 'edit') {
+            target.collapsed = false;
+            state.selectedIds = [nid];
+          }
           goToPage(npage);
-          renderPageAnnotations(npage);
+          if (state.interactionMode === 'edit') {
+            renderPageAnnotations(npage);
+          }
         };
       });
     } else if (state.rightTab === 'ai') {
@@ -3955,6 +4031,101 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     saveViewState();
   }
 
+  function syncInteractionLayersWithMode() {
+    const isEdit = state.interactionMode === 'edit';
+    const isDrawingTool = isEdit && ['pen', 'highlighter', 'eraser', 'shapes'].includes(state.activeTool);
+    document.querySelectorAll('.kn-interaction-layer').forEach((layer) => {
+      layer.classList.toggle('tool-active', isEdit && Boolean(state.activeTool));
+      layer.classList.toggle('kn-drawing-active', isDrawingTool);
+    });
+  }
+
+  let modeTooltipTimer = null;
+  function setInteractionMode(nextMode) {
+    const targetMode = nextMode === 'edit' ? 'edit' : 'browse';
+    const isEdit = targetMode === 'edit';
+    state.interactionMode = targetMode;
+
+    const wsEl = document.getElementById('kuro-notes-workspace');
+    if (wsEl) {
+      wsEl.dataset.interactionMode = targetMode;
+      wsEl.classList.toggle('kn-is-browse-mode', !isEdit);
+      wsEl.classList.toggle('kn-is-edit-mode', isEdit);
+    }
+
+    const modeBtn = document.getElementById('kn-btn-mode-toggle');
+    if (modeBtn) {
+      modeBtn.dataset.mode = targetMode;
+      modeBtn.classList.toggle('kn-mode-browse', !isEdit);
+      modeBtn.classList.toggle('kn-mode-edit', isEdit);
+      modeBtn.setAttribute('aria-label', isEdit ? 'Edit Mode' : 'Browse Mode');
+      modeBtn.setAttribute('aria-pressed', isEdit ? 'true' : 'false');
+      modeBtn.setAttribute('data-tooltip', isEdit ? 'Edit Mode' : 'Browse Mode');
+      modeBtn.setAttribute('title', isEdit ? 'Edit Mode — Annotate & Edit' : 'Browse Mode — Reading & Navigation');
+      modeBtn.classList.add('show-tooltip');
+      if (modeTooltipTimer) clearTimeout(modeTooltipTimer);
+      modeTooltipTimer = setTimeout(() => {
+        modeBtn.classList.remove('show-tooltip');
+      }, 1300);
+    }
+
+    if (!isEdit) {
+      // Switching Edit Mode -> Browse Mode:
+      // 1. Cancel any active drawing / erasing / dragging pointer session
+      try {
+        window.dispatchEvent(new PointerEvent('pointercancel'));
+      } catch (err) {}
+
+      // 2. Close active text/note editing and release virtual keyboard focus
+      state.textCreationGuardUntil = 0;
+      state.editingTextId = null;
+      document
+        .querySelectorAll('.kn-textbox-editor, .kn-note-title-input, .kn-note-textarea')
+        .forEach((el) => {
+          if (document.activeElement === el) {
+            el.blur();
+          }
+          if (el.classList.contains('kn-textbox-editor')) {
+            el.contentEditable = 'false';
+            el.tabIndex = -1;
+          } else {
+            el.readOnly = true;
+            el.tabIndex = -1;
+          }
+        });
+
+      // 3. Close any open tool popover
+      state.toolPopoverOpen = false;
+      toolPopover?.classList.remove('open');
+
+      // 4. Clear active selection & crop boxes without reloading the PDF
+      state.selectedIds = [];
+      state.croppingId = null;
+      for (let p = 1; p <= state.totalPages; p++) {
+        updateSelectionOverlayOnly(p);
+      }
+    } else {
+      // Switching Browse Mode -> Edit Mode:
+      // Unlock on-page text boxes and study notes for editing
+      document.querySelectorAll('.kn-textbox-editor').forEach((el) => {
+        el.contentEditable = 'true';
+        el.tabIndex = 0;
+      });
+      document.querySelectorAll('.kn-note-title-input, .kn-note-textarea').forEach((el) => {
+        el.readOnly = false;
+        el.removeAttribute('tabindex');
+      });
+    }
+
+    syncInteractionLayersWithMode();
+    updateHistoryButtons();
+    const sidebarAddNoteBtn = document.getElementById('kn-add-note-sidebar');
+    if (sidebarAddNoteBtn) {
+      sidebarAddNoteBtn.disabled = !isEdit;
+      sidebarAddNoteBtn.title = isEdit ? 'Add Study Note' : 'Switch to Edit Mode to add notes';
+    }
+  }
+
   function setActiveTool(toolName) {
     if (state.editingTextId) {
       state.textCreationGuardUntil = 0;
@@ -3976,7 +4147,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     const toolsWithPopover = ['pen', 'highlighter', 'eraser', 'text', 'notes', 'shapes'];
     if (state.activeTool === toolName) {
-      if (toolsWithPopover.includes(toolName)) {
+      if (toolsWithPopover.includes(toolName) && state.interactionMode === 'edit') {
         if (state.toolPopoverOpen) {
           state.activeTool = null;
           state.toolPopoverOpen = false;
@@ -3989,7 +4160,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       }
     } else {
       state.activeTool = toolName;
-      state.toolPopoverOpen = toolsWithPopover.includes(toolName);
+      state.toolPopoverOpen = state.interactionMode === 'edit' && toolsWithPopover.includes(toolName);
     }
 
     state.noteCreationState = state.activeTool === 'notes' ? 'NOTE_TOOL_ACTIVE' : 'IDLE';
@@ -4000,16 +4171,13 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       btn.setAttribute('aria-checked', isAct ? 'true' : 'false');
     });
 
-    const isDrawingTool = ['pen', 'highlighter', 'eraser', 'shapes'].includes(state.activeTool);
-    document.querySelectorAll('.kn-interaction-layer').forEach((layer) => {
-      layer.classList.toggle('tool-active', Boolean(state.activeTool));
-      layer.classList.toggle('kn-drawing-active', isDrawingTool);
-    });
-
+    // Crucial: selecting a tool does NOT automatically switch Browse Mode to Edit Mode
+    syncInteractionLayersWithMode();
     renderToolPopover();
   }
 
   function insertImageDataUrl(dataUrl, target) {
+    if (state.interactionMode !== 'edit') return;
     const pageNum = target?.page || state.currentPage;
     pushHistory();
     const newImg = {
@@ -4037,6 +4205,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   const imgInput = document.getElementById('kn-image-file-input');
   if (imgInput) {
     imgInput.onchange = (e) => {
+      if (state.interactionMode !== 'edit') {
+        imgInput.value = '';
+        return;
+      }
       const file = e.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
@@ -4050,8 +4222,12 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
   const viewportEl = document.getElementById('kn-viewport');
   if (viewportEl) {
-    viewportEl.addEventListener('dragover', (e) => e.preventDefault());
+    viewportEl.addEventListener('dragover', (e) => {
+      if (state.interactionMode !== 'edit') return;
+      e.preventDefault();
+    });
     viewportEl.addEventListener('drop', (e) => {
+      if (state.interactionMode !== 'edit') return;
       e.preventDefault();
       const file = e.dataTransfer?.files?.[0];
       if (file && file.type.startsWith('image/')) {
@@ -4060,6 +4236,62 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         reader.readAsDataURL(file);
       }
     });
+
+    // Trackpad / Ctrl+Wheel Smooth Zoom (works in both Browse Mode & Edit Mode)
+    viewportEl.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          const delta = e.deltaY < 0 ? 0.12 : -0.12;
+          setZoom(state.zoom + delta, 'custom');
+        }
+      },
+      { passive: false }
+    );
+
+    // Two-Finger Pinch-to-Zoom for Mobile & Tablet (Browse Mode & Edit Mode)
+    let pinchStartDist = 0;
+    let pinchStartZoom = 1;
+    viewportEl.addEventListener(
+      'touchstart',
+      (e) => {
+        if (e.touches && e.touches.length === 2) {
+          pinchStartDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          pinchStartZoom = state.zoom;
+        }
+      },
+      { passive: true }
+    );
+    viewportEl.addEventListener(
+      'touchmove',
+      (e) => {
+        if (e.touches && e.touches.length === 2 && pinchStartDist > 20) {
+          e.preventDefault();
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const nextZ = Math.max(0.5, Math.min(3.0, pinchStartZoom * (dist / pinchStartDist)));
+          if (Math.abs(nextZ - state.zoom) >= 0.04) {
+            setZoom(nextZ, 'custom');
+          }
+        }
+      },
+      { passive: false }
+    );
+    viewportEl.addEventListener(
+      'touchend',
+      (e) => {
+        if (!e.touches || e.touches.length < 2) {
+          pinchStartDist = 0;
+        }
+      },
+      { passive: true }
+    );
 
     // Track current page on scroll
     viewportEl.addEventListener('scroll', () => {
@@ -4087,6 +4319,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   window.addEventListener('paste', (e) => {
+    if (state.interactionMode !== 'edit') return;
     const items = e.clipboardData?.items;
     if (!items) return;
     for (const item of items) {
@@ -4105,6 +4338,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   document.getElementById('kn-btn-back').onclick = () => {
     navigateBackToSheets(sheet.subject_id || sheet.subjectId);
   };
+
+  // Global Interaction Mode Toggle (Browse Mode 👁 <-> Edit Mode ✎)
+  const modeToggleBtn = document.getElementById('kn-btn-mode-toggle');
+  if (modeToggleBtn) {
+    modeToggleBtn.onclick = (e) => {
+      e.stopPropagation();
+      setInteractionMode(state.interactionMode === 'edit' ? 'browse' : 'edit');
+    };
+  }
 
   const toggleLeftSidebar = () => {
     state.leftSidebarOpen = !state.leftSidebarOpen;
@@ -4189,8 +4431,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     }
   };
 
-  // Undo / Redo
+  // Undo / Redo (enabled only in Edit Mode)
   const performUndo = () => {
+    if (state.interactionMode !== 'edit') return;
     if (state.undoStack.length === 0) return;
     state.redoStack.push(JSON.stringify(state.annotations));
     state.annotations = JSON.parse(state.undoStack.pop());
@@ -4202,6 +4445,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   };
 
   const performRedo = () => {
+    if (state.interactionMode !== 'edit') return;
     if (state.redoStack.length === 0) return;
     state.undoStack.push(JSON.stringify(state.annotations));
     state.annotations = JSON.parse(state.redoStack.pop());
@@ -4225,6 +4469,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   // Zoom Controls
   document.getElementById('kn-btn-zoom-out').onclick = () => setZoom(state.zoom - 0.15);
   document.getElementById('kn-btn-zoom-in').onclick = () => setZoom(state.zoom + 0.15);
+  const mobZoomBtn = document.getElementById('kn-mob-zoom-btn');
+  if (mobZoomBtn) {
+    mobZoomBtn.onclick = () => {
+      const steps = [1.0, 1.25, 1.5, 0.85];
+      const curIdx = steps.findIndex((s) => Math.abs(s - state.zoom) < 0.08);
+      const nextZoom = steps[(curIdx + 1) % steps.length];
+      setZoom(nextZoom, 'custom');
+    };
+  }
   document.getElementById('kn-btn-zoom-menu').onclick = (e) => {
     e.stopPropagation();
     document.getElementById('kn-zoom-dropdown')?.classList.toggle('open');
@@ -4295,12 +4548,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const act = btn.dataset.moreAction;
       document.getElementById('kn-toolbar-more-menu')?.classList.remove('open');
       if (act === 'clear-page') {
+        if (state.interactionMode !== 'edit') return;
         pushHistory();
         state.annotations = state.annotations.filter((a) => a.page !== state.currentPage);
         saveAnnotations();
         renderPageAnnotations(state.currentPage);
         renderLeftSidebarContent();
       } else if (act === 'select-all') {
+        if (state.interactionMode !== 'edit') return;
         state.activeTool = 'select';
         state.selectedIds = state.annotations.filter((a) => a.page === state.currentPage).map((a) => a.id);
         renderPageAnnotations(state.currentPage);
@@ -4339,20 +4594,24 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   window._knKeyHandler = (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      if (state.interactionMode !== 'edit') return;
       e.preventDefault();
       if (e.shiftKey) performRedo();
       else performUndo();
     } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+      if (state.interactionMode !== 'edit') return;
       e.preventDefault();
       performRedo();
     } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
       e.preventDefault();
       document.getElementById('kn-btn-search')?.click();
     } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      if (state.interactionMode !== 'edit') return;
       e.preventDefault();
       state.selectedIds = state.annotations.filter((a) => a.page === state.currentPage).map((a) => a.id);
       renderPageAnnotations(state.currentPage);
     } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (state.interactionMode !== 'edit') return;
       if (state.selectedIds.length > 0) {
         pushHistory();
         state.annotations = state.annotations.filter((a) => !state.selectedIds.includes(a.id));

@@ -13684,6 +13684,166 @@ a:focus:not(:focus-visible) {
   }
 }
 
+/* 15. Global Interaction Mode Toggle (👁 Browse Mode <-> ✎ Edit Mode) */
+.kn-mode-toggle-btn {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 160ms ease,
+              border-color 160ms ease,
+              color 160ms ease,
+              box-shadow 160ms ease;
+}
+
+.kn-mode-toggle-btn:active {
+  transform: scale(0.93);
+}
+
+.kn-mode-toggle-btn .kn-mode-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.kn-mode-toggle-btn.kn-mode-browse .kn-mode-icon-browse {
+  display: inline-flex;
+}
+.kn-mode-toggle-btn.kn-mode-browse .kn-mode-icon-edit {
+  display: none;
+}
+
+.kn-mode-toggle-btn.kn-mode-edit .kn-mode-icon-browse {
+  display: none;
+}
+.kn-mode-toggle-btn.kn-mode-edit .kn-mode-icon-edit {
+  display: inline-flex;
+}
+
+/* Browse Mode Visual State — Soft Neutral Active */
+.kn-mode-toggle-btn.kn-mode-browse {
+  background: rgba(126, 29, 42, 0.08);
+  border: 1.5px solid rgba(126, 29, 42, 0.24);
+  color: var(--kn-primary, #7E1D2A);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+.kn-mode-toggle-btn.kn-mode-browse:hover {
+  background: rgba(126, 29, 42, 0.14);
+  border-color: rgba(126, 29, 42, 0.38);
+}
+
+[data-theme="dark"] .kn-mode-toggle-btn.kn-mode-browse {
+  background: rgba(253, 164, 175, 0.12);
+  border-color: rgba(253, 164, 175, 0.28);
+  color: #FDA4AF;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Edit Mode Visual State — Strong Burgundy Active (#7E1D2A) */
+.kn-mode-toggle-btn.kn-mode-edit {
+  background: #7E1D2A !important;
+  border: 1.5px solid #5C131D !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(126, 29, 42, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.kn-mode-toggle-btn.kn-mode-edit:hover {
+  background: #691722 !important;
+}
+
+/* Floating Tooltip Badge (Never takes permanent layout space) */
+.kn-mode-toggle-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-3px);
+  background: #1C1917;
+  color: #FAF7F2;
+  font-size: 0.69rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1), visibility 150ms ease;
+  z-index: 95;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+}
+
+.kn-mode-toggle-btn:hover::after,
+.kn-mode-toggle-btn:focus-visible::after,
+.kn-mode-toggle-btn.show-tooltip::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Global Browse Mode Lock: Pure Reading, Scrolling, Pan & Pinch-Zoom */
+.kuro-notes-workspace.kn-is-browse-mode .kn-document-viewport,
+.kuro-notes-workspace.kn-is-browse-mode .kn-pages-stack,
+.kuro-notes-workspace.kn-is-browse-mode .kn-page-card {
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.kuro-notes-workspace.kn-is-browse-mode .kn-interaction-layer {
+  pointer-events: none !important;
+  touch-action: pan-x pan-y pinch-zoom !important;
+  cursor: default !important;
+}
+
+.kuro-notes-workspace.kn-is-browse-mode .kn-objects-layer,
+.kuro-notes-workspace.kn-is-browse-mode .kn-page-object,
+.kuro-notes-workspace.kn-is-browse-mode .kn-textbox-editor,
+.kuro-notes-workspace.kn-is-browse-mode .kn-note-card,
+.kuro-notes-workspace.kn-is-browse-mode .kn-note-header,
+.kuro-notes-workspace.kn-is-browse-mode .kn-note-title-input,
+.kuro-notes-workspace.kn-is-browse-mode .kn-note-textarea,
+.kuro-notes-workspace.kn-is-browse-mode .kn-note-del-btn {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+.kuro-notes-workspace.kn-is-browse-mode .kn-selection-box,
+.kuro-notes-workspace.kn-is-browse-mode .kn-context-bar {
+  display: none !important;
+}
+
+.kuro-notes-workspace.kn-is-browse-mode .kn-text-layer {
+  pointer-events: auto;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+/* Tablet / iPad Touch-Friendly Sizing (38px x 38px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .kn-mode-toggle-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+}
+
+/* Mobile Compact Icon-Only Sizing (34px x 34px) */
+@media (max-width: 767px) {
+  .kn-mode-toggle-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 8px;
+  }
+}
+
 
 
 
