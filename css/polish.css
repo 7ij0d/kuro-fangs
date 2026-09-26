@@ -4690,12 +4690,164 @@ body { background: var(--bg-app); color: var(--text-primary); }
    ========================================================================== */
 
 /* ─── 1. Responsive Master Layout (Desktop, iPad/Tablet & Phone) ─── */
-.app-sidebar {
-  display: none !important;
+@media (min-width: 1200px) {
+  .app-sidebar:not(.open) {
+    display: none !important;
+  }
+  .mobile-toggle-btn {
+    display: none !important;
+  }
+  .sidebar-backdrop {
+    display: none !important;
+  }
 }
 
-.mobile-toggle-btn {
-  display: none !important;
+/* Mobile & Tablet Drawer Architecture (< 1200px) */
+@media (max-width: 1199px) {
+  /* 1. Backdrop Overlay (Z-Index 1000) */
+  .sidebar-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 1000 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.26s ease !important;
+  }
+
+  .sidebar-backdrop.open {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  /* 2. Slide-In Sidebar Drawer (Z-Index 1010) */
+  .app-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    width: min(85vw, 320px) !important;
+    max-width: 320px !important;
+    z-index: 1010 !important;
+    background: #0D111A !important;
+    background: linear-gradient(180deg, #111827 0%, #0D111A 100%) !important;
+    border: none !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s ease !important;
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* LTR Direction: Slide in from Left */
+  html[dir="ltr"] .app-sidebar,
+  .app-sidebar {
+    left: 0 !important;
+    right: auto !important;
+    transform: translateX(-100%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* RTL Direction: Slide in from Right */
+  html[dir="rtl"] .app-sidebar {
+    right: 0 !important;
+    left: auto !important;
+    transform: translateX(100%) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-right: none !important;
+  }
+
+  /* Open State: Drawer visible & interactive */
+  .app-sidebar.open,
+  html[dir="ltr"] .app-sidebar.open,
+  html[dir="rtl"] .app-sidebar.open {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  /* Drawer Navigation Scrolling */
+  .app-sidebar .sidebar-nav {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 12px 14px !important;
+  }
+
+  /* Drawer Header & Close Button */
+  .app-sidebar .sidebar-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .sidebar-close-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #F8FAFC !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    transition: background 0.15s ease, transform 0.1s ease !important;
+    flex-shrink: 0 !important;
+  }
+
+  .sidebar-close-btn:active {
+    transform: scale(0.95) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+  }
+
+  /* Drawer Footer */
+  .app-sidebar .sidebar-footer {
+    flex-shrink: 0 !important;
+    padding: 14px 16px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+  }
+
+  /* Mobile Burger Toggle Button */
+  .mobile-toggle-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    border: 1px solid #EAE3D6 !important;
+    background: #FFFFFF !important;
+    color: #24181B !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    transition: transform 0.1s ease, background 0.15s ease !important;
+  }
+
+  .mobile-toggle-btn:active {
+    transform: scale(0.95) !important;
+    background: #F5EFEB !important;
+  }
 }
 
 .app-main-wrapper {

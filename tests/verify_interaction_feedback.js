@@ -75,7 +75,7 @@ check('audio play circle button active state applies scale(0.93)', polishCss.inc
 // 7. Cache Busting in index.html
 console.log('\n--- 7. Cache Busting in index.html ---');
 check('index.html loads base.css with v>=11.5', /css\/base\.css\?v=11\.[5-9]/.test(indexHtml));
-check('index.html loads polish.css with v>=11.5', /css\/polish\.css\?v=11\.[5-9]/.test(indexHtml));
+check('index.html loads polish.css with v>=11.5', /css\/polish\.css\?v=(11\.[5-9]|1[2-9]\.)/.test(indexHtml));
 
 console.log('\n' + '='.repeat(75));
 console.log(`TOTAL CHECKS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
