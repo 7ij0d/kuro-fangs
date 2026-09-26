@@ -13018,12 +13018,16 @@ a:focus:not(:focus-visible) {
   cursor: move;
 }
 .kn-textbox-obj.editing {
-  border-color: #2563EB;
-  background: rgba(255, 255, 255, 0.55);
-  z-index: 25;
+  border: 1.5px solid #2563EB;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14);
+  z-index: 30;
+  cursor: text;
+  touch-action: manipulation;
 }
 .kn-textbox-editor {
   width: 100%;
+  min-height: 24px;
   height: 100%;
   outline: none;
   border: none;
@@ -13032,9 +13036,16 @@ a:focus:not(:focus-visible) {
   word-break: break-word;
   cursor: inherit;
   user-select: text;
+  -webkit-user-select: text;
 }
 .kn-textbox-obj.editing .kn-textbox-editor {
   cursor: text;
+  touch-action: manipulation;
+}
+.kn-textbox-obj.editing .kn-textbox-editor:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(120, 113, 108, 0.65);
+  pointer-events: none;
 }
 
 .kn-search-page-group {
@@ -13148,6 +13159,7 @@ a:focus:not(:focus-visible) {
   overflow: hidden;
   cursor: move;
   transition: box-shadow 140ms ease;
+  z-index: 21;
 }
 .kn-note-obj.collapsed {
   width: 38px !important;
@@ -13178,6 +13190,7 @@ a:focus:not(:focus-visible) {
   outline: none;
   padding: 4px 8px 0;
   font-family: inherit;
+  touch-action: manipulation;
 }
 .kn-note-body-input {
   flex: 1;
@@ -13190,6 +13203,7 @@ a:focus:not(:focus-visible) {
   outline: none;
   font-family: inherit;
   line-height: 1.45;
+  touch-action: manipulation;
 }
 
 /* Selection Dashed Rectangular Bounding Box, 8 Square Handles, Top Rotation Handle & Contextual Bar */
@@ -13208,6 +13222,10 @@ a:focus:not(:focus-visible) {
   border-color: #2563EB;
   background: rgba(37, 99, 235, 0.03);
 }
+.kn-selection-box.is-note-sel {
+  pointer-events: none;
+  background: transparent;
+}
 .kn-sel-handle {
   position: absolute;
   width: 10px;
@@ -13215,7 +13233,8 @@ a:focus:not(:focus-visible) {
   background: #FFFFFF;
   border: 2px solid #7E1D2A;
   border-radius: 2px;
-  z-index: 22;
+  z-index: 24;
+  pointer-events: auto;
   touch-action: none;
   box-sizing: border-box;
 }

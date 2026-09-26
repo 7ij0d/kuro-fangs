@@ -285,15 +285,19 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     // Unified Annotations Array (persisted per sheet)
     // Types: 'highlighter', 'pen', 'shape', 'text', 'image', 'note'
-    annotations: safeJSON(KEY_ANNOTS, []),
+    annotations: safeJSON(KEY_ANNOTS, []).filter((a) => a && (a.type !== 'text' || (a.text && a.text.trim().length > 0))),
     bookmarks: safeJSON(KEY_BM, []),
     undoStack: [],
     redoStack: [],
 
-    // Selection / Lasso State
+    // Selection / Lasso & Active Editing State Machine
     selectionMode: 'rect', // 'rect' | 'lasso'
     selectionFilter: 'all', // 'all' | 'handwriting' | 'pen' | 'highlighter' | 'shape' | 'image' | 'text' | 'note'
     selectedIds: [],
+    editingTextId: null,
+    editingNoteId: null,
+    textCreationGuardUntil: 0,
+    noteCreationState: 'IDLE', // 'IDLE' | 'NOTE_TOOL_ACTIVE' | 'CREATE_NOTE' | 'EDIT_NOTE'
     clipboard: [],
     croppingId: null,
     cropRect: null, // { x, y, w, h } normalized 0..1 relative to image
@@ -1026,10 +1030,56 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   // ══════════════════════════════════════════════════════════════════════════
   // ON-PAGE INTERACTIVE OBJECTS: TEXT, IMAGE (WITH CROP), STUDY NOTE
   // ══════════════════════════════════════════════════════════════════════════
+  function focusTextEditor(editorEl) {
+    if (!editorEl) return;
+    try {
+      editorEl.contentEditable = 'true';
+      editorEl.focus({ preventScroll: true });
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(editorEl);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    } catch (_) {
+      try {
+        editorEl.focus();
+      } catch (__) {}
+    }
+  }
+
+  function attachObjectPropagationBarrier(el) {
+    ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'dblclick', 'touchstart', 'touchend'].forEach((evtName) => {
+      el.addEventListener(
+        evtName,
+        (ev) => {
+          if (state.activeTool !== 'eraser') {
+            ev.stopPropagation();
+          }
+        },
+        evtName.startsWith('touch') ? { passive: true } : false
+      );
+    });
+  }
+
+  function updateSelectionOverlayOnly(pageNum) {
+    const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
+    if (!objLayer) return;
+    objLayer.querySelectorAll('.kn-selection-box, .kn-context-bar').forEach((node) => node.remove());
+    objLayer.querySelectorAll('.kn-page-object').forEach((node) => {
+      node.classList.toggle('selected', state.selectedIds.includes(node.dataset.id));
+    });
+    const s = getCanvasScale(pageNum);
+    renderSelectionOverlay(pageNum, objLayer, s);
+  }
+
   function renderTextObject(objLayer, ann, s) {
     const el = document.createElement('div');
     const isSelected = state.selectedIds.includes(ann.id);
-    el.className = `kn-page-object kn-textbox-obj ${isSelected ? 'selected' : ''}`;
+    const isEditing = state.editingTextId === ann.id;
+    el.className = `kn-page-object kn-textbox-obj ${isSelected ? 'selected' : ''} ${isEditing ? 'editing' : ''}`;
     el.dataset.id = ann.id;
     el.style.left = `${ann.x * s}px`;
     el.style.top = `${ann.y * s}px`;
@@ -1040,7 +1090,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
     const editor = document.createElement('div');
     editor.className = 'kn-textbox-editor';
-    editor.contentEditable = state.activeTool === 'text' ? 'true' : 'false';
+    editor.contentEditable = isEditing ? 'true' : 'false';
+    editor.tabIndex = 0;
+    editor.dataset.placeholder = 'Type here... / اكتب هنا...';
+    editor.setAttribute('role', 'textbox');
+    editor.setAttribute('aria-multiline', 'true');
     editor.dir = ann.dir || 'auto';
     editor.style.fontFamily = ann.fontFamily || state.text.fontFamily;
     editor.style.fontSize = `${(ann.fontSize || 16) * s}px`;
@@ -1054,40 +1108,124 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     editor.style.lineHeight = ann.lineHeight || 1.45;
     editor.innerText = ann.text || '';
 
-    // Double-click enables inline text editing even when in Select mode
-    el.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      editor.contentEditable = 'true';
+    let beforeEditSnapshot = null;
+    let pushedHistoryForSession = false;
+
+    const startInlineTextEditing = (e) => {
+      if (e) e.stopPropagation();
+      state.editingTextId = ann.id;
+      state.textCreationGuardUntil = Date.now() + 450;
+      state.selectedIds = [ann.id];
+      if (state.activeTool === 'text') {
+        deactivateCreationTool();
+      }
       el.classList.add('editing');
-      editor.focus();
+      editor.contentEditable = 'true';
+      updateSelectionOverlayOnly(ann.page);
+      focusTextEditor(editor);
+    };
+
+    // Double-click (or single-click when Text Tool is active) enables inline text editing
+    el.addEventListener('dblclick', startInlineTextEditing);
+    el.addEventListener('click', (e) => {
+      if (state.activeTool === 'text' && state.editingTextId !== ann.id) {
+        startInlineTextEditing(e);
+      }
     });
 
+    editor.addEventListener('pointerdown', (e) => {
+      if (state.editingTextId === ann.id || editor.contentEditable === 'true') {
+        e.stopPropagation();
+      }
+    });
+    editor.addEventListener(
+      'touchstart',
+      (e) => {
+        if (state.editingTextId === ann.id || editor.contentEditable === 'true') {
+          e.stopPropagation();
+        }
+      },
+      { passive: true }
+    );
+
     editor.addEventListener('focus', () => {
+      state.editingTextId = ann.id;
       el.classList.add('editing');
       if (!state.selectedIds.includes(ann.id)) {
         state.selectedIds = [ann.id];
       }
+      if (!beforeEditSnapshot) {
+        // Capture state before typing (if newly created, snapshot without this empty text)
+        const snapList = !ann.text
+          ? state.annotations.filter((a) => a.id !== ann.id)
+          : state.annotations;
+        beforeEditSnapshot = JSON.stringify(snapList);
+      }
+    });
+
+    // Live in-place persistence on every keystroke without DOM remounting (keeps mobile keyboard open!)
+    editor.addEventListener('input', () => {
+      const currentRaw = editor.innerText;
+      if (!pushedHistoryForSession && currentRaw.trim().length > 0 && beforeEditSnapshot) {
+        state.undoStack.push(beforeEditSnapshot);
+        if (state.undoStack.length > 60) state.undoStack.shift();
+        state.redoStack = [];
+        updateHistoryButtons();
+        pushedHistoryForSession = true;
+      }
+      ann.text = currentRaw;
+      saveAnnotations();
+    });
+
+    editor.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Escape') {
+        state.textCreationGuardUntil = 0;
+        editor.blur();
+      }
     });
 
     editor.addEventListener('blur', () => {
-      el.classList.remove('editing');
-      if (state.activeTool !== 'text') {
-        editor.contentEditable = 'false';
+      // Guard against synthetic mobile/tablet blur during finger-release or virtual keyboard slide-up
+      if (state.editingTextId === ann.id && Date.now() < state.textCreationGuardUntil) {
+        requestAnimationFrame(() => focusTextEditor(editor));
+        return;
       }
-      const val = editor.innerText.trim();
+
+      if (state.editingTextId === ann.id) {
+        state.editingTextId = null;
+      }
+      el.classList.remove('editing');
+      editor.contentEditable = 'false';
+
+      const rawText = editor.innerText;
+      const val = rawText.trim();
       if (!val) {
         // Cancel/delete empty text box cleanly
         state.annotations = state.annotations.filter((a) => a.id !== ann.id);
         state.selectedIds = state.selectedIds.filter((id) => id !== ann.id);
-      } else if (ann.text !== editor.innerText) {
-        pushHistory();
-        ann.text = editor.innerText;
+        saveAnnotations();
+        renderPageAnnotations(ann.page);
+        renderLeftSidebarContent();
+        return;
       }
+
+      if (!pushedHistoryForSession && ann.text !== rawText && beforeEditSnapshot) {
+        state.undoStack.push(beforeEditSnapshot);
+        if (state.undoStack.length > 60) state.undoStack.shift();
+        state.redoStack = [];
+        updateHistoryButtons();
+        pushedHistoryForSession = true;
+      }
+      ann.text = rawText;
+      beforeEditSnapshot = null;
+      pushedHistoryForSession = false;
       saveAnnotations();
-      renderPageAnnotations(ann.page);
+      updateSelectionOverlayOnly(ann.page);
       renderLeftSidebarContent();
     });
 
+    attachObjectPropagationBarrier(el);
     makeObjectDraggable(el, ann);
     el.appendChild(editor);
     objLayer.appendChild(el);
@@ -1126,6 +1264,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       el.appendChild(overlay);
     }
 
+    attachObjectPropagationBarrier(el);
     makeObjectDraggable(el, ann);
     objLayer.appendChild(el);
   }
@@ -1146,6 +1285,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       el.title = `${ann.category || 'Note'}: ${ann.title || ann.text || ''}`;
       el.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7E1D2A" stroke-width="2.2"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/></svg>`;
       el.addEventListener('dblclick', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         ann.collapsed = false;
         saveAnnotations();
@@ -1156,9 +1296,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <div class="kn-note-header">
           <span style="color:#7E1D2A;">${escapeHtml(ann.category || 'Important')}</span>
           <div style="display:flex;align-items:center;gap:4px;">
-            <button class="kn-note-pin-btn" title="Pin Note" style="border:none;background:transparent;cursor:pointer;font-size:0.75rem;opacity:${ann.pinned ? '1' : '0.4'};">📌</button>
-            <button class="kn-note-collapse-btn" title="Minimize to Compact Icon" style="border:none;background:transparent;cursor:pointer;font-size:0.75rem;">—</button>
-            <button class="kn-note-del-btn" title="Delete Note" style="border:none;background:transparent;cursor:pointer;font-size:0.75rem;color:#DC2626;">✕</button>
+            <button type="button" class="kn-note-pin-btn" title="Pin Note" style="border:none;background:transparent;cursor:pointer;font-size:0.75rem;padding:2px 4px;opacity:${ann.pinned ? '1' : '0.4'};">📌</button>
+            <button type="button" class="kn-note-collapse-btn" title="Minimize to Compact Icon" style="border:none;background:transparent;cursor:pointer;font-size:0.75rem;padding:2px 4px;">—</button>
+            <button type="button" class="kn-note-del-btn" title="Delete Note" style="border:none;background:transparent;cursor:pointer;font-size:0.78rem;font-weight:800;padding:2px 5px;color:#DC2626;">✕</button>
           </div>
         </div>
         <input type="text" class="kn-note-title-input" dir="auto" placeholder="Note Title (optional)..." value="${escapeHtml(ann.title || '')}" />
@@ -1167,37 +1307,91 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
       const titleInp = el.querySelector('.kn-note-title-input');
       const bodyInp = el.querySelector('.kn-note-body-input');
-      titleInp.addEventListener('change', () => {
-        pushHistory();
+      const pinBtn = el.querySelector('.kn-note-pin-btn');
+      const collapseBtn = el.querySelector('.kn-note-collapse-btn');
+      const delBtn = el.querySelector('.kn-note-del-btn');
+
+      // Stop pointer/touch propagation on all Note inputs & buttons so they never trigger page creation or drag
+      [titleInp, bodyInp, pinBtn, collapseBtn, delBtn].forEach((ctrl) => {
+        if (!ctrl) return;
+        ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click'].forEach((evName) => {
+          ctrl.addEventListener(evName, (ev) => ev.stopPropagation());
+        });
+        ctrl.addEventListener('touchstart', (ev) => ev.stopPropagation(), { passive: true });
+        ctrl.addEventListener('touchend', (ev) => ev.stopPropagation(), { passive: true });
+      });
+
+      let noteEditSnap = null;
+      let noteHistoryPushed = false;
+      const captureNoteSnapOnFocus = () => {
+        state.editingNoteId = ann.id;
+        noteEditSnap = JSON.stringify(state.annotations);
+        noteHistoryPushed = false;
+      };
+      const recordNoteHistoryOnce = () => {
+        if (!noteHistoryPushed && noteEditSnap) {
+          state.undoStack.push(noteEditSnap);
+          if (state.undoStack.length > 60) state.undoStack.shift();
+          state.redoStack = [];
+          updateHistoryButtons();
+          noteHistoryPushed = true;
+        }
+      };
+
+      titleInp.addEventListener('focus', captureNoteSnapOnFocus);
+      bodyInp.addEventListener('focus', captureNoteSnapOnFocus);
+
+      titleInp.addEventListener('input', () => {
+        recordNoteHistoryOnce();
         ann.title = titleInp.value;
         ann.updatedAt = Date.now();
         saveAnnotations();
         if (state.rightTab === 'notes') renderRightSidebarContent();
       });
-      bodyInp.addEventListener('change', () => {
-        pushHistory();
+      bodyInp.addEventListener('input', () => {
+        recordNoteHistoryOnce();
         ann.text = bodyInp.value;
         ann.updatedAt = Date.now();
         saveAnnotations();
         if (state.rightTab === 'notes') renderRightSidebarContent();
       });
-      el.querySelector('.kn-note-pin-btn').addEventListener('click', (e) => {
+
+      pinBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      pinBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         ann.pinned = !ann.pinned;
         saveAnnotations();
         renderPageAnnotations(ann.page);
         if (state.rightTab === 'notes') renderRightSidebarContent();
       });
-      el.querySelector('.kn-note-collapse-btn').addEventListener('click', (e) => {
+
+      collapseBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      collapseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         ann.collapsed = true;
         saveAnnotations();
         renderPageAnnotations(ann.page);
       });
-      el.querySelector('.kn-note-del-btn').addEventListener('click', (e) => {
+
+      delBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      delBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         pushHistory();
         state.annotations = state.annotations.filter((a) => a.id !== ann.id);
+        state.selectedIds = state.selectedIds.filter((id) => id !== ann.id);
+        if (state.editingNoteId === ann.id) state.editingNoteId = null;
         saveAnnotations();
         renderPageAnnotations(ann.page);
         renderRightSidebarContent();
@@ -1205,27 +1399,45 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       });
     }
 
+    attachObjectPropagationBarrier(el);
     makeObjectDraggable(el, ann);
     objLayer.appendChild(el);
   }
 
   function makeObjectDraggable(el, ann) {
+    el.addEventListener(
+      'touchstart',
+      (e) => {
+        if (state.activeTool !== 'eraser') {
+          e.stopPropagation();
+        }
+      },
+      { passive: true }
+    );
+
     el.addEventListener('pointerdown', (e) => {
+      // Always stop propagation on existing page objects (unless Eraser is active) so tapping inside an object NEVER triggers page creation!
+      if (state.activeTool !== 'eraser') {
+        e.stopPropagation();
+      } else {
+        return;
+      }
+
       if (
         e.target.tagName === 'INPUT' ||
         e.target.tagName === 'TEXTAREA' ||
         e.target.isContentEditable ||
         e.target.tagName === 'BUTTON' ||
+        e.target.closest('button') ||
         el.classList.contains('editing')
       ) {
         return;
       }
-      // If an active drawing/eraser tool is selected, let the stroke/eraser layer handle it
+      // If a drawing tool is active, do not drag object
       if (state.activeTool && state.activeTool !== 'select') {
         return;
       }
       e.preventDefault();
-      e.stopPropagation();
 
       if (e.shiftKey) {
         if (state.selectedIds.includes(ann.id)) {
@@ -1243,8 +1455,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         }
       }
 
-      // Render selection overlay once on pointerdown so handles & context bar appear immediately
-      renderPageAnnotations(ann.page);
+      // Update selection overlay in-place WITHOUT wiping objLayer.innerHTML so el stays alive for dblclick & drag!
+      updateSelectionOverlayOnly(ann.page);
 
       const pageNum = ann.page;
       const objLayer = document.getElementById(`kn-objects-layer-${pageNum}`);
@@ -1353,8 +1565,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   function renderSelectionOverlay(pageNum, objLayer, s) {
+    // Do not cover a text box with a selection drag box while the user is actively typing inside it
     const selectedOnPage = state.annotations.filter(
-      (a) => a.page === pageNum && state.selectedIds.includes(a.id)
+      (a) => a.page === pageNum && state.selectedIds.includes(a.id) && a.id !== state.editingTextId
     );
     if (selectedOnPage.length === 0) return;
 
@@ -1367,15 +1580,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     const boxH = Math.max(24, maxY - minY);
 
     const isSingleText = selectedOnPage.length === 1 && selectedOnPage[0].type === 'text';
+    const hasNoteSelected = selectedOnPage.some((a) => a.type === 'note');
 
     const selBox = document.createElement('div');
-    selBox.className = `kn-selection-box ${isSingleText ? 'is-text-sel' : ''}`;
+    selBox.className = `kn-selection-box ${isSingleText ? 'is-text-sel' : ''} ${hasNoteSelected ? 'is-note-sel' : ''}`;
     selBox.style.left = `${minX * s}px`;
     selBox.style.top = `${minY * s}px`;
     selBox.style.width = `${boxW * s}px`;
     selBox.style.height = `${boxH * s}px`;
     if (selectedOnPage.length === 1 && selectedOnPage[0].rotation) {
       selBox.style.transform = `rotate(${selectedOnPage[0].rotation}deg)`;
+    }
+
+    // Double-clicking a selected text box opens inline editing immediately
+    if (isSingleText) {
+      selBox.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleContextAction('edit', selectedOnPage, pageNum);
+      });
     }
 
     // 8 Square Resize Handles (nw, n, ne, e, se, s, sw, w) + 1 Top Circular Rotation Handle (rot)
@@ -1503,7 +1726,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       `;
     }
 
-    ctxBar.addEventListener('pointerdown', (e) => e.stopPropagation());
+    ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'click'].forEach((evName) => {
+      ctxBar.addEventListener(evName, (e) => e.stopPropagation());
+    });
     ctxBar.addEventListener('click', (e) => {
       e.stopPropagation();
       const btn = e.target.closest('[data-ctx]');
@@ -1677,9 +1902,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const domEl = objLayer?.querySelector(`.kn-page-object[data-id="${selectedItems[0].id}"]`);
       const editor = domEl?.querySelector('.kn-textbox-editor');
       if (domEl && editor) {
-        editor.contentEditable = 'true';
+        state.editingTextId = selectedItems[0].id;
+        state.textCreationGuardUntil = Date.now() + 450;
         domEl.classList.add('editing');
-        editor.focus();
+        updateSelectionOverlayOnly(pageNum);
+        focusTextEditor(editor);
       }
       return;
     } else if (action === 'copy') {
@@ -1690,6 +1917,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       state.clipboard = JSON.parse(JSON.stringify(selectedItems));
       state.annotations = state.annotations.filter((a) => !state.selectedIds.includes(a.id));
       state.selectedIds = [];
+      state.editingTextId = null;
+      state.editingNoteId = null;
     } else if (action === 'duplicate') {
       pushHistory();
       const clones = selectedItems.map((item) => {
@@ -1722,6 +1951,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       pushHistory();
       state.annotations = state.annotations.filter((a) => !state.selectedIds.includes(a.id));
       state.selectedIds = [];
+      state.editingTextId = null;
+      state.editingNoteId = null;
     } else if (action === 'front') {
       pushHistory();
       const maxZ = Math.max(0, ...state.annotations.map((a) => a.zIndex || 0));
@@ -1776,6 +2007,21 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     image.src = imgAnn.src;
   }
 
+  // Deactivate one-shot creation tools (Text, Note) and return to Neutral/Select state
+  function deactivateCreationTool() {
+    state.activeTool = null;
+    state.noteCreationState = 'IDLE';
+    state.toolPopoverOpen = false;
+    document.querySelectorAll('#kn-toolbar .kn-tool-btn[data-tool]').forEach((btn) => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-checked', 'false');
+    });
+    document.querySelectorAll('.kn-interaction-layer').forEach((layer) => {
+      layer.classList.remove('tool-active', 'kn-drawing-active');
+    });
+    renderToolPopover();
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // PAGE INTERACTION HANDLER (Drawing, Erasing, Selection Marquee/Lasso, Click-to-Add)
   // ══════════════════════════════════════════════════════════════════════════
@@ -1793,6 +2039,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     };
 
     interactLayer.addEventListener('pointerdown', (e) => {
+      // Never trigger page creation or canvas actions if pointer started inside an existing object/note/control
+      if (e.target.closest('.kn-page-object, .kn-note-obj, .kn-context-bar, .kn-selection-box')) {
+        return;
+      }
+
       // Close any open tool popover when interacting with the page canvas
       if (state.toolPopoverOpen) {
         state.toolPopoverOpen = false;
@@ -1801,6 +2052,16 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
       // If no tool is active, allow clicking any stroke/object on the page to select it, or deselect on empty space
       if (!state.activeTool) {
+        // If user was editing a text box and intentionally tapped empty page canvas, commit & exit edit mode
+        if (state.editingTextId) {
+          state.textCreationGuardUntil = 0;
+          const activeEd = document.querySelector(`.kn-page-object[data-id="${state.editingTextId}"] .kn-textbox-editor`);
+          if (activeEd && document.activeElement === activeEd) {
+            activeEd.blur();
+            return;
+          }
+          state.editingTextId = null;
+        }
         const pt = toPageCoords(e);
         const hit = findAnnotationAtPoint(pageNum, pt);
         if (hit) {
@@ -1819,9 +2080,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       const startPt = toPageCoords(e);
       const { w: logicalW, h: logicalH } = getPageLogicalSize(pageNum);
 
-      // 1. TEXT TOOL: Click on page to create inline editable text box
+      // 1. TEXT TOOL: One-shot creation with immediate focus & persistent virtual keyboard
       if (state.activeTool === 'text') {
-        pushHistory();
+        e.preventDefault();
+        e.stopPropagation();
+
+        // If another text box was being edited, clear its guard first
+        state.textCreationGuardUntil = 0;
+
         const newText = {
           id: `kn_txt_${Date.now()}`,
           type: 'text',
@@ -1836,20 +2102,39 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         };
         state.annotations.push(newText);
         state.selectedIds = [newText.id];
+        state.editingTextId = newText.id;
+        state.textCreationGuardUntil = Date.now() + 500;
+
+        // One-shot creation: immediately deactivate Text Tool so subsequent taps don't spawn extra boxes
+        deactivateCreationTool();
         renderPageAnnotations(pageNum);
-        setTimeout(() => {
-          const domEl = card.querySelector(`[data-id="${newText.id}"] .kn-textbox-editor`);
-          if (domEl) {
-            domEl.contentEditable = 'true';
-            domEl.focus();
-          }
-        }, 20);
+
+        const domEl = card.querySelector(`.kn-page-object[data-id="${newText.id}"] .kn-textbox-editor`);
+        if (domEl) {
+          // Focus synchronously inside pointerdown gesture
+          focusTextEditor(domEl);
+          // Also reinforce focus on pointerup/touchend so iOS/Android soft keyboards stay open
+          const reinforceFocus = () => {
+            window.removeEventListener('pointerup', reinforceFocus, true);
+            window.removeEventListener('touchend', reinforceFocus, true);
+            if (state.editingTextId === newText.id && domEl.isConnected) {
+              focusTextEditor(domEl);
+            }
+          };
+          window.addEventListener('pointerup', reinforceFocus, true);
+          window.addEventListener('touchend', reinforceFocus, true);
+        }
         return;
       }
 
-      // 2. NOTES TOOL: Click on page to create structured Study Note card
+      // 2. NOTES TOOL: Strict One-Shot State Machine
+      // IDLE -> NOTE_TOOL_ACTIVE -> USER_TAPS_PAGE -> CREATE_NOTE -> EDIT_NOTE -> NOTE_TOOL_DEACTIVATED -> IDLE
       if (state.activeTool === 'notes') {
+        e.preventDefault();
+        e.stopPropagation();
+        state.noteCreationState = 'USER_TAPS_PAGE';
         pushHistory();
+        state.noteCreationState = 'CREATE_NOTE';
         const newNote = {
           id: `kn_note_${Date.now()}`,
           type: 'note',
@@ -1869,14 +2154,39 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         };
         state.annotations.push(newNote);
         state.selectedIds = [newNote.id];
+        state.editingNoteId = newNote.id;
+        state.noteCreationState = 'EDIT_NOTE';
+
+        // Immediately deactivate Note Tool after creating one Note
+        state.noteCreationState = 'NOTE_TOOL_DEACTIVATED';
+        deactivateCreationTool();
+
         saveAnnotations();
         renderPageAnnotations(pageNum);
         renderRightSidebarContent();
         renderLeftSidebarContent();
-        setTimeout(() => {
-          const inp = card.querySelector(`[data-id="${newNote.id}"] .kn-note-title-input`);
-          if (inp) inp.focus();
-        }, 20);
+
+        const inp = card.querySelector(`.kn-page-object[data-id="${newNote.id}"] .kn-note-title-input`);
+        if (inp) {
+          try {
+            inp.focus({ preventScroll: true });
+          } catch (_) {
+            inp.focus();
+          }
+          const reinforceNoteFocus = () => {
+            window.removeEventListener('pointerup', reinforceNoteFocus, true);
+            window.removeEventListener('touchend', reinforceNoteFocus, true);
+            if (inp.isConnected && document.activeElement !== inp) {
+              try {
+                inp.focus({ preventScroll: true });
+              } catch (_) {
+                inp.focus();
+              }
+            }
+          };
+          window.addEventListener('pointerup', reinforceNoteFocus, true);
+          window.addEventListener('touchend', reinforceNoteFocus, true);
+        }
         return;
       }
 
@@ -1979,15 +2289,28 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         return;
       }
 
-      // 6. ERASER TOOL (Stroke, Object, and Partial Path-Splitting Eraser)
+      // 6. ERASER TOOL (Stroke, Partial Path-Splitting, and Object Eraser)
       if (state.activeTool === 'eraser') {
         e.preventDefault();
-        pushHistory();
-        eraseAtPoint(pageNum, startPt);
+        const beforeEraseSnapshot = JSON.stringify(state.annotations);
+        let didErase = false;
+
+        const recordEraseIfNeeded = (erased) => {
+          if (erased && !didErase) {
+            didErase = true;
+            state.undoStack.push(beforeEraseSnapshot);
+            if (state.undoStack.length > 60) state.undoStack.shift();
+            state.redoStack = [];
+            updateUndoRedoButtons();
+          }
+        };
+
+        updateEraserCursor(e);
+        recordEraseIfNeeded(eraseAtPoint(pageNum, startPt));
 
         const onMove = (me) => {
           updateEraserCursor(me);
-          eraseAtPoint(pageNum, toPageCoords(me));
+          recordEraseIfNeeded(eraseAtPoint(pageNum, toPageCoords(me)));
         };
         const onUp = () => {
           window.removeEventListener('pointermove', onMove);
@@ -1995,8 +2318,12 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           window.removeEventListener('pointercancel', onUp);
           const cur = document.getElementById('kn-eraser-cursor');
           if (cur) cur.style.display = 'none';
-          saveAnnotations();
-          renderLeftSidebarContent();
+          if (didErase) {
+            saveAnnotations();
+            renderPageAnnotations(pageNum);
+            renderLeftSidebarContent();
+            if (state.rightTab === 'notes') renderRightSidebarContent();
+          }
         };
         window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', onUp);
@@ -2199,11 +2526,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // ERASER ENGINE (Stroke, Object, and Partial Path-Splitting)
+  // ERASER ENGINE (Stroke, Partial Path-Splitting, and Object Eraser)
   // ══════════════════════════════════════════════════════════════════════════
   function updateEraserCursor(e) {
     const cur = document.getElementById('kn-eraser-cursor');
-    if (!cur) return;
+    if (!cur || state.eraser.showCursor === false) return;
     const d = state.eraser.size * state.zoom;
     cur.style.width = `${d}px`;
     cur.style.height = `${d}px`;
@@ -2212,10 +2539,60 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     cur.style.display = 'block';
   }
 
+  // Shortest distance from point P to line segment AB
+  function distToSegment(p, a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq));
+    const projX = a.x + t * dx;
+    const projY = a.y + t * dy;
+    return Math.hypot(p.x - projX, p.y - projY);
+  }
+
+  // Returns true if any vertex or segment of a stroke is within effectiveRadius of pt
+  function isStrokeHitByCircle(points, pt, effectiveRadius) {
+    if (!points || points.length === 0) return false;
+    if (points.length === 1) {
+      return Math.hypot(points[0].x - pt.x, points[0].y - pt.y) <= effectiveRadius;
+    }
+    for (let i = 0; i < points.length - 1; i++) {
+      if (distToSegment(pt, points[i], points[i + 1]) <= effectiveRadius) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Subdivides long stroke segments so Partial Eraser cleanly splits both freehand and straight strokes
+  function densifyStrokePoints(points, stepPx = 3) {
+    if (!points || points.length < 2) return points ? [...points] : [];
+    const out = [points[0]];
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const dist = Math.hypot(b.x - a.x, b.y - a.y);
+      if (dist > stepPx) {
+        const steps = Math.ceil(dist / stepPx);
+        for (let s = 1; s < steps; s++) {
+          const t = s / steps;
+          out.push({
+            x: a.x + (b.x - a.x) * t,
+            y: a.y + (b.y - a.y) * t,
+          });
+        }
+      }
+      out.push(b);
+    }
+    return out;
+  }
+
   function eraseAtPoint(pageNum, pt) {
-    const radius = state.eraser.size / 2;
-    const mode = state.eraser.mode; // 'stroke' | 'object' | 'partial'
+    const radius = Math.max(4, state.eraser.size / 2);
+    const mode = state.eraser.mode; // 'stroke' | 'partial' | 'object'
     const nextAnnots = [];
+    const removedIds = new Set();
     let changed = false;
 
     for (const ann of state.annotations) {
@@ -2224,19 +2601,45 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         continue;
       }
 
-      if (ann.points && ann.points.length > 0) {
-        if (mode === 'partial' && ann.mode !== 'straight') {
-          // Split stroke points into remaining sub-segments outside eraser radius
+      const isStroke = (ann.type === 'pen' || ann.type === 'highlighter') && Array.isArray(ann.points) && ann.points.length > 0;
+      const strokeHalfWidth = (ann.size || (ann.type === 'highlighter' ? 22 : 4)) / 2;
+      const effectiveRadius = radius + strokeHalfWidth;
+
+      // Check text-anchored highlighter rects if present
+      if (ann.type === 'highlighter' && Array.isArray(ann.rects) && ann.rects.length > 0 && (!ann.points || ann.points.length <= 1)) {
+        if (mode === 'stroke' || mode === 'object' || mode === 'partial') {
+          const hitRect = ann.rects.some(
+            (r) => pt.x >= r.x - radius && pt.x <= r.x + r.w + radius && pt.y >= r.y - radius && pt.y <= r.y + r.h + radius
+          );
+          if (hitRect) {
+            changed = true;
+            removedIds.add(ann.id);
+          } else {
+            nextAnnots.push(ann);
+          }
+          continue;
+        }
+      }
+
+      if (isStroke) {
+        if (mode === 'partial') {
+          // Partial Eraser: erase only the sub-section of the stroke inside effectiveRadius
+          if (!isStrokeHitByCircle(ann.points, pt, effectiveRadius)) {
+            nextAnnots.push(ann);
+            continue;
+          }
+          const densePts = densifyStrokePoints(ann.points, 3);
           let currentSeg = [];
           let hitAny = false;
-          for (const p of ann.points) {
-            const dist = Math.hypot(p.x - pt.x, p.y - pt.y);
-            if (dist <= radius) {
+
+          for (const p of densePts) {
+            if (Math.hypot(p.x - pt.x, p.y - pt.y) <= effectiveRadius) {
               hitAny = true;
               if (currentSeg.length >= 2) {
                 nextAnnots.push({
                   ...ann,
                   id: `kn_${ann.type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                  mode: 'freehand',
                   points: currentSeg,
                 });
               }
@@ -2245,12 +2648,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
               currentSeg.push(p);
             }
           }
+
           if (hitAny) {
             changed = true;
+            removedIds.add(ann.id);
             if (currentSeg.length >= 2) {
               nextAnnots.push({
                 ...ann,
                 id: `kn_${ann.type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                mode: 'freehand',
                 points: currentSeg,
               });
             }
@@ -2258,31 +2664,44 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             nextAnnots.push(ann);
           }
         } else {
-          // Stroke or Object eraser: remove entire stroke if any point is within radius
-          const hit = ann.points.some((p) => Math.hypot(p.x - pt.x, p.y - pt.y) <= radius + (ann.size || 4) / 2);
-          if (hit) {
+          // Stroke Eraser or Object Eraser: delete entire stroke when touched anywhere along its path
+          if (isStrokeHitByCircle(ann.points, pt, effectiveRadius)) {
             changed = true;
+            removedIds.add(ann.id);
           } else {
             nextAnnots.push(ann);
           }
         }
       } else if (mode === 'object') {
+        // Object Eraser: delete complete object (text, note, image, shape) when touched
         const b = getAnnotationBounds(ann);
-        const hit = pt.x >= b.x - radius && pt.x <= b.x + b.w + radius && pt.y >= b.y - radius && pt.y <= b.y + b.h + radius;
+        const hit =
+          pt.x >= b.x - radius &&
+          pt.x <= b.x + b.w + radius &&
+          pt.y >= b.y - radius &&
+          pt.y <= b.y + b.h + radius;
         if (hit) {
           changed = true;
+          removedIds.add(ann.id);
         } else {
           nextAnnots.push(ann);
         }
       } else {
+        // Stroke or Partial mode does not delete non-stroke objects (text, note, image, shape)
         nextAnnots.push(ann);
       }
     }
 
     if (changed) {
       state.annotations = nextAnnots;
+      if (removedIds.size > 0) {
+        state.selectedIds = state.selectedIds.filter((id) => !removedIds.has(id));
+        if (state.editingTextId && removedIds.has(state.editingTextId)) state.editingTextId = null;
+        if (state.editingNoteId && removedIds.has(state.editingNoteId)) state.editingNoteId = null;
+      }
       renderPageAnnotations(pageNum);
     }
+    return changed;
   }
 
   // Text-Selection Auto-Highlighting when Highlighter tool is active
@@ -2451,16 +2870,23 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       `;
     } else if (tool === 'eraser') {
       const er = state.eraser;
+      const modeDesc =
+        er.mode === 'stroke'
+          ? 'يمسح الضربة (Pen / Highlighter) بالكامل عند لمسها'
+          : er.mode === 'partial'
+            ? 'يمسح فقط الجزء الذي تمر عليه الممحاة ويقسم الخط'
+            : 'يمسح أي عنصر كامل (Text, Note, Image, Stroke)';
       toolPopover.innerHTML = `
         <div class="kn-popover-header">
-          <span>Eraser — Annotations Only (أداة الممحاة)</span>
+          <span>Eraser — Annotations Only (الممحاة)</span>
           <button class="kn-icon-btn" id="kn-close-popover" style="width:22px;height:22px;">✕</button>
         </div>
         <div class="kn-segmented-control">
-          <button class="kn-seg-btn ${er.mode === 'stroke' ? 'active' : ''}" data-er-mode="stroke">Stroke (الضربة)</button>
-          <button class="kn-seg-btn ${er.mode === 'object' ? 'active' : ''}" data-er-mode="object">Object (العنصر)</button>
-          <button class="kn-seg-btn ${er.mode === 'partial' ? 'active' : ''}" data-er-mode="partial">Partial (جزئي)</button>
+          <button class="kn-seg-btn ${er.mode === 'stroke' ? 'active' : ''}" data-er-mode="stroke">Stroke</button>
+          <button class="kn-seg-btn ${er.mode === 'partial' ? 'active' : ''}" data-er-mode="partial">Partial</button>
+          <button class="kn-seg-btn ${er.mode === 'object' ? 'active' : ''}" data-er-mode="object">Object</button>
         </div>
+        <div style="font-size:0.72rem;color:var(--kn-text-secondary);padding:2px 4px;font-weight:600;" dir="rtl">${modeDesc}</div>
         <div class="kn-slider-row">
           <span class="kn-popover-label">Size</span>
           <input type="range" id="kn-er-size" min="8" max="64" value="${er.size}" />
@@ -2469,26 +2895,16 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <div class="kn-eraser-quick-row">
           <button class="kn-eraser-size-btn ${er.size <= 14 ? 'active' : ''}" data-er-quick="12">
             <span style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block;"></span>
-            <span>Small (صغير)</span>
+            <span>Small</span>
           </button>
           <button class="kn-eraser-size-btn ${er.size > 14 && er.size < 34 ? 'active' : ''}" data-er-quick="24">
             <span style="width:14px;height:14px;border-radius:50%;background:currentColor;display:inline-block;"></span>
-            <span>Medium (متوسط)</span>
+            <span>Medium</span>
           </button>
           <button class="kn-eraser-size-btn ${er.size >= 34 ? 'active' : ''}" data-er-quick="42">
             <span style="width:20px;height:20px;border-radius:50%;background:currentColor;display:inline-block;"></span>
-            <span>Large (كبير)</span>
+            <span>Large</span>
           </button>
-        </div>
-        <div style="border-top:1px solid var(--kn-border-subtle);padding-top:6px;display:flex;flex-direction:column;gap:5px;font-size:0.73rem;color:var(--kn-text-muted);">
-          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
-            <span>إظهار مؤشر الممحاة (Show Eraser Cursor)</span>
-            <input type="checkbox" id="kn-er-show-cursor" ${er.showCursor !== false ? 'checked' : ''} />
-          </label>
-          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
-            <span>تنعيم الحواف (Smooth Edges)</span>
-            <input type="checkbox" id="kn-er-smooth" ${er.smoothEdges !== false ? 'checked' : ''} />
-          </label>
         </div>
       `;
     } else if (tool === 'select') {
@@ -3540,6 +3956,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   }
 
   function setActiveTool(toolName) {
+    if (state.editingTextId) {
+      state.textCreationGuardUntil = 0;
+      const activeEd = document.querySelector(`.kn-page-object[data-id="${state.editingTextId}"] .kn-textbox-editor`);
+      if (activeEd && document.activeElement === activeEd) {
+        activeEd.blur();
+      }
+      state.editingTextId = null;
+    }
+
     if (toolName === 'ai') {
       state.rightSidebarOpen = true;
       state.rightTab = 'ai';
@@ -3567,6 +3992,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       state.toolPopoverOpen = toolsWithPopover.includes(toolName);
     }
 
+    state.noteCreationState = state.activeTool === 'notes' ? 'NOTE_TOOL_ACTIVE' : 'IDLE';
+
     document.querySelectorAll('#kn-toolbar .kn-tool-btn[data-tool]').forEach((btn) => {
       const isAct = btn.dataset.tool === state.activeTool;
       btn.classList.toggle('active', isAct);
@@ -3577,13 +4004,6 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     document.querySelectorAll('.kn-interaction-layer').forEach((layer) => {
       layer.classList.toggle('tool-active', Boolean(state.activeTool));
       layer.classList.toggle('kn-drawing-active', isDrawingTool);
-    });
-
-    // Update text editors' contentEditable state when switching to/from text tool
-    document.querySelectorAll('.kn-textbox-editor').forEach((ed) => {
-      if (!ed.closest('.kn-textbox-obj')?.classList.contains('editing')) {
-        ed.contentEditable = state.activeTool === 'text' ? 'true' : 'false';
-      }
     });
 
     renderToolPopover();
