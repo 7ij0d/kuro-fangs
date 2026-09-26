@@ -202,10 +202,10 @@ const tests = [
   // 6. Cache Busters
   {
     category: '6. Cache Invalidation',
-    name: 'index.html bumps polish.css to v=12.10 and sheet-detail.js to v=12.7',
+    name: 'index.html bumps polish.css to v>=12.10 and sheet-detail.js to v>=12.7',
     pass:
-      indexHtml.includes('css/polish.css?v=12.10') &&
-      indexHtml.includes('js/pages/sheet-detail.js?v=12.7'),
+      /css\/polish\.css\?v=12\.(1[0-9]|[2-9][0-9])/.test(indexHtml) &&
+      /js\/pages\/sheet-detail\.js\?v=12\.([7-9]|[1-9][0-9])/.test(indexHtml),
   },
 ];
 

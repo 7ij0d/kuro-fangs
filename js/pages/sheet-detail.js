@@ -435,11 +435,17 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   };
 
   const updateHistoryButtons = () => {
+    const isEdit = state.interactionMode === 'edit';
+    const canUndo = isEdit && state.undoStack.length > 0;
+    const canRedo = isEdit && state.redoStack.length > 0;
     const uBtn = document.getElementById('kn-btn-undo');
     const rBtn = document.getElementById('kn-btn-redo');
-    const isEdit = state.interactionMode === 'edit';
-    if (uBtn) uBtn.disabled = !isEdit || state.undoStack.length === 0;
-    if (rBtn) rBtn.disabled = !isEdit || state.redoStack.length === 0;
+    if (uBtn) uBtn.disabled = !canUndo;
+    if (rBtn) rBtn.disabled = !canRedo;
+    const mobU = document.getElementById('kn-mob-undo');
+    const mobR = document.getElementById('kn-mob-redo');
+    if (mobU) mobU.disabled = !canUndo;
+    if (mobR) mobR.disabled = !canRedo;
   };
   const updateUndoRedoButtons = updateHistoryButtons;
 
@@ -484,7 +490,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
             <span class="kn-doc-title-text">${escapeHtml(docTitle)}</span>
           </div>
 
-          <!-- Undo / Redo Pill in Header -->
+        </div>
+
+        <!-- Center / Right Header Controls: History + Page Navigation + Zoom -->
+        <div class="kn-header-controls">
+          <!-- Undo / Redo Pill in Controls -->
           <div class="kn-header-pill-group kn-tool-group kn-group-history" id="kn-header-history">
             <button class="kn-tool-btn" id="kn-btn-undo" title="Undo (Ctrl+Z)" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
@@ -493,49 +503,48 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
             </button>
           </div>
-        </div>
 
-        <!-- Center / Right Header Controls: Page Navigation + Zoom + Search + Bookmark + Mode Toggle + Share + More -->
-        <div class="kn-header-controls">
-          <!-- Page Navigation Pill -->
-          <div class="kn-header-pill-group kn-tool-group kn-group-pagenav" id="kn-header-pagenav">
-            <button class="kn-tool-btn" id="kn-btn-prev" title="Previous Page">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <div class="kn-page-input-wrap" title="Jump to Page">
-              <input type="number" class="kn-page-input" id="kn-page-input" value="${state.currentPage}" min="1" max="${state.totalPages}" />
-              <span style="color:var(--kn-text-muted);font-weight:700;">/</span>
-              <span id="kn-total-pages">${state.totalPages}</span>
-            </div>
-            <button class="kn-tool-btn" id="kn-btn-next" title="Next Page">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-
-          <!-- Zoom Controls Pill (50%, 75%, 100%, 130%, 150%, 200%, 300%) -->
-          <div class="kn-header-pill-group kn-tool-group kn-group-zoom" id="kn-header-zoom">
-            <button class="kn-tool-btn" id="kn-btn-zoom-out" title="Zoom Out">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-            <div class="kn-dropdown-wrap">
-              <button class="kn-zoom-btn" id="kn-btn-zoom-menu" title="Zoom Presets (50% - 300%)">
-                <span id="kn-zoom-label">${Math.round(state.zoom * 100)}%</span>
+          <div class="kn-controls-nav-zoom-wrap" id="kn-controls-nav-zoom-wrap">
+            <!-- Page Navigation Pill -->
+            <div class="kn-header-pill-group kn-tool-group kn-group-pagenav" id="kn-header-pagenav">
+              <button class="kn-tool-btn" id="kn-btn-prev" title="Previous Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
-              <div class="kn-dropdown-menu" id="kn-zoom-dropdown">
-                <button class="kn-dropdown-item" data-zoom="fit-page"><span>Fit Page</span></button>
-                <button class="kn-dropdown-item" data-zoom="fit-width"><span>Fit Width</span></button>
-                <button class="kn-dropdown-item" data-zoom="0.5"><span>50%</span></button>
-                <button class="kn-dropdown-item" data-zoom="0.75"><span>75%</span></button>
-                <button class="kn-dropdown-item" data-zoom="1.0"><span>100%</span></button>
-                <button class="kn-dropdown-item" data-zoom="1.3"><span>130%</span></button>
-                <button class="kn-dropdown-item" data-zoom="1.5"><span>150%</span></button>
-                <button class="kn-dropdown-item" data-zoom="2.0"><span>200%</span></button>
-                <button class="kn-dropdown-item" data-zoom="3.0"><span>300%</span></button>
+              <div class="kn-page-input-wrap" title="Jump to Page">
+                <input type="number" class="kn-page-input" id="kn-page-input" value="${state.currentPage}" min="1" max="${state.totalPages}" />
+                <span style="color:var(--kn-text-muted);font-weight:700;">/</span>
+                <span id="kn-total-pages">${state.totalPages}</span>
               </div>
+              <button class="kn-tool-btn" id="kn-btn-next" title="Next Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
             </div>
-            <button class="kn-tool-btn" id="kn-btn-zoom-in" title="Zoom In">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
+
+            <!-- Zoom Controls Pill (50%, 75%, 100%, 130%, 150%, 200%, 300%) -->
+            <div class="kn-header-pill-group kn-tool-group kn-group-zoom" id="kn-header-zoom">
+              <button class="kn-tool-btn" id="kn-btn-zoom-out" title="Zoom Out">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <div class="kn-dropdown-wrap">
+                <button class="kn-zoom-btn" id="kn-btn-zoom-menu" title="Zoom Presets (50% - 300%)">
+                  <span id="kn-zoom-label">${Math.round(state.zoom * 100)}%</span>
+                </button>
+                <div class="kn-dropdown-menu" id="kn-zoom-dropdown">
+                  <button class="kn-dropdown-item" data-zoom="fit-page"><span>Fit Page</span></button>
+                  <button class="kn-dropdown-item" data-zoom="fit-width"><span>Fit Width</span></button>
+                  <button class="kn-dropdown-item" data-zoom="0.5"><span>50%</span></button>
+                  <button class="kn-dropdown-item" data-zoom="0.75"><span>75%</span></button>
+                  <button class="kn-dropdown-item" data-zoom="1.0"><span>100%</span></button>
+                  <button class="kn-dropdown-item" data-zoom="1.3"><span>130%</span></button>
+                  <button class="kn-dropdown-item" data-zoom="1.5"><span>150%</span></button>
+                  <button class="kn-dropdown-item" data-zoom="2.0"><span>200%</span></button>
+                  <button class="kn-dropdown-item" data-zoom="3.0"><span>300%</span></button>
+                </div>
+              </div>
+              <button class="kn-tool-btn" id="kn-btn-zoom-in" title="Zoom In">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -579,6 +588,22 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
             </button>
             <div class="kn-dropdown-menu" id="kn-header-more-menu">
+              <!-- Mobile Overflow Items (visible on mobile screens when header tools are collapsed) -->
+              <div class="kn-more-overflow-group" id="kn-more-overflow-group">
+                <button class="kn-dropdown-item kn-more-overflow-item" data-doc-action="more-bookmark" id="kn-more-btn-bookmark">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                  <span id="kn-more-bookmark-text">Bookmark Page</span>
+                </button>
+                <button class="kn-dropdown-item kn-more-overflow-item" data-doc-action="more-share" id="kn-more-btn-share">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                  <span>Share Sheet</span>
+                </button>
+                <button class="kn-dropdown-item kn-more-overflow-item" data-doc-action="more-mode" id="kn-more-btn-mode">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span id="kn-more-mode-text">Switch Mode</span>
+                </button>
+                <div class="kn-dropdown-divider kn-more-overflow-divider"></div>
+              </div>
               <button class="kn-dropdown-item" data-doc-action="fit-page"><span>Fit Page</span></button>
               <button class="kn-dropdown-item" data-doc-action="fit-width"><span>Fit Width</span></button>
               <button class="kn-dropdown-item" data-doc-action="actual-size"><span>Actual Size (100%)</span></button>
@@ -758,6 +783,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           <span>Pages</span>
         </button>
+        <div class="kn-mob-history-group" id="kn-mob-history-group">
+          <button class="kn-icon-btn" id="kn-mob-undo" title="Undo (Ctrl+Z)" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+          </button>
+          <button class="kn-icon-btn" id="kn-mob-redo" title="Redo (Ctrl+Y)" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+          </button>
+        </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <button class="kn-icon-btn" id="kn-mob-prev" style="width:28px;height:28px;">‹</button>
           <span id="kn-mob-page-indicator" style="font-size:0.8rem;font-weight:800;">${state.currentPage} / ${state.totalPages}</span>
@@ -4470,6 +4503,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         modeBtn.classList.remove('show-tooltip');
       }, 1300);
     }
+    updateHistoryButtons();
+    if (typeof updateMoreMenuDynamicItems === 'function') updateMoreMenuDynamicItems();
 
     if (!isEdit) {
       // Switching Edit Mode -> Browse Mode:
@@ -4805,6 +4840,23 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   document.getElementById('kn-search-prev').onclick = () => focusSearchMatch(state.search.currentIndex - 1);
   document.getElementById('kn-search-next').onclick = () => focusSearchMatch(state.search.currentIndex + 1);
 
+  const updateMoreMenuDynamicItems = () => {
+    const isBm = state.bookmarks.includes(state.currentPage);
+    const bmText = document.getElementById('kn-more-bookmark-text');
+    const bmItem = document.getElementById('kn-more-btn-bookmark');
+    if (bmText) bmText.textContent = isBm ? 'Remove Bookmark' : 'Bookmark Page';
+    if (bmItem) bmItem.classList.toggle('active', isBm);
+
+    const isEdit = state.interactionMode === 'edit';
+    const modeText = document.getElementById('kn-more-mode-text');
+    const modeItem = document.getElementById('kn-more-btn-mode');
+    if (modeText) modeText.textContent = isEdit ? 'Switch to Browse Mode' : 'Switch to Edit Mode';
+    if (modeItem) {
+      modeItem.classList.toggle('kn-mode-edit', isEdit);
+      modeItem.classList.toggle('kn-mode-browse', !isEdit);
+    }
+  };
+
   // Bookmark Toggle (both Header & Toolbar Bookmark buttons)
   const toggleCurrentPageBookmark = () => {
     const p = state.currentPage;
@@ -4818,6 +4870,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     document.getElementById('kn-btn-bookmark')?.classList.toggle('active', isBm);
     document.getElementById('kn-toolbar-bookmark')?.classList.toggle('active', isBm);
     renderLeftSidebarContent();
+    updateMoreMenuDynamicItems();
   };
   document.getElementById('kn-btn-bookmark').onclick = toggleCurrentPageBookmark;
   const tbBmEl = document.getElementById('kn-toolbar-bookmark');
@@ -4860,6 +4913,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 
   document.getElementById('kn-btn-undo').onclick = performUndo;
   document.getElementById('kn-btn-redo').onclick = performRedo;
+  const mobUndoBtn = document.getElementById('kn-mob-undo');
+  if (mobUndoBtn) mobUndoBtn.onclick = performUndo;
+  const mobRedoBtn = document.getElementById('kn-mob-redo');
+  if (mobRedoBtn) mobRedoBtn.onclick = performRedo;
 
   // Page Prev / Next / Input
   document.getElementById('kn-btn-prev').onclick = () => goToPage(state.currentPage - 1);
@@ -4942,6 +4999,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   // Header More Menu & Toolbar More Menu
   document.getElementById('kn-btn-header-more').onclick = (e) => {
     e.stopPropagation();
+    updateMoreMenuDynamicItems();
     document.getElementById('kn-header-more-menu')?.classList.toggle('open');
   };
   const tbMoreBtn = document.getElementById('kn-toolbar-more');
@@ -4956,6 +5014,18 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     btn.onclick = () => {
       const act = btn.dataset.docAction;
       document.getElementById('kn-header-more-menu')?.classList.remove('open');
+      if (act === 'more-bookmark') {
+        toggleCurrentPageBookmark();
+        return;
+      }
+      if (act === 'more-share') {
+        document.getElementById('kn-btn-share')?.click();
+        return;
+      }
+      if (act === 'more-mode') {
+        setInteractionMode(state.interactionMode === 'edit' ? 'browse' : 'edit');
+        return;
+      }
       const dlUrl = sheet.pdf_url || sheet.download_url || sheet.fileUrl || sheet.file_url || sheet.url;
       if (act === 'fit-page') setZoom(1.0, 'fit-page');
       else if (act === 'fit-width') setZoom(1.0, 'fit-width');
