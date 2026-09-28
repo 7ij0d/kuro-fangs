@@ -5282,6 +5282,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     return url;
   }
 
+  window._kfPdfDocCache = window._kfPdfDocCache || new Map();
+  const PDF_CACHE_STORAGE_NAME = 'kuro-fangs-pdf-cache-v1';
+
   async function loadRealPdfDocument() {
     const loaderEl = document.getElementById('kn-doc-loader');
     const errorEl = document.getElementById('kn-doc-error');
@@ -5303,32 +5306,88 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
 
-      const docParam =
-        typeof pdfUrl === 'string' && !pdfUrl.startsWith('blob:') && !pdfUrl.startsWith('data:')
-          ? {
-              url: pdfUrl,
-              cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
-              cMapPacked: true,
-            }
-          : pdfUrl;
-
-      let loadingTask = window.pdfjsLib.getDocument(docParam);
-      try {
-        state.pdfDoc = await loadingTask.promise;
-      } catch (firstErr) {
-        // Fallback: check if an offline copy exists in IndexedDB pdfStore
-        let fallbackBlobUrl = null;
-        if (window.DATA?.pdfStore && typeof window.DATA.pdfStore.getPdfUrl === 'function') {
-          try {
-            fallbackBlobUrl = await window.DATA.pdfStore.getPdfUrl(sheet.id);
-          } catch (e) {}
+      // 1. Check Session In-Memory PDF Document Cache (0ms, 0 network requests)
+      if (typeof pdfUrl === 'string' && window._kfPdfDocCache.has(pdfUrl)) {
+        const cachedDoc = window._kfPdfDocCache.get(pdfUrl);
+        if (cachedDoc && cachedDoc.numPages > 0) {
+          console.log('[KuroNotes PDF Cache] HIT (Session Memory):', pdfUrl);
+          state.pdfDoc = cachedDoc;
         }
-        if (fallbackBlobUrl && fallbackBlobUrl !== pdfUrl) {
-          pdfUrl = fallbackBlobUrl;
-          loadingTask = window.pdfjsLib.getDocument(fallbackBlobUrl);
+      }
+
+      // 2. Check Persistent Browser CacheStorage (0 network egress across reloads)
+      if (!state.pdfDoc && typeof pdfUrl === 'string' && pdfUrl.startsWith('http') && 'caches' in window) {
+        try {
+          const pdfCache = await caches.open(PDF_CACHE_STORAGE_NAME);
+          const cachedResponse = await pdfCache.match(pdfUrl);
+          if (cachedResponse && cachedResponse.ok) {
+            console.log('[KuroNotes PDF Cache] HIT (CacheStorage):', pdfUrl);
+            const pdfBytes = await cachedResponse.arrayBuffer();
+            if (pdfBytes && pdfBytes.byteLength > 100) {
+              const localTask = window.pdfjsLib.getDocument({
+                data: new Uint8Array(pdfBytes),
+                cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                cMapPacked: true,
+              });
+              state.pdfDoc = await localTask.promise;
+              window._kfPdfDocCache.set(pdfUrl, state.pdfDoc);
+            }
+          }
+        } catch (cacheReadErr) {}
+      }
+
+      // 3. Network Load with HTTP Range Requests & CDN Streaming
+      if (!state.pdfDoc) {
+        console.log('[KuroNotes PDF Cache] MISS -> Loading via CDN + Range Requests:', pdfUrl);
+        const docParam =
+          typeof pdfUrl === 'string' && !pdfUrl.startsWith('blob:') && !pdfUrl.startsWith('data:')
+            ? {
+                url: pdfUrl,
+                cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                cMapPacked: true,
+                disableRange: false,
+                disableStream: false,
+                disableAutoFetch: false,
+                rangeChunkSize: 65536,
+              }
+            : pdfUrl;
+
+        let loadingTask = window.pdfjsLib.getDocument(docParam);
+        try {
           state.pdfDoc = await loadingTask.promise;
-        } else {
-          throw firstErr;
+          if (typeof pdfUrl === 'string') {
+            window._kfPdfDocCache.set(pdfUrl, state.pdfDoc);
+            // Persist loaded PDF bytes into CacheStorage in the background so future opens cost 0 egress
+            if (pdfUrl.startsWith('http') && 'caches' in window && typeof state.pdfDoc.getData === 'function') {
+              state.pdfDoc.getData().then(async (uint8Arr) => {
+                try {
+                  const pdfCache = await caches.open(PDF_CACHE_STORAGE_NAME);
+                  const resp = new Response(uint8Arr.buffer, {
+                    headers: {
+                      'Content-Type': 'application/pdf',
+                      'Cache-Control': 'public, max-age=31536000, immutable'
+                    }
+                  });
+                  await pdfCache.put(pdfUrl, resp);
+                } catch (_) {}
+              }).catch(() => {});
+            }
+          }
+        } catch (firstErr) {
+          // Fallback: check if an offline copy exists in IndexedDB pdfStore
+          let fallbackBlobUrl = null;
+          if (window.DATA?.pdfStore && typeof window.DATA.pdfStore.getPdfUrl === 'function') {
+            try {
+              fallbackBlobUrl = await window.DATA.pdfStore.getPdfUrl(sheet.id);
+            } catch (e) {}
+          }
+          if (fallbackBlobUrl && fallbackBlobUrl !== pdfUrl) {
+            pdfUrl = fallbackBlobUrl;
+            loadingTask = window.pdfjsLib.getDocument(fallbackBlobUrl);
+            state.pdfDoc = await loadingTask.promise;
+          } else {
+            throw firstErr;
+          }
         }
       }
 

@@ -394,6 +394,10 @@
   }
 
   // --- CLOUD SHEETS & PDF STORAGE OPERATIONS ---
+  let _sheetsMemCache = null;
+  let _sheetsLastFetch = 0;
+  const SHEETS_CACHE_TTL = 60000; // 60s deduplication window
+
   async function uploadSheetPdf(file, sheetId) {
     initClient();
     if (!client) return null;
@@ -406,7 +410,7 @@
       const { data, error } = await client.storage
         .from('pdf-sheets')
         .upload(filePath, file, {
-          cacheControl: '3600',
+          cacheControl: '31536000',
           upsert: true,
           contentType: file.type || 'application/pdf'
         });
@@ -458,6 +462,7 @@
         return null;
       }
 
+      _sheetsMemCache = null;
       return data?.[0] || payload;
     } catch (e) {
       console.warn('publishSheetToCloud exception:', e.message);
@@ -465,24 +470,31 @@
     }
   }
 
-  async function fetchCloudSheets() {
+  async function fetchCloudSheets(forceRefresh = false) {
     initClient();
     if (!client) return [];
+
+    const now = Date.now();
+    if (!forceRefresh && _sheetsMemCache && (now - _sheetsLastFetch < SHEETS_CACHE_TTL)) {
+      return _sheetsMemCache;
+    }
 
     try {
       const { data, error } = await client
         .from('sheets')
-        .select('*')
+        .select('id, subject_id, title, title_ar, title_en, doctor_name, pages, order_index, pdf_url, download_url, pdf_source, date, created_at')
         .order('order_index', { ascending: true });
 
       if (error) {
         console.warn('Supabase fetchCloudSheets note:', error.message);
-        return [];
+        return _sheetsMemCache || [];
       }
-      return data || [];
+      _sheetsMemCache = data || [];
+      _sheetsLastFetch = now;
+      return _sheetsMemCache;
     } catch (e) {
       console.warn('fetchCloudSheets exception:', e.message);
-      return [];
+      return _sheetsMemCache || [];
     }
   }
 
