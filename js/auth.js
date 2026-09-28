@@ -1,0 +1,650 @@
+/**
+ * KURO FANGS — CENTRAL AUTHENTICATION ENGINE
+ * Single Application Auth State:
+ *   - AUTH_LOADING: Initializing & checking active Supabase session
+ *   - AUTHENTICATED: Active Google OAuth / Supabase verified session
+ *   - GUEST: Fast access mode (explore without account, limited protected features)
+ *   - UNAUTHENTICATED: Logged out, must visit /login
+ * 
+ * Complies with strict Security, RLS, and Anti-Slop Engineering Directives.
+ */
+
+(function (window) {
+  'use strict';
+
+  // Constants
+  const AUTH_STATES = {
+    LOADING: 'AUTH_LOADING',
+    AUTHENTICATED: 'AUTHENTICATED',
+    GUEST: 'GUEST',
+    UNAUTHENTICATED: 'UNAUTHENTICATED'
+  };
+
+  const STORAGE_KEYS = {
+    AUTH_MODE: 'kf_auth_mode',        // 'authenticated' | 'guest' | 'unauthenticated'
+    USER_INFO: 'kf_user_info',        // Cached user profile
+    PENDING_REDIRECT: 'kf_auth_redir' // Route to return to after auth
+  };
+
+  class AuthEngine {
+    constructor() {
+      this.state = AUTH_STATES.LOADING;
+      this.user = null;
+      this.subscribers = new Set();
+      this.initialized = false;
+      this._initPromise = null;
+    }
+
+    /**
+     * Subscribe to auth state transitions
+     */
+    subscribe(callback) {
+      if (typeof callback === 'function') {
+        this.subscribers.add(callback);
+        // Immediately notify subscriber with current state
+        callback(this.state, this.user);
+      }
+      return () => this.subscribers.delete(callback);
+    }
+
+    _notify() {
+      this.subscribers.forEach(cb => {
+        try {
+          cb(this.state, this.user);
+        } catch (e) {
+          console.error('[AuthEngine] Subscriber error:', e);
+        }
+      });
+      this.updateUI();
+    }
+
+    /**
+     * State inspection helpers
+     */
+    getState() { return this.state; }
+    getUser() { return this.user; }
+    isLoading() { return this.state === AUTH_STATES.LOADING; }
+    isAuthenticated() { return this.state === AUTH_STATES.AUTHENTICATED && !!this.user; }
+    isGuest() { return this.state === AUTH_STATES.GUEST; }
+    isUnauthenticated() { return this.state === AUTH_STATES.UNAUTHENTICATED; }
+
+    /**
+     * Initialize Auth on app startup
+     */
+    async init() {
+      if (this._initPromise) return this._initPromise;
+
+      this._initPromise = (async () => {
+        this.state = AUTH_STATES.LOADING;
+        this.renderBootLoadingScreen(true);
+
+        const supabase = this._getSupabaseClient();
+        let sessionUser = null;
+
+        if (supabase) {
+          try {
+            // Check active session via Supabase SDK (handles token refresh & URL hash detection automatically)
+            const { data, error } = await supabase.auth.getSession();
+            if (!error && data?.session?.user) {
+              sessionUser = data.session.user;
+            }
+          } catch (err) {
+            console.warn('[AuthEngine] Session check warning:', err.message);
+          }
+
+          // Register live auth state listener
+          supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+              await this._handleSignedIn(session.user);
+            } else if (event === 'SIGNED_OUT') {
+              this._handleSignedOut();
+            } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+              this._populateUserFromSupabase(session.user);
+              this._notify();
+            }
+          });
+        }
+
+        if (sessionUser) {
+          await this._handleSignedIn(sessionUser, false);
+        } else {
+          // Check if previously entered as Guest
+          const savedMode = localStorage.getItem(STORAGE_KEYS.AUTH_MODE);
+          if (savedMode === 'guest') {
+            this.state = AUTH_STATES.GUEST;
+            this.user = {
+              id: 'guest',
+              isGuest: true,
+              full_name: window.I18N?.getLang() === 'ar' ? 'طالب زائر' : 'Guest Student',
+              email: null,
+              avatar_url: null
+            };
+          } else {
+            this.state = AUTH_STATES.UNAUTHENTICATED;
+            this.user = null;
+          }
+        }
+
+        this.initialized = true;
+        this.renderBootLoadingScreen(false);
+        this._notify();
+        this._enforceRouting();
+      })();
+
+      return this._initPromise;
+    }
+
+    _getSupabaseClient() {
+      if (window.SupabaseAuth && typeof window.SupabaseAuth.getClient === 'function') {
+        return window.SupabaseAuth.getClient();
+      }
+      return null;
+    }
+
+    /**
+     * Populate internal user structure from Supabase User & metadata
+     */
+    _populateUserFromSupabase(sbUser) {
+      if (!sbUser) {
+        this.user = null;
+        return;
+      }
+
+      const meta = sbUser.user_metadata || {};
+      const fullName = meta.full_name || meta.name || sbUser.email?.split('@')[0] || 'Kuro Student';
+      const avatarUrl = meta.avatar_url || meta.picture || null;
+
+      this.user = {
+        id: sbUser.id,
+        email: sbUser.email,
+        full_name: fullName,
+        avatar_url: avatarUrl,
+        created_at: sbUser.created_at,
+        isGuest: false,
+        raw: sbUser
+      };
+
+      // Cache user info in localStorage for fast synchronous render
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify({
+          id: sbUser.id,
+          name: fullName,
+          email: sbUser.email,
+          avatar: avatarUrl,
+          created_at: sbUser.created_at
+        }));
+        localStorage.setItem(STORAGE_KEYS.AUTH_MODE, 'authenticated');
+      } catch (e) {}
+    }
+
+    /**
+     * Handle user successfully authenticated
+     */
+    async _handleSignedIn(sbUser, showToast = true) {
+      this._populateUserFromSupabase(sbUser);
+      this.state = AUTH_STATES.AUTHENTICATED;
+
+      // Sync user profile to Supabase `profiles` table
+      await this._syncProfileRecord(this.user);
+
+      // Migrate any guest activity (last opened sheet, etc.) safely
+      this.migrateGuestData(sbUser.id);
+
+      this._notify();
+
+      if (showToast && window.Toast) {
+        const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+        window.Toast.show(
+          isAr
+            ? `مرحباً بك يا ${this.user.full_name}! تم تسجيل الدخول بنجاح ☁️`
+            : `Welcome back, ${this.user.full_name}! Signed in successfully ☁️`,
+          'success'
+        );
+      }
+
+      // Check if redirect is pending or on login screen
+      const pendingRedir = sessionStorage.getItem(STORAGE_KEYS.PENDING_REDIRECT);
+      if (pendingRedir && pendingRedir !== '/login') {
+        sessionStorage.removeItem(STORAGE_KEYS.PENDING_REDIRECT);
+        window.location.hash = '#' + pendingRedir;
+      } else {
+        const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
+        if (currentHash === '/login' || window.location.hash.includes('access_token')) {
+          window.location.hash = '#/';
+        }
+      }
+    }
+
+    /**
+     * Handle user signed out
+     */
+    _handleSignedOut() {
+      this.user = null;
+      this.state = AUTH_STATES.UNAUTHENTICATED;
+      localStorage.setItem(STORAGE_KEYS.AUTH_MODE, 'unauthenticated');
+      localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+
+      this._notify();
+
+      // Redirect cleanly to login screen
+      window.location.hash = '#/login';
+    }
+
+    /**
+     * Synchronize profile record to Supabase `profiles` table
+     */
+    async _syncProfileRecord(user) {
+      const supabase = this._getSupabaseClient();
+      if (!supabase || !user || !user.id || user.isGuest) return;
+
+      try {
+        const payload = {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+          role: 'student',
+          status: 'active'
+        };
+
+        const { error } = await supabase
+          .from('profiles')
+          .upsert(payload, { onConflict: 'id' });
+
+        if (error) {
+          console.warn('[AuthEngine] Profile upsert note:', error.message);
+        }
+      } catch (err) {
+        console.warn('[AuthEngine] Profile sync note:', err.message);
+      }
+    }
+
+    /**
+     * Start Google OAuth Flow
+     */
+    async signInWithGoogle() {
+      const supabase = this._getSupabaseClient();
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+
+      if (!supabase) {
+        const msg = isAr ? 'تعذر الاتصال بخدمة التحقق' : 'Auth service unavailable';
+        window.Toast?.show(msg, 'error');
+        return { success: false, error: msg };
+      }
+
+      // Compute exact redirect URL based on environment
+      let redirectUrl = window.location.origin + window.location.pathname;
+      if (window.location.hostname === 'kurofangs.id.ly') {
+        redirectUrl = 'https://kurofangs.id.ly';
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl
+          }
+        });
+
+        if (error) {
+          console.error('[Google OAuth Technical Error]:', error);
+
+          // Check if Google provider is disabled in Supabase dashboard
+          if (error.message?.includes('provider is not enabled') || error.message?.includes('Unsupported provider')) {
+            const friendlyMsg = isAr
+              ? 'تسجيل الدخول عبر Google غير مفعّل حالياً في لوحة Supabase. يُرجى تفعيل مزود Google في Supabase Dashboard.'
+              : 'Google sign-in is not enabled in the Supabase project dashboard. Please enable Google Provider.';
+            window.Toast?.show(friendlyMsg, 'warning');
+            this.showGoogleConfigAlertModal(isAr);
+            return { success: false, error: error.message, isConfigError: true };
+          }
+
+          const friendlyMsg = isAr ? 'تعذر إتمام تسجيل الدخول مع Google. حاول ثانية.' : 'Google sign-in failed. Please try again.';
+          window.Toast?.show(friendlyMsg, 'error');
+          return { success: false, error: error.message };
+        }
+
+        return { success: true, data };
+      } catch (err) {
+        console.error('[Google OAuth Exception]:', err);
+        const friendlyMsg = isAr ? 'حدث خطأ أثناء الاتصال مع Google' : 'An error occurred connecting to Google';
+        window.Toast?.show(friendlyMsg, 'error');
+        return { success: false, error: err.message };
+      }
+    }
+
+    /**
+     * Continue as Guest Mode
+     */
+    continueAsGuest() {
+      localStorage.setItem(STORAGE_KEYS.AUTH_MODE, 'guest');
+      this.state = AUTH_STATES.GUEST;
+      this.user = {
+        id: 'guest',
+        isGuest: true,
+        full_name: window.I18N?.getLang() === 'ar' ? 'طالب زائر' : 'Guest Student',
+        email: null,
+        avatar_url: null
+      };
+
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+      if (window.Toast) {
+        window.Toast.show(
+          isAr ? 'أهلاً بك في كورو فانغز! تم تفعيل وضع الزائر السريع 🎒' : 'Welcome to Kuro Fangs! Guest mode enabled 🎒',
+          'info'
+        );
+      }
+
+      this._notify();
+
+      const pendingRedir = sessionStorage.getItem(STORAGE_KEYS.PENDING_REDIRECT);
+      if (pendingRedir && pendingRedir !== '/login') {
+        sessionStorage.removeItem(STORAGE_KEYS.PENDING_REDIRECT);
+        window.location.hash = '#' + pendingRedir;
+      } else {
+        window.location.hash = '#/';
+      }
+    }
+
+    /**
+     * Sign out
+     */
+    async signOut() {
+      const supabase = this._getSupabaseClient();
+      if (supabase) {
+        try {
+          await supabase.auth.signOut();
+        } catch (e) {
+          console.warn('[AuthEngine] Signout note:', e);
+        }
+      }
+      this._handleSignedOut();
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+      window.Toast?.show(
+        isAr ? 'تم تسجيل الخروج بنجاح. نراك قريباً! 👋' : 'Signed out successfully. See you soon! 👋',
+        'info'
+      );
+    }
+
+    /**
+     * Guard protected features for Guest users
+     * If user is Guest, shows the elegant prompt modal and returns false.
+     * If Authenticated, returns true.
+     */
+    requireAuth(featureName = 'progress') {
+      if (this.isAuthenticated()) {
+        return true;
+      }
+
+      this.showGuestRestrictionModal(featureName);
+      return false;
+    }
+
+    /**
+     * Migrate Guest activity safely to authenticated user
+     */
+    migrateGuestData(userId) {
+      if (!userId) return;
+      try {
+        // Last opened sheet migration
+        const lastSheet = localStorage.getItem('kf_last_opened_sheet');
+        if (lastSheet) {
+          localStorage.setItem(`kf_user_${userId}_last_sheet`, lastSheet);
+        }
+        // Active question session migration
+        const activeQuiz = localStorage.getItem('kf_active_question_session');
+        if (activeQuiz) {
+          localStorage.setItem(`kf_user_${userId}_active_quiz`, activeQuiz);
+        }
+      } catch (e) {}
+    }
+
+    /**
+     * Enforce clean routing on boot
+     */
+    _enforceRouting() {
+      const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
+
+      if (this.isAuthenticated() && currentHash === '/login') {
+        window.location.hash = '#/';
+      } else if (this.isUnauthenticated() && currentHash !== '/login') {
+        // Remember requested route
+        if (currentHash !== '/' && currentHash !== '') {
+          sessionStorage.setItem(STORAGE_KEYS.PENDING_REDIRECT, currentHash);
+        }
+        window.location.hash = '#/login';
+      }
+    }
+
+    /**
+     * Update UI across the application
+     */
+    updateUI() {
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+      const user = this.user;
+      const isAuthenticated = this.isAuthenticated();
+
+      // 1. Toggle Login Page Active class on body
+      const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
+      const isLoginPage = currentHash === '/login';
+      document.body.classList.toggle('login-view-active', isLoginPage);
+
+      // 2. Header Auth Box
+      const headerAuthBox = document.getElementById('header-auth-action-box');
+      if (headerAuthBox) {
+        if (isAuthenticated) {
+          const avatarHtml = user.avatar_url
+            ? `<img src="${user.avatar_url}" alt="${user.full_name}" class="header-user-avatar-circle" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" />`
+            : `<span class="header-user-avatar-initial" style="width:24px;height:24px;border-radius:50%;background:#7E1D2A;color:#FFF;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${user.full_name.charAt(0).toUpperCase()}</span>`;
+
+          headerAuthBox.innerHTML = `
+            <div class="header-user-badge" id="header-user-profile-badge" onclick="window.location.hash='#/profile'" style="display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:20px;background:rgba(126,29,42,0.06);border:1px solid rgba(126,29,42,0.14);cursor:pointer;" title="${user.email || ''}">
+              ${avatarHtml}
+              <span class="user-display-name" style="font-size:0.85rem;font-weight:700;color:var(--text-primary);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.full_name}</span>
+              <button type="button" class="btn-header-signout" onclick="event.stopPropagation(); window.AUTH.signOut()" title="${isAr ? 'تسجيل الخروج' : 'Sign Out'}" style="background:none;border:none;color:#8C827A;cursor:pointer;padding:2px;display:flex;align-items:center;">
+                <i data-lucide="log-out" style="width:13px;height:13px;"></i>
+              </button>
+            </div>
+          `;
+        } else if (this.isGuest()) {
+          headerAuthBox.innerHTML = `
+            <div class="header-guest-badge-wrap" style="display:inline-flex;align-items:center;gap:6px;">
+              <span class="header-guest-pill" style="font-size:0.75rem;padding:3px 8px;border-radius:12px;background:#F0EAE1;color:#6B6055;font-weight:700;">
+                ${isAr ? 'وضع الزائر' : 'Guest'}
+              </span>
+              <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.82rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
+                <i data-lucide="log-in" style="width:13px;height:13px;"></i>
+                <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
+              </button>
+            </div>
+          `;
+        } else {
+          headerAuthBox.innerHTML = `
+            <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.85rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
+              <i data-lucide="user" style="width:14px;height:14px;"></i>
+              <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
+            </button>
+          `;
+        }
+      }
+
+      // 3. Sidebar User Card
+      const sideName = document.querySelector('.sidebar-user-name');
+      const sideSub = document.getElementById('sidebar-user-sub');
+      const sideAvatarImg = document.getElementById('sidebar-user-avatar-img');
+
+      if (isAuthenticated) {
+        if (sideName) sideName.textContent = user.full_name;
+        if (sideSub) sideSub.textContent = isAr ? 'حساب موثق سحابياً ☁️' : 'Cloud Verified ☁️';
+        if (sideAvatarImg && user.avatar_url) {
+          sideAvatarImg.src = user.avatar_url;
+          sideAvatarImg.style.borderRadius = '50%';
+          sideAvatarImg.style.objectFit = 'cover';
+        }
+      } else if (this.isGuest()) {
+        if (sideName) sideName.textContent = isAr ? 'طالب زائر (Guest)' : 'Guest Student';
+        if (sideSub) sideSub.textContent = isAr ? 'السنة الثالثة • حساب محلي' : 'Year 3 • Local Session';
+      } else {
+        if (sideName) sideName.textContent = isAr ? 'غير مسجل' : 'Not Signed In';
+        if (sideSub) sideSub.textContent = isAr ? 'اضغط لتسجيل الدخول' : 'Click to Sign In';
+      }
+
+      // Re-initialize Lucide icons
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
+    /**
+     * Simple, non-flashing loading screen on initial boot
+     */
+    renderBootLoadingScreen(show) {
+      let loader = document.getElementById('kf-auth-boot-loader');
+      if (show) {
+        if (!loader) {
+          loader = document.createElement('div');
+          loader.id = 'kf-auth-boot-loader';
+          loader.className = 'kf-auth-boot-loader';
+          loader.innerHTML = `
+            <div class="kf-boot-content">
+              <div class="kf-boot-mascot-pulse">
+                <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" width="72" height="72" />
+              </div>
+              <h2 class="kf-boot-title">Kuro Fangs</h2>
+              <div class="kf-boot-spinner"></div>
+            </div>
+          `;
+          document.body.appendChild(loader);
+        }
+        loader.style.display = 'flex';
+      } else if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 250);
+      }
+    }
+
+    /**
+     * Renders the Guest Restriction / Upgrade Modal requested in Requirement 8
+     */
+    showGuestRestrictionModal(featureName) {
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+      const modalId = 'kf-guest-upgrade-modal-backdrop';
+      let modal = document.getElementById(modalId);
+      if (modal) modal.remove();
+
+      modal = document.createElement('div');
+      modal.id = modalId;
+      modal.className = 'auth-modal-backdrop guest-restriction-backdrop';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+
+      modal.innerHTML = `
+        <div class="auth-modal-box guest-upgrade-box" style="max-width: 440px; padding: 32px 28px; text-align: center; border-radius: 24px; background: #FFFFFF; border: 1px solid #EAE3D6; box-shadow: 0 16px 40px rgba(126,29,42,0.12);">
+          <!-- Mascot Header -->
+          <div style="width: 80px; height: 80px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; background: #FBF3EF; border-radius: 50%; border: 1px solid #EEDCD5;">
+            <img src="assets/characters/kuro/kuro-welcome-sparks.png" alt="Kuro" style="width: 58px; height: auto;" />
+          </div>
+
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: #7E1D2A; margin: 0 0 8px; letter-spacing: -0.01em;">
+            ${isAr ? 'سجّل دخولك لحفظ تقدّمك' : 'Sign in to save your progress'}
+          </h2>
+
+          <p style="font-size: 0.92rem; color: #6E655F; line-height: 1.5; margin: 0 0 24px;">
+            ${isAr
+              ? 'أنشئ حساباً مجانياً عبر Google لمزامنة نشاطك الدراسي وملاحظاتك وشيتاتك عبر جميع أجهزتك.'
+              : 'Create a free account to sync your study activity, notes, and sheets across devices.'}
+          </p>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button
+              type="button"
+              id="guest-upgrade-google-btn"
+              style="width: 100%; height: 50px; border-radius: 12px; background: #7E1D2A; color: #FFFFFF; font-size: 0.95rem; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(126,29,42,0.22); transition: transform 0.15s cubic-bezier(0.16,1,0.3,1);"
+              onmouseover="this.style.transform='scale(1.01)'"
+              onmouseout="this.style.transform='scale(1)'"
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path fill="#FFF" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#FFF" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FFF" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#FFF" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>${isAr ? 'المتابعة بحساب Google' : 'Continue with Google'}</span>
+            </button>
+
+            <button
+              type="button"
+              id="guest-upgrade-dismiss-btn"
+              style="width: 100%; height: 46px; border-radius: 12px; background: #FBF8F3; color: #5C5248; font-size: 0.9rem; font-weight: 700; border: 1px solid #EAE3D6; cursor: pointer;"
+            >
+              <span>${isAr ? 'متابعة كزائر (بدون حساب)' : 'Continue as Guest'}</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      modal.querySelector('#guest-upgrade-google-btn')?.addEventListener('click', () => {
+        modal.remove();
+        this.signInWithGoogle();
+      });
+
+      modal.querySelector('#guest-upgrade-dismiss-btn')?.addEventListener('click', () => {
+        modal.remove();
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+    }
+
+    /**
+     * Clear guidance alert modal if Supabase Google provider is disabled
+     */
+    showGoogleConfigAlertModal(isAr) {
+      const modalId = 'kf-google-config-alert-backdrop';
+      let modal = document.getElementById(modalId);
+      if (modal) modal.remove();
+
+      modal = document.createElement('div');
+      modal.id = modalId;
+      modal.className = 'auth-modal-backdrop';
+      modal.innerHTML = `
+        <div class="auth-modal-box" style="max-width: 500px; padding: 28px; border-radius: 20px; background: #FFFFFF; border: 1px solid #EAE3D6;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:42px;height:42px;border-radius:50%;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;font-size:20px;">⚠️</div>
+            <h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#1F1A17;">
+              ${isAr ? 'تفعيل تسجيل الدخول عبر Google' : 'Enable Google Sign-In in Supabase'}
+            </h3>
+          </div>
+          <p style="font-size:0.88rem;color:#6E655F;line-height:1.5;margin-bottom:16px;">
+            ${isAr
+              ? 'مزود Google OAuth غير مفعّل حالياً في مشروع Supabase الخاص بك. لتفعيله في دقيقة واحدة:'
+              : 'Google OAuth provider is not yet toggled on in your Supabase project. To enable it:'}
+          </p>
+          <ol style="font-size:0.84rem;color:#4A4036;line-height:1.6;padding-inline-start:20px;margin-bottom:20px;">
+            <li>${isAr ? 'افتح <strong>Supabase Dashboard → Authentication → Providers → Google</strong>.' : 'Open <strong>Supabase Dashboard → Authentication → Providers → Google</strong>.'}</li>
+            <li>${isAr ? 'قم بتفعيل خيار <strong>Enable Google provider</strong>.' : 'Turn on <strong>Enable Google provider</strong>.'}</li>
+            <li>${isAr ? 'أدخل <strong>Client ID</strong> و <strong>Client Secret</strong> من Google Cloud Console.' : 'Enter your <strong>Client ID</strong> and <strong>Client Secret</strong> from Google Cloud Console.'}</li>
+          </ol>
+          <div style="display:flex;justify-content:flex-end;gap:10px;">
+            <button type="button" onclick="this.closest('.auth-modal-backdrop').remove()" style="padding:8px 18px;border-radius:10px;background:#7E1D2A;color:#FFF;font-weight:700;border:none;cursor:pointer;">
+              ${isAr ? 'حسناً، فهمت' : 'Got it'}
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+  }
+
+  // Export singleton instance on window
+  window.AUTH = new AuthEngine();
+
+  // Backward-compatible hook with existing SupabaseAuth callers
+  window.addEventListener('DOMContentLoaded', () => {
+    window.AUTH.init();
+  });
+
+})(window);

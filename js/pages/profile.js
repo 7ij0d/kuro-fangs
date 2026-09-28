@@ -71,14 +71,17 @@ window.ProfilePage = {
   render(container) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
     const info = this._getUserInfo();
+    const authUser = window.AUTH ? window.AUTH.getUser() : null;
+    const isAuthenticated = window.AUTH ? window.AUTH.isAuthenticated() : false;
+    const isGuest = window.AUTH ? window.AUTH.isGuest() : false;
     this._pendingAvatar = null;
 
-    const avatarSrc = info.avatar || null;
-    const name = info.name || (isAr ? 'طالب أسنان' : 'Dental Student');
-    const email = info.email || '';
+    const avatarSrc = authUser?.avatar_url || info.avatar || null;
+    const name = authUser?.full_name || info.name || (isAr ? 'طالب أسنان' : 'Dental Student');
+    const email = authUser?.email || info.email || '';
     const points = window.STORE ? window.STORE.getPoints() : (info.points || 0);
 
-    // Masot idle for display
+    // Mascot idle for display
     const mascotSrc = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('idle'))
       || 'assets/characters/kuro/Kuro-Idle.png';
 
@@ -125,6 +128,36 @@ window.ProfilePage = {
             <i data-lucide="zap" style="width:14px;height:14px;color:#F59E0B;"></i>
             <span>${points} ${isAr ? 'نقطة' : 'pts'}</span>
           </div>
+
+          ${isAuthenticated ? `
+            <div class="profile-auth-status" style="margin-top:14px;padding:12px;border-radius:12px;background:rgba(126,29,42,0.04);border:1px solid rgba(126,29,42,0.12);text-align:center;">
+              <div style="font-size:0.8rem;font-weight:700;color:#7E1D2A;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;">
+                <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+                <span>${isAr ? 'حساب موثق عبر Google' : 'Google Verified'}</span>
+              </div>
+              <div style="font-size:0.75rem;color:var(--text-secondary);word-break:break-all;margin-bottom:10px;">
+                ${email}
+              </div>
+              <button type="button" id="profile-signout-btn" style="width:100%;padding:8px 12px;border-radius:10px;background:#FFF;border:1px solid #EAE3D6;color:#DC2626;font-size:0.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;">
+                <i data-lucide="log-out" style="width:13px;height:13px;"></i>
+                <span>${isAr ? 'تسجيل الخروج' : 'Log Out'}</span>
+              </button>
+            </div>
+          ` : isGuest ? `
+            <div class="profile-auth-status" style="margin-top:14px;padding:12px;border-radius:12px;background:#FBF8F3;border:1px solid #EAE3D6;text-align:center;">
+              <div style="font-size:0.8rem;font-weight:700;color:#854D0E;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;">
+                <i data-lucide="user" style="width:14px;height:14px;"></i>
+                <span>${isAr ? 'وضع الزائر (محلي)' : 'Guest Mode (Local)'}</span>
+              </div>
+              <p style="font-size:0.75rem;color:var(--text-secondary);margin:0 0 10px;line-height:1.4;">
+                ${isAr ? 'سجّل دخولك لحفظ وتزامن دراستك وملاحظاتك.' : 'Sign in to sync your progress.'}
+              </p>
+              <button type="button" id="profile-signin-btn" style="width:100%;padding:8px 12px;border-radius:10px;background:#7E1D2A;border:none;color:#FFF;font-size:0.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;">
+                <i data-lucide="log-in" style="width:13px;height:13px;"></i>
+                <span>${isAr ? 'المتابعة بحساب Google' : 'Sign in with Google'}</span>
+              </button>
+            </div>
+          ` : ''}
 
           <button class="profile-remove-avatar-btn" id="profile-remove-avatar-btn" style="${avatarSrc ? '' : 'display:none;'}">
             <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
@@ -231,6 +264,19 @@ window.ProfilePage = {
         || 'assets/characters/kuro/Kuro-Idle.png';
       if (img) { img.src = mascotSrc; img.style.objectFit = 'contain'; img.style.width = '80%'; img.style.height = '80%'; }
       document.getElementById('profile-remove-avatar-btn').style.display = 'none';
+    });
+
+    // Profile signout button
+    document.getElementById('profile-signout-btn')?.addEventListener('click', () => {
+      const confirmMsg = isAr ? 'هل أنت متأكد من تسجيل الخروج؟' : 'Are you sure you want to sign out?';
+      if (window.confirm(confirmMsg)) {
+        if (window.AUTH) window.AUTH.signOut();
+      }
+    });
+
+    // Profile signin / upgrade button
+    document.getElementById('profile-signin-btn')?.addEventListener('click', () => {
+      if (window.AUTH) window.AUTH.signInWithGoogle();
     });
 
     // Info form

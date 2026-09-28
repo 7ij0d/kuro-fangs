@@ -507,7 +507,9 @@
         : 'Are you sure you want to log out?';
 
       if (window.confirm(confirmMsg)) {
-        if (window.SupabaseAuth && typeof window.SupabaseAuth.signOut === 'function') {
+        if (window.AUTH && typeof window.AUTH.signOut === 'function') {
+          window.AUTH.signOut();
+        } else if (window.SupabaseAuth && typeof window.SupabaseAuth.signOut === 'function') {
           window.SupabaseAuth.signOut();
         } else {
           localStorage.removeItem('kf_user_info');
@@ -518,8 +520,7 @@
               'info'
             );
           }
-          window.location.hash = '#/';
-          setTimeout(() => window.location.reload(), 300);
+          window.location.hash = '#/login';
         }
       }
     },

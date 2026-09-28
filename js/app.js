@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (headerBrandName) headerBrandName.textContent = isAr ? 'طالب كورو' : 'Kuro Student';
 
     // Update Auth header state
-    if (window.SupabaseAuth && typeof window.SupabaseAuth.updateUI === 'function') {
+    if (window.AUTH && typeof window.AUTH.updateUI === 'function') {
+      window.AUTH.updateUI();
+    } else if (window.SupabaseAuth && typeof window.SupabaseAuth.updateUI === 'function') {
       window.SupabaseAuth.updateUI(window.SupabaseAuth.getUser());
     }
 
@@ -426,6 +428,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 8. Register Routes
   const router = window.ROUTER;
 
+  router.register('/login', (c, q) => {
+    if (window.LoginPage && typeof window.LoginPage.render === 'function') {
+      window.LoginPage.render(c, q);
+    }
+  });
   router.register('/', (c, q) => window.HomePage.render(c, q));
   router.register('/subjects', (c, q) => {
     window.location.hash = '#/sheets';
@@ -638,6 +645,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (window.SettingsMenu && typeof window.SettingsMenu.init === 'function') {
     window.SettingsMenu.init();
+  }
+  if (window.AUTH && typeof window.AUTH.init === 'function') {
+    try {
+      await window.AUTH.init();
+    } catch (e) {
+      console.warn('[App] Auth init note:', e);
+    }
   }
   router.handleRoute();
   updateActiveSidebarNav(window.location.hash.slice(1).split('?')[0] || '/');
