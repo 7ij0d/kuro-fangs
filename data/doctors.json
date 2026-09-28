@@ -14,6 +14,10 @@
     { "id": "dr-rima",    "name_ar": "د. ريما الأمين",    "name_en": "Dr. Rima Al-Amin",     "title": "ماجستير طب أسنان الأطفال",   "subjects": ["pedo"] },
     { "id": "dr-amal",    "name_ar": "د. آمال كشلاف",    "name_en": "Dr. Amal Kashlaf",     "title": "أستاذة العلاج التحفظي وعلاج الجذور", "subjects": ["cons-endo"] },
     { "id": "dr-hanan",   "name_ar": "د. حنان عمران",    "name_en": "Dr. Hanan Omran",      "title": "أستاذة طب الأسنان الوقائي ومجتمع الأسنان", "subjects": ["preventive"] },
-    { "id": "dr-aisha-abubaker", "name_ar": "د. عائشة أبوبكر شنان", "name_en": "Dr. Aisha Abubaker Shanan", "title": "أستاذة أمراض الفم", "subjects": ["oral-diseases"] }
+    { "id": "dr-aisha-abubaker", "name_ar": "د. عائشة أبوبكر شنان", "name_en": "Dr. Aisha Abubaker Shanan", "title": "أستاذة أمراض الفم", "subjects": ["oral-diseases"] },
+    { "id": "dr-asmaa",   "name_ar": "د. أسماء سلام الغرياني", "name_en": "Dr. Asmaa Salam Algharyani", "title": "أستاذة أمراض الفم", "subjects": ["oral-diseases"] },
+    { "id": "dr-abduladeem", "name_ar": "د. عبدالعظيم عياد قداد", "name_en": "Dr. Abduladeem Ayad Qaddad", "title": "أستاذ طب الفم والتشخيص والأشعة", "subjects": ["omdr"] },
+    { "id": "dr-hisham",  "name_ar": "د. هشام شمبش",      "name_en": "Dr. Hisham Shembesh",   "title": "أستاذ جراحة الفم والوجه والفكين", "subjects": ["omfs"] },
+    { "id": "dr-bassma",  "name_ar": "د. بسمة جنديلة",    "name_en": "Dr. Bassma Gendela",   "title": "أستاذة تقويم الأسنان",       "subjects": ["ortho"] }
   ]
 }

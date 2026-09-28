@@ -1,1 +1,115 @@
-{"recordings": []}
+{
+  "recordings": [
+    {
+      "id": "rec_oral_path_caries_01",
+      "sheet_id": "sh_oral_path_caries_01",
+      "subject_id": "oral-diseases",
+      "title": "تسجيل المحاضرة الأولى: Dental Caries",
+      "title_ar": "تسجيل المحاضرة الأولى: Dental Caries",
+      "title_en": "Lecture 1 Audio: Dental Caries",
+      "doctor": "د. أسماء سلام الغرياني",
+      "date": "2026-09-14",
+      "audio_url": "https://t.me/ravenrecords/13",
+      "telegram_link": "https://t.me/ravenrecords/13"
+    },
+    {
+      "id": "rec_prev_infection_control_01",
+      "sheet_id": "sh_prev_infection_control_01",
+      "subject_id": "preventive",
+      "title": "تسجيل المحاضرة الأولى: Dental Infection Control",
+      "title_ar": "تسجيل المحاضرة الأولى: Dental Infection Control",
+      "title_en": "Lecture 1 Audio: Dental Infection Control",
+      "doctor": "د. حنان عمران",
+      "date": "2026-09-15",
+      "audio_url": "https://t.me/ravenrecords/18",
+      "telegram_link": "https://t.me/ravenrecords/18"
+    },
+    {
+      "id": "rec_omdr_patient_evaluation_01",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "subject_id": "omdr",
+      "title": "تسجيل المحاضرة الأولى: Approach to the Evaluation of the Patient",
+      "title_ar": "تسجيل المحاضرة الأولى: Approach to the Evaluation of the Patient",
+      "title_en": "Lecture 1 Audio: Approach to the Evaluation of the Patient",
+      "doctor": "د. عبدالعظيم عياد قداد",
+      "date": "2026-09-15",
+      "audio_url": "https://t.me/ravenrecords/21",
+      "telegram_link": "https://t.me/ravenrecords/21"
+    },
+    {
+      "id": "rec_omfs_local_anesthesia_01",
+      "sheet_id": "sh_omfs_local_anesthesia_01",
+      "subject_id": "omfs",
+      "title": "تسجيل المحاضرة الأولى: Local Anesthesia (Part 1)",
+      "title_ar": "تسجيل المحاضرة الأولى: Local Anesthesia (الجزء 1 - سلايدات 1-41)",
+      "title_en": "Lecture 1 Audio: Local Anesthesia (Part 1 - Slides 1-41)",
+      "doctor": "د. هشام شمبش",
+      "date": "2026-09-20",
+      "audio_url": "https://t.me/ravenrecords/33",
+      "telegram_link": "https://t.me/ravenrecords/33",
+      "part": "Part 1 (Slides 1-41)"
+    },
+    {
+      "id": "rec_oral_path_pulp_02",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "subject_id": "oral-diseases",
+      "title": "تسجيل المحاضرة الثانية: Diseases of Pulp & Periapical Tissues (Part 1)",
+      "title_ar": "تسجيل المحاضرة الثانية: أمراض اللب والأنسجة الذروية (الجزء 1)",
+      "title_en": "Lecture 2 Audio: Diseases of Pulp & Periapical Tissues (Part 1)",
+      "doctor": "د. عائشة أبوبكر شنان",
+      "date": "2026-09-21",
+      "audio_url": "https://t.me/ravenrecords/35",
+      "telegram_link": "https://t.me/ravenrecords/35",
+      "part": "Part 1"
+    },
+    {
+      "id": "rec_prev_dental_caries_02",
+      "sheet_id": "sh_prev_dental_caries_02",
+      "subject_id": "preventive",
+      "title": "تسجيل المحاضرة الثانية: Dental Caries",
+      "title_ar": "تسجيل المحاضرة الثانية: Dental Caries",
+      "title_en": "Lecture 2 Audio: Dental Caries",
+      "doctor": "د. حنان عمران",
+      "date": "2026-09-22",
+      "audio_url": "https://t.me/ravenrecords/38",
+      "telegram_link": "https://t.me/ravenrecords/38"
+    },
+    {
+      "id": "rec_cons_dentin_pulp_01",
+      "sheet_id": "sh_cons_dentin_pulp_01",
+      "subject_id": "cons-endo",
+      "title": "تسجيل المحاضرة الأولى: The Dentin-Pulp Complex",
+      "title_ar": "تسجيل المحاضرة الأولى: The Dentin-Pulp Complex",
+      "title_en": "Lecture 1 Audio: The Dentin-Pulp Complex",
+      "doctor": "د. آمال كشلاف",
+      "date": "2026-09-23",
+      "audio_url": "https://t.me/ravenrecords/40",
+      "telegram_link": "https://t.me/ravenrecords/40"
+    },
+    {
+      "id": "rec_ortho_intro_terminology_01",
+      "sheet_id": "sh_ortho_intro_terminology_01",
+      "subject_id": "ortho",
+      "title": "تسجيل المحاضرة الأولى: Introduction and Terminology (Part 1)",
+      "title_ar": "تسجيل المحاضرة الأولى: Introduction and Terminology (الجزء 1 - حتى سلايد 22)",
+      "title_en": "Lecture 1 Audio: Introduction and Terminology (Part 1 - Up to Slide 22)",
+      "doctor": "د. بسمة جنديلة",
+      "date": "2026-09-23",
+      "audio_url": "https://t.me/ravenrecords/42",
+      "telegram_link": "https://t.me/ravenrecords/42",
+      "part": "Part 1 (Slides 1-22)"
+    },
+    {
+      "id": "rec_oral_path_periapical_03",
+      "sheet_id": "sh_oral_path_periapical_03",
+      "subject_id": "oral-diseases",
+      "title": "تسجيل المحاضرة الثالثة: Diseases of Periapical Tissues",
+      "title_ar": "تسجيل المحاضرة الثالثة: أمراض الأنسجة الذروية (Diseases of Periapical Tissues)",
+      "title_en": "Lecture 3 Audio: Diseases of Periapical Tissues",
+      "doctor": "د. عائشة أبوبكر شنان",
+      "date": "2026-09-28",
+      "audio_url": "https://t.me/ravenrecords/65",
+      "telegram_link": "https://t.me/ravenrecords/65"
+    }
+  ]
+}

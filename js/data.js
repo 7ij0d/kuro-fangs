@@ -123,42 +123,29 @@ class DataService {
     });
     this.alerts = this.getDefaultAlerts();
     this.sheets = this.getDefaultSheets();
+    this.recordings = this.getDefaultRecordings();
     this.questions = this.getDefaultQuestions();
     this.flashcards = this.getDefaultFlashcards();
 
     // 2. Merge cached cloud sheets & local custom admin sheets instantly
     try {
+      const obsoleteIds = ['sh_omdr_patient_evaluation_01', 'sh_cons_dentin_pulp', 'sh-fixed-provisional', 'sh_admin_1789336010378', 'sh-omdr-01'];
       ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets'].forEach(k => {
         try {
           const raw = localStorage.getItem(k);
-          if (raw && (raw.includes('sh-fixed-provisional') || raw.includes('sh_admin_1789336010378') || raw.toLowerCase().includes('provisional'))) {
-            const parsed = JSON.parse(raw).filter(s => s && s.id !== 'sh-fixed-provisional' && s.id !== 'sh_admin_1789336010378' && !(s.title || '').toLowerCase().includes('provisional'));
-            localStorage.setItem(k, JSON.stringify(parsed));
-          }
-          // Sanitize OMDR Sheet 1 legacy ID and stale title
-          if (raw && (raw.includes('sh-omdr-01') || raw.toLowerCase().includes('evaluation of the patient'))) {
+          if (raw) {
             let parsed = JSON.parse(raw);
             if (Array.isArray(parsed)) {
-              parsed = parsed.filter(s => s && s.id !== 'sh-omdr-01');
-              parsed.forEach(s => {
-                if (s && (s.id === 'sh_admin_1789462201436' || (s.title || '').toLowerCase().includes('evaluation of the patient'))) {
-                  s.id = 'sh_admin_1789462201436';
-                  s.title = 'Sheet 1: Approach to the Evaluation of the Patient';
-                  s.title_ar = 'الشيت 1: تقييم وفحص المريض';
-                  s.title_en = 'Sheet 1: Approach to the Evaluation of the Patient';
-                  s.doctor = 'د عبدالعظيم قداد';
-                  s.doctor_name = 'د عبدالعظيم قداد';
-                }
-              });
-              localStorage.setItem(k, JSON.stringify(parsed));
+              const cleaned = parsed.filter(s => s && !obsoleteIds.includes(s.id) && !(s.title || '').toLowerCase().includes('provisional'));
+              if (cleaned.length !== parsed.length) {
+                localStorage.setItem(k, JSON.stringify(cleaned));
+              }
             }
           }
         } catch (err) {}
       });
       if (this.pdfStore && typeof this.pdfStore.deletePdf === 'function') {
-        this.pdfStore.deletePdf('sh-fixed-provisional').catch(() => {});
-        this.pdfStore.deletePdf('sh_admin_1789336010378').catch(() => {});
-        this.pdfStore.deletePdf('sh-omdr-01').catch(() => {});
+        obsoleteIds.forEach(id => this.pdfStore.deletePdf(id).catch(() => {}));
       }
 
       const cachedCloudSheets = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
@@ -915,7 +902,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 4,
@@ -952,7 +939,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 4,
@@ -989,7 +976,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 4,
@@ -1026,7 +1013,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 8,
@@ -1065,7 +1052,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 8,
@@ -1104,7 +1091,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 9,
@@ -1141,7 +1128,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 9,
@@ -1179,7 +1166,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 10,
@@ -1217,7 +1204,7 @@ class DataService {
         "subject_id": "omdr",
         "subject_name_ar": "طب الفم والتشخيص والأشعة 1",
         "subject_name_en": "Oral Medicine, Diagnosis and Radiology I",
-        "sheet_id": "sh_admin_1789462201436",
+        "sheet_id": "sh_omdr_patient_evaluation_01",
         "sheet_title_ar": "الشيت 1: تقييم وفحص المريض",
         "sheet_title_en": "Sheet 1: Approach to the Evaluation of the Patient",
         "page_ref": 11,
@@ -1259,74 +1246,294 @@ class DataService {
 
   getDefaultSheets() {
     return [
-    {
-        "id": "sh_admin_1789462201436",
-        "subject_id": "omdr",
-        "title": "Sheet 1: Approach to the Evaluation of the Patient",
-        "title_ar": "الشيت 1: تقييم وفحص المريض",
-        "title_en": "Sheet 1: Approach to the Evaluation of the Patient",
-        "doctor_name": "د عبدالعظيم قداد",
-        "doctor": "د عبدالعظيم قداد",
-        "pages": 12,
-        "pages_count": 12,
-        "order_index": 1,
-        "pdf_url": "https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/pdf-sheets/sheets/sh_admin_1789462201436_1789687054748.pdf",
-        "download_url": "https://vqrpodmnzubpcsvqohwj.supabase.co/storage/v1/object/public/pdf-sheets/sheets/sh_admin_1789462201436_1789687054748.pdf",
-        "pdf_source": "cloud",
-        "date": "2026-09-15"
-    },
-    {
-        "id": "sh_cons_dentin_pulp",
-        "subject_id": "cons-endo",
-        "title": "Sheet 1: Dentin-Pulp Complex",
-        "title_ar": "الشيت 1: معقد العاج واللب (Dentin-Pulp Complex)",
-        "title_en": "Sheet 1: Dentin-Pulp Complex",
-        "doctor_name": "د. آمال كشلاف",
-        "doctor": "د. آمال كشلاف",
-        "pages": 23,
-        "pages_count": 23,
-        "order_index": 1,
-        "size": "1.7 MB",
-        "pdf_url": "data/sheets/dentin-pulp-complex.pdf",
-        "download_url": "data/sheets/dentin-pulp-complex.pdf",
-        "pdf_source": "local",
-        "date": "2026-09-23"
-    },
-    {
-        "id": "sh_prev_dental_caries_02",
-        "subject_id": "preventive",
-        "title": "Lecture 2: Dental Caries & Current Concepts of Etiology",
-        "title_ar": "المحاضرة 2: تسوس الأسنان والنظريات الحديثة للأسباب (Dental Caries)",
-        "title_en": "Lecture 2: Dental Caries & Current Concepts of Etiology",
-        "doctor_name": "د. حنان عمران",
-        "doctor": "د. حنان عمران",
-        "pages": 5,
-        "pages_count": 5,
-        "order_index": 2,
-        "size": "253 KB",
-        "pdf_url": "data/sheets/dental-caries-prevention.pdf",
-        "download_url": "data/sheets/dental-caries-prevention.pdf",
-        "pdf_source": "local",
-        "date": "2026-09-22"
-    },
-    {
-        "id": "sh_oral_path_pulp_02",
-        "subject_id": "oral-diseases",
-        "title": "Lecture 2: Disorders of the Dental Pulp",
-        "title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Disorders of Dental Pulp)",
-        "title_en": "Lecture 2: Disorders of the Dental Pulp",
-        "doctor_name": "د. عائشة أبوبكر شنان",
-        "doctor": "د. عائشة أبوبكر شنان",
-        "pages": 16,
-        "pages_count": 16,
-        "order_index": 2,
-        "size": "1.19 MB",
-        "pdf_url": "data/sheets/disorders-of-dental-pulp.pdf",
-        "download_url": "data/sheets/disorders-of-dental-pulp.pdf",
-        "pdf_source": "local",
-        "date": "2026-09-21"
-    }
-];
+      {
+        id: "sh_oral_path_caries_01",
+        subject_id: "oral-diseases",
+        subject_name_ar: "أمراض الفم (Oral Pathology)",
+        subject_code: "DS380",
+        order_index: 1,
+        title: "Lecture 1: Dental Caries",
+        title_ar: "المحاضرة 1: تسوس الأسنان (Dental Caries)",
+        title_en: "Lecture 1: Dental Caries",
+        doctor_name: "د. أسماء سلام الغرياني",
+        doctor: "د. أسماء سلام الغرياني",
+        pages: 11,
+        pages_count: 11,
+        size: "530 KB",
+        pdf_url: "data/sheets/dental-caries-dr-asmaa.pdf",
+        download_url: "data/sheets/dental-caries-dr-asmaa.pdf",
+        pdf_source: "local",
+        date: "2026-09-14"
+      },
+      {
+        id: "sh_prev_infection_control_01",
+        subject_id: "preventive",
+        subject_name_ar: "طب الأسنان الوقائي (Preventive Dentistry)",
+        subject_code: "DS381",
+        order_index: 1,
+        title: "Lecture 1: Dental Infection Control",
+        title_ar: "المحاضرة 1: مكافحة العدوى في طب الأسنان (Dental Infection Control)",
+        title_en: "Lecture 1: Dental Infection Control",
+        doctor_name: "د. حنان عمران",
+        doctor: "د. حنان عمران",
+        pages: 6,
+        pages_count: 6,
+        size: "316 KB",
+        pdf_url: "data/sheets/dental-infection-control-prev.pdf",
+        download_url: "data/sheets/dental-infection-control-prev.pdf",
+        pdf_source: "local",
+        date: "2026-09-15"
+      },
+      {
+        id: "sh_omdr_patient_evaluation_01",
+        subject_id: "omdr",
+        subject_name_ar: "طب الفم والتشخيص والأشعة 1 (OMDR)",
+        subject_code: "DS361",
+        order_index: 1,
+        title: "Lecture 1: Approach to the Evaluation of the Patient",
+        title_ar: "المحاضرة 1: مدخل إلى تقييم وفحص المريض (Approach to Evaluation of Patient)",
+        title_en: "Lecture 1: Approach to the Evaluation of the Patient",
+        doctor_name: "د. عبدالعظيم عياد قداد",
+        doctor: "د. عبدالعظيم عياد قداد",
+        pages: 12,
+        pages_count: 12,
+        size: "1.1 MB",
+        pdf_url: "data/sheets/approach-to-patient-evaluation-omdr.pdf",
+        download_url: "data/sheets/approach-to-patient-evaluation-omdr.pdf",
+        pdf_source: "local",
+        date: "2026-09-15"
+      },
+      {
+        id: "sh_omfs_local_anesthesia_01",
+        subject_id: "omfs",
+        subject_name_ar: "جراحة الفم والوجه والفكين 1 (OMFS)",
+        subject_code: "DS341",
+        order_index: 1,
+        title: "Lecture 1: Local Anesthesia",
+        title_ar: "المحاضرة 1: التخدير الموضعي في جراحة الفم (Local Anesthesia)",
+        title_en: "Lecture 1: Local Anesthesia",
+        doctor_name: "د. هشام شمبش",
+        doctor: "د. هشام شمبش",
+        pages: 80,
+        pages_count: 80,
+        size: "3.5 MB",
+        pdf_url: "data/sheets/local-anesthesia-omfs.pdf",
+        download_url: "data/sheets/local-anesthesia-omfs.pdf",
+        pdf_source: "local",
+        date: "2026-09-20"
+      },
+      {
+        id: "sh_oral_path_pulp_02",
+        subject_id: "oral-diseases",
+        subject_name_ar: "أمراض الفم (Oral Pathology)",
+        subject_code: "DS380",
+        order_index: 2,
+        title: "Lecture 2: Diseases of the Dental Pulp",
+        title_ar: "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
+        title_en: "Lecture 2: Diseases of the Dental Pulp",
+        doctor_name: "د. عائشة أبوبكر شنان",
+        doctor: "د. عائشة أبوبكر شنان",
+        pages: 16,
+        pages_count: 16,
+        size: "1.1 MB",
+        pdf_url: "data/sheets/disorders-of-dental-pulp-oral-path.pdf",
+        download_url: "data/sheets/disorders-of-dental-pulp-oral-path.pdf",
+        pdf_source: "local",
+        date: "2026-09-21"
+      },
+      {
+        id: "sh_prev_dental_caries_02",
+        subject_id: "preventive",
+        subject_name_ar: "طب الأسنان الوقائي (Preventive Dentistry)",
+        subject_code: "DS381",
+        order_index: 2,
+        title: "Lecture 2: Dental Caries & Current Concepts of Etiology",
+        title_ar: "المحاضرة 2: تسوس الأسنان والنظريات الحديثة للأسباب (Dental Caries)",
+        title_en: "Lecture 2: Dental Caries & Current Concepts of Etiology",
+        doctor_name: "د. حنان عمران",
+        doctor: "د. حنان عمران",
+        pages: 5,
+        pages_count: 5,
+        size: "253 KB",
+        pdf_url: "data/sheets/dental-caries-prev-dr-hanan.pdf",
+        download_url: "data/sheets/dental-caries-prev-dr-hanan.pdf",
+        pdf_source: "local",
+        date: "2026-09-22"
+      },
+      {
+        id: "sh_cons_dentin_pulp_01",
+        subject_id: "cons-endo",
+        subject_name_ar: "العلاج التحفظي وعلاج الجذور 2 (Cons & Endo)",
+        subject_code: "DS311",
+        order_index: 1,
+        title: "Lecture 1: The Dentin-Pulp Complex",
+        title_ar: "المحاضرة 1: معقد العاج واللب (The Dentin-Pulp Complex)",
+        title_en: "Lecture 1: The Dentin-Pulp Complex",
+        doctor_name: "د. آمال كشلاف",
+        doctor: "د. آمال كشلاف",
+        pages: 23,
+        pages_count: 23,
+        size: "1.7 MB",
+        pdf_url: "data/sheets/dentin-pulp-complex-cons.pdf",
+        download_url: "data/sheets/dentin-pulp-complex-cons.pdf",
+        pdf_source: "local",
+        date: "2026-09-23"
+      },
+      {
+        id: "sh_ortho_intro_terminology_01",
+        subject_id: "ortho",
+        subject_name_ar: "تقويم الأسنان 1 (Orthodontics)",
+        subject_code: "DS371",
+        order_index: 1,
+        title: "Lecture 1: Introduction and Terminology",
+        title_ar: "المحاضرة 1: مقدمة ومصطلحات تقويم الأسنان (Introduction and Terminology)",
+        title_en: "Lecture 1: Introduction and Terminology",
+        doctor_name: "د. بسمة جنديلة",
+        doctor: "د. بسمة جنديلة",
+        pages: 72,
+        pages_count: 72,
+        size: "2.3 MB",
+        pdf_url: "data/sheets/ortho-intro-and-terminology.pdf",
+        download_url: "data/sheets/ortho-intro-and-terminology.pdf",
+        pdf_source: "local",
+        date: "2026-09-23"
+      },
+      {
+        id: "sh_oral_path_periapical_03",
+        subject_id: "oral-diseases",
+        subject_name_ar: "أمراض الفم (Oral Pathology)",
+        subject_code: "DS380",
+        order_index: 3,
+        title: "Lecture 3: Diseases of Periapical Tissues",
+        title_ar: "المحاضرة 3: أمراض الأنسجة المحيطة بالذروة (Diseases of Periapical Tissues)",
+        title_en: "Lecture 3: Diseases of Periapical Tissues",
+        doctor_name: "د. عائشة أبوبكر شنان",
+        doctor: "د. عائشة أبوبكر شنان",
+        pages: 12,
+        pages_count: 12,
+        size: "450 KB",
+        pdf_url: "data/sheets/diseases-of-periapical-tissues-oral-path.pdf",
+        download_url: "data/sheets/diseases-of-periapical-tissues-oral-path.pdf",
+        pdf_source: "local",
+        date: "2026-09-28"
+      }
+    ];
+  }
+
+  getDefaultRecordings() {
+    return [
+      {
+        id: "rec_oral_path_caries_01",
+        sheet_id: "sh_oral_path_caries_01",
+        subject_id: "oral-diseases",
+        title: "تسجيل المحاضرة الأولى: Dental Caries",
+        title_ar: "تسجيل المحاضرة الأولى: Dental Caries",
+        title_en: "Lecture 1 Audio: Dental Caries",
+        doctor: "د. أسماء سلام الغرياني",
+        date: "2026-09-14",
+        audio_url: "https://t.me/ravenrecords/13",
+        telegram_link: "https://t.me/ravenrecords/13"
+      },
+      {
+        id: "rec_prev_infection_control_01",
+        sheet_id: "sh_prev_infection_control_01",
+        subject_id: "preventive",
+        title: "تسجيل المحاضرة الأولى: Dental Infection Control",
+        title_ar: "تسجيل المحاضرة الأولى: Dental Infection Control",
+        title_en: "Lecture 1 Audio: Dental Infection Control",
+        doctor: "د. حنان عمران",
+        date: "2026-09-15",
+        audio_url: "https://t.me/ravenrecords/18",
+        telegram_link: "https://t.me/ravenrecords/18"
+      },
+      {
+        id: "rec_omdr_patient_evaluation_01",
+        sheet_id: "sh_omdr_patient_evaluation_01",
+        subject_id: "omdr",
+        title: "تسجيل المحاضرة الأولى: Approach to the Evaluation of the Patient",
+        title_ar: "تسجيل المحاضرة الأولى: Approach to the Evaluation of the Patient",
+        title_en: "Lecture 1 Audio: Approach to the Evaluation of the Patient",
+        doctor: "د. عبدالعظيم عياد قداد",
+        date: "2026-09-15",
+        audio_url: "https://t.me/ravenrecords/21",
+        telegram_link: "https://t.me/ravenrecords/21"
+      },
+      {
+        id: "rec_omfs_local_anesthesia_01",
+        sheet_id: "sh_omfs_local_anesthesia_01",
+        subject_id: "omfs",
+        title: "تسجيل المحاضرة الأولى: Local Anesthesia (Part 1)",
+        title_ar: "تسجيل المحاضرة الأولى: Local Anesthesia (الجزء 1 - سلايدات 1-41)",
+        title_en: "Lecture 1 Audio: Local Anesthesia (Part 1 - Slides 1-41)",
+        doctor: "د. هشام شمبش",
+        date: "2026-09-20",
+        audio_url: "https://t.me/ravenrecords/33",
+        telegram_link: "https://t.me/ravenrecords/33",
+        part: "Part 1 (Slides 1-41)"
+      },
+      {
+        id: "rec_oral_path_pulp_02",
+        sheet_id: "sh_oral_path_pulp_02",
+        subject_id: "oral-diseases",
+        title: "تسجيل المحاضرة الثانية: Diseases of Pulp & Periapical Tissues (Part 1)",
+        title_ar: "تسجيل المحاضرة الثانية: أمراض اللب والأنسجة الذروية (الجزء 1)",
+        title_en: "Lecture 2 Audio: Diseases of Pulp & Periapical Tissues (Part 1)",
+        doctor: "د. عائشة أبوبكر شنان",
+        date: "2026-09-21",
+        audio_url: "https://t.me/ravenrecords/35",
+        telegram_link: "https://t.me/ravenrecords/35",
+        part: "Part 1"
+      },
+      {
+        id: "rec_prev_dental_caries_02",
+        sheet_id: "sh_prev_dental_caries_02",
+        subject_id: "preventive",
+        title: "تسجيل المحاضرة الثانية: Dental Caries",
+        title_ar: "تسجيل المحاضرة الثانية: Dental Caries",
+        title_en: "Lecture 2 Audio: Dental Caries",
+        doctor: "د. حنان عمران",
+        date: "2026-09-22",
+        audio_url: "https://t.me/ravenrecords/38",
+        telegram_link: "https://t.me/ravenrecords/38"
+      },
+      {
+        id: "rec_cons_dentin_pulp_01",
+        sheet_id: "sh_cons_dentin_pulp_01",
+        subject_id: "cons-endo",
+        title: "تسجيل المحاضرة الأولى: The Dentin-Pulp Complex",
+        title_ar: "تسجيل المحاضرة الأولى: The Dentin-Pulp Complex",
+        title_en: "Lecture 1 Audio: The Dentin-Pulp Complex",
+        doctor: "د. آمال كشلاف",
+        date: "2026-09-23",
+        audio_url: "https://t.me/ravenrecords/40",
+        telegram_link: "https://t.me/ravenrecords/40"
+      },
+      {
+        id: "rec_ortho_intro_terminology_01",
+        sheet_id: "sh_ortho_intro_terminology_01",
+        subject_id: "ortho",
+        title: "تسجيل المحاضرة الأولى: Introduction and Terminology (Part 1)",
+        title_ar: "تسجيل المحاضرة الأولى: Introduction and Terminology (الجزء 1 - حتى سلايد 22)",
+        title_en: "Lecture 1 Audio: Introduction and Terminology (Part 1 - Up to Slide 22)",
+        doctor: "د. بسمة جنديلة",
+        date: "2026-09-23",
+        audio_url: "https://t.me/ravenrecords/42",
+        telegram_link: "https://t.me/ravenrecords/42",
+        part: "Part 1 (Slides 1-22)"
+      },
+      {
+        id: "rec_oral_path_periapical_03",
+        sheet_id: "sh_oral_path_periapical_03",
+        subject_id: "oral-diseases",
+        title: "تسجيل المحاضرة الثالثة: Diseases of Periapical Tissues",
+        title_ar: "تسجيل المحاضرة الثالثة: أمراض الأنسجة الذروية (Diseases of Periapical Tissues)",
+        title_en: "Lecture 3 Audio: Diseases of Periapical Tissues",
+        doctor: "د. عائشة أبوبكر شنان",
+        date: "2026-09-28",
+        audio_url: "https://t.me/ravenrecords/65",
+        telegram_link: "https://t.me/ravenrecords/65"
+      }
+    ];
   }
 
   exportSheetsJson() {

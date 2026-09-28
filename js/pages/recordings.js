@@ -614,6 +614,13 @@
                   </div>
 
                   <div class="audio-rec-actions-group">
+                    ${(rec.telegram_link || (rec.audio_url && rec.audio_url.includes('t.me'))) ? `
+                      <a href="${rec.telegram_link || rec.audio_url}" target="_blank" rel="noopener noreferrer" class="audio-btn-telegram" title="${isAr ? 'فتح التسجيل في تيليجرام' : 'Open in Telegram'}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;background:rgba(36,161,222,0.12);color:#24A1DE;font-size:0.82rem;font-weight:700;text-decoration:none;border:1px solid rgba(36,161,222,0.25);transition:all 0.18s cubic-bezier(0.16,1,0.3,1);">
+                        <i data-lucide="send" style="width: 13px; height: 13px;"></i>
+                        <span>${isAr ? 'تيليجرام' : 'Telegram'}</span>
+                      </a>
+                    ` : ''}
+
                     <a href="#/sheet-detail?id=${sheet.id}" class="audio-btn-view-sheet">
                       <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
                       <span>${isAr ? 'عرض الشيت' : 'View Sheet'}</span>
@@ -622,11 +629,11 @@
                     <button
                       type="button"
                       class="audio-btn-more-options"
-                      title="${isAr ? 'خيارات إضافية' : 'More options'}"
-                      aria-label="More options"
-                      onclick="window.showToast ? window.showToast('${isAr ? 'تم نسخ رابط التسجيل الصوتي' : 'Audio link copied to clipboard'}', { type: 'info' }) : alert('Link copied');"
+                      title="${isAr ? 'نسخ رابط التسجيل' : 'Copy recording link'}"
+                      aria-label="Copy recording link"
+                      onclick="if(navigator.clipboard && navigator.clipboard.writeText){navigator.clipboard.writeText('${rec.telegram_link || rec.audio_url || ''}').then(() => { if(window.showToast) window.showToast('${isAr ? 'تم نسخ رابط التسجيل الصوتي بنجاح' : 'Audio link copied to clipboard'}', { type: 'success' }); });} else { alert('${isAr ? 'تم النسخ' : 'Copied'}'); }"
                     >
-                      <i data-lucide="more-horizontal" style="width: 16px; height: 16px;"></i>
+                      <i data-lucide="share-2" style="width: 15px; height: 15px;"></i>
                     </button>
                   </div>
                 </div>
@@ -714,29 +721,41 @@
         return;
       }
 
+      // Track last listened recording for Home dashboard Continue Studying
+      try {
+        const subj = window.DATA && typeof window.DATA.getSubjectById === 'function'
+          ? window.DATA.getSubjectById(rec.subject_id)
+          : null;
+        const audioRecord = {
+          id: rec.id,
+          sheet_id: rec.sheet_id || '',
+          title: rec.title || rec.title_en || rec.title_ar,
+          title_ar: rec.title_ar || rec.title || rec.title_en,
+          title_en: rec.title_en || rec.title || rec.title_ar,
+          subject_id: rec.subject_id,
+          subject_name_ar: subj ? subj.name_ar : '',
+          subject_name_en: subj ? subj.name_en : '',
+          timestamp: Date.now()
+        };
+        localStorage.setItem('kf_last_listened_audio', JSON.stringify(audioRecord));
+      } catch (e) {}
+
+      // If audioUrl is a Telegram link, open in Telegram directly
+      if (audioUrl.includes('t.me/')) {
+        window.open(audioUrl, '_blank');
+        if (window.showToast) {
+          window.showToast(
+            isAr ? 'جاري فتح تسجيل المحاضرة في تيليجرام...' : 'Opening lecture recording on Telegram...',
+            { type: 'info' }
+          );
+        }
+        return;
+      }
+
       try {
         const audio = new Audio(audioUrl);
         this.activeAudio = audio;
         this.activeRecId = recId;
-
-        // Track last listened recording for Home dashboard Continue Studying
-        try {
-          const subj = window.DATA && typeof window.DATA.getSubjectById === 'function'
-            ? window.DATA.getSubjectById(rec.subject_id)
-            : null;
-          const audioRecord = {
-            id: rec.id,
-            sheet_id: rec.sheet_id || '',
-            title: rec.title || rec.title_en || rec.title_ar,
-            title_ar: rec.title_ar || rec.title || rec.title_en,
-            title_en: rec.title_en || rec.title || rec.title_ar,
-            subject_id: rec.subject_id,
-            subject_name_ar: subj ? subj.name_ar : '',
-            subject_name_en: subj ? subj.name_en : '',
-            timestamp: Date.now()
-          };
-          localStorage.setItem('kf_last_listened_audio', JSON.stringify(audioRecord));
-        } catch (e) {}
 
         audio.addEventListener('ended', () => {
           this.activeRecId = null;

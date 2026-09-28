@@ -666,16 +666,23 @@
                       <span class="sqm-rec-duration">${rec.duration || '40:00'}</span>
                     </div>
                     <div class="sqm-rec-meta">
-                      <span class="sqm-rec-lecturer"><i data-lucide="user"></i> ${rec.lecturer || rec.doctor_name || sheet.doctor_name || 'Dr. Faculty'}</span>
-                      <span class="sqm-rec-date"><i data-lucide="calendar"></i> ${rec.date || sheet.date || '2026-09-24'}</span>
+                      <span class="sqm-rec-lecturer"><i data-lucide="user"></i> ${rec.doctor || rec.lecturer || rec.doctor_name || sheet.doctor_name || (isAr ? 'هيئة التدريس' : 'Faculty')}</span>
+                      <span class="sqm-rec-date"><i data-lucide="calendar"></i> ${rec.date || sheet.date || ''}</span>
                     </div>
-                    <div class="sqm-player-row">
-                      <button type="button" class="sqm-play-btn" data-audio-url="${rec.audio_url || ''}">
-                        <i data-lucide="play"></i>
-                      </button>
-                      <div class="sqm-player-bar-track">
-                        <div class="sqm-player-bar-fill" style="width: 0%;"></div>
-                      </div>
+                    <div class="sqm-player-row" style="display:flex;align-items:center;gap:10px;">
+                      ${(rec.telegram_link || (rec.audio_url && rec.audio_url.includes('t.me'))) ? `
+                        <a href="${rec.telegram_link || rec.audio_url}" target="_blank" rel="noopener noreferrer" class="sqm-telegram-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:rgba(36,161,222,0.12);color:#24A1DE;font-size:0.82rem;font-weight:700;text-decoration:none;border:1px solid rgba(36,161,222,0.25);transition:all 0.18s cubic-bezier(0.16,1,0.3,1);">
+                          <i data-lucide="send" style="width:13px;height:13px;"></i>
+                          <span>${isAr ? 'فتح في تيليجرام' : 'Open in Telegram'}</span>
+                        </a>
+                      ` : `
+                        <button type="button" class="sqm-play-btn" data-audio-url="${rec.audio_url || ''}">
+                          <i data-lucide="play"></i>
+                        </button>
+                        <div class="sqm-player-bar-track">
+                          <div class="sqm-player-bar-fill" style="width: 0%;"></div>
+                        </div>
+                      `}
                     </div>
                   </div>
                 `).join('')}
