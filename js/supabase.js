@@ -5,13 +5,13 @@
  */
 
 (function () {
-  // Default Supabase project configuration (Active Live Project: vqrpodmnzubpcsvqohwj)
-  const DEFAULT_SUPABASE_URL = 'https://vqrpodmnzubpcsvqohwj.supabase.co';
+  // Default Backend project configuration (Active Live Libyan Spider VPS: 102-203-202-115.sslip.io)
+  const DEFAULT_SUPABASE_URL = 'https://102-203-202-115.sslip.io';
   const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_bISG70YeoKP4mu8BKlgsuQ_xPprjcc1';
 
-  // Read configuration & auto-cleanup legacy mock project credentials
+  // Read configuration & auto-cleanup legacy mock / Supabase project credentials
   const storedUrl = localStorage.getItem('kf_supabase_url');
-  if (storedUrl && (storedUrl.includes('wuxdkhhwhsqhybdfgczp') || storedUrl.includes('placeholder'))) {
+  if (storedUrl && (storedUrl.includes('wuxdkhhwhsqhybdfgczp') || storedUrl.includes('placeholder') || storedUrl.includes('vqrpodmnzubpcsvqohwj'))) {
     localStorage.removeItem('kf_supabase_url');
     localStorage.removeItem('kf_supabase_key');
   }
