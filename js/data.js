@@ -932,7 +932,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة المعتمدة: B. التشخيص الخاطف السريع (Spot diagnosis)\n\nمرجع الشيت (صفحة 4):\n«3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data.»\nالتشخيص الخاطف هو الحالات البسيطة التي يمكن فيها التوصل إلى التشخيص الدقيق والفوري بالاعتماد على أقل قدر ممكن من البيانات المرتبطة مباشرة بالشكوى الرئيسية.",
     "answer_en": "Correct Answer: B. Spot diagnosis\n\nSheet Reference (Page 4):\n\"3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data.\"\nMinimal simple data closely related to chief complaint leads to spot diagnosis.",
-    "quote_ref": "3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data."
+    "quote_ref": "3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data.",
+    "source_reference": {
+      "id": "ref_q_omdr_01_1",
+      "question_id": "q_omdr_01",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 4,
+      "source_type": "exact",
+      "source_text": "3. Spot (snap) diagnosis: It is simple cases where rapid diagnosis can be achieved perfectly, based on minimal data.",
+      "source_text_normalized": "3 spot snap diagnosis it is simple cases where rapid diagnosis can be achieved perfectly based on minimal data",
+      "text_anchor": "3. Spot (snap) diagnosis: It is simple cases where rapid dia",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_02",
@@ -969,7 +982,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة المعتمدة: B. التشخيص التفريقي (Differential diagnosis)\n\nمرجع الشيت (صفحة 4):\n«4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.»\nالتشخيص التفريقي هو عملية وضع قائمة بالأمراض المشتبه بها ومقارنتها سريرياً.",
     "answer_en": "Correct Answer: B. Differential diagnosis\n\nSheet Reference (Page 4):\n\"4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.\"\nDifferential diagnosis compares diseases sharing similar clinical presentations.",
-    "quote_ref": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation."
+    "quote_ref": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.",
+    "source_reference": {
+      "id": "ref_q_omdr_02_1",
+      "question_id": "q_omdr_02",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 4,
+      "source_type": "exact",
+      "source_text": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.",
+      "source_text_normalized": "4 differential diagnosis it is the collection of data to develop a list of two or more different diseases having common primary clinical presentation",
+      "text_anchor": "4. Differential diagnosis: It is the collection of data to d",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_03",
@@ -1006,7 +1032,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة النموذجية المعتمدة (Model Answer):\n«It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.»\n\n📌 ملاحظة سريرية هامة من الكلية (Clinical Note):\n«The most likely lesion is put on the top of the list according to clinical impression.»\nيتم وضع المرض أو الآفة الأرجح والأكثر احتمالاً في أعلى القائمة بناءً على الانطباع السريري الأولي.\n\nمرجع الشيت (صفحة 4): البند رقم 4 تحت Types of Oral Diagnosis.",
     "answer_en": "Model Answer:\n\"It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation.\"\n\n*(Note: The most likely lesion is put on the top of the list according to clinical impression)*.\n\nSheet Reference (Page 4): Item 4 under Types of Oral Diagnosis.",
-    "quote_ref": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation. (Note: The most likely lesion is put on the top of the list according to clinical impression)."
+    "quote_ref": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation. (Note: The most likely lesion is put on the top of the list according to clinical impression).",
+    "source_reference": {
+      "id": "ref_q_omdr_03_1",
+      "question_id": "q_omdr_03",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 4,
+      "source_type": "exact",
+      "source_text": "4. Differential diagnosis: It is the collection of data to develop a list of two or more different diseases having common primary clinical presentation. (Note: The most likely lesion is put on the top of the list according to clinical impression).",
+      "source_text_normalized": "4 differential diagnosis it is the collection of data to develop a list of two or more different diseases having common primary clinical presentation note the most likely lesion is put on the top of the list according to clinical impression",
+      "text_anchor": "4. Differential diagnosis: It is the collection of data to d",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_04",
@@ -1045,7 +1084,20 @@ class DataService {
     "correct_index": 4,
     "answer_ar": "الإجابة المعتمدة: E. جميع ما سبق صحيح (All of the above)\n\nمرجع الشيت (صفحة 8):\n«The chief complaint affected by:\n• Patient memory.\n• The age of the patient.\n• The mental attitude and personality of patient.\n• The prestige of the dentist.»\nكل هذه العوامل الأربعة تؤثر تأثيراً مباشراً على كيفية وصف المريض لشكواه ومدى دقتها.",
     "answer_en": "Correct Answer: E. All of the above\n\nSheet Reference (Page 8):\n\"The chief complaint affected by:\n• Patient memory.\n• The age of the patient.\n• The mental attitude and personality of patient.\n• The prestige of the dentist.\"\nAll listed factors significantly affect the chief complaint.",
-    "quote_ref": "The chief complaint affected by: • Patient memory. • The age of the patient. • The mental attitude and personality of patient. • The prestige of the dentist."
+    "quote_ref": "The chief complaint affected by: • Patient memory. • The age of the patient. • The mental attitude and personality of patient. • The prestige of the dentist.",
+    "source_reference": {
+      "id": "ref_q_omdr_04_1",
+      "question_id": "q_omdr_04",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 8,
+      "source_type": "exact",
+      "source_text": "The chief complaint affected by: • Patient memory. • The age of the patient. • The mental attitude and personality of patient. • The prestige of the dentist.",
+      "source_text_normalized": "the chief complaint affected by patient memory the age of the patient the mental attitude and personality of patient the prestige of the dentist",
+      "text_anchor": "The chief complaint affected by: • Patient memory. • The age",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_05",
@@ -1084,7 +1136,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة المعتمدة: D. جميع ما سبق (All of the above)\n\nمرجع الشيت (صفحة 8):\n«The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic»\nالألم هو الشكوى الأكثر شيوعاً في عيادة طب الفم والأسنان، ويمكن أن يكون جسدياً أو عصبياً أو نفسياً.",
     "answer_en": "Correct Answer: D. All of the above (Somatic, Neurogenic, Psychogenic)\n\nSheet Reference (Page 8):\n\"The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic\"\nPain can be categorized into somatic, neurogenic, or psychogenic etiologies.",
-    "quote_ref": "The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic"
+    "quote_ref": "The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic",
+    "source_reference": {
+      "id": "ref_q_omdr_05_1",
+      "question_id": "q_omdr_05",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 8,
+      "source_type": "exact",
+      "source_text": "The most common chief complaint: 1. Pain — which may be: Somatic / Neurogenic / Psychogenic",
+      "source_text_normalized": "the most common chief complaint 1 pain which may be somatic neurogenic psychogenic",
+      "text_anchor": "The most common chief complaint: 1. Pain — which may be: Som",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_06",
@@ -1121,7 +1186,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة النموذجية المعتمدة (Model Answer - أي 6 من الآتية):\n1. Fungal infection (العدوى الفطرية)\n2. Viral infection (العدوى الفيروسية)\n3. Bacterial infection (العدوى البكتيرية)\n4. Fissured tongue (اللسان المشقق)\n5. Geographic tongue (اللسان الجغرافي)\n6. Anemia (فقر الدم)\n7. Coating atrophy of tongue (ضمور حليمات اللسان)\n8. Vitamin deficiency (نقص الفيتامينات)\n9. Xerostomia condition (جفاف الفم)\n\nمرجع الشيت (صفحة 9): Section 8, Item 2: «Burning sensation — e.g.»",
     "answer_en": "Model Answer (List any 6):\n1. Fungal infection\n2. Viral infection\n3. Bacterial infection\n4. Fissured tongue\n5. Geographic tongue\n6. Anemia\n7. Coating atrophy of tongue\n8. Vitamin deficiency\n9. Xerostomia condition\n\nSheet Reference (Page 9): Section 8, Item 2: Burning sensation — e.g.",
-    "quote_ref": "Burning sensation — e.g.: Fungal infection / Viral infection / Bacterial infection / Fissured tongue / Geographic tongue / Anemia / Coating atrophy of tongue / Vitamin deficiency / Xerostomia condition"
+    "quote_ref": "Burning sensation — e.g.: Fungal infection / Viral infection / Bacterial infection / Fissured tongue / Geographic tongue / Anemia / Coating atrophy of tongue / Vitamin deficiency / Xerostomia condition",
+    "source_reference": {
+      "id": "ref_q_omdr_06_1",
+      "question_id": "q_omdr_06",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 9,
+      "source_type": "exact",
+      "source_text": "Burning sensation — e.g.: Fungal infection / Viral infection / Bacterial infection / Fissured tongue / Geographic tongue / Anemia / Coating atrophy of tongue / Vitamin deficiency / Xerostomia condition",
+      "source_text_normalized": "burning sensation e g fungal infection viral infection bacterial infection fissured tongue geographic tongue anemia coating atrophy of tongue vitamin deficiency xerostomia condition",
+      "text_anchor": "Burning sensation — e.g.: Fungal infection / Viral infection",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_07",
@@ -1159,7 +1237,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة المعتمدة (Model Answer):\nيحدث جفاف الفم كسمة سريرية في الحالات الخمس الآتية:\n1. Drug therapy (العلاجات الدوائية)\n2. Sjogren's syndrome (متلازمة شوغرن)\n3. Post-radiation therapy (ما بعد العلاج الإشعاعي للرأس والعنق)\n4. Chemotherapy (العلاج الكيميائي)\n5. Mikulicz's disease (مرض ميكوليتز)\n\nمرجع الشيت (صفحة 9): Section 8, Item 4: «Dry mouth — e.g.»",
     "answer_en": "Model Answer:\n1. Drug therapy\n2. Sjogren's syndrome\n3. Post-radiation therapy\n4. Chemotherapy\n5. Mikulicz's disease\n\nSheet Reference (Page 9): Section 8, Item 4: Dry mouth — e.g.",
-    "quote_ref": "Dry mouth — e.g.: 1. Drug therapy 2. Sjogren's syndrome 3. Post-radiation therapy 4. Chemotherapy 5. Mikulicz's disease"
+    "quote_ref": "Dry mouth — e.g.: 1. Drug therapy 2. Sjogren's syndrome 3. Post-radiation therapy 4. Chemotherapy 5. Mikulicz's disease",
+    "source_reference": {
+      "id": "ref_q_omdr_07_1",
+      "question_id": "q_omdr_07",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 9,
+      "source_type": "exact",
+      "source_text": "Dry mouth — e.g.: 1. Drug therapy 2. Sjogren's syndrome 3. Post-radiation therapy 4. Chemotherapy 5. Mikulicz's disease",
+      "source_text_normalized": "dry mouth e g 1 drug therapy 2 sjogren s syndrome 3 post radiation therapy 4 chemotherapy 5 mikulicz s disease",
+      "text_anchor": "Dry mouth — e.g.: 1. Drug therapy 2. Sjogren's syndrome 3. P",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_08",
@@ -1197,7 +1288,20 @@ class DataService {
     "correct_index": 2,
     "answer_ar": "الإجابة المعتمدة: C. تأخر بزوغ الأسنان (Delayed tooth eruption)\n\nمرجع الشيت (صفحات 9–10):\n«7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas»\nالأسنان المنزاحة والأكياس والأورام والأودنتوما تُعد من العوائق الفيزيائية والموضعية التي تسبب تأخر بزوغ السن في الفك.",
     "answer_en": "Correct Answer: C. Delayed tooth eruption\n\nSheet Reference (Pages 9–10):\n\"7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas\"\nPhysical obstructions like malposed teeth, cysts, tumors, and odontomas cause delayed eruption.",
-    "quote_ref": "7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas"
+    "quote_ref": "7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas",
+    "source_reference": {
+      "id": "ref_q_omdr_08_1",
+      "question_id": "q_omdr_08",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 10,
+      "source_type": "exact",
+      "source_text": "7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Maldevelopment / Tumors / Odontomas",
+      "source_text_normalized": "7 delayed tooth eruption e g malposed tooth cysts maldevelopment tumors odontomas",
+      "text_anchor": "7. Delayed tooth eruption — e.g. Malposed tooth / Cysts / Ma",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_omdr_09",
@@ -1235,7 +1339,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة المعتمدة: D. جميع ما سبق (All of the above)\n\nمرجع الشيت (صفحة 11):\nمذكورة مباشرة تحت البند: «8. Halitosis — e.g.»:\n• Periodontal disease (الخيار B)\n• Diabetes (الخيار A)\n• Decayed teeth (الخيار C)\nلذا فإن جميع الحالات المذكورة تُعد أسباباً سريرية للبخر الفموي.",
     "answer_en": "Correct Answer: D. All of the above\n\nSheet Reference (Page 11):\nListed directly under \"8. Halitosis — e.g.\":\n• Periodontal disease (Option B)\n• Diabetes (Option A)\n• Decayed teeth (Option C)\nAll listed conditions present with halitosis.",
-    "quote_ref": "8. Halitosis — e.g.: • Periodontal disease • Diabetes • Decayed teeth"
+    "quote_ref": "8. Halitosis — e.g.: • Periodontal disease • Diabetes • Decayed teeth",
+    "source_reference": {
+      "id": "ref_q_omdr_09_1",
+      "question_id": "q_omdr_09",
+      "sheet_id": "sh_omdr_patient_evaluation_01",
+      "page_number": 11,
+      "source_type": "exact",
+      "source_text": "8. Halitosis — e.g.: • Periodontal disease • Diabetes • Decayed teeth",
+      "source_text_normalized": "8 halitosis e g periodontal disease diabetes decayed teeth",
+      "text_anchor": "8. Halitosis — e.g.: • Periodontal disease • Diabetes • Deca",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_cons_01",
@@ -1272,7 +1389,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة المعتمدة: A. كولاجين النوع الأول (Type I collagen)\n\nمرجع الشيت (صفحة 4):\n«Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water.»\nتتكون المادة العضوية في العاج بنسبة 20% وأغلبها من ألياف كولاجين النوع الأول Type I collagen مما يمنحه مرونة أكثر من المينا.",
     "answer_en": "Correct Answer: A. Type I collagen\n\nSheet Reference (Page 4):\n\"Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water.\"\nType I collagen provides dentin with high resilience compared to brittle enamel.",
-    "quote_ref": "Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water."
+    "quote_ref": "Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water.",
+    "source_reference": {
+      "id": "ref_q_cons_01_1",
+      "question_id": "q_cons_01",
+      "sheet_id": "sh_cons_dentin_pulp_01",
+      "page_number": 4,
+      "source_type": "exact",
+      "source_text": "Dentin composition: 70% inorganic hydroxyapatite crystals. 20% organic substances (Type I collagen). 10% water.",
+      "source_text_normalized": "dentin composition 70 inorganic hydroxyapatite crystals 20 organic substances type i collagen 10 water",
+      "text_anchor": "Dentin composition: 70% inorganic hydroxyapatite crystals. 2",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_cons_02",
@@ -1309,7 +1439,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة المعتمدة: B. ألياف A-دلتا (A-delta fibers)\n\nمرجع الشيت (صفحة 16):\n«A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain. In contrast, C fibers are slower in conduction and are responsible for dull and throbbing pain.»\nألياف A تقع سطحياً وتوصل الإحساس بالألم الحاد والموضعي سريعاً.",
     "answer_en": "Correct Answer: B. A-delta fibers\n\nSheet Reference (Page 16):\n\"A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain. C fibers are slower in conduction and are responsible for dull and throbbing pain.\"",
-    "quote_ref": "A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain."
+    "quote_ref": "A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain.",
+    "source_reference": {
+      "id": "ref_q_cons_02_1",
+      "question_id": "q_cons_02",
+      "sheet_id": "sh_cons_dentin_pulp_01",
+      "page_number": 16,
+      "source_type": "exact",
+      "source_text": "A delta fibers are faster in conduction and are responsible for sharp localized dentinal pain.",
+      "source_text_normalized": "a delta fibers are faster in conduction and are responsible for sharp localized dentinal pain",
+      "text_anchor": "A delta fibers are faster in conduction and are responsible ",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_prev_01",
@@ -1346,7 +1489,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة المعتمدة: B. عدم إصابة القواطع السفلية وسلامتها (Mandibular incisors NOT involved)\n\nمرجع المحاضرة (صفحة 3):\n«Involvement of Mandibular Incisors: In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected.»\nتسوس الرضاعة ينجو منه القواطع السفلية بسبب حماية اللسان وتدفق اللعاب من الغدد تحت الفك وتحت اللسان.",
     "answer_en": "Correct Answer: B. Mandibular incisors are spared and NOT involved\n\nLecture Reference (Page 3):\n\"Involvement of Mandibular Incisors: In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected.\"\nMandibular incisors are protected during sucking by the tongue and saliva flow.",
-    "quote_ref": "In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected."
+    "quote_ref": "In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected.",
+    "source_reference": {
+      "id": "ref_q_prev_01_1",
+      "question_id": "q_prev_01",
+      "sheet_id": "sh_prev_dental_caries_02",
+      "page_number": 3,
+      "source_type": "exact",
+      "source_text": "In Nursing Caries: Mandibular incisors are NOT involved. In Rampant Caries: Mandibular incisors ARE affected.",
+      "source_text_normalized": "in nursing caries mandibular incisors are not involved in rampant caries mandibular incisors are affected",
+      "text_anchor": "In Nursing Caries: Mandibular incisors are NOT involved. In ",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_prev_02",
@@ -1383,7 +1539,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة المعتمدة: B. المكورات العقدية الطافرة (Mutans Streptococci)\n\nمرجع المحاضرة (صفحة 5):\n«Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid. Lactobacilli (LB): Secondary Continuer.»\nالمكورات العقدية الطافرة هي المبادرة للتسوس، بينما اللاكتوباسيلس مكمل ومستمر للتجويف العميق.",
     "answer_en": "Correct Answer: B. Mutans Streptococci (MS)\n\nLecture Reference (Page 5):\n\"Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid. Lactobacilli (LB): Secondary Continuer.\"",
-    "quote_ref": "Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid."
+    "quote_ref": "Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid.",
+    "source_reference": {
+      "id": "ref_q_prev_02_1",
+      "question_id": "q_prev_02",
+      "sheet_id": "sh_prev_dental_caries_02",
+      "page_number": 5,
+      "source_type": "exact",
+      "source_text": "Mutans Streptococci (MS): Primary Initiator of dental caries. Produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid.",
+      "source_text_normalized": "mutans streptococci ms primary initiator of dental caries produces extracellular glucans for firm tooth attachment and rapidly ferments sugars to lactic acid",
+      "text_anchor": "Mutans Streptococci (MS): Primary Initiator of dental caries",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_path_pulp_01",
@@ -1420,7 +1589,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة المعتمدة: B. ثقب قمي واسع مع تروية دموية ممتازة وعمر مريض صغير\n\nمرجع المحاضرة (صفحة 10):\n«For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) A good sheltered area. 2) A wide apical foramen for good blood supply. 3) A wide pulp exposure. 4) Young aged patient for good proliferative power.»\nالبوليب اللبي يحدث عند صغار السن في الأضراس اللبنية أو الضرس الدائم الأول لاتساع الثقب القمي ووفرة التروية الدموية.",
     "answer_en": "Correct Answer: B. Wide apical foramen, excellent blood supply, and young patient\n\nLecture Reference (Page 10):\n\"For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) Sheltered area 2) Wide apical foramen for good blood supply 3) Wide pulp exposure 4) Young aged patient for good proliferative power.\"",
-    "quote_ref": "For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) A good sheltered area 2) A wide apical foramen for good blood supply 3) A wide pulp exposure 4) Young aged patient"
+    "quote_ref": "For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) A good sheltered area 2) A wide apical foramen for good blood supply 3) A wide pulp exposure 4) Young aged patient",
+    "source_reference": {
+      "id": "ref_q_path_pulp_01_1",
+      "question_id": "q_path_pulp_01",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 10,
+      "source_type": "exact",
+      "source_text": "For pulp polyp to develop, 4 prerequisites should be fulfilled: 1) A good sheltered area 2) A wide apical foramen for good blood supply 3) A wide pulp exposure 4) Young aged patient",
+      "source_text_normalized": "for pulp polyp to develop 4 prerequisites should be fulfilled 1 a good sheltered area 2 a wide apical foramen for good blood supply 3 a wide pulp exposure 4 young aged patient",
+      "text_anchor": "For pulp polyp to develop, 4 prerequisites should be fulfill",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_path_pulp_02",
@@ -1457,7 +1639,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة المعتمدة: B. شفافية شعاعية متناظرة ومستديرة ومحددة المعالم متصلة بمسار اللب\n\nمرجع المحاضرة (صفحة 15):\n«Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted.»\nتظهر الشفافية الشعاعية متصلة باللب مباشرة وتسبب تضخم مسار اللب وظهور بقعة وردية سريرياً (Pink Tooth) عند تآكل العاج تحت المينا.",
     "answer_en": "Correct Answer: B. Symmetrical, round, well-defined radiolucency continuous with the pulp space\n\nLecture Reference (Page 15):\n\"Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted.\"",
-    "quote_ref": "Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted."
+    "quote_ref": "Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted.",
+    "source_reference": {
+      "id": "ref_q_path_pulp_02_1",
+      "question_id": "q_path_pulp_02",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 15,
+      "source_type": "exact",
+      "source_text": "Radiographically: Symmetrical, round, well defined radiolucency continuous with the pulp space. Pulp space appears enlarged; root canal outline is distorted.",
+      "source_text_normalized": "radiographically symmetrical round well defined radiolucency continuous with the pulp space pulp space appears enlarged root canal outline is distorted",
+      "text_anchor": "Radiographically: Symmetrical, round, well defined radioluce",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_01",
@@ -1494,7 +1689,25 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nتسوس الأسنان هو مرض إنتاني بكتيري (Infectious bacterial disease) يصيب أنسجة السن الصلبة (المينا، العاج، الملاط). الآلية المرضية تتكون حتماً من مرحلتين متعاقبتين بالترتيب:\n1. المرحلة الأولى: تحلل وإزالة المعادن من المكونات غير العضوية (Demineralization of inorganic substance) بفعل الأحماض الناتجة عن تخمر السكريات بواسطة بكتيريا اللويحة.\n2. المرحلة الثانية: تدمير وتفكيك المكونات والمصفوفة العضوية (Destruction of organic substance) بواسطة الأنزيمات المحللة للبروتين (Proteolytic enzymes).\n⚠️ نقطة امتحانية متكررة: تأكد دائماً أن إزالة التمعدن غير العضوي تأتي أولاً في المينا، ثم يتبعها تدمير المادة العضوية.",
     "answer_en": "Correct Answer: B\nDental caries involves: 1. Demineralization of inorganic component by bacterial acids, followed by 2. Destruction of the organic matrix by proteolytic enzymes.",
-    "quote_ref": "Dental caries is characterized by demineralization of the inorganic substance of the tooth followed by destruction of the organic substance."
+    "quote_ref": "Dental caries is characterized by demineralization of the inorganic substance of the tooth followed by destruction of the organic substance.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_01_1",
+      "question_id": "q_oral_path_caries_01",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 2,
+      "source_type": "exact",
+      "source_text": "Dental caries is characterized by demineralization of the inorganic substance of the tooth followed by destruction of the organic substance.",
+      "source_text_normalized": "dental caries is characterized by demineralization of the inorganic substance of the tooth followed by destruction of the organic substance",
+      "text_anchor": "characterized by demineralization of the inorganic portion followed by destruction of the organic substance",
+      "bounding_box": {
+        "x": 38,
+        "y": 153,
+        "width": 574,
+        "height": 44
+      },
+      "confidence": 0.99,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_02",
@@ -1531,7 +1744,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة الصحيحة: D. كل ما سبق معاً\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nلا يحدث التسوس بتوفر عامل واحد بمفرده؛ بل يتطلب تداخل 4 عوامل رئيسية تُعرف بمخطط كيز الرباعي (Keyes / Newbrun Tetrad):\n1. المضيف وسطح السن (Host & tooth surface): وجود سن ذي قابلية ومينا ضعيفة التمعدن أو شقوق عميقة.\n2. الميكروبات (Microorganisms): وجود بكتيريا مولدة للحمض ومتحملة له (Acidogenic & Aciduric) مثل S. mutans.\n3. الركيزة الغذائية (Substrate): سكريات قابلة للتخمر (خاصة السكروز).\n4. الزمن (Time): بقاء الحمض على سطح السن لفترة زمنية كافية لتجاوز قدرة اللعاب على معادلة الحموضة.",
     "answer_en": "Correct Answer: D. All of the above\nCaries requires the simultaneous interaction of host (tooth), microbial plaque, substrate (dietary fermentable carbohydrate), and sufficient time.",
-    "quote_ref": "The four primary factors in caries etiology: tooth, dental plaque bacteria, fermentable carbohydrate substrate, and time."
+    "quote_ref": "The four primary factors in caries etiology: tooth, dental plaque bacteria, fermentable carbohydrate substrate, and time.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_02_1",
+      "question_id": "q_oral_path_caries_02",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 3,
+      "source_type": "supporting",
+      "source_text": "The four primary factors in caries etiology: tooth, dental plaque bacteria, fermentable carbohydrate substrate, and time.",
+      "source_text_normalized": "the four primary factors in caries etiology tooth dental plaque bacteria fermentable carbohydrate substrate and time",
+      "text_anchor": "The four primary factors in caries etiology: tooth, dental p",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_03",
@@ -1568,7 +1794,58 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة الصحيحة: A. مجموعة Mutans streptococci\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- Streptococcus mutans هي البكتيريا الرئيسية المسؤولة عن بدء التسوس (Initiation) لأنها:\n  1) تنتج ببتيدات سكرية خارجية لاصقة (Extracellular glucans) تمكنها من الالتصاق الصلب بسطح المينا.\n  2) سريعة جداً في تخمير السكروز وإنتاج حمض اللاكتيك بكثافة.\n  3) بعد 24 ساعة من تكوين اللويحة، تتكاثر وتصل نسبتها إلى 83% من الفلورا البكتيرية في الآفة المبكرة.\n⚠️ انتبه للمقارنة الامتحانية: بكتيريا العصيات اللبنية (Lactobacilli) مسؤولة عن تقدم وتطور التسوس في العاج (Progression/Cavitation)، بينما S. mutans مسؤولة عن البداية (Initiation)، وبكتيريا Actinomyces ترتبط بتسوس الجذور (Root caries).",
     "answer_en": "Correct Answer: A. Mutans streptococci group\nStreptococcus mutans is the primary initiator of enamel caries due to its rapid acid production and extracellular polysaccharide (glucan) synthesis.",
-    "quote_ref": "Mutans streptococci are the primary organisms responsible for the initiation of enamel caries."
+    "quote_ref": "Mutans streptococci are the primary organisms responsible for the initiation of enamel caries.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_03_1",
+      "question_id": "q_oral_path_caries_03",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 5,
+      "source_type": "exact",
+      "source_text": "Mutans streptococci are the primary organisms responsible for the initiation of enamel caries.",
+      "source_text_normalized": "mutans streptococci are the primary organisms responsible for the initiation of enamel caries",
+      "text_anchor": "Mutans streptococci are the primary organisms responsible fo",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    },
+    "source_references": [
+      {
+        "id": "ref_q_oral_path_caries_03_1",
+        "question_id": "q_oral_path_caries_03",
+        "sheet_id": "sh_oral_path_caries_01",
+        "page_number": 6,
+        "source_type": "exact",
+        "source_text": "S. Mutans has a role in initiation of dental caries, while Lactobacillus is associated with the progression of dental caries.",
+        "source_text_normalized": "s mutans has a role in initiation of dental caries while lactobacillus is associated with the progression of dental caries",
+        "text_anchor": "S. Mutans has a role in initiation of dental caries",
+        "bounding_box": {
+          "x": 40,
+          "y": 110,
+          "width": 620,
+          "height": 35
+        },
+        "confidence": 0.98,
+        "verification_status": "verified"
+      },
+      {
+        "id": "ref_q_oral_path_caries_03_2",
+        "question_id": "q_oral_path_caries_03",
+        "sheet_id": "sh_oral_path_caries_01",
+        "page_number": 2,
+        "source_type": "supporting",
+        "source_text": "When carbohydrates undergo fermentation by the bacteria, they form acids which start to dissolve the enamel",
+        "source_text_normalized": "when carbohydrates undergo fermentation by the bacteria they form acids which start to dissolve the enamel",
+        "text_anchor": "When carbohydrates undergo fermentation",
+        "bounding_box": {
+          "x": 40,
+          "y": 240,
+          "width": 220,
+          "height": 60
+        },
+        "confidence": 0.92,
+        "verification_status": "verified"
+      }
+    ]
   },
   {
     "id": "q_oral_path_caries_04",
@@ -1606,7 +1883,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة الصحيحة: A. 1% من حجم المسامات\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nالمينا الطبيعية السليمة مساميتها ضئيلة جداً ولا تتجاوز 0.1% من حجمها.\nعند حدوث التسوس المبكر (Incipient enamel lesion)، تظهر 4 مناطق نسيجية من العمق إلى السطح:\n1. المنطقة الشفافة (Translucent zone): هي أعمق منطقة وأول تغير نسيجي يمكن رصده (Advancing front). تصبح مساميتها 1% (عشرة أضعاف المينا الطبيعية).\n2. المنطقة المظلمة (Dark zone): تليها نحو السطح، مساميتها 2% إلى 4%، وتحدث فيها عمليات إعادة تمعدن جزئية (Remineralization).\n3. جسم الآفة (Body of lesion): أكبر منطقة، مساميتها من 5% إلى 25% (أكثر المناطق فقداناً للمعادن).\n4. المنطقة السطحية (Surface zone): طبقة سطحية تبدو سليمة نسبياً ومحمية بالفلورايد واللعاب ومساميتها تقارب 1% فقط.",
     "answer_en": "Correct Answer: A. 1% by volume of pores\nThe translucent zone is the deepest advancing front of enamel caries and has a pore volume of 1% (compared to 0.1% in normal enamel).",
-    "quote_ref": "Translucent zone: This is the advancing front of the lesion. It contains about 1% pore volume compared to 0.1% in sound enamel."
+    "quote_ref": "Translucent zone: This is the advancing front of the lesion. It contains about 1% pore volume compared to 0.1% in sound enamel.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_04_1",
+      "question_id": "q_oral_path_caries_04",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 6,
+      "source_type": "exact",
+      "source_text": "Translucent zone: This is the advancing front of the lesion. It contains about 1% pore volume compared to 0.1% in sound enamel.",
+      "source_text_normalized": "translucent zone this is the advancing front of the lesion it contains about 1 pore volume compared to 0 1 in sound enamel",
+      "text_anchor": "Translucent zone: This is the advancing front of the lesion.",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_05",
@@ -1643,7 +1933,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة الصحيحة: D. منطقة العاج الارتكاسي / الثانوي\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nسؤال كلاسيكي يتكرر في امتحانات أطباء الأسنان؛ مناطق تسوس المينا الأربعة هي حصراً:\n1. Translucent zone\n2. Dark zone\n3. Body of the lesion\n4. Surface zone\nبينما العاج الارتكاسي (Reactionary / Secondary dentine) هو نسيج دفاعي يفرزه مصورات العاج (Odontoblasts) داخل حجرة اللب والعاج، وليس منطقة في تسوس المينا!",
     "answer_en": "Correct Answer: D. Secondary or reactionary dentine zone\nEnamel caries has 4 zones: Translucent zone, Dark zone, Body of lesion, and Surface zone. Reactionary dentine belongs to dentin-pulp defense.",
-    "quote_ref": "The four distinct zones of early enamel caries: Translucent zone, Dark zone, Body of the lesion, and Surface zone."
+    "quote_ref": "The four distinct zones of early enamel caries: Translucent zone, Dark zone, Body of the lesion, and Surface zone.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_05_1",
+      "question_id": "q_oral_path_caries_05",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 6,
+      "source_type": "exact",
+      "source_text": "The four distinct zones of early enamel caries: Translucent zone, Dark zone, Body of the lesion, and Surface zone.",
+      "source_text_normalized": "the four distinct zones of early enamel caries translucent zone dark zone body of the lesion and surface zone",
+      "text_anchor": "The four distinct zones of early enamel caries: Translucent ",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_06",
@@ -1680,7 +1983,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B. المنطقة المظلمة (Dark zone)\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- المنطقة المظلمة (Dark zone) هي منطقة خاصة بـ **تسوس المينا فقط**!\n- أما مناطق تسوس العاج (Dentine Caries) من السطح الخارجي إلى اللب فهي:\n  1. منطقة التفكك والتنخر (Zone of destruction / necrotic debris).\n  2. منطقة الغزو البكتيري والتكاثر (Zone of bacterial invasion / infected dentine).\n  3. منطقة إزالة التمعدن الرائدة (Zone of demineralization / affected dentine).\n  4. منطقة التصلب الدفاعي (Zone of sclerosis / translucent dentine) حيث تتكلس الأنابيب العاجية لإغلاق الطريق أمام البكتيريا.\n  5. العاج الارتكاسي الثالثي (Reactionary / Reparative dentine).",
     "answer_en": "Correct Answer: B. Dark zone\nDark zone is a zone of enamel caries, not dentine caries.",
-    "quote_ref": "Zones of dentinal caries include destruction, bacterial invasion, demineralization, and tubular sclerosis."
+    "quote_ref": "Zones of dentinal caries include destruction, bacterial invasion, demineralization, and tubular sclerosis.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_06_1",
+      "question_id": "q_oral_path_caries_06",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 8,
+      "source_type": "exact",
+      "source_text": "Zones of dentinal caries include destruction, bacterial invasion, demineralization, and tubular sclerosis.",
+      "source_text_normalized": "zones of dentinal caries include destruction bacterial invasion demineralization and tubular sclerosis",
+      "text_anchor": "Zones of dentinal caries include destruction, bacterial inva",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_07",
@@ -1717,7 +2033,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة الصحيحة: D. 100 يوم\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nعند تعرض خلايا Odontoblasts لتنبيه معتدل ناتج عن التسوس أو الحفر، تبدأ بإفراز مصفوفة عاج جديدة لحماية اللب:\n- تبدأ هذه الاستجابة بالظهور بعد 3 أسابيع من بدء التحفيز.\n- يزداد معدل الترسيب حتى يصل سمك العاج الارتكاسي إلى حوالي 0.1 مليمتر عند اليوم رقم 100.\n- هذا العاج يعتبر استجابة حيوية نشطة (Vital reaction) من خلايا اللب السليمة لحماية نفسها من الاختراق الجرثومي.",
     "answer_en": "Correct Answer: D. 100 days\nReactionary dentine initiates ~3 weeks post-irritation and achieves approximately 0.1 mm thickness after 100 days.",
-    "quote_ref": "Reactionary dentine starts to develop after three weeks of onset of odontoblast irritation and reaches about 0.1 mm after 100 days."
+    "quote_ref": "Reactionary dentine starts to develop after three weeks of onset of odontoblast irritation and reaches about 0.1 mm after 100 days.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_07_1",
+      "question_id": "q_oral_path_caries_07",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 9,
+      "source_type": "exact",
+      "source_text": "Reactionary dentine starts to develop after three weeks of onset of odontoblast irritation and reaches about 0.1 mm after 100 days.",
+      "source_text_normalized": "reactionary dentine starts to develop after three weeks of onset of odontoblast irritation and reaches about 0 1 mm after 100 days",
+      "text_anchor": "Reactionary dentine starts to develop after three weeks of o",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_08",
@@ -1750,7 +2079,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة الصحيحة: A. عبارة صحيحة (True)\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nعند إزالة العوامل المسببة للتسوس أو تحسين التنظيف الفموي وتطبيق الفلورايد، يمكن أن تتوقف الآفة النخرية وتتحول إلى (Arrested caries):\n- سريرياً: يصبح قاع الآفة صلباً كالعاج السليم، ويتغير لونه إلى البني الداكن أو الأسود بسبب ترسب أصبغة الطعام والشوائب.\n- نسيجياً: يتصلب السطح ويصبح فائق التمعدن (Hypermineralized sclerotic dentine) بفضل امتصاص المعادن والفوسفات والفلورايد من اللعاب.",
     "answer_en": "Correct Answer: A. True\nArrested dentinal caries develops a hard, darkly pigmented, hypermineralized surface from salivary remineralization and fluoride.",
-    "quote_ref": "Arrested caries of dentine has a hypermineralized surface due to remineralization from oral fluids."
+    "quote_ref": "Arrested caries of dentine has a hypermineralized surface due to remineralization from oral fluids.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_08_1",
+      "question_id": "q_oral_path_caries_08",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 10,
+      "source_type": "exact",
+      "source_text": "Arrested caries of dentine has a hypermineralized surface due to remineralization from oral fluids.",
+      "source_text_normalized": "arrested caries of dentine has a hypermineralized surface due to remineralization from oral fluids",
+      "text_anchor": "Arrested caries of dentine has a hypermineralized surface du",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_caries_09",
@@ -1787,7 +2129,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- التسوس الجامح (Rampant caries): هو تسوس مفاجئ وسريع الانتشار يصيب عدداً كبيراً من الأسنان في آن واحد، ويتميز باختراق الأسطح الملساء التي نادراً ما تصاب بالتسوس كالقواطع السفلية وأسطح الأعناق.\n- أكثر ما يشاهد عند الأطفال الصغار (Nursing bottle caries)، أو المراهقين المتناولين للحلوى والسكريات بكثرة، أو المرضى المصابين بجفاف الفم الشديد (Xerostomia) بعد العلاج الإشعاعي.",
     "answer_en": "Correct Answer: B. Rapidly progressing caries involving multiple teeth\nRampant caries is characterized by widespread, rapid cavitation affecting multiple teeth and unusual surfaces.",
-    "quote_ref": "Rampant caries: A suddenly appearing, rapidly burrowing type of caries resulting in early pulp involvement in multiple teeth."
+    "quote_ref": "Rampant caries: A suddenly appearing, rapidly burrowing type of caries resulting in early pulp involvement in multiple teeth.",
+    "source_reference": {
+      "id": "ref_q_oral_path_caries_09_1",
+      "question_id": "q_oral_path_caries_09",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 11,
+      "source_type": "exact",
+      "source_text": "Rampant caries: A suddenly appearing, rapidly burrowing type of caries resulting in early pulp involvement in multiple teeth.",
+      "source_text_normalized": "rampant caries a suddenly appearing rapidly burrowing type of caries resulting in early pulp involvement in multiple teeth",
+      "text_anchor": "Rampant caries: A suddenly appearing, rapidly burrowing type",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_pulp_03",
@@ -1824,7 +2179,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة الصحيحة: D. كل ما سبق صحيح\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nالتهاب اللب الحاد غير القابل للشفاء (Irreversible Acute Pulpitis) يتميز بخصائص سريرية ثابتة في الامتحانات:\n1. طبيعة الألم: ألم حاد، شديد، نابض ومستمر لساعات (Severe throbbing pain).\n2. عدم القدرة على تحديد المكان (Poor localization): لأن اللب يحتوي على ألياف C الحسية ولا يحتوي على مستقبلات حس عميق (Proprioceptors)؛ لذا يشعر المريض بألم منتشر أو منعكس (Referred pain) في الفك أو الوجه دون معرفة السن بالتحديد.\n3. المحفزات: يزداد بالحرارة والبرودة ويستمر حتى بعد زوال المنبه، كما يزداد عند النوم أو الاستلقاء بسبب ارتفاع الضغط الوريدي داخل رأس المريض وحجرة اللب المحاطة بجدران عاجية غير مرنة.",
     "answer_en": "Correct Answer: D. All of the above\nAcute pulpitis features severe throbbing pain, lack of proprioceptors (poor localization/referred pain), and exacerbation by thermal stimuli and recumbency.",
-    "quote_ref": "Acute pulpitis is characterized by severe throbbing pain, poorly localized by the patient, and aggravated by hot and cold stimuli."
+    "quote_ref": "Acute pulpitis is characterized by severe throbbing pain, poorly localized by the patient, and aggravated by hot and cold stimuli.",
+    "source_reference": {
+      "id": "ref_q_oral_path_pulp_03_1",
+      "question_id": "q_oral_path_pulp_03",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 3,
+      "source_type": "exact",
+      "source_text": "Acute pulpitis is characterized by severe throbbing pain, poorly localized by the patient, and aggravated by hot and cold stimuli.",
+      "source_text_normalized": "acute pulpitis is characterized by severe throbbing pain poorly localized by the patient and aggravated by hot and cold stimuli",
+      "text_anchor": "Acute pulpitis is characterized by severe throbbing pain, po",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_pulp_04",
@@ -1861,7 +2229,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة الصحيحة: A. التهاب اللب المزمن التكاثري (Chronic hyperplastic pulpitis)\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- بوليب اللب (Pulp polyp) هو نمو لحمي أحمر فاقع من النسيج الحبيبي (Granulation tissue) يبرز خارج نخر عاجي مفتوح وكبير.\n- يحدث نموذجياً عند الأطفال واليافعين في الأسنان اللبنية أو الأرحاء الدائمة الفتية، لسببين حاسمين:\n  1) وجود فتحة نخرية واسعة تسمح للنسيج بالتمدد دون أن ينحبس أو ينضغط.\n  2) التروية الدموية الغزيرة جداً والمناعة العالية للب الفتي.\n- مع الوقت، تتساقط خلايا ظهارية من مخاطية الفم على سطحه ويتغطى بطبقة من الظهارة المطبقة الحرشفية (Stratified squamous epithelium) ليصبح غير مؤلم تقريباً عند اللمس.",
     "answer_en": "Correct Answer: A. Chronic hyperplastic pulpitis\nPulp polyp occurs in young teeth with open carious cavities and rich vascular supply, presenting as an exuberant mass of granulation tissue.",
-    "quote_ref": "Chronic hyperplastic pulpitis (pulp polyp): An excessive proliferation of chronically inflamed pulp tissue occurring in teeth of children and young adults."
+    "quote_ref": "Chronic hyperplastic pulpitis (pulp polyp): An excessive proliferation of chronically inflamed pulp tissue occurring in teeth of children and young adults.",
+    "source_reference": {
+      "id": "ref_q_oral_path_pulp_04_1",
+      "question_id": "q_oral_path_pulp_04",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 5,
+      "source_type": "exact",
+      "source_text": "Chronic hyperplastic pulpitis (pulp polyp): An excessive proliferation of chronically inflamed pulp tissue occurring in teeth of children and young adults.",
+      "source_text_normalized": "chronic hyperplastic pulpitis pulp polyp an excessive proliferation of chronically inflamed pulp tissue occurring in teeth of children and young adults",
+      "text_anchor": "Chronic hyperplastic pulpitis (pulp polyp): An excessive pro",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_pulp_05",
@@ -1898,7 +2279,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- التهاب اللب الحاد (Acute): يتميز بارتشاح كثيف من الكريات البيض متعددة النوى / المتعادلات (Neutrophils / PMNs) مع وذمة شديدة وتخرب خلوي وتكون بؤر قيحية.\n- التهاب اللب المزمن (Chronic): يتميز بارتشاح خلايا أحادية النواة (Mononuclear infiltrate) ممثلة بالخلايا اللمفاوية (Lymphocytes) وخلايا البلازما (Plasma cells) وتكاثر اللييفات اليافعة والأوعية الدموية لتشكيل نسيج حبيبي مزمن.",
     "answer_en": "Correct Answer: B. Progressive infiltration by lymphocytes and plasma cells\nChronic pulpitis histologically shows a chronic mononuclear infiltrate dominated by lymphocytes and plasma cells.",
-    "quote_ref": "Chronic pulpitis shows infiltration of the pulp tissue predominantly by lymphocytes and plasma cells."
+    "quote_ref": "Chronic pulpitis shows infiltration of the pulp tissue predominantly by lymphocytes and plasma cells.",
+    "source_reference": {
+      "id": "ref_q_oral_path_pulp_05_1",
+      "question_id": "q_oral_path_pulp_05",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 7,
+      "source_type": "exact",
+      "source_text": "Chronic pulpitis shows infiltration of the pulp tissue predominantly by lymphocytes and plasma cells.",
+      "source_text_normalized": "chronic pulpitis shows infiltration of the pulp tissue predominantly by lymphocytes and plasma cells",
+      "text_anchor": "Chronic pulpitis shows infiltration of the pulp tissue predo",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_pulp_06",
@@ -1931,7 +2325,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة الصحيحة: A. صحيحة (True)\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nتكلسات اللب شائعة جداً وتزداد طردياً مع التقدم في العمر:\n1. حصيات اللب الحقيقية (True pulp stones / Denticles): نادرة، وتتكون من عاج حقيقي يحتوي على أنابيب عاجية وخلايا شبيهة بمصورات العاج.\n2. حصيات اللب الكاذبة (False pulp stones): هي الأكثر شيوعاً، وتتكون من صفائح كلسية دائرية متحدة المركز (Concentric lamellae) ناتجة عن تنكس تكلسي حول أوعية دموية أو ألياف كولاجينية، وتخلو تماماً من الأنابيب العاجية.",
     "answer_en": "Correct Answer: A. True\nPulp stones are calcified masses classified structurally into true stones (containing dentinal tubules) and false stones (concentric lamellar calcifications without tubules).",
-    "quote_ref": "Pulp stones are classified as true (composed of dentine with tubules) or false (concentric layers of calcified tissue)."
+    "quote_ref": "Pulp stones are classified as true (composed of dentine with tubules) or false (concentric layers of calcified tissue).",
+    "source_reference": {
+      "id": "ref_q_oral_path_pulp_06_1",
+      "question_id": "q_oral_path_pulp_06",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 11,
+      "source_type": "exact",
+      "source_text": "Pulp stones are classified as true (composed of dentine with tubules) or false (concentric layers of calcified tissue).",
+      "source_text_normalized": "pulp stones are classified as true composed of dentine with tubules or false concentric layers of calcified tissue",
+      "text_anchor": "Pulp stones are classified as true (composed of dentine with",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_pulp_07",
@@ -1968,7 +2375,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nمع تقدم الإنسان في العمر، تحدث تغيرات فيسيولوجية حتمية في نسيج اللب:\n- انخفاض حجم حجرة اللب والقنوات الجذرية بسبب استمرار ترسيب العاج الثانوي والارتكاسي طوال الحياة.\n- انخفاض التروية الدموية (Decreased vascularity) وانخفاض عدد الأعصاب.\n- انخفاض عدد الخلايا النشطة (Decreased cellularity) مع زيادة كثافة حزم ألياف الكولاجين (Fibrosis).\n- زيادة نسبة الحصيات الكلسية؛ مما يجعل اللب المسن أقل قدرة على الشفاء وأقل حساسية للألم مقارنة باللب الشاب.",
     "answer_en": "Correct Answer: B. Decreased vascularity and cellularity with increased fibrosis\nAging pulp exhibits reduced pulp volume, decreased vascularity/cellularity, increased fibrous collagen, and more calcifications.",
-    "quote_ref": "Aging of the pulp leads to reduced volume, decreased vascularity, fewer cells, and increased collagen fibers."
+    "quote_ref": "Aging of the pulp leads to reduced volume, decreased vascularity, fewer cells, and increased collagen fibers.",
+    "source_reference": {
+      "id": "ref_q_oral_path_pulp_07_1",
+      "question_id": "q_oral_path_pulp_07",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 13,
+      "source_type": "exact",
+      "source_text": "Aging of the pulp leads to reduced volume, decreased vascularity, fewer cells, and increased collagen fibers.",
+      "source_text_normalized": "aging of the pulp leads to reduced volume decreased vascularity fewer cells and increased collagen fibers",
+      "text_anchor": "Aging of the pulp leads to reduced volume, decreased vascula",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_pulp_08",
@@ -2001,7 +2421,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة الصحيحة: A. صحيحة (True)\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- ألم الأسنان الجوي (Aerodontalgia / Barodontalgia): هو ألم سني حاد يحدث بسبب انخفاض الضغط الجوي في الارتفاعات العالية (كما في الطيران) أو ازدياده السريع (أثناء الغوص العميق).\n- الآلية: انحباس فقاعات الغازات الناتجة عن نخر قديم، أو وجود التهاب لب مسبق تحت سريري (Subclinical pulpitis)؛ فعند انخفاض الضغط يتمدد الغاز المحبوس داخل حجرة العاج الصلبة فيضغط بشدة على الأعصاب الحية مسبباً ألماً حاداً لا يطاق.",
     "answer_en": "Correct Answer: A. True\nAerodontalgia (barodontalgia) is toothache provoked by changes in ambient barometric pressure in individuals with subclinical pulpitis.",
-    "quote_ref": "Aerodontalgia: Tooth pain precipitated by decrease in atmospheric pressure at high altitudes in teeth with asymptomatic chronic pulpitis."
+    "quote_ref": "Aerodontalgia: Tooth pain precipitated by decrease in atmospheric pressure at high altitudes in teeth with asymptomatic chronic pulpitis.",
+    "source_reference": {
+      "id": "ref_q_oral_path_pulp_08_1",
+      "question_id": "q_oral_path_pulp_08",
+      "sheet_id": "sh_oral_path_pulp_02",
+      "page_number": 15,
+      "source_type": "exact",
+      "source_text": "Aerodontalgia: Tooth pain precipitated by decrease in atmospheric pressure at high altitudes in teeth with asymptomatic chronic pulpitis.",
+      "source_text_normalized": "aerodontalgia tooth pain precipitated by decrease in atmospheric pressure at high altitudes in teeth with asymptomatic chronic pulpitis",
+      "text_anchor": "Aerodontalgia: Tooth pain precipitated by decrease in atmosp",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_periapical_01",
@@ -2038,7 +2471,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nالفرق الجوهري بين التهاب اللب (Pulpitis) والتهاب الذروة (Periapical periodontitis):\n1. في التهاب الذروة (Periapical): الالتهاب انتقل إلى ألياف الرباط اللثوي (PDL) الغنية جداً بمستقبلات الحس العميق (Proprioceptors)؛ لذا فإن المريض يحدد السن بإصبعه فوراً (Well-localized pain) ويشعر بأن السن مرتفع قليلاً في سنخه (Tooth feels high/raised).\n2. الحساسية للحرارة: بما أن اللب متنخر وغير حي (Non-vital)، فإن البرودة والحرارة لن تثير حساسية عصبية لبية.\n3. الفحص الإشعاعي المبكر: لا يظهر ذوباناً عظمياً كبيراً في البداية، بل يظهر خط الرباط اللثوي طبيعياً أو متسعاً قليلاً فقط (Normal or slight widening of PDL space).",
     "answer_en": "Correct Answer: B\nIn acute apical periodontitis from a necrotic pulp, thermal testing is negative, but the tooth is exquisitely tender to percussion and mastication.",
-    "quote_ref": "In acute periapical periodontitis, the tooth is tender to pressure and percussion, and thermal stimuli elicit no response if the pulp is necrotic."
+    "quote_ref": "In acute periapical periodontitis, the tooth is tender to pressure and percussion, and thermal stimuli elicit no response if the pulp is necrotic.",
+    "source_reference": {
+      "id": "ref_q_oral_path_periapical_01_1",
+      "question_id": "q_oral_path_periapical_01",
+      "sheet_id": "sh_oral_path_periapical_03",
+      "page_number": 2,
+      "source_type": "exact",
+      "source_text": "In acute periapical periodontitis, the tooth is tender to pressure and percussion, and thermal stimuli elicit no response if the pulp is necrotic.",
+      "source_text_normalized": "in acute periapical periodontitis the tooth is tender to pressure and percussion and thermal stimuli elicit no response if the pulp is necrotic",
+      "text_anchor": "In acute periapical periodontitis, the tooth is tender to pr",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_periapical_02",
@@ -2076,7 +2522,20 @@ class DataService {
     "correct_index": 3,
     "answer_ar": "الإجابة الصحيحة: D. كلاهما معاً (Both A and B)\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\nسؤال دقيق ومشهور جداً في امتحانات Oral Pathology:\n- الورم الحبيبي الذروي (Periapical granuloma) والكيس الذروي (Radicular cyst) يشتركان في نفس البيئة الإمراضية للالتهاب المزمن للسن غير الحي:\n  1) خلايا رغوية (Foam cells / Lipid-laden macrophages) ناتجة عن بلعمة حطام الخلايا المتنخرة.\n  2) شقوق الكولسترول (Cholesterol clefts) المحاطة بخلايا عملاقة غريبة (Foreign-body giant cells).\n  3) صبغة الهيموسيديرين (Hemosiderin) نتيجة النزوف الموضعية وتكسر كريات الدم الحمراء.\n  4) أجسام روشتون / الهيالين (Rushton / Hyaline bodies) في ظهارة الكيس.\nالفرق النسيجي الحاسم بينهما: الكيس الذروي يحتوي على تجويف حقيقي مبطن بالظهارة (Epithelium-lined cavity)، بينما الجرانولوما كتلة مصمتة من النسيج الحبيبي الالتهابي (Granulation tissue).",
     "answer_en": "Correct Answer: D. Both A and B\nBoth periapical granuloma and radicular cyst share chronic inflammatory elements including cholesterol clefts, foam cells, and hemosiderin.",
-    "quote_ref": "Histopathology of apical granuloma and cyst: Chronic granulation tissue with cholesterol clefts, foreign body giant cells, foam cells, and hemosiderin."
+    "quote_ref": "Histopathology of apical granuloma and cyst: Chronic granulation tissue with cholesterol clefts, foreign body giant cells, foam cells, and hemosiderin.",
+    "source_reference": {
+      "id": "ref_q_oral_path_periapical_02_1",
+      "question_id": "q_oral_path_periapical_02",
+      "sheet_id": "sh_oral_path_periapical_03",
+      "page_number": 4,
+      "source_type": "exact",
+      "source_text": "Histopathology of apical granuloma and cyst: Chronic granulation tissue with cholesterol clefts, foreign body giant cells, foam cells, and hemosiderin.",
+      "source_text_normalized": "histopathology of apical granuloma and cyst chronic granulation tissue with cholesterol clefts foreign body giant cells foam cells and hemosiderin",
+      "text_anchor": "Histopathology of apical granuloma and cyst: Chronic granula",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_periapical_03",
@@ -2109,7 +2568,20 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B. خاطئة (False)\n\n📌 فخ امتحاني يتكرر باستمرار (Classic Exam Trap):\n- الكيس الجذري الذروي (Radicular / Apical cyst) هو كيس التهابي (Inflammatory cyst).\n- ينشأ حصراً بسبب تنخر وموت لب السن (Non-vital / Necrotic pulp)؛ حيث تنتقل السموم البكتيرية إلى الذروة فتحفز بقايا مالاسيز الظهارية (Epithelial rests of Malassez) على التكاثر.\n- إذا كان السن حياً (Vital tooth) ووجدت بقعة شفافة شعاعياً عند الذروة، فالاحتمال يكون آفة أخرى مثل الورم الملاطي النمائي (Periapical cemental dysplasia) أو ورماً سنياً آخر، وليس كيساً جذرياً!",
     "answer_en": "Correct Answer: B. False\nA radicular cyst is an inflammatory cyst that develops ONLY in association with a non-vital tooth following pulp necrosis.",
-    "quote_ref": "Radicular cysts arise from proliferation of the rests of Malassez in response to inflammation caused by non-vital teeth."
+    "quote_ref": "Radicular cysts arise from proliferation of the rests of Malassez in response to inflammation caused by non-vital teeth.",
+    "source_reference": {
+      "id": "ref_q_oral_path_periapical_03_1",
+      "question_id": "q_oral_path_periapical_03",
+      "sheet_id": "sh_oral_path_periapical_03",
+      "page_number": 6,
+      "source_type": "exact",
+      "source_text": "Radicular cysts arise from proliferation of the rests of Malassez in response to inflammation caused by non-vital teeth.",
+      "source_text_normalized": "radicular cysts arise from proliferation of the rests of malassez in response to inflammation caused by non vital teeth",
+      "text_anchor": "Radicular cysts arise from proliferation of the rests of Mal",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_periapical_04",
@@ -2146,7 +2618,20 @@ class DataService {
     "correct_index": 0,
     "answer_ar": "الإجابة الصحيحة: A. ظهارة مطبقة حرشفية غير متقرنة\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- الكيس الذروي كيس حقيقي (True cyst) لأنه يمتلك تجويفاً مبطناً بالظهارة.\n- نوع الظهارة السائدة في الغالبية الساحقة هي: ظهارة مطبقة حرشفية غير متقرنة (Non-keratinized stratified squamous epithelium)، مستمدة من تكاثر بقايا مالاسيز في الرباط السني.\n- في الحالات الملتهبة بشدة تظهر الظهارة متضخمة وغير منتظمة مع وذمة بين خلوية (Spongiosis).\n⚠️ ملحوظة: الكيس الكيراتيني السني (OKC) يتميز بظهارة متقرنة نظيرة التقرن (Parakeratinized) ومنتظمة بسمك 6-8 خلايا، بينما الكيس الذروي غير متقرن (Non-keratinized).",
     "answer_en": "Correct Answer: A. Stratified squamous epithelium, non-keratinized\nRadicular cysts are lined by non-keratinized stratified squamous epithelium derived from stimulated rests of Malassez.",
-    "quote_ref": "The radicular cyst is lined by non-keratinized stratified squamous epithelium."
+    "quote_ref": "The radicular cyst is lined by non-keratinized stratified squamous epithelium.",
+    "source_reference": {
+      "id": "ref_q_oral_path_periapical_04_1",
+      "question_id": "q_oral_path_periapical_04",
+      "sheet_id": "sh_oral_path_periapical_03",
+      "page_number": 7,
+      "source_type": "exact",
+      "source_text": "The radicular cyst is lined by non-keratinized stratified squamous epithelium.",
+      "source_text_normalized": "the radicular cyst is lined by non keratinized stratified squamous epithelium",
+      "text_anchor": "The radicular cyst is lined by non-keratinized stratified sq",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
   },
   {
     "id": "q_oral_path_periapical_05",
@@ -2184,7 +2669,69 @@ class DataService {
     "correct_index": 1,
     "answer_ar": "الإجابة الصحيحة: B\n\n📌 شرح المعلومة وفكرة السؤال في امتحانات السنوات:\n- ذبحة لودفيغ (Ludwig's Angina): هي التهاب حاد منتشر وشديد في النسج الضامة الرخوة (Cellulitis)، ينشأ غالباً من انتقال إنتان خراج ذروي من أرحاء الفك السفلي الثانية أو الثالثة (لأن جذورها تمتد أسفل العضلة الضرسية اللامية Mylohyoid).\n- تصيب الحيزات الفراغية الثلاثة ثنائية الجانب:\n  1. Submandibular spaces\n  2. Sublingual spaces\n  3. Submental space\n- الخطورة السريرية القصوى: تؤدي لتورم صلب يشبه اللوح الخشبي (Woody / Brawny edema) في قاع الفم يرفع اللسان للأعلى والخلف، مسبباً انسداداً حاداً في مجرى التنفس (Respiratory obstruction)، وصعوبة في البلع والكلام، وتعتبر حالة طوارئ جراحية مهددة للحياة.",
     "answer_en": "Correct Answer: B. Severe cellulitis involving submandibular, sublingual, and submental spaces\nLudwig's angina is a life-threatening, bilateral cellulitis involving the floor of the mouth and neck spaces.",
-    "quote_ref": "Ludwig's angina is a severe, rapidly spreading cellulitis of the submandibular, sublingual, and submental spaces."
+    "quote_ref": "Ludwig's angina is a severe, rapidly spreading cellulitis of the submandibular, sublingual, and submental spaces.",
+    "source_reference": {
+      "id": "ref_q_oral_path_periapical_05_1",
+      "question_id": "q_oral_path_periapical_05",
+      "sheet_id": "sh_oral_path_periapical_03",
+      "page_number": 10,
+      "source_type": "exact",
+      "source_text": "Ludwig's angina is a severe, rapidly spreading cellulitis of the submandibular, sublingual, and submental spaces.",
+      "source_text_normalized": "ludwig s angina is a severe rapidly spreading cellulitis of the submandibular sublingual and submental spaces",
+      "text_anchor": "Ludwig's angina is a severe, rapidly spreading cellulitis of",
+      "bounding_box": null,
+      "confidence": 0.95,
+      "verification_status": "verified"
+    }
+  },
+  {
+    "id": "q_test_fallback_01",
+    "subject_id": "oral-diseases",
+    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_en": "Oral Pathology",
+    "sheet_id": "sh_oral_path_caries_01",
+    "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
+    "sheet_title_en": "Lecture 1: Dental Caries",
+    "page_ref": 2,
+    "topic_ar": "اختبار حالة تعذر التحديد (Fallback Case)",
+    "topic_en": "Fallback Verification Test",
+    "type": "practice",
+    "source": "practice",
+    "tags": [
+      "Fallback Test",
+      "Unresolved Source"
+    ],
+    "text_ar": "سؤال تجريبي لاختبار حالة عدم العثور على النص الدقيق داخل الشيت (Fallback Case):",
+    "text_en": "Verification question to test Fallback UI when exact source quote is not found in sheet:",
+    "options_ar": [
+      "خيار تجريبي أ",
+      "خيار تجريبي ب (الصحيح)",
+      "خيار تجريبي ج",
+      "خيار تجريبي د"
+    ],
+    "options_en": [
+      "Test Option A",
+      "Test Option B (Correct)",
+      "Test Option C",
+      "Test Option D"
+    ],
+    "correct_index": 1,
+    "answer_ar": "الإجابة المعتمدة: B. هذا السؤال مخصص للتحقق من عدم اختلاق أي تظليل عشوائي (No Guessing).",
+    "answer_en": "Correct Answer: B. This question verifies fallback card with zero fake highlights.",
+    "quote_ref": "Dental implants are directly integrated into the alveolar bone after osteotomy.",
+    "source_reference": {
+      "id": "ref_q_test_fallback_01_1",
+      "question_id": "q_test_fallback_01",
+      "sheet_id": "sh_oral_path_caries_01",
+      "page_number": 2,
+      "source_type": "exact",
+      "source_text": "Dental implants are directly integrated into the alveolar bone after osteotomy.",
+      "source_text_normalized": "dental implants are directly integrated into the alveolar bone after osteotomy",
+      "text_anchor": "Dental implants are directly integrated",
+      "bounding_box": null,
+      "confidence": 0.2,
+      "verification_status": "unresolved"
+    }
   }
 ];
   }

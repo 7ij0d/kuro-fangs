@@ -379,15 +379,21 @@ const QuestionsPage = {
             </div>
 
             <!-- Question Language & Translation Bar -->
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: rgba(35, 87, 217, 0.08); color: var(--brand-accent); border: 1px solid rgba(35, 87, 217, 0.2);">ENG</span>
                 <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--bg-surface-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle);">MCQ</span>
               </div>
-              <button type="button" id="dt-btn-translate-q" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 10px; font-weight: 700; gap: 6px; color: var(--text-primary); border-radius: 8px;" title="${isAr ? 'ترجمة السؤال للغة العربية' : 'Translate question to Arabic'}">
-                <i data-lucide="languages" style="width: 13px; height: 13px; color: var(--brand-accent);"></i>
-                <span id="dt-btn-translate-label">${isAr ? 'ترجمة السؤال' : 'Translate'}</span>
-              </button>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="dt-btn-toggle-exp" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 10px; font-weight: 700; gap: 6px; color: var(--text-primary); border-radius: 8px;" title="${isAr ? 'إظهار أو إخفاء الشرح والمصدر' : 'Toggle Faculty Explanation'}">
+                  <i data-lucide="sparkles" style="width: 13px; height: 13px; color: var(--brand-accent);"></i>
+                  <span id="dt-btn-toggle-exp-label">${isAr ? 'إظهار الشرح' : 'Show Explanation'}</span>
+                </button>
+                <button type="button" id="dt-btn-translate-q" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 10px; font-weight: 700; gap: 6px; color: var(--text-primary); border-radius: 8px;" title="${isAr ? 'ترجمة السؤال للغة العربية' : 'Translate question to Arabic'}">
+                  <i data-lucide="languages" style="width: 13px; height: 13px; color: var(--brand-accent);"></i>
+                  <span id="dt-btn-translate-label">${isAr ? 'ترجمة السؤال' : 'Translate'}</span>
+                </button>
+              </div>
             </div>
 
             <!-- Question Title (English) -->
@@ -407,6 +413,30 @@ const QuestionsPage = {
             <!-- Vertical Tappable Option Buttons -->
             <div id="dt-modal-options-box" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;">
               <!-- Options dynamically injected -->
+            </div>
+
+            <!-- In-Card Faculty Explanation & Official Sheet Quote (Exact Reference Design) -->
+            <div class="dt-card-exp-section" id="dt-card-exp-section" style="display: none; margin-bottom: 22px;">
+              <div class="dt-card-faculty-exp" id="dt-card-faculty-exp">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                  <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(200, 67, 67, 0.1); border: 1px solid rgba(200, 67, 67, 0.2); display: flex; align-items: center; justify-content: center; color: var(--brand-accent);">
+                    <i data-lucide="book-open" style="width: 15px; height: 15px;"></i>
+                  </div>
+                  <span style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">${isAr ? 'شرح الكلية والحل النموذجي' : 'Faculty Explanation'}</span>
+                </div>
+                <div id="dt-card-exp-text" style="font-size: 0.85rem; color: var(--text-primary); line-height: 1.6; white-space: pre-line;"></div>
+              </div>
+
+              <div class="dt-card-quote-box" id="dt-card-quote-box" style="display: none; margin-top: 14px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                  <i data-lucide="quote" style="width: 14px; height: 14px; color: var(--brand-accent);"></i>
+                  <span style="font-weight: 800; font-size: 0.78rem; color: var(--brand-accent);">${isAr ? 'نص الشيت الرسمي:' : 'Official Sheet Quote:'}</span>
+                </div>
+                <div id="dt-card-quote-text" style="font-size: 0.825rem; font-style: italic; color: var(--text-secondary); line-height: 1.55; direction: ltr; text-align: left;"></div>
+              </div>
+
+              <!-- View in Sheet Action Button(s) Container -->
+              <div class="dt-card-source-actions" id="dt-card-source-actions" style="display: none; margin-top: 14px;"></div>
             </div>
 
             <!-- Navigation Controls -->
@@ -461,9 +491,14 @@ const QuestionsPage = {
                   </div>
                   <div class="dt-kuro-quote-text" id="dt-kuro-quote-text"></div>
                 </div>
+                <!-- Companion Mascot Source Actions Box -->
+                <div class="dt-kuro-source-actions-box" id="dt-kuro-source-actions-box" style="display: none; margin-top: 14px;"></div>
               </div>
             </div>
           </aside>
+
+          <!-- DEDICATED PDF SHEET VIEWER PANE (SPLIT-VIEW ON IPAD/DESKTOP & FULLSCREEN ON MOBILE) -->
+          <div class="dt-quiz-pdf-pane" id="dt-quiz-pdf-pane" style="display: none;"></div>
         </div>
       </div>
 
@@ -599,6 +634,7 @@ const QuestionsPage = {
     });
 
     document.getElementById('dt-btn-next')?.addEventListener('click', () => {
+      QuestionsPage.closePdfView();
       if (QuestionsPage.activeQuizIndex < QuestionsPage.activeQuizList.length - 1) {
         QuestionsPage.activeQuizIndex++;
         if (QuestionsPage.activeSession) {
@@ -623,6 +659,7 @@ const QuestionsPage = {
     });
 
     document.getElementById('dt-btn-prev')?.addEventListener('click', () => {
+      QuestionsPage.closePdfView();
       if (QuestionsPage.activeQuizIndex > 0) {
         QuestionsPage.activeQuizIndex--;
         if (QuestionsPage.activeSession) {
@@ -1358,6 +1395,7 @@ const QuestionsPage = {
   },
 
   closeQuizModal() {
+    QuestionsPage.closePdfView();
     const overlay = document.getElementById('dt-quiz-runner-modal');
     if (overlay) {
       overlay.style.display = 'none';
@@ -1469,7 +1507,40 @@ const QuestionsPage = {
 
     QuestionsPage.updateStarButton(q);
 
-    // Update Kuro explanation contents (Explanation stays in Arabic with English terms preserved!)
+    // 1. In-Card Faculty Explanation & Official Sheet Quote (Exact Reference Design)
+    const cardExpSection = document.getElementById('dt-card-exp-section');
+    const cardExpText = document.getElementById('dt-card-exp-text');
+    const cardQuoteBox = document.getElementById('dt-card-quote-box');
+    const cardQuoteText = document.getElementById('dt-card-quote-text');
+    const cardSourceActions = document.getElementById('dt-card-source-actions');
+    const kuroSourceActions = document.getElementById('dt-kuro-source-actions-box');
+
+    const expTextVal = isAr
+      ? (q.explanation_ar || q.answer_ar || q.explanation_en || q.answer_en || '')
+      : (q.explanation_en || q.answer_en || q.explanation_ar || q.answer_ar || '');
+
+    if (cardExpText) {
+      cardExpText.textContent = expTextVal;
+    }
+
+    if (cardQuoteBox && cardQuoteText) {
+      if (q.quote_ref) {
+        cardQuoteText.textContent = `«${q.quote_ref}»`;
+        cardQuoteBox.style.display = 'block';
+      } else {
+        cardQuoteBox.style.display = 'none';
+      }
+    }
+
+    const refs = QuestionsPage.getQuestionSourceReferences(q);
+    QuestionsPage.renderSourceActionButtons(cardSourceActions, refs, q);
+    QuestionsPage.renderSourceActionButtons(kuroSourceActions, refs, q);
+
+    if (cardExpSection) {
+      cardExpSection.style.display = existingAns ? 'block' : 'none';
+    }
+
+    // 2. Secondary Stage Companion Mascot Explanation
     const expSubtitle = document.getElementById('dt-kuro-exp-ref-subtitle');
     if (expSubtitle) {
       const shTitle = q.sheet_title_en || q.sheet_title || q.sheet_title_ar || 'Official Sheet';
@@ -1648,6 +1719,14 @@ const QuestionsPage = {
             window.STORE.addPoints(5);
           }
         }
+
+        // Reveal In-Card Faculty Explanation & Source Action Buttons
+        if (cardExpSection) {
+          cardExpSection.style.display = 'block';
+          setTimeout(() => {
+            cardExpSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 140);
+        }
       });
     });
 
@@ -1668,6 +1747,156 @@ const QuestionsPage = {
       starBtn.style.color = isSaved ? '#F59E0B' : 'var(--text-primary)';
       starBtn.style.borderColor = isSaved ? 'rgba(245, 158, 11, 0.4)' : 'var(--border-subtle)';
     }
+  },
+
+  getQuestionSourceReferences(q) {
+    if (!q) return [];
+    if (Array.isArray(q.source_references) && q.source_references.length > 0) {
+      return q.source_references;
+    }
+    if (q.source_reference && typeof q.source_reference === 'object') {
+      return [q.source_reference];
+    }
+    if (q.sheet_id) {
+      return [{
+        sheet_id: q.sheet_id,
+        sheet_title: q.sheet_title || q.sheet_title_en || q.sheet_title_ar || '',
+        page_number: q.page_ref || 1,
+        source_type: 'exact',
+        source_text: q.quote_ref || '',
+        quote_ref: q.quote_ref || '',
+        verification_status: 'verified'
+      }];
+    }
+    return [];
+  },
+
+  renderSourceActionButtons(container, refs, q) {
+    if (!container) return;
+    if (!refs || refs.length === 0) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '8px';
+    container.innerHTML = refs.map((ref, idx) => {
+      const isSupporting = ref.source_type === 'supporting';
+      const pageNum = ref.page_number || ref.page || ref.page_ref || q.page_ref;
+      const pageLabel = pageNum ? (isAr ? ` (صفحة ${pageNum})` : ` (Page ${pageNum})`) : '';
+      const mainLabel = isSupporting
+        ? (isAr ? `عرض المصدر الداعم${pageLabel}` : `View Supporting Source${pageLabel}`)
+        : (isAr ? `عرض في الشيت${pageLabel}` : `View in Sheet${pageLabel}`);
+      const badgeLabel = isSupporting
+        ? (isAr ? 'مصدر داعم' : 'Supporting')
+        : (isAr ? 'مصدر مؤكد' : 'Exact Source');
+
+      return `
+        <button type="button" class="dt-btn-view-sheet ${isSupporting ? 'supporting' : 'exact'}" data-ref-idx="${idx}">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="${isSupporting ? 'compass' : 'file-search'}" style="width: 15px; height: 15px; flex-shrink: 0;"></i>
+            <span>${mainLabel}</span>
+          </div>
+          <span class="dt-source-type-pill ${isSupporting ? 'supporting' : 'exact'}">${badgeLabel}</span>
+        </button>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.dt-btn-view-sheet').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const rIdx = parseInt(btn.getAttribute('data-ref-idx'), 10);
+        const selectedRef = refs[rIdx] || refs[0];
+        QuestionsPage.openSourceInSheet(selectedRef, q);
+      });
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  openSourceInSheet(ref, question) {
+    if (!ref || !question) return;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const targetSheetId = ref.sheet_id || question.sheet_id;
+    if (!targetSheetId) {
+      if (window.Toast) window.Toast.show(isAr ? 'لم يتم تحديد شيت لهذا السؤال' : 'No sheet linked to this question', 'error');
+      return;
+    }
+
+    const isDesktop = window.innerWidth >= 900;
+    const stageContainer = document.getElementById('dt-quiz-stage-container');
+    const quizOverlay = document.getElementById('dt-quiz-runner-modal');
+    const companionStage = document.getElementById('dt-kuro-companion-stage');
+    const cardBox = document.getElementById('dt-quiz-card-box');
+    const pdfPane = document.getElementById('dt-quiz-pdf-pane');
+
+    if (!pdfPane) return;
+
+    if (isDesktop) {
+      // Split view mode: Left = Question Modal Card, Right = PDF Sheet Viewer
+      stageContainer?.classList.add('dt-split-active');
+      quizOverlay?.classList.remove('dt-mobile-pdf-active');
+      if (companionStage) companionStage.style.display = 'none';
+      if (cardBox) cardBox.style.display = 'flex';
+      pdfPane.style.display = 'flex';
+    } else {
+      // Mobile sequential mode: Question hidden -> PDF full-screen with contextual bottom bar
+      stageContainer?.classList.remove('dt-split-active');
+      quizOverlay?.classList.add('dt-mobile-pdf-active');
+      if (companionStage) companionStage.style.display = 'none';
+      if (cardBox) cardBox.style.display = 'none';
+      pdfPane.style.display = 'flex';
+    }
+
+    pdfPane.innerHTML = `
+      <div id="kn-pdf-pane-loader" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 14px; color: var(--text-secondary); background: var(--bg-card);">
+        <div class="kf-spinner" style="width: 32px; height: 32px; border: 3px solid rgba(126, 29, 42, 0.15); border-top-color: var(--brand-burgundy, #7E1D2A); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        <span style="font-weight: 700; font-size: 0.85rem;">${isAr ? 'جاري فتح صفحة الشيت والتركيز على النص...' : 'Opening sheet & focusing on source...'}</span>
+      </div>
+    `;
+
+    // Render Kuro Notes Sheet inside pdfPane
+    if (window.SheetDetailPage && typeof window.SheetDetailPage.render === 'function') {
+      window.SheetDetailPage.render(
+        pdfPane,
+        targetSheetId,
+        null,
+        {
+          sourceRef: ref,
+          question: question,
+          isSplitView: isDesktop,
+          isMobileFlow: !isDesktop,
+          onBackToQuestion: () => QuestionsPage.closePdfView()
+        }
+      );
+    }
+  },
+
+  closePdfView() {
+    const stageContainer = document.getElementById('dt-quiz-stage-container');
+    const quizOverlay = document.getElementById('dt-quiz-runner-modal');
+    const companionStage = document.getElementById('dt-kuro-companion-stage');
+    const cardBox = document.getElementById('dt-quiz-card-box');
+    const pdfPane = document.getElementById('dt-quiz-pdf-pane');
+
+    stageContainer?.classList.remove('dt-split-active');
+    quizOverlay?.classList.remove('dt-mobile-pdf-active');
+
+    if (companionStage) companionStage.style.display = '';
+    if (cardBox) cardBox.style.display = '';
+    if (pdfPane) {
+      pdfPane.style.display = 'none';
+      pdfPane.innerHTML = '';
+    }
+
+    // Remove any floating docks or fallback cards that might be attached
+    document.getElementById('kn-source-ref-dock')?.remove();
+    document.getElementById('kn-source-fallback-card')?.remove();
+    document.getElementById('kn-keep-modal-backdrop')?.remove();
+
+    if (window.lucide) window.lucide.createIcons();
   }
 };
 

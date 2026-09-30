@@ -16,9 +16,16 @@
 
 window.Pages = window.Pages || {};
 
-async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
+async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, options) {
   let container = null;
   let targetId = null;
+
+  const opts = options || (maybeQuery && typeof maybeQuery === 'object' && !maybeQuery.get ? maybeQuery : {});
+  const sourceRef = opts.sourceRef || opts.sourceReference || null;
+  const sourceQuestion = opts.question || null;
+  const isSplitView = Boolean(opts.isSplitView);
+  const isMobileFlow = Boolean(opts.isMobileFlow);
+  const onBackToQuestion = opts.onBackToQuestion || null;
 
   if (typeof containerOrId === 'string') {
     targetId = containerOrId.trim();
@@ -43,6 +50,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     container = document.getElementById('app') || document.getElementById('page-content');
   }
 
+  if (!targetId && sourceRef?.sheet_id) {
+    targetId = sourceRef.sheet_id;
+  }
+
   if (!targetId) {
     try {
       const hash = window.location.hash || '';
@@ -64,21 +75,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
     (typeof I18n !== 'undefined' && I18n.currentLang === 'ar');
   const t = (ar, en) => (isAr ? ar : en);
 
-  // Helper: Hide global chrome so Kuro Notes owns 100% of the viewport
+  // Helper: Hide global chrome only when running full-page (not embedded inside modal split view)
   const appSidebar = document.getElementById('app-sidebar') || document.getElementById('sidebar');
   const appHeader = document.getElementById('site-header') || document.getElementById('top-header');
   const mobileNav = document.querySelector('.mobile-bottom-nav');
-  if (appSidebar) appSidebar.style.display = 'none';
-  if (appHeader) appHeader.style.display = 'none';
-  if (mobileNav) mobileNav.style.display = 'none';
-  document.body.style.overflow = 'hidden';
+  if (!isSplitView && !isMobileFlow) {
+    if (appSidebar) appSidebar.style.display = 'none';
+    if (appHeader) appHeader.style.display = 'none';
+    if (mobileNav) mobileNav.style.display = 'none';
+    document.body.style.overflow = 'hidden';
+  }
 
   const restoreGlobalUI = () => {
-    if (appSidebar) appSidebar.style.display = '';
-    if (appHeader) appHeader.style.display = '';
-    if (mobileNav) mobileNav.style.display = '';
-    document.body.classList.remove('studio-fullscreen-active');
-    document.body.style.overflow = '';
+    if (!isSplitView && !isMobileFlow) {
+      if (appSidebar) appSidebar.style.display = '';
+      if (appHeader) appHeader.style.display = '';
+      if (mobileNav) mobileNav.style.display = '';
+      document.body.classList.remove('studio-fullscreen-active');
+      document.body.style.overflow = '';
+    }
     if (window._knKeyHandler) {
       window.removeEventListener('keydown', window._knKeyHandler);
       window._knKeyHandler = null;
@@ -288,13 +303,30 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
   const isDesktop = window.innerWidth > 1100;
   const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1100;
 
+  const initialTargetPage = parseInt(
+    sourceRef?.page_number ||
+    sourceRef?.page ||
+    sourceRef?.page_ref ||
+    (maybeQuery && typeof maybeQuery.get === 'function' ? maybeQuery.get('page') : null) ||
+    opts.page ||
+    savedView.currentPage ||
+    1,
+    10
+  );
+
   // Unified State
   const state = {
     pdfDoc: null,
     pdfBaseRatio: null,
     totalPages: Math.max(1, parseInt(sheet.pages || sheet.pages_count, 10) || 12),
-    currentPage: savedView.currentPage || 1,
-    zoom: savedView.zoom || 1.0,
+    currentPage: Math.max(1, initialTargetPage),
+    sourceReference: sourceRef,
+    sourceQuestion: sourceQuestion,
+    activeSourceMatch: null,
+    hasAutoFocusedSource: false,
+    isSplitView: isSplitView,
+    isMobileFlow: isMobileFlow,
+    zoom: savedView.zoom || (isSplitView ? 1.15 : 1.0),
     zoomMode: savedView.zoomMode || 'custom', // 'custom' | 'fit-width' | 'fit-page'
     rotation: savedView.rotation || 0, // 0, 90, 180, 270
     // IMPORTANT: Global Interaction Mode defaults to 'browse' (Safe Reading & Navigation Only) on every sheet open
@@ -829,6 +861,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
         <canvas class="kn-pdf-canvas" id="kn-pdf-canvas-${p}" width="${width}" height="${height}"></canvas>
         <canvas class="kn-highlight-canvas" id="kn-hl-canvas-${p}" width="${width}" height="${height}"></canvas>
         <div class="kn-text-layer" id="kn-text-layer-${p}"></div>
+        <div class="kn-source-ref-layer" id="kn-source-ref-layer-${p}"></div>
         <canvas class="kn-annotation-layer" id="kn-annot-canvas-${p}" width="${width}" height="${height}"></canvas>
         <div class="kn-objects-layer" id="kn-objects-layer-${p}"></div>
         <div class="kn-interaction-layer ${isEditActive && state.activeTool ? 'tool-active' : ''} ${isEditActive && ['pen', 'highlighter', 'eraser', 'shapes'].includes(state.activeTool) ? 'kn-drawing-active' : ''}" id="kn-interact-layer-${p}" data-page="${p}"></div>
@@ -836,6 +869,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       pagesContainer.appendChild(card);
       drawFallbackSheetPage(p, document.getElementById(`kn-pdf-canvas-${p}`));
       renderPageAnnotations(p);
+      renderSourceReferenceHighlight(p);
       bindPageInteraction(card, p);
     }
   }
@@ -935,6 +969,303 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       )
       .join('');
     renderSearchMarksOnPage(pageNum);
+    checkAndResolveSourceReference(pageNum);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // QUESTION -> EXACT SHEET LOCATION MATCHING & REFERENCE HIGHLIGHT
+  // ══════════════════════════════════════════════════════════════════════════
+
+  function checkAndResolveSourceReference(pageNum) {
+    if (!state.sourceReference) return;
+    const targetPage = parseInt(
+      state.sourceReference.page_number ||
+      state.sourceReference.page ||
+      state.sourceReference.page_ref,
+      10
+    );
+
+    // If source reference is for a specific page, only resolve when on that target page
+    if (targetPage && targetPage !== pageNum) return;
+
+    const pageData = state.pageTexts[pageNum];
+    if (!pageData) return;
+
+    if (window.PdfSourceMatcher) {
+      const match = window.PdfSourceMatcher.matchSourceInPage(pageData, state.sourceReference, pageNum);
+      if (match.verified) {
+        state.activeSourceMatch = match;
+        renderSourceReferenceHighlight(pageNum);
+        mountSourceReferenceDock(match);
+        if (!state.hasAutoFocusedSource) {
+          state.hasAutoFocusedSource = true;
+          focusOnSourceLocation(pageNum, match.bounds, true);
+        }
+      } else {
+        state.activeSourceMatch = null;
+        renderSourceReferenceHighlight(pageNum);
+        mountFallbackWarningCard(pageNum);
+        mountSourceReferenceDock(null);
+      }
+    }
+  }
+
+  function renderSourceReferenceHighlight(pageNum) {
+    const layer = document.getElementById(`kn-source-ref-layer-${pageNum}`);
+    if (!layer) return;
+    layer.innerHTML = '';
+
+    if (!state.activeSourceMatch || state.activeSourceMatch.page !== pageNum || !state.activeSourceMatch.verified) {
+      return;
+    }
+
+    const s = state.zoom;
+    const rects = state.activeSourceMatch.rects || [state.activeSourceMatch.bounds];
+    const isSupporting = state.activeSourceMatch.sourceType === 'supporting';
+
+    rects.forEach((r) => {
+      const el = document.createElement('div');
+      el.className = `dt-question-source-highlight ${isSupporting ? 'supporting' : 'exact'}`;
+      el.style.position = 'absolute';
+      el.style.left = `${r.x * s}px`;
+      el.style.top = `${r.y * s}px`;
+      el.style.width = `${r.w * s}px`;
+      el.style.height = `${r.h * s}px`;
+      layer.appendChild(el);
+    });
+  }
+
+  function focusOnSourceLocation(pageNum, bounds, autoZoom = true) {
+    const viewport = document.getElementById('kn-viewport');
+    const card = pagesContainer?.querySelector(`.kn-page-card[data-page="${pageNum}"]`);
+    if (!viewport || !card || !bounds) return;
+
+    if (autoZoom && state.zoom < 1.3) {
+      setZoom(1.35, 'custom');
+    }
+
+    setTimeout(() => {
+      const updatedCard = pagesContainer?.querySelector(`.kn-page-card[data-page="${pageNum}"]`);
+      if (!updatedCard || !viewport) return;
+      const s = state.zoom;
+      const cardTop = updatedCard.offsetTop;
+      const targetY = cardTop + (bounds.y * s);
+      const targetScrollTop = Math.max(0, targetY - (viewport.clientHeight / 3));
+
+      viewport.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth'
+      });
+
+      const refLayer = document.getElementById(`kn-source-ref-layer-${pageNum}`);
+      if (refLayer) {
+        refLayer.querySelectorAll('.dt-question-source-highlight').forEach((el) => {
+          el.classList.remove('pulse-attention');
+          void el.offsetWidth;
+          el.classList.add('pulse-attention');
+        });
+      }
+    }, 80);
+  }
+
+  function mountSourceReferenceDock(matchResult) {
+    let dock = document.getElementById('kn-source-ref-dock');
+    if (dock) dock.remove();
+
+    if (!state.sourceReference) return;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const q = state.sourceQuestion;
+    const qNum = q?.id ? (q.id.replace(/[^\d]/g, '') || '1') : '1';
+    const pageNum = matchResult ? matchResult.page : (state.sourceReference.page_number || state.currentPage);
+    const isSupporting = (matchResult?.sourceType === 'supporting') || (state.sourceReference.source_type === 'supporting');
+    const snippet = matchResult?.matchedText || state.sourceReference.source_text || state.sourceReference.quote_ref || '';
+
+    dock = document.createElement('div');
+    dock.className = 'kn-source-ref-dock';
+    dock.id = 'kn-source-ref-dock';
+    dock.innerHTML = `
+      <button type="button" class="kn-dock-back-btn" id="kn-dock-btn-back">
+        <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 15px; height: 15px;"></i>
+        <span>${isAr ? 'العودة للسؤال' : 'Back to Question'}</span>
+      </button>
+
+      <div class="kn-dock-center-meta">
+        <div class="kn-dock-title-row">
+          <span class="kn-dock-q-num">Question ${qNum}</span>
+          <span class="kn-dock-sep">•</span>
+          <span class="kn-dock-status ${isSupporting ? 'supporting' : 'exact'}">
+            ${isSupporting ? (isAr ? 'مصدر داعم' : 'Supporting Source') : (isAr ? 'المصدر المؤكد' : 'Found in Sheet')}
+          </span>
+          <span class="kn-dock-sep">•</span>
+          <span class="kn-dock-page">Page ${pageNum} / ${state.totalPages}</span>
+        </div>
+        ${snippet ? `
+          <div class="kn-dock-snippet" title="${escapeHtml(snippet)}">
+            «${escapeHtml(snippet)}»
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="kn-dock-actions">
+        ${matchResult && matchResult.verified ? `
+          <button type="button" class="kn-dock-btn kn-dock-focus-btn" id="kn-dock-btn-focus" title="${isAr ? 'تركيز على مكان النص' : 'Focus on Source Text'}">
+            <i data-lucide="target" style="width: 15px; height: 15px;"></i>
+            <span>${isAr ? 'تركيز (Focus)' : 'Focus'}</span>
+          </button>
+          <button type="button" class="kn-dock-btn kn-dock-keep-btn" id="kn-dock-btn-keep" title="${isAr ? 'تثبيت التظليل كملاحظة في Kuro Notes' : 'Keep as Note in Kuro Notes'}">
+            <i data-lucide="bookmark" style="width: 15px; height: 15px;"></i>
+            <span id="kn-dock-keep-label">${isAr ? 'تثبيت التظليل' : 'Keep Highlight'}</span>
+          </button>
+        ` : ''}
+      </div>
+    `;
+
+    const workspace = document.getElementById('kuro-notes-workspace');
+    if (workspace) workspace.appendChild(dock);
+
+    document.getElementById('kn-dock-btn-back')?.addEventListener('click', () => {
+      if (typeof onBackToQuestion === 'function') {
+        onBackToQuestion();
+      } else {
+        window.history.back();
+      }
+    });
+
+    document.getElementById('kn-dock-btn-focus')?.addEventListener('click', () => {
+      if (matchResult && matchResult.bounds) {
+        focusOnSourceLocation(matchResult.page, matchResult.bounds, false);
+      }
+    });
+
+    document.getElementById('kn-dock-btn-keep')?.addEventListener('click', () => {
+      promptKeepHighlight(matchResult);
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function mountFallbackWarningCard(targetPage) {
+    let fb = document.getElementById('kn-source-fallback-card');
+    if (fb) fb.remove();
+
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    fb = document.createElement('div');
+    fb.className = 'kn-source-fallback-card';
+    fb.id = 'kn-source-fallback-card';
+    fb.innerHTML = `
+      <div class="kn-fallback-badge-icon">
+        <i data-lucide="alert-triangle" style="width: 22px; height: 22px; color: #D97706;"></i>
+      </div>
+      <div class="kn-fallback-text-col">
+        <h4 class="kn-fallback-title">
+          ${isAr ? 'تعذر تحديد مكان المصدر داخل الشيت تلقائيًا.' : 'Source location could not be identified automatically.'}
+        </h4>
+        <p class="kn-fallback-sub">
+          ${isAr ? 'تم فتح الصفحة الأصلية. يمكنك قراءة هذه الصفحة يدويًا أو مراجعة سياق الشيت.' : 'The original page has been opened. You can read this page manually or try a nearby section.'}
+        </p>
+      </div>
+      <div class="kn-fallback-btn-row">
+        <button type="button" class="kn-btn kn-btn-back-q" id="kn-fallback-btn-back">
+          <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}" style="width: 14px; height: 14px;"></i>
+          <span>${isAr ? 'العودة للسؤال' : 'Back to Question'}</span>
+        </button>
+        <button type="button" class="kn-btn kn-btn-manual-read" id="kn-fallback-btn-manual">
+          <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
+          <span>${isAr ? 'تصفح الصفحة يدويًا' : 'Open Page Manually'}</span>
+        </button>
+      </div>
+    `;
+
+    const workspace = document.getElementById('kuro-notes-workspace');
+    if (workspace) workspace.appendChild(fb);
+
+    document.getElementById('kn-fallback-btn-back')?.addEventListener('click', () => {
+      if (typeof onBackToQuestion === 'function') {
+        onBackToQuestion();
+      } else {
+        window.history.back();
+      }
+    });
+
+    document.getElementById('kn-fallback-btn-manual')?.addEventListener('click', () => {
+      fb.style.opacity = '0';
+      fb.style.transform = 'translate(-50%, 16px)';
+      setTimeout(() => fb.remove(), 250);
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function promptKeepHighlight(matchResult) {
+    if (!matchResult) return;
+    let modal = document.getElementById('kn-keep-modal-backdrop');
+    if (modal) modal.remove();
+
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    modal = document.createElement('div');
+    modal.className = 'kn-keep-modal-backdrop';
+    modal.id = 'kn-keep-modal-backdrop';
+    modal.innerHTML = `
+      <div class="kn-keep-modal-card">
+        <div class="kn-keep-modal-icon">
+          <i data-lucide="bookmark-check" style="width: 26px; height: 26px; color: var(--brand-burgundy, #7E1D2A);"></i>
+        </div>
+        <h3 class="kn-keep-modal-title">
+          ${isAr ? 'حفظ كملاحظة في Kuro Notes؟' : 'Save as Note?'}
+        </h3>
+        <p class="kn-keep-modal-desc">
+          ${isAr ? 'هل تريد تثبيت هذا التظليل كملاحظة دائمة في شيت Kuro Notes الخاص بك؟' : 'Do you want to keep this highlight as a note in your Kuro Notes?'}
+        </p>
+        <div class="kn-keep-modal-actions">
+          <button type="button" class="btn btn-secondary" id="kn-keep-cancel-btn">
+            ${isAr ? 'إلغاء' : 'Cancel'}
+          </button>
+          <button type="button" class="btn btn-primary" id="kn-keep-confirm-btn" style="background: var(--brand-burgundy, #7E1D2A); border-color: var(--brand-burgundy, #7E1D2A); font-weight: 750;">
+            ${isAr ? 'تثبيت التظليل' : 'Keep Highlight'}
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    if (window.lucide) window.lucide.createIcons();
+
+    document.getElementById('kn-keep-cancel-btn')?.addEventListener('click', () => {
+      modal.remove();
+    });
+
+    document.getElementById('kn-keep-confirm-btn')?.addEventListener('click', () => {
+      modal.remove();
+      const newAnn = {
+        id: 'ann_ref_' + Date.now(),
+        type: 'highlighter',
+        page: matchResult.page,
+        rects: matchResult.rects || [matchResult.bounds],
+        color: '#FACC15',
+        opacity: 0.42,
+        size: 20,
+        title: (state.sourceQuestion ? `Question Reference: ` : '') + (matchResult.matchedText || 'Verified Source'),
+        createdAt: Date.now()
+      };
+      state.annotations.push(newAnn);
+      renderPageAnnotations(matchResult.page);
+      saveViewState();
+
+      const keepBtn = document.getElementById('kn-dock-btn-keep');
+      if (keepBtn) {
+        keepBtn.classList.add('saved');
+        keepBtn.disabled = true;
+        const lbl = document.getElementById('kn-dock-keep-label');
+        if (lbl) lbl.textContent = isAr ? '✓ تم التثبيت' : '✓ Saved';
+      }
+
+      if (window.Toast) {
+        window.Toast.show(
+          isAr ? 'تم حفظ التظليل كملاحظة دائمة في Kuro Notes ✨' : 'Highlight saved permanently to your Kuro Notes ✨',
+          'success'
+        );
+      }
+    });
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -5414,6 +5745,19 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
       renderLeftSidebarContent();
       await renderVisiblePdfPages();
       await renderSidebarPdfThumbnails();
+
+      if (state.sourceReference) {
+        const targetP = parseInt(
+          state.sourceReference.page_number ||
+          state.sourceReference.page ||
+          state.sourceReference.page_ref,
+          10
+        );
+        if (targetP && targetP >= 1 && targetP <= state.totalPages) {
+          goToPage(targetP, false);
+          checkAndResolveSourceReference(targetP);
+        }
+      }
     } catch (err) {
       console.error('[KuroNotes] Failed to load PDF document:', pdfUrl, err);
       if (loaderEl) loaderEl.style.display = 'none';
@@ -5443,7 +5787,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery) {
 window.Pages.sheetDetail = renderKuroNotesSheet;
 window.SheetDetailPage = {
   render(container, sheetIdOrQuery, maybeQuery) {
-    return renderKuroNotesSheet(container, sheetIdOrQuery, maybeQuery);
+    const options = arguments[3];
+    return renderKuroNotesSheet(container, sheetIdOrQuery, maybeQuery, options);
   },
 };
 
