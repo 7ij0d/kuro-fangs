@@ -1854,13 +1854,23 @@ body { background: var(--bg-app); color: var(--text-primary); }
 
 .dt-quiz-option.correct {
   border-color: #10B981 !important;
-  background: rgba(16, 185, 129, 0.1) !important;
+  background: rgba(16, 185, 129, 0.12) !important;
   color: #065F46 !important;
   font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3), 0 4px 14px rgba(16, 185, 129, 0.15) !important;
+  animation: dtCorrectSoftPulse 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="dark"] .dt-quiz-option.correct {
+  background: rgba(16, 185, 129, 0.18) !important;
   color: #34D399 !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.4), 0 4px 18px rgba(16, 185, 129, 0.22) !important;
+}
+
+@keyframes dtCorrectSoftPulse {
+  0% { transform: scale(0.99); }
+  50% { transform: scale(1.012); }
+  100% { transform: scale(1); }
 }
 
 .dt-quiz-option.incorrect {
@@ -1876,12 +1886,124 @@ body { background: var(--bg-app); color: var(--text-primary); }
 
 @keyframes shakeWrong {
   0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
 }
 
 .shake-wrong {
-  animation: shakeWrong 0.4s ease;
+  animation: shakeWrong 0.38s ease;
+}
+
+/* Animated Pop Icons for Answer Choices */
+.dt-anim-pop-check {
+  display: inline-block;
+  animation: dtPopCheck 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes dtPopCheck {
+  0% {
+    transform: scale(0) rotate(-15deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.25) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.dt-anim-pop-wrong {
+  display: inline-block;
+  animation: dtPopWrong 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes dtPopWrong {
+  0% {
+    transform: scale(0) rotate(15deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.22) rotate(-4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Kuro Mascot Happy Bounce on Correct */
+.dt-mascot-happy-bounce {
+  animation: dtMascotBounce 0.48s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes dtMascotBounce {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-10px) scale(1.05); }
+  70% { transform: translateY(2px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* Staged Explanation Reveal Sequence (Fluid & Non-distracting) */
+.dt-card-exp-section.staged-reveal {
+  animation: dtFadeSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dt-card-exp-section.staged-reveal .dt-card-faculty-exp {
+  animation: dtFadeSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+}
+
+.dt-card-exp-section.staged-reveal .dt-card-quote-box {
+  animation: dtFadeSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.dt-card-exp-section.staged-reveal #dt-card-source-actions {
+  animation: dtFadeSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+}
+
+@keyframes dtFadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Quick Mute Button in Quiz Runner Header */
+#dt-btn-sound.active-muted {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  color: #EF4444;
+}
+
+/* Quiz Completion Modal Styling */
+.dt-completion-card {
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-card);
+}
+
+.dt-completion-mascot-box img {
+  filter: drop-shadow(0 10px 22px rgba(126, 29, 42, 0.25));
+  animation: dtCelebrationFloat 3.2s ease-in-out infinite;
+}
+
+@keyframes dtCelebrationFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.dt-completion-stat-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dt-completion-stat-card:hover {
+  transform: translateY(-2px);
 }
 
 /* ==========================================================================

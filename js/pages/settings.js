@@ -121,6 +121,8 @@
       const currentTheme = window.STORE ? window.STORE.getTheme() : 'light';
       const isDark = currentTheme === 'dark';
       const soundEnabled = window.SoundFX ? window.SoundFX.isEnabled() : true;
+      const questionSoundEnabled = window.SoundManager ? window.SoundManager.isQuestionSoundEnabled() : true;
+      const volumeLevel = window.SoundManager ? window.SoundManager.getVolumeLevel() : 'medium';
       const userInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
 
       switch (tabId) {
@@ -170,19 +172,37 @@
               </div>
             </div>
 
-            <!-- Sound Setting Card -->
+            <!-- Master Sound Setting Card -->
             <div class="settings-card">
               <div class="set-card-left">
                 <div class="set-card-icon-box">
                   <i data-lucide="${soundEnabled ? 'volume-2' : 'volume-x'}"></i>
                 </div>
                 <div class="set-card-meta">
-                  <h3 class="set-card-title">${isAr ? 'المؤثرات الصوتية' : 'Sound'}</h3>
-                  <p class="set-card-subtitle">${isAr ? 'تفعيل أو كتم أصوات النقر والإشعارات التفاعلية.' : 'Enable or disable system sounds.'}</p>
+                  <h3 class="set-card-title">${isAr ? 'المؤثرات الصوتية العامة' : 'General Sound Effects'}</h3>
+                  <p class="set-card-subtitle">${isAr ? 'تفعيل أو كتم جميع أصوات النظام والأزرار التفاعلية.' : 'Enable or mute all system sounds.'}</p>
                 </div>
               </div>
               <div class="set-card-action">
                 <button type="button" class="settings-toggle-switch ${soundEnabled ? 'active' : ''}" id="settings-sound-switch">
+                  <span class="settings-switch-thumb"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Question Sounds Toggle Card -->
+            <div class="settings-card">
+              <div class="set-card-left">
+                <div class="set-card-icon-box">
+                  <i data-lucide="help-circle"></i>
+                </div>
+                <div class="set-card-meta">
+                  <h3 class="set-card-title">${isAr ? 'أصوات حل الأسئلة' : 'Question Feedback Sounds'}</h3>
+                  <p class="set-card-subtitle">${isAr ? 'نغمات الإجابة الصحيحة والخاطئة التفاعلية أثناء حل الأسئلة.' : 'Interactive chimes for correct and wrong answer choices.'}</p>
+                </div>
+              </div>
+              <div class="set-card-action">
+                <button type="button" class="settings-toggle-switch ${questionSoundEnabled ? 'active' : ''}" id="settings-question-sound-switch">
                   <span class="settings-switch-thumb"></span>
                 </button>
               </div>
@@ -246,13 +266,54 @@
                 </div>
                 <div class="set-card-meta">
                   <h3 class="set-card-title">${isAr ? 'أصوات أزرار النظام' : 'UI Feedback Sounds'}</h3>
-                  <p class="set-card-subtitle">${isAr ? 'نغمات التأكيد عند إتمام الكويزات أو النقاط.' : 'Chimes and feedback tones for quizzes and rewards.'}</p>
+                  <p class="set-card-subtitle">${isAr ? 'نغمات التأكيد عند النقر والتنقل في المنصة.' : 'Chimes and feedback tones for taps and UI navigation.'}</p>
                 </div>
               </div>
               <div class="set-card-action">
                 <button type="button" class="settings-toggle-switch ${soundEnabled ? 'active' : ''}" id="settings-sound-switch-tab">
                   <span class="settings-switch-thumb"></span>
                 </button>
+              </div>
+            </div>
+
+            <!-- Question Sounds Toggle Card -->
+            <div class="settings-card">
+              <div class="set-card-left">
+                <div class="set-card-icon-box">
+                  <i data-lucide="help-circle"></i>
+                </div>
+                <div class="set-card-meta">
+                  <h3 class="set-card-title">${isAr ? 'أصوات حل الأسئلة' : 'Question Feedback Sounds'}</h3>
+                  <p class="set-card-subtitle">${isAr ? 'نغمات الإجابة الصحيحة والخاطئة التفاعلية أثناء حل الأسئلة.' : 'Interactive chimes for correct and wrong answer choices.'}</p>
+                </div>
+              </div>
+              <div class="set-card-action">
+                <button type="button" class="settings-toggle-switch ${questionSoundEnabled ? 'active' : ''}" id="settings-question-sound-switch-tab">
+                  <span class="settings-switch-thumb"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Sound Volume Setting Card -->
+            <div class="settings-card">
+              <div class="set-card-left">
+                <div class="set-card-icon-box">
+                  <i data-lucide="sliders"></i>
+                </div>
+                <div class="set-card-meta">
+                  <h3 class="set-card-title">${isAr ? 'مستوى صوت المؤثرات' : 'Sound Effects Volume'}</h3>
+                  <p class="set-card-subtitle">${isAr ? 'تحديد مستوى ارتفاع نغمات الأسئلة والأزرار التفاعلية.' : 'Select volume level for questions and interactive sound effects.'}</p>
+                </div>
+              </div>
+              <div class="set-card-action">
+                <div class="settings-select-wrap">
+                  <select id="settings-sound-volume-select" class="settings-select-ctrl">
+                    <option value="low" ${volumeLevel === 'low' ? 'selected' : ''}>${isAr ? 'منخفض (Low)' : 'Low'}</option>
+                    <option value="medium" ${volumeLevel === 'medium' ? 'selected' : ''}>${isAr ? 'متوسط (Medium)' : 'Medium'}</option>
+                    <option value="high" ${volumeLevel === 'high' ? 'selected' : ''}>${isAr ? 'مرتفع (High)' : 'High'}</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="settings-select-arrow"></i>
+                </div>
               </div>
             </div>
           `;
@@ -458,6 +519,25 @@
           window.SettingsMenu.handleSoundToggle();
           const enabled = window.SoundFX ? window.SoundFX.isEnabled() : true;
           soundSwitch.classList.toggle('active', enabled);
+        }
+      });
+
+      // Question Sound switch
+      const qSoundSwitch = contentEl.querySelector('#settings-question-sound-switch, #settings-question-sound-switch-tab');
+      qSoundSwitch?.addEventListener('click', () => {
+        if (window.SoundManager) {
+          const isNowOn = window.SoundManager.toggleQuestionSound();
+          qSoundSwitch.classList.toggle('active', isNowOn);
+          if (isNowOn) window.SoundManager.play('tap');
+        }
+      });
+
+      // Sound volume select
+      const volSelect = contentEl.querySelector('#settings-sound-volume-select');
+      volSelect?.addEventListener('change', (e) => {
+        if (window.SoundManager) {
+          window.SoundManager.setVolumeLevel(e.target.value);
+          window.SoundManager.play('tap');
         }
       });
 

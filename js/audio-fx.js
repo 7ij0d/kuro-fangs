@@ -13,13 +13,37 @@
   let lastPlayTime = 0;
   const MIN_INTERVAL_MS = 35; // Debounce threshold for rapid clicks
 
-  // Persistent user preference (defaults to true)
+  // Persistent user preferences (Audio Settings)
   let soundEnabled = true;
+  let questionSoundEnabled = true;
+  let volumeLevel = 'medium'; // 'low' | 'medium' | 'high'
+
+  const VOLUME_MAP = {
+    low: 0.16,
+    medium: 0.32,
+    high: 0.55
+  };
+
   try {
     const stored = localStorage.getItem('kf_sound_fx_enabled');
     soundEnabled = stored === null ? true : stored === 'true';
+
+    const qStored = localStorage.getItem('kf_question_sounds_enabled');
+    questionSoundEnabled = qStored === null ? soundEnabled : qStored === 'true';
+
+    const vStored = localStorage.getItem('kf_sound_volume');
+    if (vStored && VOLUME_MAP[vStored]) {
+      volumeLevel = vStored;
+    }
   } catch (e) {
     soundEnabled = true;
+    questionSoundEnabled = true;
+    volumeLevel = 'medium';
+  }
+
+  function getEffectiveGain() {
+    if (!soundEnabled) return 0;
+    return VOLUME_MAP[volumeLevel] || 0.32;
   }
 
   /**
@@ -31,7 +55,7 @@
       if (!AudioContextClass) return null;
       audioCtx = new AudioContextClass();
       masterGain = audioCtx.createGain();
-      masterGain.gain.setValueAtTime(soundEnabled ? 0.35 : 0, audioCtx.currentTime);
+      masterGain.gain.setValueAtTime(getEffectiveGain(), audioCtx.currentTime);
       masterGain.connect(audioCtx.destination);
     }
     if (audioCtx.state === 'suspended') {
@@ -391,18 +415,27 @@
     }
   };
 
+  // Aliases for unified Sound Manager API
+  SoundSynthesizers.wrong = SoundSynthesizers.incorrect;
+  SoundSynthesizers.complete = SoundSynthesizers.victory;
+  SoundSynthesizers.click = SoundSynthesizers.tap;
+  SoundSynthesizers.navigation = SoundSynthesizers.switch;
+
   /**
-   * Main Public API
+   * Main Public API — Centralized Sound Manager
    */
   const SoundFX = {
     /**
      * Play a sound effect by name
-     * @param {string} type Name of sound (tap, pop, switch, kuroTalk, correct, etc.)
+     * @param {string} type Name of sound (correct, wrong, complete, tap, pop, switch, kuroTalk, etc.)
      */
     play(type) {
       if (!soundEnabled) return;
+      const isQuestionSound = ['correct', 'wrong', 'incorrect', 'complete', 'victory'].includes(type);
+      if (isQuestionSound && !questionSoundEnabled) return;
+
       const nowMs = performance.now();
-      if (nowMs - lastPlayTime < MIN_INTERVAL_MS && type === 'tap') {
+      if (nowMs - lastPlayTime < MIN_INTERVAL_MS && (type === 'tap' || type === 'click')) {
         return; // Throttling rapid repeated taps
       }
       lastPlayTime = nowMs;
@@ -410,7 +443,8 @@
       try {
         const ctx = getAudioContext();
         if (!ctx) return;
-        const fn = SoundSynthesizers[type] || SoundSynthesizers.tap;
+        const synthName = type === 'wrong' ? 'incorrect' : (type === 'complete' ? 'victory' : (type === 'click' ? 'tap' : (type === 'navigation' ? 'switch' : type)));
+        const fn = SoundSynthesizers[synthName] || SoundSynthesizers[type] || SoundSynthesizers.tap;
         fn(ctx, ctx.currentTime);
       } catch (err) {
         // Audio playback failures are non-fatal
@@ -428,7 +462,7 @@
       } catch (e) {}
 
       if (masterGain && audioCtx) {
-        masterGain.gain.setValueAtTime(soundEnabled ? 0.35 : 0, audioCtx.currentTime);
+        masterGain.gain.setValueAtTime(getEffectiveGain(), audioCtx.currentTime);
       }
 
       if (soundEnabled) {
@@ -438,6 +472,9 @@
       window.dispatchEvent(new CustomEvent('kf:sound-toggle', {
         detail: { enabled: soundEnabled }
       }));
+      window.dispatchEvent(new CustomEvent('kf:sound-changed', {
+        detail: { enabled: soundEnabled, questionSound: questionSoundEnabled, volume: volumeLevel }
+      }));
 
       return soundEnabled;
     },
@@ -446,10 +483,69 @@
       return soundEnabled;
     },
 
+    setEnabled(enabled) {
+      soundEnabled = Boolean(enabled);
+      try {
+        localStorage.setItem('kf_sound_fx_enabled', soundEnabled ? 'true' : 'false');
+      } catch (e) {}
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(getEffectiveGain(), audioCtx.currentTime);
+      }
+      window.dispatchEvent(new CustomEvent('kf:sound-changed', {
+        detail: { enabled: soundEnabled, questionSound: questionSoundEnabled, volume: volumeLevel }
+      }));
+      return soundEnabled;
+    },
+
+    // Question Sounds ON/OFF
+    isQuestionSoundEnabled() {
+      return soundEnabled && questionSoundEnabled;
+    },
+
+    setQuestionSoundEnabled(val) {
+      questionSoundEnabled = Boolean(val);
+      try {
+        localStorage.setItem('kf_question_sounds_enabled', questionSoundEnabled ? 'true' : 'false');
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent('kf:sound-changed', {
+        detail: { enabled: soundEnabled, questionSound: questionSoundEnabled, volume: volumeLevel }
+      }));
+      return questionSoundEnabled;
+    },
+
+    toggleQuestionSound() {
+      return this.setQuestionSoundEnabled(!questionSoundEnabled);
+    },
+
+    // Volume Control (low | medium | high)
+    getVolumeLevel() {
+      return volumeLevel;
+    },
+
+    setVolumeLevel(lvl) {
+      if (!VOLUME_MAP[lvl]) lvl = 'medium';
+      volumeLevel = lvl;
+      try {
+        localStorage.setItem('kf_sound_volume', volumeLevel);
+      } catch (e) {}
+
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(getEffectiveGain(), audioCtx.currentTime);
+      }
+
+      window.dispatchEvent(new CustomEvent('kf:sound-changed', {
+        detail: { enabled: soundEnabled, questionSound: questionSoundEnabled, volume: volumeLevel }
+      }));
+      return volumeLevel;
+    },
+
     setVolume(vol) {
+      if (typeof vol === 'string') {
+        return this.setVolumeLevel(vol);
+      }
       if (!masterGain || !audioCtx) return;
       const clamped = Math.max(0, Math.min(1, vol));
-      masterGain.gain.setValueAtTime(soundEnabled ? clamped * 0.35 : 0, audioCtx.currentTime);
+      masterGain.gain.setValueAtTime(soundEnabled ? clamped * (VOLUME_MAP[volumeLevel] || 0.32) : 0, audioCtx.currentTime);
     }
   };
 
@@ -502,7 +598,9 @@
     setupGlobalEventDelegation();
   }
 
-  // Expose to window
+  // Expose both legacy SoundFX and unified SoundManager / soundManager
   window.SoundFX = SoundFX;
+  window.SoundManager = SoundFX;
+  window.soundManager = SoundFX;
 
 })(window);

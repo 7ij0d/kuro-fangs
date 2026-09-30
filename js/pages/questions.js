@@ -362,6 +362,9 @@ const QuestionsPage = {
                 </span>
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="dt-btn-sound" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 6px 10px; gap: 6px;" title="${isAr ? 'كتم/تشغيل أصوات الأسئلة' : 'Toggle Question Sounds'}" aria-label="Toggle Question Sounds">
+                  <i data-lucide="${(window.SoundManager && !window.SoundManager.isQuestionSoundEnabled()) ? 'volume-x' : 'volume-2'}" style="width: 14px; height: 14px;"></i>
+                </button>
                 <button type="button" id="dt-btn-star" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 6px 12px; gap: 6px;">
                   <i data-lucide="star" style="width: 14px; height: 14px;"></i>
                   <span id="dt-star-text">${isAr ? 'حفظ للمراجعة' : 'Save'}</span>
@@ -502,6 +505,51 @@ const QuestionsPage = {
         </div>
       </div>
 
+      <!-- DENTISTOIRE-GRADE QUIZ COMPLETION MODAL -->
+      <div id="dt-quiz-completion-modal" class="dt-quiz-overlay" style="display: none; z-index: 10500;">
+        <div class="dt-quiz-card dt-completion-card" style="max-width: 480px; text-align: center; padding: 32px 28px;">
+          <!-- Celebratory Mascot Frame -->
+          <div class="dt-completion-mascot-box" style="margin: 0 auto 18px; width: 110px; height: 110px; position: relative;">
+            <img id="dt-completion-mascot-img" src="assets/characters/kuro/Kuro-Excited.png" alt="Kuro Celebrating" style="width: 100%; height: 100%; object-fit: contain;" />
+          </div>
+
+          <h2 style="font-size: 1.35rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;" id="dt-completion-title">
+            ${isAr ? '🎉 اكتمل الاختبار بنجاح!' : '🎉 Quiz Complete!'}
+          </h2>
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0 0 24px; font-weight: 500;" id="dt-completion-subtitle">
+            ${isAr ? 'عمل رائع ومتميز في مراجعة أسئلة طب الأسنان!' : 'Great work reviewing your clinical dental MCQs!'}
+          </p>
+
+          <!-- Score Summary Bento Box -->
+          <div class="dt-completion-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 26px;">
+            <div class="dt-completion-stat-card" style="padding: 14px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+              <div style="font-size: 1.3rem; font-weight: 900; color: #10B981;" id="dt-comp-correct-count">0</div>
+              <div style="font-size: 0.72rem; font-weight: 750; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'إجابات صحيحة' : 'Correct'}</div>
+            </div>
+            <div class="dt-completion-stat-card" style="padding: 14px 10px; border-radius: 12px; background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.18);">
+              <div style="font-size: 1.3rem; font-weight: 900; color: #EF4444;" id="dt-comp-wrong-count">0</div>
+              <div style="font-size: 0.72rem; font-weight: 750; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'إجابات خاطئة' : 'Wrong'}</div>
+            </div>
+            <div class="dt-completion-stat-card" style="padding: 14px 10px; border-radius: 12px; background: rgba(126, 29, 42, 0.06); border: 1px solid rgba(126, 29, 42, 0.2);">
+              <div style="font-size: 1.3rem; font-weight: 900; color: var(--brand-burgundy, #7E1D2A);" id="dt-comp-score-pct">0%</div>
+              <div style="font-size: 0.72rem; font-weight: 750; color: var(--text-secondary); margin-top: 2px;">${isAr ? 'الدرجة النهائية' : 'Final Score'}</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" id="dt-btn-comp-review" class="btn btn-secondary" style="flex: 1; min-width: 140px; justify-content: center; font-weight: 750; gap: 6px;">
+              <i data-lucide="rotate-ccw" style="width: 15px; height: 15px;"></i>
+              <span>${isAr ? 'مراجعة الأسئلة' : 'Review Quiz'}</span>
+            </button>
+            <button type="button" id="dt-btn-comp-exit" class="btn btn-primary" style="flex: 1; min-width: 140px; justify-content: center; font-weight: 750; background: var(--brand-burgundy, #7E1D2A); border-color: var(--brand-burgundy, #7E1D2A); gap: 6px;">
+              <i data-lucide="check" style="width: 15px; height: 15px;"></i>
+              <span>${isAr ? 'إنهاء وخروج' : 'Finish & Exit'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- QUESTION TYPE SELECTOR MODAL -->
       <div id="qt-type-selector-modal" class="dt-quiz-overlay" style="display: none;">
         <div class="dt-quiz-card" style="max-width: 440px;">
@@ -624,12 +672,39 @@ const QuestionsPage = {
       QuestionsPage.closeQuizModal();
     });
 
+    document.getElementById('dt-btn-sound')?.addEventListener('click', () => {
+      if (window.SoundManager) {
+        const isNowOn = window.SoundManager.toggleQuestionSound();
+        QuestionsPage.updateSoundButtonUI(isNowOn);
+      }
+    });
+
+    // Sync sound button if sound settings change externally
+    window.addEventListener('kf:sound-changed', (e) => {
+      if (e.detail && typeof e.detail.questionSound === 'boolean') {
+        QuestionsPage.updateSoundButtonUI(e.detail.questionSound);
+      }
+    });
+
+    // Quiz Completion modal buttons
+    document.getElementById('dt-btn-comp-review')?.addEventListener('click', () => {
+      QuestionsPage.closeCompletionModal();
+      QuestionsPage.activeQuizIndex = 0;
+      QuestionsPage.renderModalQuestion();
+      if (window.SoundManager) window.SoundManager.play('tap');
+    });
+
+    document.getElementById('dt-btn-comp-exit')?.addEventListener('click', () => {
+      QuestionsPage.closeCompletionModal();
+      QuestionsPage.closeQuizModal();
+    });
+
     document.getElementById('dt-btn-star')?.addEventListener('click', () => {
       const q = QuestionsPage.activeQuizList[QuestionsPage.activeQuizIndex];
       if (q) {
         QuestionsPage.saveQuestion(q);
         QuestionsPage.updateStarButton(q);
-        if (window.SoundFX) window.SoundFX.play('badge');
+        if (window.SoundManager) window.SoundManager.play('badge');
       }
     });
 
@@ -642,19 +717,26 @@ const QuestionsPage = {
           QuestionsPage.saveSession(QuestionsPage.activeSession);
         }
         QuestionsPage.renderModalQuestion();
-        if (window.SoundFX) window.SoundFX.play('tap');
+        if (window.SoundManager) window.SoundManager.play('tap');
       } else {
+        const total = QuestionsPage.activeQuizList.length;
+        const answers = (QuestionsPage.activeSession && QuestionsPage.activeSession.answers) || {};
+        const answeredCount = Object.keys(answers).length;
+        const correctCount = Object.values(answers).filter(a => a.is_correct).length;
+        const wrongCount = Math.max(0, answeredCount - correctCount);
+        const scorePct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
         if (QuestionsPage.activeSession) {
-          const total = QuestionsPage.activeQuizList.length;
-          const answeredCount = Object.keys(QuestionsPage.activeSession.answers || {}).length;
-          if (answeredCount >= total) {
-            QuestionsPage.activeSession.completed = true;
-          }
+          QuestionsPage.activeSession.completed = true;
           QuestionsPage.saveSession(QuestionsPage.activeSession);
         }
-        if (window.SoundFX) window.SoundFX.play('victory');
-        if (window.Toast) window.Toast.show(isAr ? '🎉 أكملت جميع أسئلة هذا الاختبار بنجاح!' : 'You completed all questions!', 'success');
-        QuestionsPage.closeQuizModal();
+
+        QuestionsPage.showCompletionModal({
+          total,
+          correct: correctCount,
+          wrong: wrongCount,
+          scorePct
+        });
       }
     });
 
@@ -1396,6 +1478,7 @@ const QuestionsPage = {
 
   closeQuizModal() {
     QuestionsPage.closePdfView();
+    QuestionsPage.closeCompletionModal();
     const overlay = document.getElementById('dt-quiz-runner-modal');
     if (overlay) {
       overlay.style.display = 'none';
@@ -1435,6 +1518,8 @@ const QuestionsPage = {
       session.current_index = QuestionsPage.activeQuizIndex;
       QuestionsPage.saveSession(session);
     }
+
+    QuestionsPage.updateSoundButtonUI();
 
     const tagEl = document.getElementById('dt-modal-subject-tag');
     if (tagEl) tagEl.textContent = QuestionsPage.activeSubjectTitle || (isAr ? q.subject_name_ar : q.subject_name_en);
@@ -1670,13 +1755,8 @@ const QuestionsPage = {
 
         QuestionsPage.saveSession(sess);
 
-        if (window.SoundFX) {
-          if (isCorrect) {
-            window.SoundFX.play('correct');
-            setTimeout(() => { if (window.SoundFX) window.SoundFX.play('kuroHappy'); }, 220);
-          } else {
-            window.SoundFX.play('incorrect');
-          }
+        if (window.SoundManager) {
+          window.SoundManager.play(isCorrect ? 'correct' : 'wrong');
         }
 
         optBox.querySelectorAll('.dt-quiz-option').forEach((b, bIdx) => {
@@ -1685,15 +1765,15 @@ const QuestionsPage = {
           if (bIdx === correctIdx) {
             b.classList.add('correct');
             if (statusIcon) {
-              statusIcon.textContent = '✓';
-              statusIcon.style.display = 'inline-block';
+              statusIcon.innerHTML = '<span class="dt-anim-pop-check">✓</span>';
+              statusIcon.style.display = 'inline-flex';
               statusIcon.style.color = '#10B981';
             }
-          } else if (bIdx === selectedIdx) {
+          } else if (bIdx === selectedIdx && !isCorrect) {
             b.classList.add('incorrect', 'shake-wrong');
             if (statusIcon) {
-              statusIcon.textContent = '✕';
-              statusIcon.style.display = 'inline-block';
+              statusIcon.innerHTML = '<span class="dt-anim-pop-wrong">✕</span>';
+              statusIcon.style.display = 'inline-flex';
               statusIcon.style.color = '#EF4444';
             }
           }
@@ -1701,12 +1781,26 @@ const QuestionsPage = {
 
         // Update Kuro Mascot reaction
         if (mascotImg && !QuestionsPage.kuroExplanationOpen) {
+          clearTimeout(QuestionsPage._mascotResetTimer);
           if (isCorrect) {
             mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('happy')) || 'assets/characters/kuro/Kuro-Happy.png';
-            if (bubbleText) bubbleText.textContent = isAr ? '🎉 إجابة صحيحة! انقر للشرح والصفحة' : '🎉 Correct! Click for explanation';
+            if (bubbleText) bubbleText.textContent = isAr ? 'إجابة صحيحة! 🎉' : 'Correct! 🎉';
+            mascotImg.parentElement?.classList.remove('dt-mascot-happy-bounce');
+            void mascotImg.offsetWidth;
+            mascotImg.parentElement?.classList.add('dt-mascot-happy-bounce');
+            QuestionsPage._mascotResetTimer = setTimeout(() => {
+              if (!QuestionsPage.kuroExplanationOpen && bubbleText) {
+                bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
+              }
+            }, 2800);
           } else {
             mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
-            if (bubbleText) bubbleText.textContent = isAr ? '💡 انقر على كورو لمراجعة الشرح والصفحة' : '💡 Click Kuro to review explanation';
+            if (bubbleText) bubbleText.textContent = isAr ? 'مش صحيحة، حاول تفهم السبب.' : 'Not quite — try to understand why.';
+            QuestionsPage._mascotResetTimer = setTimeout(() => {
+              if (!QuestionsPage.kuroExplanationOpen && bubbleText) {
+                bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
+              }
+            }, 3200);
           }
         }
 
@@ -1720,12 +1814,15 @@ const QuestionsPage = {
           }
         }
 
-        // Reveal In-Card Faculty Explanation & Source Action Buttons
+        // Reveal In-Card Faculty Explanation & Source Action Buttons (Staged Reveal Flow)
         if (cardExpSection) {
+          cardExpSection.classList.remove('staged-reveal');
+          void cardExpSection.offsetWidth;
+          cardExpSection.classList.add('staged-reveal');
           cardExpSection.style.display = 'block';
           setTimeout(() => {
             cardExpSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 140);
+          }, 220);
         }
       });
     });
@@ -1897,7 +1994,90 @@ const QuestionsPage = {
     document.getElementById('kn-keep-modal-backdrop')?.remove();
 
     if (window.lucide) window.lucide.createIcons();
+  },
+
+  updateSoundButtonUI(isQuestionSoundOn) {
+    const btn = document.getElementById('dt-btn-sound');
+    if (!btn) return;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const isEnabled = typeof isQuestionSoundOn === 'boolean' 
+      ? isQuestionSoundOn 
+      : (window.SoundManager ? window.SoundManager.isQuestionSoundEnabled() : true);
+
+    btn.innerHTML = `<i data-lucide="${isEnabled ? 'volume-2' : 'volume-x'}" style="width: 14px; height: 14px; color: ${isEnabled ? 'inherit' : '#EF4444'};"></i>`;
+    btn.title = isEnabled ? (isAr ? 'كتم أصوات الأسئلة' : 'Mute Question Sounds') : (isAr ? 'تشغيل أصوات الأسئلة' : 'Unmute Question Sounds');
+    btn.classList.toggle('active-muted', !isEnabled);
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  showCompletionModal(stats = {}) {
+    const modal = document.getElementById('dt-quiz-completion-modal');
+    if (!modal) return;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+
+    const total = stats.total || 0;
+    const correct = stats.correct || 0;
+    const wrong = stats.wrong || 0;
+    const pct = typeof stats.scorePct === 'number' ? stats.scorePct : (total > 0 ? Math.round((correct / total) * 100) : 0);
+
+    const correctEl = document.getElementById('dt-comp-correct-count');
+    const wrongEl = document.getElementById('dt-comp-wrong-count');
+    const scorePctEl = document.getElementById('dt-comp-score-pct');
+    const mascotImg = document.getElementById('dt-completion-mascot-img');
+    const titleEl = document.getElementById('dt-completion-title');
+    const subEl = document.getElementById('dt-completion-subtitle');
+
+    if (correctEl) correctEl.textContent = correct;
+    if (wrongEl) wrongEl.textContent = wrong;
+    if (scorePctEl) scorePctEl.textContent = `${pct}%`;
+
+    if (mascotImg) {
+      if (pct >= 80) {
+        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('excited')) || 'assets/characters/kuro/Kuro-Excited.png';
+      } else if (pct >= 50) {
+        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('achieving')) || 'assets/characters/kuro/Kuro-Achieving.png';
+      } else {
+        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
+      }
+    }
+
+    if (titleEl) {
+      if (pct >= 85) {
+        titleEl.textContent = isAr ? '🌟 إنجاز ممتاز! أداء استثنائي' : '🌟 Outstanding Achievement!';
+      } else if (pct >= 50) {
+        titleEl.textContent = isAr ? '🎉 اكتمل الاختبار بنجاح!' : '🎉 Quiz Completed Successfully!';
+      } else {
+        titleEl.textContent = isAr ? '💪 اكتمل الاختبار — راجع نقاط ضعفك' : '💪 Quiz Finished — Keep Practicing!';
+      }
+    }
+
+    if (subEl) {
+      if (pct >= 85) {
+        subEl.textContent = isAr ? 'أظهرت فهماً سريرياً دقيقاً لمفاهيم الشيت!' : 'You demonstrated accurate clinical mastery of this sheet!';
+      } else if (pct >= 50) {
+        subEl.textContent = isAr ? 'أداء رائع، يمكنك مراجعة الأسئلة لتعزيز حفظك.' : 'Great effort! Review explanations to solidify your understanding.';
+      } else {
+        subEl.textContent = isAr ? 'استفد من شروحات الأسئلة ومواقعها في الشيت للتحسن.' : 'Review the faculty explanations and sheet sources to master weak points.';
+      }
+    }
+
+    modal.style.display = 'flex';
+
+    // Play victory fanfare sound
+    if (window.SoundManager) {
+      window.SoundManager.play('complete');
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  closeCompletionModal() {
+    const modal = document.getElementById('dt-quiz-completion-modal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
   }
 };
 
 window.QuestionsPage = QuestionsPage;
+
