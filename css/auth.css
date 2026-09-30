@@ -305,9 +305,213 @@ body.login-view-active #app {
 .login-card-subtitle {
   font-size: 0.95rem;
   color: #6E655F;
-  margin: 0 0 28px 0;
+  margin: 0 0 20px 0;
   line-height: 1.5;
-  max-width: 340px;
+  max-width: 360px;
+}
+
+/* 4.2.1 Segmented Mode Switcher (Sign In / Register) */
+.login-tabs-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #F4EFEB;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid #EAE3D6;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.login-tab-pill {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #7A7067;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+}
+
+.login-tab-pill:hover {
+  color: #1F1A17;
+}
+
+.login-tab-pill.active {
+  background: #FFFFFF;
+  color: #7E1D2A;
+  box-shadow: 0 2px 8px rgba(126, 29, 42, 0.08), inset 0 1px 0 #FFF;
+}
+
+/* 4.2.2 Auth Form Container */
+.login-auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: start;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.login-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.login-input-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #3D352E;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.login-input-label-hint {
+  font-size: 0.72rem;
+  color: #9C9189;
+  font-weight: 500;
+}
+
+.login-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #FAF7F2;
+  border: 1.5px solid #E5DFD5;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.login-input-wrap:focus-within {
+  background: #FFFFFF;
+  border-color: #7E1D2A;
+  box-shadow: 0 0 0 3px rgba(126, 29, 42, 0.12);
+}
+
+.login-input-icon {
+  width: 18px;
+  height: 18px;
+  color: #9C9189;
+  margin-inline-start: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-input-field {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: #1F1A17;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.login-input-field::placeholder {
+  color: #B5ACA3;
+  font-size: 0.88rem;
+}
+
+.login-pwd-toggle {
+  background: none;
+  border: none;
+  color: #9C9189;
+  cursor: pointer;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.login-pwd-toggle:hover {
+  color: #7E1D2A;
+}
+
+.login-submit-btn {
+  width: 100%;
+  height: 50px;
+  border-radius: 12px;
+  background: #7E1D2A;
+  color: #FFFFFF;
+  border: none;
+  font-size: 0.96rem;
+  font-weight: 750;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(126, 29, 42, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  margin-top: 4px;
+}
+
+.login-submit-btn:hover {
+  background: #942534;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(126, 29, 42, 0.32);
+}
+
+.login-submit-btn:active {
+  transform: scale(0.985);
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.login-alert-banner {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-bottom: 12px;
+  text-align: start;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.login-alert-banner.error {
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #B91C1C;
+}
+
+.login-alert-banner.success {
+  background: #ECFDF5;
+  border: 1px solid #6EE7B7;
+  color: #047857;
+}
+
+.login-alert-banner.info {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #166534;
 }
 
 /* 4.3 Google Primary Button */

@@ -313,6 +313,118 @@
     }
 
     /**
+     * Sign In with Email & Password
+     */
+    async signInWithEmail(email, password) {
+      const supabase = this._getSupabaseClient();
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+
+      if (!supabase) {
+        const msg = isAr ? 'تعذر الاتصال بخدمة التحقق' : 'Auth service unavailable';
+        window.Toast?.show(msg, 'error');
+        return { success: false, error: msg };
+      }
+
+      const cleanEmail = (email || '').trim();
+      const cleanPassword = password || '';
+
+      if (!cleanEmail || !cleanPassword) {
+        const msg = isAr ? 'يرجى إدخال البريد الإلكتروني وكلمة المرور' : 'Please enter email and password';
+        window.Toast?.show(msg, 'warning');
+        return { success: false, error: msg };
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: cleanPassword
+        });
+
+        if (error) {
+          console.warn('[Email Sign In Error]:', error);
+          const friendlyMsg = isAr
+            ? (error.message.includes('Invalid') || error.message.includes('credentials')
+                ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+                : error.message)
+            : error.message;
+          window.Toast?.show(friendlyMsg, 'error');
+          return { success: false, error: friendlyMsg };
+        }
+
+        if (data?.user) {
+          await this._handleSignedIn(data.user);
+        }
+        return { success: true, data };
+      } catch (err) {
+        console.error('[Email Sign In Exception]:', err);
+        window.Toast?.show(err.message, 'error');
+        return { success: false, error: err.message };
+      }
+    }
+
+    /**
+     * Sign Up with Email, Password & Full Name
+     */
+    async signUpWithEmail(email, password, fullName) {
+      const supabase = this._getSupabaseClient();
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+
+      if (!supabase) {
+        const msg = isAr ? 'تعذر الاتصال بخدمة التحقق' : 'Auth service unavailable';
+        window.Toast?.show(msg, 'error');
+        return { success: false, error: msg };
+      }
+
+      const cleanEmail = (email || '').trim();
+      const cleanPassword = password || '';
+      const cleanName = (fullName || '').trim() || cleanEmail.split('@')[0];
+
+      if (!cleanEmail || !cleanPassword) {
+        const msg = isAr ? 'يرجى إدخال البريد الإلكتروني وكلمة المرور' : 'Please fill all fields';
+        window.Toast?.show(msg, 'warning');
+        return { success: false, error: msg };
+      }
+
+      if (cleanPassword.length < 6) {
+        const msg = isAr ? 'يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل' : 'Password must be at least 6 characters';
+        window.Toast?.show(msg, 'warning');
+        return { success: false, error: msg };
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password: cleanPassword,
+          options: {
+            data: {
+              full_name: cleanName
+            }
+          }
+        });
+
+        if (error) {
+          console.warn('[Email Sign Up Error]:', error);
+          const friendlyMsg = isAr
+            ? (error.message.includes('already registered') || error.message.includes('already')
+                ? 'هذا البريد مسجل مسبقاً، يمكنك تسجيل الدخول به مباشرة'
+                : error.message)
+            : error.message;
+          window.Toast?.show(friendlyMsg, 'error');
+          return { success: false, error: friendlyMsg };
+        }
+
+        if (data?.user) {
+          await this._handleSignedIn(data.user);
+        }
+        return { success: true, data };
+      } catch (err) {
+        console.error('[Email Sign Up Exception]:', err);
+        window.Toast?.show(err.message, 'error');
+        return { success: false, error: err.message };
+      }
+    }
+
+    /**
      * Continue as Guest Mode
      */
     continueAsGuest() {

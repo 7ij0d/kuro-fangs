@@ -138,14 +138,133 @@
                   ${isAr ? 'مرحباً بك في كورو فانغز' : 'Welcome to Kuro Fangs'}
                 </h2>
                 <p class="login-card-subtitle">
-                  ${isAr ? 'سجّل دخولك لمواصلة رحلتك الدراسية في طب الأسنان.' : 'Sign in to continue your dental study journey.'}
+                  ${isAr ? 'سجّل دخولك أو أنشئ حسابك لحفظ تقدّمك ومزامنة شيتاتك.' : 'Sign in or create an account to sync your study progress.'}
                 </p>
 
-                <!-- Primary Action: Continue with Google -->
+                <!-- Mode Switcher Tabs -->
+                <div class="login-tabs-container" role="tablist">
+                  <button type="button" class="login-tab-pill active" id="tab-login-signin" role="tab" aria-selected="true">
+                    <i data-lucide="log-in" style="width:14px;height:14px;"></i>
+                    <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
+                  </button>
+                  <button type="button" class="login-tab-pill" id="tab-login-register" role="tab" aria-selected="false">
+                    <i data-lucide="user-plus" style="width:14px;height:14px;"></i>
+                    <span>${isAr ? 'إنشاء حساب جديد' : 'New Account'}</span>
+                  </button>
+                </div>
+
+                <!-- Alert Message Box -->
+                <div id="login-alert-box" class="login-alert-banner" style="display: none;"></div>
+
+                <!-- Auth Form (Sign In / Register) -->
+                <form id="kuro-auth-form" class="login-auth-form" novalidate>
+                  <!-- Full Name Field (Hidden during Sign In) -->
+                  <div class="login-input-row" id="row-auth-name" style="display: none;">
+                    <label class="login-input-label" for="input-auth-name">
+                      <span>${isAr ? 'الاسم الكامل' : 'Full Name'}</span>
+                      <span class="login-input-label-hint">${isAr ? 'يظهر في ملفك الدراسي' : 'Student name'}</span>
+                    </label>
+                    <div class="login-input-wrap">
+                      <div class="login-input-icon">
+                        <i data-lucide="user"></i>
+                      </div>
+                      <input
+                        type="text"
+                        id="input-auth-name"
+                        class="login-input-field"
+                        placeholder="${isAr ? 'مثال: أحمد علي' : 'e.g. John Doe'}"
+                        autocomplete="name"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Email Field -->
+                  <div class="login-input-row" id="row-auth-email">
+                    <label class="login-input-label" for="input-auth-email">
+                      <span>${isAr ? 'البريد الإلكتروني' : 'Email Address'}</span>
+                    </label>
+                    <div class="login-input-wrap">
+                      <div class="login-input-icon">
+                        <i data-lucide="mail"></i>
+                      </div>
+                      <input
+                        type="email"
+                        id="input-auth-email"
+                        class="login-input-field"
+                        placeholder="${isAr ? 'student@gmail.com' : 'student@example.com'}"
+                        autocomplete="email"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Password Field -->
+                  <div class="login-input-row" id="row-auth-password">
+                    <label class="login-input-label" for="input-auth-password">
+                      <span>${isAr ? 'كلمة المرور' : 'Password'}</span>
+                      <span class="login-input-label-hint" id="hint-auth-password">${isAr ? '6 خانات على الأقل' : '6+ characters'}</span>
+                    </label>
+                    <div class="login-input-wrap">
+                      <div class="login-input-icon">
+                        <i data-lucide="lock"></i>
+                      </div>
+                      <input
+                        type="password"
+                        id="input-auth-password"
+                        class="login-input-field"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        required
+                      />
+                      <button type="button" class="login-pwd-toggle" id="btn-toggle-password" title="${isAr ? 'إظهار/إخفاء كلمة المرور' : 'Toggle password'}">
+                        <i data-lucide="eye" style="width:16px;height:16px;"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Submit Action Button -->
+                  <button type="submit" id="btn-auth-submit" class="login-submit-btn">
+                    <i data-lucide="arrow-right" class="login-submit-icon" style="width:16px;height:16px;"></i>
+                    <span id="btn-auth-submit-text">${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
+                  </button>
+                </form>
+
+                <!-- Divider: "──────── or ────────" -->
+                <div class="login-card-divider">
+                  <span class="login-divider-text">${isAr ? 'أو المتابعة السريعة' : 'or quick access'}</span>
+                </div>
+
+                <!-- Secondary Action: Continue as Guest -->
+                <button
+                  type="button"
+                  id="btn-login-guest"
+                  class="login-btn-guest"
+                  aria-label="${isAr ? 'الدخول كزائر' : 'Continue as Guest'}"
+                >
+                  <div class="login-btn-guest-left">
+                    <div class="login-guest-icon-box">
+                      <i data-lucide="compass"></i>
+                    </div>
+                    <span class="login-btn-guest-text">
+                      ${isAr ? 'المتابعة كزائر (بدون حساب)' : 'Continue as Guest'}
+                    </span>
+                  </div>
+                  <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="login-btn-chevron"></i>
+                </button>
+
+                <!-- Sub-caption under Guest -->
+                <p class="login-guest-note">
+                  ${isAr 
+                    ? 'استكشف المنصة وجميع الشيتات فوراً كزائر، ويمكنك إنشاء حسابك لاحقاً لحفظ ملاحظاتك.' 
+                    : 'Explore all sheets instantly as a guest, and create an account later to save notes.'}
+                </p>
+
+                <!-- Tertiary Action: Continue with Google -->
                 <button
                   type="button"
                   id="btn-login-google"
                   class="login-btn-google"
+                  style="margin-bottom: 16px;"
                   aria-label="${isAr ? 'المتابعة بحساب Google' : 'Continue with Google'}"
                 >
                   <div class="login-btn-google-left">
@@ -161,36 +280,6 @@
                   </div>
                   <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="login-btn-chevron"></i>
                 </button>
-
-                <!-- Divider: "──────── or ────────" -->
-                <div class="login-card-divider">
-                  <span class="login-divider-text">${isAr ? 'أو' : 'or'}</span>
-                </div>
-
-                <!-- Secondary Action: Continue as Guest -->
-                <button
-                  type="button"
-                  id="btn-login-guest"
-                  class="login-btn-guest"
-                  aria-label="${isAr ? 'الدخول كزائر' : 'Continue as Guest'}"
-                >
-                  <div class="login-btn-guest-left">
-                    <div class="login-guest-icon-box">
-                      <i data-lucide="user"></i>
-                    </div>
-                    <span class="login-btn-guest-text">
-                      ${isAr ? 'المتابعة كزائر' : 'Continue as Guest'}
-                    </span>
-                  </div>
-                  <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="login-btn-chevron"></i>
-                </button>
-
-                <!-- Sub-caption under Guest -->
-                <p class="login-guest-note">
-                  ${isAr 
-                    ? 'استكشف المنصة بدون حساب. بعض ميزات المزامنة السحابية قد تكون محدودة.' 
-                    : 'Explore the platform without an account. Some features may be limited.'}
-                </p>
 
                 <!-- 3 Micro Benefit Badges -->
                 <div class="login-card-badges-row">
@@ -247,17 +336,147 @@
     },
 
     bindEvents(container) {
-      // 1. Continue with Google click handler
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+      let activeMode = 'signin'; // 'signin' | 'register'
+
+      const tabSignIn = container.querySelector('#tab-login-signin');
+      const tabRegister = container.querySelector('#tab-login-register');
+      const nameRow = container.querySelector('#row-auth-name');
+      const nameInput = container.querySelector('#input-auth-name');
+      const emailInput = container.querySelector('#input-auth-email');
+      const passwordInput = container.querySelector('#input-auth-password');
+      const pwdToggle = container.querySelector('#btn-toggle-password');
+      const submitBtn = container.querySelector('#btn-auth-submit');
+      const submitText = container.querySelector('#btn-auth-submit-text');
+      const alertBox = container.querySelector('#login-alert-box');
+      const form = container.querySelector('#kuro-auth-form');
+
+      function showAlert(msg, type = 'error') {
+        if (!alertBox) return;
+        alertBox.className = `login-alert-banner ${type}`;
+        alertBox.textContent = msg;
+        alertBox.style.display = 'block';
+      }
+
+      function hideAlert() {
+        if (alertBox) alertBox.style.display = 'none';
+      }
+
+      // 1. Tab Switcher
+      function setMode(mode) {
+        activeMode = mode;
+        hideAlert();
+        if (mode === 'signin') {
+          tabSignIn?.classList.add('active');
+          tabRegister?.classList.remove('active');
+          tabSignIn?.setAttribute('aria-selected', 'true');
+          tabRegister?.setAttribute('aria-selected', 'false');
+          if (nameRow) nameRow.style.display = 'none';
+          if (submitText) submitText.textContent = isAr ? 'تسجيل الدخول' : 'Sign In';
+          if (passwordInput) passwordInput.setAttribute('autocomplete', 'current-password');
+        } else {
+          tabRegister?.classList.add('active');
+          tabSignIn?.classList.remove('active');
+          tabRegister?.setAttribute('aria-selected', 'true');
+          tabSignIn?.setAttribute('aria-selected', 'false');
+          if (nameRow) nameRow.style.display = 'flex';
+          if (submitText) submitText.textContent = isAr ? 'إنشاء الحساب وبدء الدراسة ✨' : 'Create Account & Begin ✨';
+          if (passwordInput) passwordInput.setAttribute('autocomplete', 'new-password');
+        }
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      tabSignIn?.addEventListener('click', () => setMode('signin'));
+      tabRegister?.addEventListener('click', () => setMode('register'));
+
+      // 2. Toggle Password Visibility
+      pwdToggle?.addEventListener('click', () => {
+        if (!passwordInput) return;
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        pwdToggle.innerHTML = isPassword
+          ? `<i data-lucide="eye-off" style="width:16px;height:16px;"></i>`
+          : `<i data-lucide="eye" style="width:16px;height:16px;"></i>`;
+        if (window.lucide) window.lucide.createIcons();
+      });
+
+      // 3. Form Submission (Sign In or Sign Up)
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const email = (emailInput?.value || '').trim();
+        const password = passwordInput?.value || '';
+        const fullName = (nameInput?.value || '').trim();
+
+        if (!email) {
+          showAlert(isAr ? 'يرجى إدخال البريد الإلكتروني.' : 'Please enter your email.');
+          emailInput?.focus();
+          return;
+        }
+
+        if (!password) {
+          showAlert(isAr ? 'يرجى إدخال كلمة المرور.' : 'Please enter your password.');
+          passwordInput?.focus();
+          return;
+        }
+
+        if (activeMode === 'register' && password.length < 6) {
+          showAlert(isAr ? 'كلمة المرور يجب أن تكون 6 خانات على الأقل.' : 'Password must be at least 6 characters.');
+          passwordInput?.focus();
+          return;
+        }
+
+        submitBtn.disabled = true;
+        const originalText = submitText?.textContent;
+        if (submitText) submitText.textContent = isAr ? 'جارٍ التحقق...' : 'Verifying...';
+
+        try {
+          if (activeMode === 'signin') {
+            const res = await (window.AUTH?.signInWithEmail
+              ? window.AUTH.signInWithEmail(email, password)
+              : window.SupabaseAuth?.signInWithEmail(email, password));
+
+            if (res && res.error) {
+              showAlert(res.error, 'error');
+            }
+          } else {
+            const res = await (window.AUTH?.signUpWithEmail
+              ? window.AUTH.signUpWithEmail(email, password, fullName)
+              : window.SupabaseAuth?.signUpWithEmail(email, password, fullName));
+
+            if (res && res.error) {
+              showAlert(res.error, 'error');
+            }
+          }
+        } catch (err) {
+          showAlert(err.message || (isAr ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred'), 'error');
+        } finally {
+          submitBtn.disabled = false;
+          if (submitText) submitText.textContent = originalText;
+        }
+      });
+
+      // 4. Continue with Google click handler
       const googleBtn = container.querySelector('#btn-login-google');
       if (googleBtn) {
         googleBtn.addEventListener('click', async (e) => {
           e.preventDefault();
+          hideAlert();
           googleBtn.disabled = true;
           googleBtn.style.opacity = '0.7';
 
           try {
             if (window.AUTH && typeof window.AUTH.signInWithGoogle === 'function') {
-              await window.AUTH.signInWithGoogle();
+              const res = await window.AUTH.signInWithGoogle();
+              if (res && res.isConfigError) {
+                showAlert(
+                  isAr 
+                    ? 'تسجيل Google يتطلب إعداد مفاتيح Google Cloud. يمكنك التسجيل فوراً بالبريد الإلكتروني أعلاه.' 
+                    : 'Google login requires Google Cloud setup. Please use email & password above.',
+                  'info'
+                );
+              }
             } else if (window.SupabaseAuth && typeof window.SupabaseAuth.signInWithGoogle === 'function') {
               await window.SupabaseAuth.signInWithGoogle();
             }
@@ -270,7 +489,7 @@
         });
       }
 
-      // 2. Continue as Guest click handler
+      // 5. Continue as Guest click handler
       const guestBtn = container.querySelector('#btn-login-guest');
       if (guestBtn) {
         guestBtn.addEventListener('click', (e) => {
