@@ -11,7 +11,7 @@
   'use strict';
 
   const LoginPage = {
-    render(container) {
+    render(container, params) {
       if (!container) return;
 
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
@@ -327,7 +327,7 @@
         </div>
       `;
 
-      this.bindEvents(container);
+      this.bindEvents(container, params);
 
       // Recreate Lucide icons inside login card
       if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -335,7 +335,7 @@
       }
     },
 
-    bindEvents(container) {
+    bindEvents(container, params) {
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
       let activeMode = 'signin'; // 'signin' | 'register'
 
@@ -360,6 +360,20 @@
 
       function hideAlert() {
         if (alertBox) alertBox.style.display = 'none';
+      }
+
+      // Check query params for redirected feedback (e.g. google_pending_client_id)
+      const hashQuery = window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '';
+      const urlParams = params || new URLSearchParams(hashQuery || window.location.search);
+      const authError = urlParams ? urlParams.get('error') : null;
+
+      if (authError === 'google_pending_client_id') {
+        showAlert(
+          isAr
+            ? '⚡ التسجيل الذاتي المستقل متاح فوراً! أدخل بريدك الإلكتروني وكلمة المرور أدناه لإنشاء حسابك أو الدخول مباشرة.'
+            : '⚡ Direct registration is available! Enter your email and password below to sign in or create your account.',
+          'info'
+        );
       }
 
       // 1. Tab Switcher

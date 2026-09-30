@@ -288,18 +288,18 @@
         if (error) {
           console.error('[Google OAuth Technical Error]:', error);
 
-          // Check if Google provider is disabled in Supabase dashboard
-          if (error.message?.includes('provider is not enabled') || error.message?.includes('Unsupported provider')) {
+          // Check if Google provider is pending configuration
+          if (error.message?.includes('provider is not enabled') || error.message?.includes('Unsupported provider') || error.message?.includes('google_pending_client_id')) {
             const friendlyMsg = isAr
-              ? 'تسجيل الدخول عبر Google غير مفعّل حالياً في لوحة Supabase. يُرجى تفعيل مزود Google في Supabase Dashboard.'
-              : 'Google sign-in is not enabled in the Supabase project dashboard. Please enable Google Provider.';
-            window.Toast?.show(friendlyMsg, 'warning');
+              ? 'تسجيل الدخول عبر Google يتطلب تفعيل معرف Google Cloud. يمكنك التسجيل والدخول فوراً بالبريد الإلكتروني أدناه.'
+              : 'Google OAuth requires Google Cloud setup. You can register and sign in directly with email below.';
+            window.Toast?.show(friendlyMsg, 'info');
             this.showGoogleConfigAlertModal(isAr);
-            return { success: false, error: error.message, isConfigError: true };
+            return { success: false, error: friendlyMsg, isConfigError: true };
           }
 
-          const friendlyMsg = isAr ? 'تعذر إتمام تسجيل الدخول مع Google. حاول ثانية.' : 'Google sign-in failed. Please try again.';
-          window.Toast?.show(friendlyMsg, 'error');
+          const friendlyMsg = isAr ? 'تعذر الاتصال بـ Google. يمكنك التسجيل والدخول بالبريد الإلكتروني أدناه.' : 'Google sign-in unavailable. Please use email & password.';
+          window.Toast?.show(friendlyMsg, 'warning');
           return { success: false, error: error.message };
         }
 
@@ -712,7 +712,7 @@
     }
 
     /**
-     * Clear guidance alert modal if Supabase Google provider is disabled
+     * Guidance modal explaining direct self-hosted authentication
      */
     showGoogleConfigAlertModal(isAr) {
       const modalId = 'kf-google-config-alert-backdrop';
@@ -723,26 +723,26 @@
       modal.id = modalId;
       modal.className = 'auth-modal-backdrop';
       modal.innerHTML = `
-        <div class="auth-modal-box" style="max-width: 500px; padding: 28px; border-radius: 20px; background: #FFFFFF; border: 1px solid #EAE3D6;">
+        <div class="auth-modal-box" style="max-width: 480px; padding: 28px; border-radius: 20px; background: #FFFFFF; border: 1px solid #EAE3D6; box-shadow: 0 20px 40px rgba(0,0,0,0.12);">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-            <div style="width:42px;height:42px;border-radius:50%;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;font-size:20px;">⚠️</div>
-            <h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#1F1A17;">
-              ${isAr ? 'تفعيل تسجيل الدخول عبر Google' : 'Enable Google Sign-In in Supabase'}
+            <div style="width:42px;height:42px;border-radius:12px;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;font-size:20px;">⚡</div>
+            <h3 style="margin:0;font-size:1.12rem;font-weight:800;color:#1F1A17;">
+              ${isAr ? 'التسجيل الذاتي المستقل متاح فوراً' : 'Direct Registration Ready'}
             </h3>
           </div>
-          <p style="font-size:0.88rem;color:#6E655F;line-height:1.5;margin-bottom:16px;">
+          <p style="font-size:0.88rem;color:#554B41;line-height:1.6;margin-bottom:14px;">
             ${isAr
-              ? 'مزود Google OAuth غير مفعّل حالياً في مشروع Supabase الخاص بك. لتفعيله في دقيقة واحدة:'
-              : 'Google OAuth provider is not yet toggled on in your Supabase project. To enable it:'}
+              ? 'تم نقل نظام المصادقة بالكامل إلى خادم Kuro Fangs الخاص المستقل. يمكنك إنشاء حسابك الجديد والدخول مباشرة عبر البريد الإلكتروني وكلمة المرور أدناه، أو مواصلة الدراسة كزائر.'
+              : 'Authentication is fully self-hosted on Kuro Fangs private cloud. You can register directly with your email and password below, or continue studying as a guest.'}
           </p>
-          <ol style="font-size:0.84rem;color:#4A4036;line-height:1.6;padding-inline-start:20px;margin-bottom:20px;">
-            <li>${isAr ? 'افتح <strong>Supabase Dashboard → Authentication → Providers → Google</strong>.' : 'Open <strong>Supabase Dashboard → Authentication → Providers → Google</strong>.'}</li>
-            <li>${isAr ? 'قم بتفعيل خيار <strong>Enable Google provider</strong>.' : 'Turn on <strong>Enable Google provider</strong>.'}</li>
-            <li>${isAr ? 'أدخل <strong>Client ID</strong> و <strong>Client Secret</strong> من Google Cloud Console.' : 'Enter your <strong>Client ID</strong> and <strong>Client Secret</strong> from Google Cloud Console.'}</li>
-          </ol>
+          <div style="background:#F7F4EE;border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:0.82rem;color:#7A6E63;line-height:1.5;">
+            ${isAr
+              ? '💡 <strong>ملاحظة:</strong> لا توجد أي قيود أو اشتراكات خارجية، حسابك يُحفظ بأمان في قاعدة بيانات كورو الخاصة.'
+              : '💡 <strong>Note:</strong> Zero external billing locks; all student data is saved securely on your private server.'}
+          </div>
           <div style="display:flex;justify-content:flex-end;gap:10px;">
-            <button type="button" onclick="this.closest('.auth-modal-backdrop').remove()" style="padding:8px 18px;border-radius:10px;background:#7E1D2A;color:#FFF;font-weight:700;border:none;cursor:pointer;">
-              ${isAr ? 'حسناً، فهمت' : 'Got it'}
+            <button type="button" onclick="this.closest('.auth-modal-backdrop').remove()" style="padding:10px 22px;border-radius:10px;background:#7E1D2A;color:#FFF;font-weight:700;border:none;cursor:pointer;font-size:0.88rem;">
+              ${isAr ? 'بدء التسجيل الآن' : 'Start Registration'}
             </button>
           </div>
         </div>
