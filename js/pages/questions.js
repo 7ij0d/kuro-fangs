@@ -523,6 +523,15 @@ const QuestionsPage = {
     QuestionsPage.bindEvents(container);
     QuestionsPage.renderCurrentView();
 
+    // Dynamically fetch and refresh question bank in background
+    if (window.DATA && typeof window.DATA.fetchQuestions === 'function') {
+      window.DATA.fetchQuestions().then((fetched) => {
+        if (Array.isArray(fetched) && fetched.length > 0) {
+          QuestionsPage.renderCurrentView();
+        }
+      }).catch(() => {});
+    }
+
     // Deep-link Resume Check
     if (isResume || sheetId) {
       QuestionsPage.resumeQuizSession(sheetId, QuestionsPage.selectedSubjectId);
