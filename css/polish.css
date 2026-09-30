@@ -1852,19 +1852,27 @@ body { background: var(--bg-app); color: var(--text-primary); }
   transform: translateY(-1px);
 }
 
+.dt-modal-options-box.locked .dt-quiz-option {
+  pointer-events: none !important;
+}
+
+.dt-quiz-option:disabled {
+  cursor: default;
+}
+
 .dt-quiz-option.correct {
   border-color: #10B981 !important;
   background: rgba(16, 185, 129, 0.12) !important;
   color: #065F46 !important;
   font-weight: 700;
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3), 0 4px 14px rgba(16, 185, 129, 0.15) !important;
-  animation: dtCorrectSoftPulse 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.35), 0 4px 16px rgba(16, 185, 129, 0.18) !important;
+  animation: dtCorrectSoftPulse 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="dark"] .dt-quiz-option.correct {
   background: rgba(16, 185, 129, 0.18) !important;
   color: #34D399 !important;
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.4), 0 4px 18px rgba(16, 185, 129, 0.22) !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.45), 0 4px 20px rgba(16, 185, 129, 0.24) !important;
 }
 
 @keyframes dtCorrectSoftPulse {
@@ -1878,6 +1886,7 @@ body { background: var(--bg-app); color: var(--text-primary); }
   background: rgba(239, 68, 68, 0.1) !important;
   color: #991B1B !important;
   font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25) !important;
 }
 
 [data-theme="dark"] .dt-quiz-option.incorrect {
@@ -1886,12 +1895,51 @@ body { background: var(--bg-app); color: var(--text-primary); }
 
 @keyframes shakeWrong {
   0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-5px); }
-  40%, 80% { transform: translateX(5px); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
 }
 
 .shake-wrong {
-  animation: shakeWrong 0.38s ease;
+  animation: shakeWrong 0.34s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Feedback Badges inside Explanation Section */
+.dt-feedback-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 0.85rem;
+  font-weight: 750;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.dt-feedback-badge.correct {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #059669;
+}
+
+[data-theme="dark"] .dt-feedback-badge.correct {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34D399;
+}
+
+.dt-feedback-badge.incorrect {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  color: #DC2626;
+}
+
+[data-theme="dark"] .dt-feedback-badge.incorrect {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #F87171;
 }
 
 /* Animated Pop Icons for Answer Choices */
@@ -1949,25 +1997,30 @@ body { background: var(--bg-app); color: var(--text-primary); }
 
 /* Staged Explanation Reveal Sequence (Fluid & Non-distracting) */
 .dt-card-exp-section.staged-reveal {
-  animation: dtFadeSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 1;
+}
+
+.dt-card-exp-section.staged-reveal .dt-card-feedback-banner {
+  animation: dtFadeSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.02s both;
 }
 
 .dt-card-exp-section.staged-reveal .dt-card-faculty-exp {
-  animation: dtFadeSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+  animation: dtFadeSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
 }
 
 .dt-card-exp-section.staged-reveal .dt-card-quote-box {
-  animation: dtFadeSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  animation: dtFadeSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
 }
 
+.dt-card-exp-section.staged-reveal .dt-card-source-actions,
 .dt-card-exp-section.staged-reveal #dt-card-source-actions {
-  animation: dtFadeSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+  animation: dtFadeSlideDown 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.40s both;
 }
 
 @keyframes dtFadeSlideDown {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;

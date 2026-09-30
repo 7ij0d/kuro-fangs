@@ -280,75 +280,106 @@
       osc.stop(now + 0.026);
     },
 
-    // 10. Radiant golden harmonic chime for correct MCQ answers
+    // 10. Radiant academic chime for correct MCQ answers (short, crisp, non-punitive, ~220ms)
     correct(ctx, now) {
-      // C5 - E5 - G5 - C6 arpeggio with golden shimmer
-      const chord = [523.25, 659.25, 783.99, 1046.5];
-      chord.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        const t = now + idx * 0.065;
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, t);
-
-        gain.gain.setValueAtTime(0.13, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-
-        osc.start(t);
-        osc.stop(t + 0.23);
-      });
-    },
-
-    // 11. Soft, warm low double-thud for incorrect answers (gentle, encouraging, non-punitive)
-    incorrect(ctx, now) {
-      [160, 120].forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        const t = now + idx * 0.08;
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, t);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.75, t + 0.07);
-
-        gain.gain.setValueAtTime(0.09, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.075);
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-
-        osc.start(t);
-        osc.stop(t + 0.08);
-      });
-    },
-
-    // 12. Triumphant celebratory fanfare on quiz victory / high score
-    victory(ctx, now) {
-      const melody = [
-        { f: 523.25, t: 0, d: 0.12 },    // C5
-        { f: 659.25, t: 0.12, d: 0.12 }, // E5
-        { f: 783.99, t: 0.24, d: 0.14 }, // G5
-        { f: 1046.5, t: 0.38, d: 0.35 }  // C6 sustain
+      // 2-step harmonic chime: E5 (659.25Hz) -> B5 (987.77Hz) with subtle golden overtone
+      const notes = [
+        { f: 659.25, t: 0, d: 0.18, g: 0.13 },
+        { f: 987.77, t: 0.055, d: 0.20, g: 0.15 },
+        { f: 1318.5, t: 0.065, d: 0.16, g: 0.06 } // subtle high shimmer
       ];
-      melody.forEach(note => {
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(3200, now);
+      filter.connect(masterGain);
+
+      notes.forEach(n => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        const start = now + note.t;
+        const start = now + n.t;
 
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(note.f, start);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(n.f, start);
 
-        gain.gain.setValueAtTime(0.14, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + note.d);
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.linearRampToValueAtTime(n.g, start + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + n.d);
 
         osc.connect(gain);
-        gain.connect(masterGain);
+        gain.connect(filter);
 
         osc.start(start);
-        osc.stop(start + note.d + 0.01);
+        osc.stop(start + n.d + 0.01);
+      });
+    },
+
+    // 11. Soft, warm non-punitive dual-drop for incorrect answers (Duolingo/Quizlet caliber, ~220ms)
+    incorrect(ctx, now) {
+      // Gentle warm descending droplet: 310Hz -> 235Hz (No harsh buzzer, soft encouraging tone)
+      const drops = [
+        { f: 310, t: 0, d: 0.09, g: 0.10 },
+        { f: 235, t: 0.075, d: 0.12, g: 0.09 }
+      ];
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(520, now);
+      filter.connect(masterGain);
+
+      drops.forEach(d => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = now + d.t;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(d.f, start);
+        osc.frequency.exponentialRampToValueAtTime(d.f * 0.82, start + d.d);
+
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.linearRampToValueAtTime(d.g, start + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + d.d);
+
+        osc.connect(gain);
+        gain.connect(filter);
+
+        osc.start(start);
+        osc.stop(start + d.d + 0.01);
+      });
+    },
+
+    // 12. Triumphant celebratory fanfare on quiz victory / session completion (~1.3s)
+    victory(ctx, now) {
+      const chords = [
+        { freqs: [523.25, 659.25], t: 0, d: 0.22, g: 0.11 },      // C5 - E5
+        { freqs: [587.33, 783.99], t: 0.20, d: 0.24, g: 0.12 },    // D5 - G5
+        { freqs: [659.25, 783.99, 1046.5], t: 0.44, d: 0.85, g: 0.14 } // E5 - G5 - C6 triumph
+      ];
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(3600, now);
+      filter.connect(masterGain);
+
+      chords.forEach(c => {
+        c.freqs.forEach(freq => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const start = now + c.t;
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, start);
+
+          gain.gain.setValueAtTime(0.001, start);
+          gain.gain.linearRampToValueAtTime(c.g / c.freqs.length, start + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + c.d);
+
+          osc.connect(gain);
+          gain.connect(filter);
+
+          osc.start(start);
+          osc.stop(start + c.d + 0.02);
+        });
       });
     },
 
@@ -546,6 +577,19 @@
       if (!masterGain || !audioCtx) return;
       const clamped = Math.max(0, Math.min(1, vol));
       masterGain.gain.setValueAtTime(soundEnabled ? clamped * (VOLUME_MAP[volumeLevel] || 0.32) : 0, audioCtx.currentTime);
+    },
+
+    // Dedicated Question Helpers for clean API invocation
+    playQuestionCorrect() {
+      this.play('correct');
+    },
+
+    playQuestionWrong() {
+      this.play('wrong');
+    },
+
+    playQuizComplete() {
+      this.play('complete');
     }
   };
 

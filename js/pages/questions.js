@@ -420,6 +420,7 @@ const QuestionsPage = {
 
             <!-- In-Card Faculty Explanation & Official Sheet Quote (Exact Reference Design) -->
             <div class="dt-card-exp-section" id="dt-card-exp-section" style="display: none; margin-bottom: 22px;">
+              <div id="dt-card-feedback-banner" class="dt-card-feedback-banner" style="display: none; margin-bottom: 12px;"></div>
               <div class="dt-card-faculty-exp" id="dt-card-faculty-exp">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                   <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(200, 67, 67, 0.1); border: 1px solid rgba(200, 67, 67, 0.2); display: flex; align-items: center; justify-content: center; color: var(--brand-accent);">
@@ -538,11 +539,15 @@ const QuestionsPage = {
 
           <!-- Action Buttons -->
           <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-            <button type="button" id="dt-btn-comp-review" class="btn btn-secondary" style="flex: 1; min-width: 140px; justify-content: center; font-weight: 750; gap: 6px;">
-              <i data-lucide="rotate-ccw" style="width: 15px; height: 15px;"></i>
+            <button type="button" id="dt-btn-comp-review" class="btn btn-secondary" style="flex: 1; min-width: 130px; justify-content: center; font-weight: 750; gap: 6px;">
+              <i data-lucide="eye" style="width: 15px; height: 15px;"></i>
               <span>${isAr ? 'مراجعة الأسئلة' : 'Review Quiz'}</span>
             </button>
-            <button type="button" id="dt-btn-comp-exit" class="btn btn-primary" style="flex: 1; min-width: 140px; justify-content: center; font-weight: 750; background: var(--brand-burgundy, #7E1D2A); border-color: var(--brand-burgundy, #7E1D2A); gap: 6px;">
+            <button type="button" id="dt-btn-comp-retry" class="btn btn-secondary" style="flex: 1; min-width: 130px; justify-content: center; font-weight: 750; gap: 6px; color: var(--brand-accent); border-color: rgba(35, 87, 217, 0.3);">
+              <i data-lucide="rotate-ccw" style="width: 15px; height: 15px;"></i>
+              <span>${isAr ? 'إعادة المحاولة' : 'Retry Quiz'}</span>
+            </button>
+            <button type="button" id="dt-btn-comp-exit" class="btn btn-primary" style="flex: 1; min-width: 130px; justify-content: center; font-weight: 750; background: var(--brand-burgundy, #7E1D2A); border-color: var(--brand-burgundy, #7E1D2A); gap: 6px;">
               <i data-lucide="check" style="width: 15px; height: 15px;"></i>
               <span>${isAr ? 'إنهاء وخروج' : 'Finish & Exit'}</span>
             </button>
@@ -676,6 +681,13 @@ const QuestionsPage = {
       if (window.SoundManager) {
         const isNowOn = window.SoundManager.toggleQuestionSound();
         QuestionsPage.updateSoundButtonUI(isNowOn);
+        if (window.Toast) {
+          window.Toast.show(
+            isNowOn ? (isAr ? 'تم تشغيل أصوات الأسئلة 🔊' : 'Question sounds enabled 🔊')
+                    : (isAr ? 'تم كتم أصوات الأسئلة 🔇' : 'Question sounds muted 🔇'),
+            'info'
+          );
+        }
       }
     });
 
@@ -692,6 +704,25 @@ const QuestionsPage = {
       QuestionsPage.activeQuizIndex = 0;
       QuestionsPage.renderModalQuestion();
       if (window.SoundManager) window.SoundManager.play('tap');
+    });
+
+    document.getElementById('dt-btn-comp-retry')?.addEventListener('click', () => {
+      QuestionsPage.closeCompletionModal();
+      if (QuestionsPage.activeSession) {
+        QuestionsPage.activeSession.answers = {};
+        QuestionsPage.activeSession.score = 0;
+        QuestionsPage.activeSession.answered = 0;
+        QuestionsPage.activeSession.percent = 0;
+        QuestionsPage.activeSession.completed = false;
+        QuestionsPage.activeSession.current_index = 0;
+        QuestionsPage.saveSession(QuestionsPage.activeSession);
+      }
+      QuestionsPage.activeQuizIndex = 0;
+      QuestionsPage.renderModalQuestion();
+      if (window.SoundManager) window.SoundManager.play('pop');
+      if (window.Toast) {
+        window.Toast.show(isAr ? 'بدء محاولة جديدة! بالتوفيق 🦷' : 'Started fresh retry! Good luck 🦷', 'info');
+      }
     });
 
     document.getElementById('dt-btn-comp-exit')?.addEventListener('click', () => {
@@ -1599,6 +1630,27 @@ const QuestionsPage = {
     const cardQuoteText = document.getElementById('dt-card-quote-text');
     const cardSourceActions = document.getElementById('dt-card-source-actions');
     const kuroSourceActions = document.getElementById('dt-kuro-source-actions-box');
+    const feedbackBanner = document.getElementById('dt-card-feedback-banner');
+
+    if (feedbackBanner) {
+      if (existingAns) {
+        feedbackBanner.innerHTML = existingAns.is_correct ? `
+          <div class="dt-feedback-badge correct">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>${isAr ? 'إجابة صحيحة! أحسنت' : 'Correct answer! Well done'}</span>
+          </div>
+        ` : `
+          <div class="dt-feedback-badge incorrect">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>${isAr ? 'إجابة غير صحيحة — راجع التفسير السريري أدناه' : 'Incorrect — Review clinical faculty explanation below'}</span>
+          </div>
+        `;
+        feedbackBanner.style.display = 'block';
+      } else {
+        feedbackBanner.style.display = 'none';
+        feedbackBanner.innerHTML = '';
+      }
+    }
 
     const expTextVal = isAr
       ? (q.explanation_ar || q.answer_ar || q.explanation_en || q.answer_en || '')
@@ -1686,6 +1738,12 @@ const QuestionsPage = {
     const optBox = document.getElementById('dt-modal-options-box');
     if (!optBox) return;
 
+    if (existingAns) {
+      optBox.classList.add('locked');
+    } else {
+      optBox.classList.remove('locked');
+    }
+
     const options = q.options_en || q.options || q.options_ar || [];
     const correctIdx = typeof q.correct_index === 'number' ? q.correct_index : 0;
     const optLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -1722,6 +1780,12 @@ const QuestionsPage = {
       btn.addEventListener('click', () => {
         if (btn.disabled || QuestionsPage.hasCurrentQuestionBeenAnswered) return;
 
+        // 1. Lock options immediately to prevent multi-clicking
+        optBox.classList.add('locked');
+        optBox.querySelectorAll('.dt-quiz-option').forEach(b => {
+          b.disabled = true;
+        });
+
         const selectedIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
         const isCorrect = (selectedIdx === correctIdx);
 
@@ -1755,10 +1819,24 @@ const QuestionsPage = {
 
         QuestionsPage.saveSession(sess);
 
+        // 2. Play Audio FX
         if (window.SoundManager) {
-          window.SoundManager.play(isCorrect ? 'correct' : 'wrong');
+          if (isCorrect) {
+            if (typeof window.SoundManager.playQuestionCorrect === 'function') {
+              window.SoundManager.playQuestionCorrect();
+            } else {
+              window.SoundManager.play('correct');
+            }
+          } else {
+            if (typeof window.SoundManager.playQuestionWrong === 'function') {
+              window.SoundManager.playQuestionWrong();
+            } else {
+              window.SoundManager.play('wrong');
+            }
+          }
         }
 
+        // 3. Visual feedback on options
         optBox.querySelectorAll('.dt-quiz-option').forEach((b, bIdx) => {
           b.disabled = true;
           const statusIcon = b.querySelector('.dt-opt-status-icon');
@@ -1779,7 +1857,7 @@ const QuestionsPage = {
           }
         });
 
-        // Update Kuro Mascot reaction
+        // 4. Update Kuro Mascot reaction
         if (mascotImg && !QuestionsPage.kuroExplanationOpen) {
           clearTimeout(QuestionsPage._mascotResetTimer);
           if (isCorrect) {
@@ -1804,6 +1882,22 @@ const QuestionsPage = {
           }
         }
 
+        // 5. In-Card Feedback Banner
+        if (feedbackBanner) {
+          feedbackBanner.innerHTML = isCorrect ? `
+            <div class="dt-feedback-badge correct">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <span>${isAr ? 'إجابة صحيحة! أحسنت' : 'Correct answer! Well done'}</span>
+            </div>
+          ` : `
+            <div class="dt-feedback-badge incorrect">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>${isAr ? 'إجابة غير صحيحة — راجع التفسير السريري أدناه' : 'Incorrect — Review clinical faculty explanation below'}</span>
+            </div>
+          `;
+          feedbackBanner.style.display = 'block';
+        }
+
         // If wrong, record as weak question
         if (!isCorrect) {
           QuestionsPage.recordWeakQuestion(q);
@@ -1814,7 +1908,7 @@ const QuestionsPage = {
           }
         }
 
-        // Reveal In-Card Faculty Explanation & Source Action Buttons (Staged Reveal Flow)
+        // 6. Staggered Reveal of In-Card Faculty Explanation & Source Action Buttons
         if (cardExpSection) {
           cardExpSection.classList.remove('staged-reveal');
           void cardExpSection.offsetWidth;
@@ -1822,7 +1916,7 @@ const QuestionsPage = {
           cardExpSection.style.display = 'block';
           setTimeout(() => {
             cardExpSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 220);
+          }, 240);
         }
       });
     });
@@ -2065,7 +2159,11 @@ const QuestionsPage = {
 
     // Play victory fanfare sound
     if (window.SoundManager) {
-      window.SoundManager.play('complete');
+      if (typeof window.SoundManager.playQuizComplete === 'function') {
+        window.SoundManager.playQuizComplete();
+      } else {
+        window.SoundManager.play('complete');
+      }
     }
 
     if (window.lucide) window.lucide.createIcons();
