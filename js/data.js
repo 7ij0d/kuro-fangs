@@ -253,12 +253,14 @@ class DataService {
             });
 
             // 2. Remove any sheets that exist locally but were deleted from Supabase
-            // (only remove sheets that were once synced to cloud — don't remove static/local-only sheets
-            //  that were never uploaded, identified by having no pdf_url from cloud)
+            // Built-in curriculum sheets must NEVER be removed
+            const defaultSheetIds = new Set(this.getDefaultSheets().map(s => s.id));
             const cachedCloudIds = new Set(
               JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]').map(s => s.id)
             );
             this.sheets = this.sheets.filter(s => {
+              // Always preserve built-in curriculum sheets
+              if (defaultSheetIds.has(s.id)) return true;
               // Keep if it's in current cloud list
               if (cloudIds.has(s.id)) return true;
               // Keep if it was never in cloud before (static/built-in sheet)
@@ -272,12 +274,13 @@ class DataService {
           } else if (Array.isArray(liveCloudSheets) && liveCloudSheets.length === 0) {
             // Cloud returned empty — could be first run or all sheets deleted
             // Only clear cached cloud sheets (don't touch built-in sheets)
+            const defaultSheetIds = new Set(this.getDefaultSheets().map(s => s.id));
             const cachedIds = new Set(
               JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]').map(s => s.id)
             );
             if (cachedIds.size > 0) {
-              // Previously had cloud sheets, now all gone — remove them
-              this.sheets = this.sheets.filter(s => !cachedIds.has(s.id));
+              // Previously had cloud sheets, now all gone — remove them (preserve built-in sheets)
+              this.sheets = this.sheets.filter(s => defaultSheetIds.has(s.id) || !cachedIds.has(s.id));
               localStorage.setItem('kf_cloud_cached_sheets', '[]');
             }
           }
@@ -2790,6 +2793,7 @@ class DataService {
         pages_count: 72,
         size: "2.3 MB",
         pdf_url: "data/sheets/ortho-intro-and-terminology.pdf",
+        cloud_pdf_url: "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/sheets/sh_ortho_intro_terminology_01.pdf",
         download_url: "data/sheets/ortho-intro-and-terminology.pdf",
         pdf_source: "local",
         date: "2026-09-23"

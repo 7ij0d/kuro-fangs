@@ -4772,6 +4772,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     document.querySelectorAll('.kn-thumbnail-item').forEach((tEl) => {
       tEl.classList.toggle('active', parseInt(tEl.dataset.thumbPage, 10) === clamped);
     });
+    renderVisiblePdfPages(clamped);
     saveViewState();
   }
 
@@ -5079,6 +5080,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
             document.querySelectorAll('.kn-thumbnail-item').forEach((tEl) => {
               tEl.classList.toggle('active', parseInt(tEl.dataset.thumbPage, 10) === p);
             });
+            renderVisiblePdfPages(p);
           }
           break;
         }
@@ -5487,33 +5489,90 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
   // ══════════════════════════════════════════════════════════════════════════
   // REAL PDF.JS DOCUMENT LOADER, RETINA RENDERER & THUMBNAIL PIPELINE
   // ══════════════════════════════════════════════════════════════════════════
+  let _thumbRenderTimeout = null;
   async function renderSidebarPdfThumbnails() {
     if (!state.pdfDoc) return;
-    for (let p = 1; p <= state.totalPages; p++) {
-      try {
-        const tc = document.getElementById(`kn-thumb-canvas-${p}`);
-        if (!tc) continue;
-        const page = await state.pdfDoc.getPage(p);
-        const unscaledVp = page.getViewport({ scale: 1.0, rotation: state.rotation });
-        const thumbScale = 150 / (unscaledVp.width || BASE_W);
-        const thumbVp = page.getViewport({ scale: thumbScale, rotation: state.rotation });
-        tc.width = Math.max(1, Math.round(thumbVp.width));
-        tc.height = Math.max(1, Math.round(thumbVp.height));
-        const tCtx = tc.getContext('2d');
-        tCtx.fillStyle = '#FFFFFF';
-        tCtx.fillRect(0, 0, tc.width, tc.height);
-        await page.render({ canvasContext: tCtx, viewport: thumbVp }).promise;
-      } catch (e) {}
+    const total = state.totalPages;
+    const initialBatch = Math.min(total, 6);
+    
+    // Render first 6 thumbs immediately so sidebar previews appear at once
+    for (let p = 1; p <= initialBatch; p++) {
+      await renderSingleThumb(p);
+    }
+    
+    // Render remaining thumbs lazily in background idle batches (4 at a time)
+    if (initialBatch < total) {
+      if (_thumbRenderTimeout) clearTimeout(_thumbRenderTimeout);
+      let nextP = initialBatch + 1;
+      function renderNextChunk() {
+        if (!state.pdfDoc) return;
+        const chunkEnd = Math.min(total, nextP + 3);
+        (async () => {
+          for (let p = nextP; p <= chunkEnd; p++) {
+            await renderSingleThumb(p);
+          }
+          nextP = chunkEnd + 1;
+          if (nextP <= total) {
+            _thumbRenderTimeout = setTimeout(renderNextChunk, 80);
+          }
+        })();
+      }
+      _thumbRenderTimeout = setTimeout(renderNextChunk, 120);
     }
   }
 
-  async function renderVisiblePdfPages() {
+  async function renderSingleThumb(p) {
+    try {
+      const tc = document.getElementById(`kn-thumb-canvas-${p}`);
+      if (!tc || tc._isRendered) return;
+      const page = await state.pdfDoc.getPage(p);
+      const unscaledVp = page.getViewport({ scale: 1.0, rotation: state.rotation });
+      const thumbScale = 150 / (unscaledVp.width || BASE_W);
+      const thumbVp = page.getViewport({ scale: thumbScale, rotation: state.rotation });
+      tc.width = Math.max(1, Math.round(thumbVp.width));
+      tc.height = Math.max(1, Math.round(thumbVp.height));
+      const tCtx = tc.getContext('2d');
+      tCtx.fillStyle = '#FFFFFF';
+      tCtx.fillRect(0, 0, tc.width, tc.height);
+      await page.render({ canvasContext: tCtx, viewport: thumbVp }).promise;
+      tc._isRendered = true;
+    } catch (e) {}
+  }
+
+  async function renderVisiblePdfPages(centerPage) {
     if (!state.pdfDoc) return;
     const loaderEl = document.getElementById('kn-doc-loader');
     const dpr = Math.min(window.devicePixelRatio || 1.5, 2.0);
+    const activePage = typeof centerPage === 'number' ? centerPage : (state.currentPage || 1);
+
+    // Active rendering window: activePage +/- 1 (3 pages total), prevents iOS 384MB canvas crash
+    const buffer = window.innerWidth <= 768 ? 1 : 2;
+    const minPage = Math.max(1, activePage - buffer);
+    const maxPage = Math.min(state.totalPages, activePage + buffer);
 
     for (let p = 1; p <= state.totalPages; p++) {
       try {
+        const card = pagesContainer.querySelector(`.kn-page-card[data-page="${p}"]`);
+        if (!card) continue;
+
+        // If page is outside active window, free its heavy canvas memory to keep 60fps & 0 memory pressure
+        if (p < minPage || p > maxPage) {
+          const canvas = document.getElementById(`kn-pdf-canvas-${p}`);
+          if (canvas && canvas._isRendered) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.width = 1;
+            canvas.height = 1;
+            canvas._isRendered = false;
+          }
+          continue;
+        }
+
+        const canvas = document.getElementById(`kn-pdf-canvas-${p}`);
+        if (canvas && canvas._isRendered && canvas._renderedZoom === state.zoom && canvas._renderedRot === state.rotation) {
+          continue;
+        }
+
         const page = await state.pdfDoc.getPage(p);
         const unscaledVp = page.getViewport({ scale: 1.0, rotation: state.rotation });
         const cssWidth = Math.round(BASE_W * state.zoom);
@@ -5522,11 +5581,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
         const cssW = Math.max(1, Math.round(cssViewport.width));
         const cssH = Math.max(1, Math.round(cssViewport.height));
 
-        const card = pagesContainer.querySelector(`.kn-page-card[data-page="${p}"]`);
-        if (card) {
-          card.style.width = `${cssW}px`;
-          card.style.height = `${cssH}px`;
-        }
+        card.style.width = `${cssW}px`;
+        card.style.height = `${cssH}px`;
 
         const hlCanvas = document.getElementById(`kn-hl-canvas-${p}`);
         const annotCanvas = document.getElementById(`kn-annot-canvas-${p}`);
@@ -5539,7 +5595,6 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           annotCanvas.height = cssH;
         }
 
-        const canvas = document.getElementById(`kn-pdf-canvas-${p}`);
         if (canvas) {
           const renderViewport = page.getViewport({ scale: cssScale * dpr, rotation: state.rotation });
           canvas.width = Math.max(1, Math.round(renderViewport.width));
@@ -5550,11 +5605,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
+          canvas._isRendered = true;
+          canvas._renderedZoom = state.zoom;
+          canvas._renderedRot = state.rotation;
         }
 
         renderPageAnnotations(p);
 
-        if (p === 1 && loaderEl) {
+        if (p === activePage && loaderEl) {
           loaderEl.style.display = 'none';
         }
 
@@ -5715,6 +5773,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           if (fallbackBlobUrl && fallbackBlobUrl !== pdfUrl) {
             pdfUrl = fallbackBlobUrl;
             loadingTask = window.pdfjsLib.getDocument(fallbackBlobUrl);
+            state.pdfDoc = await loadingTask.promise;
+          } else if (sheet.cloud_pdf_url && sheet.cloud_pdf_url !== pdfUrl) {
+            pdfUrl = sheet.cloud_pdf_url;
+            loadingTask = window.pdfjsLib.getDocument(sheet.cloud_pdf_url);
+            state.pdfDoc = await loadingTask.promise;
+          } else if (sheet.pdf_url && sheet.pdf_url !== pdfUrl) {
+            pdfUrl = sheet.pdf_url;
+            loadingTask = window.pdfjsLib.getDocument(sheet.pdf_url);
             state.pdfDoc = await loadingTask.promise;
           } else {
             throw firstErr;
