@@ -171,6 +171,25 @@
       "download_url": "data/sheets/diseases-of-periapical-tissues-oral-path.pdf",
       "pdf_source": "local",
       "date": "2026-09-28"
+    },
+    {
+      "id": "sh_oral_path_cysts_04",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_code": "DS380",
+      "order_index": 4,
+      "title": "Lecture 4: Cysts of the Jaw",
+      "title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "title_en": "Lecture 4: Cysts of the Jaw",
+      "doctor_name": "د. إبتسام الديب",
+      "doctor": "د. إبتسام الديب",
+      "pages": 37,
+      "pages_count": 37,
+      "size": "3.4 MB",
+      "pdf_url": "data/sheets/cysts-of-the-jaw-dr-ebtesam.pdf",
+      "download_url": "data/sheets/cysts-of-the-jaw-dr-ebtesam.pdf",
+      "pdf_source": "local",
+      "date": "2026-09-30"
     }
   ]
 }

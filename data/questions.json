@@ -1735,6 +1735,774 @@
         "confidence": 0.2,
         "verification_status": "unresolved"
       }
+    },
+    {
+      "id": "q_oral_path_cysts_01",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 3,
+      "topic_ar": "الفرق بين الأكياس الحقيقية والكاذبة (True Cysts vs Pseudocysts)",
+      "topic_en": "True Cysts vs Pseudocysts",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Cyst definition",
+        "Pseudocysts",
+        "True cysts",
+        "Odontogenic keratocyst",
+        "Bone cysts"
+      ],
+      "text_ar": "جميع الآفات والتجاويف التالية في الفكين تُعد أكياساً كاذبة (Pseudocysts / غير مبطنة بنسيج طلائي) ما عدا:",
+      "text_en": "All of the following jaw lesions are classified as pseudocysts (non-epithelialized cysts) EXCEPT:",
+      "options_ar": [
+        "الكيس العظمي أم الدموي (Aneurysmal Bone Cyst)",
+        "الكيس المتقرن سني المنشأ (Odontogenic Keratocyst - OKC)",
+        "الكيس العظمي الرضحي / البسيط (Traumatic / Simple Bone Cyst)",
+        "الكيس العظمي الكامن / انخفاض ستافني (Stafne's Defect / Latent Bone Cyst)"
+      ],
+      "options_en": [
+        "Aneurysmal Bone Cyst",
+        "Odontogenic Keratocyst (OKC)",
+        "Traumatic / Simple Bone Cyst",
+        "Stafne's Defect (Latent Bone Cyst)"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. الكيس المتقرن سني المنشأ (Odontogenic Keratocyst - OKC)\n\n📌 من أسئلة الامتحانات المتكررة وشيت د. إبتسام (ص 3، 6):\n- الكيس الحقيقي (True Cyst): تجويف مرضي مغلق مبطن بالكامل بنسيج طلائي (Lined by epithelium) ويحتوي على سائل أو شبه سائل؛ مثل الـ Odontogenic Keratocyst، الكيس التاجي، والكيس الجذري.\n- الكيس الكاذب (Pseudocyst): تجويف مرضي أو تقعر عظمي يفتقر لوجود بطانة طلائية (Not lined by epithelium)؛ مثل الكيس العظمي البسيط (Simple bone cyst)، الكيس العظمي أم الدموي (Aneurysmal bone cyst)، وتجويف ستافني (Stafne defect).",
+      "answer_en": "Correct Answer: B. Odontogenic Keratocyst (OKC)\n\nSheet Reference (Pages 3, 6):\n\"True cysts: lined by epithelium (e.g., OKC, dentigerous cyst, radicular cyst). Pseudocysts: not lined by epithelium (e.g., solitary/traumatic bone cyst, aneurysmal bone cyst, Stafne's defect).\"\nOKC is a true odontogenic developmental epithelial cyst.",
+      "quote_ref": "True cysts: lined by epithelium. Pseudocysts: not lined by epithelium (e.g. solitary bone cyst, aneurysmal bone cyst, Stafne's defect).",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_01_1",
+        "question_id": "q_oral_path_cysts_01",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 3,
+        "source_type": "exact",
+        "source_text": "True cysts: lined by epithelium. Pseudocysts: not lined by epithelium (e.g. solitary bone cyst, aneurysmal bone cyst, Stafne's defect).",
+        "source_text_normalized": "true cysts lined by epithelium pseudocysts not lined by epithelium eg solitary bone cyst aneurysmal bone cyst stafnes defect",
+        "text_anchor": "True cysts: lined by epithelium. Pseudocysts: not lined",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_02",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 5,
+      "topic_ar": "المصادر الجنينية للبطانة الطلائية (Origin of Epithelial Linings)",
+      "topic_en": "Origin of Epithelial Linings in Odontogenic Cysts",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Epithelial rests",
+        "Malassez",
+        "Serres",
+        "Reduced Enamel Epithelium",
+        "Embryology"
+      ],
+      "text_ar": "تنشأ البطانة الطلائية لمختلف الأكياس سنية المنشأ (Odontogenic cysts) من بقايا أي من التراكيب الجنينية التالية:",
+      "text_en": "The epithelial lining of odontogenic cysts originates from residues of which of the following embryological tissues:",
+      "options_ar": [
+        "بقايا مالاسيز الطلائية (Epithelial rests of Malassez)",
+        "بقايا سيريس الطلائية الناتجة عن الصفيحة السنية (Epithelial rests of Serres)",
+        "النسيج الطلائي المصغر للميناء (Reduced enamel epithelium)",
+        "جميع ما سبق (All of the above)"
+      ],
+      "options_en": [
+        "Epithelial rests of Malassez",
+        "Epithelial rests of Serres",
+        "Reduced enamel epithelium",
+        "All of the above"
+      ],
+      "correct_index": 3,
+      "answer_ar": "الإجابة الصحيحة: D. جميع ما سبق (All of the above)\n\n📌 مرجع الشيت (صفحة 5):\nتستمد الأكياس سنية المنشأ بطانتها من ثلاث بقايا طلائية رئيسية:\n1. بقايا مالاسيز (Rests of Malassez): بقايا غمد هيرتفيغ في الرباط اللثوي -> تعطي الكيس الجذري (Radicular cyst).\n2. النسيج الطلائي المصغر للميناء (Reduced Enamel Epithelium): يحيط بتاج السن المكتمل -> يعطي الكيس التاجي (Dentigerous cyst) وكيس البزوغ (Eruption cyst).\n3. بقايا سيريس (Rests of Serres): بقايا الصفيحة السنية (Dental lamina) -> تعطي الكيس المتقرن (OKC) وكيس الرباط الجانبي (Lateral periodontal cyst) وكيس اللثة.",
+      "answer_en": "Correct Answer: D. All of the above\n\nSheet Reference (Page 5):\n\"Origin of epithelial linings of Odontogenic Cysts:\n1. Epithelial rests of Malassez (remnants of Hertwig's root sheath) -> radicular cyst.\n2. Reduced enamel epithelium -> dentigerous cyst & eruption cyst.\n3. Epithelial rests of Serres (remnants of dental lamina) -> OKC, lateral periodontal cyst, gingival cysts.\"",
+      "quote_ref": "Origin of epithelial linings of Odontogenic Cysts: 1. Epithelial rests of Malassez... 2. Reduced enamel epithelium... 3. Epithelial rests of Serres.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_02_1",
+        "question_id": "q_oral_path_cysts_02",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 5,
+        "source_type": "exact",
+        "source_text": "Origin of epithelial linings of Odontogenic Cysts: 1. Epithelial rests of Malassez. 2. Reduced enamel epithelium. 3. Epithelial rests of Serres.",
+        "source_text_normalized": "origin of epithelial linings of odontogenic cysts 1 epithelial rests of malassez 2 reduced enamel epithelium 3 epithelial rests of serres",
+        "text_anchor": "Origin of epithelial linings of Odontogenic Cysts: 1. Epit",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_03",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 9,
+      "topic_ar": "إمراضية الكيس الجذري الالتهابي (Pathogenesis of Radicular Cyst)",
+      "topic_en": "Pathogenesis of Inflammatory Radicular Cyst",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Radicular cyst",
+        "Pathogenesis",
+        "Rests of Malassez",
+        "Pulp necrosis"
+      ],
+      "text_ar": "المصدر الطلائي المسؤول عن إمراضية ونشأة جميع الأكياس الجذرية الالتهابية (Radicular cysts) هو:",
+      "text_en": "The pathogenesis and epithelial lining of all odontogenic inflammatory radicular cysts are derived from:",
+      "options_ar": [
+        "النسيج الطلائي المصغر للميناء (Reduced enamel epithelium)",
+        "بقايا مالاسيز الطلائية داخل الرباط حول السني (Epithelial rests of Malassez)",
+        "بقايا سيريس في اللثة (Epithelial rests of Serres)",
+        "خلايا الغشاء المخاطي للجيب الفكي"
+      ],
+      "options_en": [
+        "Reduced enamel epithelium",
+        "Epithelial rests of Malassez",
+        "Epithelial rests of Serres",
+        "Respiratory maxillary sinus epithelium"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. بقايا مالاسيز الطلائية (Epithelial rests of Malassez)\n\n📌 مرجع الشيت (صفحة 5، 9):\nتنشأ الأكياس الجذرية (الذروية والجانبية والمتبقية) عندما تُحفّز بقايا خلايا مالاسيز (Epithelial rests of Malassez) المتواجدة في رباط السن (PDL) نتيجة الوسائط الالتهابية والذيفانات المتسربة من قناة جذر سن متنخر عصبياً (Necrotic pulp).",
+      "answer_en": "Correct Answer: B. Epithelial rests of Malassez\n\nSheet Reference (Pages 5, 9):\n\"Radicular cyst: Arises from residues of the epithelial rests of Malassez within the periodontal ligament, stimulated by inflammation following pulp necrosis.\"",
+      "quote_ref": "Radicular cyst: Arises from residues of the epithelial rests of Malassez within the periodontal ligament, stimulated by inflammation following pulp necrosis.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_03_1",
+        "question_id": "q_oral_path_cysts_03",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 9,
+        "source_type": "exact",
+        "source_text": "Radicular cyst: Arises from residues of the epithelial rests of Malassez within the periodontal ligament, stimulated by inflammation following pulp necrosis.",
+        "source_text_normalized": "radicular cyst arises from residues of the epithelial rests of malassez within the periodontal ligament stimulated by inflammation following pulp necrosis",
+        "text_anchor": "Radicular cyst: Arises from residues of the epithelial rests",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_04",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 9,
+      "topic_ar": "حيوية السن في الكيس الجذري (Tooth Vitality in Radicular Cyst)",
+      "topic_en": "Tooth Vitality in Radicular Cyst",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Radicular cyst",
+        "Pulp necrosis",
+        "Tooth vitality",
+        "True or False"
+      ],
+      "text_ar": "«الصورة الشعاعية للكيس الجذري (Radicular cyst) قد تُظهر تخلخلاً شعاعياً واضح الحدود محاطاً بإطار عظمي ظليل رقيق حول ذروة سن حي وسليم (Vital tooth)». هذه العبارة:",
+      "text_en": "\"Radiographic picture of radicular cyst may show well-defined radiolucency surrounded by narrow radio-opaque margin around the apex of a vital tooth.\" This statement is:",
+      "options_ar": [
+        "صحيحة (The statement is true)",
+        "خاطئة (The statement is false)"
+      ],
+      "options_en": [
+        "The statement is true",
+        "The statement is false"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. خاطئة (The statement is false)\n\n📌 قاعدة ذهبية في امتحانات الأورال باثولوجي (د. إبتسام - ص 9):\nالكيس الجذري هو كيس التهابي بالتعريف، وينشأ حتماً وحصراً حول ذروة سن ميت العصب وغير حي (NON-VITAL tooth). إذا أظهر فحص الحيوية أن السن حي (Vital)، فإن احتمال الكيس الجذري ملغى تماماً، ويجب الشك في آفة أخرى مثل Periapical cemento-osseous dysplasia أو كيس غير سني المنشأ.",
+      "answer_en": "Correct Answer: B. The statement is false\n\nSheet Reference (Page 9):\nA radicular cyst ALWAYS arises secondary to pulpal necrosis in a NON-VITAL tooth. If the adjacent tooth is vital, radicular cyst is ruled out.",
+      "quote_ref": "Radicular cyst: stimulated by inflammation following pulp necrosis (associated tooth is non-vital).",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_04_1",
+        "question_id": "q_oral_path_cysts_04",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 9,
+        "source_type": "exact",
+        "source_text": "Radicular cyst is an inflammatory odontogenic cyst that develops at the apex of a non-vital tooth following pulp necrosis.",
+        "source_text_normalized": "radicular cyst is an inflammatory odontogenic cyst that develops at the apex of a non-vital tooth following pulp necrosis",
+        "text_anchor": "Radicular cyst is an inflammatory odontogenic cyst that develops",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_05",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 10,
+      "topic_ar": "المظاهر النسيجية لجدار الكيس الجذري (Histopathology of Radicular Cyst)",
+      "topic_en": "Histopathology of Radicular Cyst Lining and Wall",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Cholesterol clefts",
+        "Rushton bodies",
+        "Foam cells",
+        "Hemosiderin",
+        "Radicular cyst"
+      ],
+      "text_ar": "الخلايا الرغوية (Foam cells)، أجسام رشتون الهيالينية (Rushton / Hyaline bodies)، شقوق الكولسترول مع الخلايا العملاقة، ورواسب الهيموسيديرين؛ هي مظاهر مجهرية مميزة لـ:",
+      "text_en": "Foam cells, Rushton (hyaline) bodies, cholesterol clefts with foreign-body giant cells, and hemosiderin pigmentation are histopathological features of:",
+      "options_ar": [
+        "الكيس الجذري (Radicular cyst) والورم الحبيبي الذروي (Periapical granuloma)",
+        "خراج دواعم السن الجانبي فقط",
+        "الكيس المتقرن سني المنشأ فقط",
+        "ورم الأرومة المينائية"
+      ],
+      "options_en": [
+        "Radicular cyst and Periapical granuloma",
+        "Lateral periodontal abscess only",
+        "Odontogenic keratocyst only",
+        "Ameloblastoma"
+      ],
+      "correct_index": 0,
+      "answer_ar": "الإجابة الصحيحة: A. الكيس الجذري والورم الحبيبي الذروي (a & b)\n\n📌 مرجع الشيت (صفحة 10، 11):\nيشترك الكيس الجذري والورم الحبيبي الذروي في مظاهر الالتهاب المزمن: شقوق بلورات الكولسترول (Cholesterol clefts) المحاطة بخلايا عملاقة متعددة النوى، وخلايا بالعة محملة بالدهون (Foam cells / xanthoma cells)، ورواسب الهيموسيديرين من النزف القديم. بالإضافة إلى ذلك، توجد داخل بطانة الكيس الجذري الطلائية أجسام رشتون الهيالينية المقوسة (Rushton / hyaline bodies).",
+      "answer_en": "Correct Answer: A. Radicular cyst and Periapical granuloma\n\nSheet Reference (Pages 10, 11):\nBoth inflammatory periapical lesions feature cholesterol clefts, multinucleated foreign body giant cells, foam cells (lipid-laden macrophages), and hemosiderin. Rushton bodies (curved linear eosinophilic hyaline structures) are characteristically found embedded within the odontogenic epithelial lining of the cyst.",
+      "quote_ref": "Microscopic features: Fibrous capsule contains cholesterol clefts, multinucleated giant cells, foam cells, hemosiderin, and Rushton bodies (hyaline bodies) in the epithelial lining.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_05_1",
+        "question_id": "q_oral_path_cysts_05",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 10,
+        "source_type": "exact",
+        "source_text": "Microscopic features: Fibrous capsule contains cholesterol clefts, multinucleated giant cells, foam cells, hemosiderin, and Rushton bodies (hyaline bodies) in the epithelial lining.",
+        "source_text_normalized": "microscopic features fibrous capsule contains cholesterol clefts multinucleated giant cells foam cells hemosiderin and rushton bodies hyaline bodies in the epithelial lining",
+        "text_anchor": "Microscopic features: Fibrous capsule contains cholesterol",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_06",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 16,
+      "topic_ar": "المظهر الشعاعي للكيس التاجي (Dentigerous Cyst Radiographic Presentation)",
+      "topic_en": "Dentigerous Cyst Radiographic Presentation",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Dentigerous cyst",
+        "Follicular cyst",
+        "Unerupted tooth",
+        "CEJ attachment",
+        "Radiography"
+      ],
+      "text_ar": "شعاعياً، يظهر الكيس التاجي (Dentigerous / Follicular cyst) نموذجياً على هيئة تخلخل شعاعي وحيد الحجرة محدد الحواف يحيط بـ:",
+      "text_en": "Radiographically, dentigerous (follicular) cyst appears as a well-defined area of radiolucency surrounding the:",
+      "options_ar": [
+        "الجزء الذروي من جذر سن بازغ",
+        "تاج سن غير بازغ أو منطمر ويتصل عند عنق السن (CEJ)",
+        "منطقة مفترق الجذور لسن طاحن سفلي حي",
+        "كامل جذر السن من الذروة للتاج"
+      ],
+      "options_en": [
+        "Periapical part of the tooth",
+        "Crown of unerupted or impacted tooth attached at the CEJ",
+        "Bifurcation of a mandibular vital molar",
+        "Entire root from apex to crown"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. تاج سن غير بازغ أو منطمر ويتصل عند عنق السن (CEJ)\n\n📌 مرجع الشيت (صفحة 16، 17):\nينشأ الكيس التاجي نتيجة انفصال وتراكم السائل بين طبقات النسيج الطلائي المصغر للميناء (REE) وسطح تاج السن غير البازغ. يحيط الكيس بالتاج وتلتحم محفظته حصراً عند الملتقى المينائي الملاطي (Cementoenamel junction - CEJ)، وأشيع أسنانه هي طواحين العقل السفلية والأنياب العلوية المنطمرة.",
+      "answer_en": "Correct Answer: B. Crown of unerupted or impacted tooth attached at the CEJ\n\nSheet Reference (Pages 16, 17):\n\"Radiographically, it appears as a well-defined unilocular radiolucency enclosing the crown of an unerupted tooth, attached symmetrically at the cementoenamel junction (cervical margin).\"",
+      "quote_ref": "Dentigerous cyst encloses the crown of an unerupted tooth and is attached to the tooth at the cementoenamel junction.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_06_1",
+        "question_id": "q_oral_path_cysts_06",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 16,
+        "source_type": "exact",
+        "source_text": "Dentigerous cyst encloses the crown of an unerupted tooth and is attached to the tooth at the cementoenamel junction.",
+        "source_text_normalized": "dentigerous cyst encloses the crown of an unerupted tooth and is attached to the tooth at the cementoenamel junction",
+        "text_anchor": "Dentigerous cyst encloses the crown of an unerupted tooth",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_07",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 18,
+      "topic_ar": "التحول الورمي لبطانة الكيس التاجي (Neoplastic Potential of Dentigerous Cyst)",
+      "topic_en": "Neoplastic Potential & Complications of Dentigerous Cyst",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Dentigerous cyst",
+        "Neoplastic transformation",
+        "Ameloblastoma",
+        "Mucoepidermoid carcinoma"
+      ],
+      "text_ar": "قد تخضع البطانة الطلائية للكيس التاجي (Dentigerous cyst) لتحول ورمي وتتطور إلى أي من الأورام التالية:",
+      "text_en": "The epithelial lining of a dentigerous cyst may undergo neoplastic transformation into which of the following neoplasms:",
+      "options_ar": [
+        "ورم الأرومة المينائية (Ameloblastoma)",
+        "السرطانة المخاطية البشروية داخل العظم (Mucoepidermoid carcinoma)",
+        "كلاهما معاً (a & b)",
+        "ساركوما العظام (Osteosarcoma)"
+      ],
+      "options_en": [
+        "Ameloblastoma",
+        "Mucoepidermoid carcinoma",
+        "Both a & b",
+        "Osteosarcoma"
+      ],
+      "correct_index": 2,
+      "answer_ar": "الإجابة الصحيحة: C. كلاهما معاً (Both a & b)\n\n📌 مرجع الشيت (صفحة 18) وسؤال سنوات دورة طرابلس:\nتمتلك بطانة الكيس التاجي قدرة كامنة للتحول الورمي (Neoplastic transformation):\n1. Unicystic ameloblastoma (أشيع ورم ينشأ داخل جدار الكيس التاجي).\n2. Intraosseous mucoepidermoid carcinoma (بسبب وجود خلايا مخاطية متحولة في البطانة).\n3. Squamous cell carcinoma (سرطانة الخلايا الحرشفية).",
+      "answer_en": "Correct Answer: C. Both a & b\n\nSheet Reference (Page 18):\n\"Lining of dentigerous cyst may undergo neoplastic transformation into:\n1. Ameloblastoma (unicystic type)\n2. Intraosseous mucoepidermoid carcinoma (via mucous metaplasia)\n3. Squamous cell carcinoma.\"",
+      "quote_ref": "Complications: Potential to develop ameloblastoma, squamous cell carcinoma, or intraosseous mucoepidermoid carcinoma.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_07_1",
+        "question_id": "q_oral_path_cysts_07",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 18,
+        "source_type": "exact",
+        "source_text": "Complications: Potential to develop ameloblastoma, squamous cell carcinoma, or intraosseous mucoepidermoid carcinoma.",
+        "source_text_normalized": "complications potential to develop ameloblastoma squamous cell carcinoma or intraosseous mucoepidermoid carcinoma",
+        "text_anchor": "Complications: Potential to develop ameloblastoma, squamous",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_08",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 22,
+      "topic_ar": "سماكة وخصائص بطانة الكيس المتقرن (OKC Epithelial Lining)",
+      "topic_en": "Histopathology of Odontogenic Keratocyst (OKC) Lining",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "OKC",
+        "Epithelial thickness",
+        "Palisaded basal layer",
+        "Histopathology"
+      ],
+      "text_ar": "نسيجياً، تتميز البطانة الطلائية للكيس المتقرن سني المنشأ (Odontogenic Keratocyst - OKC) بسماكة رقيقة منتظمة مميزة تبلغ حوالي:",
+      "text_en": "Histopathologically, the epithelial lining thickness of odontogenic keratocyst (OKC) is characteristically about:",
+      "options_ar": [
+        "1 إلى 2 طبقة خلوية فقط",
+        "5 إلى 10 (نموذجياً 6 إلى 8) طبقات خلوية دون حليمات رابطة (No rete pegs)",
+        "15 إلى 20 طبقة خلوية مع حليمات رابطة بارزة",
+        "21 إلى 25 طبقة خلوية مطبقة متقرنة بالكامل"
+      ],
+      "options_en": [
+        "1–2 cells in thickness",
+        "5–10 cells in thickness without rete pegs",
+        "15–20 cells in thickness",
+        "21–25 cells in thickness"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. من 5 إلى 10 خلايا في السماكة دون حليمات رابطة\n\n📌 المظهر النسيجي الكلاسيكي لـ OKC (شيت د. إبتسام ص 22):\n1. بطانة طلائية رقيقة ومنتظمة السماكة (5–10 خلايا أو 6–8 خلايا).\n2. سطح تجويفي متموج ومتقرن جزئياً (Corrugated parakeratinized surface).\n3. غياب الحليمات الرابطة (Absence of rete pegs / flat basal interface).\n4. طبقة قاعدية عمادية أو مكعبة ذات أنوية مفرطة التصبغ مصطفة كألواح السياج أو شواهد القبور (Palisaded / tombstone nuclei).",
+      "answer_en": "Correct Answer: B. 5–10 cells in thickness without rete pegs\n\nSheet Reference (Page 22):\n\"Microscopic features of OKC: Epithelial lining is remarkably uniform in thickness, usually 6 to 8 (5-10) cells thick, with flat basal interface and no rete pegs. Basal layer exhibits palisaded hyperchromatic nuclei.\"",
+      "quote_ref": "Microscopic features of OKC: Epithelial lining is remarkably uniform in thickness, usually 6 to 8 (5-10) cells thick, with no rete pegs.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_08_1",
+        "question_id": "q_oral_path_cysts_08",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 22,
+        "source_type": "exact",
+        "source_text": "Microscopic features of OKC: Epithelial lining is remarkably uniform in thickness, usually 6 to 8 (5-10) cells thick, with no rete pegs.",
+        "source_text_normalized": "microscopic features of okc epithelial lining is remarkably uniform in thickness usually 6 to 8 510 cells thick with no rete pegs",
+        "text_anchor": "Microscopic features of OKC: Epithelial lining is remarkably",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_09",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 22,
+      "topic_ar": "أكياس الأقمار وسر النكس في الكيس المتقرن (OKC Satellite Cysts & Recurrence)",
+      "topic_en": "Daughter / Satellite Cysts and High Recurrence in OKC",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "OKC",
+        "Satellite cysts",
+        "Daughter cysts",
+        "Recurrence rate",
+        "Fibrous capsule"
+      ],
+      "text_ar": "الكيس السني التطوري الذي يشتهر باحتواء محفظته الليفية على أكياس ابنة أو أقمار مجهرية (Daughter / Satellite cysts) تسبب ارتفاع نسبة نكسه بعد الاستئصال هو:",
+      "text_en": "The developmental odontogenic cyst that characteristically contains daughter (satellite) cysts in its fibrous capsule, leading to high recurrence, is:",
+      "options_ar": [
+        "الكيس اللثوي (Gingival cyst)",
+        "الكيس المتقرن سني المنشأ (Odontogenic Keratocyst - OKC)",
+        "كيس الرباط الجانبي (Lateral periodontal cyst)",
+        "الكيس السني الغدي (Glandular odontogenic cyst)"
+      ],
+      "options_en": [
+        "Gingival cyst",
+        "Odontogenic Keratocyst (OKC)",
+        "Lateral periodontal cyst",
+        "Glandular odontogenic cyst"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. الكيس المتقرن سني المنشأ (OKC)\n\n📌 مرجع الشيت (صفحة 22، 23):\nتحتوي محفظة الـ OKC الليفية في كثير من الحالات على أكياس تابعة صغيرة (Satellite microcysts) وجزر خلوية سنية منفصلة. عند تجريف الكيس الرئيس، قد تبقى هذه البؤر المجهرية مدفونة في العظم المحيط لتعاود النمو لاحقاً، مما يرفع نسبة النكس إلى قرابة 30-60%.",
+      "answer_en": "Correct Answer: B. Odontogenic Keratocyst (OKC)\n\nSheet Reference (Pages 22, 23):\n\"Capsule: May contain small satellite cysts (daughter cysts) and solid islands of odontogenic epithelium, which account for the high recurrence rate.\"",
+      "quote_ref": "Capsule: May contain small satellite cysts (daughter cysts) and solid islands of odontogenic epithelium, which account for the high recurrence rate.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_09_1",
+        "question_id": "q_oral_path_cysts_09",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 22,
+        "source_type": "exact",
+        "source_text": "Capsule: May contain small satellite cysts (daughter cysts) and solid islands of odontogenic epithelium, which account for the high recurrence rate.",
+        "source_text_normalized": "capsule may contain small satellite cysts daughter cysts and solid islands of odontogenic epithelium which account for the high recurrence rate",
+        "text_anchor": "Capsule: May contain small satellite cysts (daughter cysts)",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_10",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 20,
+      "topic_ar": "نمط النمو الطولي للكيس المتقرن (OKC Anteroposterior Growth Pattern)",
+      "topic_en": "Clinical Growth Pattern of OKC",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "OKC",
+        "Growth pattern",
+        "Anteroposterior",
+        "Mandible ramus"
+      ],
+      "text_ar": "أي من أكياس الفكين يمتلك خاصية سريرية فريدة للنمو والامتداد داخل نخاع العظم بالاتجاه الأمامي الخلفي (Anteroposterior) دون إحداث انتفاخ قشري خارجي واضح إلا بعد وصوله لحجم ضخم:",
+      "text_en": "Which of the jaw cysts exhibits a characteristic tendency to grow along the internal medullary cavity in an anteroposterior direction with minimal cortical expansion until reaching a large size:",
+      "options_ar": [
+        "الكيس الجذري (Radicular cyst)",
+        "الكيس المتقرن سني المنشأ (Odontogenic Keratocyst - OKC)",
+        "الكيس التاجي (Dentigerous cyst)",
+        "الكيس العظمي أم الدموي (Aneurysmal bone cyst)"
+      ],
+      "options_en": [
+        "Radicular cyst",
+        "Odontogenic Keratocyst (OKC)",
+        "Dentigerous cyst",
+        "Aneurysmal bone cyst"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. الكيس المتقرن سني المنشأ (OKC)\n\n📌 مرجع الشيت (صفحة 20، 21):\nيتميز الـ OKC بكونه ينمو عبر استبدال التربيق العظمي الإسفنجي الداخلي والامتداد طولياً بالاتجاه الأمامي الخلفي (Anteroposterior direction) داخل جسم ورأد الفك السفلي (Ramus) دون أن يُحدث تمدداً ملحوظاً في الصفيحتين العظميتين الدهليزية أو اللسانية، ولذلك يكتشفه الطبيب غالباً بالصدفة في الأشعة البانورامية بحجم كبير.",
+      "answer_en": "Correct Answer: B. Odontogenic Keratocyst (OKC)\n\nSheet Reference (Pages 20, 21):\n\"Clinical features: Remarkable tendency to grow in an anteroposterior direction within the medullary cavity without causing marked cortical expansion, often reaching large dimensions before discovery.\"",
+      "quote_ref": "Clinical features: Remarkable tendency to grow in an anteroposterior direction within the medullary cavity without causing marked cortical expansion.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_10_1",
+        "question_id": "q_oral_path_cysts_10",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 20,
+        "source_type": "exact",
+        "source_text": "Clinical features: Remarkable tendency to grow in an anteroposterior direction within the medullary cavity without causing marked cortical expansion.",
+        "source_text_normalized": "clinical features remarkable tendency to grow in an anteroposterior direction within the medullary cavity without causing marked cortical expansion",
+        "text_anchor": "Clinical features: Remarkable tendency to grow in an antero",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_11",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 24,
+      "topic_ar": "متلازمة غورلين-غولتز وأكياس الـ OKC المتعددة (Gorlin-Goltz Syndrome)",
+      "topic_en": "Gorlin-Goltz Syndrome (Nevoid Basal Cell Carcinoma Syndrome)",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Gorlin-Goltz",
+        "NBCCS",
+        "Multiple OKCs",
+        "Bifid rib",
+        "Falx cerebri"
+      ],
+      "text_ar": "مريض يراجع بوجود أكياس متقرنة متعددة بالفكين (Multiple OKCs)، سرطانات قاعدية الخلايا في الجلد (BCC)، أضلاع مشقوقة (Bifid ribs)، وتكلس في منجل المخ (Falx cerebri)؛ التشخيص هو:",
+      "text_en": "A patient presenting with multiple odontogenic keratocysts (OKCs), multiple basal cell carcinomas of skin, bifid ribs, and calcification of the falx cerebri is diagnosed with:",
+      "options_ar": [
+        "متلازمة غاردنر (Gardner syndrome)",
+        "متلازمة غورلين-غولتز / سرطانة الخلايا القاعدية الوحمانية (Gorlin-Goltz syndrome / NBCCS)",
+        "متلازمة بوتز-جيغرز (Peutz-Jeghers syndrome)",
+        "متلازمة ستيرج ويبر (Sturge-Weber syndrome)"
+      ],
+      "options_en": [
+        "Gardner syndrome",
+        "Gorlin-Goltz syndrome (Nevoid basal cell carcinoma syndrome)",
+        "Peutz-Jeghers syndrome",
+        "Sturge-Weber syndrome"
+      ],
+      "correct_index": 1,
+      "answer_ar": "الإجابة الصحيحة: B. متلازمة غورلين-غولتز (Gorlin-Goltz syndrome)\n\n📌 مرجع الشيت (صفحة 24):\nتحدث متلازمة غورلين-غولتز (NBCCS) نتيجة طفرة في الجين الكابت للأورام PTCH (الصبغي 9q). تتظاهر بالأركان الكلاسيكية الأربعة:\n1. أكياس OKC سنية متعددة في الفكين.\n2. سرطانات قاعدية الخلايا جلدية متعددة (Multiple Nevoid Basal Cell Carcinomas).\n3. تشوهات هيكلية عظمية أبرزها الأضلاع المشقوقة (Bifid ribs).\n4. تكلس باكر لغشاء منجل المخ (Calcification of falx cerebri).",
+      "answer_en": "Correct Answer: B. Gorlin-Goltz syndrome (Nevoid basal cell carcinoma syndrome)\n\nSheet Reference (Page 24):\n\"Gorlin-Goltz Syndrome (NBCCS): Autosomal dominant disorder caused by PTCH gene mutation. Hallmarks include multiple OKCs, multiple basal cell carcinomas, bifid ribs, and calcification of the falx cerebri.\"",
+      "quote_ref": "Gorlin-Goltz Syndrome: Multiple OKCs, multiple nevoid basal cell carcinomas, skeletal anomalies (bifid ribs), calcification of falx cerebri.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_11_1",
+        "question_id": "q_oral_path_cysts_11",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 24,
+        "source_type": "exact",
+        "source_text": "Gorlin-Goltz Syndrome: Multiple OKCs, multiple nevoid basal cell carcinomas, skeletal anomalies (bifid ribs), calcification of falx cerebri.",
+        "source_text_normalized": "gorlingoltz syndrome multiple okcs multiple nevoid basal cell carcinomas skeletal anomalies bifid ribs calcification of falx cerebri",
+        "text_anchor": "Gorlin-Goltz Syndrome: Multiple OKCs, multiple nevoid basal",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_12",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 25,
+      "topic_ar": "كيس الرباط اللثوي الجانبي وحيوية السن (Lateral Periodontal Cyst)",
+      "topic_en": "Lateral Periodontal Cyst vs Lateral Radicular Cyst",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Lateral periodontal cyst",
+        "Tooth vitality",
+        "Botryoid cyst",
+        "Differential diagnosis"
+      ],
+      "text_ar": "فيما يخص كيس الرباط اللثوي الجانبي (Lateral Periodontal Cyst)، أي من العبارات التالية خاطئة وغير صحيحة:",
+      "text_en": "Regarding the Lateral Periodontal Cyst, which of the following statements is FALSE:",
+      "options_ar": [
+        "ينشأ من بقايا الصفيحة السنية (بقايا سيريس)",
+        "تحدث معظم حالاته في منطقة الضواحك والأنياب بالفك السفلي",
+        "يظهر شعاعياً كتخلخل مجاور لجذر سن غير حي وميت اللب (Non-vital tooth)",
+        "يُعرف شكله عديد المساكن / الحجرات بالكيس البوتريويدي (Botryoid odontogenic cyst)"
+      ],
+      "options_en": [
+        "Arises from rests of dental lamina (rests of Serres)",
+        "Most cases occur in the mandibular canine-premolar region",
+        "Radiographically located lateral to the root of a non-vital tooth",
+        "The botryoid variant shows a multilocular radiographic appearance"
+      ],
+      "correct_index": 2,
+      "answer_ar": "الإجابة الصحيحة: C. العبارة الخاطئة هي ارتباطه بسن غير حي (Non-vital)\n\n📌 فرق سريري جوهري في امتحانات الأورال باثولوجي (د. إبتسام ص 25):\n- كيس الرباط اللثوي الجانبي (Lateral periodontal cyst): كيس تطوري (Developmental) وتكون الأسنان المجاورة له حية وسليمة عصبياً (VITAL teeth).\n- إذا كان السن غير حي (Non-vital)، فالآفة هي كيس جذري جانبي (Lateral radicular cyst) ناتج عن قناة لبية جانبية ملتهبة متفرعة من عصب متعفن.",
+      "answer_en": "Correct Answer: C. Radiographically located lateral to the root of a non-vital tooth (False statement)\n\nSheet Reference (Page 25):\nLateral periodontal cyst is a developmental cyst strictly associated with adjacent VITAL teeth. Association with a non-vital tooth indicates an inflammatory lateral radicular cyst.",
+      "quote_ref": "Lateral periodontal cyst: Developmental cyst, vital adjacent teeth. Site: mandibular canine-premolar area. Must be differentiated from lateral radicular cyst (non-vital tooth).",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_12_1",
+        "question_id": "q_oral_path_cysts_12",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 25,
+        "source_type": "exact",
+        "source_text": "Lateral periodontal cyst: Developmental cyst, vital adjacent teeth. Site: mandibular canine-premolar area. Must be differentiated from lateral radicular cyst (non-vital tooth).",
+        "source_text_normalized": "lateral periodontal cyst developmental cyst vital adjacent teeth site mandibular caninepremolar area must be differentiated from lateral radicular cyst nonvital tooth",
+        "text_anchor": "Lateral periodontal cyst: Developmental cyst, vital adjacent",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_13",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 27,
+      "topic_ar": "الخلايا الشبحية في كيس غورلين (Ghost Cells in Calcifying Odontogenic Cyst)",
+      "topic_en": "Ghost Cells in Calcifying Odontogenic Cyst (COC / Gorlin Cyst)",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Ghost cells",
+        "COC",
+        "Gorlin cyst",
+        "Calcification",
+        "Histopathology"
+      ],
+      "text_ar": "الخلايا الشبحية (Ghost cells - خلايا طلائية يوزينية شاحبة متضخمة فقدت أنويتها مع بقاء حدودها الخلوية واضحة) هي السمة النسيجية التشخيصية لـ:",
+      "text_en": "Ghost cells (pale eosinophilic, anucleated swollen epithelial cells with preserved outlines) are the pathognomonic diagnostic feature of:",
+      "options_ar": [
+        "ساركوما الألياف (Fibrosarcoma)",
+        "ساركوما العظام (Osteosarcoma)",
+        "الكيس السني المتكلس / كيس غورلين (Calcifying Odontogenic Cyst - COC / Gorlin's cyst)",
+        "ورم الأرومة المينائية الصلب"
+      ],
+      "options_en": [
+        "Fibrosarcoma",
+        "Osteosarcoma",
+        "Calcifying Odontogenic Cyst (COC / Gorlin's cyst)",
+        "Solid ameloblastoma"
+      ],
+      "correct_index": 2,
+      "answer_ar": "الإجابة الصحيحة: C. الكيس السني المتكلس / كيس غورلين (COC / Gorlin's cyst)\n\n📌 سؤال سنوات متكرر في جامعة طرابلس وشيت د. إبتسام (ص 27، 28):\nالخلايا الشبحية (Ghost cells) هي خلايا طلائية خضعت لتقرن غير طبيعي وفقدت أنويتها تاركة شكلاً شاحباً كالشبح، وتتميز بقابليتها للتكلس التحللي (Dystrophic calcification). وهي السمة النسيجية الفارقة لكيس غورلين (Calcifying Odontogenic Cyst - COC).",
+      "answer_en": "Correct Answer: C. Calcifying Odontogenic Cyst (COC / Gorlin's cyst)\n\nSheet Reference (Pages 27, 28):\n\"Calcifying Odontogenic Cyst (Gorlin's cyst): Characterized by presence of ghost cells within the epithelial lining which may undergo calcification.\"",
+      "quote_ref": "Calcifying Odontogenic Cyst (Gorlin cyst): Characterized by presence of ghost cells within the epithelial lining which may undergo calcification.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_13_1",
+        "question_id": "q_oral_path_cysts_13",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 27,
+        "source_type": "exact",
+        "source_text": "Calcifying Odontogenic Cyst (Gorlin cyst): Characterized by presence of ghost cells within the epithelial lining which may undergo calcification.",
+        "source_text_normalized": "calcifying odontogenic cyst gorlin cyst characterized by presence of ghost cells within the epithelial lining which may undergo calcification",
+        "text_anchor": "Calcifying Odontogenic Cyst (Gorlin cyst): Characterized by",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_14",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 6,
+      "topic_ar": "تصنيف الأكياس: سنية وغير سنية (Odontogenic vs Non-Odontogenic Cysts)",
+      "topic_en": "WHO Classification: Odontogenic vs Non-Odontogenic Cysts",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Classification",
+        "Non-odontogenic cyst",
+        "Nasopalatine duct cyst",
+        "WHO classification"
+      ],
+      "text_ar": "جميع الأكياس التالية تُصنف كأكياس تطورية سنية المنشأ (Developmental Odontogenic Cysts) ما عدا:",
+      "text_en": "All of the following are developmental odontogenic cysts EXCEPT:",
+      "options_ar": [
+        "الكيس المتقرن سني المنشأ (Odontogenic keratocyst)",
+        "الكيس التاجي (Dentigerous cyst)",
+        "كيس الرباط اللثوي الجانبي (Lateral periodontal cyst)",
+        "كيس القناة الأنفية الحنكية / القناة القاطعة (Nasopalatine duct / Incisive canal cyst)"
+      ],
+      "options_en": [
+        "Odontogenic keratocyst",
+        "Dentigerous cyst",
+        "Lateral periodontal cyst",
+        "Nasopalatine duct (incisive canal) cyst"
+      ],
+      "correct_index": 3,
+      "answer_ar": "الإجابة الصحيحة: D. كيس القناة الأنفية الحنكية (Nasopalatine duct cyst)\n\n📌 تصنيف منظمة الصحة العالمية وشيت د. إبتسام (ص 6، 31):\n- الأكياس سنية المنشأ (Odontogenic): تشمل OKC، Dentigerous cyst، Lateral periodontal cyst، و Gingival cyst.\n- كيس القناة الأنفية الحنكية (Nasopalatine duct cyst): كيس تطوري غير سني المنشأ (Non-odontogenic cyst) ينشأ من بقايا القناة الأنفية الحنكية في قبة الحنك بين الثنايا العلوية.",
+      "answer_en": "Correct Answer: D. Nasopalatine duct (incisive canal) cyst\n\nSheet Reference (Pages 6, 31):\nNasopalatine duct cyst is a developmental NON-ODONTOGENIC cyst originating from epithelial remnants of the incisive canal/nasopalatine duct, whereas OKC, dentigerous cyst, and lateral periodontal cyst are odontogenic.",
+      "quote_ref": "Non-odontogenic Cysts: Nasopalatine duct cyst (incisive canal cyst), Nasolabial cyst.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_14_1",
+        "question_id": "q_oral_path_cysts_14",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 6,
+        "source_type": "exact",
+        "source_text": "Non-odontogenic Cysts: Nasopalatine duct cyst (incisive canal cyst), Nasolabial cyst.",
+        "source_text_normalized": "nonodontogenic cysts nasopalatine duct cyst incisive canal cyst nasolabial cyst",
+        "text_anchor": "Non-odontogenic Cysts: Nasopalatine duct cyst (incisive canal",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "q_oral_path_cysts_15",
+      "subject_id": "oral-diseases",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
+      "subject_name_en": "Oral Pathology",
+      "sheet_id": "sh_oral_path_cysts_04",
+      "sheet_title_ar": "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
+      "sheet_title_en": "Lecture 4: Cysts of the Jaw",
+      "page_ref": 36,
+      "topic_ar": "كيس ستافني العظمي وانخفاض الغدة اللعابية (Stafne Bone Defect)",
+      "topic_en": "Stafne Bone Defect / Latent Bone Cavity",
+      "type": "past_exam",
+      "source": "past_exam",
+      "tags": [
+        "Stafne bone cyst",
+        "Salivary gland",
+        "Pseudocyst",
+        "Lingual mandible"
+      ],
+      "text_ar": "أي من العبارات التالية صحيحة تماماً فيما يتعلق بـ تجويف أو كيس ستافني العظمي (Stafne bone cyst / Latent bone cavity)؟",
+      "text_en": "Which statement is true regarding Stafne bone cyst (latent bone cavity)?",
+      "options_ar": [
+        "هو انخفاض تقعري في العظم القشري على السطح اللساني للفك السفلي أسفل القناة السنخية",
+        "يحتوي نموذجياً على نسيج من الغدة اللعابية تحت الفك السفلي (Submandibular gland tissue)",
+        "هو كيس كاذب غير مبطن بالطلائية، غير مترقٍ، ولا يحتاج لأي علاج جراحي",
+        "جميع ما سبق صحيح (All of the above)"
+      ],
+      "options_en": [
+        "A focal concavity of the cortical bone on the lingual surface of the mandible",
+        "Contains ectopic submandibular salivary gland tissue",
+        "Static asymptomatic pseudocyst that requires no surgical treatment",
+        "All of the above"
+      ],
+      "correct_index": 3,
+      "answer_ar": "الإجابة الصحيحة: D. جميع ما سبق صحيح (All of the above)\n\n📌 مرجع الشيت (صفحة 36) وسؤال سنوات دورة طرابلس:\nانخفاض ستافني (Stafne defect / Latent bone cavity):\n1. انخفاض تشريحي في العظم القشري اللساني للفك السفلي يقع تحت القناة العصبية السنخية السفلية قرب زاوية الفك.\n2. تشغله فصوص من الغدة اللعابية تحت الفك السفلي (Submandibular gland).\n3. يُعد كيساً كاذباً (Pseudocyst / Non-epithelialized) ثابتاً ولا يسبب أعراضاً، ولا يتطلب أي استئصال جراحي.",
+      "answer_en": "Correct Answer: D. All of the above\n\nSheet Reference (Page 36):\n\"Stafne Bone Defect: Concavity on lingual surface of the mandible below the inferior dental canal, containing normal salivary gland tissue... Static, asymptomatic, no treatment required.\"",
+      "quote_ref": "Stafne Bone Defect: Concavity on lingual surface of mandible containing normal salivary gland tissue... Static, asymptomatic, no treatment required.",
+      "source_reference": {
+        "id": "ref_q_oral_path_cysts_15_1",
+        "question_id": "q_oral_path_cysts_15",
+        "sheet_id": "sh_oral_path_cysts_04",
+        "page_number": 36,
+        "source_type": "exact",
+        "source_text": "Stafne Bone Defect: Concavity on lingual surface of mandible containing normal salivary gland tissue... Static, asymptomatic, no treatment required.",
+        "source_text_normalized": "stafne bone defect concavity on lingual surface of mandible containing normal salivary gland tissue static asymptomatic no treatment required",
+        "text_anchor": "Stafne Bone Defect: Concavity on lingual surface of mandible",
+        "bounding_box": null,
+        "confidence": 0.95,
+        "verification_status": "verified"
+      }
     }
   ]
 }

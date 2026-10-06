@@ -171,6 +171,15 @@
       "subjects": [
         "ortho"
       ]
+    },
+    {
+      "id": "dr-ebtesam",
+      "name_ar": "د. إبتسام الديب",
+      "name_en": "Dr. Ebtesam Aldieb",
+      "title": "أستاذة اورال باثولوجي",
+      "subjects": [
+        "oral-diseases"
+      ]
     }
   ]
 }
