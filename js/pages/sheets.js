@@ -94,7 +94,7 @@ const SheetsPage = {
     { id: 'cons-endo', code: 'CONS-302', name_en: 'Conservative Dentistry and Endodontics II', name_ar: 'طب الأسنان التحفظي 2', icon: 'tooth' },
     { id: 'ortho', code: 'ORT-301', name_en: 'Orthodontics I', name_ar: 'تقويم الأسنان 1', icon: 'smile' },
     { id: 'omfs', code: 'OMS-301', name_en: 'Oral and Maxillofacial Surgery I', name_ar: 'جراحة الفم والوجه والفكين 1', icon: 'scissors' },
-    { id: 'oral-diseases', code: 'OD-301', name_en: 'Oral Diseases', name_ar: 'علم أمراض الفم', icon: 'microscope' },
+    { id: 'oral-diseases', code: 'OD-301', name_en: 'Oral Pathology', name_ar: 'اورال باثولوجي', icon: 'microscope', aliases: ['علم أمراض الفم', 'أمراض الفم', 'oral-pathology'] },
     { id: 'fixed-pros', code: 'FP-302', name_en: 'Fixed Prosthodontics II', name_ar: 'الاستعاضة السنية الثابتة 2', icon: 'crown' },
     { id: 'pedo', code: 'PED-301', name_en: 'Pediatric Dentistry I', name_ar: 'طب أسنان الأطفال 1', icon: 'heart', aliases: ['pediatric'] },
     { id: 'endo', code: 'END-301', name_en: 'Diseases and Treatment of the Pulp I (Endodontics I)', name_ar: 'أمراض وعلاج لب الأسنان 1', icon: 'activity' }

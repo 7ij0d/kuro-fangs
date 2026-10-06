@@ -57,7 +57,7 @@ class DataService {
         dayIndex: 1, // Monday
         day_ar: 'الإثنين', day_en: 'Monday',
         slots: [
-          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS380', subject_id: 'oral-diseases', subject_ar: 'أمراض الفم', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' },
+          { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS380', subject_id: 'oral-diseases', subject_ar: 'اورال باثولوجي', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' },
           { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'DS351', subject_id: 'endo', subject_ar: 'أمراض وعلاج اللثة 1', subject_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#C2410C' }
         ]
       },
@@ -75,7 +75,7 @@ class DataService {
         slots: [
           { time: '08:00 - 10:00', startHour: 8, endHour: 10, code: 'DS311', subject_id: 'cons-endo', subject_ar: 'العلاج التحفظي وعلاج الجذور 2', subject_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#DB2777' },
           { time: '10:00 - 12:00', startHour: 10, endHour: 12, code: 'DS371', subject_id: 'ortho', subject_ar: 'تقويم الأسنان 1', subject_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#9333EA' },
-          { time: '02:00 - 04:00', startHour: 14, endHour: 16, code: 'DS380', subject_id: 'oral-diseases', subject_ar: 'أمراض الفم (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' }
+          { time: '02:00 - 04:00', startHour: 14, endHour: 16, code: 'DS380', subject_id: 'oral-diseases', subject_ar: 'اورال باثولوجي (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' }
         ]
       },
       {
@@ -793,8 +793,8 @@ class DataService {
       },
       {
         id: 'oral-diseases',
-        name_ar: 'علم أمراض الفم',
-        name_en: 'Oral Diseases / Pathology',
+        name_ar: 'اورال باثولوجي',
+        name_en: 'Oral Pathology',
         code: 'OD-301',
         doctor_name_ar: null,
         doctor_name_en: null,
@@ -1460,7 +1460,7 @@ class DataService {
   {
     "id": "q_path_pulp_01",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Disorders of Dental Pulp)",
@@ -1510,7 +1510,7 @@ class DataService {
   {
     "id": "q_path_pulp_02",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Disorders of Dental Pulp)",
@@ -1560,7 +1560,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_01",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -1615,7 +1615,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_02",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -1665,7 +1665,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_03",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -1753,7 +1753,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_04",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -1804,7 +1804,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_05",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -1854,7 +1854,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_06",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -1904,7 +1904,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_07",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -1954,7 +1954,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_08",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -2000,7 +2000,7 @@ class DataService {
   {
     "id": "q_oral_path_caries_09",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -2050,7 +2050,7 @@ class DataService {
   {
     "id": "q_oral_path_pulp_03",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
@@ -2100,7 +2100,7 @@ class DataService {
   {
     "id": "q_oral_path_pulp_04",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
@@ -2150,7 +2150,7 @@ class DataService {
   {
     "id": "q_oral_path_pulp_05",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
@@ -2200,7 +2200,7 @@ class DataService {
   {
     "id": "q_oral_path_pulp_06",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
@@ -2246,7 +2246,7 @@ class DataService {
   {
     "id": "q_oral_path_pulp_07",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
@@ -2296,7 +2296,7 @@ class DataService {
   {
     "id": "q_oral_path_pulp_08",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_pulp_02",
     "sheet_title_ar": "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
@@ -2342,7 +2342,7 @@ class DataService {
   {
     "id": "q_oral_path_periapical_01",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_periapical_03",
     "sheet_title_ar": "المحاضرة 3: أمراض الأنسجة المحيطة بالذروة (Diseases of Periapical Tissues)",
@@ -2392,7 +2392,7 @@ class DataService {
   {
     "id": "q_oral_path_periapical_02",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_periapical_03",
     "sheet_title_ar": "المحاضرة 3: أمراض الأنسجة المحيطة بالذروة (Diseases of Periapical Tissues)",
@@ -2443,7 +2443,7 @@ class DataService {
   {
     "id": "q_oral_path_periapical_03",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_periapical_03",
     "sheet_title_ar": "المحاضرة 3: أمراض الأنسجة المحيطة بالذروة (Diseases of Periapical Tissues)",
@@ -2489,7 +2489,7 @@ class DataService {
   {
     "id": "q_oral_path_periapical_04",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_periapical_03",
     "sheet_title_ar": "المحاضرة 3: أمراض الأنسجة المحيطة بالذروة (Diseases of Periapical Tissues)",
@@ -2539,7 +2539,7 @@ class DataService {
   {
     "id": "q_oral_path_periapical_05",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_periapical_03",
     "sheet_title_ar": "المحاضرة 3: أمراض الأنسجة المحيطة بالذروة (Diseases of Periapical Tissues)",
@@ -2590,7 +2590,7 @@ class DataService {
   {
     "id": "q_test_fallback_01",
     "subject_id": "oral-diseases",
-    "subject_name_ar": "أمراض الفم (Oral Pathology)",
+    "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
     "subject_name_en": "Oral Pathology",
     "sheet_id": "sh_oral_path_caries_01",
     "sheet_title_ar": "المحاضرة 1: تسوس الأسنان (Dental Caries)",
@@ -2648,7 +2648,7 @@ class DataService {
       {
         id: "sh_oral_path_caries_01",
         subject_id: "oral-diseases",
-        subject_name_ar: "أمراض الفم (Oral Pathology)",
+        subject_name_ar: "اورال باثولوجي (Oral Pathology)",
         subject_code: "DS380",
         order_index: 1,
         title: "Lecture 1: Dental Caries",
@@ -2724,7 +2724,7 @@ class DataService {
       {
         id: "sh_oral_path_pulp_02",
         subject_id: "oral-diseases",
-        subject_name_ar: "أمراض الفم (Oral Pathology)",
+        subject_name_ar: "اورال باثولوجي (Oral Pathology)",
         subject_code: "DS380",
         order_index: 2,
         title: "Lecture 2: Diseases of the Dental Pulp",
@@ -2801,7 +2801,7 @@ class DataService {
       {
         id: "sh_oral_path_periapical_03",
         subject_id: "oral-diseases",
-        subject_name_ar: "أمراض الفم (Oral Pathology)",
+        subject_name_ar: "اورال باثولوجي (Oral Pathology)",
         subject_code: "DS380",
         order_index: 3,
         title: "Lecture 3: Diseases of Periapical Tissues",

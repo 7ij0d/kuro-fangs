@@ -76,8 +76,8 @@
     },
     {
       "id": "oral-diseases",
-      "name_ar": "أمراض الفم",
-      "name_en": "Oral Diseases",
+      "name_ar": "اورال باثولوجي",
+      "name_en": "Oral Pathology",
       "code": "OD-301",
       "year": 3,
       "semester": "both",

@@ -2235,7 +2235,7 @@ const messages = {
     "studyPlan.addBlock": "أضف جلسة",
     "studyPlan.planSession": "خطّط جلستك القادمة",
     "studyPlan.taskTitle": "عنوان المهمة",
-    "studyPlan.taskPlaceholder": "مثال: مراجعة ملاحظات أمراض الفم",
+    "studyPlan.taskPlaceholder": "مثال: مراجعة ملاحظات اورال باثولوجي",
     "studyPlan.subject": "المادة",
     "studyPlan.optional": "(اختياري)",
     "studyPlan.subjectPlaceholder": "علم الأمراض",

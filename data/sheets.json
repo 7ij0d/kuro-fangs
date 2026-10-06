@@ -3,7 +3,7 @@
     {
       "id": "sh_oral_path_caries_01",
       "subject_id": "oral-diseases",
-      "subject_name_ar": "أمراض الفم (Oral Pathology)",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
       "subject_code": "DS380",
       "order_index": 1,
       "title": "Lecture 1: Dental Caries",
@@ -79,7 +79,7 @@
     {
       "id": "sh_oral_path_pulp_02",
       "subject_id": "oral-diseases",
-      "subject_name_ar": "أمراض الفم (Oral Pathology)",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
       "subject_code": "DS380",
       "order_index": 2,
       "title": "Lecture 2: Diseases of the Dental Pulp",
@@ -156,7 +156,7 @@
     {
       "id": "sh_oral_path_periapical_03",
       "subject_id": "oral-diseases",
-      "subject_name_ar": "أمراض الفم (Oral Pathology)",
+      "subject_name_ar": "اورال باثولوجي (Oral Pathology)",
       "subject_code": "DS380",
       "order_index": 3,
       "title": "Lecture 3: Diseases of Periapical Tissues",

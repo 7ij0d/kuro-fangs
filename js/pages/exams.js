@@ -53,7 +53,7 @@ const ExamsPage = {
       day_ar: 'الإثنين',
       day_en: 'Monday',
       slots: {
-        slot1: { code: 'DS380', course_ar: 'أمراض الفم', course_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#D97706' },
+        slot1: { code: 'DS380', course_ar: 'اورال باثولوجي', course_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#D97706' },
         slot2: { code: 'DS351', course_ar: 'أمراض وعلاج اللثة 1', course_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#C2410C' },
         slot3: null,
         slot4: null
@@ -76,7 +76,7 @@ const ExamsPage = {
         slot1: { code: 'DS311', course_ar: 'العلاج التحفظي وعلاج الجذور 2', course_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '08:00 - 10:00', color: '#DB2777' },
         slot2: { code: 'DS371', course_ar: 'تقويم الأسنان 1', course_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '10:00 - 12:00', color: '#9333EA' },
         slot3: null,
-        slot4: { code: 'DS380', course_ar: 'أمراض الفم (المحاضرة 2)', course_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '02:00 - 04:00', color: '#D97706' }
+        slot4: { code: 'DS380', course_ar: 'اورال باثولوجي (المحاضرة 2)', course_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', time: '02:00 - 04:00', color: '#D97706' }
       }
     },
     {
@@ -110,7 +110,7 @@ const ExamsPage = {
     {
       day_ar: 'الإثنين', day_en: 'Monday',
       slots: [
-        { time: '08:00 - 10:00', code: 'DS380', subject_ar: 'أمراض الفم', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' },
+        { time: '08:00 - 10:00', code: 'DS380', subject_ar: 'اورال باثولوجي', subject_en: 'Oral Pathology', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' },
         { time: '10:00 - 12:00', code: 'DS351', subject_ar: 'أمراض وعلاج اللثة 1', subject_en: 'Periodontology I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#C2410C' }
       ]
     },
@@ -126,7 +126,7 @@ const ExamsPage = {
       slots: [
         { time: '08:00 - 10:00', code: 'DS311', subject_ar: 'العلاج التحفظي وعلاج الجذور 2', subject_en: 'Cons & Endo II', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#DB2777' },
         { time: '10:00 - 12:00', code: 'DS371', subject_ar: 'تقويم الأسنان 1', subject_en: 'Orthodontics I', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#9333EA' },
-        { time: '02:00 - 04:00', code: 'DS380', subject_ar: 'أمراض الفم (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' }
+        { time: '02:00 - 04:00', code: 'DS380', subject_ar: 'اورال باثولوجي (المحاضرة 2)', subject_en: 'Oral Pathology (Lecture 2)', hall_ar: 'مدرج 2', hall_en: 'Auditorium 2', color: '#D97706' }
       ]
     },
     {
@@ -144,7 +144,7 @@ const ExamsPage = {
     { no: 2, name_ar: 'طب الأسنان الوقائي', name_en: 'Preventive Dentistry', code: 'DS 381', day_ar: 'الأربعاء', day_en: 'Wednesday', date: '2027/01/06', time: '11:00 - 12:00' },
     { no: 3, name_ar: 'جراحة الفم والوجه والفكين 1', name_en: 'Oral & Maxillofacial Surgery I', code: 'DS 341', day_ar: 'الأحد', day_en: 'Sunday', date: '2027/01/10', time: '11:00 - 12:00' },
     { no: 4, name_ar: 'الجراحة العامة', name_en: 'General Surgery', code: 'MS 320', day_ar: 'الأربعاء', day_en: 'Wednesday', date: '2027/01/13', time: '11:00 - 12:00' },
-    { no: 5, name_ar: 'أمراض الفم', name_en: 'Oral Diseases / Pathology', code: 'DS 380', day_ar: 'الأحد', day_en: 'Sunday', date: '2027/01/17', time: '11:00 - 12:00' },
+    { no: 5, name_ar: 'اورال باثولوجي', name_en: 'Oral Pathology', code: 'DS 380', day_ar: 'الأحد', day_en: 'Sunday', date: '2027/01/17', time: '11:00 - 12:00' },
     { no: 6, name_ar: 'العلاج التحفظي وعلاج الجذور 2', name_en: 'Cons & Endo II', code: 'DS 311', day_ar: 'الأربعاء', day_en: 'Wednesday', date: '2027/01/20', time: '11:00 - 12:00' },
     { no: 7, name_ar: 'الاستعاضة السنية المتحركة 2', name_en: 'Removable Prosthodontics II', code: 'DS 321', day_ar: 'الأحد', day_en: 'Sunday', date: '2027/01/24', time: '11:00 - 12:00' },
     { no: 8, name_ar: 'الاستعاضة السنية الثابتة 2', name_en: 'Fixed Prosthodontics II', code: 'DS 331', day_ar: 'الأربعاء', day_en: 'Wednesday', date: '2027/01/27', time: '11:00 - 12:00' },
@@ -158,7 +158,7 @@ const ExamsPage = {
   finalData: [
     { no: 1, name_ar: 'الباطنة العامة', name_en: 'General Medicine', code: 'MS 310', day_ar: 'الأحد', day_en: 'Sunday', date: '2027/04/18', time: '11:00 - 13:00' },
     { no: 2, name_ar: 'الجراحة العامة', name_en: 'General Surgery', code: 'MS 320', day_ar: 'السبت', day_en: 'Saturday', date: '2027/04/24', time: '11:00 - 13:00' },
-    { no: 3, name_ar: 'أمراض الفم', name_en: 'Oral Diseases / Pathology', code: 'DS 380', day_ar: 'الخميس', day_en: 'Thursday', date: '2027/04/29', time: '11:00 - 13:00' }
+    { no: 3, name_ar: 'اورال باثولوجي', name_en: 'Oral Pathology', code: 'DS 380', day_ar: 'الخميس', day_en: 'Thursday', date: '2027/04/29', time: '11:00 - 13:00' }
   ],
 
   // Days Countdown Calculation

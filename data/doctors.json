@@ -1,23 +1,176 @@
 {
   "doctors": [
-    { "id": "dr-ahmed",   "name_ar": "د. أحمد الزروق",    "name_en": "Dr. Ahmed Al-Zarouq",  "title": "دكتوراه أمراض الفم",         "subjects": ["oral-diseases"] },
-    { "id": "dr-fatima",  "name_ar": "د. فاطمة المصراتي", "name_en": "Dr. Fatima Al-Misrati", "title": "ماجستير أمراض الفم",        "subjects": ["oral-diseases"] },
-    { "id": "dr-mahmoud", "name_ar": "د. محمود التاجوري", "name_en": "Dr. Mahmoud Al-Tajouri", "title": "دكتوراه الجراحة العامة",   "subjects": ["gen-surgery"] },
-    { "id": "dr-sara",    "name_ar": "د. سارة الهادي",    "name_en": "Dr. Sara Al-Hadi",     "title": "ماجستير الطب الباطني",       "subjects": ["gen-med"] },
-    { "id": "dr-khalid",  "name_ar": "د. خالد البوسيفي",  "name_en": "Dr. Khalid Al-Busaifi", "title": "دكتوراه علاج وجذور الأسنان", "subjects": ["cons-endo", "endo"] },
-    { "id": "dr-nadia",   "name_ar": "د. نادية الشريف",   "name_en": "Dr. Nadia Al-Sharif",  "title": "ماجستير التركيبات الثابتة",   "subjects": ["fixed-pros"] },
-    { "id": "dr-mustafa", "name_ar": "د. مصطفى الغرياني", "name_en": "Dr. Mustafa Al-Gharyani","title": "دكتوراه الاستعاضة المتحركة", "subjects": ["removable-pros"] },
-    { "id": "dr-layla",   "name_ar": "د. ليلى الورفلي",   "name_en": "Dr. Layla Al-Warfali", "title": "ماجستير طب الأسنان الوقائي", "subjects": ["preventive"] },
-    { "id": "dr-youssef", "name_ar": "د. يوسف الكوني",    "name_en": "Dr. Youssef Al-Kouni", "title": "دكتوراه جراحة الفم والفكين", "subjects": ["omfs"] },
-    { "id": "dr-aisha",   "name_ar": "د. عائشة الصياد",   "name_en": "Dr. Aisha Al-Sayyad",  "title": "ماجستير طب الفم والأشعة",    "subjects": ["omdr"] },
-    { "id": "dr-hana",    "name_ar": "د. هناء التركي",    "name_en": "Dr. Hana Al-Turki",    "title": "دكتوراه تقويم الأسنان",     "subjects": ["ortho"] },
-    { "id": "dr-rima",    "name_ar": "د. ريما الأمين",    "name_en": "Dr. Rima Al-Amin",     "title": "ماجستير طب أسنان الأطفال",   "subjects": ["pedo"] },
-    { "id": "dr-amal",    "name_ar": "د. آمال كشلاف",    "name_en": "Dr. Amal Kashlaf",     "title": "أستاذة العلاج التحفظي وعلاج الجذور", "subjects": ["cons-endo"] },
-    { "id": "dr-hanan",   "name_ar": "د. حنان عمران",    "name_en": "Dr. Hanan Omran",      "title": "أستاذة طب الأسنان الوقائي ومجتمع الأسنان", "subjects": ["preventive"] },
-    { "id": "dr-aisha-abubaker", "name_ar": "د. عائشة أبوبكر شنان", "name_en": "Dr. Aisha Abubaker Shanan", "title": "أستاذة أمراض الفم", "subjects": ["oral-diseases"] },
-    { "id": "dr-asmaa",   "name_ar": "د. أسماء سلام الغرياني", "name_en": "Dr. Asmaa Salam Algharyani", "title": "أستاذة أمراض الفم", "subjects": ["oral-diseases"] },
-    { "id": "dr-abduladeem", "name_ar": "د. عبدالعظيم عياد قداد", "name_en": "Dr. Abduladeem Ayad Qaddad", "title": "أستاذ طب الفم والتشخيص والأشعة", "subjects": ["omdr"] },
-    { "id": "dr-hisham",  "name_ar": "د. هشام شمبش",      "name_en": "Dr. Hisham Shembesh",   "title": "أستاذ جراحة الفم والوجه والفكين", "subjects": ["omfs"] },
-    { "id": "dr-bassma",  "name_ar": "د. بسمة جنديلة",    "name_en": "Dr. Bassma Gendela",   "title": "أستاذة تقويم الأسنان",       "subjects": ["ortho"] }
+    {
+      "id": "dr-ahmed",
+      "name_ar": "د. أحمد الزروق",
+      "name_en": "Dr. Ahmed Al-Zarouq",
+      "title": "دكتوراه اورال باثولوجي",
+      "subjects": [
+        "oral-diseases"
+      ]
+    },
+    {
+      "id": "dr-fatima",
+      "name_ar": "د. فاطمة المصراتي",
+      "name_en": "Dr. Fatima Al-Misrati",
+      "title": "ماجستير اورال باثولوجي",
+      "subjects": [
+        "oral-diseases"
+      ]
+    },
+    {
+      "id": "dr-mahmoud",
+      "name_ar": "د. محمود التاجوري",
+      "name_en": "Dr. Mahmoud Al-Tajouri",
+      "title": "دكتوراه الجراحة العامة",
+      "subjects": [
+        "gen-surgery"
+      ]
+    },
+    {
+      "id": "dr-sara",
+      "name_ar": "د. سارة الهادي",
+      "name_en": "Dr. Sara Al-Hadi",
+      "title": "ماجستير الطب الباطني",
+      "subjects": [
+        "gen-med"
+      ]
+    },
+    {
+      "id": "dr-khalid",
+      "name_ar": "د. خالد البوسيفي",
+      "name_en": "Dr. Khalid Al-Busaifi",
+      "title": "دكتوراه علاج وجذور الأسنان",
+      "subjects": [
+        "cons-endo",
+        "endo"
+      ]
+    },
+    {
+      "id": "dr-nadia",
+      "name_ar": "د. نادية الشريف",
+      "name_en": "Dr. Nadia Al-Sharif",
+      "title": "ماجستير التركيبات الثابتة",
+      "subjects": [
+        "fixed-pros"
+      ]
+    },
+    {
+      "id": "dr-mustafa",
+      "name_ar": "د. مصطفى الغرياني",
+      "name_en": "Dr. Mustafa Al-Gharyani",
+      "title": "دكتوراه الاستعاضة المتحركة",
+      "subjects": [
+        "removable-pros"
+      ]
+    },
+    {
+      "id": "dr-layla",
+      "name_ar": "د. ليلى الورفلي",
+      "name_en": "Dr. Layla Al-Warfali",
+      "title": "ماجستير طب الأسنان الوقائي",
+      "subjects": [
+        "preventive"
+      ]
+    },
+    {
+      "id": "dr-youssef",
+      "name_ar": "د. يوسف الكوني",
+      "name_en": "Dr. Youssef Al-Kouni",
+      "title": "دكتوراه جراحة الفم والفكين",
+      "subjects": [
+        "omfs"
+      ]
+    },
+    {
+      "id": "dr-aisha",
+      "name_ar": "د. عائشة الصياد",
+      "name_en": "Dr. Aisha Al-Sayyad",
+      "title": "ماجستير طب الفم والأشعة",
+      "subjects": [
+        "omdr"
+      ]
+    },
+    {
+      "id": "dr-hana",
+      "name_ar": "د. هناء التركي",
+      "name_en": "Dr. Hana Al-Turki",
+      "title": "دكتوراه تقويم الأسنان",
+      "subjects": [
+        "ortho"
+      ]
+    },
+    {
+      "id": "dr-rima",
+      "name_ar": "د. ريما الأمين",
+      "name_en": "Dr. Rima Al-Amin",
+      "title": "ماجستير طب أسنان الأطفال",
+      "subjects": [
+        "pedo"
+      ]
+    },
+    {
+      "id": "dr-amal",
+      "name_ar": "د. آمال كشلاف",
+      "name_en": "Dr. Amal Kashlaf",
+      "title": "أستاذة العلاج التحفظي وعلاج الجذور",
+      "subjects": [
+        "cons-endo"
+      ]
+    },
+    {
+      "id": "dr-hanan",
+      "name_ar": "د. حنان عمران",
+      "name_en": "Dr. Hanan Omran",
+      "title": "أستاذة طب الأسنان الوقائي ومجتمع الأسنان",
+      "subjects": [
+        "preventive"
+      ]
+    },
+    {
+      "id": "dr-aisha-abubaker",
+      "name_ar": "د. عائشة أبوبكر شنان",
+      "name_en": "Dr. Aisha Abubaker Shanan",
+      "title": "أستاذة اورال باثولوجي",
+      "subjects": [
+        "oral-diseases"
+      ]
+    },
+    {
+      "id": "dr-asmaa",
+      "name_ar": "د. أسماء سلام الغرياني",
+      "name_en": "Dr. Asmaa Salam Algharyani",
+      "title": "أستاذة اورال باثولوجي",
+      "subjects": [
+        "oral-diseases"
+      ]
+    },
+    {
+      "id": "dr-abduladeem",
+      "name_ar": "د. عبدالعظيم عياد قداد",
+      "name_en": "Dr. Abduladeem Ayad Qaddad",
+      "title": "أستاذ طب الفم والتشخيص والأشعة",
+      "subjects": [
+        "omdr"
+      ]
+    },
+    {
+      "id": "dr-hisham",
+      "name_ar": "د. هشام شمبش",
+      "name_en": "Dr. Hisham Shembesh",
+      "title": "أستاذ جراحة الفم والوجه والفكين",
+      "subjects": [
+        "omfs"
+      ]
+    },
+    {
+      "id": "dr-bassma",
+      "name_ar": "د. بسمة جنديلة",
+      "name_en": "Dr. Bassma Gendela",
+      "title": "أستاذة تقويم الأسنان",
+      "subjects": [
+        "ortho"
+      ]
+    }
   ]
 }
