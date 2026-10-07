@@ -40,6 +40,12 @@ window.PdfThumbnailService = window.PdfThumbnailService || {
           withCredentials: false
         });
         const pdf = await loadingTask.promise;
+        window._kfPdfDocCache = window._kfPdfDocCache || new Map();
+        window._kfPdfDocCache.set(pdfUrl, pdf);
+        try {
+          const absUrl = new URL(pdfUrl, window.location.href).href;
+          window._kfPdfDocCache.set(absUrl, pdf);
+        } catch (e) {}
         const page = await pdf.getPage(1);
 
         const unscaledViewport = page.getViewport({ scale: 1.0 });
@@ -587,6 +593,25 @@ const SheetsPage = {
     if (listContainer) {
       listContainer.querySelectorAll('.sheets-grid-card, .sheets-list-row').forEach(card => {
         card.style.cursor = 'pointer';
+        const prefetchSheet = () => {
+          const id = card.getAttribute('data-id');
+          const doc = filteredSheets.find(s => s.id === id);
+          const pdfUrl = doc?.pdf_url || doc?.download_url;
+          if (pdfUrl && 'caches' in window) {
+            try {
+              const absUrl = new URL(pdfUrl, window.location.href).href;
+              caches.open('kuro-fangs-pdf-cache-v1').then(async (c) => {
+                const has = await c.match(absUrl);
+                if (!has) {
+                  fetch(absUrl).then(r => { if (r.ok) c.put(absUrl, r); }).catch(() => {});
+                }
+              }).catch(() => {});
+            } catch (_) {}
+          }
+        };
+        card.addEventListener('mouseenter', prefetchSheet, { once: true, passive: true });
+        card.addEventListener('touchstart', prefetchSheet, { once: true, passive: true });
+
         card.addEventListener('click', (e) => {
           if (e.target.closest('.download-sheet-btn') || e.target.closest('.sgc-menu-btn')) return;
           const id = card.getAttribute('data-id');

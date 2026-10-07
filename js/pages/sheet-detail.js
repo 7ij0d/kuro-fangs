@@ -876,6 +876,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
 
   function drawFallbackSheetPage(pageNum, canvas) {
     if (!canvas || state.pdfDoc) return;
+    if (pageNum > 2) return; // Prevent blocking JS thread on multi-page decks
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
@@ -5695,9 +5696,14 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
 
+      const absolutePdfUrl =
+        typeof pdfUrl === 'string' && !pdfUrl.startsWith('blob:') && !pdfUrl.startsWith('data:')
+          ? new URL(pdfUrl, window.location.href).href
+          : pdfUrl;
+
       // 1. Check Session In-Memory PDF Document Cache (0ms, 0 network requests)
-      if (typeof pdfUrl === 'string' && window._kfPdfDocCache.has(pdfUrl)) {
-        const cachedDoc = window._kfPdfDocCache.get(pdfUrl);
+      if (typeof pdfUrl === 'string' && (window._kfPdfDocCache.has(pdfUrl) || window._kfPdfDocCache.has(absolutePdfUrl))) {
+        const cachedDoc = window._kfPdfDocCache.get(pdfUrl) || window._kfPdfDocCache.get(absolutePdfUrl);
         if (cachedDoc && cachedDoc.numPages > 0) {
           console.log('[KuroNotes PDF Cache] HIT (Session Memory):', pdfUrl);
           state.pdfDoc = cachedDoc;
@@ -5705,12 +5711,12 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       }
 
       // 2. Check Persistent Browser CacheStorage (0 network egress across reloads)
-      if (!state.pdfDoc && typeof pdfUrl === 'string' && pdfUrl.startsWith('http') && 'caches' in window) {
+      if (!state.pdfDoc && 'caches' in window && typeof absolutePdfUrl === 'string' && absolutePdfUrl.startsWith('http')) {
         try {
           const pdfCache = await caches.open(PDF_CACHE_STORAGE_NAME);
-          const cachedResponse = await pdfCache.match(pdfUrl);
+          const cachedResponse = (await pdfCache.match(absolutePdfUrl)) || (await pdfCache.match(pdfUrl));
           if (cachedResponse && cachedResponse.ok) {
-            console.log('[KuroNotes PDF Cache] HIT (CacheStorage):', pdfUrl);
+            console.log('[KuroNotes PDF Cache] HIT (CacheStorage):', absolutePdfUrl);
             const pdfBytes = await cachedResponse.arrayBuffer();
             if (pdfBytes && pdfBytes.byteLength > 100) {
               const localTask = window.pdfjsLib.getDocument({
@@ -5720,49 +5726,76 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
               });
               state.pdfDoc = await localTask.promise;
               window._kfPdfDocCache.set(pdfUrl, state.pdfDoc);
+              window._kfPdfDocCache.set(absolutePdfUrl, state.pdfDoc);
             }
           }
         } catch (cacheReadErr) {}
       }
 
-      // 3. Network Load with HTTP Range Requests & CDN Streaming
+      // 3. Ultra-Fast Direct Streaming Download -> Save to CacheStorage -> In-Memory Parse
       if (!state.pdfDoc) {
-        console.log('[KuroNotes PDF Cache] MISS -> Loading via CDN + Range Requests:', pdfUrl);
-        const docParam =
-          typeof pdfUrl === 'string' && !pdfUrl.startsWith('blob:') && !pdfUrl.startsWith('data:')
-            ? {
-                url: pdfUrl,
-                cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
-                cMapPacked: true,
-                disableRange: false,
-                disableStream: false,
-                disableAutoFetch: false,
-                rangeChunkSize: 65536,
-              }
-            : pdfUrl;
+        let loadedViaDirectFetch = false;
+        if (typeof absolutePdfUrl === 'string' && absolutePdfUrl.startsWith('http')) {
+          try {
+            console.log('[KuroNotes PDF Stream] High-speed stream fetch:', absolutePdfUrl);
+            const fetchResp = await fetch(absolutePdfUrl);
+            if (fetchResp.ok) {
+              const pdfBytes = await fetchResp.arrayBuffer();
+              if (pdfBytes && pdfBytes.byteLength > 100) {
+                // Save to CacheStorage for instant future opens
+                if ('caches' in window) {
+                  try {
+                    const pdfCache = await caches.open(PDF_CACHE_STORAGE_NAME);
+                    const cacheResp = new Response(pdfBytes.slice(0), {
+                      headers: {
+                        'Content-Type': 'application/pdf',
+                        'Cache-Control': 'public, max-age=31536000, immutable'
+                      }
+                    });
+                    await pdfCache.put(absolutePdfUrl, cacheResp);
+                    await pdfCache.put(pdfUrl, cacheResp.clone());
+                  } catch (_) {}
+                }
 
-        let loadingTask = window.pdfjsLib.getDocument(docParam);
-        try {
-          state.pdfDoc = await loadingTask.promise;
-          if (typeof pdfUrl === 'string') {
-            window._kfPdfDocCache.set(pdfUrl, state.pdfDoc);
-            // Persist loaded PDF bytes into CacheStorage in the background so future opens cost 0 egress
-            if (pdfUrl.startsWith('http') && 'caches' in window && typeof state.pdfDoc.getData === 'function') {
-              state.pdfDoc.getData().then(async (uint8Arr) => {
-                try {
-                  const pdfCache = await caches.open(PDF_CACHE_STORAGE_NAME);
-                  const resp = new Response(uint8Arr.buffer, {
-                    headers: {
-                      'Content-Type': 'application/pdf',
-                      'Cache-Control': 'public, max-age=31536000, immutable'
-                    }
-                  });
-                  await pdfCache.put(pdfUrl, resp);
-                } catch (_) {}
-              }).catch(() => {});
+                const localTask = window.pdfjsLib.getDocument({
+                  data: new Uint8Array(pdfBytes),
+                  cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                  cMapPacked: true,
+                });
+                state.pdfDoc = await localTask.promise;
+                window._kfPdfDocCache.set(pdfUrl, state.pdfDoc);
+                window._kfPdfDocCache.set(absolutePdfUrl, state.pdfDoc);
+                loadedViaDirectFetch = true;
+              }
             }
+          } catch (fetchErr) {
+            console.warn('[KuroNotes] Direct fetch stream failed, falling back to worker:', fetchErr);
           }
-        } catch (firstErr) {
+        }
+
+        if (!loadedViaDirectFetch && !state.pdfDoc) {
+          console.log('[KuroNotes PDF Cache] Loading via PDF.js worker:', pdfUrl);
+          const docParam =
+            typeof pdfUrl === 'string' && !pdfUrl.startsWith('blob:') && !pdfUrl.startsWith('data:')
+              ? {
+                  url: pdfUrl,
+                  cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                  cMapPacked: true,
+                  disableRange: false,
+                  disableStream: false,
+                  disableAutoFetch: false,
+                  rangeChunkSize: 262144, // 256KB chunks instead of 64KB
+                }
+              : pdfUrl;
+
+          let loadingTask = window.pdfjsLib.getDocument(docParam);
+          try {
+            state.pdfDoc = await loadingTask.promise;
+            if (typeof pdfUrl === 'string') {
+              window._kfPdfDocCache.set(pdfUrl, state.pdfDoc);
+              window._kfPdfDocCache.set(absolutePdfUrl, state.pdfDoc);
+            }
+          } catch (firstErr) {
           // Fallback: check if an offline copy exists in IndexedDB pdfStore
           let fallbackBlobUrl = null;
           if (window.DATA?.pdfStore && typeof window.DATA.pdfStore.getPdfUrl === 'function') {
@@ -5782,11 +5815,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
             pdfUrl = sheet.pdf_url;
             loadingTask = window.pdfjsLib.getDocument(sheet.pdf_url);
             state.pdfDoc = await loadingTask.promise;
-          } else {
-            throw firstErr;
           }
         }
       }
+    }
 
       state.totalPages = Math.max(1, state.pdfDoc.numPages || state.totalPages);
       if (state.currentPage > state.totalPages) state.currentPage = 1;
@@ -5810,7 +5842,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       buildPageCards();
       renderLeftSidebarContent();
       await renderVisiblePdfPages();
-      await renderSidebarPdfThumbnails();
+      // Render sidebar thumbnails lazily in background without delaying main screen view
+      renderSidebarPdfThumbnails();
 
       if (state.sourceReference) {
         const targetP = parseInt(
