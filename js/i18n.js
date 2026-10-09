@@ -1,7 +1,31 @@
-/**
- * KURO FANGS — INTERNATIONALIZATION (i18n)
- * Default Language: English (en) with full Arabic (ar) support
- */
+// High-Performance Debounced & Frame-Rate Optimized Lucide Icons Engine
+(function setupHighPerfLucideEngine() {
+  function applyLucideDebouncer() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function' && !window.lucide._debounced) {
+      const origCreateIcons = window.lucide.createIcons.bind(window.lucide);
+      let lucideRafId = null;
+      let pendingOptions = null;
+
+      window.lucide.createIcons = function(options) {
+        pendingOptions = options || pendingOptions;
+        if (lucideRafId) return;
+        lucideRafId = requestAnimationFrame(() => {
+          try {
+            origCreateIcons(pendingOptions);
+          } catch (e) {}
+          lucideRafId = null;
+          pendingOptions = null;
+        });
+      };
+      window.lucide._debounced = true;
+    }
+  }
+
+  applyLucideDebouncer();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyLucideDebouncer);
+  }
+})();
 
 class I18nManager {
   constructor() {

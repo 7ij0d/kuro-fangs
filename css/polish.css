@@ -15667,3 +15667,54 @@ body.login-view-active #guest-encourage-banner {
   padding: 0 !important;
   overflow: hidden !important;
 }
+
+
+/* ==========================================================================
+   HIGH-PERFORMANCE 60 FPS GPU HARDWARE ACCELERATION & SMOOTHNESS OPTIMIZATIONS
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* GPU hardware compositing layers for layout containers and cards */
+.site-header,
+#app-sidebar,
+.app-main-wrapper,
+.main-content,
+.kuro-login-viewport,
+.kuro-wizard-container,
+.kuro-login-card,
+.subject-card,
+.sheet-card,
+.header-auth-action-box,
+.settings-popover-menu,
+.kuro-avatar-modal-card {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+/* Hardware accelerated spring transitions */
+.header-nav-pill,
+.sidebar-user-card,
+.wizard-btn-primary,
+.wizard-group-card,
+.avatar-preset-card,
+.login-submit-btn,
+.btn-header-signout,
+.subject-card,
+.sheet-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tactile click responsiveness */
+.wizard-btn-primary:active,
+.login-submit-btn:active,
+.header-nav-pill:active,
+.avatar-preset-card:active,
+.subject-card:active,
+.sheet-card:active {
+  transform: scale(0.97) translateZ(0) !important;
+}
