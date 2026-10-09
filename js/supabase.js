@@ -42,61 +42,110 @@
     }
   }
 
-  // Check initial session & register auth listener
+  let _initAuthPromise = null;
+
+  // Check initial session & register auth listener (Singleton & Idempotent)
   async function initAuth() {
-    initClient();
+    if (_initAuthPromise) return _initAuthPromise;
 
-    if (!client) {
-      // Fallback: guest mode works with zero errors
-      updateUIForAuth(null);
-      return;
-    }
+    _initAuthPromise = (async () => {
+      initClient();
 
-    try {
-      const { data, error } = await client.auth.getSession();
-      if (!error && data?.session?.user) {
-        currentUser = data.session.user;
-        await onUserAuthenticated(currentUser);
-      } else {
+      if (!client) {
+        // Fallback: guest mode works with zero errors
+        updateUIForAuth(null);
+        return;
+      }
+
+      try {
+        const hashStr = window.location.hash || '';
+        const searchStr = window.location.search || '';
+        const rawUrlStr = hashStr.includes('access_token=') ? hashStr : (searchStr.includes('access_token=') ? searchStr : '');
+
+        if (rawUrlStr) {
+          const cleanParamsStr = rawUrlStr.replace(/^#\/?/, '').replace(/^\?/, '');
+          const urlParams = new URLSearchParams(cleanParamsStr);
+          const accessToken = urlParams.get('access_token');
+          const refreshToken = urlParams.get('refresh_token');
+
+          if (accessToken) {
+            try {
+              const { data, error } = await client.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken || ''
+              });
+              if (!error && data?.session?.user) {
+                currentUser = data.session.user;
+              }
+            } catch (err) {}
+
+            if (!currentUser) {
+              try {
+                const parts = accessToken.split('.');
+                if (parts.length === 3) {
+                  const base64Url = parts[1];
+                  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                  const jsonStr = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                  const payload = JSON.parse(jsonStr);
+                  if (payload && payload.sub) {
+                    const meta = payload.user_metadata || {};
+                    currentUser = {
+                      id: payload.sub,
+                      email: payload.email || '',
+                      user_metadata: meta,
+                      app_metadata: payload.app_metadata || {},
+                      created_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : new Date().toISOString()
+                    };
+                  }
+                }
+              } catch (e) {}
+            }
+          }
+        }
+
+        if (!currentUser) {
+          const { data, error } = await client.auth.getSession();
+          if (!error && data?.session?.user) {
+            currentUser = data.session.user;
+          }
+        }
+
+        if (currentUser) {
+          await onUserAuthenticated(currentUser);
+        } else {
+          currentUser = null;
+          updateUIForAuth(null);
+        }
+
+        // Listen for auth state changes (silently update state & profile without toast spam)
+        client.auth.onAuthStateChange(async (event, session) => {
+          const user = session?.user || null;
+          currentUser = user;
+
+          if (event === 'SIGNED_IN' && user) {
+            await onUserAuthenticated(user);
+          } else if (event === 'SIGNED_OUT') {
+            currentUser = null;
+            updateUIForAuth(null);
+          }
+        });
+      } catch (err) {
+        console.warn('Auth session check failed (continuing as guest):', err);
         currentUser = null;
         updateUIForAuth(null);
       }
 
-      // Listen for auth state changes
-      client.auth.onAuthStateChange(async (event, session) => {
-        const user = session?.user || null;
-        currentUser = user;
+      // Subscribe to store events to auto-sync to cloud when logged in
+      if (window.STORE) {
+        window.STORE.subscribe((event) => {
+          if (currentUser && ['points_changed', 'skin_equipped', 'skin_unlocked'].includes(event)) {
+            triggerDebouncedSync();
+          }
+        });
+      }
+    })();
 
-        if (event === 'SIGNED_IN' && user) {
-          await onUserAuthenticated(user);
-          const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-          const name = user.user_metadata?.full_name || user.email.split('@')[0];
-          window.Toast?.success(
-            isAr ? `أهلاً بك يا ${name}! تم تسجيل الدخول والمزامنة بنجاح ☁️` : `Welcome, ${name}! Signed in and cloud synced ☁️`
-          );
-        } else if (event === 'SIGNED_OUT') {
-          currentUser = null;
-          updateUIForAuth(null);
-          const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
-          window.Toast?.info(
-            isAr ? 'تم تسجيل الخروج. يمكنك مواصلة الدراسة كزائر.' : 'Signed out. Continuing as guest.'
-          );
-        }
-      });
-    } catch (err) {
-      console.warn('Auth session check failed (continuing as guest):', err);
-      currentUser = null;
-      updateUIForAuth(null);
-    }
-
-    // Subscribe to store events to auto-sync to cloud when logged in
-    if (window.STORE) {
-      window.STORE.subscribe((event) => {
-        if (currentUser && ['points_changed', 'skin_equipped', 'skin_unlocked'].includes(event)) {
-          triggerDebouncedSync();
-        }
-      });
-    }
+    return _initAuthPromise;
   }
 
   // Called when user is signed in: Pull cloud data & merge with local

@@ -5,6 +5,8 @@
 
 (function () {
   let toastContainer = null;
+  const recentToasts = new Map();
+  const DEDUPE_WINDOW_MS = 2500;
 
   function ensureContainer() {
     if (!toastContainer || !document.body.contains(toastContainer)) {
@@ -37,6 +39,28 @@
     if (!cleanMessage && points) {
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
       cleanMessage = isAr ? 'تمت العملية بنجاح!' : 'Action completed successfully!';
+    }
+
+    if (!cleanMessage) return;
+
+    // Deduplication check: ignore identical (type + message) within 2500ms
+    const now = Date.now();
+    const dedupeKey = `${type}:${cleanMessage}`;
+    if (recentToasts.has(dedupeKey)) {
+      const lastTime = recentToasts.get(dedupeKey);
+      if (now - lastTime < DEDUPE_WINDOW_MS) {
+        return; // Suppress duplicate toast
+      }
+    }
+    recentToasts.set(dedupeKey, now);
+
+    // Housekeeping: clean up old dedupe entries
+    if (recentToasts.size > 50) {
+      for (const [k, time] of recentToasts.entries()) {
+        if (now - time > DEDUPE_WINDOW_MS * 2) {
+          recentToasts.delete(k);
+        }
+      }
     }
 
     const container = ensureContainer();

@@ -33,6 +33,7 @@
       this.subscribers = new Set();
       this.initialized = false;
       this._initPromise = null;
+      this._isInteractiveLogin = false;
     }
 
     /**
@@ -83,10 +84,68 @@
 
         if (supabase) {
           try {
-            // Check active session via Supabase SDK (handles token refresh & URL hash detection automatically)
-            const { data, error } = await supabase.auth.getSession();
-            if (!error && data?.session?.user) {
-              sessionUser = data.session.user;
+            // Check for OAuth hash tokens in URL (#access_token=...&refresh_token=...)
+            const hashStr = window.location.hash || '';
+            const searchStr = window.location.search || '';
+            const rawUrlStr = hashStr.includes('access_token=') ? hashStr : (searchStr.includes('access_token=') ? searchStr : '');
+            
+            if (rawUrlStr) {
+              this._isInteractiveLogin = true;
+              try { sessionStorage.setItem('kf_interactive_login', 'true'); } catch (e) {}
+
+              const cleanParamsStr = rawUrlStr.replace(/^#\/?/, '').replace(/^\?/, '');
+              const urlParams = new URLSearchParams(cleanParamsStr);
+              const accessToken = urlParams.get('access_token');
+              const refreshToken = urlParams.get('refresh_token');
+
+              if (accessToken) {
+                try {
+                  const { data, error } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken || ''
+                  });
+                  if (!error && data?.session?.user) {
+                    sessionUser = data.session.user;
+                  }
+                } catch (err) {}
+
+                if (!sessionUser) {
+                  // Fallback: decode JWT payload directly from access_token
+                  try {
+                    const parts = accessToken.split('.');
+                    if (parts.length === 3) {
+                      const base64Url = parts[1];
+                      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                      const jsonStr = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                      const payload = JSON.parse(jsonStr);
+                      if (payload && payload.sub) {
+                        const meta = payload.user_metadata || {};
+                        const fullName = meta.full_name || meta.name || payload.email?.split('@')[0] || 'Kuro Student';
+                        sessionUser = {
+                          id: payload.sub,
+                          email: payload.email || '',
+                          user_metadata: meta,
+                          app_metadata: payload.app_metadata || {},
+                          created_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : new Date().toISOString()
+                        };
+                      }
+                    }
+                  } catch (e) {}
+                }
+
+                // Clean hash from browser address bar
+                if (window.history && window.history.replaceState) {
+                  window.history.replaceState(null, '', window.location.pathname + '#/');
+                }
+              }
+            }
+
+            if (!sessionUser) {
+              // Check active session via Supabase SDK
+              const { data, error } = await supabase.auth.getSession();
+              if (!error && data?.session?.user) {
+                sessionUser = data.session.user;
+              }
             }
           } catch (err) {
             console.warn('[AuthEngine] Session check warning:', err.message);
@@ -192,7 +251,11 @@
 
       this._notify();
 
-      if (showToast && window.Toast) {
+      const isInteractive = this._isInteractiveLogin || sessionStorage.getItem('kf_interactive_login') === 'true';
+      sessionStorage.removeItem('kf_interactive_login');
+      this._isInteractiveLogin = false;
+
+      if (showToast && isInteractive && window.Toast) {
         const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
         window.Toast.show(
           isAr
@@ -271,6 +334,11 @@
         return { success: false, error: msg };
       }
 
+      this._isInteractiveLogin = true;
+      try {
+        sessionStorage.setItem('kf_interactive_login', 'true');
+      } catch (e) {}
+
       // Compute exact redirect URL based on environment
       let redirectUrl = window.location.origin + window.location.pathname;
       if (window.location.hostname === 'kurofangs.id.ly') {
@@ -287,6 +355,8 @@
 
         if (error) {
           console.error('[Google OAuth Technical Error]:', error);
+          this._isInteractiveLogin = false;
+          try { sessionStorage.removeItem('kf_interactive_login'); } catch (e) {}
 
           // Check if Google provider is pending configuration
           if (error.message?.includes('provider is not enabled') || error.message?.includes('Unsupported provider') || error.message?.includes('google_pending_client_id')) {
@@ -306,6 +376,8 @@
         return { success: true, data };
       } catch (err) {
         console.error('[Google OAuth Exception]:', err);
+        this._isInteractiveLogin = false;
+        try { sessionStorage.removeItem('kf_interactive_login'); } catch (e) {}
         const friendlyMsg = isAr ? 'حدث خطأ أثناء الاتصال مع Google' : 'An error occurred connecting to Google';
         window.Toast?.show(friendlyMsg, 'error');
         return { success: false, error: err.message };
@@ -334,6 +406,9 @@
         return { success: false, error: msg };
       }
 
+      this._isInteractiveLogin = true;
+      try { sessionStorage.setItem('kf_interactive_login', 'true'); } catch (e) {}
+
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: cleanEmail,
@@ -342,6 +417,8 @@
 
         if (error) {
           console.warn('[Email Sign In Error]:', error);
+          this._isInteractiveLogin = false;
+          try { sessionStorage.removeItem('kf_interactive_login'); } catch (e) {}
           const friendlyMsg = isAr
             ? (error.message.includes('Invalid') || error.message.includes('credentials')
                 ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
@@ -357,6 +434,8 @@
         return { success: true, data };
       } catch (err) {
         console.error('[Email Sign In Exception]:', err);
+        this._isInteractiveLogin = false;
+        try { sessionStorage.removeItem('kf_interactive_login'); } catch (e) {}
         window.Toast?.show(err.message, 'error');
         return { success: false, error: err.message };
       }
@@ -391,6 +470,9 @@
         return { success: false, error: msg };
       }
 
+      this._isInteractiveLogin = true;
+      try { sessionStorage.setItem('kf_interactive_login', 'true'); } catch (e) {}
+
       try {
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
@@ -404,6 +486,8 @@
 
         if (error) {
           console.warn('[Email Sign Up Error]:', error);
+          this._isInteractiveLogin = false;
+          try { sessionStorage.removeItem('kf_interactive_login'); } catch (e) {}
           const friendlyMsg = isAr
             ? (error.message.includes('already registered') || error.message.includes('already')
                 ? 'هذا البريد مسجل مسبقاً، يمكنك تسجيل الدخول به مباشرة'
@@ -419,6 +503,8 @@
         return { success: true, data };
       } catch (err) {
         console.error('[Email Sign Up Exception]:', err);
+        this._isInteractiveLogin = false;
+        try { sessionStorage.removeItem('kf_interactive_login'); } catch (e) {}
         window.Toast?.show(err.message, 'error');
         return { success: false, error: err.message };
       }
