@@ -70,6 +70,29 @@
     isUnauthenticated() { return this.state === AUTH_STATES.UNAUTHENTICATED; }
 
     /**
+     * Authoritative single source of truth for registration completion status
+     */
+    isRegistrationComplete() {
+      if (this.isLoading()) return false;
+      if (this.isGuest()) return true;
+      if (!this.isAuthenticated()) return false;
+
+      if (this.user && this.user.registration_status === 'completed') {
+        return true;
+      }
+
+      try {
+        const localInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}');
+        if (localInfo.id === this.user?.id && localInfo.registration_status === 'completed') {
+          if (this.user) this.user.registration_status = 'completed';
+          return true;
+        }
+      } catch (e) {}
+
+      return false;
+    }
+
+    /**
      * Initialize Auth on app startup
      */
     async init() {
@@ -290,7 +313,7 @@
       }
 
       // Check registration status: incomplete profiles must go to student registration setup
-      const isCompleted = (profile?.registration_status === 'completed') || (this.user?.registration_status === 'completed');
+      const isCompleted = this.isRegistrationComplete() || (profile?.registration_status === 'completed');
       if (!isCompleted) {
         if (!window.location.hash.includes('register-setup')) {
           window.location.hash = '#/register-setup';
@@ -341,41 +364,58 @@
           .maybeSingle();
 
         if (data) {
+          const isCompletedLocally = this.isRegistrationComplete();
+          const finalRegStatus = (data.registration_status === 'completed' || isCompletedLocally) ? 'completed' : (data.registration_status || 'pending');
+
           if (data.full_name_ar) this.user.full_name_ar = data.full_name_ar;
           if (data.full_name_en) this.user.full_name_en = data.full_name_en;
           if (data.full_name) this.user.full_name = data.full_name;
           if (data.gender) this.user.gender = data.gender;
           if (data.practical_group_id) this.user.practical_group_id = data.practical_group_id;
           if (data.avatar_url) this.user.avatar_url = data.avatar_url;
-          if (data.registration_status) this.user.registration_status = data.registration_status;
+          this.user.registration_status = finalRegStatus;
+
+          // Heal Supabase record if local state is completed but remote database was missing registration_status
+          if (isCompletedLocally && data.registration_status !== 'completed') {
+            supabase.from('profiles').update({
+              registration_status: 'completed',
+              full_name_ar: this.user.full_name_ar,
+              practical_group_id: this.user.practical_group_id,
+              updated_at: new Date().toISOString()
+            }).eq('id', user.id).catch(() => {});
+          }
 
           // Cache profile details
           try {
             const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}');
             localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify({
               ...current,
-              name: data.full_name_ar || data.full_name,
-              full_name_ar: data.full_name_ar,
-              full_name_en: data.full_name_en,
-              gender: data.gender,
-              practical_group_id: data.practical_group_id,
-              avatar: data.avatar_url,
-              registration_status: data.registration_status
+              name: data.full_name_ar || data.full_name || current.name,
+              full_name_ar: data.full_name_ar || current.full_name_ar,
+              full_name_en: data.full_name_en || current.full_name_en,
+              gender: data.gender || current.gender,
+              practical_group_id: data.practical_group_id || current.practical_group_id,
+              avatar: data.avatar_url || current.avatar,
+              registration_status: finalRegStatus
             }));
           } catch (e) {}
 
-          return data;
+          return { ...data, registration_status: finalRegStatus };
         } else {
+          const isCompletedLocally = this.isRegistrationComplete();
+          const regStatus = isCompletedLocally ? 'completed' : 'pending';
           const payload = {
             id: user.id,
             full_name: user.full_name,
+            full_name_ar: user.full_name_ar || user.full_name,
             email: user.email,
-            registration_status: 'pending',
+            registration_status: regStatus,
+            practical_group_id: user.practical_group_id || 'A1',
             role: 'student',
             status: 'active'
           };
           await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
-          this.user.registration_status = 'pending';
+          this.user.registration_status = regStatus;
           return payload;
         }
       } catch (err) {

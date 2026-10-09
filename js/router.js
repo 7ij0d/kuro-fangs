@@ -112,10 +112,10 @@ class Router {
     const targetPath = path.startsWith('/') ? path : '/' + path;
     const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
     if (currentHash === targetPath) {
-      this.handleRoute();
-    } else {
-      window.location.hash = '#' + targetPath;
+      // Already on requested route; avoid recursive callstack execution
+      return;
     }
+    window.location.hash = '#' + targetPath;
   }
 
   async handleRoute() {
@@ -182,17 +182,22 @@ class Router {
     document.body.classList.toggle('login-view-active', isFullPageAuth);
 
     // Auth state route guards
-    if (window.AUTH && !window.AUTH.isLoading()) {
-      const user = window.AUTH.getUser();
-      const isAuth = window.AUTH.isAuthenticated();
+    if (window.AUTH) {
+      if (window.AUTH.isLoading()) {
+        // Wait for authentication resolution before evaluating guards
+        return;
+      }
 
-      if (isAuth && !user?.isGuest) {
-        const isCompleted = user?.registration_status === 'completed';
+      if (window.AUTH.isAuthenticated() && !window.AUTH.isGuest()) {
+        const isCompleted = window.AUTH.isRegistrationComplete();
+
         if (!isCompleted && path !== '/register-setup') {
+          console.log('[Router Guard] Registration incomplete -> Redirecting to /register-setup');
           this.navigate('/register-setup');
           return;
         }
         if (isCompleted && (path === '/login' || path === '/register-setup')) {
+          console.log('[Router Guard] Registration complete -> Redirecting to /');
           this.navigate('/');
           return;
         }

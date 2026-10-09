@@ -190,10 +190,22 @@
           window.STORE.equipSkin(data.equipped_skin);
         }
 
-        // Update local user info name
-        const displayName = data.name || user.user_metadata?.full_name || user.email.split('@')[0];
+        // Update local user info name safely without wiping registration completion fields
+        let existingInfo = {};
+        try { existingInfo = JSON.parse(localStorage.getItem(window.STORE.STORAGE_KEYS.USER_INFO) || '{}'); } catch (e) {}
+
+        const displayName = data.full_name_ar || data.name || user.user_metadata?.full_name || user.email.split('@')[0];
+        const isCompletedLocally = existingInfo.registration_status === 'completed' || window.AUTH?.isRegistrationComplete();
+
         localStorage.setItem(window.STORE.STORAGE_KEYS.USER_INFO, JSON.stringify({
+          ...existingInfo,
+          id: user.id,
           name: displayName,
+          full_name_ar: data.full_name_ar || existingInfo.full_name_ar || displayName,
+          full_name_en: data.full_name_en || existingInfo.full_name_en || null,
+          gender: data.gender || existingInfo.gender || null,
+          practical_group_id: data.practical_group_id || existingInfo.practical_group_id || 'A1',
+          registration_status: (data.registration_status === 'completed' || isCompletedLocally) ? 'completed' : (data.registration_status || existingInfo.registration_status || 'pending'),
           title: 'Year 3 Dental Student',
           avatarText: displayName.charAt(0).toUpperCase()
         }));
@@ -214,14 +226,24 @@
     isSyncing = true;
 
     try {
+      let localInfo = {};
+      try { localInfo = JSON.parse(localStorage.getItem(window.STORE.STORAGE_KEYS.USER_INFO) || '{}'); } catch (e) {}
+
+      const isCompleted = localInfo.registration_status === 'completed' || window.AUTH?.isRegistrationComplete();
+
       const profilePayload = {
         id: user.id,
         email: user.email,
-        name: user.user_metadata?.full_name || user.email.split('@')[0],
+        name: user.user_metadata?.full_name || localInfo.full_name_ar || user.email.split('@')[0],
+        full_name_ar: localInfo.full_name_ar || null,
+        full_name_en: localInfo.full_name_en || null,
+        gender: localInfo.gender || null,
+        practical_group_id: localInfo.practical_group_id || 'A1',
+        registration_status: isCompleted ? 'completed' : (localInfo.registration_status || 'pending'),
         points: window.STORE.getPoints(),
         equipped_skin: window.STORE.getEquippedSkin(),
         unlocked_skins: window.STORE.getOwnedSkins(),
-        avatar_url: user.user_metadata?.avatar_url || null,
+        avatar_url: user.user_metadata?.avatar_url || localInfo.avatar || null,
         updated_at: new Date().toISOString()
       };
 

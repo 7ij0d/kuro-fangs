@@ -26,6 +26,16 @@
     render(container, params) {
       if (!container) return;
 
+      // If profile registration is already complete, redirect to Home unless viewing immediate Step 5
+      if (window.AUTH && window.AUTH.isRegistrationComplete() && this.step !== 5) {
+        if (window.ROUTER && typeof window.ROUTER.navigate === 'function') {
+          window.ROUTER.navigate('/');
+        } else {
+          window.location.hash = '#/';
+        }
+        return;
+      }
+
       const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
       const user = window.AUTH ? window.AUTH.getUser() : null;
 
@@ -589,27 +599,34 @@
       });
 
       // Step 5 Launch Button
-      container.querySelector('#btn-success-launch')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.body.classList.remove('login-view-active');
-        document.querySelectorAll('#kuro-avatar-modal-overlay, .kuro-avatar-modal-overlay, #subject-modal-backdrop').forEach(el => el.remove());
+      const launchBtn = container.querySelector('#btn-success-launch');
+      if (launchBtn) {
+        launchBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          if (launchBtn.disabled) return;
+          launchBtn.disabled = true;
+          launchBtn.style.opacity = '0.6';
 
-        if (window.AUTH && window.AUTH.user) {
-          window.AUTH.user.registration_status = 'completed';
-        }
-        try {
-          const current = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
-          localStorage.setItem('kf_user_info', JSON.stringify({ ...current, registration_status: 'completed' }));
-        } catch (err) {}
+          document.body.classList.remove('login-view-active');
+          document.querySelectorAll('#kuro-avatar-modal-overlay, .kuro-avatar-modal-overlay, #subject-modal-backdrop').forEach(el => el.remove());
 
-        if (window.ROUTER && typeof window.ROUTER.navigate === 'function') {
-          window.ROUTER.navigate('/');
-        } else if (typeof window.navigate === 'function') {
-          window.navigate('/');
-        } else {
-          window.location.hash = '#/';
-        }
-      });
+          // Re-affirm registration completion authoritatively across all stores
+          if (window.AUTH) {
+            await window.AUTH.saveCompleteStudentProfile(this.formData);
+          }
+
+          // Reset wizard step state for future clean invocations
+          this.step = 1;
+
+          if (window.ROUTER && typeof window.ROUTER.navigate === 'function') {
+            window.ROUTER.navigate('/');
+          } else if (typeof window.navigate === 'function') {
+            window.navigate('/');
+          } else {
+            window.location.hash = '#/';
+          }
+        });
+      }
     }
   };
 
