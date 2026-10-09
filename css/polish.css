@@ -15678,24 +15678,6 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* GPU hardware compositing layers for layout containers and cards */
-.site-header,
-#app-sidebar,
-.app-main-wrapper,
-.main-content,
-.kuro-login-viewport,
-.kuro-wizard-container,
-.kuro-login-card,
-.subject-card,
-.sheet-card,
-.header-auth-action-box,
-.settings-popover-menu,
-.kuro-avatar-modal-card {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform, opacity;
-}
-
 /* Hardware accelerated spring transitions */
 .header-nav-pill,
 .sidebar-user-card,
