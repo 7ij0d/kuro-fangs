@@ -430,15 +430,13 @@
   }
 
   async function signOut() {
-    if (client) {
-      try {
-        await client.auth.signOut();
-      } catch (e) {
-        console.warn('Sign out note:', e);
-      }
-    }
     currentUser = null;
     updateUIForAuth(null);
+    if (client) {
+      try {
+        client.auth.signOut().catch(() => {});
+      } catch (e) {}
+    }
     return { success: true };
   }
 

@@ -544,23 +544,27 @@
     }
 
     /**
-     * Sign out
+     * Sign out (Instant Optimistic UI update <5ms)
      */
     async signOut() {
+      // 1. Immediately clear local session state & update UI
+      this._handleSignedOut();
+
+      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+      if (window.Toast) {
+        window.Toast.show(
+          isAr ? 'تم تسجيل الخروج بنجاح. نراك قريباً! 👋' : 'Signed out successfully. See you soon! 👋',
+          'info'
+        );
+      }
+
+      // 2. Non-blocking remote session revocation
       const supabase = this._getSupabaseClient();
       if (supabase) {
         try {
-          await supabase.auth.signOut();
-        } catch (e) {
-          console.warn('[AuthEngine] Signout note:', e);
-        }
+          supabase.auth.signOut().catch(e => console.warn('[AuthEngine] Signout note:', e));
+        } catch (e) {}
       }
-      this._handleSignedOut();
-      const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-      window.Toast?.show(
-        isAr ? 'تم تسجيل الخروج بنجاح. نراك قريباً! 👋' : 'Signed out successfully. See you soon! 👋',
-        'info'
-      );
     }
 
     /**
