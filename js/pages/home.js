@@ -289,28 +289,28 @@ const HomePage = {
           <div class="kssc-icon-box"><i data-lucide="calendar-days"></i></div>
           <div class="kssc-meta">
             <strong class="kssc-val">${todayClassesCount}</strong>
-            <span class="kssc-label">${isAr ? 'محاضرات اليوم' : 'Classes'}</span>
+            <span class="kssc-label">${isAr ? 'محاضرات اليوم' : "Today's Classes"}</span>
           </div>
         </a>
         <a href="#/study-rooms" class="kuro-summary-stat-card stat-streak">
           <div class="kssc-icon-box"><i data-lucide="flame"></i></div>
           <div class="kssc-meta">
             <strong class="kssc-val">${streakDays}</strong>
-            <span class="kssc-label">${isAr ? 'أيام الالتزام' : 'Streak'}</span>
+            <span class="kssc-label">${isAr ? 'أيام الالتزام' : 'Study Streak'}</span>
           </div>
         </a>
         <a href="#/study-rooms" class="kuro-summary-stat-card stat-time">
           <div class="kssc-icon-box"><i data-lucide="bar-chart-3"></i></div>
           <div class="kssc-meta">
             <strong class="kssc-val">${studyTimeDisplay}</strong>
-            <span class="kssc-label">${isAr ? 'وقت الدراسة' : 'Study Time'}</span>
+            <span class="kssc-label">${isAr ? 'إجمالي وقت الدراسة' : 'Total Study Time'}</span>
           </div>
         </a>
         <a href="#/questions" class="kuro-summary-stat-card stat-questions">
           <div class="kssc-icon-box"><i data-lucide="check-circle-2"></i></div>
           <div class="kssc-meta">
             <strong class="kssc-val">${totalQuestionsAnswered}</strong>
-            <span class="kssc-label">${isAr ? 'أسئلة محلولة' : 'Questions'}</span>
+            <span class="kssc-label">${isAr ? 'الأسئلة المحلولة' : 'Completed Questions'}</span>
           </div>
         </a>
       </section>
@@ -514,7 +514,9 @@ const HomePage = {
       if (!slots || slots.length === 0) {
         return `
           <div class="kuro-empty-day-state">
-            <span class="keds-icon">☕</span>
+            <div class="keds-mascot-wrap">
+              <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" width="46" height="46" class="keds-mascot-img" loading="lazy" />
+            </div>
             <h4 class="keds-title">${isAr ? (isToday ? 'لا توجد محاضرات اليوم' : 'لا توجد محاضرات غداً') : (isToday ? 'No classes today' : 'No classes tomorrow')}</h4>
             <p class="keds-desc">${isAr ? 'استغل هذا الوقت للدراسة أو المراجعة أو انضم لغرفة دراسة!' : 'Take this time to study, review or join a study room!'}</p>
             <a href="#/study-rooms" class="keds-action-btn">
@@ -527,7 +529,10 @@ const HomePage = {
 
       return `
         <div class="kuro-mini-lecture-list">
-          ${slots.map(slot => `
+          ${slots.map(slot => {
+            const theme = SUBJECT_THEMES[slot.subject_id] || DEFAULT_THEME;
+            const accentColor = slot.color || theme.color || '#7D1E30';
+            return `
             <div
               class="kuro-schedule-row-card"
               role="button"
@@ -536,22 +541,29 @@ const HomePage = {
               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.HomePage.handleSubjectClick('${slot.subject_id}');}"
               title="${isAr ? 'انقر لفتح المادة وشيتاتها' : 'Click to open subject'}"
             >
-              <div class="ksrc-accent-bar" style="background-color: ${slot.color || '#7E1D2A'};"></div>
+              <div class="ksrc-accent-bar" style="background-color: ${accentColor};"></div>
+              <div class="ksrc-icon-box" style="background-color: ${theme.bg}; color: ${theme.color}; border-color: ${theme.border};">
+                <i data-lucide="${theme.icon}"></i>
+              </div>
               <div class="ksrc-content">
                 <div class="ksrc-top">
                   <span class="ksrc-time">${slot.time}</span>
-                  <span class="ksrc-location">
-                    <i data-lucide="map-pin"></i>
-                    <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
-                  </span>
                 </div>
                 <div class="ksrc-subject">${isAr ? slot.subject_ar : slot.subject_en}</div>
+                <div class="ksrc-location">
+                  <i data-lucide="map-pin"></i>
+                  <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
+                </div>
               </div>
-              <div class="ksrc-arrow">
-                <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
+              <div class="ksrc-end">
+                <span class="ksrc-status-badge">${isToday ? (isAr ? 'اليوم' : 'Today') : (isAr ? 'غداً' : 'Tomorrow')}</span>
+                <div class="ksrc-arrow">
+                  <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
+                </div>
               </div>
             </div>
-          `).join('')}
+          `;
+          }).join('')}
         </div>
       `;
     };
@@ -659,7 +671,7 @@ const HomePage = {
     const audioTimestamp = audioData ? (audioData.timestamp || audioData.listenedAt || audioData.openedAt) : null;
     const audioMeta = (hasAudio && audioTimestamp)
       ? `${isAr ? 'آخر استماع:' : 'Last listened:'} ${HomePage.formatRelativeTime(audioTimestamp, isAr)}`
-      : (hasAudio ? (isAr ? 'آخر استماع: مؤخراً' : 'Last listened: Recently') : '—');
+      : (hasAudio ? (isAr ? 'آخر استماع: مؤخراً' : 'Last listened: Recently') : '');
     const audioUrl = '#/recordings';
     const audioBtnText = hasAudio
       ? (isAr ? 'متابعة الاستماع' : 'Continue Listening')
@@ -715,10 +727,15 @@ const HomePage = {
           <!-- Card A: Last Opened Sheet -->
           <div class="continue-study-card" id="continue-card-sheet" role="region" aria-label="${sheetTitle}">
             <div class="continue-card-top">
-              <span class="continue-tag-badge sheet">
-                <i data-lucide="file-text"></i>
-                <span>${isAr ? 'آخر شيت تم فتحه' : 'Last Opened Sheet'}</span>
-              </span>
+              <div class="continue-card-badge-row">
+                <span class="continue-tag-badge sheet">
+                  <i data-lucide="file-text"></i>
+                  <span>${isAr ? 'آخر شيت تم فتحه' : 'Last Opened Sheet'}</span>
+                </span>
+                <span class="continue-card-type-icon sheet-icon" aria-hidden="true">
+                  <i data-lucide="book-open"></i>
+                </span>
+              </div>
               <h3 class="continue-card-title" title="${sheetTitle}">${sheetTitle}</h3>
               <p class="continue-card-subject" title="${sheetSub}">${sheetSub}</p>
               <span class="continue-card-meta">${sheetMeta}</span>
@@ -734,13 +751,18 @@ const HomePage = {
           <!-- Card B: Last Listening -->
           <div class="continue-study-card" id="continue-card-recording" role="region" aria-label="${audioTitle}">
             <div class="continue-card-top">
-              <span class="continue-tag-badge recording">
-                <i data-lucide="headphones"></i>
-                <span>${isAr ? 'آخر تسجيل صوتي' : 'Last Listening'}</span>
-              </span>
+              <div class="continue-card-badge-row">
+                <span class="continue-tag-badge recording">
+                  <i data-lucide="headphones"></i>
+                  <span>${isAr ? 'آخر تسجيل صوتي' : 'Last Listening'}</span>
+                </span>
+                <span class="continue-card-type-icon recording-icon" aria-hidden="true">
+                  <i data-lucide="headphones"></i>
+                </span>
+              </div>
               <h3 class="continue-card-title" title="${audioTitle}">${audioTitle}</h3>
               <p class="continue-card-subject" title="${audioSub}">${audioSub}</p>
-              <span class="continue-card-meta">${audioMeta}</span>
+              ${audioMeta ? `<span class="continue-card-meta">${audioMeta}</span>` : ''}
             </div>
             <div class="continue-card-bottom">
               <a href="${audioUrl}" class="continue-action-btn ${hasAudio ? '' : 'secondary'}">
@@ -753,17 +775,22 @@ const HomePage = {
           <!-- Card C: Continue Questions -->
           <div class="continue-study-card ${isCompleted ? 'quiz-completed' : ''}" id="continue-card-questions" role="region" aria-label="${qTitle}">
             <div class="continue-card-top">
-              <span class="continue-tag-badge questions ${isCompleted ? 'completed-badge' : ''}">
-                <i data-lucide="${isCompleted ? 'check-circle' : 'help-circle'}"></i>
-                <span>${qBadgeText}</span>
-              </span>
+              <div class="continue-card-badge-row">
+                <span class="continue-tag-badge questions ${isCompleted ? 'completed-badge' : ''}">
+                  <i data-lucide="${isCompleted ? 'check-circle' : 'help-circle'}"></i>
+                  <span>${qBadgeText}</span>
+                </span>
+                <span class="continue-card-type-icon questions-icon ${isCompleted ? 'completed-icon' : ''}" aria-hidden="true">
+                  <i data-lucide="${isCompleted ? 'check-circle-2' : 'help-circle'}"></i>
+                </span>
+              </div>
               <h3 class="continue-card-title" title="${qTitle}">${qTitle}</h3>
               <p class="continue-card-subject" title="${qSub}">${qSub}</p>
               <div class="continue-progress-wrap ${hasQ ? '' : 'empty'}">
                 ${hasQ ? `
                   <div class="continue-progress-label">
                     <span>${qAnswered} / ${qTotal} ${isAr ? 'سؤال' : 'questions'}</span>
-                    <span>${qPercent}%</span>
+                    <span class="continue-progress-pct">${qPercent}%</span>
                   </div>
                   <div class="continue-progress-track">
                     <div class="continue-progress-fill ${isCompleted ? 'completed-fill' : ''}" style="width: ${qPercent}%;"></div>

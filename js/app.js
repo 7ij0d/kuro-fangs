@@ -145,6 +145,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const moreSchedules = document.getElementById('more-item-schedules');
     if (moreSchedules) moreSchedules.textContent = isAr ? 'الجداول الدراسية' : 'Schedules';
+    const moreProfile = document.getElementById('more-item-profile');
+    if (moreProfile) moreProfile.textContent = isAr ? 'الملف الشخصي' : 'Student Profile';
+    const moreSettings = document.getElementById('more-item-settings');
+    if (moreSettings) moreSettings.textContent = isAr ? 'إعدادات المنصة' : 'Settings';
     const navRewards = document.getElementById('nav-item-rewards');
     if (navRewards) navRewards.textContent = isAr ? 'كورو والتخصيص' : 'Mascot Hub';
     const navGames = document.getElementById('nav-item-games');
@@ -440,6 +444,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeMobileSearch();
     });
   }
+
+  document.addEventListener('click', (e) => {
+    if (siteHeaderEl && siteHeaderEl.classList.contains('mobile-search-open')) {
+      const searchBoxEl = document.getElementById('header-search-box');
+      if (searchBoxEl && !searchBoxEl.contains(e.target) && (!mobileSearchToggleBtn || !mobileSearchToggleBtn.contains(e.target))) {
+        closeMobileSearch();
+      }
+    }
+  });
 
   // 6.7. Setup Mobile "More" Bottom Sheet Controls
   const mobileMoreBtn = document.getElementById('mobile-bottom-more-btn');
@@ -833,9 +846,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Update Top Header Nav Pills
+    const scheduleSubRoutes = ['/schedules', '/lecture-schedule', '/practical-schedule', '/exams'];
+    const headerMoreRoutes = ['/rewards', '/games', '/admin', '/settings'];
     document.querySelectorAll('.header-nav-pill').forEach(pill => {
       const target = pill.getAttribute('data-route') || pill.getAttribute('href')?.replace('#', '');
       if (target && (target === normalizedPath || (target === '/' && (normalizedPath === '' || normalizedPath === '/')))) {
+        pill.classList.add('active');
+      } else if (target === '/sheets' && normalizedPath.startsWith('/sheet')) {
+        pill.classList.add('active');
+      } else if (target === '/schedules' && scheduleSubRoutes.includes(normalizedPath)) {
+        pill.classList.add('active');
+      } else if (pill.id === 'header-more-btn' && headerMoreRoutes.includes(normalizedPath)) {
         pill.classList.add('active');
       } else {
         pill.classList.remove('active');

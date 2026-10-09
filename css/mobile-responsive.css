@@ -139,9 +139,9 @@
 }
 
 /* ============================================================================
-   1. MASTER SMARTPHONE ARCHITECTURE (Portrait <= 600px OR Landscape Phone)
+   1. MASTER SMARTPHONE ARCHITECTURE (Portrait <= 599px OR Landscape Phone)
    ============================================================================ */
-@media (max-width: 600px),
+@media (max-width: 599px),
        ((max-width: 960px) and (max-height: 500px) and (orientation: landscape)) {
 
   /* Zero accidental horizontal page overflow while preserving native vertical scroll */
@@ -825,9 +825,9 @@
 }
 
 /* ============================================================================
-   2. SMARTPHONE PORTRAIT LAYOUT (320px <= width <= 600px)
+   2. SMARTPHONE PORTRAIT LAYOUT (320px <= width <= 599px)
    ============================================================================ */
-@media (max-width: 600px) {
+@media (max-width: 599px) {
 
   /* Hide Landscape-only bottom nav shortcuts in portrait (accessible via More) */
   .mobile-bottom-item.landscape-extra-item {
