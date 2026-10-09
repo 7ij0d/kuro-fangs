@@ -598,7 +598,13 @@
           localStorage.setItem('kf_user_info', JSON.stringify({ ...current, registration_status: 'completed' }));
         } catch (err) {}
 
-        window.location.hash = '#/';
+        if (window.ROUTER && typeof window.ROUTER.navigate === 'function') {
+          window.ROUTER.navigate('/');
+        } else if (typeof window.navigate === 'function') {
+          window.navigate('/');
+        } else {
+          window.location.hash = '#/';
+        }
       });
     }
   };

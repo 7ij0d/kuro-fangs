@@ -109,7 +109,13 @@ class Router {
   }
 
   navigate(path) {
-    window.location.hash = path.startsWith('/') ? path : '/' + path;
+    const targetPath = path.startsWith('/') ? path : '/' + path;
+    const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
+    if (currentHash === targetPath) {
+      this.handleRoute();
+    } else {
+      window.location.hash = '#' + targetPath;
+    }
   }
 
   async handleRoute() {
