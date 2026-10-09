@@ -154,6 +154,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const sideSchedules = document.getElementById('side-nav-schedules');
     if (sideSchedules) sideSchedules.textContent = isAr ? 'الجداول الدراسية' : 'Schedules';
+
+    const sideStudyRooms = document.getElementById('side-nav-study-rooms');
+    if (sideStudyRooms) sideStudyRooms.textContent = isAr ? 'غرف الدراسة' : 'Study Rooms';
+
+    const navStudyRooms = document.getElementById('nav-item-study-rooms');
+    if (navStudyRooms) navStudyRooms.textContent = isAr ? 'غرف الدراسة' : 'Study Rooms';
+
+    const moreStudyRooms = document.getElementById('more-item-study-rooms');
+    if (moreStudyRooms) moreStudyRooms.textContent = isAr ? 'غرف الدراسة' : 'Study Rooms';
   };
 
   const initialLang = window.I18N.getLang();
@@ -484,6 +493,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   router.register('/alerts', (c, q) => window.SecondaryPages.renderAlerts(c, q));
   router.register('/search', (c, q) => window.SecondaryPages.renderSearch(c, q));
   router.register('/admin', (c, q) => window.AdminPage.render(c, q));
+  router.register('/study-rooms', async (c, q) => {
+    if (window.StudyRoomsPage && typeof window.StudyRoomsPage.render === 'function') {
+      await window.StudyRoomsPage.render(c, q);
+    }
+  });
   router.register('/games', async (c, q) => {
     if (window.GamesPage && typeof window.GamesPage.render === 'function') {
       await window.GamesPage.render(c, q);

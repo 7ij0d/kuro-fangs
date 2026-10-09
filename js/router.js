@@ -98,6 +98,11 @@ class Router {
         if (window.RegisterSetupPage && typeof window.RegisterSetupPage.render === 'function') {
           window.RegisterSetupPage.render(container, params);
         }
+      },
+      '/study-rooms': async (container, params) => {
+        if (window.StudyRoomsPage && typeof window.StudyRoomsPage.render === 'function') {
+          await window.StudyRoomsPage.render(container, params);
+        }
       }
     };
     this.currentPath = '';
@@ -110,7 +115,7 @@ class Router {
 
   navigate(path) {
     const targetPath = path.startsWith('/') ? path : '/' + path;
-    const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
+    const currentHash = window.location.hash.slice(1) || '/';
     if (currentHash === targetPath) {
       // Already on requested route; avoid recursive callstack execution
       return;
@@ -151,7 +156,8 @@ class Router {
       '#jnotes-eraser-cursor',
       '#kuro-avatar-modal-overlay',
       '.kuro-avatar-modal-overlay',
-      '#subject-modal-backdrop'
+      '#subject-modal-backdrop',
+      '.sr-modal-backdrop'
     ];
     backdropsToClean.forEach(sel => {
       document.querySelectorAll(sel).forEach(el => el.remove());
