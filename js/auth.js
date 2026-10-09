@@ -213,23 +213,47 @@
       const fullName = meta.full_name || meta.name || sbUser.email?.split('@')[0] || 'Kuro Student';
       const avatarUrl = meta.avatar_url || meta.picture || null;
 
+      // Read existing cached profile data to preserve registration completion
+      let localInfo = {};
+      try {
+        localInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}');
+      } catch (e) {}
+
+      const existingUser = this.user || {};
+      const regStatus = existingUser.registration_status || localInfo.registration_status || meta.registration_status || 'pending';
+      const nameAr = existingUser.full_name_ar || localInfo.full_name_ar || localInfo.name || fullName;
+      const nameEn = existingUser.full_name_en || localInfo.full_name_en || null;
+      const gender = existingUser.gender || localInfo.gender || null;
+      const group = existingUser.practical_group_id || localInfo.practical_group_id || 'A1';
+
       this.user = {
         id: sbUser.id,
         email: sbUser.email,
-        full_name: fullName,
-        avatar_url: avatarUrl,
+        full_name: nameAr || fullName,
+        full_name_ar: nameAr,
+        full_name_en: nameEn,
+        gender: gender,
+        practical_group_id: group,
+        registration_status: regStatus,
+        avatar_url: existingUser.avatar_url || localInfo.avatar || avatarUrl,
         created_at: sbUser.created_at,
         isGuest: false,
         raw: sbUser
       };
 
-      // Cache user info in localStorage for fast synchronous render
+      // Cache user info in localStorage while preserving registration fields
       try {
         localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify({
+          ...localInfo,
           id: sbUser.id,
-          name: fullName,
+          name: this.user.full_name,
+          full_name_ar: this.user.full_name_ar,
+          full_name_en: this.user.full_name_en,
           email: sbUser.email,
-          avatar: avatarUrl,
+          gender: this.user.gender,
+          practical_group_id: this.user.practical_group_id,
+          registration_status: this.user.registration_status,
+          avatar: this.user.avatar_url,
           created_at: sbUser.created_at
         }));
         localStorage.setItem(STORAGE_KEYS.AUTH_MODE, 'authenticated');

@@ -605,8 +605,18 @@
       });
 
       // Step 5 Launch Button
-      container.querySelector('#btn-success-launch')?.addEventListener('click', () => {
+      container.querySelector('#btn-success-launch')?.addEventListener('click', (e) => {
+        e.preventDefault();
         document.body.classList.remove('login-view-active');
+
+        if (window.AUTH && window.AUTH.user) {
+          window.AUTH.user.registration_status = 'completed';
+        }
+        try {
+          const current = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
+          localStorage.setItem('kf_user_info', JSON.stringify({ ...current, registration_status: 'completed' }));
+        } catch (err) {}
+
         window.location.hash = '#/';
       });
     }
