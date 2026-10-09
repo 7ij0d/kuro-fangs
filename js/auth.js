@@ -266,9 +266,11 @@
       }
 
       // Check registration status: incomplete profiles must go to student registration setup
-      const regStatus = profile?.registration_status || this.user?.registration_status;
-      if (regStatus !== 'completed' && !window.location.hash.includes('register-setup')) {
-        window.location.hash = '#/register-setup';
+      const isCompleted = (profile?.registration_status === 'completed') || (this.user?.registration_status === 'completed');
+      if (!isCompleted) {
+        if (!window.location.hash.includes('register-setup')) {
+          window.location.hash = '#/register-setup';
+        }
         return;
       }
 

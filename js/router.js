@@ -174,16 +174,20 @@ class Router {
 
     // Auth state route guards
     if (window.AUTH && !window.AUTH.isLoading()) {
-      if (path === '/login' && window.AUTH.isAuthenticated()) {
-        const user = window.AUTH.getUser();
-        if (user && user.registration_status !== 'completed') {
+      const user = window.AUTH.getUser();
+      const isAuth = window.AUTH.isAuthenticated();
+
+      if (isAuth && !user?.isGuest) {
+        const isCompleted = user?.registration_status === 'completed';
+        if (!isCompleted && path !== '/register-setup') {
           this.navigate('/register-setup');
-        } else {
-          this.navigate('/');
+          return;
         }
-        return;
-      }
-      if (path !== '/login' && path !== '/register-setup' && window.AUTH.isUnauthenticated()) {
+        if (isCompleted && (path === '/login' || path === '/register-setup')) {
+          this.navigate('/');
+          return;
+        }
+      } else if (window.AUTH.isUnauthenticated() && path !== '/login') {
         this.navigate('/login');
         return;
       }
