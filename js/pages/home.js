@@ -391,7 +391,11 @@ const HomePage = {
           <div class="kuro-empty-day-state">
             <span class="keds-icon">☕</span>
             <h4 class="keds-title">${isAr ? (isToday ? 'لا توجد محاضرات اليوم' : 'لا توجد محاضرات غداً') : (isToday ? 'No classes today' : 'No classes tomorrow')}</h4>
-            <p class="keds-desc">${isAr ? 'استغل هذا الوقت للدراسة ومراجعة الدروس!' : 'Take this time to study or catch up!'}</p>
+            <p class="keds-desc">${isAr ? 'استغل هذا الوقت للدراسة أو المراجعة أو انضم لغرفة دراسة!' : 'Take this time to study, review or join a study room!'}</p>
+            <a href="#/study-rooms" class="keds-action-btn">
+              <span>${isAr ? 'تصفح غرف الدراسة' : 'Browse Study Rooms'}</span>
+              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+            </a>
           </div>
         `;
       }
@@ -576,6 +580,10 @@ const HomePage = {
             <i data-lucide="book-open"></i>
             <span>${isAr ? 'متابعة الدراسة' : 'Continue Studying'}</span>
           </h2>
+          <a href="#/sheets" class="kuro-continue-view-all-btn">
+            <span>${isAr ? 'عرض الكل' : 'View All'}</span>
+            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+          </a>
         </div>
 
         <div class="kuro-continue-studying-grid">
