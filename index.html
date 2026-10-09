@@ -35,15 +35,16 @@
   </script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=20.0" />
-  <link rel="stylesheet" href="css/base.css?v=20.0" />
-  <link rel="stylesheet" href="css/layout.css?v=20.0" />
-  <link rel="stylesheet" href="css/components.css?v=20.0" />
+  <link rel="stylesheet" href="css/tokens.css?v=21.0" />
+  <link rel="stylesheet" href="css/base.css?v=21.0" />
+  <link rel="stylesheet" href="css/layout.css?v=21.0" />
+  <link rel="stylesheet" href="css/components.css?v=21.0" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=20.0" />
-  <link rel="stylesheet" href="css/auth.css?v=20.0" />
-  <link rel="stylesheet" href="css/study-rooms.css?v=20.0" />
-  <link rel="stylesheet" href="css/tablet-responsive.css?v=20.0" />
+  <link rel="stylesheet" href="css/polish.css?v=21.0" />
+  <link rel="stylesheet" href="css/auth.css?v=21.0" />
+  <link rel="stylesheet" href="css/study-rooms.css?v=21.0" />
+  <link rel="stylesheet" href="css/tablet-responsive.css?v=21.0" />
+  <link rel="stylesheet" href="css/mobile-responsive.css?v=21.0" />
 </head>
 <body id="app-body">
   <!-- ==========================================================================
@@ -264,10 +265,18 @@
 
         <!-- Right Header Tools: Search, Notifications, Profile & Quick Toggles -->
         <div class="header-right-tools">
+          <!-- Mobile Search Trigger Button (Opens expandable search row on narrow phones) -->
+          <button type="button" id="mobile-search-toggle-btn" class="header-toggle-btn mobile-search-toggle-btn" title="البحث | Search" aria-label="Search" aria-expanded="false">
+            <i data-lucide="search"></i>
+          </button>
+
           <!-- Search Box -->
-          <div class="header-search-box">
+          <div class="header-search-box" id="header-search-box">
             <i data-lucide="search" class="search-icon"></i>
             <input type="text" id="header-search-input" placeholder="Search subjects, sheets..." autocomplete="off" />
+            <button type="button" id="mobile-search-close-btn" class="mobile-search-close-btn" aria-label="Close search">
+              <i data-lucide="x"></i>
+            </button>
           </div>
 
           <!-- Auth Header Status Pill / Profile Badge -->
@@ -296,44 +305,181 @@
     </div>
   </div>
 
+  <!-- ==========================================================================
+       3. MOBILE BOTTOM NAVIGATION BAR & ORGANIZED "MORE" SHEET (Smartphones Only)
+       ========================================================================== -->
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="Mobile Primary Navigation">
+    <a href="#/" class="mobile-bottom-item active" data-route="/">
+      <span class="mbi-icon-wrap"><i data-lucide="home"></i></span>
+      <span class="mbi-label" id="mbi-label-home">Home</span>
+    </a>
+    <a href="#/sheets" class="mobile-bottom-item" data-route="/sheets">
+      <span class="mbi-icon-wrap"><i data-lucide="book-open"></i></span>
+      <span class="mbi-label" id="mbi-label-sheets">Sheets</span>
+    </a>
+    <a href="#/recordings" class="mobile-bottom-item" data-route="/recordings">
+      <span class="mbi-icon-wrap"><i data-lucide="headphones"></i></span>
+      <span class="mbi-label" id="mbi-label-recordings">Recordings</span>
+    </a>
+    <a href="#/questions" class="mobile-bottom-item" data-route="/questions">
+      <span class="mbi-icon-wrap"><i data-lucide="help-circle"></i></span>
+      <span class="mbi-label" id="mbi-label-questions">Questions</span>
+    </a>
+    <!-- Landscape-Visible Direct Destinations (Rooms & Schedules) -->
+    <a href="#/study-rooms" class="mobile-bottom-item landscape-extra-item" data-route="/study-rooms">
+      <span class="mbi-icon-wrap"><i data-lucide="timer"></i></span>
+      <span class="mbi-label" id="mbi-label-rooms">Rooms</span>
+    </a>
+    <a href="#/schedules" class="mobile-bottom-item landscape-extra-item" data-route="/schedules">
+      <span class="mbi-icon-wrap"><i data-lucide="calendar"></i></span>
+      <span class="mbi-label" id="mbi-label-schedules">Schedules</span>
+    </a>
+    <!-- More Sheet Trigger -->
+    <button type="button" id="mobile-bottom-more-btn" class="mobile-bottom-item mobile-more-trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="mobile-more-sheet">
+      <span class="mbi-icon-wrap"><i data-lucide="more-horizontal"></i></span>
+      <span class="mbi-label" id="mbi-label-more">More</span>
+    </button>
+  </nav>
+
+  <!-- Mobile "More" Bottom Sheet Backdrop & Dialog -->
+  <div id="mobile-more-backdrop" class="mobile-more-backdrop" aria-hidden="true"></div>
+  <aside id="mobile-more-sheet" class="mobile-more-sheet" role="dialog" aria-modal="true" aria-labelledby="mms-sheet-title" aria-hidden="true">
+    <div class="mms-handle-bar"><span></span></div>
+    <div class="mms-header">
+      <div class="mms-header-title-wrap">
+        <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" width="28" height="28" class="mms-brand-img" />
+        <h2 id="mms-sheet-title" class="mms-title">More Destinations</h2>
+      </div>
+      <button type="button" id="mobile-more-close-btn" class="mms-close-btn" aria-label="Close More menu">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <div class="mms-body">
+      <!-- Featured Primary Destinations: Study Rooms & Academic Schedules -->
+      <div class="mms-featured-grid">
+        <a href="#/study-rooms" class="mms-featured-card mms-feat-rooms" data-route="/study-rooms">
+          <div class="mms-feat-icon"><i data-lucide="timer"></i></div>
+          <div class="mms-feat-info">
+            <strong id="mms-item-study-rooms">Study Rooms</strong>
+            <span id="mms-sub-study-rooms">Focus timer & live group sessions</span>
+          </div>
+        </a>
+        <a href="#/schedules" class="mms-featured-card mms-feat-schedules" data-route="/schedules">
+          <div class="mms-feat-icon"><i data-lucide="calendar"></i></div>
+          <div class="mms-feat-info">
+            <strong id="mms-item-schedules">Academic Schedules</strong>
+            <span id="mms-sub-schedules">Lectures, clinics & official exams</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Direct Timetable Shortcuts -->
+      <div class="mms-section-label" id="mms-sec-timetables">TIMETABLES & EXAMS</div>
+      <div class="mms-links-list">
+        <a href="#/lecture-schedule" class="mms-list-item" data-route="/lecture-schedule">
+          <span class="mms-item-icon"><i data-lucide="book-open"></i></span>
+          <span class="mms-item-text" id="mms-item-theory">Theory Lectures Schedule</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+        <a href="#/practical-schedule" class="mms-list-item" data-route="/practical-schedule">
+          <span class="mms-item-icon"><i data-lucide="microscope"></i></span>
+          <span class="mms-item-text" id="mms-item-practical">Clinical & Lab Schedule</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+        <a href="#/exams" class="mms-list-item" data-route="/exams">
+          <span class="mms-item-icon"><i data-lucide="calendar-check"></i></span>
+          <span class="mms-item-text" id="mms-item-exams">Official Exam Schedules</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+      </div>
+
+      <!-- Platform & Account -->
+      <div class="mms-section-label" id="mms-sec-platform">PLATFORM & ACCOUNT</div>
+      <div class="mms-links-list">
+        <a href="#/profile" class="mms-list-item" data-route="/profile">
+          <span class="mms-item-icon"><i data-lucide="user"></i></span>
+          <span class="mms-item-text" id="mms-item-profile">Student Profile</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+        <a href="#/rewards" class="mms-list-item" data-route="/rewards">
+          <span class="mms-item-icon"><i data-lucide="sparkles"></i></span>
+          <span class="mms-item-text" id="mms-item-rewards">Fox Mascot Hub</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+        <a href="#/games" class="mms-list-item" data-route="/games">
+          <span class="mms-item-icon"><i data-lucide="gamepad-2"></i></span>
+          <span class="mms-item-text" id="mms-item-games">Arcade & Games</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+        <a href="#/settings" class="mms-list-item" data-route="/settings">
+          <span class="mms-item-icon"><i data-lucide="settings"></i></span>
+          <span class="mms-item-text" id="mms-item-settings">Platform Settings</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+        <a href="#/admin" class="mms-list-item" data-route="/admin">
+          <span class="mms-item-icon"><i data-lucide="shield-check"></i></span>
+          <span class="mms-item-text" id="mms-item-admin">Faculty Admin Portal</span>
+          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
+        </a>
+      </div>
+
+      <!-- Quick Preferences Bar -->
+      <div class="mms-quick-prefs">
+        <button type="button" id="mms-lang-btn" class="mms-pref-pill">
+          <i data-lucide="globe"></i>
+          <span id="mms-lang-text">AR / EN</span>
+        </button>
+        <button type="button" id="mms-theme-btn" class="mms-pref-pill">
+          <i data-lucide="moon" id="mms-theme-icon"></i>
+          <span id="mms-theme-text">Theme</span>
+        </button>
+        <button type="button" id="mms-sound-btn" class="mms-pref-pill">
+          <i data-lucide="volume-2" id="mms-sound-icon"></i>
+          <span id="mms-sound-text">Sound</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=20.0"></script>
-  <script src="js/audio-fx.js?v=20.0"></script>
-  <script src="js/character-theme.js?v=20.0"></script>
-  <script src="js/store.js?v=20.0"></script>
-  <script src="js/components/toast.js?v=20.0"></script>
-  <script src="js/components/auth-modal.js?v=20.0"></script>
-  <script src="js/components/avatar-modal.js?v=20.0"></script>
-  <script src="js/supabase.js?v=20.0"></script>
-  <script src="js/auth.js?v=20.0"></script>
-  <script src="js/data.js?v=20.0"></script>
-  <script src="js/data-clinical.js?v=20.0"></script>
-  <script src="js/components/subject-modal.js?v=20.0"></script>
-  <script src="js/components/sheet-edit-modal.js?v=20.0"></script>
-  <script src="js/components/notifications-center.js?v=20.0"></script>
-  <script src="js/components/sheet-copy-engine.js?v=20.0"></script>
-  <script src="js/components/settings-menu.js?v=20.0"></script>
-  <script src="js/router.js?v=20.0"></script>
-  <script src="js/pages/login.js?v=20.0"></script>
-  <script src="js/pages/register-setup.js?v=20.0"></script>
-  <script src="js/pages/home.js?v=20.0"></script>
-  <script src="js/pages/sheets.js?v=20.0"></script>
-  <script src="js/components/pdf-source-matcher.js?v=20.0"></script>
-  <script src="js/pages/sheet-detail.js?v=20.0"></script>
-  <script src="js/pages/recordings.js?v=20.0"></script>
-  <script src="js/pages/exams.js?v=20.0"></script>
-  <script src="js/pages/quizzes.js?v=20.0"></script>
-  <script src="js/pages/questions.js?v=20.0"></script>
-  <script src="js/pages/flashcards.js?v=20.0"></script>
-  <script src="js/pages/study-rooms.js?v=20.0"></script>
-  <script src="js/pages/previous-years.js?v=20.0"></script>
-  <script src="js/pages/rewards.js?v=20.0"></script>
-  <script src="js/pages/games.js?v=20.0"></script>
-  <script src="js/git-sync.js?v=20.0"></script>
-  <script src="js/pages/admin.js?v=20.0"></script>
-  <script src="js/pages/profile.js?v=20.0"></script>
-  <script src="js/pages/settings.js?v=20.0"></script>
-  <script src="js/pages/secondary.js?v=20.0"></script>
-  <script src="js/app.js?v=20.0"></script>
+  <script src="js/i18n.js?v=21.0"></script>
+  <script src="js/audio-fx.js?v=21.0"></script>
+  <script src="js/character-theme.js?v=21.0"></script>
+  <script src="js/store.js?v=21.0"></script>
+  <script src="js/components/toast.js?v=21.0"></script>
+  <script src="js/components/auth-modal.js?v=21.0"></script>
+  <script src="js/components/avatar-modal.js?v=21.0"></script>
+  <script src="js/supabase.js?v=21.0"></script>
+  <script src="js/auth.js?v=21.0"></script>
+  <script src="js/data.js?v=21.0"></script>
+  <script src="js/data-clinical.js?v=21.0"></script>
+  <script src="js/components/subject-modal.js?v=21.0"></script>
+  <script src="js/components/sheet-edit-modal.js?v=21.0"></script>
+  <script src="js/components/notifications-center.js?v=21.0"></script>
+  <script src="js/components/sheet-copy-engine.js?v=21.0"></script>
+  <script src="js/components/settings-menu.js?v=21.0"></script>
+  <script src="js/router.js?v=21.0"></script>
+  <script src="js/pages/login.js?v=21.0"></script>
+  <script src="js/pages/register-setup.js?v=21.0"></script>
+  <script src="js/pages/home.js?v=21.0"></script>
+  <script src="js/pages/sheets.js?v=21.0"></script>
+  <script src="js/components/pdf-source-matcher.js?v=21.0"></script>
+  <script src="js/pages/sheet-detail.js?v=21.0"></script>
+  <script src="js/pages/recordings.js?v=21.0"></script>
+  <script src="js/pages/exams.js?v=21.0"></script>
+  <script src="js/pages/quizzes.js?v=21.0"></script>
+  <script src="js/pages/questions.js?v=21.0"></script>
+  <script src="js/pages/flashcards.js?v=21.0"></script>
+  <script src="js/pages/study-rooms.js?v=21.0"></script>
+  <script src="js/pages/previous-years.js?v=21.0"></script>
+  <script src="js/pages/rewards.js?v=21.0"></script>
+  <script src="js/pages/games.js?v=21.0"></script>
+  <script src="js/git-sync.js?v=21.0"></script>
+  <script src="js/pages/admin.js?v=21.0"></script>
+  <script src="js/pages/profile.js?v=21.0"></script>
+  <script src="js/pages/settings.js?v=21.0"></script>
+  <script src="js/pages/secondary.js?v=21.0"></script>
+  <script src="js/app.js?v=21.0"></script>
 </body>
 </html>

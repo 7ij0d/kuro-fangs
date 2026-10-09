@@ -76,25 +76,42 @@ const HomePage = {
   _todayFormatted: '',
   _tomorrowFormatted: '',
 
-  /* ─── Dynamic time-of-day greeting engine ─── */
+  /* ─── Dynamic time-of-day greeting engine (uses real student name when available) ─── */
   getHeroGreetingData(isAr) {
     const now = new Date();
     const h = now.getHours();
+
+    let studentName = isAr ? 'طالب كورو' : 'Kuro Student';
+    try {
+      const authUser = window.AUTH && typeof window.AUTH.getUser === 'function' ? window.AUTH.getUser() : null;
+      const rawAuthName = authUser && authUser.full_name ? String(authUser.full_name).trim() : '';
+      let storedName = '';
+      try {
+        const localInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
+        storedName = String(localInfo.full_name || localInfo.name || '').trim();
+      } catch (e) {}
+
+      const candidate = rawAuthName || storedName;
+      const genericPlaceholders = ['kuro student', 'طالب كورو', 'dental student', 'طالب أسنان', 'guest student', 'طالب زائر'];
+      if (candidate && !genericPlaceholders.includes(candidate.toLowerCase())) {
+        studentName = candidate.split(/\s+/)[0];
+      }
+    } catch (e) {}
 
     let title = '';
     let subtitle = '';
 
     if (h >= 5 && h < 12) {
-      title = isAr ? 'صباح الخير، طالب كورو 👋' : 'Good Morning, Kuro Student 👋';
+      title = isAr ? `صباح الخير، ${studentName} 👋` : `Good Morning, ${studentName} 👋`;
       subtitle = isAr ? 'جاهز ليوم دراسي ممتع ومثمر؟' : 'Ready for a productive day?';
     } else if (h >= 12 && h < 17) {
-      title = isAr ? 'مساء الخير، طالب كورو 👋' : 'Good Afternoon, Kuro Student 👋';
+      title = isAr ? `مساء الخير، ${studentName} 👋` : `Good Afternoon, ${studentName} 👋`;
       subtitle = isAr ? 'واصل التقدّم، أنت تنجز خطوة بخطوة.' : "Keep going, you're making progress.";
     } else if (h >= 17 && h < 21) {
-      title = isAr ? 'مساء الخير، طالب كورو 👋' : 'Good Evening, Kuro Student 👋';
+      title = isAr ? `مساء الخير، ${studentName} 👋` : `Good Evening, ${studentName} 👋`;
       subtitle = isAr ? 'خذ استراحة قصيرة وراجع إنجازات اليوم.' : "Take a moment to review today's progress.";
     } else {
-      title = isAr ? 'تصبح على خير، طالب كورو 🌙' : 'Good Night, Kuro Student 🌙';
+      title = isAr ? `تصبح على خير، ${studentName} 🌙` : `Good Night, ${studentName} 🌙`;
       subtitle = isAr ? 'خطوة إضافية واحدة قبل أن تختم يومك.' : 'One more step before you call it a day.';
     }
 
@@ -188,6 +205,114 @@ const HomePage = {
             </div>
           </div>
         </div>
+      </section>
+    `;
+  },
+
+  /* ══════════════════════════════════════════
+     1B. REAL-DATA STUDY SUMMARY STRIP (Classes, Streak, Study Time, Questions)
+     ══════════════════════════════════════════ */
+  renderStudySummaryStrip(isAr) {
+    // 1. Today's scheduled classes count from official schedule engine
+    let todayClassesCount = 0;
+    try {
+      const todaySchedule = window.DATA && typeof window.DATA.getTheoryScheduleForDay === 'function'
+        ? window.DATA.getTheoryScheduleForDay(new Date().getDay())
+        : null;
+      if (todaySchedule && Array.isArray(todaySchedule.slots)) {
+        todayClassesCount = todaySchedule.slots.length;
+      }
+    } catch (e) {}
+
+    // 2. Study Streak & Study Time from real Study Rooms stats store
+    let streakDays = 0;
+    let totalStudyMinutes = 0;
+    try {
+      const rawStats = localStorage.getItem('kf_study_room_stats_v1');
+      if (rawStats) {
+        const parsed = JSON.parse(rawStats);
+        if (parsed && typeof parsed === 'object') {
+          streakDays = Math.max(0, parseInt(parsed.streak, 10) || 0);
+          totalStudyMinutes = Math.max(0, parseInt(parsed.totalMinutes, 10) || 0);
+        }
+      }
+    } catch (e) {}
+
+    const hours = Math.floor(totalStudyMinutes / 60);
+    const mins = totalStudyMinutes % 60;
+    let studyTimeDisplay = '';
+    if (hours > 0) {
+      studyTimeDisplay = isAr ? `${hours}س ${mins}د` : `${hours}h ${mins}m`;
+    } else {
+      studyTimeDisplay = isAr ? `${mins} د` : `${mins}m`;
+    }
+
+    // 3. Questions Answered across real student quiz sessions
+    let totalQuestionsAnswered = 0;
+    try {
+      const seenSheetIds = new Set();
+      const allRaw = localStorage.getItem('kf_all_question_sessions');
+      if (allRaw) {
+        const list = JSON.parse(allRaw);
+        if (Array.isArray(list)) {
+          list.forEach(s => {
+            if (!s) return;
+            const sid = s.sheet_id || s.id;
+            const count = s.answers && typeof s.answers === 'object'
+              ? Object.keys(s.answers).length
+              : (parseInt(s.answered, 10) || 0);
+            if (sid && !seenSheetIds.has(sid)) {
+              seenSheetIds.add(sid);
+              totalQuestionsAnswered += Math.max(0, count);
+            }
+          });
+        }
+      }
+      const activeRaw = localStorage.getItem('kf_active_question_session');
+      if (activeRaw) {
+        const act = JSON.parse(activeRaw);
+        if (act) {
+          const sid = act.sheet_id || act.id || 'active';
+          if (!seenSheetIds.has(sid)) {
+            const count = act.answers && typeof act.answers === 'object'
+              ? Object.keys(act.answers).length
+              : (parseInt(act.answered, 10) || 0);
+            totalQuestionsAnswered += Math.max(0, count);
+          }
+        }
+      }
+    } catch (e) {}
+
+    return `
+      <section class="kuro-study-summary-strip" aria-label="${isAr ? 'ملخص النشاط الدراسي' : 'Study Summary'}">
+        <a href="#/schedules" class="kuro-summary-stat-card stat-classes">
+          <div class="kssc-icon-box"><i data-lucide="calendar-days"></i></div>
+          <div class="kssc-meta">
+            <strong class="kssc-val">${todayClassesCount}</strong>
+            <span class="kssc-label">${isAr ? 'محاضرات اليوم' : 'Classes'}</span>
+          </div>
+        </a>
+        <a href="#/study-rooms" class="kuro-summary-stat-card stat-streak">
+          <div class="kssc-icon-box"><i data-lucide="flame"></i></div>
+          <div class="kssc-meta">
+            <strong class="kssc-val">${streakDays}</strong>
+            <span class="kssc-label">${isAr ? 'أيام الالتزام' : 'Streak'}</span>
+          </div>
+        </a>
+        <a href="#/study-rooms" class="kuro-summary-stat-card stat-time">
+          <div class="kssc-icon-box"><i data-lucide="bar-chart-3"></i></div>
+          <div class="kssc-meta">
+            <strong class="kssc-val">${studyTimeDisplay}</strong>
+            <span class="kssc-label">${isAr ? 'وقت الدراسة' : 'Study Time'}</span>
+          </div>
+        </a>
+        <a href="#/questions" class="kuro-summary-stat-card stat-questions">
+          <div class="kssc-icon-box"><i data-lucide="check-circle-2"></i></div>
+          <div class="kssc-meta">
+            <strong class="kssc-val">${totalQuestionsAnswered}</strong>
+            <span class="kssc-label">${isAr ? 'أسئلة محلولة' : 'Questions'}</span>
+          </div>
+        </a>
       </section>
     `;
   },
@@ -711,6 +836,9 @@ const HomePage = {
       <div class="kuro-dashboard-container">
         <!-- 1. Compact Hero Study Scene Banner with Dynamic Greeting -->
         ${HomePage.renderHeroSection(isAr)}
+
+        <!-- 1B. Real-Data Study Summary Strip (Classes, Streak, Study Time, Questions) -->
+        ${HomePage.renderStudySummaryStrip(isAr)}
 
         <!-- 2. Today & Tomorrow Schedule (Split 2-Column Cards) -->
         ${HomePage.renderDailyLecturesSection(isAr)}

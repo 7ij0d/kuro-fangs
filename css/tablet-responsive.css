@@ -76,9 +76,9 @@
 }
 
 /* ============================================================================
-   1. MASTER TABLET ARCHITECTURE (600px <= width <= 1366px)
+   1. MASTER TABLET ARCHITECTURE (601px <= width <= 1366px, height >= 501px)
    ============================================================================ */
-@media (min-width: 600px) and (max-width: 1366px) {
+@media (min-width: 601px) and (max-width: 1366px) and (min-height: 501px) {
 
   /* Prevent any accidental horizontal page scroll while preserving vertical scroll */
   html,
@@ -422,7 +422,7 @@
    iPad Air Landscape (1180×820, 1112×834), Standard iPad Landscape (1024×768),
    Redmi Pad Pro Landscape (1280×800), iPad Pro 12.9" Portrait (1024×1366)
    ============================================================================ */
-@media (min-width: 992px) and (max-width: 1366px) {
+@media (min-width: 992px) and (max-width: 1366px) and (min-height: 501px) {
 
   /* All 7 primary navigation items fit comfortably in Row 2 on >= 992px */
   .desktop-only-nav-item {
@@ -492,12 +492,12 @@
 }
 
 /* ============================================================================
-   3. TABLET PORTRAIT OPTIMIZATION (600px <= width <= 991px)
+   3. TABLET PORTRAIT OPTIMIZATION (601px <= width <= 991px, height >= 501px)
    Covers: iPad Pro 11" Portrait (834×1194), iPad Air 10.9"/11" Portrait (820×1180),
    iPad 10th/9th Gen Portrait (768×1024, 810×1080), iPad mini Portrait (744×1133),
-   Redmi Pad Pro Portrait (800×1280, 600×960)
+   Redmi Pad Pro Portrait (800×1280)
    ============================================================================ */
-@media (min-width: 600px) and (max-width: 991px) {
+@media (min-width: 601px) and (max-width: 991px) and (min-height: 501px) {
 
   .main-content {
     padding-block: 18px 48px !important;
@@ -558,7 +558,7 @@
 
   /* Today & Tomorrow in Portrait:
      - 720px – 991px (iPad Air, iPad 10th Gen, iPad Pro 11", iPad mini): 2 balanced columns
-     - 600px – 719px (Compact 600×960 tablet portrait): 1 stacked column so cards never squeeze */
+     - 601px – 719px (Compact tablet portrait): 1 stacked column so cards never squeeze */
   .kuro-schedule-split-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 14px !important;
@@ -617,9 +617,9 @@
 }
 
 /* ============================================================================
-   4. COMPACT TABLET PORTRAIT (600px <= width <= 719px, e.g., 600×960)
+   4. COMPACT TABLET PORTRAIT (601px <= width <= 719px, height >= 501px)
    ============================================================================ */
-@media (min-width: 600px) and (max-width: 719px) {
+@media (min-width: 601px) and (max-width: 719px) and (min-height: 501px) {
 
   .site-header {
     padding-inline: 16px !important;
