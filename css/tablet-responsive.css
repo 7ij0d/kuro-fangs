@@ -70,24 +70,26 @@
   height: 14px;
 }
 
-/* Empty Day Mascot Emblem */
+/* Empty Day Schedule Icon Emblem */
 .keds-mascot-wrap {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-  background: #F5EFE6;
-  border: 1px solid #E6DED4;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: #F9E6E8;
+  border: 1px solid rgba(125, 30, 48, 0.16);
+  color: #7D1E30;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-block-end: 8px;
+  margin-block-end: 10px;
   box-shadow: inset 0 1px 0 #FFFFFF;
 }
 
-.keds-mascot-img {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
+.keds-mascot-wrap svg {
+  width: 24px;
+  height: 24px;
+  stroke: #7D1E30;
+  color: #7D1E30;
 }
 
 /* Upgraded Schedule Entry Row (Icon Box + Stacked Content + Status Pill) */
@@ -421,31 +423,32 @@
   .header-brand-identity {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 9px !important;
+    gap: 0 !important;
+    text-decoration: none !important;
   }
 
   .header-brand-avatar {
-    width: 34px !important;
-    height: 34px !important;
-    border: 1.5px solid rgba(125, 30, 48, 0.25) !important;
-    background: #FFFFFF !important;
-    flex-shrink: 0 !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: none !important;
   }
 
   .header-brand-name {
-    font-size: 0.94rem !important;
-    font-weight: 800 !important;
-    color: var(--kf-tab-text, #30272A) !important;
-    letter-spacing: -0.015em !important;
+    font-size: 0.96rem !important;
+    font-weight: 850 !important;
+    color: var(--kf-tab-burgundy, #7D1E30) !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
     white-space: nowrap !important;
     max-width: none !important;
   }
 
   [data-theme="dark"] .header-brand-name {
-    color: #F5F2EB !important;
+    color: #FDA4AF !important;
   }
 
-  /* 2. Center Navigation: Single-Row Icon + Label Items */
+  /* 2. Center Navigation: Clean Horizontal Text Pills (Matches Reference #2) */
   .header-nav-center {
     order: 2 !important;
     flex: 1 1 auto !important;
@@ -453,7 +456,7 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 3px !important;
+    gap: 4px !important;
     padding: 0 !important;
     background: transparent !important;
     border: none !important;
@@ -464,77 +467,63 @@
   .header-nav-pill {
     flex: 0 1 auto !important;
     display: inline-flex !important;
-    flex-direction: column !important;
+    flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 3px !important;
-    min-height: 46px !important;
-    padding-block: 5px !important;
-    padding-inline: 10px !important;
-    border-radius: 10px !important;
+    gap: 4px !important;
+    min-height: 36px !important;
+    padding-block: 6px !important;
+    padding-inline: 11px !important;
+    border-radius: 9999px !important;
     background: transparent !important;
     border: 1px solid transparent !important;
-    color: var(--kf-tab-text-sec, #796F70) !important;
-    font-size: 0.72rem !important;
+    color: #4A3E40 !important;
+    font-size: 0.78rem !important;
     font-weight: 650 !important;
-    line-height: 1.1 !important;
+    line-height: 1.15 !important;
     white-space: nowrap !important;
     box-shadow: none !important;
     transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
-  .header-nav-pill svg {
-    width: 16px !important;
-    height: 16px !important;
-    stroke-width: 2 !important;
-    color: #5A4E50 !important;
-    stroke: #5A4E50 !important;
+  /* Hide top stacked icon inside tablet nav pills so they render as clean text pills like Reference #2 */
+  .header-nav-pill .nav-pill-icon,
+  .header-nav-pill svg:not(.header-more-chevron) {
+    display: none !important;
+  }
+
+  .header-nav-pill .header-more-chevron {
+    display: inline-block !important;
+    width: 13px !important;
+    height: 13px !important;
+    stroke-width: 2.2 !important;
+    color: currentColor !important;
+    stroke: currentColor !important;
     flex-shrink: 0 !important;
   }
 
   .header-nav-pill:hover {
-    background: rgba(125, 30, 48, 0.05) !important;
+    background: rgba(125, 30, 48, 0.06) !important;
     color: var(--kf-tab-burgundy, #7D1E30) !important;
   }
 
-  .header-nav-pill:hover svg {
-    color: var(--kf-tab-burgundy, #7D1E30) !important;
-    stroke: var(--kf-tab-burgundy, #7D1E30) !important;
-  }
-
-  /* Active Navigation Pill: Subtle Muted Blush Background & Burgundy Accent (Section 5.C) */
+  /* Active Navigation Pill: Subtle Muted Blush Background & Burgundy Accent (Reference #2) */
   .header-nav-pill.active {
     background: var(--kf-tab-blush, #F2E4E5) !important;
-    border-color: rgba(125, 30, 48, 0.16) !important;
+    border-color: rgba(125, 30, 48, 0.18) !important;
     color: var(--kf-tab-burgundy, #7D1E30) !important;
     font-weight: 750 !important;
     box-shadow: none !important;
   }
 
-  .header-nav-pill.active svg {
-    color: var(--kf-tab-burgundy, #7D1E30) !important;
-    stroke: var(--kf-tab-burgundy, #7D1E30) !important;
-    stroke-width: 2.25 !important;
-  }
-
   [data-theme="dark"] .header-nav-pill {
-    color: #A9A29C !important;
-  }
-
-  [data-theme="dark"] .header-nav-pill svg {
-    color: #A9A29C !important;
-    stroke: #A9A29C !important;
+    color: #C4BDB7 !important;
   }
 
   [data-theme="dark"] .header-nav-pill.active {
     background: rgba(125, 30, 48, 0.28) !important;
     border-color: rgba(253, 164, 175, 0.24) !important;
     color: #FDA4AF !important;
-  }
-
-  [data-theme="dark"] .header-nav-pill.active svg {
-    color: #FDA4AF !important;
-    stroke: #FDA4AF !important;
   }
 
   /* Safe anchoring for More dropdown menu */
@@ -582,6 +571,7 @@
 
   /* Compact Search Trigger Button in the Single Row */
   .mobile-search-toggle-btn {
+    order: 1 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -606,8 +596,11 @@
   }
 
   .mobile-search-toggle-btn svg {
-    width: 17px !important;
-    height: 17px !important;
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #4A3E40 !important;
+    stroke: #4A3E40 !important;
   }
 
   /* Anchored Floating Search Bar when Search Icon is tapped on Tablet */
@@ -695,12 +688,20 @@
     flex-shrink: 0 !important;
   }
 
+  .notifications-bell-btn svg {
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #4A3E40 !important;
+    stroke: #4A3E40 !important;
+  }
+
   .notifications-bell-btn:hover {
     background: var(--kf-tab-blush, #F2E4E5) !important;
     color: var(--kf-tab-burgundy, #7D1E30) !important;
   }
 
-  /* User Profile Control (#header-auth-action-box) — Ordered [Bell] then [Avatar + Name] */
+  /* User Profile Control (#header-auth-action-box) — Ordered [Search] -> [Bell] -> [Avatar + Name] */
   .notifications-bell-wrapper {
     order: 2 !important;
   }
@@ -717,11 +718,16 @@
     align-items: center !important;
     gap: 7px !important;
     height: 36px !important;
-    padding: 4px 10px 4px 5px !important;
+    padding: 4px 12px 4px 5px !important;
     border-radius: 9999px !important;
     background: var(--kf-tab-cream, #F5F0E7) !important;
     border: 1px solid var(--kf-tab-border, #E6DED4) !important;
     box-sizing: border-box !important;
+  }
+
+  /* Keep profile pill clean [T] Taha on tablet without extra signout button clutter */
+  #header-auth-action-box .btn-header-signout {
+    display: none !important;
   }
 
   #header-auth-action-box .header-user-avatar-circle,
@@ -735,7 +741,7 @@
     font-size: 0.8rem !important;
     font-weight: 750 !important;
     color: var(--kf-tab-text, #30272A) !important;
-    max-width: 72px !important;
+    max-width: 84px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -751,13 +757,19 @@
   }
 
   /* --------------------------------------------------------------------------
-     GLOBAL TABLET CONTAINER & SPACING RHYTHM (Section 4 & 13)
+     GLOBAL TABLET CONTAINER & SPACING RHYTHM (No Excessive Bottom Whitespace)
      -------------------------------------------------------------------------- */
+  .app-layout,
+  .app-main-wrapper {
+    min-height: auto !important;
+  }
+
   .main-content {
+    flex: 0 0 auto !important;
     width: 100% !important;
     max-width: 1220px !important;
     margin-inline: auto !important;
-    padding-block: 16px 48px !important;
+    padding-block: 18px 24px !important;
     padding-inline: 20px !important;
     box-sizing: border-box !important;
   }
@@ -765,11 +777,11 @@
   .kuro-dashboard-container {
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
+    gap: 18px !important;
   }
 
   /* --------------------------------------------------------------------------
-     REDESIGNED HERO BANNER (Section 6 — Reference #2: Balanced, Lower Height)
+     REDESIGNED HERO BANNER (Reference #3: Character-Free Academic Study Desk)
      -------------------------------------------------------------------------- */
   .kuro-hero-workspace {
     border-radius: 16px !important;
@@ -780,64 +792,75 @@
   }
 
   .kuro-hero-banner {
-    height: 146px !important;
-    min-height: 146px !important;
-    max-height: 146px !important;
+    height: 164px !important;
+    min-height: 164px !important;
+    max-height: 164px !important;
   }
 
   .kuro-hero-bg-img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
-    object-position: 76% center !important;
+    object-position: right center !important;
   }
 
   .kuro-hero-vignette {
-    background: linear-gradient(90deg, rgba(250, 247, 240, 0.96) 0%, rgba(250, 247, 240, 0.86) 38%, rgba(250, 247, 240, 0.25) 64%, rgba(250, 247, 240, 0) 82%) !important;
+    background: linear-gradient(90deg, rgba(250, 247, 240, 0.96) 0%, rgba(250, 247, 240, 0.88) 40%, rgba(250, 247, 240, 0.22) 65%, rgba(250, 247, 240, 0) 84%) !important;
   }
 
   html[dir="ltr"] .kuro-hero-greeting-overlay {
-    left: 24px !important;
+    left: 26px !important;
     right: auto !important;
     text-align: left !important;
-    width: clamp(280px, 52%, 480px) !important;
+    width: clamp(280px, 54%, 490px) !important;
   }
 
   html[dir="rtl"] .kuro-hero-greeting-overlay {
-    left: 24px !important;
+    left: 26px !important;
     right: auto !important;
     text-align: right !important;
-    width: clamp(280px, 52%, 480px) !important;
+    width: clamp(280px, 54%, 490px) !important;
   }
 
   .kuro-hero-greeting-title {
-    font-size: clamp(1.28rem, 2.1vw, 1.48rem) !important;
+    font-size: clamp(1.32rem, 2.2vw, 1.54rem) !important;
     font-weight: 800 !important;
     color: var(--kf-tab-burgundy-deep, #581B29) !important;
-    margin-block-end: 4px !important;
+    margin-block-end: 5px !important;
     line-height: 1.2 !important;
   }
 
   .kuro-hero-greeting-sub {
-    font-size: 0.84rem !important;
+    font-size: 0.86rem !important;
     font-weight: 550 !important;
     color: #6E474B !important;
-    margin-block-end: 10px !important;
-    line-height: 1.3 !important;
+    margin-block-end: 12px !important;
+    line-height: 1.35 !important;
   }
 
   .kuro-hero-date-chip {
-    background: rgba(255, 255, 255, 0.88) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
     border: 1px solid var(--kf-tab-border, #E6DED4) !important;
     color: var(--kf-tab-text, #30272A) !important;
-    padding: 4px 12px !important;
+    padding: 5px 13px !important;
     font-size: 0.76rem !important;
     font-weight: 700 !important;
     border-radius: 9999px !important;
   }
 
+  .kuro-hero-date-chip svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: var(--kf-tab-burgundy, #7D1E30) !important;
+    stroke: var(--kf-tab-burgundy, #7D1E30) !important;
+    flex-shrink: 0 !important;
+  }
+
   /* --------------------------------------------------------------------------
-     REDESIGNED STUDY STATISTICS CARDS (Section 7 — Reference #3)
+     REDESIGNED STUDY STATISTICS CARDS (Reference #4: Crisp Icons & Full Labels)
      -------------------------------------------------------------------------- */
   .kuro-study-summary-strip {
     display: grid !important;
@@ -850,13 +873,13 @@
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 12px !important;
-    padding: 13px 15px !important;
+    gap: 11px !important;
+    padding: 13px 13px !important;
     background: var(--kf-tab-card, #FFFFFF) !important;
     border: 1px solid var(--kf-tab-border, #E6DED4) !important;
     border-radius: 14px !important;
     box-shadow: inset 0 1px 0 #FFFFFF, 0 2px 8px rgba(48, 39, 42, 0.03) !important;
-    min-height: 66px !important;
+    min-height: 70px !important;
     box-sizing: border-box !important;
   }
 
@@ -864,10 +887,14 @@
     width: 40px !important;
     height: 40px !important;
     border-radius: 11px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     flex-shrink: 0 !important;
   }
 
   .kssc-icon-box svg {
+    display: block !important;
     width: 19px !important;
     height: 19px !important;
     stroke-width: 2.1 !important;
@@ -904,28 +931,30 @@
     text-align: start !important;
     gap: 2px !important;
     min-width: 0 !important;
+    flex: 1 1 auto !important;
   }
 
   .kssc-val {
-    font-size: 1.2rem !important;
+    font-size: 1.22rem !important;
     font-weight: 800 !important;
     color: var(--kf-tab-text, #30272A) !important;
     line-height: 1.15 !important;
   }
 
+  /* Ensure "Completed Questions" is 100% readable and never truncated with ellipsis */
   .kssc-label {
-    font-size: 0.74rem !important;
+    font-size: 0.72rem !important;
     font-weight: 650 !important;
     color: var(--kf-tab-text-sec, #796F70) !important;
-    line-height: 1.2 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    line-height: 1.22 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
     max-width: 100% !important;
   }
 
   /* --------------------------------------------------------------------------
-     REDESIGNED TODAY & TOMORROW SECTION (Section 8 — Reference #4)
+     REDESIGNED TODAY & TOMORROW SECTION (Reference #5 & #6)
      -------------------------------------------------------------------------- */
   .kuro-schedule-split-section {
     margin-block: 0 !important;
@@ -942,7 +971,7 @@
     background: var(--kf-tab-card, #FFFFFF) !important;
     border: 1px solid var(--kf-tab-border, #E6DED4) !important;
     border-radius: 16px !important;
-    padding: 16px 18px !important;
+    padding: 18px 20px !important;
     min-height: 0 !important;
     box-shadow: inset 0 1px 0 #FFFFFF, 0 2px 10px rgba(48, 39, 42, 0.03) !important;
     display: flex !important;
@@ -954,14 +983,14 @@
     align-items: center !important;
     justify-content: space-between !important;
     gap: 10px !important;
-    margin-block-end: 12px !important;
+    margin-block-end: 14px !important;
     padding-block-end: 10px !important;
     border-block-end: 1px solid #F2ECE4 !important;
     min-height: 40px !important;
   }
 
   .kuro-split-card-title {
-    font-size: 1.02rem !important;
+    font-size: 1.04rem !important;
     font-weight: 800 !important;
     color: var(--kf-tab-text, #30272A) !important;
   }
@@ -972,7 +1001,7 @@
     color: var(--kf-tab-text-sec, #796F70) !important;
   }
 
-  /* Refined Secondary View Full Schedule Button (Matches Reference #4) */
+  /* Refined Secondary View Full Schedule Button */
   .kuro-view-full-schedule-btn {
     min-height: 34px !important;
     padding-block: 6px !important;
@@ -994,15 +1023,15 @@
 
   /* Schedule Lecture Entry Row */
   .kuro-mini-lecture-list {
-    gap: 10px !important;
+    gap: 11px !important;
   }
 
   .kuro-schedule-row-card {
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
-    padding: 11px 14px !important;
-    min-height: 68px !important;
+    padding: 12px 14px !important;
+    min-height: 72px !important;
     border-radius: 13px !important;
     background: var(--kf-tab-ivory, #FAF7F0) !important;
     border: 1px solid #ECE3D8 !important;
@@ -1060,7 +1089,7 @@
 
   /* Compact Empty Schedule State */
   .kuro-empty-day-state {
-    padding: 18px 16px !important;
+    padding: 20px 16px !important;
     background: var(--kf-tab-ivory, #FAF7F0) !important;
     border: 1px solid #EDE5DA !important;
     border-radius: 13px !important;
@@ -1072,25 +1101,24 @@
   }
 
   .keds-title {
-    font-size: 0.95rem !important;
+    font-size: 0.96rem !important;
     font-weight: 800 !important;
     color: var(--kf-tab-text, #30272A) !important;
-    margin-block-end: 3px !important;
+    margin-block-end: 4px !important;
   }
 
   .keds-desc {
     font-size: 0.78rem !important;
     color: var(--kf-tab-text-sec, #796F70) !important;
     max-width: 280px !important;
-    line-height: 1.35 !important;
+    line-height: 1.38 !important;
   }
 
   /* --------------------------------------------------------------------------
-     REDESIGNED CONTINUE STUDYING SECTION (Section 9 — Reference #5)
-     Balanced 3-Column Card Grid on Tablets >= 768px (including Redmi Pad Pro)
+     REDESIGNED CONTINUE STUDYING SECTION (Reference #6: No Title Overlap, Equal Height)
      -------------------------------------------------------------------------- */
   .continue-studying-section {
-    margin-block: 0 12px !important;
+    margin-block: 0 4px !important;
   }
 
   .continue-studying-header {
@@ -1116,8 +1144,8 @@
     align-items: stretch !important;
     justify-content: space-between !important;
     gap: 14px !important;
-    padding: 16px !important;
-    min-height: 188px !important;
+    padding: 18px 16px !important;
+    min-height: 204px !important;
     background: var(--kf-tab-card, #FFFFFF) !important;
     border: 1px solid var(--kf-tab-border, #E6DED4) !important;
     border-radius: 16px !important;
@@ -1131,6 +1159,11 @@
     margin-block-end: 0 !important;
     width: 100% !important;
     flex: 1 1 auto !important;
+    overflow: visible !important;
+  }
+
+  .continue-card-badge-row {
+    flex-shrink: 0 !important;
   }
 
   .continue-tag-badge {
@@ -1141,25 +1174,37 @@
   }
 
   .continue-card-title {
-    font-size: 0.94rem !important;
+    font-size: 0.95rem !important;
     font-weight: 800 !important;
     color: var(--kf-tab-text, #30272A) !important;
-    line-height: 1.32 !important;
-    margin-block-start: 2px !important;
+    line-height: 1.38 !important;
+    margin-block: 4px 2px !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+  }
+
+  .continue-card-title-text {
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.38 !important;
   }
 
   .continue-card-subject {
-    font-size: 0.77rem !important;
+    font-size: 0.78rem !important;
     color: var(--kf-tab-text-sec, #796F70) !important;
-    line-height: 1.35 !important;
+    line-height: 1.38 !important;
+    margin-block: 0 !important;
+    flex-shrink: 0 !important;
+    white-space: normal !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .continue-card-meta {
@@ -1168,11 +1213,13 @@
     color: #938683 !important;
     margin-block-start: auto !important;
     padding-block-start: 4px !important;
+    flex-shrink: 0 !important;
   }
 
   .continue-progress-wrap {
     margin-block-start: auto !important;
     padding-block-start: 4px !important;
+    flex-shrink: 0 !important;
   }
 
   .continue-card-bottom {
@@ -1251,6 +1298,52 @@
   }
 }
 
+/* Compact header spacing for 720px–920px tablets so all 7 nav items fit with zero overlap */
+@media (min-width: 720px) and (max-width: 920px) and (min-height: 501px) {
+  .site-header {
+    padding-inline: 12px !important;
+    gap: 4px !important;
+  }
+
+  .header-brand-name {
+    font-size: 0.84rem !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  .header-nav-center {
+    gap: 1px !important;
+  }
+
+  .header-nav-pill {
+    padding-inline: 5px !important;
+    padding-block: 5px !important;
+    font-size: 0.7rem !important;
+    min-height: 30px !important;
+  }
+
+  .header-nav-pill.active {
+    padding-inline: 8px !important;
+  }
+
+  #header-auth-action-box .header-guest-pill,
+  #header-auth-action-box .header-guest-badge {
+    display: none !important;
+  }
+
+  #header-auth-action-box .header-signin-btn,
+  #header-auth-action-box .btn-header-signin {
+    height: 32px !important;
+    padding: 4px 10px !important;
+    font-size: 0.74rem !important;
+  }
+
+  #header-auth-action-box .header-user-badge {
+    height: 32px !important;
+    padding: 3px 9px 3px 4px !important;
+    gap: 5px !important;
+  }
+}
+
 /* ============================================================================
    3. MEDIUM PORTRAIT TABLETS (720px <= width <= 819px, height >= 501px)
    Covers:
@@ -1260,17 +1353,7 @@
    ============================================================================ */
 @media (min-width: 720px) and (max-width: 819px) and (min-height: 501px) {
 
-  .site-header {
-    padding-inline: 14px !important;
-    gap: 6px !important;
-  }
-
-  .header-nav-pill {
-    padding-inline: 8px !important;
-    font-size: 0.7rem !important;
-  }
-
-  /* Keep all 7 nav items visible in the single row using compact stacked icon+label */
+  /* Keep all 7 nav items visible in the single row using clean horizontal text pills */
   .desktop-only-nav-item {
     display: inline-flex !important;
   }
@@ -1283,11 +1366,28 @@
     padding-inline: 16px !important;
   }
 
-  /* Portrait Hero: slightly more compact height */
+  /* Portrait Hero: balanced academic study desk height */
   .kuro-hero-banner {
-    height: 140px !important;
-    min-height: 140px !important;
-    max-height: 140px !important;
+    height: 160px !important;
+    min-height: 160px !important;
+    max-height: 160px !important;
+  }
+
+  /* Statistics cards on 720px-819px: ensure "Completed Questions" fits cleanly */
+  .kuro-summary-stat-card {
+    padding: 12px 11px !important;
+    gap: 9px !important;
+  }
+
+  .kssc-icon-box {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+  }
+
+  .kssc-label {
+    font-size: 0.7rem !important;
+    line-height: 1.2 !important;
   }
 
   /* Continue Studying: 3 balanced vertical columns on >= 768px (768, 800, 810),

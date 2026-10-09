@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update Header Brand
     const isAr = lang === 'ar';
     const headerBrandName = document.getElementById('header-brand-name');
-    if (headerBrandName) headerBrandName.textContent = isAr ? 'بوابة طب الأسنان • السنة الثالثة' : 'Dentistry Portal • Year 3';
+    if (headerBrandName) headerBrandName.textContent = 'KURO FANGS';
 
     const sideBrandTitle = document.getElementById('sidebar-brand-title');
-    if (sideBrandTitle) sideBrandTitle.textContent = isAr ? 'بوابة طب الأسنان' : 'Dentistry Portal';
+    if (sideBrandTitle) sideBrandTitle.textContent = 'KURO FANGS';
 
     // Update Auth header state
     if (window.AUTH && typeof window.AUTH.updateUI === 'function') {

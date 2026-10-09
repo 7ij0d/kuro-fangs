@@ -6463,34 +6463,38 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
   font-size: 1.02rem;
   font-weight: 750;
   color: #24181B;
-  margin: 0;
-  line-height: 1.35;
+  margin: 4px 0 2px;
+  line-height: 1.38;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  display: block;
+  flex-shrink: 0;
+}
+
+.continue-card-title-text {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.38;
 }
 
 .continue-card-subject {
   font-size: 0.8125rem;
   color: #756966;
   margin: 0;
+  line-height: 1.4;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+  flex-shrink: 0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -6504,6 +6508,7 @@ html[dir="ltr"] .kuro-hero-greeting-overlay {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -15702,18 +15707,51 @@ html {
 }
 
 /* ==========================================================================
-   FORMAL ACADEMIC PORTAL OVERRIDES (v23.0)
-   Suppress small cartoon mascot thumbnails while keeping the main Hero Banner
+   FORMAL ACADEMIC PORTAL OVERRIDES (v24.0)
+   Clean KURO FANGS Wordmark, Zero Empty Icon Squares, Crisp Outline Icons
    ========================================================================== */
 img[src*="assets/characters/kuro"] {
   display: none !important;
 }
 
 .header-brand-avatar,
-.sidebar-brand-emblem,
+.sidebar-brand-emblem {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+#header-brand-name,
+.header-brand-name {
+  font-weight: 850 !important;
+  color: #7D1E30 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+[data-theme="dark"] #header-brand-name,
+[data-theme="dark"] .header-brand-name {
+  color: #FDA4AF !important;
+}
+
 .keds-mascot-wrap {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  color: #7D1E30 !important;
+}
+
+.kssc-icon-box svg,
+.keds-mascot-wrap svg,
+.ksrc-icon-box svg,
+.continue-card-type-icon svg {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  flex-shrink: 0 !important;
 }
 

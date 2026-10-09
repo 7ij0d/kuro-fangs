@@ -837,13 +837,10 @@
                 ${avatarHtml}
                 <span class="user-display-name" style="font-size:0.85rem;font-weight:700;color:var(--text-primary);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${userName}</span>
                 <button type="button" class="btn-header-signout" onclick="event.stopPropagation(); window.AUTH.signOut()" title="${isAr ? 'تسجيل الخروج' : 'Sign Out'}" style="background:none;border:none;color:#8C827A;cursor:pointer;padding:2px;display:flex;align-items:center;">
-                  <i data-lucide="log-out" style="width:13px;height:13px;"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
                 </button>
               </div>
             `;
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-              window.lucide.createIcons();
-            }
           } else if (this.isGuest()) {
             headerAuthBox.innerHTML = `
               <div class="header-guest-badge-wrap" style="display:inline-flex;align-items:center;gap:6px;">
@@ -851,24 +848,18 @@
                   ${isAr ? 'وضع الزائر' : 'Guest'}
                 </span>
                 <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.82rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
-                  <i data-lucide="log-in" style="width:13px;height:13px;"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
                   <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
                 </button>
               </div>
             `;
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-              window.lucide.createIcons();
-            }
           } else {
             headerAuthBox.innerHTML = `
               <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.85rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
-                <i data-lucide="user" style="width:14px;height:14px;"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
               </button>
             `;
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-              window.lucide.createIcons();
-            }
           }
         }
       }

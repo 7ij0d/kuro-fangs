@@ -17,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Instant Kuro Hero Banner Preload & In-Memory Priming -->
-  <link rel="preload" as="image" href="assets/hero/kuro-study-hero.jpg" fetchpriority="high" type="image/jpeg" />
+  <!-- Instant Academic Study Hero Banner Preload & In-Memory Priming -->
+  <link rel="preload" as="image" href="assets/hero/academic-study-hero.jpg?v=24.0" fetchpriority="high" type="image/jpeg" />
 
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lucide Icons CDN (jsdelivr primary + unpkg fallback) -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <!-- Supabase Client CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -35,16 +35,16 @@
   </script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=23.0" />
-  <link rel="stylesheet" href="css/base.css?v=23.0" />
-  <link rel="stylesheet" href="css/layout.css?v=23.0" />
-  <link rel="stylesheet" href="css/components.css?v=23.0" />
+  <link rel="stylesheet" href="css/tokens.css?v=24.0" />
+  <link rel="stylesheet" href="css/base.css?v=24.0" />
+  <link rel="stylesheet" href="css/layout.css?v=24.0" />
+  <link rel="stylesheet" href="css/components.css?v=24.0" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=23.0" />
-  <link rel="stylesheet" href="css/auth.css?v=23.0" />
-  <link rel="stylesheet" href="css/study-rooms.css?v=23.0" />
-  <link rel="stylesheet" href="css/tablet-responsive.css?v=23.0" />
-  <link rel="stylesheet" href="css/mobile-responsive.css?v=23.0" />
+  <link rel="stylesheet" href="css/polish.css?v=24.0" />
+  <link rel="stylesheet" href="css/auth.css?v=24.0" />
+  <link rel="stylesheet" href="css/study-rooms.css?v=24.0" />
+  <link rel="stylesheet" href="css/tablet-responsive.css?v=24.0" />
+  <link rel="stylesheet" href="css/mobile-responsive.css?v=24.0" />
 </head>
 <body id="app-body">
   <!-- ==========================================================================
@@ -70,11 +70,8 @@
       <!-- Sidebar Brand Header -->
       <div class="sidebar-header">
         <a href="#/" class="sidebar-brand">
-          <div class="sidebar-brand-emblem" style="display:inline-flex;align-items:center;justify-content:center;background:rgba(125,30,48,0.08);border:1px solid rgba(125,30,48,0.18);border-radius:10px;width:36px;height:36px;flex-shrink:0;">
-            <i data-lucide="graduation-cap" style="width:20px;height:20px;color:#7D1E30;"></i>
-          </div>
           <div class="sidebar-brand-meta">
-            <span class="sidebar-brand-title" id="sidebar-brand-title">Dentistry Portal</span>
+            <span class="sidebar-brand-title" id="sidebar-brand-title">KURO FANGS</span>
             <span class="sidebar-brand-sub" id="sidebar-brand-sub">Faculty of Dentistry — Year 3</span>
           </div>
         </a>
@@ -194,47 +191,45 @@
             <i data-lucide="menu"></i>
           </button>
 
-          <!-- Formal Academic Identity Brand -->
+          <!-- Clean Product Wordmark (No empty icon box) -->
           <a href="#/" class="header-brand-identity" id="header-brand-identity">
-            <div class="header-brand-avatar" style="display:inline-flex;align-items:center;justify-content:center;background:rgba(125,30,48,0.08);border:1px solid rgba(125,30,48,0.18);border-radius:9px;">
-              <i data-lucide="graduation-cap" style="width:18px;height:18px;color:#7D1E30;"></i>
-            </div>
-            <span class="header-brand-name" id="header-brand-name">Dentistry Portal • Year 3</span>
+            <span class="header-brand-name" id="header-brand-name">KURO FANGS</span>
           </a>
         </div>
 
-        <!-- Center Desktop Navigation Links (Matching Master Reference) -->
+        <!-- Center Desktop & Tablet Navigation Links -->
         <nav class="header-nav-center" aria-label="Main Navigation">
           <a href="#/" class="header-nav-pill active" data-route="/">
-            <i data-lucide="home"></i>
+            <i data-lucide="home" class="nav-pill-icon"></i>
             <span id="nav-item-home">Home</span>
           </a>
           <a href="#/sheets" class="header-nav-pill" data-route="/sheets">
-            <i data-lucide="book-open"></i>
+            <i data-lucide="book-open" class="nav-pill-icon"></i>
             <span id="nav-item-sheets">Sheets</span>
           </a>
           <a href="#/recordings" class="header-nav-pill" data-route="/recordings">
-            <i data-lucide="headphones"></i>
+            <i data-lucide="headphones" class="nav-pill-icon"></i>
             <span id="nav-item-recordings">Recordings</span>
           </a>
           <a href="#/questions" class="header-nav-pill" data-route="/questions">
-            <i data-lucide="help-circle"></i>
+            <i data-lucide="help-circle" class="nav-pill-icon"></i>
             <span id="nav-item-questions">Questions</span>
           </a>
           <a href="#/study-rooms" class="header-nav-pill" data-route="/study-rooms">
-            <i data-lucide="timer"></i>
+            <i data-lucide="timer" class="nav-pill-icon"></i>
             <span id="nav-item-study-rooms">Study Rooms</span>
           </a>
           <a href="#/schedules" class="header-nav-pill desktop-only-nav-item" data-route="/schedules">
-            <i data-lucide="calendar"></i>
+            <i data-lucide="calendar" class="nav-pill-icon"></i>
             <span id="nav-item-schedules">Schedules</span>
           </a>
 
           <!-- More Dropdown -->
           <div class="header-nav-dropdown-wrap" id="header-more-dropdown-wrap">
             <button class="header-nav-pill header-dropdown-trigger" id="header-more-btn" aria-haspopup="true" aria-expanded="false">
-              <i data-lucide="more-horizontal"></i>
+              <i data-lucide="more-horizontal" class="nav-pill-icon"></i>
               <span id="nav-item-more">More</span>
+              <svg class="header-more-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
             </button>
             <div class="header-dropdown-menu" id="header-dropdown-menu">
               <!-- Tablet only: Schedules collapsed into More dropdown on compact portrait tablets -->
@@ -273,17 +268,17 @@
 
         <!-- Right Header Tools: Search, Notifications, Profile & Quick Toggles -->
         <div class="header-right-tools">
-          <!-- Mobile Search Trigger Button (Opens expandable search row on narrow phones) -->
+          <!-- Search Trigger Button -->
           <button type="button" id="mobile-search-toggle-btn" class="header-toggle-btn mobile-search-toggle-btn" title="البحث | Search" aria-label="Search" aria-expanded="false">
-            <i data-lucide="search"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           </button>
 
           <!-- Search Box -->
           <div class="header-search-box" id="header-search-box">
-            <i data-lucide="search" class="search-icon"></i>
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="text" id="header-search-input" placeholder="Search subjects, sheets..." autocomplete="off" />
             <button type="button" id="mobile-search-close-btn" class="mobile-search-close-btn" aria-label="Close search">
-              <i data-lucide="x"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
 
@@ -293,7 +288,7 @@
           <!-- Notifications Bell Trigger -->
           <div class="notifications-bell-wrapper" id="notifications-bell-wrapper">
             <button id="header-notifications-btn" class="header-toggle-btn notifications-bell-btn" title="الإشعارات والأخبار | Notifications" aria-label="Notifications">
-              <i data-lucide="bell"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
               <span id="notifications-badge" class="notifications-badge" style="display: none;">0</span>
             </button>
           </div>
@@ -301,7 +296,7 @@
           <!-- Settings Gear Trigger Button & Anchored Popover -->
           <div class="settings-trigger-wrapper" id="settings-trigger-wrapper">
             <button id="header-settings-btn" class="header-toggle-btn settings-gear-btn" title="الإعدادات | Settings" aria-label="Settings" aria-haspopup="true" aria-expanded="false">
-              <i data-lucide="settings"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
             <div id="settings-popover-menu" class="settings-popover-menu" style="display: none;"></div>
           </div>
@@ -453,43 +448,43 @@
   </aside>
 
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=23.0"></script>
-  <script src="js/audio-fx.js?v=23.0"></script>
-  <script src="js/character-theme.js?v=23.0"></script>
-  <script src="js/store.js?v=23.0"></script>
-  <script src="js/components/toast.js?v=23.0"></script>
-  <script src="js/components/auth-modal.js?v=23.0"></script>
-  <script src="js/components/avatar-modal.js?v=23.0"></script>
-  <script src="js/supabase.js?v=23.0"></script>
-  <script src="js/auth.js?v=23.0"></script>
-  <script src="js/data.js?v=23.0"></script>
-  <script src="js/data-clinical.js?v=23.0"></script>
-  <script src="js/components/subject-modal.js?v=23.0"></script>
-  <script src="js/components/sheet-edit-modal.js?v=23.0"></script>
-  <script src="js/components/notifications-center.js?v=23.0"></script>
-  <script src="js/components/sheet-copy-engine.js?v=23.0"></script>
-  <script src="js/components/settings-menu.js?v=23.0"></script>
-  <script src="js/router.js?v=23.0"></script>
-  <script src="js/pages/login.js?v=23.0"></script>
-  <script src="js/pages/register-setup.js?v=23.0"></script>
-  <script src="js/pages/home.js?v=23.0"></script>
-  <script src="js/pages/sheets.js?v=23.0"></script>
-  <script src="js/components/pdf-source-matcher.js?v=23.0"></script>
-  <script src="js/pages/sheet-detail.js?v=23.0"></script>
-  <script src="js/pages/recordings.js?v=23.0"></script>
-  <script src="js/pages/exams.js?v=23.0"></script>
-  <script src="js/pages/quizzes.js?v=23.0"></script>
-  <script src="js/pages/questions.js?v=23.0"></script>
-  <script src="js/pages/flashcards.js?v=23.0"></script>
-  <script src="js/pages/study-rooms.js?v=23.0"></script>
-  <script src="js/pages/previous-years.js?v=23.0"></script>
-  <script src="js/pages/rewards.js?v=23.0"></script>
-  <script src="js/pages/games.js?v=23.0"></script>
-  <script src="js/git-sync.js?v=23.0"></script>
-  <script src="js/pages/admin.js?v=23.0"></script>
-  <script src="js/pages/profile.js?v=23.0"></script>
-  <script src="js/pages/settings.js?v=23.0"></script>
-  <script src="js/pages/secondary.js?v=23.0"></script>
-  <script src="js/app.js?v=23.0"></script>
+  <script src="js/i18n.js?v=24.0"></script>
+  <script src="js/audio-fx.js?v=24.0"></script>
+  <script src="js/character-theme.js?v=24.0"></script>
+  <script src="js/store.js?v=24.0"></script>
+  <script src="js/components/toast.js?v=24.0"></script>
+  <script src="js/components/auth-modal.js?v=24.0"></script>
+  <script src="js/components/avatar-modal.js?v=24.0"></script>
+  <script src="js/supabase.js?v=24.0"></script>
+  <script src="js/auth.js?v=24.0"></script>
+  <script src="js/data.js?v=24.0"></script>
+  <script src="js/data-clinical.js?v=24.0"></script>
+  <script src="js/components/subject-modal.js?v=24.0"></script>
+  <script src="js/components/sheet-edit-modal.js?v=24.0"></script>
+  <script src="js/components/notifications-center.js?v=24.0"></script>
+  <script src="js/components/sheet-copy-engine.js?v=24.0"></script>
+  <script src="js/components/settings-menu.js?v=24.0"></script>
+  <script src="js/router.js?v=24.0"></script>
+  <script src="js/pages/login.js?v=24.0"></script>
+  <script src="js/pages/register-setup.js?v=24.0"></script>
+  <script src="js/pages/home.js?v=24.0"></script>
+  <script src="js/pages/sheets.js?v=24.0"></script>
+  <script src="js/components/pdf-source-matcher.js?v=24.0"></script>
+  <script src="js/pages/sheet-detail.js?v=24.0"></script>
+  <script src="js/pages/recordings.js?v=24.0"></script>
+  <script src="js/pages/exams.js?v=24.0"></script>
+  <script src="js/pages/quizzes.js?v=24.0"></script>
+  <script src="js/pages/questions.js?v=24.0"></script>
+  <script src="js/pages/flashcards.js?v=24.0"></script>
+  <script src="js/pages/study-rooms.js?v=24.0"></script>
+  <script src="js/pages/previous-years.js?v=24.0"></script>
+  <script src="js/pages/rewards.js?v=24.0"></script>
+  <script src="js/pages/games.js?v=24.0"></script>
+  <script src="js/git-sync.js?v=24.0"></script>
+  <script src="js/pages/admin.js?v=24.0"></script>
+  <script src="js/pages/profile.js?v=24.0"></script>
+  <script src="js/pages/settings.js?v=24.0"></script>
+  <script src="js/pages/secondary.js?v=24.0"></script>
+  <script src="js/app.js?v=24.0"></script>
 </body>
 </html>

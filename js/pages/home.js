@@ -27,14 +27,16 @@ const DEFAULT_THEME = {
   border: 'rgba(126, 29, 42, 0.20)'
 };
 
-/* ─── Instant Hero Banner In-Memory & LocalStorage Engine ─── */
+/* ─── Instant Hero Banner In-Memory & LocalStorage Engine (Character-Free Academic Study Desk) ─── */
 const HERO_BANNER_CONFIG = {
-  src: 'assets/hero/kuro-study-hero.jpg',
-  storageKey: 'kf_hero_banner_b64'
+  src: 'assets/hero/academic-study-hero.jpg?v=24.0',
+  storageKey: 'kf_academic_hero_banner_v24'
 };
 
 let _cachedHeroDataUrl = null;
 try {
+  // Purge legacy character hero cache so old Kuro artwork never reappears
+  localStorage.removeItem('kf_hero_banner_b64');
   _cachedHeroDataUrl = localStorage.getItem(HERO_BANNER_CONFIG.storageKey);
 } catch (e) { /* private mode or disabled storage */ }
 
@@ -67,6 +69,43 @@ if (!_cachedHeroDataUrl && typeof window !== 'undefined' && typeof window.fetch 
       })
       .catch(() => {});
   }, 50);
+}
+
+const HOME_INLINE_SVGS = {
+  'calendar': '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+  'calendar-days': '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/>',
+  'calendar-check': '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/>',
+  'flame': '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  'check-circle': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  'check-circle-2': '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  'book-open': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  'file-text': '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  'headphones': '<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+  'help-circle': '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  'list-checks': '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+  'map-pin': '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  'arrow-left': '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+  'chevron-left': '<path d="m15 18-6-6 6-6"/>',
+  'stethoscope': '<path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/>',
+  'activity': '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  'shield': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  'scissors': '<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
+  'microscope': '<path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>',
+  'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  'scan': '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>',
+  'sparkles': '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',
+  'heart-pulse': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>',
+  'smile': '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/>',
+  'baby': '<path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>',
+  'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'
+};
+
+function renderInlineSvg(name, size = 18, extraClass = '') {
+  const paths = HOME_INLINE_SVGS[name] || HOME_INLINE_SVGS['book-open'];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-${name} ${extraClass}" aria-hidden="true">${paths}</svg>`;
 }
 
 const HomePage = {
@@ -199,7 +238,7 @@ const HomePage = {
             <h1 class="kuro-hero-greeting-title">${title}</h1>
             <p class="kuro-hero-greeting-sub">${subtitle}</p>
             <div class="kuro-hero-date-chip">
-              <i data-lucide="calendar" class="kuro-hero-date-icon"></i>
+              ${renderInlineSvg('calendar', 15, 'kuro-hero-date-icon')}
               <span class="kuro-hero-date-full">${dateFormatted}</span>
               <span class="kuro-hero-date-short">${shortDateFormatted}</span>
             </div>
@@ -286,28 +325,28 @@ const HomePage = {
     return `
       <section class="kuro-study-summary-strip" aria-label="${isAr ? 'ملخص النشاط الدراسي' : 'Study Summary'}">
         <a href="#/schedules" class="kuro-summary-stat-card stat-classes">
-          <div class="kssc-icon-box"><i data-lucide="calendar-days"></i></div>
+          <div class="kssc-icon-box">${renderInlineSvg('calendar-days', 19)}</div>
           <div class="kssc-meta">
             <strong class="kssc-val">${todayClassesCount}</strong>
             <span class="kssc-label">${isAr ? 'محاضرات اليوم' : "Today's Classes"}</span>
           </div>
         </a>
         <a href="#/study-rooms" class="kuro-summary-stat-card stat-streak">
-          <div class="kssc-icon-box"><i data-lucide="flame"></i></div>
+          <div class="kssc-icon-box">${renderInlineSvg('flame', 19)}</div>
           <div class="kssc-meta">
             <strong class="kssc-val">${streakDays}</strong>
             <span class="kssc-label">${isAr ? 'أيام الالتزام' : 'Study Streak'}</span>
           </div>
         </a>
         <a href="#/study-rooms" class="kuro-summary-stat-card stat-time">
-          <div class="kssc-icon-box"><i data-lucide="bar-chart-3"></i></div>
+          <div class="kssc-icon-box">${renderInlineSvg('clock', 19)}</div>
           <div class="kssc-meta">
             <strong class="kssc-val">${studyTimeDisplay}</strong>
             <span class="kssc-label">${isAr ? 'إجمالي وقت الدراسة' : 'Total Study Time'}</span>
           </div>
         </a>
         <a href="#/questions" class="kuro-summary-stat-card stat-questions">
-          <div class="kssc-icon-box"><i data-lucide="check-circle-2"></i></div>
+          <div class="kssc-icon-box">${renderInlineSvg('check-circle-2', 19)}</div>
           <div class="kssc-meta">
             <strong class="kssc-val">${totalQuestionsAnswered}</strong>
             <span class="kssc-label">${isAr ? 'الأسئلة المحلولة' : 'Completed Questions'}</span>
@@ -515,13 +554,13 @@ const HomePage = {
         return `
           <div class="kuro-empty-day-state">
             <div class="keds-mascot-wrap">
-              <i data-lucide="calendar-check" style="width:24px;height:24px;color:#7D1E30;"></i>
+              ${renderInlineSvg('calendar-days', 24)}
             </div>
             <h4 class="keds-title">${isAr ? (isToday ? 'لا توجد محاضرات اليوم' : 'لا توجد محاضرات غداً') : (isToday ? 'No classes today' : 'No classes tomorrow')}</h4>
             <p class="keds-desc">${isAr ? 'استغل هذا الوقت للدراسة أو المراجعة أو انضم لغرفة دراسة!' : 'Take this time to study, review or join a study room!'}</p>
             <a href="#/study-rooms" class="keds-action-btn">
               <span>${isAr ? 'تصفح غرف الدراسة' : 'Browse Study Rooms'}</span>
-              <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+              ${renderInlineSvg(isAr ? 'arrow-left' : 'arrow-right', 14)}
             </a>
           </div>
         `;
@@ -543,7 +582,7 @@ const HomePage = {
             >
               <div class="ksrc-accent-bar" style="background-color: ${accentColor};"></div>
               <div class="ksrc-icon-box" style="background-color: ${theme.bg}; color: ${theme.color}; border-color: ${theme.border};">
-                <i data-lucide="${theme.icon}"></i>
+                ${renderInlineSvg(theme.icon, 19)}
               </div>
               <div class="ksrc-content">
                 <div class="ksrc-top">
@@ -551,14 +590,14 @@ const HomePage = {
                 </div>
                 <div class="ksrc-subject">${isAr ? slot.subject_ar : slot.subject_en}</div>
                 <div class="ksrc-location">
-                  <i data-lucide="map-pin"></i>
+                  ${renderInlineSvg('map-pin', 12)}
                   <span>${isAr ? slot.hall_ar : slot.hall_en}</span>
                 </div>
               </div>
               <div class="ksrc-end">
                 <span class="ksrc-status-badge">${isToday ? (isAr ? 'اليوم' : 'Today') : (isAr ? 'غداً' : 'Tomorrow')}</span>
                 <div class="ksrc-arrow">
-                  <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}"></i>
+                  ${renderInlineSvg(isAr ? 'chevron-left' : 'chevron-right', 16)}
                 </div>
               </div>
             </div>
@@ -593,7 +632,7 @@ const HomePage = {
               </div>
               <a href="#/schedules" class="kuro-view-full-schedule-btn" title="${isAr ? 'عرض جدول المحاضرات كاملاً' : 'View Full Academic Schedule'}">
                 <span>${isAr ? 'عرض الجدول كاملاً' : 'View Full Schedule'}</span>
-                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                ${renderInlineSvg(isAr ? 'arrow-left' : 'arrow-right', 14)}
               </a>
             </div>
             <div class="kuro-split-card-body">
@@ -714,12 +753,12 @@ const HomePage = {
       <section class="continue-studying-section" aria-label="Continue Studying">
         <div class="continue-studying-header">
           <h2 class="kuro-section-title">
-            <i data-lucide="book-open"></i>
+            ${renderInlineSvg('book-open', 19)}
             <span>${isAr ? 'متابعة الدراسة' : 'Continue Studying'}</span>
           </h2>
           <a href="#/sheets" class="kuro-continue-view-all-btn">
             <span>${isAr ? 'عرض الكل' : 'View All'}</span>
-            <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+            ${renderInlineSvg(isAr ? 'arrow-left' : 'arrow-right', 14)}
           </a>
         </div>
 
@@ -729,21 +768,21 @@ const HomePage = {
             <div class="continue-card-top">
               <div class="continue-card-badge-row">
                 <span class="continue-tag-badge sheet">
-                  <i data-lucide="file-text"></i>
+                  ${renderInlineSvg('file-text', 12)}
                   <span>${isAr ? 'آخر شيت تم فتحه' : 'Last Opened Sheet'}</span>
                 </span>
                 <span class="continue-card-type-icon sheet-icon" aria-hidden="true">
-                  <i data-lucide="book-open"></i>
+                  ${renderInlineSvg('file-text', 17)}
                 </span>
               </div>
-              <h3 class="continue-card-title" title="${sheetTitle}">${sheetTitle}</h3>
+              <h3 class="continue-card-title" title="${sheetTitle}"><span class="continue-card-title-text">${sheetTitle}</span></h3>
               <p class="continue-card-subject" title="${sheetSub}">${sheetSub}</p>
               <span class="continue-card-meta">${sheetMeta}</span>
             </div>
             <div class="continue-card-bottom">
               <a href="${sheetUrl}" class="continue-action-btn ${hasSheet ? '' : 'secondary'}">
                 <span>${sheetBtnText}</span>
-                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                ${renderInlineSvg(isAr ? 'arrow-left' : 'arrow-right', 15)}
               </a>
             </div>
           </div>
@@ -753,21 +792,21 @@ const HomePage = {
             <div class="continue-card-top">
               <div class="continue-card-badge-row">
                 <span class="continue-tag-badge recording">
-                  <i data-lucide="headphones"></i>
+                  ${renderInlineSvg('headphones', 12)}
                   <span>${isAr ? 'آخر تسجيل صوتي' : 'Last Listening'}</span>
                 </span>
                 <span class="continue-card-type-icon recording-icon" aria-hidden="true">
-                  <i data-lucide="headphones"></i>
+                  ${renderInlineSvg('headphones', 17)}
                 </span>
               </div>
-              <h3 class="continue-card-title" title="${audioTitle}">${audioTitle}</h3>
+              <h3 class="continue-card-title" title="${audioTitle}"><span class="continue-card-title-text">${audioTitle}</span></h3>
               <p class="continue-card-subject" title="${audioSub}">${audioSub}</p>
               ${audioMeta ? `<span class="continue-card-meta">${audioMeta}</span>` : ''}
             </div>
             <div class="continue-card-bottom">
               <a href="${audioUrl}" class="continue-action-btn ${hasAudio ? '' : 'secondary'}">
                 <span>${audioBtnText}</span>
-                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                ${renderInlineSvg(isAr ? 'arrow-left' : 'arrow-right', 15)}
               </a>
             </div>
           </div>
@@ -777,14 +816,14 @@ const HomePage = {
             <div class="continue-card-top">
               <div class="continue-card-badge-row">
                 <span class="continue-tag-badge questions ${isCompleted ? 'completed-badge' : ''}">
-                  <i data-lucide="${isCompleted ? 'check-circle' : 'help-circle'}"></i>
+                  ${renderInlineSvg(isCompleted ? 'check-circle' : 'help-circle', 12)}
                   <span>${qBadgeText}</span>
                 </span>
                 <span class="continue-card-type-icon questions-icon ${isCompleted ? 'completed-icon' : ''}" aria-hidden="true">
-                  <i data-lucide="${isCompleted ? 'check-circle-2' : 'help-circle'}"></i>
+                  ${renderInlineSvg(isCompleted ? 'check-circle-2' : 'list-checks', 17)}
                 </span>
               </div>
-              <h3 class="continue-card-title" title="${qTitle}">${qTitle}</h3>
+              <h3 class="continue-card-title" title="${qTitle}"><span class="continue-card-title-text">${qTitle}</span></h3>
               <p class="continue-card-subject" title="${qSub}">${qSub}</p>
               <div class="continue-progress-wrap ${hasQ ? '' : 'empty'}">
                 ${hasQ ? `
@@ -803,7 +842,7 @@ const HomePage = {
             <div class="continue-card-bottom">
               <a href="${qUrl}" class="continue-action-btn ${hasQ ? '' : 'secondary'}">
                 <span>${qBtnText}</span>
-                <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
+                ${renderInlineSvg(isAr ? 'arrow-left' : 'arrow-right', 15)}
               </a>
             </div>
           </div>
