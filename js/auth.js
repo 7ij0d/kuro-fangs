@@ -193,13 +193,17 @@
           // Check if previously entered as Guest
           const savedMode = localStorage.getItem(STORAGE_KEYS.AUTH_MODE);
           if (savedMode === 'guest') {
+            let localInfo = {};
+            try { localInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}'); } catch (e) {}
+            const guestCustomAvatar = localStorage.getItem('kf_custom_avatar_guest') || localStorage.getItem('kf_custom_avatar_latest') || localInfo.avatar || null;
+            const guestName = localStorage.getItem('kf_custom_name_guest') || localInfo.name || (window.I18N?.getLang() === 'ar' ? 'طالب زائر' : 'Guest Student');
             this.state = AUTH_STATES.GUEST;
             this.user = {
               id: 'guest',
               isGuest: true,
-              full_name: window.I18N?.getLang() === 'ar' ? 'طالب زائر' : 'Guest Student',
-              email: null,
-              avatar_url: null
+              full_name: guestName,
+              email: localInfo.email || null,
+              avatar_url: guestCustomAvatar === '__REMOVED__' ? null : guestCustomAvatar
             };
           } else {
             this.state = AUTH_STATES.UNAUTHENTICATED;
@@ -224,6 +228,21 @@
     }
 
     /**
+     * Resolve custom avatar stored permanently for a user ID
+     */
+    _getSavedCustomAvatar(userId) {
+      try {
+        if (userId) {
+          const byId = localStorage.getItem('kf_custom_avatar_' + userId);
+          if (byId) return byId;
+        }
+        const latest = localStorage.getItem('kf_custom_avatar_latest');
+        if (latest) return latest;
+      } catch (e) {}
+      return null;
+    }
+
+    /**
      * Populate internal user structure from Supabase User & metadata
      */
     _populateUserFromSupabase(sbUser) {
@@ -243,11 +262,21 @@
       } catch (e) {}
 
       const existingUser = this.user || {};
+      const savedCustomName = localStorage.getItem('kf_custom_name_' + sbUser.id);
+      const savedCustomAvatar = this._getSavedCustomAvatar(sbUser.id);
+
       const regStatus = existingUser.registration_status || localInfo.registration_status || meta.registration_status || 'pending';
-      const nameAr = existingUser.full_name_ar || localInfo.full_name_ar || localInfo.name || fullName;
+      const nameAr = savedCustomName || existingUser.full_name_ar || localInfo.full_name_ar || localInfo.name || fullName;
       const nameEn = existingUser.full_name_en || localInfo.full_name_en || null;
       const gender = existingUser.gender || localInfo.gender || null;
       const group = existingUser.practical_group_id || localInfo.practical_group_id || 'A1';
+
+      let resolvedAvatar = existingUser.avatar_url || localInfo.avatar_url || localInfo.avatar || avatarUrl;
+      if (savedCustomAvatar === '__REMOVED__') {
+        resolvedAvatar = null;
+      } else if (savedCustomAvatar) {
+        resolvedAvatar = savedCustomAvatar;
+      }
 
       this.user = {
         id: sbUser.id,
@@ -258,7 +287,7 @@
         gender: gender,
         practical_group_id: group,
         registration_status: regStatus,
-        avatar_url: existingUser.avatar_url || localInfo.avatar || avatarUrl,
+        avatar_url: resolvedAvatar,
         created_at: sbUser.created_at,
         isGuest: false,
         raw: sbUser
@@ -277,6 +306,7 @@
           practical_group_id: this.user.practical_group_id,
           registration_status: this.user.registration_status,
           avatar: this.user.avatar_url,
+          avatar_url: this.user.avatar_url,
           created_at: sbUser.created_at
         }));
         localStorage.setItem(STORAGE_KEYS.AUTH_MODE, 'authenticated');
@@ -363,23 +393,52 @@
           .eq('id', user.id)
           .maybeSingle();
 
+        const savedCustomAvatar = this._getSavedCustomAvatar(user.id);
+        const savedCustomName = localStorage.getItem('kf_custom_name_' + user.id);
+
         if (data) {
           const isCompletedLocally = this.isRegistrationComplete();
           const finalRegStatus = (data.registration_status === 'completed' || isCompletedLocally) ? 'completed' : (data.registration_status || 'pending');
 
-          if (data.full_name_ar) this.user.full_name_ar = data.full_name_ar;
+          if (savedCustomName) {
+            this.user.full_name = savedCustomName;
+            this.user.full_name_ar = savedCustomName;
+          } else {
+            if (data.full_name_ar) this.user.full_name_ar = data.full_name_ar;
+            if (data.full_name) this.user.full_name = data.full_name;
+          }
           if (data.full_name_en) this.user.full_name_en = data.full_name_en;
-          if (data.full_name) this.user.full_name = data.full_name;
           if (data.gender) this.user.gender = data.gender;
           if (data.practical_group_id) this.user.practical_group_id = data.practical_group_id;
-          if (data.avatar_url) this.user.avatar_url = data.avatar_url;
+
+          // Resolve avatar priority: explicit custom avatar > remote profile custom avatar
+          if (savedCustomAvatar === '__REMOVED__') {
+            this.user.avatar_url = null;
+          } else if (savedCustomAvatar) {
+            this.user.avatar_url = savedCustomAvatar;
+          } else if (data.avatar_url) {
+            this.user.avatar_url = data.avatar_url;
+            try {
+              localStorage.setItem('kf_custom_avatar_' + user.id, data.avatar_url);
+              localStorage.setItem('kf_custom_avatar_latest', data.avatar_url);
+            } catch (e) {}
+          }
+
           this.user.registration_status = finalRegStatus;
 
-          // Heal Supabase record if local state is completed but remote database was missing registration_status
-          if (isCompletedLocally && data.registration_status !== 'completed') {
+          // Sync custom avatar/name or registration status back to Supabase if out of date
+          const needsRemoteHeal =
+            (isCompletedLocally && data.registration_status !== 'completed') ||
+            (savedCustomAvatar && savedCustomAvatar !== '__REMOVED__' && data.avatar_url !== savedCustomAvatar) ||
+            (savedCustomAvatar === '__REMOVED__' && data.avatar_url !== null) ||
+            (savedCustomName && data.full_name_ar !== savedCustomName);
+
+          if (needsRemoteHeal) {
             supabase.from('profiles').update({
-              registration_status: 'completed',
+              registration_status: finalRegStatus,
+              full_name: this.user.full_name,
               full_name_ar: this.user.full_name_ar,
+              avatar_url: this.user.avatar_url,
               practical_group_id: this.user.practical_group_id,
               updated_at: new Date().toISOString()
             }).eq('id', user.id).catch(() => {});
@@ -390,17 +449,18 @@
             const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}');
             localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify({
               ...current,
-              name: data.full_name_ar || data.full_name || current.name,
-              full_name_ar: data.full_name_ar || current.full_name_ar,
+              name: this.user.full_name_ar || this.user.full_name || current.name,
+              full_name_ar: this.user.full_name_ar || current.full_name_ar,
               full_name_en: data.full_name_en || current.full_name_en,
               gender: data.gender || current.gender,
               practical_group_id: data.practical_group_id || current.practical_group_id,
-              avatar: data.avatar_url || current.avatar,
+              avatar: this.user.avatar_url,
+              avatar_url: this.user.avatar_url,
               registration_status: finalRegStatus
             }));
           } catch (e) {}
 
-          return { ...data, registration_status: finalRegStatus };
+          return { ...data, avatar_url: this.user.avatar_url, registration_status: finalRegStatus };
         } else {
           const isCompletedLocally = this.isRegistrationComplete();
           const regStatus = isCompletedLocally ? 'completed' : 'pending';
@@ -409,6 +469,7 @@
             full_name: user.full_name,
             full_name_ar: user.full_name_ar || user.full_name,
             email: user.email,
+            avatar_url: user.avatar_url || null,
             registration_status: regStatus,
             practical_group_id: user.practical_group_id || 'A1',
             role: 'student',
@@ -422,6 +483,93 @@
         console.warn('[AuthEngine] Profile sync note:', err.message);
         return null;
       }
+    }
+
+    /**
+     * Permanently save updated account profile (name, email, custom avatar)
+     * across localStorage, active AuthEngine state, header/sidebar UI, and Supabase `profiles` table.
+     */
+    async updateAccountProfile({ name, email, avatar } = {}) {
+      let localInfo = {};
+      try {
+        localInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}');
+      } catch (e) {}
+
+      const userId = this.user?.id || localInfo.id || 'guest';
+
+      if (avatar !== undefined) {
+        const isRemoved = (avatar === null || avatar === '' || avatar === 'remove');
+        const storedVal = isRemoved ? '__REMOVED__' : avatar;
+        try {
+          localStorage.setItem('kf_custom_avatar_' + userId, storedVal);
+          localStorage.setItem('kf_custom_avatar_latest', storedVal);
+        } catch (e) {}
+        if (this.user) {
+          this.user.avatar_url = isRemoved ? null : avatar;
+        }
+        localInfo.avatar = isRemoved ? null : avatar;
+        localInfo.avatar_url = isRemoved ? null : avatar;
+      }
+
+      if (typeof name === 'string' && name.trim()) {
+        const cleanName = name.trim();
+        try {
+          localStorage.setItem('kf_custom_name_' + userId, cleanName);
+        } catch (e) {}
+        if (this.user) {
+          this.user.full_name = cleanName;
+          this.user.full_name_ar = cleanName;
+        }
+        localInfo.name = cleanName;
+        localInfo.full_name = cleanName;
+        localInfo.full_name_ar = cleanName;
+      }
+
+      if (typeof email === 'string' && email.trim()) {
+        const cleanEmail = email.trim();
+        if (this.user && this.user.isGuest) {
+          this.user.email = cleanEmail;
+        }
+        localInfo.email = cleanEmail;
+      }
+
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(localInfo));
+      } catch (e) {}
+
+      // Force header & sidebar DOM refresh
+      const headerAuthBox = document.getElementById('header-auth-action-box');
+      if (headerAuthBox) {
+        headerAuthBox.removeAttribute('data-render-avatar');
+        headerAuthBox.removeAttribute('data-render-name');
+      }
+      this._notify();
+      this.updateUI();
+
+      // Persist to Supabase `profiles` table for authenticated accounts
+      const supabase = this._getSupabaseClient();
+      if (supabase && this.user && this.user.id && !this.user.isGuest) {
+        try {
+          const updatePayload = {
+            id: this.user.id,
+            full_name: this.user.full_name,
+            full_name_ar: this.user.full_name_ar || this.user.full_name,
+            email: this.user.email || localInfo.email || null,
+            avatar_url: this.user.avatar_url || null,
+            updated_at: new Date().toISOString()
+          };
+          await supabase.from('profiles').upsert(updatePayload, { onConflict: 'id' });
+          if (typeof name === 'string' && name.trim()) {
+            await supabase.auth.updateUser({
+              data: { full_name: name.trim(), name: name.trim() }
+            }).catch(() => {});
+          }
+        } catch (err) {
+          console.warn('[AuthEngine] Remote profile update note:', err.message);
+        }
+      }
+
+      return localInfo;
     }
 
     /**
@@ -443,6 +591,13 @@
       };
 
       try {
+        if (payload.avatar_url) {
+          localStorage.setItem('kf_custom_avatar_' + this.user.id, payload.avatar_url);
+          localStorage.setItem('kf_custom_avatar_latest', payload.avatar_url);
+        }
+        if (payload.full_name_ar) {
+          localStorage.setItem('kf_custom_name_' + this.user.id, payload.full_name_ar);
+        }
         const info = {
           id: this.user.id,
           name: payload.full_name_ar,
@@ -451,7 +606,8 @@
           email: this.user.email,
           gender: payload.gender,
           practical_group_id: payload.practical_group_id,
-          avatar: payload.avatar_url,
+          avatar: this.user.avatar_url,
+          avatar_url: this.user.avatar_url,
           registration_status: 'completed'
         };
         localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(info));

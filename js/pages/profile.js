@@ -76,7 +76,17 @@ window.ProfilePage = {
     const isGuest = window.AUTH ? window.AUTH.isGuest() : false;
     this._pendingAvatar = null;
 
-    const rawAvatarSrc = authUser?.avatar_url || info.avatar || null;
+    const savedCustomAvatar = (window.AUTH && typeof window.AUTH._getSavedCustomAvatar === 'function')
+      ? window.AUTH._getSavedCustomAvatar(authUser?.id || info.id)
+      : null;
+
+    let rawAvatarSrc = authUser?.avatar_url || info.avatar_url || info.avatar || null;
+    if (savedCustomAvatar === '__REMOVED__') {
+      rawAvatarSrc = null;
+    } else if (savedCustomAvatar) {
+      rawAvatarSrc = savedCustomAvatar;
+    }
+
     const avatarSrc = (
       rawAvatarSrc &&
       !String(rawAvatarSrc).toLowerCase().includes('characters/kuro') &&
@@ -256,14 +266,23 @@ window.ProfilePage = {
     const fileInput = document.getElementById('profile-avatar-file-input');
     fileInput?.addEventListener('change', (e) => this._onAvatarChange(e, isAr));
 
-    // Remove avatar
-    document.getElementById('profile-remove-avatar-btn')?.addEventListener('click', () => {
-      this._pendingAvatar = 'remove';
+    // Remove avatar (saves immediately and permanently)
+    document.getElementById('profile-remove-avatar-btn')?.addEventListener('click', async () => {
+      this._pendingAvatar = null;
       const img = document.getElementById('profile-avatar-img');
       const placeholder = document.getElementById('profile-avatar-placeholder');
       if (img) { img.src = ''; img.style.display = 'none'; }
       if (placeholder) { placeholder.style.display = 'flex'; }
-      document.getElementById('profile-remove-avatar-btn').style.display = 'none';
+      const removeBtn = document.getElementById('profile-remove-avatar-btn');
+      if (removeBtn) removeBtn.style.display = 'none';
+
+      this._saveUserInfo({ avatar: null, avatar_url: null });
+      if (window.AUTH && typeof window.AUTH.updateAccountProfile === 'function') {
+        await window.AUTH.updateAccountProfile({ avatar: 'remove' });
+      }
+      this._syncSidebar({ ...this._getUserInfo(), avatar: null });
+      this._showFeedback('profile-info-feedback', isAr ? '✅ تمت إزالة الصورة وحفظ التعديل في الحساب' : '✅ Photo removed from your account', 'success');
+      if (window.Toast?.show) window.Toast.show(isAr ? 'تمت إزالة الصورة الشخصية' : 'Profile photo removed', 'info');
     });
 
     // Profile signout button
@@ -306,21 +325,53 @@ window.ProfilePage = {
     });
   },
 
-  _onAvatarChange(e, isAr) {
+  _compressAvatarImage(file, maxDim = 256, quality = 0.86) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Failed to read image'));
+      reader.onload = (ev) => {
+        const rawDataUrl = ev.target.result;
+        const image = new Image();
+        image.onerror = () => resolve(rawDataUrl);
+        image.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = maxDim;
+            canvas.height = maxDim;
+            const ctx = canvas.getContext('2d');
+            const minSide = Math.min(image.width, image.height);
+            const sx = Math.max(0, (image.width - minSide) / 2);
+            const sy = Math.max(0, (image.height - minSide) / 2);
+            ctx.drawImage(image, sx, sy, minSide, minSide, 0, 0, maxDim, maxDim);
+            const compressed = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressed || rawDataUrl);
+          } catch (err) {
+            resolve(rawDataUrl);
+          }
+        };
+        image.src = rawDataUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+  },
+
+  async _onAvatarChange(e, isAr) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024) {
-      this._showFeedback('profile-info-feedback', isAr ? 'حجم الصورة يتجاوز 3MB' : 'Image exceeds 3MB limit', 'error');
+    if (file.size > 12 * 1024 * 1024) {
+      this._showFeedback('profile-info-feedback', isAr ? 'حجم الصورة كبير جداً (الحد الأقصى 12MB)' : 'Image exceeds 12MB limit', 'error');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      this._pendingAvatar = ev.target.result;
+
+    try {
+      const compressedAvatar = await this._compressAvatarImage(file, 256, 0.86);
+      this._pendingAvatar = compressedAvatar;
+
       const img = document.getElementById('profile-avatar-img');
       const placeholder = document.getElementById('profile-avatar-placeholder');
       if (placeholder) placeholder.style.display = 'none';
       if (img) {
-        img.src = this._pendingAvatar;
+        img.src = compressedAvatar;
         img.style.display = 'block';
         img.style.objectFit = 'cover';
         img.style.width = '100%';
@@ -328,11 +379,28 @@ window.ProfilePage = {
       }
       const removeBtn = document.getElementById('profile-remove-avatar-btn');
       if (removeBtn) removeBtn.style.display = '';
-    };
-    reader.readAsDataURL(file);
+
+      // Immediately persist the new photo permanently to the account & local storage
+      this._saveUserInfo({ avatar: compressedAvatar, avatar_url: compressedAvatar });
+      if (window.AUTH && typeof window.AUTH.updateAccountProfile === 'function') {
+        await window.AUTH.updateAccountProfile({ avatar: compressedAvatar });
+      }
+      this._syncSidebar({ ...this._getUserInfo(), avatar: compressedAvatar });
+
+      this._showFeedback(
+        'profile-info-feedback',
+        isAr ? '✅ تم حفظ الصورة الشخصية بشكل دائم في حسابك' : '✅ Profile picture saved permanently to your account',
+        'success'
+      );
+      if (window.Toast?.show) {
+        window.Toast.show(isAr ? 'تم حفظ صورتك الشخصية في الحساب بنجاح ✨' : 'Profile photo saved to your account ✨', 'success');
+      }
+    } catch (err) {
+      this._showFeedback('profile-info-feedback', isAr ? 'تعذر تحميل الصورة' : 'Could not load image', 'error');
+    }
   },
 
-  _saveInfo(isAr) {
+  async _saveInfo(isAr) {
     const name = document.getElementById('profile-name-input')?.value.trim();
     const email = document.getElementById('profile-email-input')?.value.trim();
 
@@ -341,28 +409,43 @@ window.ProfilePage = {
       return;
     }
 
-    const updates = { name, email };
+    const updates = { name, full_name: name, full_name_ar: name, email };
 
-    // Handle avatar change
+    // Handle avatar change if pending
     if (this._pendingAvatar === 'remove') {
       updates.avatar = null;
+      updates.avatar_url = null;
     } else if (this._pendingAvatar) {
       updates.avatar = this._pendingAvatar;
+      updates.avatar_url = this._pendingAvatar;
     }
 
     this._saveUserInfo(updates);
+    if (window.AUTH && typeof window.AUTH.updateAccountProfile === 'function') {
+      await window.AUTH.updateAccountProfile({
+        name,
+        email,
+        ...(this._pendingAvatar !== null ? { avatar: this._pendingAvatar } : {})
+      });
+    }
     this._syncSidebar({ ...this._getUserInfo(), ...updates });
     this._pendingAvatar = null;
 
     // Update displayed name/email in avatar card
     const nameDisplay = document.querySelector('.profile-name-display');
     const emailDisplay = document.querySelector('.profile-email-display');
+    const placeholder = document.getElementById('profile-avatar-placeholder');
     if (nameDisplay) nameDisplay.textContent = name;
     if (emailDisplay) emailDisplay.textContent = email || (isAr ? 'بدون بريد إلكتروني' : 'No email set');
+    if (placeholder) placeholder.textContent = name.charAt(0).toUpperCase();
 
-    this._showFeedback('profile-info-feedback', isAr ? '✅ تم حفظ المعلومات بنجاح' : '✅ Information saved successfully', 'success');
+    this._showFeedback('profile-info-feedback', isAr ? '✅ تم حفظ المعلومات في حسابك بشكل دائم' : '✅ Information permanently saved to your account', 'success');
 
-    if (window.showToast) window.showToast(isAr ? 'تم تحديث ملفك الشخصي' : 'Profile updated', { type: 'success' });
+    if (window.Toast?.show) {
+      window.Toast.show(isAr ? 'تم حفظ بيانات حسابك بنجاح' : 'Account profile saved', 'success');
+    } else if (window.showToast) {
+      window.showToast(isAr ? 'تم تحديث ملفك الشخصي' : 'Profile updated', { type: 'success' });
+    }
   },
 
   _savePassword(isAr) {

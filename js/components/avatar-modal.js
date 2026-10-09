@@ -178,29 +178,53 @@
         }
       });
 
-      const handleFile = (file) => {
+      const compressImage = (file, maxDim = 256, quality = 0.86) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onerror = () => resolve(null);
+        reader.onload = (e) => {
+          const rawUrl = e.target.result;
+          const img = new Image();
+          img.onerror = () => resolve(rawUrl);
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = maxDim;
+              canvas.height = maxDim;
+              const ctx = canvas.getContext('2d');
+              const minSide = Math.min(img.width, img.height);
+              const sx = Math.max(0, (img.width - minSide) / 2);
+              const sy = Math.max(0, (img.height - minSide) / 2);
+              ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, maxDim, maxDim);
+              resolve(canvas.toDataURL('image/jpeg', quality) || rawUrl);
+            } catch (_) {
+              resolve(rawUrl);
+            }
+          };
+          img.src = rawUrl;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      const handleFile = async (file) => {
         if (!file) return;
         if (!file.type.startsWith('image/')) {
           if (window.Toast) window.Toast.show(isAr ? 'يرجى اختيار ملف صورة صالحة' : 'Please select a valid image file', 'warning');
           return;
         }
-        if (file.size > 5 * 1024 * 1024) {
-          if (window.Toast) window.Toast.show(isAr ? 'حجم الصورة كبير جداً (الأقصى 5 ميجابايت)' : 'Image too large (max 5MB)', 'warning');
+        if (file.size > 12 * 1024 * 1024) {
+          if (window.Toast) window.Toast.show(isAr ? 'حجم الصورة كبير جداً (الأقصى 12 ميجابايت)' : 'Image too large (max 12MB)', 'warning');
           return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const dataUrl = e.target.result;
-          this.selectedUrl = dataUrl;
-          const previewIcon = overlay.querySelector('#avatar-upload-preview-icon');
-          if (previewIcon) previewIcon.style.display = 'none';
-          if (previewImg) {
-            previewImg.src = dataUrl;
-            previewImg.style.display = 'block';
-          }
-        };
-        reader.readAsDataURL(file);
+        const dataUrl = await compressImage(file, 256, 0.86);
+        if (!dataUrl) return;
+        this.selectedUrl = dataUrl;
+        const previewIcon = overlay.querySelector('#avatar-upload-preview-icon');
+        if (previewIcon) previewIcon.style.display = 'none';
+        if (previewImg) {
+          previewImg.src = dataUrl;
+          previewImg.style.display = 'block';
+        }
       };
 
       fileInput?.addEventListener('change', (e) => {
@@ -222,9 +246,14 @@
       });
 
       // Save action
-      btnSave?.addEventListener('click', () => {
-        if (this.selectedUrl && typeof this.onSaveCallback === 'function') {
-          this.onSaveCallback(this.selectedUrl);
+      btnSave?.addEventListener('click', async () => {
+        if (this.selectedUrl) {
+          if (window.AUTH && typeof window.AUTH.updateAccountProfile === 'function') {
+            await window.AUTH.updateAccountProfile({ avatar: this.selectedUrl });
+          }
+          if (typeof this.onSaveCallback === 'function') {
+            this.onSaveCallback(this.selectedUrl);
+          }
         }
         this.close();
       });

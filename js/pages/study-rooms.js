@@ -261,6 +261,9 @@
         } catch (e) {}
       }
 
+      // Purge any previously seeded demo/trial rooms & logs
+      this._purgeDemoRooms();
+
       // Restore active room if user refreshes or navigates across pages
       const savedRoomId = localStorage.getItem(STORAGE_KEYS.ACTIVE_ROOM_ID);
       if (savedRoomId) {
@@ -286,8 +289,8 @@
 
       const isAr = this._isAr();
 
-      // Ensure starter rooms exist for discovery
-      this._seedStarterRoomsIfEmpty();
+      // Ensure no demo/trial rooms remain in localStorage or state
+      this._purgeDemoRooms();
 
       // Check URL query parameters (?room=ID or ?code=CODE or ?view=stats)
       let roomId = null;
@@ -2290,15 +2293,18 @@
       const totalHours = Math.floor(totalSeconds / 3600);
       const totalMins = Math.floor((totalSeconds % 3600) / 60);
 
-      // Compute 7-day bar chart (Sat -> Fri)
+      // Compute 7-day bar chart (Sat -> Fri) strictly from real user logs
       const dayLabelsAr = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
       const dayLabelsEn = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-      const dayBuckets = [1.5, 2.2, 3.3, 1.8, 2.7, 1.2, 0.8]; // Baseline + user logs
-      logs.forEach((l, i) => {
-        const idx = i % 7;
-        dayBuckets[idx] = Math.min(8, +(dayBuckets[idx] + (l.focus_seconds || 1800) / 3600).toFixed(1));
+      const dayBuckets = [0, 0, 0, 0, 0, 0, 0];
+      logs.forEach((l) => {
+        const dt = l.completed_at ? new Date(l.completed_at) : new Date();
+        // JS getDay(): 0=Sun..6=Sat -> map Sat=0, Sun=1, Mon=2, Tue=3, Wed=4, Thu=5, Fri=6
+        const idx = (dt.getDay() + 1) % 7;
+        dayBuckets[idx] = Math.min(12, +(dayBuckets[idx] + (l.focus_seconds || 0) / 3600).toFixed(1));
       });
-      const maxBucket = Math.max(4, ...dayBuckets);
+      const maxBucket = Math.max(2, ...dayBuckets);
+      const todayIdx = (new Date().getDay() + 1) % 7;
 
       container.innerHTML = `
         <section class="sr-page" dir="${isAr ? 'rtl' : 'ltr'}">
@@ -2337,7 +2343,7 @@
                   <span>${isAr ? 'إجمالي وقت الدراسة' : 'Total Study Time'}</span>
                 </div>
                 <div class="sr-kpi-card">
-                  <strong class="sr-tabular">${Math.max(25, Math.round(avgSeconds / 60))} ${isAr ? 'دقيقة' : 'min'}</strong>
+                  <strong class="sr-tabular">${totalSessions > 0 ? Math.round(avgSeconds / 60) : 0} ${isAr ? 'دقيقة' : 'min'}</strong>
                   <span>${isAr ? 'متوسط الجلسة' : 'Average Session'}</span>
                 </div>
               </div>
@@ -2346,12 +2352,12 @@
               <div class="sr-chart-box">
                 <div class="sr-chart-bars">
                   ${dayBuckets.map((hrs, idx) => {
-                    const heightPct = Math.max(12, Math.round((hrs / maxBucket) * 100));
+                    const heightPct = hrs > 0 ? Math.max(12, Math.round((hrs / maxBucket) * 100)) : 4;
                     const hInt = Math.floor(hrs);
                     const mInt = Math.round((hrs - hInt) * 60);
                     const label = `${hInt}:${String(mInt).padStart(2, '0')}`;
                     return `
-                      <div class="sr-chart-col ${idx === 2 ? 'highlight' : ''}">
+                      <div class="sr-chart-col ${idx === todayIdx ? 'highlight' : ''}">
                         <span class="sr-chart-tooltip sr-tabular">${label}</span>
                         <div class="sr-chart-bar-track">
                           <div class="sr-chart-bar-fill" style="height:${heightPct}%"></div>
@@ -2374,7 +2380,13 @@
               </div>
 
               <div class="sr-history-list">
-                ${logs.map(l => {
+                ${logs.length === 0 ? `
+                  <div class="sr-empty-state" style="padding:28px 16px;">
+                    <p style="margin:0;color:var(--text-muted,#796F70);font-size:13px;">
+                      ${isAr ? 'لا توجد جلسات مكتملة بعد. انضم إلى غرفة دراسة أو أنشئ غرفتك للبدء.' : 'No completed sessions yet. Join or create a study room to start tracking.'}
+                    </p>
+                  </div>
+                ` : logs.map(l => {
                   const dateStr = new Date(l.completed_at).toLocaleDateString('en-GB');
                   return `
                     <div class="sr-history-item">
@@ -2546,133 +2558,90 @@
     // ========================================================================
     // 12. DUAL-LAYER PERSISTENCE & SUPABASE REALTIME SYNC
     // ========================================================================
-    _seedStarterRoomsIfEmpty() {
-      const existing = this._getLocalRooms();
-      if (existing.length > 0) return;
+    _isDemoRoom(room) {
+      if (!room) return false;
+      const demoIds = new Set(['room-evening-focus', 'room-calm-study', 'room-night-focus']);
+      if (demoIds.has(room.id)) return true;
+      if (typeof room.host_user_id === 'string' && room.host_user_id.startsWith('starter-host-')) return true;
+      return false;
+    },
 
-      const now = Date.now();
-      const starterRooms = [
-        {
-          id: 'room-evening-focus',
-          name: 'جلسة تركيز مسائية',
-          subject: 'Oral Pathology',
-          session_goal: 'مراجعة المحاضرات وحل أسئلة السنوات السابقة بهدوء 🌱',
-          visibility: 'public',
-          preset: 'deep_focus',
-          status: 'active',
-          phase: 'focus',
-          current_round: 1,
-          total_rounds: 3,
-          rounds_before_long: 3,
-          focus_duration_seconds: 3000,
-          short_break_seconds: 600,
-          long_break_seconds: 1200,
-          total_session_seconds: 10800,
-          started_at: new Date(now - 1050 * 1000).toISOString(),
-          ends_at: new Date(now + 1950 * 1000).toISOString(),
-          participant_count: 28,
-          max_participants: 50,
-          invitation_code: '7F3K9',
-          host_user_id: 'starter-host-1',
-          host_name: 'Taha Mohamed',
-          created_at: new Date(now - 1800 * 1000).toISOString()
-        },
-        {
-          id: 'room-calm-study',
-          name: 'دراسة هادئة',
-          subject: 'Prosthodontics',
-          session_goal: 'بومودورو 25/5 — التزم معنا في جو دراسي مريح',
-          visibility: 'public',
-          preset: 'pomodoro',
-          status: 'active',
-          phase: 'short_break',
-          current_round: 2,
-          total_rounds: 4,
-          rounds_before_long: 4,
-          focus_duration_seconds: 1500,
-          short_break_seconds: 600,
-          long_break_seconds: 900,
-          total_session_seconds: 7200,
-          started_at: new Date(now - 160 * 1000).toISOString(),
-          ends_at: new Date(now + 440 * 1000).toISOString(),
-          participant_count: 12,
-          max_participants: 50,
-          invitation_code: 'K7F9D',
-          host_user_id: 'starter-host-2',
-          host_name: 'Maha',
-          created_at: new Date(now - 3600 * 1000).toISOString()
-        },
-        {
-          id: 'room-night-focus',
-          name: 'تركيز ليلي',
-          subject: 'Operative Dentistry',
-          session_goal: 'جلسة مراجعة مكثفة قبل الامتحان النصفي',
-          visibility: 'public',
-          preset: 'deep_focus',
-          status: 'waiting',
-          phase: 'waiting',
-          current_round: 0,
-          total_rounds: 3,
-          rounds_before_long: 3,
-          focus_duration_seconds: 3000,
-          short_break_seconds: 600,
-          long_break_seconds: 1200,
-          total_session_seconds: 10800,
-          scheduled_start_at: new Date(now + 15 * 60000).toISOString(),
-          started_at: null,
-          ends_at: null,
-          participant_count: 19,
-          max_participants: 50,
-          invitation_code: 'N9M4P',
-          host_user_id: 'starter-host-3',
-          host_name: 'Ahlam',
-          created_at: new Date(now - 900 * 1000).toISOString()
+    _purgeDemoRooms() {
+      const demoRoomIds = ['room-evening-focus', 'room-calm-study', 'room-night-focus'];
+      const demoLogIds = new Set(['log-1', 'log-2', 'log-3']);
+
+      // 1. Purge demo rooms from localStorage
+      try {
+        const existingRooms = this._getLocalRooms();
+        const cleanedRooms = existingRooms.filter(r => !this._isDemoRoom(r));
+        if (cleanedRooms.length !== existingRooms.length) {
+          this._setLocalRooms(cleanedRooms);
         }
-      ];
+      } catch (e) {}
 
-      localStorage.setItem(STORAGE_KEYS.ROOMS, JSON.stringify(starterRooms));
+      // 2. If active room was one of the demo rooms, clear it
+      try {
+        const activeId = localStorage.getItem(STORAGE_KEYS.ACTIVE_ROOM_ID);
+        if (activeId && demoRoomIds.includes(activeId)) {
+          localStorage.removeItem(STORAGE_KEYS.ACTIVE_ROOM_ID);
+        }
+      } catch (e) {}
 
-      // Seed realistic participants for leaderboard
-      const starterParticipants = {
-        'room-evening-focus': [
-          { user_id: 'starter-host-1', user_name: 'Taha Mohamed', status: 'focusing', focus_seconds_earned: 5100, personal_goal: 'Oral Pathology — Odontogenic Tumors' },
-          { user_id: 'peer-ahlam', user_name: 'Ahlam', status: 'focusing', focus_seconds_earned: 4350, personal_goal: 'Sheet 4 Review' },
-          { user_id: 'peer-maha', user_name: 'Maha', status: 'on_break', focus_seconds_earned: 3490, personal_goal: 'Past Exam Questions' },
-          { user_id: 'peer-khaled', user_name: 'Khaled', status: 'paused', focus_seconds_earned: 2700, personal_goal: 'Pharmacology Notes' },
-          { user_id: 'peer-salma', user_name: 'Salma', status: 'focusing', focus_seconds_earned: 2535, personal_goal: 'Clinical Cases' }
-        ],
-        'room-calm-study': [
-          { user_id: 'starter-host-2', user_name: 'Maha', status: 'on_break', focus_seconds_earned: 3120, personal_goal: 'Fixed Prosthodontics' },
-          { user_id: 'peer-karim', user_name: 'Karim', status: 'focusing', skip_break_override: true, focus_seconds_earned: 2890, personal_goal: 'Endodontics Access Cavity' },
-          { user_id: 'peer-aya', user_name: 'Aya', status: 'on_break', focus_seconds_earned: 2290, personal_goal: 'Oral Surgery Local Anesthesia' }
-        ],
-        'room-night-focus': [
-          { user_id: 'starter-host-3', user_name: 'Ahlam', status: 'ready', focus_seconds_earned: 0, personal_goal: 'Operative Cavity Prep' },
-          { user_id: 'peer-omar', user_name: 'Omar', status: 'ready', focus_seconds_earned: 0, personal_goal: 'Dental Materials' }
-        ]
-      };
-      localStorage.setItem(STORAGE_KEYS.PARTICIPANTS, JSON.stringify(starterParticipants));
+      // 3. Purge demo participants from localStorage
+      try {
+        const allParticipants = JSON.parse(localStorage.getItem(STORAGE_KEYS.PARTICIPANTS) || '{}');
+        let changed = false;
+        demoRoomIds.forEach(id => {
+          if (allParticipants[id]) {
+            delete allParticipants[id];
+            changed = true;
+          }
+        });
+        if (changed) {
+          localStorage.setItem(STORAGE_KEYS.PARTICIPANTS, JSON.stringify(allParticipants));
+        }
+      } catch (e) {}
 
-      // Seed starter session logs if empty
-      if (!localStorage.getItem(STORAGE_KEYS.SESSION_LOGS)) {
-        const starterLogs = [
-          { id: 'log-1', room_name: 'جلسة تركيز مسائية', focus_seconds: 8314, rank_achieved: 2, completed_at: new Date(now - 86400000).toISOString() },
-          { id: 'log-2', room_name: 'دراسة هادئة', focus_seconds: 6312, rank_achieved: 1, completed_at: new Date(now - 2 * 86400000).toISOString() },
-          { id: 'log-3', room_name: 'مراجعة طب الفم', focus_seconds: 7512, rank_achieved: 3, completed_at: new Date(now - 4 * 86400000).toISOString() }
-        ];
-        localStorage.setItem(STORAGE_KEYS.SESSION_LOGS, JSON.stringify(starterLogs));
+      // 4. Purge demo session logs from localStorage
+      try {
+        const rawLogs = localStorage.getItem(STORAGE_KEYS.SESSION_LOGS);
+        if (rawLogs) {
+          const parsedLogs = JSON.parse(rawLogs);
+          if (Array.isArray(parsedLogs)) {
+            const cleanedLogs = parsedLogs.filter(l => l && !demoLogIds.has(l.id));
+            if (cleanedLogs.length !== parsedLogs.length) {
+              localStorage.setItem(STORAGE_KEYS.SESSION_LOGS, JSON.stringify(cleanedLogs));
+            }
+          }
+        }
+      } catch (e) {}
+
+      // 5. Purge demo rooms from Supabase if they were previously synced
+      const sb = this._getClient();
+      if (sb) {
+        sb.from('study_rooms')
+          .delete()
+          .in('id', demoRoomIds)
+          .then(() => {})
+          .catch(() => {});
       }
+    },
+
+    _seedStarterRoomsIfEmpty() {
+      this._purgeDemoRooms();
     },
 
     _getLocalRooms() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.ROOMS) || '[]');
+        const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.ROOMS) || '[]');
+        return Array.isArray(list) ? list.filter(r => !this._isDemoRoom(r)) : [];
       } catch (e) { return []; }
     },
 
     _setLocalRooms(rooms) {
       try {
-        localStorage.setItem(STORAGE_KEYS.ROOMS, JSON.stringify(rooms));
+        const cleaned = Array.isArray(rooms) ? rooms.filter(r => !this._isDemoRoom(r)) : [];
+        localStorage.setItem(STORAGE_KEYS.ROOMS, JSON.stringify(cleaned));
       } catch (e) {}
     },
 
@@ -2712,11 +2681,14 @@
     },
 
     async _fetchRoomById(roomId) {
+      if (['room-evening-focus', 'room-calm-study', 'room-night-focus'].includes(roomId)) {
+        return null;
+      }
       const sb = this._getClient();
       if (sb) {
         try {
           const { data, error } = await sb.from('study_rooms').select('*').eq('id', roomId).maybeSingle();
-          if (!error && data) {
+          if (!error && data && !this._isDemoRoom(data)) {
             const localRooms = this._getLocalRooms();
             const idx = localRooms.findIndex(r => r.id === data.id);
             if (idx >= 0) localRooms[idx] = data;
@@ -2756,7 +2728,7 @@
             .eq('invitation_code', code)
             .neq('status', 'closed')
             .maybeSingle();
-          if (data) return data;
+          if (data && !this._isDemoRoom(data)) return data;
         } catch (e) {}
       }
       return null;
@@ -2773,11 +2745,12 @@
           .order('created_at', { ascending: false })
           .limit(30);
 
-        if (!error && Array.isArray(data) && data.length > 0) {
+        if (!error && Array.isArray(data)) {
+          const validRemote = data.filter(r => !this._isDemoRoom(r));
           const local = this._getLocalRooms();
           const map = new Map();
           local.forEach(r => map.set(r.id, r));
-          data.forEach(r => map.set(r.id, r));
+          validRemote.forEach(r => map.set(r.id, r));
           this._setLocalRooms(Array.from(map.values()));
           if (this.view === 'discovery') {
             this._renderDiscoveryCards(container);
@@ -2936,7 +2909,9 @@
 
     _getSessionLogs() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSION_LOGS) || '[]');
+        const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSION_LOGS) || '[]');
+        const demoLogIds = new Set(['log-1', 'log-2', 'log-3']);
+        return Array.isArray(list) ? list.filter(l => l && !demoLogIds.has(l.id)) : [];
       } catch (e) { return []; }
     },
 
