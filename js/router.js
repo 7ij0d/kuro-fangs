@@ -148,7 +148,10 @@ class Router {
       '#admin-publish-overlay',
       '#auth-modal-backdrop',
       '#drawer-backdrop',
-      '#jnotes-eraser-cursor'
+      '#jnotes-eraser-cursor',
+      '#kuro-avatar-modal-overlay',
+      '.kuro-avatar-modal-overlay',
+      '#subject-modal-backdrop'
     ];
     backdropsToClean.forEach(sel => {
       document.querySelectorAll(sel).forEach(el => el.remove());

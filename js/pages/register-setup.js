@@ -41,6 +41,9 @@
         if (localInfo.avatar && !this.formData.avatar_url) this.formData.avatar_url = localInfo.avatar;
       } catch (e) {}
 
+      // Clean lingering avatar modals or overlays from previous interactions
+      document.querySelectorAll('#kuro-avatar-modal-overlay, .kuro-avatar-modal-overlay, #subject-modal-backdrop').forEach(el => el.remove());
+
       // Add special class to body to format wizard viewport
       document.body.classList.add('login-view-active');
 
@@ -589,6 +592,7 @@
       container.querySelector('#btn-success-launch')?.addEventListener('click', (e) => {
         e.preventDefault();
         document.body.classList.remove('login-view-active');
+        document.querySelectorAll('#kuro-avatar-modal-overlay, .kuro-avatar-modal-overlay, #subject-modal-backdrop').forEach(el => el.remove());
 
         if (window.AUTH && window.AUTH.user) {
           window.AUTH.user.registration_status = 'completed';

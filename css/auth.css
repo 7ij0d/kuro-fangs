@@ -940,6 +940,9 @@ body.login-view-active #app {
 }
 
 .kuro-wizard-container {
+  position: relative;
+  z-index: 100;
+  pointer-events: auto;
   width: 100%;
   max-width: 760px;
   background: #FFFFFF;
