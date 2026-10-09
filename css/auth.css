@@ -2057,3 +2057,21 @@ body.login-view-active #app {
   cursor: pointer;
 }
 
+
+
+/* Absolute header and layout override for full-page auth/wizard views */
+body.login-view-active #site-header,
+body.login-view-active .site-header,
+body.login-view-active #app-sidebar,
+body.login-view-active #sidebar-backdrop,
+body.login-view-active .mobile-bottom-nav,
+body.login-view-active #guest-encourage-banner {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}

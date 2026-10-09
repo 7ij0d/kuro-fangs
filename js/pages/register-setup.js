@@ -552,19 +552,56 @@
         this.formData.confirmation = e.target.checked;
       });
 
-      container.querySelector('#btn-step3-submit')?.addEventListener('click', async () => {
+      container.querySelector('#btn-step3-submit')?.addEventListener('click', async (e) => {
+        e.preventDefault();
         const confirmChk = container.querySelector('#chk-reg-confirm');
         if (confirmChk && !confirmChk.checked) {
           if (window.Toast) window.Toast.show(isAr ? 'يرجى الموافقة على صحة البيانات للمتابعة' : 'Please check confirmation to proceed', 'warning');
           return;
         }
 
-        this.formData.confirmation = true;
-        this.step = 4;
-        this.render(container);
+        const btn = container.querySelector('#btn-step3-submit');
+        if (btn) {
+          btn.disabled = true;
+          btn.style.opacity = '0.7';
+          btn.innerHTML = `<i data-lucide="loader-2" class="spin-icon"></i> <span>${isAr ? 'جاري التفعيل...' : 'Saving...'}</span>`;
+          if (window.lucide) window.lucide.createIcons();
+        }
 
-        // Run saving animation checklist
-        await this.runSavingSequence(container, isAr);
+        this.formData.confirmation = true;
+
+        // Save profile to Supabase & localStorage immediately
+        const profilePayload = {
+          full_name_ar: this.formData.full_name_ar,
+          full_name_en: this.formData.full_name_en,
+          gender: this.formData.gender,
+          practical_group_id: this.formData.practical_group_id,
+          avatar_url: this.formData.avatar_url,
+          registration_status: 'completed',
+          updated_at: new Date().toISOString()
+        };
+
+        if (window.AUTH && typeof window.AUTH.saveCompleteStudentProfile === 'function') {
+          await window.AUTH.saveCompleteStudentProfile(profilePayload);
+        } else {
+          try {
+            const current = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
+            localStorage.setItem('kf_user_info', JSON.stringify({
+              ...current,
+              name: this.formData.full_name_ar,
+              full_name_ar: this.formData.full_name_ar,
+              full_name_en: this.formData.full_name_en,
+              gender: this.formData.gender,
+              practical_group_id: this.formData.practical_group_id,
+              avatar: this.formData.avatar_url,
+              registration_status: 'completed'
+            }));
+          } catch (err) {}
+        }
+
+        // Instantly transition to Success screen (Step 5)
+        this.step = 5;
+        this.render(container);
       });
 
       // Step 5 Launch Button
@@ -572,83 +609,6 @@
         document.body.classList.remove('login-view-active');
         window.location.hash = '#/';
       });
-    },
-
-    async runSavingSequence(container, isAr) {
-      const fillBar = container.querySelector('#wizard-saving-fill');
-      const item1 = container.querySelector('#chk-item-1');
-      const item2 = container.querySelector('#chk-item-2');
-      const item3 = container.querySelector('#chk-item-3');
-
-      // Phase 1: Create profile payload & save
-      if (fillBar) fillBar.style.width = '35%';
-      await new Promise(r => setTimeout(r, 600));
-
-      if (item1) {
-        item1.className = 'checklist-item done';
-        item1.querySelector('i').outerHTML = `<i data-lucide="check-circle" class="check-icon"></i>`;
-      }
-      if (item2) {
-        item2.className = 'checklist-item active';
-        item2.querySelector('i').outerHTML = `<i data-lucide="loader-2" class="spin-icon"></i>`;
-      }
-      if (fillBar) fillBar.style.width = '70%';
-
-      // Save to Supabase & localStorage
-      const user = window.AUTH ? window.AUTH.getUser() : null;
-      const profilePayload = {
-        full_name_ar: this.formData.full_name_ar,
-        full_name_en: this.formData.full_name_en,
-        gender: this.formData.gender,
-        practical_group_id: this.formData.practical_group_id,
-        avatar_url: this.formData.avatar_url,
-        registration_status: 'completed',
-        updated_at: new Date().toISOString()
-      };
-
-      if (window.AUTH && typeof window.AUTH.saveCompleteStudentProfile === 'function') {
-        await window.AUTH.saveCompleteStudentProfile(profilePayload);
-      } else {
-        // Fallback local save
-        try {
-          const current = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
-          localStorage.setItem('kf_user_info', JSON.stringify({
-            ...current,
-            name: this.formData.full_name_ar,
-            full_name_ar: this.formData.full_name_ar,
-            full_name_en: this.formData.full_name_en,
-            gender: this.formData.gender,
-            practical_group_id: this.formData.practical_group_id,
-            avatar: this.formData.avatar_url,
-            registration_status: 'completed'
-          }));
-        } catch (e) {}
-      }
-
-      await new Promise(r => setTimeout(r, 700));
-
-      if (item2) {
-        item2.className = 'checklist-item done';
-        item2.querySelector('i').outerHTML = `<i data-lucide="check-circle" class="check-icon"></i>`;
-      }
-      if (item3) {
-        item3.className = 'checklist-item active';
-        item3.querySelector('i').outerHTML = `<i data-lucide="loader-2" class="spin-icon"></i>`;
-      }
-      if (fillBar) fillBar.style.width = '100%';
-
-      await new Promise(r => setTimeout(r, 600));
-
-      if (item3) {
-        item3.className = 'checklist-item done';
-        item3.querySelector('i').outerHTML = `<i data-lucide="check-circle" class="check-icon"></i>`;
-      }
-
-      await new Promise(r => setTimeout(r, 300));
-
-      // Advance to Success screen
-      this.step = 5;
-      this.render(container);
     }
   };
 
