@@ -52,7 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update Header Brand
     const isAr = lang === 'ar';
     const headerBrandName = document.getElementById('header-brand-name');
-    if (headerBrandName) headerBrandName.textContent = isAr ? 'طالب كورو' : 'Kuro Student';
+    if (headerBrandName) headerBrandName.textContent = isAr ? 'بوابة طب الأسنان • السنة الثالثة' : 'Dentistry Portal • Year 3';
+
+    const sideBrandTitle = document.getElementById('sidebar-brand-title');
+    if (sideBrandTitle) sideBrandTitle.textContent = isAr ? 'بوابة طب الأسنان' : 'Dentistry Portal';
 
     // Update Auth header state
     if (window.AUTH && typeof window.AUTH.updateUI === 'function') {
@@ -743,76 +746,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 9. Global Mascot & User Avatars Synchronization
+  // 9. Formal User Avatar & Name Synchronization (No Mascot Thumbnails)
   const updateGlobalMascotAvatars = () => {
-    const charImg = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('idle')) || 'assets/characters/kuro/Kuro-Idle.png';
-    const isEn = window.I18N && window.I18N.getLang() === 'en';
-    const charName = isEn ? 'Kuro' : 'كورو';
-
     let customAvatar = null;
     let customName = null;
     try {
       const userInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
-      if (userInfo.avatar) customAvatar = userInfo.avatar;
-      if (userInfo.name && userInfo.name !== 'طالب أسنان' && userInfo.name !== 'Dental Student') {
+      if (userInfo.avatar && !String(userInfo.avatar).toLowerCase().includes('characters/kuro')) {
+        customAvatar = userInfo.avatar;
+      }
+      if (
+        userInfo.name &&
+        userInfo.name !== 'طالب أسنان' &&
+        userInfo.name !== 'Dental Student' &&
+        userInfo.name !== 'طالب كورو' &&
+        userInfo.name !== 'Kuro Student'
+      ) {
         customName = userInfo.name;
       }
     } catch (e) {}
 
-    // 1.0 Sidebar Brand Emblem Avatar
-    const sideBrandAvatar = document.getElementById('sidebar-brand-avatar-img');
-    if (sideBrandAvatar) {
-      sideBrandAvatar.src = charImg;
-      sideBrandAvatar.alt = charName;
-    }
-
-    // 1. Sidebar user avatar
-    const sideAvatar = document.getElementById('sidebar-user-avatar-img');
-    if (sideAvatar) {
-      if (customAvatar) {
-        sideAvatar.src = customAvatar;
-        sideAvatar.style.objectFit = 'cover';
-        sideAvatar.style.borderRadius = '50%';
-      } else {
-        sideAvatar.src = charImg;
-        sideAvatar.style.objectFit = 'contain';
-        sideAvatar.style.borderRadius = '';
-      }
-      sideAvatar.alt = customName || charName;
-    }
-
-    // 1.1 Sidebar user name
     if (customName) {
       const sideName = document.querySelector('.sidebar-user-name');
       if (sideName) sideName.textContent = customName;
     }
-
-    // 2. Sidebar Mascot Subtle Watermark
-    const sideWatermark = document.getElementById('sidebar-watermark-img');
-    if (sideWatermark) {
-      sideWatermark.src = charImg;
-    }
-
-    // 3. Header Mascot / User Avatar Button
-    const headerAvatar = document.getElementById('header-mascot-avatar-img');
-    if (headerAvatar) {
-      if (customAvatar) {
-        headerAvatar.src = customAvatar;
-        headerAvatar.style.objectFit = 'cover';
-        headerAvatar.style.borderRadius = '50%';
-      } else {
-        headerAvatar.src = charImg;
-        headerAvatar.style.objectFit = 'contain';
-        headerAvatar.style.borderRadius = '';
-      }
-      headerAvatar.alt = customName || charName;
-    }
-
-    // 4. Any other on-screen current mascot images (profile, rewards, etc.)
-    document.querySelectorAll('.current-mascot-img').forEach(img => {
-      img.src = charImg;
-      img.alt = charName;
-    });
   };
 
   window.updateGlobalMascotAvatars = updateGlobalMascotAvatars;

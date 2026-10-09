@@ -22,14 +22,16 @@
 
   class AvatarModal {
     constructor() {
-      this.activeTab = 'preset'; // 'preset' | 'upload'
+      this.activeTab = 'upload';
       this.selectedUrl = null;
       this.onSaveCallback = null;
       this.modalEl = null;
     }
 
     open(currentUrl, onSave) {
-      this.selectedUrl = currentUrl || KURO_PRESET_AVATARS[0].url;
+      const cleanUrl = (currentUrl && !String(currentUrl).toLowerCase().includes('characters/kuro')) ? currentUrl : '';
+      this.selectedUrl = cleanUrl;
+      this.activeTab = 'upload';
       this.onSaveCallback = onSave;
       this.render();
     }
@@ -62,11 +64,11 @@
           <div class="avatar-modal-header">
             <div class="avatar-modal-header-info">
               <div class="avatar-modal-header-icon">
-                <i data-lucide="sparkles"></i>
+                <i data-lucide="camera"></i>
               </div>
               <div>
                 <h3 class="avatar-modal-title">${isAr ? 'تغيير الصورة الشخصية' : 'Change Profile Avatar'}</h3>
-                <p class="avatar-modal-sub">${isAr ? 'اختر من شخصيات كورو المميزة أو ارفع صورتك الخاصة' : 'Choose a Kuro character or upload your custom image'}</p>
+                <p class="avatar-modal-sub">${isAr ? 'ارفع صورتك الشخصية لحسابك الأكاديمي' : 'Upload your personal profile picture'}</p>
               </div>
             </div>
             <button type="button" class="avatar-modal-close-btn" id="btn-close-avatar-modal" aria-label="Close">
@@ -74,44 +76,13 @@
             </button>
           </div>
 
-          <!-- Tabs Switcher -->
-          <div class="avatar-modal-tabs">
-            <button type="button" class="avatar-modal-tab ${this.activeTab === 'preset' ? 'active' : ''}" id="tab-avatar-preset">
-              <i data-lucide="smile"></i>
-              <span>${isAr ? 'شخصيات كورو' : 'Kuro Characters'}</span>
-            </button>
-            <button type="button" class="avatar-modal-tab ${this.activeTab === 'upload' ? 'active' : ''}" id="tab-avatar-upload">
-              <i data-lucide="upload-cloud"></i>
-              <span>${isAr ? 'رفع صورة خاصة' : 'Upload Image'}</span>
-            </button>
-          </div>
-
-          <!-- Tab Content: Presets Grid -->
-          <div class="avatar-modal-body" id="avatar-body-preset" style="display: ${this.activeTab === 'preset' ? 'block' : 'none'};">
-            <div class="avatar-presets-grid">
-              ${KURO_PRESET_AVATARS.map(item => {
-                const isSelected = this.selectedUrl === item.url;
-                return `
-                  <button type="button" class="avatar-preset-card ${isSelected ? 'selected' : ''}" data-avatar-url="${item.url}">
-                    <div class="preset-avatar-img-wrap">
-                      <img src="${item.url}" alt="${item.nameAr}" onerror="this.src='assets/characters/kuro/Kuro-Idle.png'" />
-                      <div class="preset-avatar-badge-check">
-                        <i data-lucide="check"></i>
-                      </div>
-                    </div>
-                    <span class="preset-avatar-name">${isAr ? item.nameAr : item.nameEn}</span>
-                  </button>
-                `;
-              }).join('')}
-            </div>
-          </div>
-
           <!-- Tab Content: Upload Zone -->
-          <div class="avatar-modal-body" id="avatar-body-upload" style="display: ${this.activeTab === 'upload' ? 'block' : 'none'};">
+          <div class="avatar-modal-body" id="avatar-body-upload" style="display: block;">
             <div class="avatar-upload-zone" id="avatar-drop-zone">
               <input type="file" id="input-avatar-file" accept="image/png, image/jpeg, image/webp" style="display:none;" />
-              <div class="upload-zone-preview" id="avatar-upload-preview-wrap">
-                <img id="avatar-upload-preview-img" src="${this.selectedUrl || 'assets/characters/kuro/Kuro-Idle.png'}" alt="Preview" />
+              <div class="upload-zone-preview" id="avatar-upload-preview-wrap" style="display:flex;align-items:center;justify-content:center;background:rgba(125,30,48,0.08);">
+                <img id="avatar-upload-preview-img" src="${this.selectedUrl || ''}" alt="Preview" style="${this.selectedUrl ? 'display:block;' : 'display:none;'}" />
+                <i data-lucide="user" id="avatar-upload-preview-icon" style="${this.selectedUrl ? 'display:none;' : 'display:block;'}width:32px;height:32px;color:#7D1E30;"></i>
               </div>
               <div class="upload-zone-instructions">
                 <i data-lucide="image" class="upload-icon-main"></i>
@@ -222,7 +193,12 @@
         reader.onload = (e) => {
           const dataUrl = e.target.result;
           this.selectedUrl = dataUrl;
-          if (previewImg) previewImg.src = dataUrl;
+          const previewIcon = overlay.querySelector('#avatar-upload-preview-icon');
+          if (previewIcon) previewIcon.style.display = 'none';
+          if (previewImg) {
+            previewImg.src = dataUrl;
+            previewImg.style.display = 'block';
+          }
         };
         reader.readAsDataURL(file);
       };

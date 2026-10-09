@@ -43,9 +43,9 @@ window.AuthModal = (function () {
 
     box.innerHTML = `
       <div style="max-width: 440px; padding: 34px 28px; text-align: center; border-radius: 26px; background: #FFFFFF; border: 1px solid #EAE3D6; box-shadow: 0 16px 40px rgba(126,29,42,0.12);">
-        <!-- Mascot Avatar -->
-        <div style="width: 76px; height: 76px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; background: #FBF3EF; border-radius: 50%; border: 1px solid #EEDCD5;">
-          <img src="assets/characters/kuro/kuro-welcome-sparks.png" alt="Kuro" style="width: 54px; height: auto;" />
+        <!-- Formal Academic Emblem -->
+        <div style="width: 72px; height: 72px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; background: #FBF3EF; border-radius: 50%; border: 1px solid #EEDCD5;">
+          <i data-lucide="graduation-cap" style="width: 34px; height: 34px; color: #7E1D2A;"></i>
         </div>
 
         <h2 style="font-size: 1.35rem; font-weight: 850; color: #7E1D2A; margin: 0 0 8px; letter-spacing: -0.01em;">

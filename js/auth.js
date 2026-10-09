@@ -143,7 +143,7 @@
                       const payload = JSON.parse(jsonStr);
                       if (payload && payload.sub) {
                         const meta = payload.user_metadata || {};
-                        const fullName = meta.full_name || meta.name || payload.email?.split('@')[0] || 'Kuro Student';
+                        const fullName = meta.full_name || meta.name || payload.email?.split('@')[0] || 'Dental Student';
                         sessionUser = {
                           id: payload.sub,
                           email: payload.email || '',
@@ -233,7 +233,7 @@
       }
 
       const meta = sbUser.user_metadata || {};
-      const fullName = meta.full_name || meta.name || sbUser.email?.split('@')[0] || 'Kuro Student';
+      const fullName = meta.full_name || meta.name || sbUser.email?.split('@')[0] || 'Dental Student';
       const avatarUrl = meta.avatar_url || meta.picture || null;
 
       // Read existing cached profile data to preserve registration completion
@@ -803,8 +803,13 @@
         const currentLang = headerAuthBox.getAttribute('data-render-lang');
 
         const userId = user ? (user.id || 'auth') : 'none';
-        const userName = user ? (user.full_name || '') : '';
-        const userAvatar = user ? (user.avatar_url || '') : '';
+        const userName = user ? (user.full_name || (isAr ? 'طالب طب الأسنان' : 'Dental Student')) : '';
+        const rawUserAvatar = user ? (user.avatar_url || '') : '';
+        const userAvatar = (
+          rawUserAvatar &&
+          !String(rawUserAvatar).toLowerCase().includes('characters/kuro') &&
+          !String(rawUserAvatar).toLowerCase().includes('kuro-idle')
+        ) ? rawUserAvatar : '';
         const langStr = isAr ? 'ar' : 'en';
 
         if (
@@ -825,7 +830,7 @@
           if (isAuthenticated) {
             const avatarHtml = userAvatar
               ? `<img src="${userAvatar}" alt="${userName}" class="header-user-avatar-circle" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" />`
-              : `<span class="header-user-avatar-initial" style="width:24px;height:24px;border-radius:50%;background:#7E1D2A;color:#FFF;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${userName.charAt(0).toUpperCase()}</span>`;
+              : `<span class="header-user-avatar-initial" style="width:24px;height:24px;border-radius:50%;background:#7E1D2A;color:#FFF;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${(userName || 'D').charAt(0).toUpperCase()}</span>`;
 
             headerAuthBox.innerHTML = `
               <div class="header-user-badge" id="header-user-profile-badge" onclick="window.location.hash='#/profile'" style="display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:20px;background:rgba(126,29,42,0.06);border:1px solid rgba(126,29,42,0.14);cursor:pointer;" title="${user.email || ''}">
@@ -871,15 +876,23 @@
       // 3. Sidebar User Card
       const sideName = document.querySelector('.sidebar-user-name');
       const sideSub = document.getElementById('sidebar-user-sub');
-      const sideAvatarImg = document.getElementById('sidebar-user-avatar-img');
+      const sideAvatarBox = document.getElementById('sidebar-user-avatar-box');
 
       if (isAuthenticated) {
-        if (sideName) sideName.textContent = user.full_name;
+        const displayFullName = user.full_name || (isAr ? 'طالب طب الأسنان' : 'Dental Student');
+        if (sideName) sideName.textContent = displayFullName;
         if (sideSub) sideSub.textContent = isAr ? 'حساب موثق سحابياً ☁️' : 'Cloud Verified ☁️';
-        if (sideAvatarImg && user.avatar_url) {
-          sideAvatarImg.src = user.avatar_url;
-          sideAvatarImg.style.borderRadius = '50%';
-          sideAvatarImg.style.objectFit = 'cover';
+        const validSideAvatar = (
+          user.avatar_url &&
+          !String(user.avatar_url).toLowerCase().includes('characters/kuro') &&
+          !String(user.avatar_url).toLowerCase().includes('kuro-idle')
+        ) ? user.avatar_url : '';
+        if (sideAvatarBox) {
+          if (validSideAvatar) {
+            sideAvatarBox.innerHTML = `<img src="${validSideAvatar}" alt="${displayFullName}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />`;
+          } else {
+            sideAvatarBox.textContent = displayFullName.charAt(0).toUpperCase();
+          }
         }
       } else if (this.isGuest()) {
         if (sideName) sideName.textContent = isAr ? 'طالب زائر (Guest)' : 'Guest Student';
@@ -907,14 +920,17 @@
           loader.className = 'kf-auth-boot-loader';
           loader.innerHTML = `
             <div class="kf-boot-content">
-              <div class="kf-boot-mascot-pulse">
-                <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" width="72" height="72" />
+              <div class="kf-boot-mascot-pulse" style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:18px;background:rgba(126,29,42,0.1);border:1px solid rgba(126,29,42,0.2);">
+                <i data-lucide="graduation-cap" style="width:34px;height:34px;color:#7E1D2A;"></i>
               </div>
-              <h2 class="kf-boot-title">Kuro Fangs</h2>
+              <h2 class="kf-boot-title">بوابة طب الأسنان • Dentistry Portal</h2>
               <div class="kf-boot-spinner"></div>
             </div>
           `;
           document.body.appendChild(loader);
+          if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+          }
         }
         loader.style.display = 'flex';
       } else if (loader) {
@@ -940,9 +956,9 @@
 
       modal.innerHTML = `
         <div class="auth-modal-box guest-upgrade-box" style="max-width: 440px; padding: 32px 28px; text-align: center; border-radius: 24px; background: #FFFFFF; border: 1px solid #EAE3D6; box-shadow: 0 16px 40px rgba(126,29,42,0.12);">
-          <!-- Mascot Header -->
-          <div style="width: 80px; height: 80px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; background: #FBF3EF; border-radius: 50%; border: 1px solid #EEDCD5;">
-            <img src="assets/characters/kuro/kuro-welcome-sparks.png" alt="Kuro" style="width: 58px; height: auto;" />
+          <!-- Academic Emblem Header -->
+          <div style="width: 72px; height: 72px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; background: #FBF3EF; border-radius: 50%; border: 1px solid #EEDCD5;">
+            <i data-lucide="graduation-cap" style="width: 34px; height: 34px; color: #7E1D2A;"></i>
           </div>
 
           <h2 style="font-size: 1.35rem; font-weight: 800; color: #7E1D2A; margin: 0 0 8px; letter-spacing: -0.01em;">

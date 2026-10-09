@@ -46,8 +46,8 @@ const QuizzesPage = {
         <div class="kf-panel" style="margin-bottom: 24px; padding: 22px 26px; border-radius: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 18px;">
-              <div style="width: 64px; height: 64px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(200, 67, 67, 0.12) 0%, transparent 70%);">
-                <img src="${window.CharacterThemeSystem ? window.CharacterThemeSystem.getAsset('focused') : 'assets/characters/kuro/Kuro-Focused.png'}" alt="Kuro Focused" class="kuro-character-img kuro-float" style="width: 58px; height: 58px; object-fit: contain;" />
+              <div style="width: 58px; height: 58px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 16px; background: rgba(125, 30, 48, 0.08); border: 1px solid rgba(125, 30, 48, 0.18);">
+                <i data-lucide="file-check-2" style="width: 28px; height: 28px; color: #7D1E30;"></i>
               </div>
               <div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">

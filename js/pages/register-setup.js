@@ -19,7 +19,7 @@
       email: '',
       gender: 'male', // 'male' | 'female'
       practical_group_id: 'A1', // 'A1' | 'A2' | 'B1' | 'B2'
-      avatar_url: 'assets/characters/kuro/Kuro-Idle.png',
+      avatar_url: '',
       confirmation: false
     },
 
@@ -43,12 +43,16 @@
       if (user) {
         this.formData.email = user.email || this.formData.email;
         this.formData.full_name_ar = user.full_name || this.formData.full_name_ar;
-        this.formData.avatar_url = user.avatar_url || this.formData.avatar_url;
+        if (user.avatar_url && !String(user.avatar_url).toLowerCase().includes('characters/kuro')) {
+          this.formData.avatar_url = user.avatar_url;
+        }
       }
       try {
         const localInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
         if (localInfo.name && !this.formData.full_name_ar) this.formData.full_name_ar = localInfo.name;
-        if (localInfo.avatar && !this.formData.avatar_url) this.formData.avatar_url = localInfo.avatar;
+        if (localInfo.avatar && !this.formData.avatar_url && !String(localInfo.avatar).toLowerCase().includes('characters/kuro')) {
+          this.formData.avatar_url = localInfo.avatar;
+        }
       } catch (e) {}
 
       // Clean lingering avatar modals or overlays from previous interactions
@@ -64,9 +68,11 @@
             <!-- Wizard Top Branding Emblem -->
             <header class="wizard-header">
               <div class="wizard-brand-badge">
-                <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" width="36" height="36" />
+                <div style="width:36px;height:36px;border-radius:10px;background:rgba(125,30,48,0.1);border:1px solid rgba(125,30,48,0.18);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <i data-lucide="graduation-cap" style="width:20px;height:20px;color:#7D1E30;"></i>
+                </div>
                 <div class="wizard-brand-meta">
-                  <span class="wizard-brand-title">Kuro Fangs</span>
+                  <span class="wizard-brand-title">${isAr ? 'بوابة طب الأسنان' : 'Dentistry Portal'}</span>
                   <span class="wizard-brand-tag">${isAr ? 'كلية طب وجراحة الفم والأسنان — السنة الثالثة' : 'Faculty of Dentistry — Year 3'}</span>
                 </div>
               </div>
@@ -119,6 +125,7 @@
 
     renderStepContent(isAr) {
       if (this.step === 1) {
+        const hasValidAvatar = this.formData.avatar_url && !String(this.formData.avatar_url).toLowerCase().includes('characters/kuro');
         return `
           <div class="wizard-step-pane animated fadeIn">
             <div class="wizard-step-header">
@@ -128,17 +135,20 @@
 
             <!-- Avatar Pick Banner -->
             <div class="wizard-avatar-section">
-              <div class="wizard-avatar-preview-wrap">
-                <img id="wizard-avatar-img" src="${this.formData.avatar_url}" alt="Student Avatar" onerror="this.src='assets/characters/kuro/Kuro-Idle.png'" />
+              <div class="wizard-avatar-preview-wrap" style="display:flex;align-items:center;justify-content:center;background:rgba(125,30,48,0.08);">
+                ${hasValidAvatar
+                  ? `<img id="wizard-avatar-img" src="${this.formData.avatar_url}" alt="Student Avatar" />`
+                  : `<i data-lucide="user" style="width:32px;height:32px;color:#7D1E30;"></i>`
+                }
                 <button type="button" class="wizard-avatar-edit-badge" id="btn-trigger-avatar-modal" title="${isAr ? 'تغيير الصورة' : 'Change Avatar'}">
                   <i data-lucide="camera"></i>
                 </button>
               </div>
               <div class="wizard-avatar-info">
                 <strong class="avatar-title-text">${isAr ? 'الصورة الشخصية' : 'Profile Picture'}</strong>
-                <span class="avatar-desc-text">${isAr ? 'انقر على الكاميرا لاختيار شخصية كورو أو رفع صورتك' : 'Click the camera to pick a Kuro mascot or upload'}</span>
+                <span class="avatar-desc-text">${isAr ? 'انقر على الكاميرا لرفع صورتك الشخصية (اختياري)' : 'Click the camera to upload your profile picture (optional)'}</span>
                 <button type="button" class="wizard-avatar-picker-link" id="btn-trigger-avatar-modal-link">
-                  <i data-lucide="sparkles"></i>
+                  <i data-lucide="camera"></i>
                   <span>${isAr ? 'تغيير الصورة الشخصية' : 'Change Avatar'}</span>
                 </button>
               </div>
@@ -319,9 +329,12 @@
               </div>
               <div class="review-card-body">
                 <div class="review-avatar-row">
-                  <img src="${this.formData.avatar_url}" alt="Avatar" class="review-avatar-img" onerror="this.src='assets/characters/kuro/Kuro-Idle.png'" />
+                  ${(this.formData.avatar_url && !String(this.formData.avatar_url).toLowerCase().includes('characters/kuro'))
+                    ? `<img src="${this.formData.avatar_url}" alt="Avatar" class="review-avatar-img" />`
+                    : `<div class="review-avatar-img" style="display:inline-flex;align-items:center;justify-content:center;background:#7D1E30;color:#FFF;font-weight:800;font-size:1.1rem;border-radius:50%;">${(this.formData.full_name_ar || 'D').charAt(0).toUpperCase()}</div>`
+                  }
                   <div>
-                    <strong class="review-user-name">${this.formData.full_name_ar || 'طالب كورو'}</strong>
+                    <strong class="review-user-name">${this.formData.full_name_ar || (isAr ? 'طالب طب الأسنان' : 'Dental Student')}</strong>
                     <span class="review-user-email">${this.formData.email}</span>
                   </div>
                 </div>
@@ -387,8 +400,8 @@
               </button>
 
               <button type="button" class="wizard-btn-primary submit-final" id="btn-step3-submit">
-                <i data-lucide="rocket"></i>
-                <span>${isAr ? 'إكمال التسجيل والبدء 🚀' : 'Complete Registration 🚀'}</span>
+                <i data-lucide="check-circle-2"></i>
+                <span>${isAr ? 'إكمال التسجيل والبدء' : 'Complete Registration'}</span>
               </button>
             </div>
           </div>
@@ -398,12 +411,12 @@
       if (this.step === 4) {
         return `
           <div class="wizard-step-pane animated fadeIn text-center">
-            <div class="saving-mascot-wrap">
-              <img src="assets/characters/kuro/Kuro-Smart.png" alt="Kuro Saving" class="saving-mascot-img pulse-anim" />
+            <div class="saving-mascot-wrap" style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:50%;background:rgba(125,30,48,0.08);border:1px solid rgba(125,30,48,0.18);margin:0 auto 16px;">
+              <i data-lucide="graduation-cap" style="width:36px;height:36px;color:#7D1E30;"></i>
             </div>
 
             <h3 class="saving-title">${isAr ? 'جاري إعداد حسابك الطلابي...' : 'Creating Student Account...'}</h3>
-            <p class="saving-sub">${isAr ? 'يرجى الانتظار لححظات بينما نقوم بمزامنة بياناتك الأكاديمية' : 'Please wait while we sync your academic record'}</p>
+            <p class="saving-sub">${isAr ? 'يرجى الانتظار للحظات بينما نقوم بمزامنة بياناتك الأكاديمية' : 'Please wait while we sync your academic record'}</p>
 
             <!-- Progress Bar -->
             <div class="wizard-progress-bar-wrap">
@@ -432,15 +445,15 @@
       if (this.step === 5) {
         return `
           <div class="wizard-step-pane animated fadeIn text-center">
-            <div class="success-mascot-wrap">
-              <img src="assets/characters/kuro/kuro-welcome-sparks.png" alt="Success Kuro" class="success-mascot-img float-anim" onerror="this.src='assets/characters/kuro/Kuro-Excited.png'" />
+            <div class="success-mascot-wrap" style="display:inline-flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:50%;background:rgba(21,128,61,0.1);border:1px solid rgba(21,128,61,0.22);margin:0 auto 16px;">
+              <i data-lucide="check-circle-2" style="width:40px;height:40px;color:#15803D;"></i>
             </div>
 
-            <h2 class="success-title">${isAr ? 'تم إنشاء ملفك الطلابي بنجاح! 🎉' : 'Student Profile Created Successfully! 🎉'}</h2>
+            <h2 class="success-title">${isAr ? 'تم إنشاء ملفك الطلابي بنجاح!' : 'Student Profile Created Successfully!'}</h2>
             <p class="success-sub">
               ${isAr 
-                ? `مرحباً بك يا <strong>${this.formData.full_name_ar}</strong> في كورو فانغز! تم إعداد جدولك وشيتاتك للمجموعة <strong>${this.formData.practical_group_id}</strong> بنجاح.` 
-                : `Welcome <strong>${this.formData.full_name_ar}</strong> to Kuro Fangs! Your schedule and sheets for Group <strong>${this.formData.practical_group_id}</strong> are ready.`}
+                ? `مرحباً بك يا <strong>${this.formData.full_name_ar}</strong> في بوابة طب الأسنان! تم إعداد جدولك وشيتاتك للمجموعة <strong>${this.formData.practical_group_id}</strong> بنجاح.` 
+                : `Welcome <strong>${this.formData.full_name_ar}</strong> to the Dentistry Portal! Your schedule and sheets for Group <strong>${this.formData.practical_group_id}</strong> are ready.`}
             </p>
 
             <div class="success-badges-row">
@@ -451,7 +464,7 @@
 
             <div class="wizard-actions-row center">
               <button type="button" class="wizard-btn-primary success-launch-btn" id="btn-success-launch">
-                <span>${isAr ? 'الانتقال إلى المنصة الرئيسية 🚀' : 'Launch Kuro Fangs 🚀'}</span>
+                <span>${isAr ? 'الانتقال إلى المنصة الرئيسية' : 'Enter Dentistry Portal'}</span>
                 <i data-lucide="${isAr ? 'arrow-left' : 'arrow-right'}"></i>
               </button>
             </div>

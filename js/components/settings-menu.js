@@ -207,7 +207,7 @@
             <a href="#/settings?tab=about" class="settings-menu-item set-nav-link" id="set-row-about">
               <div class="set-item-left">
                 <i data-lucide="info" class="set-item-icon"></i>
-                <span class="set-item-label">${isAr ? 'حول طالب كورو' : 'About Kuro Student'}</span>
+                <span class="set-item-label">${isAr ? 'حول بوابة طب الأسنان' : 'About Dentistry Portal'}</span>
               </div>
               <div class="set-item-right">
                 <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="set-chevron"></i>
@@ -352,7 +352,7 @@
             <a href="#/settings?tab=about" class="settings-menu-item set-nav-link" id="set-row-about-mob">
               <div class="set-item-left">
                 <i data-lucide="info" class="set-item-icon"></i>
-                <span class="set-item-label">${isAr ? 'حول طالب كورو' : 'About Kuro Student'}</span>
+                <span class="set-item-label">${isAr ? 'حول بوابة طب الأسنان' : 'About Dentistry Portal'}</span>
               </div>
               <div class="set-item-right">
                 <i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" class="set-chevron"></i>

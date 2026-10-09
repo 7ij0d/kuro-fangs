@@ -35,7 +35,7 @@ class I18nManager {
 
     this.translations = {
       en: {
-        brandName: 'Kuro Fangs',
+        brandName: 'Dentistry Portal • Year 3',
         brandSub: 'Faculty of Dentistry — Year 3',
         searchPlaceholder: 'Search subjects, lectures, or topics...',
         navSubjects: 'Subjects (12)',
@@ -172,7 +172,7 @@ class I18nManager {
         pointsEarned: 'Downloaded successfully! (+10 pts earned)'
       },
       ar: {
-        brandName: 'Kuro Fangs',
+        brandName: 'بوابة طب الأسنان • السنة الثالثة',
         brandSub: 'كلية طب وجراحة الفم والأسنان — السنة الثالثة',
         searchPlaceholder: 'ابحث عن أي مادة أو شيت أو موضوع...',
         navSubjects: 'المواد (12)',

@@ -30,13 +30,13 @@
             <section class="kuro-login-left-pane">
               <!-- Top Branding Emblem -->
               <div class="login-brand-header">
-                <div class="login-brand-emblem-wrap">
-                  <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" width="38" height="38" />
+                <div class="login-brand-emblem-wrap" style="display:inline-flex;align-items:center;justify-content:center;background:rgba(125,30,48,0.1);border:1px solid rgba(125,30,48,0.2);">
+                  <i data-lucide="graduation-cap" style="width:22px;height:22px;color:#7D1E30;"></i>
                 </div>
                 <div class="login-brand-meta">
-                  <span class="login-brand-title">Kuro Fangs</span>
+                  <span class="login-brand-title">${isAr ? 'بوابة طب الأسنان • السنة الثالثة' : 'Dentistry Portal • Year 3'}</span>
                   <span class="login-brand-tagline">
-                    ${isAr ? 'رفيقك الأكاديمي الشامل لطب وجراحة الفم والأسنان' : 'Your Complete Dental Study Companion'}
+                    ${isAr ? 'المنصة الأكاديمية الرسمية لطب وجراحة الفم والأسنان' : 'Official Academic Dental Study Portal'}
                   </span>
                 </div>
               </div>
@@ -104,7 +104,7 @@
               <div class="login-desk-illustration-wrap">
                 <img
                   src="assets/hero/kuro-study-desk.png"
-                  alt="Kuro Studying"
+                  alt="Study Desk"
                   class="login-desk-img"
                   loading="eager"
                   onerror="this.src='assets/hero/kuro-study-hero.png'"
@@ -123,19 +123,14 @@
             <section class="kuro-login-right-pane">
               <div class="kuro-login-card">
                 
-                <!-- Mascot Head with Radiant Sparks -->
-                <div class="login-card-mascot-wrap">
-                  <img
-                    src="assets/characters/kuro/kuro-welcome-sparks.png"
-                    alt="Kuro Welcome"
-                    class="login-card-mascot-img"
-                    onerror="this.src='assets/characters/kuro/Kuro-Excited.png'"
-                  />
+                <!-- Formal Academic Emblem -->
+                <div class="login-card-mascot-wrap" style="display:flex;align-items:center;justify-content:center;width:68px;height:68px;margin:0 auto 14px;border-radius:20px;background:rgba(125,30,48,0.08);border:1px solid rgba(125,30,48,0.18);">
+                  <i data-lucide="graduation-cap" style="width:34px;height:34px;color:#7D1E30;"></i>
                 </div>
 
                 <!-- Card Heading -->
                 <h2 class="login-card-title">
-                  ${isAr ? 'مرحباً بك في كورو فانغز' : 'Welcome to Kuro Fangs'}
+                  ${isAr ? 'مرحباً بك في بوابة طب الأسنان' : 'Welcome to the Dentistry Portal'}
                 </h2>
                 <p class="login-card-subtitle">
                   ${isAr ? 'سجّل دخولك أو أنشئ حسابك لحفظ تقدّمك ومزامنة شيتاتك.' : 'Sign in or create an account to sync your study progress.'}

@@ -15700,3 +15700,20 @@ html {
 .sheet-card:active {
   transform: scale(0.97) translateZ(0) !important;
 }
+
+/* ==========================================================================
+   FORMAL ACADEMIC PORTAL OVERRIDES (v23.0)
+   Suppress small cartoon mascot thumbnails while keeping the main Hero Banner
+   ========================================================================== */
+img[src*="assets/characters/kuro"] {
+  display: none !important;
+}
+
+.header-brand-avatar,
+.sidebar-brand-emblem,
+.keds-mascot-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+

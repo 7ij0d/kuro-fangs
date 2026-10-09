@@ -35,16 +35,16 @@
   </script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=22.0" />
-  <link rel="stylesheet" href="css/base.css?v=22.0" />
-  <link rel="stylesheet" href="css/layout.css?v=22.0" />
-  <link rel="stylesheet" href="css/components.css?v=22.0" />
+  <link rel="stylesheet" href="css/tokens.css?v=23.0" />
+  <link rel="stylesheet" href="css/base.css?v=23.0" />
+  <link rel="stylesheet" href="css/layout.css?v=23.0" />
+  <link rel="stylesheet" href="css/components.css?v=23.0" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=22.0" />
-  <link rel="stylesheet" href="css/auth.css?v=22.0" />
-  <link rel="stylesheet" href="css/study-rooms.css?v=22.0" />
-  <link rel="stylesheet" href="css/tablet-responsive.css?v=22.0" />
-  <link rel="stylesheet" href="css/mobile-responsive.css?v=22.0" />
+  <link rel="stylesheet" href="css/polish.css?v=23.0" />
+  <link rel="stylesheet" href="css/auth.css?v=23.0" />
+  <link rel="stylesheet" href="css/study-rooms.css?v=23.0" />
+  <link rel="stylesheet" href="css/tablet-responsive.css?v=23.0" />
+  <link rel="stylesheet" href="css/mobile-responsive.css?v=23.0" />
 </head>
 <body id="app-body">
   <!-- ==========================================================================
@@ -70,11 +70,11 @@
       <!-- Sidebar Brand Header -->
       <div class="sidebar-header">
         <a href="#/" class="sidebar-brand">
-          <div class="sidebar-brand-emblem">
-            <img id="sidebar-brand-avatar-img" class="sidebar-brand-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" width="34" height="34" loading="lazy" />
+          <div class="sidebar-brand-emblem" style="display:inline-flex;align-items:center;justify-content:center;background:rgba(125,30,48,0.08);border:1px solid rgba(125,30,48,0.18);border-radius:10px;width:36px;height:36px;flex-shrink:0;">
+            <i data-lucide="graduation-cap" style="width:20px;height:20px;color:#7D1E30;"></i>
           </div>
           <div class="sidebar-brand-meta">
-            <span class="sidebar-brand-title">Kuro Fangs</span>
+            <span class="sidebar-brand-title" id="sidebar-brand-title">Dentistry Portal</span>
             <span class="sidebar-brand-sub" id="sidebar-brand-sub">Faculty of Dentistry — Year 3</span>
           </div>
         </a>
@@ -136,16 +136,16 @@
           <span class="sidebar-menu-text" id="side-nav-exams-schedule">Official Exam Schedules</span>
         </a>
 
-        <!-- MORE Section -->
-        <div class="sidebar-section-title" id="side-sec-more">MORE</div>
+        <!-- MORE Section (Hidden in Formal Academic Mode) -->
+        <div class="sidebar-section-title" id="side-sec-more" style="display:none !important;">MORE</div>
 
-        <a href="#/rewards" class="sidebar-menu-item" data-route="/rewards">
+        <a href="#/rewards" class="sidebar-menu-item" data-route="/rewards" style="display:none !important;">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="sparkles"></i></span>
           <span class="sidebar-menu-text" id="side-nav-rewards">Fox Mascot Hub</span>
           <span class="sidebar-soon-badge" id="side-soon-rewards">Soon</span>
         </a>
 
-        <a href="#/games" class="nav-item sidebar-menu-item" data-route="/games">
+        <a href="#/games" class="nav-item sidebar-menu-item" data-route="/games" style="display:none !important;">
           <span class="sidebar-menu-icon-wrap"><i data-lucide="gamepad-2"></i></span>
           <span class="sidebar-menu-text" id="side-nav-games">Arcade & Games</span>
           <span class="sidebar-soon-badge" id="side-soon-games">Soon</span>
@@ -173,11 +173,11 @@
           </button>
         </div>
         <a href="#/profile" class="sidebar-user-card" id="sidebar-user-card-link" title="الملف الشخصي وإعدادات الحساب | Student Profile">
-          <div class="sidebar-user-avatar">
-            <img id="sidebar-user-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" class="mascot-avatar-img sidebar-mascot" width="38" height="38" loading="lazy" />
+          <div class="sidebar-user-avatar" id="sidebar-user-avatar-box" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#7D1E30;color:#FFF;font-weight:700;font-size:14px;flex-shrink:0;">
+            <i data-lucide="user" style="width:18px;height:18px;color:#FFF;"></i>
           </div>
           <div class="sidebar-user-meta">
-            <span class="sidebar-user-name">Kuro Student</span>
+            <span class="sidebar-user-name">Dental Student</span>
             <span class="sidebar-user-sub" id="sidebar-user-sub">Year 3 — Faculty of Dentistry</span>
           </div>
         </a>
@@ -194,12 +194,12 @@
             <i data-lucide="menu"></i>
           </button>
 
-          <!-- Kuro Identity Brand -->
+          <!-- Formal Academic Identity Brand -->
           <a href="#/" class="header-brand-identity" id="header-brand-identity">
-            <div class="header-brand-avatar">
-              <img id="header-brand-avatar-img" src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro Mascot" width="34" height="34" loading="lazy" />
+            <div class="header-brand-avatar" style="display:inline-flex;align-items:center;justify-content:center;background:rgba(125,30,48,0.08);border:1px solid rgba(125,30,48,0.18);border-radius:9px;">
+              <i data-lucide="graduation-cap" style="width:18px;height:18px;color:#7D1E30;"></i>
             </div>
-            <span class="header-brand-name" id="header-brand-name">Kuro Student</span>
+            <span class="header-brand-name" id="header-brand-name">Dentistry Portal • Year 3</span>
           </a>
         </div>
 
@@ -250,11 +250,11 @@
                 <i data-lucide="user"></i>
                 <span id="more-item-profile">Student Profile</span>
               </a>
-              <a href="#/rewards" class="header-dropdown-item">
+              <a href="#/rewards" class="header-dropdown-item" style="display:none !important;">
                 <i data-lucide="sparkles"></i>
                 <span id="nav-item-rewards">Mascot Hub</span>
               </a>
-              <a href="#/games" class="header-dropdown-item">
+              <a href="#/games" class="header-dropdown-item" style="display:none !important;">
                 <i data-lucide="gamepad-2"></i>
                 <span id="nav-item-games">Games</span>
               </a>
@@ -355,7 +355,9 @@
     <div class="mms-handle-bar"><span></span></div>
     <div class="mms-header">
       <div class="mms-header-title-wrap">
-        <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" width="28" height="28" class="mms-brand-img" />
+        <span class="mms-brand-icon" style="width:28px;height:28px;border-radius:8px;background:rgba(125,30,48,0.1);border:1px solid rgba(125,30,48,0.18);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="graduation-cap" style="width:16px;height:16px;color:#7D1E30;"></i>
+        </span>
         <h2 id="mms-sheet-title" class="mms-title">More Destinations</h2>
       </div>
       <button type="button" id="mobile-more-close-btn" class="mms-close-btn" aria-label="Close More menu">
@@ -410,12 +412,12 @@
           <span class="mms-item-text" id="mms-item-profile">Student Profile</span>
           <i data-lucide="chevron-right" class="mms-item-arrow"></i>
         </a>
-        <a href="#/rewards" class="mms-list-item" data-route="/rewards">
+        <a href="#/rewards" class="mms-list-item" data-route="/rewards" style="display:none !important;">
           <span class="mms-item-icon"><i data-lucide="sparkles"></i></span>
           <span class="mms-item-text" id="mms-item-rewards">Fox Mascot Hub</span>
           <i data-lucide="chevron-right" class="mms-item-arrow"></i>
         </a>
-        <a href="#/games" class="mms-list-item" data-route="/games">
+        <a href="#/games" class="mms-list-item" data-route="/games" style="display:none !important;">
           <span class="mms-item-icon"><i data-lucide="gamepad-2"></i></span>
           <span class="mms-item-text" id="mms-item-games">Arcade & Games</span>
           <i data-lucide="chevron-right" class="mms-item-arrow"></i>
@@ -451,43 +453,43 @@
   </aside>
 
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=22.0"></script>
-  <script src="js/audio-fx.js?v=22.0"></script>
-  <script src="js/character-theme.js?v=22.0"></script>
-  <script src="js/store.js?v=22.0"></script>
-  <script src="js/components/toast.js?v=22.0"></script>
-  <script src="js/components/auth-modal.js?v=22.0"></script>
-  <script src="js/components/avatar-modal.js?v=22.0"></script>
-  <script src="js/supabase.js?v=22.0"></script>
-  <script src="js/auth.js?v=22.0"></script>
-  <script src="js/data.js?v=22.0"></script>
-  <script src="js/data-clinical.js?v=22.0"></script>
-  <script src="js/components/subject-modal.js?v=22.0"></script>
-  <script src="js/components/sheet-edit-modal.js?v=22.0"></script>
-  <script src="js/components/notifications-center.js?v=22.0"></script>
-  <script src="js/components/sheet-copy-engine.js?v=22.0"></script>
-  <script src="js/components/settings-menu.js?v=22.0"></script>
-  <script src="js/router.js?v=22.0"></script>
-  <script src="js/pages/login.js?v=22.0"></script>
-  <script src="js/pages/register-setup.js?v=22.0"></script>
-  <script src="js/pages/home.js?v=22.0"></script>
-  <script src="js/pages/sheets.js?v=22.0"></script>
-  <script src="js/components/pdf-source-matcher.js?v=22.0"></script>
-  <script src="js/pages/sheet-detail.js?v=22.0"></script>
-  <script src="js/pages/recordings.js?v=22.0"></script>
-  <script src="js/pages/exams.js?v=22.0"></script>
-  <script src="js/pages/quizzes.js?v=22.0"></script>
-  <script src="js/pages/questions.js?v=22.0"></script>
-  <script src="js/pages/flashcards.js?v=22.0"></script>
-  <script src="js/pages/study-rooms.js?v=22.0"></script>
-  <script src="js/pages/previous-years.js?v=22.0"></script>
-  <script src="js/pages/rewards.js?v=22.0"></script>
-  <script src="js/pages/games.js?v=22.0"></script>
-  <script src="js/git-sync.js?v=22.0"></script>
-  <script src="js/pages/admin.js?v=22.0"></script>
-  <script src="js/pages/profile.js?v=22.0"></script>
-  <script src="js/pages/settings.js?v=22.0"></script>
-  <script src="js/pages/secondary.js?v=22.0"></script>
-  <script src="js/app.js?v=22.0"></script>
+  <script src="js/i18n.js?v=23.0"></script>
+  <script src="js/audio-fx.js?v=23.0"></script>
+  <script src="js/character-theme.js?v=23.0"></script>
+  <script src="js/store.js?v=23.0"></script>
+  <script src="js/components/toast.js?v=23.0"></script>
+  <script src="js/components/auth-modal.js?v=23.0"></script>
+  <script src="js/components/avatar-modal.js?v=23.0"></script>
+  <script src="js/supabase.js?v=23.0"></script>
+  <script src="js/auth.js?v=23.0"></script>
+  <script src="js/data.js?v=23.0"></script>
+  <script src="js/data-clinical.js?v=23.0"></script>
+  <script src="js/components/subject-modal.js?v=23.0"></script>
+  <script src="js/components/sheet-edit-modal.js?v=23.0"></script>
+  <script src="js/components/notifications-center.js?v=23.0"></script>
+  <script src="js/components/sheet-copy-engine.js?v=23.0"></script>
+  <script src="js/components/settings-menu.js?v=23.0"></script>
+  <script src="js/router.js?v=23.0"></script>
+  <script src="js/pages/login.js?v=23.0"></script>
+  <script src="js/pages/register-setup.js?v=23.0"></script>
+  <script src="js/pages/home.js?v=23.0"></script>
+  <script src="js/pages/sheets.js?v=23.0"></script>
+  <script src="js/components/pdf-source-matcher.js?v=23.0"></script>
+  <script src="js/pages/sheet-detail.js?v=23.0"></script>
+  <script src="js/pages/recordings.js?v=23.0"></script>
+  <script src="js/pages/exams.js?v=23.0"></script>
+  <script src="js/pages/quizzes.js?v=23.0"></script>
+  <script src="js/pages/questions.js?v=23.0"></script>
+  <script src="js/pages/flashcards.js?v=23.0"></script>
+  <script src="js/pages/study-rooms.js?v=23.0"></script>
+  <script src="js/pages/previous-years.js?v=23.0"></script>
+  <script src="js/pages/rewards.js?v=23.0"></script>
+  <script src="js/pages/games.js?v=23.0"></script>
+  <script src="js/git-sync.js?v=23.0"></script>
+  <script src="js/pages/admin.js?v=23.0"></script>
+  <script src="js/pages/profile.js?v=23.0"></script>
+  <script src="js/pages/settings.js?v=23.0"></script>
+  <script src="js/pages/secondary.js?v=23.0"></script>
+  <script src="js/app.js?v=23.0"></script>
 </body>
 </html>

@@ -76,14 +76,16 @@ window.ProfilePage = {
     const isGuest = window.AUTH ? window.AUTH.isGuest() : false;
     this._pendingAvatar = null;
 
-    const avatarSrc = authUser?.avatar_url || info.avatar || null;
-    const name = authUser?.full_name || info.name || (isAr ? 'طالب أسنان' : 'Dental Student');
+    const rawAvatarSrc = authUser?.avatar_url || info.avatar || null;
+    const avatarSrc = (
+      rawAvatarSrc &&
+      !String(rawAvatarSrc).toLowerCase().includes('characters/kuro') &&
+      !String(rawAvatarSrc).toLowerCase().includes('kuro-idle')
+    ) ? rawAvatarSrc : null;
+    const name = authUser?.full_name || info.name || (isAr ? 'طالب طب الأسنان' : 'Dental Student');
     const email = authUser?.email || info.email || '';
     const points = window.STORE ? window.STORE.getPoints() : (info.points || 0);
-
-    // Mascot idle for display
-    const mascotSrc = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('idle'))
-      || 'assets/characters/kuro/Kuro-Idle.png';
+    const initialChar = (name || 'D').charAt(0).toUpperCase();
 
     container.innerHTML = `
       <!-- Page Title -->
@@ -109,10 +111,8 @@ window.ProfilePage = {
         <div class="profile-avatar-card kf-panel">
           <div class="profile-avatar-circle-wrap">
             <div class="profile-avatar-circle" id="profile-avatar-ring" onclick="document.getElementById('profile-avatar-file-input').click()">
-              ${avatarSrc
-                ? `<img id="profile-avatar-img" src="${avatarSrc}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
-                : `<img id="profile-avatar-img" src="${mascotSrc}" alt="mascot" style="width:80%;height:80%;object-fit:contain;" />`
-              }
+              <div id="profile-avatar-placeholder" style="${avatarSrc ? 'display:none;' : 'display:flex;'}width:100%;height:100%;align-items:center;justify-content:center;background:#7D1E30;color:#FFF;font-size:2.1rem;font-weight:800;border-radius:50%;">${initialChar}</div>
+              <img id="profile-avatar-img" src="${avatarSrc || ''}" alt="${name}" style="${avatarSrc ? 'display:block;' : 'display:none;'}width:100%;height:100%;object-fit:cover;border-radius:50%;" />
               <div class="profile-avatar-overlay">
                 <i data-lucide="camera" style="width:22px;height:22px;"></i>
                 <span>${isAr ? 'تغيير' : 'Change'}</span>
@@ -260,9 +260,9 @@ window.ProfilePage = {
     document.getElementById('profile-remove-avatar-btn')?.addEventListener('click', () => {
       this._pendingAvatar = 'remove';
       const img = document.getElementById('profile-avatar-img');
-      const mascotSrc = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('idle'))
-        || 'assets/characters/kuro/Kuro-Idle.png';
-      if (img) { img.src = mascotSrc; img.style.objectFit = 'contain'; img.style.width = '80%'; img.style.height = '80%'; }
+      const placeholder = document.getElementById('profile-avatar-placeholder');
+      if (img) { img.src = ''; img.style.display = 'none'; }
+      if (placeholder) { placeholder.style.display = 'flex'; }
       document.getElementById('profile-remove-avatar-btn').style.display = 'none';
     });
 
@@ -317,8 +317,11 @@ window.ProfilePage = {
     reader.onload = (ev) => {
       this._pendingAvatar = ev.target.result;
       const img = document.getElementById('profile-avatar-img');
+      const placeholder = document.getElementById('profile-avatar-placeholder');
+      if (placeholder) placeholder.style.display = 'none';
       if (img) {
         img.src = this._pendingAvatar;
+        img.style.display = 'block';
         img.style.objectFit = 'cover';
         img.style.width = '100%';
         img.style.height = '100%';

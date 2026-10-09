@@ -218,26 +218,11 @@
                 </div>
                 <div class="set-card-meta">
                   <h3 class="set-card-title">${isAr ? 'نمط الألوان الأكاديمي' : 'Color Mode'}</h3>
-                  <p class="set-card-subtitle">${isAr ? 'نظام ألوان طالب كورو الرسمي (عاجي دافئ وبورغندي ملكي).' : 'Kuro Student official warm ivory and burgundy palette.'}</p>
+                  <p class="set-card-subtitle">${isAr ? 'نظام الألوان الأكاديمي الرسمي لبوابة طب الأسنان (عاجي دافئ وبورغندي ملكي).' : 'Official Dentistry Portal warm ivory and burgundy academic palette.'}</p>
                 </div>
               </div>
               <div class="set-card-action">
                 <span class="settings-badge-pill">${isAr ? 'معتمد رسمياً' : 'Official Palette'}</span>
-              </div>
-            </div>
-
-            <div class="settings-card">
-              <div class="set-card-left">
-                <div class="set-card-icon-box">
-                  <i data-lucide="smile"></i>
-                </div>
-                <div class="set-card-meta">
-                  <h3 class="set-card-title">${isAr ? 'شخصية التميمة (كورو)' : 'Mascot Companion'}</h3>
-                  <p class="set-card-subtitle">${isAr ? 'تميمة قط كورو التفاعلية المرافقة لك في رحلتك الدراسية.' : 'Interactive Kuro cat mascot companion.'}</p>
-                </div>
-              </div>
-              <div class="set-card-action">
-                <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" style="width: 38px; height: 38px; object-fit: contain;" />
               </div>
             </div>
           `;
@@ -417,12 +402,12 @@
                   <i data-lucide="shield-check"></i>
                 </div>
                 <div class="set-card-meta">
-                  <h3 class="set-card-title">Kuro Student (طالب كورو)</h3>
-                  <p class="set-card-subtitle">${isAr ? 'الإصدار 10.9 — المنصة الطلابية المتكاملة لطب وجراحة الفم والأسنان.' : 'Version 10.9 — The Comprehensive Dental Student Platform.'}</p>
+                  <h3 class="set-card-title">${isAr ? 'بوابة طب الأسنان • السنة الثالثة' : 'Dentistry Portal • Year 3'}</h3>
+                  <p class="set-card-subtitle">${isAr ? 'المنصة الأكاديمية الرسمية المتكاملة لطب وجراحة الفم والأسنان.' : 'The Official Comprehensive Dental Academic Platform.'}</p>
                 </div>
               </div>
               <div class="set-card-action">
-                <span class="settings-badge-pill">v10.9</span>
+                <span class="settings-badge-pill">${isAr ? 'معتمد رسمياً' : 'Official'}</span>
               </div>
             </div>
 

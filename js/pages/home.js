@@ -81,7 +81,7 @@ const HomePage = {
     const now = new Date();
     const h = now.getHours();
 
-    let studentName = isAr ? 'طالب كورو' : 'Kuro Student';
+    let studentName = isAr ? 'طالب طب الأسنان' : 'Dental Student';
     try {
       const authUser = window.AUTH && typeof window.AUTH.getUser === 'function' ? window.AUTH.getUser() : null;
       const rawAuthName = authUser && authUser.full_name ? String(authUser.full_name).trim() : '';
@@ -92,7 +92,7 @@ const HomePage = {
       } catch (e) {}
 
       const candidate = rawAuthName || storedName;
-      const genericPlaceholders = ['kuro student', 'طالب كورو', 'dental student', 'طالب أسنان', 'guest student', 'طالب زائر'];
+      const genericPlaceholders = ['kuro student', 'طالب كورو', 'dental student', 'طالب أسنان', 'طالب طب الأسنان', 'guest student', 'طالب زائر'];
       if (candidate && !genericPlaceholders.includes(candidate.toLowerCase())) {
         studentName = candidate.split(/\s+/)[0];
       }
@@ -515,7 +515,7 @@ const HomePage = {
         return `
           <div class="kuro-empty-day-state">
             <div class="keds-mascot-wrap">
-              <img src="assets/characters/kuro/Kuro-Idle.png" alt="Kuro" width="46" height="46" class="keds-mascot-img" loading="lazy" />
+              <i data-lucide="calendar-check" style="width:24px;height:24px;color:#7D1E30;"></i>
             </div>
             <h4 class="keds-title">${isAr ? (isToday ? 'لا توجد محاضرات اليوم' : 'لا توجد محاضرات غداً') : (isToday ? 'No classes today' : 'No classes tomorrow')}</h4>
             <p class="keds-desc">${isAr ? 'استغل هذا الوقت للدراسة أو المراجعة أو انضم لغرفة دراسة!' : 'Take this time to study, review or join a study room!'}</p>

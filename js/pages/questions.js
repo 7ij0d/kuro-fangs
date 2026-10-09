@@ -456,16 +456,15 @@ const QuestionsPage = {
             </div>
           </div>
 
-          <!-- SECONDARY STAGE: LARGE KURO COMPANION & EXPLANATION WING -->
-          <aside class="dt-kuro-companion-stage" id="dt-kuro-companion-stage" aria-label="Kuro Study Companion">
-            <button type="button" class="dt-kuro-mascot-trigger" id="dt-kuro-mascot-trigger" title="${isAr ? 'انقر على كورو لإظهار أو إخفاء الشرح السريري' : 'Click Kuro to toggle faculty clinical explanation'}" aria-expanded="false">
-              <div class="dt-kuro-avatar-frame">
-                <img id="dt-kuro-mascot-img" class="dt-kuro-mascot-img" src="assets/characters/kuro/Kuro-Thinking.png" alt="Kuro Character Companion" />
-                <span class="dt-kuro-pulse-ring"></span>
+          <!-- SECONDARY STAGE: CLINICAL EXPLANATION WING -->
+          <aside class="dt-kuro-companion-stage" id="dt-kuro-companion-stage" aria-label="Clinical Explanation">
+            <button type="button" class="dt-kuro-mascot-trigger" id="dt-kuro-mascot-trigger" title="${isAr ? 'انقر لإظهار أو إخفاء الشرح السريري' : 'Click to toggle faculty clinical explanation'}" aria-expanded="false">
+              <div class="dt-kuro-avatar-frame" style="display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:16px;background:rgba(125,30,48,0.08);border:1px solid rgba(125,30,48,0.18);">
+                <i data-lucide="book-open-check" style="width:26px;height:26px;color:#7D1E30;"></i>
               </div>
               <div class="dt-kuro-bubble-callout" id="dt-kuro-bubble-callout">
                 <span class="dt-kuro-bubble-icon">💡</span>
-                <span class="dt-kuro-bubble-text" id="dt-kuro-bubble-text">${isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation'}</span>
+                <span class="dt-kuro-bubble-text" id="dt-kuro-bubble-text">${isAr ? 'انقر لعرض الشرح السريري' : 'Click for Clinical Explanation'}</span>
               </div>
             </button>
 
@@ -477,7 +476,7 @@ const QuestionsPage = {
                     <i data-lucide="book-open" style="width: 16px; height: 16px; color: var(--brand-accent);"></i>
                   </div>
                   <div>
-                    <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary);">${isAr ? 'شرح كورو والكلية' : 'Faculty Explanation'}</div>
+                    <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary);">${isAr ? 'الشرح السريري المعتمد' : 'Faculty Explanation'}</div>
                     <div id="dt-kuro-exp-ref-subtitle" style="font-size: 0.73rem; color: var(--brand-accent); font-weight: 700;"></div>
                   </div>
                 </div>
@@ -509,13 +508,13 @@ const QuestionsPage = {
       <!-- DENTISTOIRE-GRADE QUIZ COMPLETION MODAL -->
       <div id="dt-quiz-completion-modal" class="dt-quiz-overlay" style="display: none; z-index: 10500;">
         <div class="dt-quiz-card dt-completion-card" style="max-width: 480px; text-align: center; padding: 32px 28px;">
-          <!-- Celebratory Mascot Frame -->
-          <div class="dt-completion-mascot-box" style="margin: 0 auto 18px; width: 110px; height: 110px; position: relative;">
-            <img id="dt-completion-mascot-img" src="assets/characters/kuro/Kuro-Excited.png" alt="Kuro Celebrating" style="width: 100%; height: 100%; object-fit: contain;" />
+          <!-- Formal Completion Emblem -->
+          <div class="dt-completion-mascot-box" style="margin: 0 auto 18px; width: 76px; height: 76px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.24); display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="award" style="width: 38px; height: 38px; color: #10B981;"></i>
           </div>
 
           <h2 style="font-size: 1.35rem; font-weight: 850; color: var(--text-primary); margin: 0 0 6px;" id="dt-completion-title">
-            ${isAr ? '🎉 اكتمل الاختبار بنجاح!' : '🎉 Quiz Complete!'}
+            ${isAr ? 'اكتمل الاختبار بنجاح!' : 'Quiz Complete!'}
           </h2>
           <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0 0 24px; font-weight: 500;" id="dt-completion-subtitle">
             ${isAr ? 'عمل رائع ومتميز في مراجعة أسئلة طب الأسنان!' : 'Great work reviewing your clinical dental MCQs!'}
@@ -1710,9 +1709,6 @@ const QuestionsPage = {
     if (QuestionsPage.kuroExplanationOpen && expPane) {
       expPane.style.display = 'block';
       if (trigger) trigger.setAttribute('aria-expanded', 'true');
-      if (mascotImg) {
-        mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('reading')) || 'assets/characters/kuro/Kuro-Reading.png';
-      }
       if (bubbleText) bubbleText.textContent = isAr ? 'إغلاق الشرح السريري ✕' : 'Close Explanation ✕';
     } else {
       if (expPane) expPane.style.display = 'none';
@@ -1720,17 +1716,12 @@ const QuestionsPage = {
 
       if (existingAns) {
         if (existingAns.is_correct) {
-          if (mascotImg) mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('happy')) || 'assets/characters/kuro/Kuro-Happy.png';
-          if (bubbleText) bubbleText.textContent = isAr ? '🎉 إجابة صحيحة! انقر للشرح والصفحة' : '🎉 Correct! Click for explanation';
+          if (bubbleText) bubbleText.textContent = isAr ? 'إجابة صحيحة! انقر للشرح والصفحة' : 'Correct! Click for explanation';
         } else {
-          if (mascotImg) mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
-          if (bubbleText) bubbleText.textContent = isAr ? '💡 انقر على كورو لمراجعة الشرح والصفحة' : '💡 Click Kuro to review explanation';
+          if (bubbleText) bubbleText.textContent = isAr ? 'انقر لمراجعة الشرح السريري والصفحة' : 'Click to review explanation';
         }
       } else {
-        if (mascotImg) {
-          mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
-        }
-        if (bubbleText) bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
+        if (bubbleText) bubbleText.textContent = isAr ? 'انقر لعرض الشرح السريري' : 'Click for Explanation';
       }
     }
 
@@ -1857,26 +1848,21 @@ const QuestionsPage = {
           }
         });
 
-        // 4. Update Kuro Mascot reaction
-        if (mascotImg && !QuestionsPage.kuroExplanationOpen) {
+        // 4. Update Explanation Callout text
+        if (bubbleText && !QuestionsPage.kuroExplanationOpen) {
           clearTimeout(QuestionsPage._mascotResetTimer);
           if (isCorrect) {
-            mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('happy')) || 'assets/characters/kuro/Kuro-Happy.png';
-            if (bubbleText) bubbleText.textContent = isAr ? 'إجابة صحيحة! 🎉' : 'Correct! 🎉';
-            mascotImg.parentElement?.classList.remove('dt-mascot-happy-bounce');
-            void mascotImg.offsetWidth;
-            mascotImg.parentElement?.classList.add('dt-mascot-happy-bounce');
+            bubbleText.textContent = isAr ? 'إجابة صحيحة!' : 'Correct!';
             QuestionsPage._mascotResetTimer = setTimeout(() => {
               if (!QuestionsPage.kuroExplanationOpen && bubbleText) {
-                bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
+                bubbleText.textContent = isAr ? 'انقر لعرض الشرح السريري' : 'Click for Explanation';
               }
             }, 2800);
           } else {
-            mascotImg.src = (window.CharacterThemeSystem && window.CharacterThemeSystem.getAsset('thinking')) || 'assets/characters/kuro/Kuro-Thinking.png';
-            if (bubbleText) bubbleText.textContent = isAr ? 'مش صحيحة، حاول تفهم السبب.' : 'Not quite — try to understand why.';
+            bubbleText.textContent = isAr ? 'راجع الشرح السريري أدناه' : 'Review explanation below';
             QuestionsPage._mascotResetTimer = setTimeout(() => {
               if (!QuestionsPage.kuroExplanationOpen && bubbleText) {
-                bubbleText.textContent = isAr ? 'انقر على كورو للشرح السريري' : 'Click Kuro for Explanation';
+                bubbleText.textContent = isAr ? 'انقر لعرض الشرح السريري' : 'Click for Explanation';
               }
             }, 3200);
           }

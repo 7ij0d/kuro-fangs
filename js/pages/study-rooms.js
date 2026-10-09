@@ -2959,10 +2959,12 @@
       const authUser = window.AUTH && typeof window.AUTH.getUser === 'function' ? window.AUTH.getUser() : null;
       let stored = {};
       try { stored = JSON.parse(localStorage.getItem('kf_user_info') || '{}'); } catch (e) {}
+      const rawAvatar = authUser?.avatar_url || stored?.avatar_url || stored?.avatar || null;
+      const cleanAvatar = (rawAvatar && !String(rawAvatar).toLowerCase().includes('characters/kuro')) ? rawAvatar : null;
       return {
         id: authUser?.id || stored?.id || 'local-student-id',
-        name: authUser?.full_name_ar || authUser?.full_name || stored?.full_name_ar || stored?.name || 'طالب كورو',
-        avatar: authUser?.avatar_url || stored?.avatar_url || stored?.avatar || null
+        name: authUser?.full_name_ar || authUser?.full_name || stored?.full_name_ar || stored?.name || 'طالب طب الأسنان',
+        avatar: cleanAvatar
       };
     },
 
