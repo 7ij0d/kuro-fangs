@@ -133,38 +133,21 @@
 
             <!-- Form Inputs -->
             <div class="wizard-form-grid">
-              <!-- Full Name Arabic -->
-              <div class="wizard-field-group">
-                <label class="wizard-label" for="input-reg-name-ar">
-                  <span>${isAr ? 'الاسم الثلاثي (بالعربية)' : 'Full Name (Arabic)'}</span>
+              <!-- Full Name Field -->
+              <div class="wizard-field-group full-width">
+                <label class="wizard-label" for="input-reg-name">
+                  <span>${isAr ? 'الاسم الكامل' : 'Full Name'}</span>
                   <span class="wizard-req">*</span>
                 </label>
                 <div class="wizard-input-wrap">
                   <i data-lucide="user" class="wizard-input-icon"></i>
                   <input
                     type="text"
-                    id="input-reg-name-ar"
+                    id="input-reg-name"
                     class="wizard-input"
                     placeholder="${isAr ? 'مثال: طه عياد كابيلو' : 'e.g. Taha Cabello'}"
-                    value="${this.formData.full_name_ar}"
+                    value="${this.formData.full_name || this.formData.full_name_ar || ''}"
                     required
-                  />
-                </div>
-              </div>
-
-              <!-- Full Name English -->
-              <div class="wizard-field-group">
-                <label class="wizard-label" for="input-reg-name-en">
-                  <span>${isAr ? 'الاسم بالإنجليزية (اختياري)' : 'English Full Name (Optional)'}</span>
-                </label>
-                <div class="wizard-input-wrap">
-                  <i data-lucide="globe" class="wizard-input-icon"></i>
-                  <input
-                    type="text"
-                    id="input-reg-name-en"
-                    class="wizard-input"
-                    placeholder="e.g. Taha Cabello"
-                    value="${this.formData.full_name_en}"
                   />
                 </div>
               </div>
@@ -331,8 +314,8 @@
                 </div>
                 <div class="review-details-grid">
                   <div class="review-detail-item">
-                    <span class="review-lbl">${isAr ? 'الاسم بالإنجليزي:' : 'English Name:'}</span>
-                    <strong class="review-val">${this.formData.full_name_en || '—'}</strong>
+                    <span class="review-lbl">${isAr ? 'الاسم الكامل:' : 'Full Name:'}</span>
+                    <strong class="review-val">${this.formData.full_name || this.formData.full_name_ar || '—'}</strong>
                   </div>
                   <div class="review-detail-item">
                     <span class="review-lbl">${isAr ? 'الجنس:' : 'Gender:'}</span>
@@ -494,19 +477,17 @@
 
       // Step 1 Next Button
       container.querySelector('#btn-step1-next')?.addEventListener('click', () => {
-        const nameArInput = container.querySelector('#input-reg-name-ar');
-        const nameEnInput = container.querySelector('#input-reg-name-en');
-        const valAr = (nameArInput?.value || '').trim();
-        const valEn = (nameEnInput?.value || '').trim();
+        const nameInput = container.querySelector('#input-reg-name');
+        const val = (nameInput?.value || '').trim();
 
-        if (!valAr) {
-          if (window.Toast) window.Toast.show(isAr ? 'يرجى إدخال اسمك الثلاثي بالعربية' : 'Please enter your full name in Arabic', 'warning');
-          nameArInput?.focus();
+        if (!val) {
+          if (window.Toast) window.Toast.show(isAr ? 'يرجى إدخال اسمك الكامل' : 'Please enter your full name', 'warning');
+          nameInput?.focus();
           return;
         }
 
-        this.formData.full_name_ar = valAr;
-        this.formData.full_name_en = valEn;
+        this.formData.full_name = val;
+        this.formData.full_name_ar = val;
         this.step = 2;
         this.render(container);
       });
