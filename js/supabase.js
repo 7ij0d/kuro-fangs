@@ -263,9 +263,12 @@
 
   // Update UI Elements across Header, Sidebar and Profile
   function updateUIForAuth(user) {
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
+    if (window.AUTH && typeof window.AUTH.updateUI === 'function') {
+      window.AUTH.updateUI();
+      return;
+    }
 
-    // 1. Sidebar User Meta
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
     const sideUserName = document.querySelector('.sidebar-user-name');
     const sideUserSub = document.getElementById('sidebar-user-sub');
 
@@ -284,38 +287,6 @@
     } else {
       if (sideUserName) sideUserName.textContent = isAr ? 'طالب زائر (Guest)' : 'Guest Student';
       if (sideUserSub) sideUserSub.textContent = isAr ? 'السنة الثالثة • حساب محلي' : 'Year 3 • Local Guest';
-    }
-
-    // 2. Header Auth Button / Profile Pill
-    const headerAuthContainer = document.getElementById('header-auth-action-box');
-    if (headerAuthContainer) {
-      if (user) {
-        const name = user.user_metadata?.full_name || localInfo.name || user.email.split('@')[0];
-        headerAuthContainer.innerHTML = `
-          <div class="header-user-badge" id="header-user-menu-btn" onclick="window.location.hash='#/profile'" style="cursor: pointer;" title="${user.email} — ${isAr ? 'فتح الملف الشخصي' : 'Open Profile'}">
-            <span class="user-cloud-icon" title="${isAr ? 'متصل بالسحابة' : 'Cloud Synced'}">☁️</span>
-            <span class="user-display-name">${name}</span>
-            <button class="btn-auth-signout" onclick="event.stopPropagation(); window.SupabaseAuth.signOut()" title="${isAr ? 'تسجيل الخروج' : 'Sign Out'}">
-              <i data-lucide="log-out" style="width: 13px; height: 13px;"></i>
-            </button>
-          </div>
-        `;
-      } else if (localInfo.name && localInfo.name !== 'طالب أسنان' && localInfo.name !== 'Dental Student') {
-        headerAuthContainer.innerHTML = `
-          <div class="header-user-badge" id="header-user-menu-btn" onclick="window.location.hash='#/profile'" style="cursor: pointer;" title="${localInfo.email || ''} — ${isAr ? 'فتح الملف الشخصي' : 'Open Profile'}">
-            <span class="user-cloud-icon" title="${isAr ? 'حساب مسجل' : 'Account'}">👤</span>
-            <span class="user-display-name">${localInfo.name}</span>
-          </div>
-        `;
-      } else {
-        headerAuthContainer.innerHTML = `
-          <button class="header-auth-btn" onclick="window.AuthModal.open()" title="${isAr ? 'تسجيل الدخول أو إنشاء حساب اختياري' : 'Sign In or Create Account'}">
-            <i data-lucide="user" style="width: 14px; height: 14px;"></i>
-            <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
-          </button>
-        `;
-      }
-      if (window.lucide) window.lucide.createIcons();
     }
 
     // 3. Guest Banner Visibility

@@ -630,42 +630,79 @@
       const isLoginPage = currentHash === '/login';
       document.body.classList.toggle('login-view-active', isLoginPage);
 
-      // 2. Header Auth Box
+      // 2. Header Auth Box (Idempotent render - prevents DOM recreation flickering)
       const headerAuthBox = document.getElementById('header-auth-action-box');
       if (headerAuthBox) {
-        if (isAuthenticated) {
-          const avatarHtml = user.avatar_url
-            ? `<img src="${user.avatar_url}" alt="${user.full_name}" class="header-user-avatar-circle" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" />`
-            : `<span class="header-user-avatar-initial" style="width:24px;height:24px;border-radius:50%;background:#7E1D2A;color:#FFF;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${user.full_name.charAt(0).toUpperCase()}</span>`;
+        const targetMode = isAuthenticated ? 'auth' : (this.isGuest() ? 'guest' : 'unauth');
+        const currentMode = headerAuthBox.getAttribute('data-render-mode');
+        const currentUserId = headerAuthBox.getAttribute('data-render-userid');
+        const currentName = headerAuthBox.getAttribute('data-render-name');
+        const currentAvatar = headerAuthBox.getAttribute('data-render-avatar');
+        const currentLang = headerAuthBox.getAttribute('data-render-lang');
 
-          headerAuthBox.innerHTML = `
-            <div class="header-user-badge" id="header-user-profile-badge" onclick="window.location.hash='#/profile'" style="display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:20px;background:rgba(126,29,42,0.06);border:1px solid rgba(126,29,42,0.14);cursor:pointer;" title="${user.email || ''}">
-              ${avatarHtml}
-              <span class="user-display-name" style="font-size:0.85rem;font-weight:700;color:var(--text-primary);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.full_name}</span>
-              <button type="button" class="btn-header-signout" onclick="event.stopPropagation(); window.AUTH.signOut()" title="${isAr ? 'تسجيل الخروج' : 'Sign Out'}" style="background:none;border:none;color:#8C827A;cursor:pointer;padding:2px;display:flex;align-items:center;">
-                <i data-lucide="log-out" style="width:13px;height:13px;"></i>
-              </button>
-            </div>
-          `;
-        } else if (this.isGuest()) {
-          headerAuthBox.innerHTML = `
-            <div class="header-guest-badge-wrap" style="display:inline-flex;align-items:center;gap:6px;">
-              <span class="header-guest-pill" style="font-size:0.75rem;padding:3px 8px;border-radius:12px;background:#F0EAE1;color:#6B6055;font-weight:700;">
-                ${isAr ? 'وضع الزائر' : 'Guest'}
-              </span>
-              <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.82rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
-                <i data-lucide="log-in" style="width:13px;height:13px;"></i>
+        const userId = user ? (user.id || 'auth') : 'none';
+        const userName = user ? (user.full_name || '') : '';
+        const userAvatar = user ? (user.avatar_url || '') : '';
+        const langStr = isAr ? 'ar' : 'en';
+
+        if (
+          currentMode === targetMode &&
+          currentUserId === userId &&
+          currentName === userName &&
+          currentAvatar === userAvatar &&
+          currentLang === langStr
+        ) {
+          // DOM is already up-to-date and 100% stable; skip tear down
+        } else {
+          headerAuthBox.setAttribute('data-render-mode', targetMode);
+          headerAuthBox.setAttribute('data-render-userid', userId);
+          headerAuthBox.setAttribute('data-render-name', userName);
+          headerAuthBox.setAttribute('data-render-avatar', userAvatar);
+          headerAuthBox.setAttribute('data-render-lang', langStr);
+
+          if (isAuthenticated) {
+            const avatarHtml = userAvatar
+              ? `<img src="${userAvatar}" alt="${userName}" class="header-user-avatar-circle" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" />`
+              : `<span class="header-user-avatar-initial" style="width:24px;height:24px;border-radius:50%;background:#7E1D2A;color:#FFF;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${userName.charAt(0).toUpperCase()}</span>`;
+
+            headerAuthBox.innerHTML = `
+              <div class="header-user-badge" id="header-user-profile-badge" onclick="window.location.hash='#/profile'" style="display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:20px;background:rgba(126,29,42,0.06);border:1px solid rgba(126,29,42,0.14);cursor:pointer;" title="${user.email || ''}">
+                ${avatarHtml}
+                <span class="user-display-name" style="font-size:0.85rem;font-weight:700;color:var(--text-primary);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${userName}</span>
+                <button type="button" class="btn-header-signout" onclick="event.stopPropagation(); window.AUTH.signOut()" title="${isAr ? 'تسجيل الخروج' : 'Sign Out'}" style="background:none;border:none;color:#8C827A;cursor:pointer;padding:2px;display:flex;align-items:center;">
+                  <i data-lucide="log-out" style="width:13px;height:13px;"></i>
+                </button>
+              </div>
+            `;
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+              window.lucide.createIcons();
+            }
+          } else if (this.isGuest()) {
+            headerAuthBox.innerHTML = `
+              <div class="header-guest-badge-wrap" style="display:inline-flex;align-items:center;gap:6px;">
+                <span class="header-guest-pill" style="font-size:0.75rem;padding:3px 8px;border-radius:12px;background:#F0EAE1;color:#6B6055;font-weight:700;">
+                  ${isAr ? 'وضع الزائر' : 'Guest'}
+                </span>
+                <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.82rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
+                  <i data-lucide="log-in" style="width:13px;height:13px;"></i>
+                  <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
+                </button>
+              </div>
+            `;
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+              window.lucide.createIcons();
+            }
+          } else {
+            headerAuthBox.innerHTML = `
+              <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.85rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
+                <i data-lucide="user" style="width:14px;height:14px;"></i>
                 <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
               </button>
-            </div>
-          `;
-        } else {
-          headerAuthBox.innerHTML = `
-            <button type="button" class="header-signin-btn" onclick="window.location.hash='#/login'" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:10px;background:#7E1D2A;color:#FFF;font-size:0.85rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(126,29,42,0.2);">
-              <i data-lucide="user" style="width:14px;height:14px;"></i>
-              <span>${isAr ? 'تسجيل الدخول' : 'Sign In'}</span>
-            </button>
-          `;
+            `;
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+              window.lucide.createIcons();
+            }
+          }
         }
       }
 
