@@ -1376,7 +1376,10 @@ body.login-view-active #app {
 .wizard-groups-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-inline-end: 4px;
 }
 
 .wizard-group-card {

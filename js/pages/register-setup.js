@@ -266,9 +266,9 @@
               </div>
             </div>
 
-            <!-- Groups Cards Grid (A1, A2, B1, B2) -->
+            <!-- Groups Cards Grid (A1 to E2: 10 Groups) -->
             <div class="wizard-groups-grid">
-              ${['A1', 'A2', 'B1', 'B2'].map(grp => {
+              ${['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2', 'E1', 'E2'].map(grp => {
                 const isSelected = this.formData.practical_group_id === grp;
                 return `
                   <div class="wizard-group-card ${isSelected ? 'selected' : ''}" data-group-id="${grp}">
