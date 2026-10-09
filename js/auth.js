@@ -243,8 +243,8 @@
       this._populateUserFromSupabase(sbUser);
       this.state = AUTH_STATES.AUTHENTICATED;
 
-      // Sync user profile to Supabase `profiles` table
-      await this._syncProfileRecord(this.user);
+      // Sync profile and check completion status
+      const profile = await this._syncProfileRecord(this.user);
 
       // Migrate any guest activity (last opened sheet, etc.) safely
       this.migrateGuestData(sbUser.id);
@@ -265,14 +265,21 @@
         );
       }
 
+      // Check registration status: incomplete profiles must go to student registration setup
+      const regStatus = profile?.registration_status || this.user?.registration_status;
+      if (regStatus !== 'completed' && !window.location.hash.includes('register-setup')) {
+        window.location.hash = '#/register-setup';
+        return;
+      }
+
       // Check if redirect is pending or on login screen
       const pendingRedir = sessionStorage.getItem(STORAGE_KEYS.PENDING_REDIRECT);
-      if (pendingRedir && pendingRedir !== '/login') {
+      if (pendingRedir && pendingRedir !== '/login' && pendingRedir !== '/register-setup') {
         sessionStorage.removeItem(STORAGE_KEYS.PENDING_REDIRECT);
         window.location.hash = '#' + pendingRedir;
       } else {
         const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
-        if (currentHash === '/login' || window.location.hash.includes('access_token')) {
+        if (currentHash === '/login' || currentHash === '/register-setup' || window.location.hash.includes('access_token')) {
           window.location.hash = '#/';
         }
       }
@@ -294,31 +301,120 @@
     }
 
     /**
-     * Synchronize profile record to Supabase `profiles` table
+     * Synchronize & fetch profile record from Supabase `profiles` table
      */
     async _syncProfileRecord(user) {
       const supabase = this._getSupabaseClient();
-      if (!supabase || !user || !user.id || user.isGuest) return;
+      if (!supabase || !user || !user.id || user.isGuest) return null;
 
       try {
-        const payload = {
-          id: user.id,
-          full_name: user.full_name,
-          email: user.email,
-          role: 'student',
-          status: 'active'
-        };
-
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('profiles')
-          .upsert(payload, { onConflict: 'id' });
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
 
-        if (error) {
-          console.warn('[AuthEngine] Profile upsert note:', error.message);
+        if (data) {
+          if (data.full_name_ar) this.user.full_name_ar = data.full_name_ar;
+          if (data.full_name_en) this.user.full_name_en = data.full_name_en;
+          if (data.full_name) this.user.full_name = data.full_name;
+          if (data.gender) this.user.gender = data.gender;
+          if (data.practical_group_id) this.user.practical_group_id = data.practical_group_id;
+          if (data.avatar_url) this.user.avatar_url = data.avatar_url;
+          if (data.registration_status) this.user.registration_status = data.registration_status;
+
+          // Cache profile details
+          try {
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}');
+            localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify({
+              ...current,
+              name: data.full_name_ar || data.full_name,
+              full_name_ar: data.full_name_ar,
+              full_name_en: data.full_name_en,
+              gender: data.gender,
+              practical_group_id: data.practical_group_id,
+              avatar: data.avatar_url,
+              registration_status: data.registration_status
+            }));
+          } catch (e) {}
+
+          return data;
+        } else {
+          const payload = {
+            id: user.id,
+            full_name: user.full_name,
+            email: user.email,
+            registration_status: 'pending',
+            role: 'student',
+            status: 'active'
+          };
+          await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
+          this.user.registration_status = 'pending';
+          return payload;
         }
       } catch (err) {
         console.warn('[AuthEngine] Profile sync note:', err.message);
+        return null;
       }
+    }
+
+    /**
+     * Save complete student registration wizard profile payload
+     */
+    async saveCompleteStudentProfile(payload) {
+      if (!this.user || this.user.isGuest) return;
+
+      const supabase = this._getSupabaseClient();
+      this.user = {
+        ...this.user,
+        full_name: payload.full_name_ar || this.user.full_name,
+        full_name_ar: payload.full_name_ar,
+        full_name_en: payload.full_name_en,
+        gender: payload.gender,
+        practical_group_id: payload.practical_group_id,
+        avatar_url: payload.avatar_url || this.user.avatar_url,
+        registration_status: 'completed'
+      };
+
+      try {
+        const info = {
+          id: this.user.id,
+          name: payload.full_name_ar,
+          full_name_ar: payload.full_name_ar,
+          full_name_en: payload.full_name_en,
+          email: this.user.email,
+          gender: payload.gender,
+          practical_group_id: payload.practical_group_id,
+          avatar: payload.avatar_url,
+          registration_status: 'completed'
+        };
+        localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(info));
+      } catch (e) {}
+
+      if (supabase) {
+        try {
+          const profileData = {
+            id: this.user.id,
+            full_name: payload.full_name_ar,
+            full_name_ar: payload.full_name_ar,
+            full_name_en: payload.full_name_en,
+            email: this.user.email,
+            gender: payload.gender,
+            practical_group_id: payload.practical_group_id,
+            avatar_url: payload.avatar_url,
+            registration_status: 'completed',
+            role: 'student',
+            status: 'active',
+            updated_at: new Date().toISOString()
+          };
+
+          await supabase.from('profiles').upsert(profileData, { onConflict: 'id' });
+        } catch (err) {
+          console.warn('[AuthEngine] Complete profile save note:', err.message);
+        }
+      }
+
+      this._notify();
     }
 
     /**

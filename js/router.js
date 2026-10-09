@@ -93,6 +93,11 @@ class Router {
         if (window.LoginPage && typeof window.LoginPage.render === 'function') {
           window.LoginPage.render(container, params);
         }
+      },
+      '/register-setup': async (container, params) => {
+        if (window.RegisterSetupPage && typeof window.RegisterSetupPage.render === 'function') {
+          window.RegisterSetupPage.render(container, params);
+        }
       }
     };
     this.currentPath = '';
@@ -163,17 +168,22 @@ class Router {
       document.body.classList.remove('studio-fullscreen-active');
     }
 
-    // Toggle login-view-active class on body
-    const isLoginRoute = path === '/login';
-    document.body.classList.toggle('login-view-active', isLoginRoute);
+    // Toggle login-view-active class on body for auth / wizard screens
+    const isFullPageAuth = path === '/login' || path === '/register-setup';
+    document.body.classList.toggle('login-view-active', isFullPageAuth);
 
     // Auth state route guards
     if (window.AUTH && !window.AUTH.isLoading()) {
-      if (isLoginRoute && window.AUTH.isAuthenticated()) {
-        this.navigate('/');
+      if (path === '/login' && window.AUTH.isAuthenticated()) {
+        const user = window.AUTH.getUser();
+        if (user && user.registration_status !== 'completed') {
+          this.navigate('/register-setup');
+        } else {
+          this.navigate('/');
+        }
         return;
       }
-      if (!isLoginRoute && window.AUTH.isUnauthenticated()) {
+      if (path !== '/login' && path !== '/register-setup' && window.AUTH.isUnauthenticated()) {
         this.navigate('/login');
         return;
       }
