@@ -93,93 +93,68 @@
     }
 
     /**
-     * Initialize Auth on app startup
+     * Check synchronously whether a Supabase session token or OAuth callback exists
+     */
+    _hasStoredOrUrlSession() {
+      try {
+        const hashStr = window.location.hash || '';
+        const searchStr = window.location.search || '';
+        if (hashStr.includes('access_token=') || searchStr.includes('access_token=')) {
+          return true;
+        }
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && ((key.startsWith('sb-') && key.endsWith('-auth-token')) || key === 'supabase.auth.token')) {
+            const val = localStorage.getItem(key);
+            if (val && val !== 'null' && val !== '{}') return true;
+          }
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    /**
+     * Activate non-blocking Guest user state so the main interface works immediately
+     */
+    _setGuestUserState() {
+      let localInfo = {};
+      try { localInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}'); } catch (e) {}
+      const guestCustomAvatar = localStorage.getItem('kf_custom_avatar_guest') || localInfo.avatar || null;
+      const guestName = localStorage.getItem('kf_custom_name_guest') || localInfo.name || (window.I18N?.getLang() === 'ar' ? 'طالب زائر' : 'Guest Student');
+      this.state = AUTH_STATES.GUEST;
+      this.user = {
+        id: 'guest',
+        isGuest: true,
+        full_name: guestName,
+        email: localInfo.email || null,
+        avatar_url: guestCustomAvatar === '__REMOVED__' ? null : guestCustomAvatar
+      };
+      try {
+        localStorage.setItem(STORAGE_KEYS.AUTH_MODE, 'guest');
+      } catch (e) {}
+    }
+
+    /**
+     * Initialize Auth on app startup (0ms instant boot for Guest / logged-out users)
      */
     async init() {
       if (this._initPromise) return this._initPromise;
 
       this._initPromise = (async () => {
-        this.state = AUTH_STATES.LOADING;
-        this.renderBootLoadingScreen(true);
-
         const supabase = this._getSupabaseClient();
-        let sessionUser = null;
+        const hasPotentialSession = this._hasStoredOrUrlSession();
 
-        if (supabase) {
-          try {
-            // Check for OAuth hash tokens in URL (#access_token=...&refresh_token=...)
-            const hashStr = window.location.hash || '';
-            const searchStr = window.location.search || '';
-            const rawUrlStr = hashStr.includes('access_token=') ? hashStr : (searchStr.includes('access_token=') ? searchStr : '');
-            
-            if (rawUrlStr) {
-              this._isInteractiveLogin = true;
-              try { sessionStorage.setItem('kf_interactive_login', 'true'); } catch (e) {}
-
-              const cleanParamsStr = rawUrlStr.replace(/^#\/?/, '').replace(/^\?/, '');
-              const urlParams = new URLSearchParams(cleanParamsStr);
-              const accessToken = urlParams.get('access_token');
-              const refreshToken = urlParams.get('refresh_token');
-
-              if (accessToken) {
-                try {
-                  const { data, error } = await supabase.auth.setSession({
-                    access_token: accessToken,
-                    refresh_token: refreshToken || ''
-                  });
-                  if (!error && data?.session?.user) {
-                    sessionUser = data.session.user;
-                  }
-                } catch (err) {}
-
-                if (!sessionUser) {
-                  // Fallback: decode JWT payload directly from access_token
-                  try {
-                    const parts = accessToken.split('.');
-                    if (parts.length === 3) {
-                      const base64Url = parts[1];
-                      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                      const jsonStr = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-                      const payload = JSON.parse(jsonStr);
-                      if (payload && payload.sub) {
-                        const meta = payload.user_metadata || {};
-                        const fullName = meta.full_name || meta.name || payload.email?.split('@')[0] || 'Dental Student';
-                        sessionUser = {
-                          id: payload.sub,
-                          email: payload.email || '',
-                          user_metadata: meta,
-                          app_metadata: payload.app_metadata || {},
-                          created_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : new Date().toISOString()
-                        };
-                      }
-                    }
-                  } catch (e) {}
-                }
-
-                // Clean hash from browser address bar
-                if (window.history && window.history.replaceState) {
-                  window.history.replaceState(null, '', window.location.pathname + '#/');
-                }
-              }
-            }
-
-            if (!sessionUser) {
-              // Check active session via Supabase SDK
-              const { data, error } = await supabase.auth.getSession();
-              if (!error && data?.session?.user) {
-                sessionUser = data.session.user;
-              }
-            }
-          } catch (err) {
-            console.warn('[AuthEngine] Session check warning:', err.message);
-          }
-
-          // Register live auth state listener
+        // Register live auth state listener once
+        if (supabase && !this._authListenerRegistered) {
+          this._authListenerRegistered = true;
           supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
+              if (this.state === AUTH_STATES.AUTHENTICATED && this.user?.id === session.user.id) {
+                return;
+              }
               await this._handleSignedIn(session.user);
             } else if (event === 'SIGNED_OUT') {
-              this._handleSignedOut();
+              this._handleSignedOut(false);
             } else if (event === 'TOKEN_REFRESHED' && session?.user) {
               this._populateUserFromSupabase(session.user);
               this._notify();
@@ -187,28 +162,90 @@
           });
         }
 
+        // Fast-path: First-time visitor or logged-out user with no stored token -> 0ms instant Guest boot
+        if (!supabase || !hasPotentialSession) {
+          this._setGuestUserState();
+          this.initialized = true;
+          this.renderBootLoadingScreen(false);
+          this._notify();
+          return;
+        }
+
+        this.state = AUTH_STATES.LOADING;
+        let sessionUser = null;
+
+        try {
+          // Check for OAuth hash tokens in URL (#access_token=...&refresh_token=...)
+          const hashStr = window.location.hash || '';
+          const searchStr = window.location.search || '';
+          const rawUrlStr = hashStr.includes('access_token=') ? hashStr : (searchStr.includes('access_token=') ? searchStr : '');
+          
+          if (rawUrlStr) {
+            this.renderBootLoadingScreen(true);
+            this._isInteractiveLogin = true;
+            try { sessionStorage.setItem('kf_interactive_login', 'true'); } catch (e) {}
+
+            const cleanParamsStr = rawUrlStr.replace(/^#\/?/, '').replace(/^\?/, '');
+            const urlParams = new URLSearchParams(cleanParamsStr);
+            const accessToken = urlParams.get('access_token');
+            const refreshToken = urlParams.get('refresh_token');
+
+            if (accessToken) {
+              try {
+                const { data, error } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken || ''
+                });
+                if (!error && data?.session?.user) {
+                  sessionUser = data.session.user;
+                }
+              } catch (err) {}
+
+              if (!sessionUser) {
+                // Fallback: decode JWT payload directly from access_token
+                try {
+                  const parts = accessToken.split('.');
+                  if (parts.length === 3) {
+                    const base64Url = parts[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonStr = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                    const payload = JSON.parse(jsonStr);
+                    if (payload && payload.sub) {
+                      const meta = payload.user_metadata || {};
+                      sessionUser = {
+                        id: payload.sub,
+                        email: payload.email || '',
+                        user_metadata: meta,
+                        app_metadata: payload.app_metadata || {},
+                        created_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : new Date().toISOString()
+                      };
+                    }
+                  }
+                } catch (e) {}
+              }
+
+              // Clean hash from browser address bar
+              if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname + '#/');
+              }
+            }
+          }
+
+          if (!sessionUser) {
+            // Check active session via Supabase SDK
+            const { data, error } = await supabase.auth.getSession();
+            if (!error && data?.session?.user) {
+              sessionUser = data.session.user;
+            }
+          }
+        } catch (err) {
+          console.warn('[AuthEngine] Session check warning:', err.message);
+        }
+
         if (sessionUser) {
           await this._handleSignedIn(sessionUser, false);
         } else {
-          // Check if previously entered as Guest
-          const savedMode = localStorage.getItem(STORAGE_KEYS.AUTH_MODE);
-          if (savedMode === 'guest') {
-            let localInfo = {};
-            try { localInfo = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_INFO) || '{}'); } catch (e) {}
-            const guestCustomAvatar = localStorage.getItem('kf_custom_avatar_guest') || localStorage.getItem('kf_custom_avatar_latest') || localInfo.avatar || null;
-            const guestName = localStorage.getItem('kf_custom_name_guest') || localInfo.name || (window.I18N?.getLang() === 'ar' ? 'طالب زائر' : 'Guest Student');
-            this.state = AUTH_STATES.GUEST;
-            this.user = {
-              id: 'guest',
-              isGuest: true,
-              full_name: guestName,
-              email: localInfo.email || null,
-              avatar_url: guestCustomAvatar === '__REMOVED__' ? null : guestCustomAvatar
-            };
-          } else {
-            this.state = AUTH_STATES.UNAUTHENTICATED;
-            this.user = null;
-          }
+          this._setGuestUserState();
         }
 
         this.initialized = true;
@@ -365,18 +402,34 @@
     }
 
     /**
-     * Handle user signed out
+     * Handle user signed out (Seamless transition to Guest mode on the main interface)
      */
-    _handleSignedOut() {
-      this.user = null;
-      this.state = AUTH_STATES.UNAUTHENTICATED;
-      localStorage.setItem(STORAGE_KEYS.AUTH_MODE, 'unauthenticated');
-      localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+    _handleSignedOut(shouldNavigate = true) {
+      if (!shouldNavigate && this.state === AUTH_STATES.GUEST && this.user?.isGuest) {
+        return;
+      }
 
+      try {
+        localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && ((key.startsWith('sb-') && key.endsWith('-auth-token')) || key === 'supabase.auth.token')) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (e) {}
+
+      this._setGuestUserState();
       this._notify();
 
-      // Redirect cleanly to login screen
-      window.location.hash = '#/login';
+      if (shouldNavigate) {
+        const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
+        if (currentHash !== '/') {
+          window.location.hash = '#/';
+        } else if (window.ROUTER && typeof window.ROUTER.handleRoute === 'function') {
+          window.ROUTER.handleRoute();
+        }
+      }
     }
 
     /**
@@ -924,14 +977,8 @@
     _enforceRouting() {
       const currentHash = window.location.hash.slice(1).split('?')[0] || '/';
 
-      if (this.isAuthenticated() && currentHash === '/login') {
+      if (this.isAuthenticated() && !this.isGuest() && currentHash === '/login') {
         window.location.hash = '#/';
-      } else if (this.isUnauthenticated() && currentHash !== '/login') {
-        // Remember requested route
-        if (currentHash !== '/' && currentHash !== '') {
-          sessionStorage.setItem(STORAGE_KEYS.PENDING_REDIRECT, currentHash);
-        }
-        window.location.hash = '#/login';
       }
     }
 

@@ -207,9 +207,6 @@ class Router {
           this.navigate('/');
           return;
         }
-      } else if (window.AUTH.isUnauthenticated() && path !== '/login') {
-        this.navigate('/login');
-        return;
       }
     }
 
@@ -248,7 +245,7 @@ class Router {
       }
     }
 
-    // Refresh Lucide icons across the whole page
+    // Refresh Lucide icons across newly rendered elements only
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
@@ -285,6 +282,29 @@ class Router {
     }
   }
 }
+
+// Fast-path Lucide Icon Hydration Optimizer:
+// Prevents lucide.createIcons() from re-parsing and replacing all 100+ already-rendered <svg> elements
+// across the sidebar, header, and page on every route transition or UI event.
+(function optimizeLucideCreateIcons() {
+  if (!window.lucide || typeof window.lucide.createIcons !== 'function' || window.lucide._kfOptimized) {
+    return;
+  }
+  const origCreateIcons = window.lucide.createIcons.bind(window.lucide);
+  window.lucide._kfOptimized = true;
+  window.lucide.createIcons = function (options) {
+    if (!document.querySelector('[data-lucide]')) {
+      return;
+    }
+    origCreateIcons(options);
+    const renderedSvgs = document.querySelectorAll('svg[data-lucide]');
+    for (let i = 0; i < renderedSvgs.length; i++) {
+      const svg = renderedSvgs[i];
+      svg.setAttribute('data-kf-icon', svg.getAttribute('data-lucide') || '');
+      svg.removeAttribute('data-lucide');
+    }
+  };
+})();
 
 window.ROUTER = new Router();
 window.navigate = function (path) {

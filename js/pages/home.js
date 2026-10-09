@@ -27,49 +27,21 @@ const DEFAULT_THEME = {
   border: 'rgba(126, 29, 42, 0.20)'
 };
 
-/* ─── Instant Hero Banner In-Memory & LocalStorage Engine (Character-Free Academic Study Desk) ─── */
+/* ─── Instant Hero Banner Engine (Character-Free Academic Study Desk) ─── */
 const HERO_BANNER_CONFIG = {
-  src: 'assets/hero/academic-study-hero.jpg?v=24.0',
-  storageKey: 'kf_academic_hero_banner_v24'
+  src: 'assets/hero/academic-study-hero.jpg?v=26.0'
 };
 
-let _cachedHeroDataUrl = null;
 try {
-  // Purge legacy character hero cache so old Kuro artwork never reappears
+  // Purge legacy & oversized 1MB base64 hero strings from localStorage so main thread never freezes
   localStorage.removeItem('kf_hero_banner_b64');
-  _cachedHeroDataUrl = localStorage.getItem(HERO_BANNER_CONFIG.storageKey);
+  localStorage.removeItem('kf_academic_hero_banner_v24');
 } catch (e) { /* private mode or disabled storage */ }
 
-// Prime memory & GPU bitmap cache immediately so first paint is 0ms
+// Prime browser HTTP/memory cache non-blockingly
 const _prewarmHero = new Image();
-_prewarmHero.src = _cachedHeroDataUrl || HERO_BANNER_CONFIG.src;
-
-// If image is not yet cached in localStorage as base64, fetch in background and persist
-if (!_cachedHeroDataUrl && typeof window !== 'undefined' && typeof window.fetch === 'function') {
-  setTimeout(() => {
-    fetch(HERO_BANNER_CONFIG.src)
-      .then(res => {
-        if (!res.ok) throw new Error('Hero fetch status ' + res.status);
-        return res.blob();
-      })
-      .then(blob => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          try {
-            const base64 = reader.result;
-            if (base64 && typeof base64 === 'string') {
-              localStorage.setItem(HERO_BANNER_CONFIG.storageKey, base64);
-              _cachedHeroDataUrl = base64;
-            }
-          } catch (e) {
-            // Storage quota or sandboxed
-          }
-        };
-        reader.readAsDataURL(blob);
-      })
-      .catch(() => {});
-  }, 50);
-}
+_prewarmHero.decoding = 'async';
+_prewarmHero.src = HERO_BANNER_CONFIG.src;
 
 const HOME_INLINE_SVGS = {
   'calendar': '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
@@ -218,19 +190,19 @@ const HomePage = {
      ══════════════════════════════════════════ */
   renderHeroSection(isAr) {
     const { title, subtitle, dateFormatted, shortDateFormatted } = HomePage.getHeroGreetingData(isAr);
-    const heroSrc = _cachedHeroDataUrl || HERO_BANNER_CONFIG.src;
+    const heroSrc = HERO_BANNER_CONFIG.src;
 
     return `
       <section class="kuro-hero-workspace" aria-label="Hero Study Workspace">
         <div class="kuro-hero-banner">
           <img
             src="${heroSrc}"
-            alt="Kuro Cozy Study Scene"
+            alt="Academic Study Workspace"
             class="kuro-hero-bg-img"
             width="1280"
             height="560"
             loading="eager"
-            decoding="sync"
+            decoding="async"
             fetchpriority="high"
           />
           <div class="kuro-hero-vignette"></div>

@@ -534,23 +534,20 @@ const SheetsPage = {
     `;
 
     // ── Bind Level 2 Event Listeners ──
-    container.querySelector('#sheets-back-btn')?.addEventListener('click', () => {
+    const handleBackToSubjects = () => {
       this.selectedSubjectId = null;
-      window.location.hash = '#/sheets';
-      this.renderLevel1Subjects(container);
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        window.lucide.createIcons();
+      if (window.location.hash !== '#/sheets') {
+        window.location.hash = '#/sheets';
+      } else {
+        this.renderLevel1Subjects(container);
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
       }
-    });
+    };
 
-    container.querySelector('#sheets-empty-back-btn')?.addEventListener('click', () => {
-      this.selectedSubjectId = null;
-      window.location.hash = '#/sheets';
-      this.renderLevel1Subjects(container);
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        window.lucide.createIcons();
-      }
-    });
+    container.querySelector('#sheets-back-btn')?.addEventListener('click', handleBackToSubjects);
+    container.querySelector('#sheets-empty-back-btn')?.addEventListener('click', handleBackToSubjects);
 
     const docSearchInput = container.querySelector('#sheets-doc-search-input');
     const docSearchClear = container.querySelector('#sheets-doc-search-clear');
@@ -593,24 +590,6 @@ const SheetsPage = {
     if (listContainer) {
       listContainer.querySelectorAll('.sheets-grid-card, .sheets-list-row').forEach(card => {
         card.style.cursor = 'pointer';
-        const prefetchSheet = () => {
-          const id = card.getAttribute('data-id');
-          const doc = filteredSheets.find(s => s.id === id);
-          const pdfUrl = doc?.pdf_url || doc?.download_url;
-          if (pdfUrl && 'caches' in window) {
-            try {
-              const absUrl = new URL(pdfUrl, window.location.href).href;
-              caches.open('kuro-fangs-pdf-cache-v1').then(async (c) => {
-                const has = await c.match(absUrl);
-                if (!has) {
-                  fetch(absUrl).then(r => { if (r.ok) c.put(absUrl, r); }).catch(() => {});
-                }
-              }).catch(() => {});
-            } catch (_) {}
-          }
-        };
-        card.addEventListener('mouseenter', prefetchSheet, { once: true, passive: true });
-        card.addEventListener('touchstart', prefetchSheet, { once: true, passive: true });
 
         card.addEventListener('click', (e) => {
           if (e.target.closest('.download-sheet-btn') || e.target.closest('.sgc-menu-btn')) return;
@@ -636,26 +615,35 @@ const SheetsPage = {
         });
       });
 
-      // Asynchronous PDF Thumbnail Hydration via PdfThumbnailService
+      // Throttled Asynchronous PDF Thumbnail Hydration (max 2 concurrent jobs to keep UI 60fps)
       if (this.viewMode === 'grid' && window.PdfThumbnailService) {
-        filteredSheets.forEach(item => {
-          const url = item.pdf_url || item.download_url;
-          if (!url) return;
-          const imgEl = document.getElementById(`thumb-img-${item.id}`);
-          const placeholderEl = document.getElementById(`thumb-placeholder-${item.id}`);
-          if (!imgEl) return;
-
-          window.PdfThumbnailService.getThumbnail(url).then(dataUrl => {
-            if (dataUrl && imgEl) {
-              imgEl.src = dataUrl;
-              imgEl.onload = () => {
-                imgEl.style.display = 'block';
-                imgEl.classList.add('loaded');
-                if (placeholderEl) placeholderEl.style.display = 'none';
-              };
-            }
-          }).catch(() => {});
-        });
+        const renderToken = (this._thumbRenderToken = (this._thumbRenderToken || 0) + 1);
+        const queue = filteredSheets.slice();
+        const runWorker = async () => {
+          while (queue.length > 0) {
+            if (this._thumbRenderToken !== renderToken) return;
+            const item = queue.shift();
+            const url = item?.pdf_url || item?.download_url;
+            if (!url) continue;
+            const imgEl = document.getElementById(`thumb-img-${item.id}`);
+            const placeholderEl = document.getElementById(`thumb-placeholder-${item.id}`);
+            if (!imgEl) continue;
+            try {
+              const dataUrl = await window.PdfThumbnailService.getThumbnail(url);
+              if (this._thumbRenderToken !== renderToken) return;
+              if (dataUrl && imgEl.isConnected) {
+                imgEl.src = dataUrl;
+                imgEl.onload = () => {
+                  imgEl.style.display = 'block';
+                  imgEl.classList.add('loaded');
+                  if (placeholderEl) placeholderEl.style.display = 'none';
+                };
+              }
+            } catch (_) {}
+          }
+        };
+        runWorker();
+        runWorker();
       }
     }
   },
@@ -861,13 +849,17 @@ const SheetsPage = {
   },
 
   /**
-   * Transition to selected subject
+   * Transition to selected subject (single-pass render)
    */
   openSubject(subjectId) {
     this.selectedSubjectId = subjectId;
     this.sheetSearchQuery = '';
     this.lecturerFilter = 'all';
-    window.location.hash = '#/sheets?subject=' + subjectId;
+    const targetHash = '#/sheets?subject=' + subjectId;
+    if (window.location.hash !== targetHash) {
+      window.location.hash = targetHash;
+      return;
+    }
     const stageEl = document.getElementById('sheets-dynamic-stage');
     if (stageEl) {
       this.renderLevel2Sheets(stageEl);

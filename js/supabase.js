@@ -57,6 +57,22 @@
         return;
       }
 
+      // If primary AuthEngine (window.AUTH) is active, delegate session & profile lifecycle to it
+      // to avoid duplicate getSession(), onAuthStateChange(), and profiles network queries on boot
+      if (window.AUTH) {
+        window.AUTH.subscribe((state, authUser) => {
+          currentUser = (state === 'authenticated' && authUser && !authUser.isGuest) ? (authUser.raw || authUser) : null;
+        });
+        if (window.STORE) {
+          window.STORE.subscribe((event) => {
+            if (currentUser && ['points_changed', 'skin_equipped', 'skin_unlocked'].includes(event)) {
+              triggerDebouncedSync();
+            }
+          });
+        }
+        return;
+      }
+
       try {
         const hashStr = window.location.hash || '';
         const searchStr = window.location.search || '';
