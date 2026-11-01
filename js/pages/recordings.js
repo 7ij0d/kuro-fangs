@@ -342,20 +342,35 @@
       const subjTitle = isAr ? subj.name_ar : subj.name_en;
       const iconHtml = this.getSubjectIconHtml(subj.icon);
 
-      // Fetch ONLY real sheets belonging to this subject from central database
-      const sheets = (window.DATA && typeof window.DATA.getSheetsBySubject === 'function')
-        ? window.DATA.getSheetsBySubject(this.selectedSubjectId)
-        : ((window.DATA?.sheets || []).filter(s => s.subject_id === this.selectedSubjectId));
-
       const allRecordings = window.DATA?.recordings || [];
+      const subjectRecordings = allRecordings.filter(r => r.subject_id === this.selectedSubjectId);
+
+      // Derive lecture groups directly from recordings for this subject
+      const groupMap = new Map();
+      subjectRecordings.forEach((rec, idx) => {
+        const groupId = rec.sheet_id || rec.id || `lec_${idx + 1}`;
+        if (!groupMap.has(groupId)) {
+          const cleanAr = (rec.title_ar || rec.title || `المحاضرة ${idx + 1}`).replace(/^تسجيل\s*/i, '');
+          const cleanEn = (rec.title_en || rec.title || `Lecture ${idx + 1}`).replace(/^Lecture\s*\d+\s*Audio:\s*/i, (m) => m.replace(/Audio:\s*/i, ': '));
+          groupMap.set(groupId, {
+            id: groupId,
+            subject_id: this.selectedSubjectId,
+            title: cleanEn || cleanAr,
+            title_ar: cleanAr,
+            title_en: cleanEn,
+            doctor: rec.doctor || ''
+          });
+        }
+      });
+      const sheets = Array.from(groupMap.values());
       const totalSheetsCount = sheets.length;
       
       // Calculate real total recordings count for this subject
-      const totalRecsCount = allRecordings.filter(r => r.subject_id === this.selectedSubjectId).length;
+      const totalRecsCount = subjectRecordings.length;
 
       const subtitleInfo = isAr
-        ? `${subj.code} · ${totalSheetsCount} شيتات · ${totalRecsCount} تسجيلات`
-        : `${subj.code} · ${totalSheetsCount} sheets · ${totalRecsCount} recordings`;
+        ? `${subj.code} · ${totalSheetsCount} محاضرات · ${totalRecsCount} تسجيلات`
+        : `${subj.code} · ${totalSheetsCount} lectures · ${totalRecsCount} recordings`;
 
       container.innerHTML = `
         <!-- Top Back Navigation -->
@@ -485,25 +500,30 @@
         name_ar: subjFromData?.name_ar || 'المقرر الأكاديمي'
       };
 
-      // Retrieve real sheet record from central database
-      const sheet = (window.DATA && typeof window.DATA.getSheetById === 'function')
-        ? window.DATA.getSheetById(this.selectedSheetId)
-        : ((window.DATA?.sheets || []).find(s => s.id === this.selectedSheetId));
+      // Retrieve lecture group from recordings
+      const allRecordings = window.DATA?.recordings || [];
+      const matchedRec = allRecordings.find(r => (r.sheet_id || r.id) === this.selectedSheetId);
+      const sheet = matchedRec ? {
+        id: this.selectedSheetId,
+        title: matchedRec.title_en || matchedRec.title || 'Lecture Audio',
+        title_ar: (matchedRec.title_ar || matchedRec.title || 'تسجيل المحاضرة').replace(/^تسجيل\s*/i, ''),
+        title_en: matchedRec.title_en || matchedRec.title || 'Lecture Audio'
+      } : null;
 
       if (!sheet) {
         container.innerHTML = `
           <div class="audio-level-nav-bar">
             <button type="button" class="audio-back-btn" id="audio-back-to-sheets">
               <i data-lucide="${isAr ? 'arrow-right' : 'arrow-left'}"></i>
-              <span>${isAr ? 'العودة للشيتات' : 'Back to Sheets'}</span>
+              <span>${isAr ? 'العودة للمحاضرات' : 'Back to Lectures'}</span>
             </button>
           </div>
           <div class="audio-empty-card">
             <h3 style="color: var(--text-primary); margin-bottom: 8px;">
-              ${isAr ? 'لم يتم العثور على الشيت المطلوب' : 'Sheet Not Found'}
+              ${isAr ? 'لم يتم العثور على المحاضرة المطلوبة' : 'Lecture Not Found'}
             </h3>
             <p style="color: var(--text-muted); font-size: 0.88rem;">
-              ${isAr ? 'قد يكون تم حذف الشيت أو تعديل معرفه.' : 'The requested sheet may have been removed or updated.'}
+              ${isAr ? 'يرجى العودة لاختيار محاضرة صوتية أخرى.' : 'Please return to select another audio lecture.'}
             </p>
           </div>
         `;
@@ -517,9 +537,8 @@
       const sheetTitle = isAr ? (sheet.title_ar || sheet.title) : (sheet.title_en || sheet.title);
       const subjTitle = isAr ? subj.name_ar : subj.name_en;
 
-      // Locate real recordings linked to this sheet via sheet_id
-      const allRecordings = window.DATA?.recordings || [];
-      const recordings = allRecordings.filter(r => r.sheet_id === sheet.id);
+      // Locate real recordings linked to this lecture group
+      const recordings = allRecordings.filter(r => (r.sheet_id || r.id) === sheet.id);
 
       container.innerHTML = `
         <!-- Top Back Navigation -->

@@ -100,47 +100,37 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     }
   };
 
-  const navigateBackToSheets = (subjectId) => {
+  const navigateBackToSheets = (folderOrSubjectId) => {
     restoreGlobalUI();
-    const targetRoute = subjectId ? `/sheets?subject=${encodeURIComponent(subjectId)}` : '/sheets';
-    if (window.router && typeof window.router.navigate === 'function') {
+    try {
+      if (typeof playbackAudio !== 'undefined' && playbackAudio) {
+        playbackAudio.pause();
+      }
+    } catch (e) {}
+    if (window.SheetsPage && sheet && sheet.folderId !== undefined) {
+      window.SheetsPage.currentFolderId = sheet.folderId || null;
+    }
+    const targetRoute = '/sheets';
+    if (window.ROUTER && typeof window.ROUTER.navigate === 'function') {
+      window.ROUTER.navigate(targetRoute);
+    } else if (window.router && typeof window.router.navigate === 'function') {
       window.router.navigate(targetRoute);
-    } else if (typeof Router !== 'undefined' && typeof Router.navigate === 'function') {
-      Router.navigate(targetRoute);
     } else {
       window.location.hash = `#${targetRoute}`;
     }
   };
 
-  // Multi-source lookup across window.DATA, cached cloud sheets, custom admin sheets, and legacy Store
+  // Lookup file in Personal Study Library (strictly scoped to current user)
   const findSheetById = (id) => {
     if (!id) return null;
     const cleanId = String(id).trim();
-    if (window.DATA) {
-      if (typeof window.DATA.getSheetById === 'function') {
-        const found = window.DATA.getSheetById(cleanId);
-        if (found) return found;
-      }
-      if (Array.isArray(window.DATA.sheets)) {
-        const found = window.DATA.sheets.find((s) => s && String(s.id) === cleanId);
-        if (found) return found;
-      }
+    if (window.PersonalLibrary && typeof window.PersonalLibrary.getFileById === 'function') {
+      const foundPersonal = window.PersonalLibrary.getFileById(cleanId);
+      if (foundPersonal) return foundPersonal;
     }
-    const storageKeys = ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets', 'kf_sheets'];
-    for (const k of storageKeys) {
-      try {
-        const arr = JSON.parse(localStorage.getItem(k) || '[]');
-        if (Array.isArray(arr)) {
-          const found = arr.find((s) => s && String(s.id) === cleanId);
-          if (found) return found;
-        }
-      } catch (e) {}
-    }
-    if (typeof Store !== 'undefined' && typeof Store.getById === 'function') {
-      try {
-        const found = Store.getById('sheets', cleanId);
-        if (found) return found;
-      } catch (e) {}
+    if (window.DATA && typeof window.DATA.getSheetById === 'function') {
+      const found = window.DATA.getSheetById(cleanId);
+      if (found) return found;
     }
     return null;
   };
@@ -283,23 +273,26 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
   const BASE_W = 720;
   const BASE_H = 960;
 
-  // Storage keys
-  const KEY_ANNOTS = `kf_kn_annotations_${sheet.id}`;
-  const KEY_BM = `kf_kn_bookmarks_${sheet.id}`;
-  const KEY_STATE = `kf_kn_viewstate_${sheet.id}`;
-  const KEY_HL_PRESETS = `kf_kn_hl_presets_v1`;
-  const KEY_PEN_PRESETS = `kf_kn_pen_presets_v1`;
+  // User-scoped Storage keys so every student's annotations, bookmarks, and view state are private
+  const activeUserId = window.PersonalLibrary && typeof window.PersonalLibrary.getCurrentUserId === 'function'
+    ? window.PersonalLibrary.getCurrentUserId()
+    : 'guest';
+  const KEY_ANNOTS = `kf_kn_annotations_${activeUserId}_${sheet.id}`;
+  const KEY_BM = `kf_kn_bookmarks_${activeUserId}_${sheet.id}`;
+  const KEY_STATE = `kf_kn_viewstate_${activeUserId}_${sheet.id}`;
+  const KEY_HL_PRESETS = `kf_kn_hl_presets_${activeUserId}_v1`;
+  const KEY_PEN_PRESETS = `kf_kn_pen_presets_${activeUserId}_v1`;
 
-  const safeJSON = (key, fallback) => {
+  const safeJSON = (key, fallback, legacyKey = null) => {
     try {
-      const raw = localStorage.getItem(key);
+      const raw = localStorage.getItem(key) || (legacyKey ? localStorage.getItem(legacyKey) : null);
       return raw ? JSON.parse(raw) : fallback;
     } catch (e) {
       return fallback;
     }
   };
 
-  const savedView = safeJSON(KEY_STATE, {});
+  const savedView = safeJSON(KEY_STATE, {}, `kf_kn_viewstate_${sheet.id}`);
   const isDesktop = window.innerWidth > 1100;
   const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1100;
 
@@ -310,6 +303,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     (maybeQuery && typeof maybeQuery.get === 'function' ? maybeQuery.get('page') : null) ||
     opts.page ||
     savedView.currentPage ||
+    sheet.lastPage ||
     1,
     10
   );
@@ -318,7 +312,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
   const state = {
     pdfDoc: null,
     pdfBaseRatio: null,
-    totalPages: Math.max(1, parseInt(sheet.pages || sheet.pages_count, 10) || 12),
+    totalPages: Math.max(1, parseInt(sheet.pages || sheet.pages_count, 10) || 1),
     currentPage: Math.max(1, initialTargetPage),
     sourceReference: sourceRef,
     sourceQuestion: sourceQuestion,
@@ -329,21 +323,36 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     zoom: savedView.zoom || (isSplitView ? 1.15 : 1.0),
     zoomMode: savedView.zoomMode || 'custom', // 'custom' | 'fit-width' | 'fit-page'
     rotation: savedView.rotation || 0, // 0, 90, 180, 270
-    // IMPORTANT: Global Interaction Mode defaults to 'browse' (Safe Reading & Navigation Only) on every sheet open
+    // Global Interaction Mode
     interactionMode: 'browse', // 'browse' | 'edit'
-    // Active tool is decoupled from interactionMode (selecting a tool does NOT auto-enable Edit Mode)
     activeTool: null,
     toolPopoverOpen: false,
     leftSidebarOpen: savedView.leftSidebarOpen !== undefined ? savedView.leftSidebarOpen : (isDesktop || isTablet),
     rightSidebarOpen: savedView.rightSidebarOpen !== undefined ? savedView.rightSidebarOpen : isDesktop,
+    rightSidebarSize: savedView.rightSidebarSize || 'standard', // 'compact' | 'standard' | 'expanded'
     leftTab: savedView.leftTab || 'pages', // 'pages' | 'bookmarks' | 'annotations'
-    rightTab: savedView.rightTab || 'outline', // 'outline' | 'notes' | 'ai'
+    rightTab: savedView.rightTab === 'notes' ? 'notes' : 'audio', // 'audio' | 'notes'
     readingMode: false,
 
-    // Unified Annotations Array (persisted per sheet)
+    // Audio Recording Dashboard State
+    audioStudio: {
+      mode: 'page', // 'page' | 'document'
+      status: 'idle', // 'idle' | 'recording' | 'paused'
+      elapsedSec: 0,
+      startedPage: 1,
+      pageTimestamps: [], // [{ page, timeSec, label }]
+      sortBy: 'date', // 'date' | 'page'
+      filterCurrentPageOnly: false,
+      playingId: null,
+      isPlaying: false,
+      currentTimeSec: 0,
+      durationSec: 0
+    },
+
+    // Unified Annotations Array (persisted per user & sheet)
     // Types: 'highlighter', 'pen', 'shape', 'text', 'image', 'note'
-    annotations: safeJSON(KEY_ANNOTS, []).filter((a) => a && (a.type !== 'text' || (a.text && a.text.trim().length > 0))),
-    bookmarks: safeJSON(KEY_BM, []),
+    annotations: safeJSON(KEY_ANNOTS, [], `kf_kn_annotations_${sheet.id}`).filter((a) => a && (a.type !== 'text' || (a.text && a.text.trim().length > 0))),
+    bookmarks: safeJSON(KEY_BM, [], `kf_kn_bookmarks_${sheet.id}`),
     undoStack: [],
     redoStack: [],
 
@@ -610,7 +619,23 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
             </svg>
           </button>
 
-          <button class="kn-btn kn-btn-primary" id="kn-btn-share" title="Share Sheet">
+          <!-- Docked Audio Recording Dashboard Toggle -->
+          <button
+            type="button"
+            class="kn-btn ${state.rightSidebarOpen ? 'kn-btn-primary' : ''}"
+            id="kn-btn-right-sidebar"
+            title="${t('إظهار/إخفاء لوحة التسجيلات الصوتية', 'Toggle Audio Recording Dashboard')}"
+            style="gap:6px;font-weight:800;"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+            <span class="kn-btn-text">${t('التسجيلات الصوتية', 'Audio Studio')}</span>
+          </button>
+
+          <button class="kn-btn" id="kn-btn-share" title="Share Sheet">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             <span class="kn-btn-text">Share</span>
           </button>
@@ -693,25 +718,48 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
             <span class="kn-tool-label">Text</span>
           </button>
 
-          <!-- 6. Image -->
+          <!-- 6. Shapes -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="shapes" title="Geometric Shapes (Rectangle, Circle, Line, Arrow)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="11" height="11" rx="2"/><circle cx="16" cy="16" r="5"/></svg>
+            <span class="kn-tool-label">Shapes</span>
+            <span class="kn-tool-chevron">⌄</span>
+          </button>
+
+          <!-- 7. Underline -->
+          <button class="kn-tool-btn kn-pill-tool" data-tool="underline" title="Underline Text Tool (U)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+            <span class="kn-tool-label">Underline</span>
+          </button>
+
+          <!-- 8. Image -->
           <button class="kn-tool-btn kn-pill-tool" data-tool="image" title="Insert Image (I)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <span class="kn-tool-label">Image</span>
           </button>
 
-          <!-- 7. Note -->
+          <!-- 9. Note -->
           <button class="kn-tool-btn kn-pill-tool" data-tool="notes" title="Study Note Card (N)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/></svg>
             <span class="kn-tool-label">Note</span>
           </button>
 
-          <!-- 8. Bookmark -->
+          <!-- 10. Bookmark -->
           <button class="kn-tool-btn kn-pill-tool ${state.bookmarks.includes(state.currentPage) ? 'active' : ''}" id="kn-toolbar-bookmark" title="Bookmark Current Page">
             <svg viewBox="0 0 24 24" fill="none" stroke="#7E1D2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
             <span class="kn-tool-label">Bookmark</span>
           </button>
 
-          <!-- 9. Fullscreen / Expand (Final button at the end of toolbar) -->
+          <!-- 11. Audio Recording Studio Dock Toggle -->
+          <button class="kn-tool-btn kn-pill-tool ${state.rightSidebarOpen ? 'active' : ''}" id="kn-toolbar-audio-btn" title="Docked Audio Recording Studio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+            <span class="kn-tool-label">${t('تسجيل صوتي', 'Record Audio')}</span>
+          </button>
+
+          <!-- 12. Fullscreen / Expand (Final button at the end of toolbar) -->
           <button class="kn-tool-btn kn-pill-tool kn-fullscreen-btn" id="kn-btn-reading-mode" title="Fullscreen / Focus Reading Mode" aria-label="Fullscreen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -793,21 +841,40 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           <div class="kn-pages-container" id="kn-pages-container"></div>
         </main>
 
-        <!-- RIGHT SIDEBAR (Collapsed by default; no AI or Outline clutter) -->
-        <aside class="kn-sidebar-right kn-sidebar-collapsed" id="kn-sidebar-right" style="display:none;">
-          <div class="kn-sidebar-tab-bar" id="kn-right-tabs">
-            <button class="kn-tab-pill active" data-right-tab="notes">Notes (${state.annotations.filter((a) => a.type === 'note').length})</button>
+        <!-- DOCKED AUDIO RECORDING & STUDY DASHBOARD SIDEBAR (Part of Workspace Flex Layout, Never a Floating Window) -->
+        <aside
+          class="kn-sidebar-right kn-audio-dock-sidebar kn-size-${state.rightSidebarSize || 'standard'} ${state.rightSidebarOpen ? '' : 'kn-sidebar-collapsed'}"
+          id="kn-sidebar-right"
+        >
+          <div class="kn-sidebar-tab-bar" id="kn-right-tabs" style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 10px;border-bottom:1px solid var(--kn-border);">
+            <div style="display:flex;align-items:center;gap:4px;flex:1;">
+              <button class="kn-tab-pill ${state.rightTab === 'audio' ? 'active' : ''}" data-right-tab="audio" style="display:inline-flex;align-items:center;gap:5px;font-weight:800;">
+                <span>🎙️</span>
+                <span>${t('التسجيلات الصوتية', 'Audio Studio')}</span>
+              </button>
+              <button class="kn-tab-pill ${state.rightTab === 'notes' ? 'active' : ''}" data-right-tab="notes" style="display:inline-flex;align-items:center;gap:4px;">
+                <span>📝</span>
+                <span>${t('الملاحظات', 'Notes')} (${state.annotations.filter((a) => a.type === 'note').length})</span>
+              </button>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;">
+              <button type="button" class="kn-icon-btn" id="kn-right-size-btn" title="${t('تصغير / توسيع مساحة اللوحة', 'Resize Dashboard Width')}" style="width:26px;height:26px;font-size:0.75rem;font-weight:800;">⇔</button>
+              <button type="button" class="kn-icon-btn" id="kn-right-collapse-btn" title="${t('إخفاء اللوحة الجانبية', 'Hide Dashboard')}" style="width:26px;height:26px;font-weight:800;">»</button>
+            </div>
           </div>
           <div id="kn-right-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden;"></div>
         </aside>
       </div>
 
-      <!-- Tablet / iPad Quick-Toggle Floating Corner Button for Pages -->
+      <!-- Tablet / iPad Quick-Toggle Corner Buttons -->
       <button class="kn-ipad-fab kn-ipad-fab-left" id="kn-ipad-fab-left">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
         <span>Pages</span>
       </button>
-      <button class="kn-ipad-fab kn-ipad-fab-right" id="kn-ipad-fab-right" style="display:none;"></button>
+      <button class="kn-ipad-fab kn-ipad-fab-right" id="kn-ipad-fab-right">
+        <span>🎙️</span>
+        <span>${t('التسجيلات', 'Audio')}</span>
+      </button>
 
       <!-- Mobile Compact Bottom Bar (<768px) -->
       <div class="kn-mobile-bottom-bar" id="kn-mobile-bottom-bar">
@@ -829,7 +896,10 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           <button class="kn-icon-btn" id="kn-mob-next" style="width:28px;height:28px;">›</button>
         </div>
         <button class="kn-zoom-btn" id="kn-mob-zoom-btn">${Math.round(state.zoom * 100)}%</button>
-        <button class="kn-btn" id="kn-mob-panel-btn" style="display:none;"></button>
+        <button class="kn-btn" id="kn-mob-panel-btn" style="font-weight:800;gap:4px;">
+          <span>🎙️</span>
+          <span>${t('التسجيلات', 'Audio')}</span>
+        </button>
       </div>
     </div>
   `;
@@ -4387,8 +4457,357 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // RIGHT SMART PANEL CONTENT (Outline, Study Notes Manager, Kuro AI)
+  // DOCKED AUDIO RECORDING STUDIO ENGINE & RIGHT DASHBOARD PANEL
+  // (Integrated Flex Sidebar — Never a Floating Window over PDF Content)
   // ══════════════════════════════════════════════════════════════════════════
+  let mediaRecorder = null;
+  let audioStream = null;
+  let recordedChunks = [];
+  let audioTimerInterval = null;
+  let audioCheckpointInterval = null;
+  let activeCheckpointId = null;
+  let audioCtx = null;
+  let analyserNode = null;
+  let waveformAnimId = null;
+  const playbackAudio = new Audio();
+
+  function formatDurationClock(sec) {
+    const total = Math.max(0, Math.floor(Number(sec) || 0));
+    const hrs = Math.floor(total / 3600);
+    const mins = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    if (hrs > 0) {
+      return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function updateLiveAudioTimerDom() {
+    const timerEl = document.getElementById('kn-rec-live-timer');
+    if (timerEl) {
+      timerEl.textContent = formatDurationClock(state.audioStudio.elapsedSec);
+    }
+    const pageEl = document.getElementById('kn-rec-current-page-num');
+    if (pageEl) {
+      pageEl.textContent = `${state.currentPage} / ${state.totalPages}`;
+    }
+  }
+
+  function onAudioStudioPageChanged(newPage) {
+    updateLiveAudioTimerDom();
+    if (state.audioStudio.status === 'recording' && state.audioStudio.mode === 'document') {
+      const tsList = state.audioStudio.pageTimestamps;
+      const lastEntry = tsList[tsList.length - 1];
+      if (!lastEntry || lastEntry.page !== newPage) {
+        tsList.push({
+          page: newPage,
+          timeSec: state.audioStudio.elapsedSec,
+          label: `${t('صفحة', 'Page')} ${newPage}`
+        });
+        renderRightSidebarContent();
+      }
+    } else if (state.rightSidebarOpen && state.rightTab === 'audio' && state.audioStudio.filterCurrentPageOnly) {
+      renderRightSidebarContent();
+    }
+  }
+
+  function drawLiveWaveform() {
+    const canvas = document.getElementById('kn-audio-waveform-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    if (state.audioStudio.status === 'recording' && analyserNode) {
+      const bufferLen = analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLen);
+      analyserNode.getByteFrequencyData(dataArray);
+
+      const barCount = 32;
+      const step = Math.max(1, Math.floor(bufferLen / barCount));
+      const barWidth = Math.max(3, Math.floor((w - (barCount - 1) * 3) / barCount));
+
+      for (let i = 0; i < barCount; i++) {
+        const val = dataArray[i * step] || 8;
+        const pct = Math.max(0.12, val / 255);
+        const barH = Math.max(4, Math.round(pct * (h - 6)));
+        const x = i * (barWidth + 3);
+        const y = Math.round((h - barH) / 2);
+        ctx.fillStyle = '#DC2626';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(x, y, barWidth, barH, 2) : ctx.rect(x, y, barWidth, barH);
+        ctx.fill();
+      }
+      waveformAnimId = requestAnimationFrame(drawLiveWaveform);
+    } else {
+      // Idle or paused baseline bars
+      const barCount = 32;
+      const barWidth = Math.max(3, Math.floor((w - (barCount - 1) * 3) / barCount));
+      ctx.fillStyle = state.audioStudio.status === 'paused' ? '#D97706' : '#CBD5E1';
+      for (let i = 0; i < barCount; i++) {
+        const barH = state.audioStudio.status === 'paused' ? (6 + (i % 4) * 3) : 4;
+        const x = i * (barWidth + 3);
+        const y = Math.round((h - barH) / 2);
+        ctx.fillRect(x, y, barWidth, barH);
+      }
+    }
+  }
+
+  async function startAudioRecording() {
+    if (state.audioStudio.status !== 'idle') return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      window.showToast?.(t('المتصفح لا يدعم التسجيل الصوتي', 'Browser does not support audio recording'), { type: 'error' });
+      return;
+    }
+
+    try {
+      audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recordedChunks = [];
+      state.audioStudio.elapsedSec = 0;
+      state.audioStudio.startedPage = state.currentPage;
+      state.audioStudio.pageTimestamps = [
+        {
+          page: state.currentPage,
+          timeSec: 0,
+          label: `${t('بداية التسجيل • صفحة', 'Start • Page')} ${state.currentPage}`
+        }
+      ];
+      activeCheckpointId = `arec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
+      const preferredTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+      let chosenMime = '';
+      if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
+        for (const mt of preferredTypes) {
+          if (MediaRecorder.isTypeSupported(mt)) {
+            chosenMime = mt;
+            break;
+          }
+        }
+      }
+
+      mediaRecorder = chosenMime ? new MediaRecorder(audioStream, { mimeType: chosenMime }) : new MediaRecorder(audioStream);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      };
+
+      // Setup Web Audio Analyser for live waveform visualization
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+          const source = audioCtx.createMediaStreamSource(audioStream);
+          analyserNode = audioCtx.createAnalyser();
+          analyserNode.fftSize = 128;
+          source.connect(analyserNode);
+        }
+      } catch (vizErr) {}
+
+      mediaRecorder.start(1000);
+      state.audioStudio.status = 'recording';
+
+      if (audioTimerInterval) clearInterval(audioTimerInterval);
+      audioTimerInterval = setInterval(() => {
+        if (state.audioStudio.status === 'recording') {
+          state.audioStudio.elapsedSec += 1;
+          updateLiveAudioTimerDom();
+        }
+      }, 1000);
+
+      // Periodic 3-second auto-checkpoint to IndexedDB so audio is never lost
+      if (audioCheckpointInterval) clearInterval(audioCheckpointInterval);
+      audioCheckpointInterval = setInterval(async () => {
+        if (recordedChunks.length > 0 && activeCheckpointId && window.PersonalLibrary) {
+          const mime = mediaRecorder?.mimeType || 'audio/webm';
+          const partialBlob = new Blob(recordedChunks, { type: mime });
+          const defaultTitle = state.audioStudio.mode === 'page'
+            ? `${t('تسجيل صفحة', 'Page Recording')} ${state.audioStudio.startedPage}`
+            : `${t('تسجيل كامل •', 'Full Lecture •')} ${sheet.title || docTitle}`;
+          await window.PersonalLibrary.saveRecording({
+            id: activeCheckpointId,
+            fileId: sheet.id,
+            fileName: sheet.title || docTitle,
+            name: defaultTitle,
+            mode: state.audioStudio.mode,
+            pageNumber: state.audioStudio.startedPage,
+            pageTimestamps: state.audioStudio.pageTimestamps,
+            durationSec: state.audioStudio.elapsedSec,
+            mimeType: mime,
+            blob: partialBlob
+          }).catch(() => {});
+        }
+      }, 3000);
+
+      renderRightSidebarContent();
+      drawLiveWaveform();
+    } catch (err) {
+      console.error('Microphone access error:', err);
+      window.showToast?.(t('يرجى السماح بصلاحية الميكروفون لبدء التسجيل الصوتي', 'Please allow microphone access to start recording'), { type: 'error' });
+    }
+  }
+
+  function pauseAudioRecording() {
+    if (!mediaRecorder || state.audioStudio.status !== 'recording') return;
+    try {
+      if (mediaRecorder.state === 'recording') mediaRecorder.pause();
+      state.audioStudio.status = 'paused';
+      if (waveformAnimId) cancelAnimationFrame(waveformAnimId);
+      renderRightSidebarContent();
+      drawLiveWaveform();
+    } catch (e) {}
+  }
+
+  function resumeAudioRecording() {
+    if (!mediaRecorder || state.audioStudio.status !== 'paused') return;
+    try {
+      if (mediaRecorder.state === 'paused') mediaRecorder.resume();
+      state.audioStudio.status = 'recording';
+      renderRightSidebarContent();
+      drawLiveWaveform();
+    } catch (e) {}
+  }
+
+  async function stopAndSaveAudioRecording() {
+    if (!mediaRecorder || state.audioStudio.status === 'idle') return;
+    if (audioTimerInterval) { clearInterval(audioTimerInterval); audioTimerInterval = null; }
+    if (audioCheckpointInterval) { clearInterval(audioCheckpointInterval); audioCheckpointInterval = null; }
+    if (waveformAnimId) { cancelAnimationFrame(waveformAnimId); waveformAnimId = null; }
+
+    const finalDuration = Math.max(1, state.audioStudio.elapsedSec);
+    const finalMode = state.audioStudio.mode;
+    const finalPage = state.audioStudio.startedPage || state.currentPage;
+    const finalTimestamps = [...state.audioStudio.pageTimestamps];
+    const saveId = activeCheckpointId || `arec_${Date.now()}`;
+    const mime = mediaRecorder.mimeType || 'audio/webm';
+
+    await new Promise((resolve) => {
+      mediaRecorder.onstop = () => resolve();
+      try {
+        if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        else resolve();
+      } catch (e) {
+        resolve();
+      }
+    });
+
+    try {
+      audioStream?.getTracks().forEach(tr => tr.stop());
+    } catch (e) {}
+    try {
+      audioCtx?.close();
+    } catch (e) {}
+    audioStream = null;
+    audioCtx = null;
+    analyserNode = null;
+    mediaRecorder = null;
+    activeCheckpointId = null;
+    state.audioStudio.status = 'idle';
+
+    const finalBlob = new Blob(recordedChunks, { type: mime });
+    recordedChunks = [];
+
+    const existingPageRecs = window.PersonalLibrary
+      ? window.PersonalLibrary.getRecordingsForPage(sheet.id, finalPage)
+      : [];
+    const seqNum = existingPageRecs.length + 1;
+    const autoName = finalMode === 'page'
+      ? `${t('تسجيل صفحة', 'Page')} ${finalPage}${seqNum > 1 ? ` (#${seqNum})` : ''}`
+      : `${t('تسجيل كامل للمحاضرة', 'Full Document Recording')} (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+
+    if (window.PersonalLibrary) {
+      await window.PersonalLibrary.saveRecording({
+        id: saveId,
+        fileId: sheet.id,
+        fileName: sheet.title || docTitle,
+        name: autoName,
+        mode: finalMode,
+        pageNumber: finalPage,
+        pageTimestamps: finalTimestamps,
+        durationSec: finalDuration,
+        mimeType: mime,
+        blob: finalBlob
+      });
+    }
+
+    window.showToast?.(t('تم حفظ التسجيل الصوتي بنجاح داخل الملف! 🎙️', 'Audio recording saved to this file! 🎙️'), { type: 'success' });
+    renderRightSidebarContent();
+    renderLeftSidebarContent();
+  }
+
+  async function togglePlaySavedRecording(recId, jumpToSecond = null) {
+    const lib = window.PersonalLibrary;
+    if (!lib || !window.DATA?.audioStore) return;
+    const allRecs = lib.getRecordingsForFile(sheet.id);
+    const recMeta = allRecs.find(r => r.id === recId);
+    if (!recMeta) return;
+
+    // Synchronize PDF page automatically when playing a recording
+    if (recMeta.mode === 'page' && recMeta.pageNumber) {
+      goToPage(recMeta.pageNumber);
+    }
+
+    if (state.audioStudio.playingId === recId) {
+      if (jumpToSecond !== null) {
+        playbackAudio.currentTime = jumpToSecond;
+        if (playbackAudio.paused) await playbackAudio.play().catch(() => {});
+        state.audioStudio.isPlaying = true;
+        renderRightSidebarContent();
+        return;
+      }
+      if (!playbackAudio.paused) {
+        playbackAudio.pause();
+        state.audioStudio.isPlaying = false;
+      } else {
+        await playbackAudio.play().catch(() => {});
+        state.audioStudio.isPlaying = true;
+      }
+      renderRightSidebarContent();
+      return;
+    }
+
+    // Load new audio blob URL from IndexedDB
+    playbackAudio.pause();
+    const url = await window.DATA.audioStore.getAudioUrl(recId);
+    if (!url) {
+      window.showToast?.(t('تعذر العثور على الملف الصوتي المحفوظ', 'Stored audio file not found'), { type: 'error' });
+      return;
+    }
+
+    playbackAudio.src = url;
+    state.audioStudio.playingId = recId;
+    state.audioStudio.durationSec = recMeta.durationSec || 1;
+    state.audioStudio.currentTimeSec = jumpToSecond !== null ? jumpToSecond : 0;
+    if (jumpToSecond !== null) {
+      playbackAudio.currentTime = jumpToSecond;
+    }
+
+    playbackAudio.ontimeupdate = () => {
+      state.audioStudio.currentTimeSec = playbackAudio.currentTime || 0;
+      const seekEl = document.querySelector(`[data-rec-seek="${recId}"]`);
+      if (seekEl && !seekEl.matches(':active')) {
+        seekEl.value = Math.round(playbackAudio.currentTime || 0);
+      }
+      const timeLbl = document.querySelector(`[data-rec-time="${recId}"]`);
+      if (timeLbl) {
+        timeLbl.textContent = `${formatDurationClock(playbackAudio.currentTime)} / ${formatDurationClock(recMeta.durationSec || playbackAudio.duration || 0)}`;
+      }
+      // Auto-highlight or sync page in Full Document mode if desired
+    };
+
+    playbackAudio.onended = () => {
+      state.audioStudio.isPlaying = false;
+      state.audioStudio.currentTimeSec = 0;
+      renderRightSidebarContent();
+    };
+
+    await playbackAudio.play().catch(() => {});
+    state.audioStudio.isPlaying = true;
+    renderRightSidebarContent();
+  }
+
   function renderRightSidebarContent() {
     const rightContent = document.getElementById('kn-right-content');
     if (!rightContent) return;
@@ -4396,47 +4815,371 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     const totalNotesCount = state.annotations.filter((a) => a.type === 'note').length;
     const notesTabBtn = document.querySelector('[data-right-tab="notes"]');
     if (notesTabBtn) {
-      notesTabBtn.textContent = totalNotesCount > 0 ? `Notes (${totalNotesCount})` : 'Notes';
+      notesTabBtn.innerHTML = `<span>📝</span><span>${t('الملاحظات', 'Notes')} (${totalNotesCount})</span>`;
     }
 
-    if (state.rightTab === 'outline') {
-      const outlineItems =
-        state.outline.length > 0
-          ? state.outline
-          : [
-              { title: '1. Clinical Overview & Classification', page: 1, sub: false },
-              { title: '2. Pathogenesis & Histopathology', page: Math.min(2, state.totalPages), sub: false },
-              { title: '3. Radiographic & Differential Diagnosis', page: Math.min(3, state.totalPages), sub: false },
-              { title: '4. Surgical Management & Follow-Up', page: Math.min(4, state.totalPages), sub: false },
-            ];
+    const allFileRecordings = window.PersonalLibrary
+      ? window.PersonalLibrary.getRecordingsForFile(sheet.id, { sortBy: state.audioStudio.sortBy })
+      : [];
+    const audioTabBtn = document.querySelector('[data-right-tab="audio"]');
+    if (audioTabBtn) {
+      audioTabBtn.innerHTML = `<span>🎙️</span><span>${t('التسجيلات', 'Audio')} (${allFileRecordings.length})</span>`;
+    }
+
+    if (state.rightTab === 'audio') {
+      const st = state.audioStudio;
+      const isRec = st.status === 'recording';
+      const isPaused = st.status === 'paused';
+      const isIdle = st.status === 'idle';
+
+      const statusText = isRec
+        ? t('جاري التسجيل الآن...', 'Recording Live...')
+        : isPaused
+        ? t('التسجيل متوقف مؤقتاً', 'Recording Paused')
+        : t('جاهز للتسجيل', 'Ready to Record');
+
+      const statusColor = isRec ? '#DC2626' : isPaused ? '#D97706' : '#10B981';
+
+      const displayedRecordings = st.filterCurrentPageOnly
+        ? allFileRecordings.filter(r => r.mode === 'document' || Number(r.pageNumber) === Number(state.currentPage))
+        : allFileRecordings;
 
       rightContent.innerHTML = `
-        <input type="text" class="kn-outline-search" id="kn-outline-filter" placeholder="Search in this sheet..." />
-        <div class="kn-outline-list" id="kn-outline-list">
-          ${outlineItems
-            .map(
-              (item) => `
-            <div class="kn-outline-item ${item.sub ? 'sub-item' : ''} ${item.page === state.currentPage ? 'active' : ''}" data-outline-page="${item.page}">
-              <span style="flex:1;">${escapeHtml(item.title)}</span>
-              <span style="font-size:0.72rem;color:var(--kn-text-muted);">p.${item.page}</span>
-            </div>`
-            )
-            .join('')}
+        <div class="kn-audio-dashboard-wrap" style="display:flex;flex-direction:column;flex:1;overflow-y:auto;padding:12px;gap:12px;">
+          
+          <!-- 1. DOCKED RECORDING CONTROL STUDIO CARD -->
+          <div class="kn-audio-studio-card" style="background:var(--kn-surface,#FFFFFF);border:1px solid var(--kn-border,#E8E2D5);border-radius:14px;padding:14px;box-shadow:0 4px 14px rgba(31,26,23,0.05);">
+            
+            <!-- File & Current Page Info Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--kn-border-subtle,#F0EAE1);">
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:0.68rem;font-weight:700;color:var(--kn-text-muted,#7C736B);">${t('الملف الحالي', 'CURRENT FILE')}</div>
+                <div style="font-size:0.8rem;font-weight:800;color:var(--kn-text,#1F1A17);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(sheet.title || docTitle)}">${escapeHtml(sheet.title || docTitle)}</div>
+              </div>
+              <div style="text-align:end;flex-shrink:0;background:rgba(126,29,42,0.08);border:1px solid rgba(126,29,42,0.2);border-radius:8px;padding:4px 9px;">
+                <div style="font-size:0.64rem;font-weight:700;color:#7E1D2A;">${t('الصفحة الحالية', 'PAGE')}</div>
+                <div id="kn-rec-current-page-num" style="font-size:0.82rem;font-weight:800;color:#7E1D2A;">${state.currentPage} / ${state.totalPages}</div>
+              </div>
+            </div>
+
+            <!-- Recording Mode Selector (Current Page vs Full Document) -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:0.72rem;font-weight:800;color:var(--kn-text-muted);margin-bottom:6px;">${t('نوع التسجيل الصوتي:', 'Recording Mode:')}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button
+                  type="button"
+                  class="kn-rec-mode-btn ${st.mode === 'page' ? 'active' : ''}"
+                  data-rec-mode="page"
+                  ${!isIdle ? 'disabled' : ''}
+                  style="padding:8px 10px;border-radius:9px;border:1.5px solid ${st.mode === 'page' ? '#7E1D2A' : 'var(--kn-border,#E8E2D5)'};background:${st.mode === 'page' ? 'rgba(126,29,42,0.09)' : 'var(--kn-bg,#F6F1E8)'};color:${st.mode === 'page' ? '#7E1D2A' : 'var(--kn-text)'};font-size:0.76rem;font-weight:800;cursor:${isIdle ? 'pointer' : 'not-allowed'};text-align:center;"
+                >
+                  📄 ${t('الصفحة الحالية', 'Current Page')}
+                </button>
+                <button
+                  type="button"
+                  class="kn-rec-mode-btn ${st.mode === 'document' ? 'active' : ''}"
+                  data-rec-mode="document"
+                  ${!isIdle ? 'disabled' : ''}
+                  style="padding:8px 10px;border-radius:9px;border:1.5px solid ${st.mode === 'document' ? '#7E1D2A' : 'var(--kn-border,#E8E2D5)'};background:${st.mode === 'document' ? 'rgba(126,29,42,0.09)' : 'var(--kn-bg,#F6F1E8)'};color:${st.mode === 'document' ? '#7E1D2A' : 'var(--kn-text)'};font-size:0.76rem;font-weight:800;cursor:${isIdle ? 'pointer' : 'not-allowed'};text-align:center;"
+                >
+                  📚 ${t('الملف بالكامل', 'Full Document')}
+                </button>
+              </div>
+              <div style="font-size:0.7rem;color:var(--kn-text-muted);margin-top:5px;line-height:1.4;">
+                ${st.mode === 'page'
+                  ? t(`سيتم ربط التسجيل بالصفحة رقم (${state.currentPage}) مع إمكانية إضافة عدة تسجيلات لنفس الصفحة.`, `Links audio directly to Page ${state.currentPage} (multiple recordings per page supported).`)
+                  : t('يستمر التسجيل أثناء تنقلك بين الصفحات ويحفظ توقيت كل صفحة تلقائياً.', 'Records continuously across pages and automatically logs page timestamps.')
+                }
+              </div>
+            </div>
+
+            <!-- Live Timer + Visual Status Indicator + Waveform -->
+            <div style="background:var(--kn-bg,#F6F1E8);border:1px solid var(--kn-border,#E8E2D5);border-radius:11px;padding:10px 12px;margin-bottom:12px;text-align:center;">
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span style="width:9px;height:9px;border-radius:50%;background:${statusColor};display:inline-block;${isRec ? 'box-shadow:0 0 0 4px rgba(220,38,38,0.22);' : ''}"></span>
+                <span style="font-size:0.73rem;font-weight:800;color:${statusColor};">${statusText}</span>
+              </div>
+              <div id="kn-rec-live-timer" style="font-size:1.65rem;font-weight:900;font-variant-numeric:tabular-nums;color:var(--kn-text,#1F1A17);letter-spacing:0.04em;margin:2px 0 6px;">
+                ${formatDurationClock(st.elapsedSec)}
+              </div>
+              <canvas id="kn-audio-waveform-canvas" width="250" height="34" style="width:100%;height:34px;display:block;"></canvas>
+            </div>
+
+            <!-- Primary Recording Controls: Start / Pause / Resume / Stop -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              ${isIdle ? `
+                <button
+                  type="button"
+                  id="kn-rec-btn-start"
+                  style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:10px;border:none;background:#DC2626;color:#FFFFFF;font-size:0.84rem;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(220,38,38,0.3);"
+                >
+                  <span>⏺</span>
+                  <span>${st.mode === 'page' ? t(`بدء تسجيل صفحة ${state.currentPage}`, `Record Page ${state.currentPage}`) : t('بدء تسجيل الملف بالكامل', 'Start Full Recording')}</span>
+                </button>
+              ` : ''}
+
+              ${isRec ? `
+                <button
+                  type="button"
+                  id="kn-rec-btn-pause"
+                  style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:10px;border:1px solid #D97706;background:rgba(217,119,6,0.12);color:#D97706;font-size:0.8rem;font-weight:800;cursor:pointer;"
+                >
+                  <span>⏸</span>
+                  <span>${t('إيقاف مؤقت (Pause)', 'Pause')}</span>
+                </button>
+              ` : ''}
+
+              ${isPaused ? `
+                <button
+                  type="button"
+                  id="kn-rec-btn-resume"
+                  style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:10px;border:none;background:#0284C7;color:#FFFFFF;font-size:0.8rem;font-weight:800;cursor:pointer;"
+                >
+                  <span>▶</span>
+                  <span>${t('استئناف (Resume)', 'Resume')}</span>
+                </button>
+              ` : ''}
+
+              ${!isIdle ? `
+                <button
+                  type="button"
+                  id="kn-rec-btn-stop"
+                  style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:10px;border:none;background:#1F1A17;color:#FFFFFF;font-size:0.8rem;font-weight:800;cursor:pointer;"
+                >
+                  <span>⏹</span>
+                  <span>${t('إنهاء وحفظ (Stop)', 'Stop & Save')}</span>
+                </button>
+              ` : ''}
+            </div>
+
+            ${!isIdle && st.mode === 'document' ? `
+              <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--kn-border);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+                  <span style="font-size:0.7rem;font-weight:800;color:var(--kn-text-muted);">${t('مواضع الصفحات المسجلة تلقائياً:', 'Tracked Page Timestamps:')}</span>
+                  <button type="button" id="kn-rec-mark-page-btn" style="font-size:0.68rem;font-weight:800;padding:2px 7px;border-radius:6px;border:1px solid #7E1D2A;background:transparent;color:#7E1D2A;cursor:pointer;">
+                    + ${t(`تثبيت ص ${state.currentPage}`, `Mark P.${state.currentPage}`)}
+                  </button>
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;max-height:64px;overflow-y:auto;">
+                  ${st.pageTimestamps.map(pt => `
+                    <span style="font-size:0.68rem;padding:2px 7px;border-radius:6px;background:rgba(126,29,42,0.08);color:#7E1D2A;font-weight:700;">
+                      📄 ص ${pt.page} • ${formatDurationClock(pt.timeSec)}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- 2. AUDIO LIBRARY FOR THIS FILE (إدارة التسجيلات الصوتية) -->
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;">
+              <div style="font-size:0.82rem;font-weight:800;color:var(--kn-text,#1F1A17);">
+                🎧 ${t('مكتبة تسجيلات الملف', 'File Audio Library')} (${displayedRecordings.length})
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <select id="kn-audio-sort-select" style="padding:3px 7px;border-radius:6px;border:1px solid var(--kn-border);background:var(--kn-surface);color:var(--kn-text);font-size:0.72rem;font-weight:700;">
+                  <option value="date" ${st.sortBy === 'date' ? 'selected' : ''}>${t('ترتيب: الأحدث', 'Sort: Date')}</option>
+                  <option value="page" ${st.sortBy === 'page' ? 'selected' : ''}>${t('ترتيب: الصفحة', 'Sort: Page')}</option>
+                </select>
+              </div>
+            </div>
+
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.73rem;color:var(--kn-text-muted);cursor:pointer;">
+              <input type="checkbox" id="kn-audio-filter-page" ${st.filterCurrentPageOnly ? 'checked' : ''} />
+              <span>${t(`عرض تسجيلات الصفحة الحالية (${state.currentPage}) فقط`, `Show Page ${state.currentPage} recordings only`)}</span>
+            </label>
+
+            ${displayedRecordings.length === 0 ? `
+              <div style="padding:28px 14px;text-align:center;background:var(--kn-surface,#FFFFFF);border:1px dashed var(--kn-border,#E8E2D5);border-radius:12px;color:var(--kn-text-muted);font-size:0.78rem;line-height:1.5;">
+                <div style="font-size:1.35rem;margin-bottom:6px;">🎙️</div>
+                <div style="font-weight:800;color:var(--kn-text);margin-bottom:4px;">${t('لا توجد تسجيلات صوتية بعد', 'No Audio Recordings Yet')}</div>
+                <div>${t('اضغط على زر "بدء التسجيل" أعلاه لتسجيل شرح الصفحة الحالية أو المحاضرة بالكامل.', 'Click "Start Recording" above to record explanations for this page or the entire lecture.')}</div>
+              </div>
+            ` : `
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                ${displayedRecordings.map(rec => {
+                  const isThisPlaying = st.playingId === rec.id && st.isPlaying;
+                  const isThisLoaded = st.playingId === rec.id;
+                  const dateStr = rec.createdAt ? new Date(rec.createdAt).toLocaleDateString() : '';
+                  const badgeText = rec.mode === 'document'
+                    ? `📚 ${t('الملف بالكامل', 'Full Doc')}`
+                    : `📄 ${t('صفحة', 'Page')} ${rec.pageNumber || 1}`;
+
+                  return `
+                    <div class="kn-audio-rec-item" style="background:var(--kn-surface,#FFFFFF);border:1px solid ${isThisLoaded ? '#7E1D2A' : 'var(--kn-border,#E8E2D5)'};border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+                      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+                        <div style="min-width:0;flex:1;">
+                          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+                            <span
+                              data-rec-jump-page="${rec.pageNumber || 1}"
+                              style="cursor:pointer;font-size:0.68rem;font-weight:800;padding:2px 7px;border-radius:6px;background:${rec.mode === 'document' ? 'rgba(2,132,199,0.12)' : 'rgba(126,29,42,0.1)'};color:${rec.mode === 'document' ? '#0284C7' : '#7E1D2A'};"
+                              title="${t('الانتقال إلى الصفحة المرتبطة', 'Jump to linked page')}"
+                            >${badgeText}</span>
+                            <span style="font-size:0.68rem;color:var(--kn-text-muted);">${dateStr}</span>
+                            <span style="font-size:0.68rem;font-weight:800;color:var(--kn-text-muted);">⏱ ${formatDurationClock(rec.durationSec)}</span>
+                          </div>
+                          <div style="font-size:0.82rem;font-weight:800;color:var(--kn-text,#1F1A17);word-break:break-word;" dir="auto">${escapeHtml(rec.name)}</div>
+                        </div>
+
+                        <div style="display:flex;align-items:center;gap:3px;flex-shrink:0;">
+                          <button type="button" class="kn-icon-btn" data-rec-rename="${rec.id}" title="${t('إعادة تسمية التسجيل', 'Rename')}" style="width:26px;height:26px;font-size:0.75rem;">✎</button>
+                          <button type="button" class="kn-icon-btn" data-rec-download="${rec.id}" title="${t('تنزيل التسجيل', 'Download')}" style="width:26px;height:26px;font-size:0.75rem;">⬇</button>
+                          <button type="button" class="kn-icon-btn" data-rec-delete="${rec.id}" title="${t('حذف التسجيل', 'Delete')}" style="width:26px;height:26px;font-size:0.75rem;color:#DC2626;">🗑</button>
+                        </div>
+                      </div>
+
+                      <!-- Playback Bar -->
+                      <div style="display:flex;align-items:center;gap:8px;background:var(--kn-bg,#F6F1E8);padding:6px 9px;border-radius:9px;">
+                        <button
+                          type="button"
+                          data-rec-play="${rec.id}"
+                          style="width:28px;height:28px;border-radius:50%;border:none;background:#7E1D2A;color:#FFFFFF;font-size:0.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;"
+                          title="${isThisPlaying ? t('إيقاف مؤقت', 'Pause') : t('تشغيل ومزامنة الصفحة', 'Play & Sync Page')}"
+                        >${isThisPlaying ? '⏸' : '▶'}</button>
+
+                        <input
+                          type="range"
+                          data-rec-seek="${rec.id}"
+                          min="0"
+                          max="${Math.max(1, rec.durationSec || 1)}"
+                          value="${isThisLoaded ? Math.round(st.currentTimeSec || 0) : 0}"
+                          style="flex:1;cursor:pointer;"
+                        />
+
+                        <span data-rec-time="${rec.id}" style="font-size:0.68rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--kn-text-muted);min-width:64px;text-align:end;">
+                          ${isThisLoaded ? `${formatDurationClock(st.currentTimeSec)} / ${formatDurationClock(rec.durationSec)}` : formatDurationClock(rec.durationSec)}
+                        </span>
+                      </div>
+
+                      <!-- Clickable Page Timestamps for Full Document Recordings -->
+                      ${rec.mode === 'document' && Array.isArray(rec.pageTimestamps) && rec.pageTimestamps.length > 0 ? `
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;padding-top:2px;">
+                          ${rec.pageTimestamps.map(pt => `
+                            <button
+                              type="button"
+                              data-rec-ts-play="${rec.id}"
+                              data-rec-ts-page="${pt.page}"
+                              data-rec-ts-sec="${pt.timeSec || 0}"
+                              style="font-size:0.66rem;font-weight:700;padding:2px 6px;border-radius:5px;border:1px solid rgba(2,132,199,0.28);background:rgba(2,132,199,0.08);color:#0284C7;cursor:pointer;"
+                              title="${t('انتقل إلى هذه الصفحة وهذه اللحظة في التسجيل', 'Jump to page and timestamp')}"
+                            >📄 ص ${pt.page} (${formatDurationClock(pt.timeSec)})</button>
+                          `).join('')}
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
         </div>
       `;
 
-      const filterInp = document.getElementById('kn-outline-filter');
-      if (filterInp) {
-        filterInp.oninput = () => {
-          const q = filterInp.value.toLowerCase();
-          rightContent.querySelectorAll('.kn-outline-item').forEach((el) => {
-            el.style.display = el.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
-          });
-        };
-      }
+      drawLiveWaveform();
 
-      rightContent.querySelectorAll('[data-outline-page]').forEach((el) => {
-        el.onclick = () => goToPage(parseInt(el.dataset.outlinePage, 10));
+      // Bind Audio Studio Controls
+      rightContent.querySelectorAll('[data-rec-mode]').forEach(btn => {
+        btn.onclick = () => {
+          if (state.audioStudio.status !== 'idle') return;
+          state.audioStudio.mode = btn.getAttribute('data-rec-mode') || 'page';
+          renderRightSidebarContent();
+        };
+      });
+
+      document.getElementById('kn-rec-btn-start')?.addEventListener('click', startAudioRecording);
+      document.getElementById('kn-rec-btn-pause')?.addEventListener('click', pauseAudioRecording);
+      document.getElementById('kn-rec-btn-resume')?.addEventListener('click', resumeAudioRecording);
+      document.getElementById('kn-rec-btn-stop')?.addEventListener('click', stopAndSaveAudioRecording);
+
+      document.getElementById('kn-rec-mark-page-btn')?.addEventListener('click', () => {
+        state.audioStudio.pageTimestamps.push({
+          page: state.currentPage,
+          timeSec: state.audioStudio.elapsedSec,
+          label: `${t('صفحة', 'Page')} ${state.currentPage}`
+        });
+        renderRightSidebarContent();
+      });
+
+      document.getElementById('kn-audio-sort-select')?.addEventListener('change', (e) => {
+        state.audioStudio.sortBy = e.target.value;
+        renderRightSidebarContent();
+      });
+
+      document.getElementById('kn-audio-filter-page')?.addEventListener('change', (e) => {
+        state.audioStudio.filterCurrentPageOnly = e.target.checked;
+        renderRightSidebarContent();
+      });
+
+      rightContent.querySelectorAll('[data-rec-play]').forEach(btn => {
+        btn.onclick = () => togglePlaySavedRecording(btn.getAttribute('data-rec-play'));
+      });
+
+      rightContent.querySelectorAll('[data-rec-seek]').forEach(slider => {
+        slider.oninput = (e) => {
+          const rId = slider.getAttribute('data-rec-seek');
+          const sec = Number(e.target.value) || 0;
+          if (state.audioStudio.playingId === rId) {
+            playbackAudio.currentTime = sec;
+            state.audioStudio.currentTimeSec = sec;
+          }
+        };
+      });
+
+      rightContent.querySelectorAll('[data-rec-jump-page]').forEach(badge => {
+        badge.onclick = () => {
+          const p = parseInt(badge.getAttribute('data-rec-jump-page'), 10);
+          if (p) goToPage(p);
+        };
+      });
+
+      rightContent.querySelectorAll('[data-rec-ts-play]').forEach(chip => {
+        chip.onclick = () => {
+          const rId = chip.getAttribute('data-rec-ts-play');
+          const p = parseInt(chip.getAttribute('data-rec-ts-page'), 10) || 1;
+          const sec = parseInt(chip.getAttribute('data-rec-ts-sec'), 10) || 0;
+          goToPage(p);
+          togglePlaySavedRecording(rId, sec);
+        };
+      });
+
+      rightContent.querySelectorAll('[data-rec-rename]').forEach(btn => {
+        btn.onclick = () => {
+          const rId = btn.getAttribute('data-rec-rename');
+          const target = allFileRecordings.find(r => r.id === rId);
+          if (!target) return;
+          const nextName = window.prompt(t('إعادة تسمية التسجيل الصوتي:', 'Rename Audio Recording:'), target.name);
+          if (nextName && nextName.trim() && window.PersonalLibrary) {
+            window.PersonalLibrary.renameRecording(rId, nextName.trim());
+            renderRightSidebarContent();
+          }
+        };
+      });
+
+      rightContent.querySelectorAll('[data-rec-download]').forEach(btn => {
+        btn.onclick = async () => {
+          const rId = btn.getAttribute('data-rec-download');
+          if (window.PersonalLibrary) {
+            await window.PersonalLibrary.downloadRecording(rId);
+          }
+        };
+      });
+
+      rightContent.querySelectorAll('[data-rec-delete]').forEach(btn => {
+        btn.onclick = async () => {
+          const rId = btn.getAttribute('data-rec-delete');
+          if (window.confirm(t('هل أنت متأكد من حذف هذا التسجيل الصوتي نهائياً؟', 'Are you sure you want to delete this audio recording?'))) {
+            if (state.audioStudio.playingId === rId) {
+              playbackAudio.pause();
+              state.audioStudio.playingId = null;
+              state.audioStudio.isPlaying = false;
+            }
+            if (window.PersonalLibrary) {
+              await window.PersonalLibrary.deleteRecording(rId);
+            }
+            renderRightSidebarContent();
+          }
+        };
       });
     } else if (state.rightTab === 'notes') {
       const nc = state.notesConfig;
@@ -4465,8 +5208,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       rightContent.innerHTML = `
         <div style="padding:10px;border-bottom:1px solid var(--kn-border);display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;gap:6px;">
-            <input type="text" id="kn-notes-search" class="kn-outline-search" style="margin:0;flex:1;" placeholder="Search study notes..." value="${escapeHtml(nc.searchQuery)}" />
-            <button class="kn-btn kn-btn-primary" id="kn-add-note-sidebar" style="padding:4px 10px;" ${state.interactionMode !== 'edit' ? 'disabled title="Switch to Edit Mode to add notes"' : ''}>+ Note</button>
+            <input type="text" id="kn-notes-search" class="kn-outline-search" style="margin:0;flex:1;" placeholder="${t('ابحث في الملاحظات...', 'Search study notes...')}" value="${escapeHtml(nc.searchQuery)}" />
+            <button class="kn-btn kn-btn-primary" id="kn-add-note-sidebar" style="padding:4px 10px;">+ ${t('ملاحظة', 'Note')}</button>
           </div>
           <div style="display:flex;gap:6px;align-items:center;justify-content:space-between;">
             <select id="kn-notes-cat-filter" style="flex:1;padding:4px 6px;border-radius:6px;border:1px solid var(--kn-border);background:var(--kn-bg);color:var(--kn-text);font-size:0.74rem;font-weight:600;">
@@ -4491,8 +5234,8 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           ${
             notesList.length === 0
               ? `<div style="padding:36px 14px;text-align:center;color:var(--kn-text-muted);font-size:0.8rem;">
-                  <div style="font-weight:800;color:var(--kn-text);margin-bottom:4px;">No Notes Yet</div>
-                  Select the Notes tool in the toolbar or click <b>+ Note</b> to add structured study notes on any page.
+                  <div style="font-weight:800;color:var(--kn-text);margin-bottom:4px;">${t('لا توجد ملاحظات مضافة بعد', 'No Notes Yet')}</div>
+                  ${t('اضغط على زر + ملاحظة لإضافة ملاحظة دراسية مرتبطة بالصفحة الحالية.', 'Click + Note to add a structured study note on the current page.')}
                 </div>`
               : notesList
                   .map(
@@ -4535,7 +5278,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       const addBtn = document.getElementById('kn-add-note-sidebar');
       if (addBtn) {
         addBtn.onclick = () => {
-          if (state.interactionMode !== 'edit') return;
+          if (state.interactionMode !== 'edit') setInteractionMode('edit');
           pushHistory();
           const newNote = {
             id: `kn_note_${Date.now()}`,
@@ -4575,36 +5318,6 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           if (state.interactionMode === 'edit') {
             renderPageAnnotations(npage);
           }
-        };
-      });
-    } else if (state.rightTab === 'ai') {
-      rightContent.innerHTML = `
-        <div style="padding:14px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto;">
-          <div style="background:var(--kn-bg);border:1px solid var(--kn-border);border-radius:10px;padding:12px;font-size:0.8rem;line-height:1.5;">
-            <div style="font-weight:800;color:var(--kn-primary);margin-bottom:4px;">Kuro AI Study Assistant</div>
-            Ask about <b>${escapeHtml(sheet.title || docTitle)}</b> (Page ${state.currentPage}), generate high-yield flashcards, or summarize key clinical concepts.
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            <button class="kn-preset-chip" data-ai-prompt="Summarize Page ${state.currentPage}">✨ Summarize Page ${state.currentPage}</button>
-            <button class="kn-preset-chip" data-ai-prompt="Generate 5 High-Yield MCQs">📝 Generate 5 MCQs</button>
-            <button class="kn-preset-chip" data-ai-prompt="Key Clinical Definitions">🦷 Key Definitions</button>
-          </div>
-          <div id="kn-ai-response-box" style="flex:1;background:var(--kn-surface);border:1px solid var(--kn-border);border-radius:10px;padding:12px;font-size:0.79rem;line-height:1.55;overflow-y:auto;color:var(--kn-text-muted);">
-            Select a prompt above to analyze Page ${state.currentPage}.
-          </div>
-        </div>
-      `;
-      rightContent.querySelectorAll('[data-ai-prompt]').forEach((btn) => {
-        btn.onclick = () => {
-          const box = document.getElementById('kn-ai-response-box');
-          if (!box) return;
-          const pText = state.pageTexts[state.currentPage]?.fullText || sheet.title || 'Dental Lecture';
-          box.style.color = 'var(--kn-text)';
-          box.innerHTML = `
-            <div style="font-weight:800;color:var(--kn-primary);margin-bottom:6px;">${escapeHtml(btn.dataset.aiPrompt)}</div>
-            <div>• <b>Core Concept (Page ${state.currentPage}):</b> ${escapeHtml(pText.slice(0, 220))}...</div>
-            <div style="margin-top:6px;">• <b>Exam Pearl:</b> Correlate histopathological lining features with radiographic margins before surgical planning.</div>
-          `;
         };
       });
     }
@@ -4775,6 +5488,12 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     });
     renderVisiblePdfPages(clamped);
     saveViewState();
+    if (window.PersonalLibrary && sheet.id) {
+      window.PersonalLibrary.updateFile(sheet.id, { lastPage: clamped });
+    }
+    if (typeof onAudioStudioPageChanged === 'function') {
+      onAudioStudioPageChanged(clamped);
+    }
   }
 
   function setZoom(newZoom, mode = 'custom') {
@@ -4906,13 +5625,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       state.editingTextId = null;
     }
 
-    if (toolName === 'ai') {
-      state.rightSidebarOpen = true;
-      state.rightTab = 'ai';
-      document.getElementById('kn-sidebar-right')?.classList.remove('kn-sidebar-collapsed');
-      document.querySelectorAll('[data-right-tab]').forEach((b) => b.classList.toggle('active', b.dataset.rightTab === 'ai'));
-      renderRightSidebarContent();
+    if (toolName === 'underline') {
+      if (state.interactionMode !== 'edit') setInteractionMode('edit');
+      state.shapes.shapeType = 'line';
+      state.shapes.color = '#7E1D2A';
+      state.activeTool = 'shapes';
+      state.toolPopoverOpen = false;
+      document.querySelectorAll('#kn-toolbar .kn-tool-btn[data-tool]').forEach((btn) => {
+        const isAct = btn.dataset.tool === 'underline';
+        btn.classList.toggle('active', isAct);
+        btn.setAttribute('aria-checked', isAct ? 'true' : 'false');
+      });
+      syncInteractionLayersWithMode();
+      renderToolPopover();
       return;
+    }
+
+    // Auto-enable Edit Mode when an annotation tool is selected so students can write/draw immediately
+    if (state.interactionMode !== 'edit' && ['select', 'pen', 'highlighter', 'eraser', 'text', 'notes', 'shapes', 'image'].includes(toolName)) {
+      setInteractionMode('edit');
     }
 
     const toolsWithPopover = ['select', 'pen', 'highlighter', 'eraser', 'text', 'notes', 'shapes'];
@@ -5082,6 +5813,12 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
               tEl.classList.toggle('active', parseInt(tEl.dataset.thumbPage, 10) === p);
             });
             renderVisiblePdfPages(p);
+            if (window.PersonalLibrary && sheet.id) {
+              window.PersonalLibrary.updateFile(sheet.id, { lastPage: p });
+            }
+            if (typeof onAudioStudioPageChanged === 'function') {
+              onAudioStudioPageChanged(p);
+            }
           }
           break;
         }
@@ -5129,7 +5866,27 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
   const toggleRightSidebar = () => {
     state.rightSidebarOpen = !state.rightSidebarOpen;
     document.getElementById('kn-sidebar-right')?.classList.toggle('kn-sidebar-collapsed', !state.rightSidebarOpen);
-    document.getElementById('kn-btn-right-sidebar')?.classList.toggle('active', state.rightSidebarOpen);
+    document.getElementById('kn-btn-right-sidebar')?.classList.toggle('kn-btn-primary', state.rightSidebarOpen);
+    document.getElementById('kn-toolbar-audio-btn')?.classList.toggle('active', state.rightSidebarOpen);
+    if (state.rightSidebarOpen) {
+      renderRightSidebarContent();
+    }
+    saveViewState();
+  };
+
+  const cycleRightSidebarSize = () => {
+    const sizes = ['compact', 'standard', 'expanded'];
+    const curIdx = sizes.indexOf(state.rightSidebarSize || 'standard');
+    const nextSize = sizes[(curIdx + 1) % sizes.length];
+    state.rightSidebarSize = nextSize;
+    const rightEl = document.getElementById('kn-sidebar-right');
+    if (rightEl) {
+      rightEl.classList.remove('kn-size-compact', 'kn-size-standard', 'kn-size-expanded');
+      rightEl.classList.add(`kn-size-${nextSize}`);
+      const widths = { compact: '280px', standard: '340px', expanded: '430px' };
+      rightEl.style.width = widths[nextSize];
+      rightEl.style.minWidth = widths[nextSize];
+    }
     saveViewState();
   };
 
@@ -5138,6 +5895,12 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
   if (collapseSidebarBtn) collapseSidebarBtn.onclick = toggleLeftSidebar;
   const rightSidebarBtn = document.getElementById('kn-btn-right-sidebar');
   if (rightSidebarBtn) rightSidebarBtn.onclick = toggleRightSidebar;
+  const toolbarAudioBtn = document.getElementById('kn-toolbar-audio-btn');
+  if (toolbarAudioBtn) toolbarAudioBtn.onclick = toggleRightSidebar;
+  const rightCollapseBtn = document.getElementById('kn-right-collapse-btn');
+  if (rightCollapseBtn) rightCollapseBtn.onclick = toggleRightSidebar;
+  const rightSizeBtn = document.getElementById('kn-right-size-btn');
+  if (rightSizeBtn) rightSizeBtn.onclick = cycleRightSidebarSize;
   document.getElementById('kn-ipad-fab-left').onclick = toggleLeftSidebar;
   document.getElementById('kn-ipad-fab-right').onclick = toggleRightSidebar;
   document.getElementById('kn-mob-pages-btn').onclick = toggleLeftSidebar;
@@ -5684,7 +6447,54 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     if (errorEl) errorEl.style.display = 'none';
 
     let pdfUrl = await resolvePdfUrl();
-    if (!pdfUrl || !window.pdfjsLib) {
+    if (!pdfUrl) {
+      return;
+    }
+
+    // Support Image Handouts (PNG, JPG, WebP, GIF, SVG) imported into Personal Study Library
+    const isImageFile = sheet.fileKind === 'image' || (sheet.fileType && String(sheet.fileType).startsWith('image/'));
+    if (isImageFile) {
+      if (loaderEl) loaderEl.style.display = 'flex';
+      await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          state.totalPages = 1;
+          state.currentPage = 1;
+          if (img.width > 0 && img.height > 0) {
+            state.pdfBaseRatio = img.height / img.width;
+          }
+          buildPageCards();
+          renderLeftSidebarContent();
+          const canvas = document.getElementById('kn-pdf-canvas-1');
+          if (canvas) {
+            const { width, height } = getPageDimensions();
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          }
+          const thumbCanvas = document.getElementById('kn-thumb-canvas-1');
+          if (thumbCanvas) {
+            const tCtx = thumbCanvas.getContext('2d');
+            tCtx.drawImage(img, 0, 0, thumbCanvas.width, thumbCanvas.height);
+          }
+          renderPageAnnotations(1);
+          if (loaderEl) loaderEl.style.display = 'none';
+          resolve();
+        };
+        img.onerror = () => {
+          if (loaderEl) loaderEl.style.display = 'none';
+          resolve();
+        };
+        img.src = pdfUrl;
+      });
+      return;
+    }
+
+    if (!window.pdfjsLib) {
       return;
     }
 

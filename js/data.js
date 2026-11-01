@@ -122,59 +122,15 @@ class DataService {
       s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.webp`;
     });
     this.alerts = this.getDefaultAlerts();
-    this.sheets = this.getDefaultSheets();
+    this.sheets = [];
     this.recordings = this.getDefaultRecordings();
     this.questions = this.getDefaultQuestions();
     this.flashcards = this.getDefaultFlashcards();
 
-    // 2. Merge cached cloud sheets & local custom admin sheets instantly
+    // 2. Purge legacy old sheets system cache from localStorage
     try {
-      const obsoleteIds = ['sh_admin_1789338349423', 'sh_omdr_patient_evaluation_01', 'sh_cons_dentin_pulp', 'sh-fixed-provisional', 'sh_admin_1789336010378', 'sh-omdr-01'];
-      ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets'].forEach(k => {
-        try {
-          const raw = localStorage.getItem(k);
-          if (raw) {
-            let parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              const cleaned = parsed.filter(s => s && !obsoleteIds.includes(s.id) && !(s.title || '').toLowerCase().includes('provisional'));
-              if (cleaned.length !== parsed.length) {
-                localStorage.setItem(k, JSON.stringify(cleaned));
-              }
-            }
-          }
-        } catch (err) {}
-      });
-      if (this.pdfStore && typeof this.pdfStore.deletePdf === 'function') {
-        obsoleteIds.forEach(id => this.pdfStore.deletePdf(id).catch(() => {}));
-      }
-
-      const cachedCloudSheets = JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]');
-      if (Array.isArray(cachedCloudSheets) && cachedCloudSheets.length > 0) {
-        cachedCloudSheets.forEach(cs => {
-          const idx = this.sheets.findIndex(s => s.id === cs.id);
-          if (idx !== -1) {
-            this.sheets[idx] = { ...this.sheets[idx], ...cs };
-          } else {
-            this.sheets.push(cs);
-          }
-        });
-      }
-      const customSheets = JSON.parse(localStorage.getItem('kf_admin_custom_sheets') || '[]');
-      if (Array.isArray(customSheets) && customSheets.length > 0) {
-        customSheets.forEach(cs => {
-          if (!this.sheets.some(s => s.id === cs.id)) {
-            this.sheets.unshift(cs);
-          }
-        });
-      }
-
-      // Deduplicate sheets by ID
-      const seenIds = new Set();
-      this.sheets = this.sheets.filter(s => {
-        if (!s || !s.id || s.id === 'sh-omdr-01') return false;
-        if (seenIds.has(s.id)) return false;
-        seenIds.add(s.id);
-        return true;
+      ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets', 'kf_sheets', 'kf_deleted_sheet_ids'].forEach(k => {
+        try { localStorage.removeItem(k); } catch (err) {}
       });
     } catch (e) {}
 
@@ -204,12 +160,11 @@ class DataService {
 
     this.loaded = true;
 
-    // 3. Fire JSON & Cloud sync asynchronously in background (Non-Blocking)
+    // 3. Fire JSON sync asynchronously in background (Non-Blocking, Non-Sheets)
     setTimeout(async () => {
       try {
-        const [subjectsRes, sheetsRes, alertsRes, doctorsRes] = await Promise.allSettled([
+        const [subjectsRes, alertsRes, doctorsRes] = await Promise.allSettled([
           fetch('data/subjects.json').then(r => r.json()),
-          fetch('data/sheets.json').then(r => r.json()),
           fetch('data/alerts.json').then(r => r.json()),
           fetch('data/doctors.json').then(r => r.json())
         ]);
@@ -220,70 +175,11 @@ class DataService {
             s.cover_image = s.cover_image || this.subjectCovers[s.id] || `assets/covers/${s.id}.webp`;
           });
         }
-        if (sheetsRes.status === 'fulfilled' && Array.isArray(sheetsRes.value?.sheets) && sheetsRes.value.sheets.length > 0) {
-          sheetsRes.value.sheets.forEach(s => {
-            if (!this.sheets.some(existing => existing.id === s.id)) {
-              this.sheets.push(s);
-            }
-          });
-        }
         if (alertsRes.status === 'fulfilled' && alertsRes.value?.alerts) {
           this.alerts = alertsRes.value.alerts;
         }
         if (doctorsRes.status === 'fulfilled' && doctorsRes.value?.doctors) {
           this.doctors = doctorsRes.value.doctors;
-        }
-
-        // Live Central Cloud Sync from Supabase in background
-        // Supabase is the source of truth: sheets not in Supabase are removed from local view
-        if (window.KuroCloud && typeof window.KuroCloud.fetchCloudSheets === 'function') {
-          const liveCloudSheets = await window.KuroCloud.fetchCloudSheets();
-          if (Array.isArray(liveCloudSheets) && liveCloudSheets.length > 0) {
-            // Build set of cloud sheet IDs (authoritative list)
-            const cloudIds = new Set(liveCloudSheets.map(s => s.id));
-
-            // 1. Update/merge cloud sheets into local list
-            liveCloudSheets.forEach(cs => {
-              const idx = this.sheets.findIndex(s => s.id === cs.id);
-              if (idx !== -1) {
-                this.sheets[idx] = { ...this.sheets[idx], ...cs };
-              } else {
-                this.sheets.push(cs);
-              }
-            });
-
-            // 2. Remove any sheets that exist locally but were deleted from Supabase
-            // Built-in curriculum sheets must NEVER be removed
-            const defaultSheetIds = new Set(this.getDefaultSheets().map(s => s.id));
-            const cachedCloudIds = new Set(
-              JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]').map(s => s.id)
-            );
-            this.sheets = this.sheets.filter(s => {
-              // Always preserve built-in curriculum sheets
-              if (defaultSheetIds.has(s.id)) return true;
-              // Keep if it's in current cloud list
-              if (cloudIds.has(s.id)) return true;
-              // Keep if it was never in cloud before (static/built-in sheet)
-              if (!cachedCloudIds.has(s.id)) return true;
-              // Remove if it was in cloud before but no longer is (admin deleted it)
-              return false;
-            });
-
-            // Update cache with latest cloud state
-            localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(liveCloudSheets));
-          } else if (Array.isArray(liveCloudSheets) && liveCloudSheets.length === 0) {
-            // Cloud returned empty — could be first run or all sheets deleted
-            // Only clear cached cloud sheets (don't touch built-in sheets)
-            const defaultSheetIds = new Set(this.getDefaultSheets().map(s => s.id));
-            const cachedIds = new Set(
-              JSON.parse(localStorage.getItem('kf_cloud_cached_sheets') || '[]').map(s => s.id)
-            );
-            if (cachedIds.size > 0) {
-              // Previously had cloud sheets, now all gone — remove them (preserve built-in sheets)
-              this.sheets = this.sheets.filter(s => defaultSheetIds.has(s.id) || !cachedIds.has(s.id));
-              localStorage.setItem('kf_cloud_cached_sheets', '[]');
-            }
-          }
         }
       } catch (err) {
         console.warn('Background data sync note:', err);
@@ -421,42 +317,24 @@ class DataService {
 
   getSheetById(sheetId) {
     if (!sheetId) return null;
-    const deleted = this.getDeletedSheetIds();
-    if (deleted.includes(sheetId)) return null;
-    return (this.sheets || []).find(s => s && s.id === sheetId) || null;
+    if (window.PersonalLibrary && typeof window.PersonalLibrary.getFileById === 'function') {
+      const personalFile = window.PersonalLibrary.getFileById(sheetId);
+      if (personalFile) return personalFile;
+    }
+    return null;
   }
 
   getRecentSheets(limit = 6) {
-    const deleted = this.getDeletedSheetIds();
-    return [...(this.sheets || [])].filter(s => !deleted.includes(s.id)).slice(0, limit);
+    if (window.PersonalLibrary && typeof window.PersonalLibrary.getAllFiles === 'function') {
+      return window.PersonalLibrary.getAllFiles().slice(0, limit);
+    }
+    return [];
   }
 
   /**
-   * Synchronize sheets live from central Supabase database
-   * Can be invoked on route changes or when refreshing data
+   * Legacy syncCloudSheets stub — Old curriculum sheets system replaced by Personal Study Library
    */
   async syncCloudSheets() {
-    try {
-      if (window.KuroCloud && typeof window.KuroCloud.fetchCloudSheets === 'function') {
-        const liveCloudSheets = await window.KuroCloud.fetchCloudSheets();
-        if (Array.isArray(liveCloudSheets) && liveCloudSheets.length > 0) {
-          const deleted = this.getDeletedSheetIds();
-          liveCloudSheets.forEach(cs => {
-            if (deleted.includes(cs.id)) return;
-            const idx = this.sheets.findIndex(s => s.id === cs.id);
-            if (idx !== -1) {
-              this.sheets[idx] = { ...this.sheets[idx], ...cs };
-            } else {
-              this.sheets.push(cs);
-            }
-          });
-          localStorage.setItem('kf_cloud_cached_sheets', JSON.stringify(liveCloudSheets));
-          return liveCloudSheets;
-        }
-      }
-    } catch (e) {
-      console.warn('Live syncCloudSheets note:', e);
-    }
     return [];
   }
 
@@ -3412,200 +3290,7 @@ class DataService {
   }
 
   getDefaultSheets() {
-    return [
-      {
-        id: "sh_oral_path_caries_01",
-        subject_id: "oral-diseases",
-        subject_name_ar: "اورال باثولوجي (Oral Pathology)",
-        subject_code: "DS380",
-        order_index: 1,
-        title: "Lecture 1: Dental Caries",
-        title_ar: "المحاضرة 1: تسوس الأسنان (Dental Caries)",
-        title_en: "Lecture 1: Dental Caries",
-        doctor_name: "د. أسماء سلام الغرياني",
-        doctor: "د. أسماء سلام الغرياني",
-        pages: 11,
-        pages_count: 11,
-        size: "530 KB",
-        pdf_url: "data/sheets/dental-caries-dr-asmaa.pdf",
-        download_url: "data/sheets/dental-caries-dr-asmaa.pdf",
-        pdf_source: "local",
-        date: "2026-09-14"
-      },
-      {
-        id: "sh_prev_infection_control_01",
-        subject_id: "preventive",
-        subject_name_ar: "طب الأسنان الوقائي (Preventive Dentistry)",
-        subject_code: "DS381",
-        order_index: 1,
-        title: "Lecture 1: Dental Infection Control",
-        title_ar: "المحاضرة 1: مكافحة العدوى في طب الأسنان (Dental Infection Control)",
-        title_en: "Lecture 1: Dental Infection Control",
-        doctor_name: "د. حنان عمران",
-        doctor: "د. حنان عمران",
-        pages: 6,
-        pages_count: 6,
-        size: "316 KB",
-        pdf_url: "data/sheets/dental-infection-control-prev.pdf",
-        download_url: "data/sheets/dental-infection-control-prev.pdf",
-        pdf_source: "local",
-        date: "2026-09-15"
-      },
-      {
-        id: "sh_omdr_patient_evaluation_01",
-        subject_id: "omdr",
-        subject_name_ar: "طب الفم والتشخيص والأشعة 1 (OMDR)",
-        subject_code: "DS361",
-        order_index: 1,
-        title: "Lecture 1: Approach to the Evaluation of the Patient",
-        title_ar: "المحاضرة 1: مدخل إلى تقييم وفحص المريض (Approach to Evaluation of Patient)",
-        title_en: "Lecture 1: Approach to the Evaluation of the Patient",
-        doctor_name: "د. عبدالعظيم عياد قداد",
-        doctor: "د. عبدالعظيم عياد قداد",
-        pages: 12,
-        pages_count: 12,
-        size: "1.1 MB",
-        pdf_url: "data/sheets/approach-to-patient-evaluation-omdr.pdf",
-        download_url: "data/sheets/approach-to-patient-evaluation-omdr.pdf",
-        pdf_source: "local",
-        date: "2026-09-15"
-      },
-      {
-        id: "sh_omfs_local_anesthesia_01",
-        subject_id: "omfs",
-        subject_name_ar: "جراحة الفم والوجه والفكين 1 (OMFS)",
-        subject_code: "DS341",
-        order_index: 1,
-        title: "Lecture 1: Local Anesthesia",
-        title_ar: "المحاضرة 1: التخدير الموضعي في جراحة الفم (Local Anesthesia)",
-        title_en: "Lecture 1: Local Anesthesia",
-        doctor_name: "د. هشام شمبش",
-        doctor: "د. هشام شمبش",
-        pages: 80,
-        pages_count: 80,
-        size: "3.5 MB",
-        pdf_url: "data/sheets/local-anesthesia-omfs.pdf",
-        download_url: "data/sheets/local-anesthesia-omfs.pdf",
-        pdf_source: "local",
-        date: "2026-09-20"
-      },
-      {
-        id: "sh_oral_path_pulp_02",
-        subject_id: "oral-diseases",
-        subject_name_ar: "اورال باثولوجي (Oral Pathology)",
-        subject_code: "DS380",
-        order_index: 2,
-        title: "Lecture 2: Diseases of the Dental Pulp",
-        title_ar: "المحاضرة 2: أمراض واضطرابات لب الأسنان (Diseases of Dental Pulp)",
-        title_en: "Lecture 2: Diseases of the Dental Pulp",
-        doctor_name: "د. عائشة أبوبكر شنان",
-        doctor: "د. عائشة أبوبكر شنان",
-        pages: 16,
-        pages_count: 16,
-        size: "1.1 MB",
-        pdf_url: "data/sheets/disorders-of-dental-pulp-oral-path.pdf",
-        download_url: "data/sheets/disorders-of-dental-pulp-oral-path.pdf",
-        pdf_source: "local",
-        date: "2026-09-21"
-      },
-      {
-        id: "sh_prev_dental_caries_02",
-        subject_id: "preventive",
-        subject_name_ar: "طب الأسنان الوقائي (Preventive Dentistry)",
-        subject_code: "DS381",
-        order_index: 2,
-        title: "Lecture 2: Dental Caries & Current Concepts of Etiology",
-        title_ar: "المحاضرة 2: تسوس الأسنان والنظريات الحديثة للأسباب (Dental Caries)",
-        title_en: "Lecture 2: Dental Caries & Current Concepts of Etiology",
-        doctor_name: "د. حنان عمران",
-        doctor: "د. حنان عمران",
-        pages: 5,
-        pages_count: 5,
-        size: "253 KB",
-        pdf_url: "data/sheets/dental-caries-prev-dr-hanan.pdf",
-        download_url: "data/sheets/dental-caries-prev-dr-hanan.pdf",
-        pdf_source: "local",
-        date: "2026-09-22"
-      },
-      {
-        id: "sh_cons_dentin_pulp_01",
-        subject_id: "cons-endo",
-        subject_name_ar: "العلاج التحفظي وعلاج الجذور 2 (Cons & Endo)",
-        subject_code: "DS311",
-        order_index: 1,
-        title: "Lecture 1: The Dentin-Pulp Complex",
-        title_ar: "المحاضرة 1: معقد العاج واللب (The Dentin-Pulp Complex)",
-        title_en: "Lecture 1: The Dentin-Pulp Complex",
-        doctor_name: "د. آمال كشلاف",
-        doctor: "د. آمال كشلاف",
-        pages: 23,
-        pages_count: 23,
-        size: "1.7 MB",
-        pdf_url: "data/sheets/dentin-pulp-complex-cons.pdf",
-        download_url: "data/sheets/dentin-pulp-complex-cons.pdf",
-        pdf_source: "local",
-        date: "2026-09-23"
-      },
-      {
-        id: "sh_ortho_intro_terminology_01",
-        subject_id: "ortho",
-        subject_name_ar: "تقويم الأسنان 1 (Orthodontics)",
-        subject_code: "DS371",
-        order_index: 1,
-        title: "Lecture 1: Introduction and Terminology",
-        title_ar: "المحاضرة 1: مقدمة ومصطلحات تقويم الأسنان (Introduction and Terminology)",
-        title_en: "Lecture 1: Introduction and Terminology",
-        doctor_name: "د. بسمة جنديلة",
-        doctor: "د. بسمة جنديلة",
-        pages: 72,
-        pages_count: 72,
-        size: "2.3 MB",
-        pdf_url: "data/sheets/ortho-intro-and-terminology.pdf",
-        cloud_pdf_url: "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/sheets/sh_ortho_intro_terminology_01.pdf",
-        download_url: "data/sheets/ortho-intro-and-terminology.pdf",
-        pdf_source: "local",
-        date: "2026-09-23"
-      },
-      {
-        id: "sh_oral_path_periapical_03",
-        subject_id: "oral-diseases",
-        subject_name_ar: "اورال باثولوجي (Oral Pathology)",
-        subject_code: "DS380",
-        order_index: 3,
-        title: "Lecture 3: Diseases of Periapical Tissues",
-        title_ar: "المحاضرة 3: أمراض الأنسجة المحيطة بالذروة (Diseases of Periapical Tissues)",
-        title_en: "Lecture 3: Diseases of Periapical Tissues",
-        doctor_name: "د. عائشة أبوبكر شنان",
-        doctor: "د. عائشة أبوبكر شنان",
-        pages: 12,
-        pages_count: 12,
-        size: "450 KB",
-        pdf_url: "data/sheets/diseases-of-periapical-tissues-oral-path.pdf",
-        download_url: "data/sheets/diseases-of-periapical-tissues-oral-path.pdf",
-        pdf_source: "local",
-        date: "2026-09-28"
-      },
-      {
-        id: "sh_oral_path_cysts_04",
-        subject_id: "oral-diseases",
-        subject_name_ar: "اورال باثولوجي (Oral Pathology)",
-        subject_code: "DS380",
-        order_index: 4,
-        title: "Lecture 4: Cysts of the Jaw",
-        title_ar: "المحاضرة 4: أكياس الفكين (Cysts of the Jaw)",
-        title_en: "Lecture 4: Cysts of the Jaw",
-        doctor_name: "د. إبتسام الديب",
-        doctor: "د. إبتسام الديب",
-        pages: 37,
-        pages_count: 37,
-        size: "3.4 MB",
-        pdf_url: "data/sheets/cysts-of-the-jaw-dr-ebtesam.pdf",
-        cloud_pdf_url: "https://api.kurofangs.id.ly/storage/v1/object/public/pdf-sheets/sheets/sh_oral_path_cysts_04.pdf",
-        download_url: "data/sheets/cysts-of-the-jaw-dr-ebtesam.pdf",
-        pdf_source: "local",
-        date: "2026-09-30"
-      }
-    ];
+    return [];
   }
 
   getDefaultRecordings() {
@@ -3826,23 +3511,25 @@ class PdfStore {
   }
 
   /**
-   * Save a PDF file for a sheet
+   * Save a PDF or Image/Document file for a personal library item
    * @param {string} sheetId
-   * @param {File} file - The PDF File object
+   * @param {File|Blob} file - The File or Blob object
+   * @param {object} [extraMeta] - Optional metadata (userId, fileName, fileType)
    * @returns {Promise<boolean>}
    */
-  async savePdf(sheetId, file) {
+  async savePdf(sheetId, file, extraMeta = {}) {
     try {
       const db = await this._getDB();
-      const arrayBuffer = await file.arrayBuffer();
+      const arrayBuffer = typeof file.arrayBuffer === 'function' ? await file.arrayBuffer() : file;
       return new Promise((resolve, reject) => {
         const tx = db.transaction(this.storeName, 'readwrite');
         const store = tx.objectStore(this.storeName);
         store.put({
           sheetId: sheetId,
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
+          userId: extraMeta.userId || null,
+          fileName: extraMeta.fileName || file.name || 'document.pdf',
+          fileSize: extraMeta.fileSize || file.size || (arrayBuffer ? arrayBuffer.byteLength : 0),
+          fileType: extraMeta.fileType || file.type || 'application/pdf',
           data: arrayBuffer,
           savedAt: new Date().toISOString()
         });
@@ -3856,22 +3543,29 @@ class PdfStore {
   }
 
   /**
-   * Get a Blob URL for a stored PDF
+   * Get full record (including Blob & fileType) for a stored file
    * @param {string} sheetId
-   * @returns {Promise<string|null>} Blob URL or null
+   * @returns {Promise<{blob: Blob, url: string, fileType: string, fileName: string, fileSize: number}|null>}
    */
-  async getPdfUrl(sheetId) {
+  async getFileRecord(sheetId) {
     try {
       const db = await this._getDB();
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const tx = db.transaction(this.storeName, 'readonly');
         const store = tx.objectStore(this.storeName);
         const request = store.get(sheetId);
         request.onsuccess = () => {
           const result = request.result;
           if (result && result.data) {
-            const blob = new Blob([result.data], { type: result.fileType || 'application/pdf' });
-            resolve(URL.createObjectURL(blob));
+            const fileType = result.fileType || 'application/pdf';
+            const blob = new Blob([result.data], { type: fileType });
+            resolve({
+              blob,
+              url: URL.createObjectURL(blob),
+              fileType,
+              fileName: result.fileName || 'document',
+              fileSize: result.fileSize || blob.size
+            });
           } else {
             resolve(null);
           }
@@ -3884,7 +3578,17 @@ class PdfStore {
   }
 
   /**
-   * Get PDF metadata (name, size) without loading the full file
+   * Get a Blob URL for a stored PDF/Image
+   * @param {string} sheetId
+   * @returns {Promise<string|null>} Blob URL or null
+   */
+  async getPdfUrl(sheetId) {
+    const rec = await this.getFileRecord(sheetId);
+    return rec ? rec.url : null;
+  }
+
+  /**
+   * Get PDF metadata (name, size, type) without creating a Blob URL
    * @param {string} sheetId
    * @returns {Promise<object|null>}
    */
@@ -3898,7 +3602,12 @@ class PdfStore {
         request.onsuccess = () => {
           const result = request.result;
           if (result) {
-            resolve({ fileName: result.fileName, fileSize: result.fileSize, savedAt: result.savedAt });
+            resolve({
+              fileName: result.fileName,
+              fileSize: result.fileSize,
+              fileType: result.fileType || 'application/pdf',
+              savedAt: result.savedAt
+            });
           } else {
             resolve(null);
           }
@@ -3910,21 +3619,11 @@ class PdfStore {
     }
   }
 
-  /**
-   * Check if a PDF is stored for a sheet
-   * @param {string} sheetId
-   * @returns {Promise<boolean>}
-   */
   async hasPdf(sheetId) {
     const meta = await this.getPdfMeta(sheetId);
     return !!meta;
   }
 
-  /**
-   * Delete a stored PDF
-   * @param {string} sheetId
-   * @returns {Promise<boolean>}
-   */
   async deletePdf(sheetId) {
     try {
       const db = await this._getDB();
@@ -3945,7 +3644,8 @@ window.DATA.pdfStore = new PdfStore();
 
 /**
  * IndexedDB Audio Storage Engine
- * Stores large audio files locally as ArrayBuffers in IndexedDB.
+ * Stores large audio recordings locally as ArrayBuffers in IndexedDB,
+ * completely independent of the PDF binary store so recordings are safe.
  */
 class AudioStore {
   constructor() {
@@ -3976,18 +3676,21 @@ class AudioStore {
     });
   }
 
-  async saveAudio(recordingId, file) {
+  async saveAudio(recordingId, fileOrBlob, meta = {}) {
     try {
       const db = await this._getDB();
-      const arrayBuffer = await file.arrayBuffer();
+      const arrayBuffer = typeof fileOrBlob.arrayBuffer === 'function'
+        ? await fileOrBlob.arrayBuffer()
+        : fileOrBlob;
       return new Promise((resolve, reject) => {
         const tx = db.transaction(this.storeName, 'readwrite');
         const store = tx.objectStore(this.storeName);
         store.put({
           recordingId: recordingId,
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
+          fileName: meta.fileName || fileOrBlob.name || `${recordingId}.webm`,
+          fileSize: meta.fileSize || fileOrBlob.size || (arrayBuffer ? arrayBuffer.byteLength : 0),
+          fileType: meta.fileType || fileOrBlob.type || 'audio/webm',
+          meta: meta,
           data: arrayBuffer,
           savedAt: new Date().toISOString()
         });
@@ -4000,18 +3703,31 @@ class AudioStore {
     }
   }
 
-  async getAudioUrl(recordingId) {
+  async saveAudioBlob(recordingId, blob, meta = {}) {
+    return this.saveAudio(recordingId, blob, meta);
+  }
+
+  async getAudioRecord(recordingId) {
     try {
       const db = await this._getDB();
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const tx = db.transaction(this.storeName, 'readonly');
         const store = tx.objectStore(this.storeName);
         const request = store.get(recordingId);
         request.onsuccess = () => {
           const result = request.result;
           if (result && result.data) {
-            const blob = new Blob([result.data], { type: result.fileType || 'audio/mpeg' });
-            resolve(URL.createObjectURL(blob));
+            const fileType = result.fileType || 'audio/webm';
+            const blob = new Blob([result.data], { type: fileType });
+            resolve({
+              blob,
+              url: URL.createObjectURL(blob),
+              fileType,
+              fileName: result.fileName || `${recordingId}.webm`,
+              fileSize: result.fileSize || blob.size,
+              meta: result.meta || {},
+              savedAt: result.savedAt
+            });
           } else {
             resolve(null);
           }
@@ -4021,6 +3737,11 @@ class AudioStore {
     } catch (e) {
       return null;
     }
+  }
+
+  async getAudioUrl(recordingId) {
+    const rec = await this.getAudioRecord(recordingId);
+    return rec ? rec.url : null;
   }
 
   async hasAudio(recordingId) {
@@ -4057,6 +3778,630 @@ class AudioStore {
 }
 
 window.DATA.audioStore = new AudioStore();
+
+/**
+ * ============================================================================
+ * PERSONAL STUDY LIBRARY & AUDIO RECORDINGS ENGINE (window.PersonalLibrary)
+ * Strictly isolated per user account (userId).
+ * Starts completely empty (GoodNotes / Notability style) with zero default files.
+ * ============================================================================
+ */
+class PersonalLibraryService {
+  constructor() {
+    this.FOLDER_COLORS = [
+      { id: 'sky', hex: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.14)', border: 'rgba(14, 165, 233, 0.35)', labelAr: 'أزرق سماوي', labelEn: 'Sky Blue' },
+      { id: 'emerald', hex: '#10b981', bg: 'rgba(16, 185, 129, 0.14)', border: 'rgba(16, 185, 129, 0.35)', labelAr: 'أخضر زمردي', labelEn: 'Emerald' },
+      { id: 'amber', hex: '#f59e0b', bg: 'rgba(245, 158, 11, 0.14)', border: 'rgba(245, 158, 11, 0.35)', labelAr: 'كهرماني', labelEn: 'Amber' },
+      { id: 'rose', hex: '#f43f5e', bg: 'rgba(244, 63, 94, 0.14)', border: 'rgba(244, 63, 94, 0.35)', labelAr: 'وردي ياقوتي', labelEn: 'Rose' },
+      { id: 'violet', hex: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.14)', border: 'rgba(139, 92, 246, 0.35)', labelAr: 'بنفسجي', labelEn: 'Violet' },
+      { id: 'teal', hex: '#14b8a6', bg: 'rgba(20, 184, 166, 0.14)', border: 'rgba(20, 184, 166, 0.35)', labelAr: 'فيروزي طبي', labelEn: 'Medical Teal' },
+      { id: 'indigo', hex: '#6366f1', bg: 'rgba(99, 102, 241, 0.14)', border: 'rgba(99, 102, 241, 0.35)', labelAr: 'نيلي عميق', labelEn: 'Indigo' },
+      { id: 'slate', hex: '#64748b', bg: 'rgba(100, 116, 139, 0.14)', border: 'rgba(100, 116, 139, 0.35)', labelAr: 'رمادي صخري', labelEn: 'Slate' }
+    ];
+
+    this.FOLDER_ICONS = [
+      'folder', 'book-open', 'microscope', 'stethoscope', 'activity',
+      'brain', 'pill', 'syringe', 'shield-check', 'Sparkles', 'layers', 'archive'
+    ];
+  }
+
+  /**
+   * Resolve the active user's unique identifier so every student's library is 100% isolated.
+   */
+  getCurrentUserId() {
+    try {
+      const u = window.AUTH && typeof window.AUTH.getUser === 'function' ? window.AUTH.getUser() : null;
+      if (u) {
+        const raw = String(u.id || u.student_id || u.email || u.username || 'user').trim().toLowerCase();
+        return raw.replace(/[^a-z0-9_\-@\.]/g, '_');
+      }
+      const savedSession = localStorage.getItem('kf_session');
+      if (savedSession) {
+        const parsed = JSON.parse(savedSession);
+        if (parsed && (parsed.id || parsed.student_id || parsed.email)) {
+          return String(parsed.id || parsed.student_id || parsed.email).trim().toLowerCase().replace(/[^a-z0-9_\-@\.]/g, '_');
+        }
+      }
+    } catch (e) {}
+    return 'guest_local';
+  }
+
+  _storageKey() {
+    return `kf_personal_library_v1_${this.getCurrentUserId()}`;
+  }
+
+  _recordingsKey() {
+    return `kf_personal_recordings_v1_${this.getCurrentUserId()}`;
+  }
+
+  _loadState() {
+    try {
+      const raw = localStorage.getItem(this._storageKey());
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return {
+            folders: Array.isArray(parsed.folders) ? parsed.folders : [],
+            files: Array.isArray(parsed.files) ? parsed.files : []
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('PersonalLibrary _loadState error:', e);
+    }
+    return { folders: [], files: [] };
+  }
+
+  _saveState(state) {
+    try {
+      localStorage.setItem(this._storageKey(), JSON.stringify({
+        folders: Array.isArray(state.folders) ? state.folders : [],
+        files: Array.isArray(state.files) ? state.files : [],
+        updatedAt: new Date().toISOString()
+      }));
+      window.dispatchEvent(new CustomEvent('kf-library-updated'));
+    } catch (e) {
+      console.warn('PersonalLibrary _saveState error:', e);
+    }
+  }
+
+  // ==================== FOLDERS SYSTEM ====================
+
+  getAllFolders() {
+    const state = this._loadState();
+    return state.folders.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+  }
+
+  getFoldersByParent(parentId = null) {
+    const normParent = parentId || null;
+    return this.getAllFolders().filter(f => (f.parentId || null) === normParent);
+  }
+
+  getFolderById(folderId) {
+    if (!folderId) return null;
+    return this.getAllFolders().find(f => f.id === folderId) || null;
+  }
+
+  getFolderBreadcrumbs(folderId) {
+    const crumbs = [];
+    const all = this.getAllFolders();
+    let curr = all.find(f => f.id === folderId);
+    const visited = new Set();
+    while (curr && !visited.has(curr.id)) {
+      visited.add(curr.id);
+      crumbs.unshift(curr);
+      curr = curr.parentId ? all.find(f => f.id === curr.parentId) : null;
+    }
+    return crumbs;
+  }
+
+  getFolderCounts(folderId) {
+    const state = this._loadState();
+    const subfolders = state.folders.filter(f => (f.parentId || null) === folderId);
+    const directFiles = state.files.filter(f => (f.folderId || null) === folderId);
+
+    // Also compute total recursive files count inside subfolders
+    const countRecursiveFiles = (fid, seen = new Set()) => {
+      if (seen.has(fid)) return 0;
+      seen.add(fid);
+      let total = state.files.filter(f => (f.folderId || null) === fid).length;
+      const children = state.folders.filter(f => (f.parentId || null) === fid);
+      for (const ch of children) {
+        total += countRecursiveFiles(ch.id, seen);
+      }
+      return total;
+    };
+
+    return {
+      subfoldersCount: subfolders.length,
+      directFilesCount: directFiles.length,
+      totalFilesCount: countRecursiveFiles(folderId)
+    };
+  }
+
+  createFolder({ name, parentId = null, color = 'sky', icon = 'folder' }) {
+    const cleanName = String(name || '').trim();
+    if (!cleanName) return null;
+    const state = this._loadState();
+    const siblings = state.folders.filter(f => (f.parentId || null) === (parentId || null));
+    const maxOrder = siblings.reduce((m, f) => Math.max(m, typeof f.orderIndex === 'number' ? f.orderIndex : 0), -1);
+    const folder = {
+      id: `fld_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      userId: this.getCurrentUserId(),
+      name: cleanName,
+      parentId: parentId || null,
+      color: color || 'sky',
+      icon: icon || 'folder',
+      orderIndex: maxOrder + 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    state.folders.push(folder);
+    this._saveState(state);
+    return folder;
+  }
+
+  updateFolder(folderId, updates = {}) {
+    const state = this._loadState();
+    const idx = state.folders.findIndex(f => f.id === folderId);
+    if (idx === -1) return null;
+
+    // Prevent circular parent assignment
+    if (updates.parentId !== undefined && updates.parentId !== null) {
+      if (updates.parentId === folderId) return state.folders[idx];
+      const crumbs = this.getFolderBreadcrumbs(updates.parentId);
+      if (crumbs.some(c => c.id === folderId)) return state.folders[idx];
+    }
+
+    state.folders[idx] = {
+      ...state.folders[idx],
+      ...(updates.name !== undefined ? { name: String(updates.name).trim() || state.folders[idx].name } : {}),
+      ...(updates.color !== undefined ? { color: updates.color } : {}),
+      ...(updates.icon !== undefined ? { icon: updates.icon } : {}),
+      ...(updates.parentId !== undefined ? { parentId: updates.parentId || null } : {}),
+      updatedAt: new Date().toISOString()
+    };
+    this._saveState(state);
+    return state.folders[idx];
+  }
+
+  reorderFolders(parentId = null, orderedFolderIds = []) {
+    const state = this._loadState();
+    const normParent = parentId || null;
+    const orderMap = new Map();
+    orderedFolderIds.forEach((id, i) => orderMap.set(id, i));
+    state.folders.forEach(f => {
+      if ((f.parentId || null) === normParent && orderMap.has(f.id)) {
+        f.orderIndex = orderMap.get(f.id);
+      }
+    });
+    this._saveState(state);
+  }
+
+  async deleteFolder(folderId, { deleteFiles = true } = {}) {
+    const state = this._loadState();
+    const target = state.folders.find(f => f.id === folderId);
+    if (!target) return false;
+
+    // Collect all descendant folder IDs
+    const folderIdsToRemove = new Set([folderId]);
+    let added = true;
+    while (added) {
+      added = false;
+      for (const f of state.folders) {
+        if (f.parentId && folderIdsToRemove.has(f.parentId) && !folderIdsToRemove.has(f.id)) {
+          folderIdsToRemove.add(f.id);
+          added = true;
+        }
+      }
+    }
+
+    if (deleteFiles) {
+      const filesToRemove = state.files.filter(fl => folderIdsToRemove.has(fl.folderId));
+      for (const fl of filesToRemove) {
+        if (window.DATA?.pdfStore) {
+          await window.DATA.pdfStore.deletePdf(fl.id).catch(() => {});
+        }
+      }
+      state.files = state.files.filter(fl => !folderIdsToRemove.has(fl.folderId));
+    } else {
+      // Move files to parent folder of deleted folder
+      state.files.forEach(fl => {
+        if (folderIdsToRemove.has(fl.folderId)) {
+          fl.folderId = target.parentId || null;
+        }
+      });
+    }
+
+    state.folders = state.folders.filter(f => !folderIdsToRemove.has(f.id));
+    this._saveState(state);
+    return true;
+  }
+
+  // ==================== FILES SYSTEM ====================
+
+  getAllFiles() {
+    const state = this._loadState();
+    return state.files.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+  }
+
+  getFilesByFolder(folderId = null) {
+    const normFolder = folderId || null;
+    return this.getAllFiles().filter(f => (f.folderId || null) === normFolder);
+  }
+
+  getFileById(fileId) {
+    if (!fileId) return null;
+    const state = this._loadState();
+    const found = state.files.find(f => f.id === fileId);
+    if (!found) return null;
+    // Normalize properties so sheet-detail.js has everything it expects
+    const folder = found.folderId ? state.folders.find(fl => fl.id === found.folderId) : null;
+    return {
+      ...found,
+      title_ar: found.title || found.name,
+      title_en: found.title || found.name,
+      subject_id: found.folderId || 'personal-library',
+      subject_name_ar: folder ? folder.name : 'المكتبة الشخصية',
+      subject_code: found.fileKind === 'image' ? 'IMAGE' : 'PDF',
+      pages: found.pages || 1,
+      pages_count: found.pages || 1,
+      pdf_source: 'indexeddb'
+    };
+  }
+
+  formatFileSize(bytes) {
+    const b = Number(bytes) || 0;
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    return `${(b / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  /**
+   * Inspect a PDF or Image File to extract page count and optional thumbnail data URL
+   */
+  async inspectUploadedFile(file) {
+    const mime = (file.type || '').toLowerCase();
+    const ext = (file.name || '').split('.').pop().toLowerCase();
+    const isImage = mime.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'svg'].includes(ext);
+    const isPdf = mime === 'application/pdf' || ext === 'pdf';
+
+    if (isImage) {
+      const thumb = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              const maxDim = 260;
+              const scale = Math.min(1, maxDim / Math.max(img.width || 1, img.height || 1));
+              canvas.width = Math.max(1, Math.round((img.width || 200) * scale));
+              canvas.height = Math.max(1, Math.round((img.height || 260) * scale));
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL('image/webp', 0.75));
+            } catch (e) {
+              resolve(null);
+            }
+          };
+          img.onerror = () => resolve(null);
+          img.src = reader.result;
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+      return { pages: 1, fileKind: 'image', thumbnail: thumb };
+    }
+
+    if (isPdf && window.pdfjsLib) {
+      try {
+        const ab = await file.arrayBuffer();
+        const loadingTask = window.pdfjsLib.getDocument({ data: ab });
+        const pdfDoc = await loadingTask.promise;
+        const numPages = pdfDoc.numPages || 1;
+        let thumbnail = null;
+        try {
+          const page1 = await pdfDoc.getPage(1);
+          const vp = page1.getViewport({ scale: 0.35 });
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(vp.width));
+          canvas.height = Math.max(1, Math.round(vp.height));
+          const ctx = canvas.getContext('2d');
+          await page1.render({ canvasContext: ctx, viewport: vp }).promise;
+          thumbnail = canvas.toDataURL('image/webp', 0.72);
+        } catch (thumbErr) {}
+        return { pages: numPages, fileKind: 'pdf', thumbnail };
+      } catch (e) {
+        // Fallback binary regex page count if pdfjsLib isn't loaded yet
+        try {
+          const ab = await file.arrayBuffer();
+          const text = new TextDecoder('latin1').decode(ab.slice(0, Math.min(ab.byteLength, 2 * 1024 * 1024)));
+          const matches = text.match(/\/Type\s*\/Page\b/g);
+          const count = matches ? Math.max(1, matches.length) : 1;
+          return { pages: count, fileKind: 'pdf', thumbnail: null };
+        } catch (e2) {}
+      }
+    }
+
+    return { pages: 1, fileKind: isPdf ? 'pdf' : (isImage ? 'image' : 'document'), thumbnail: null };
+  }
+
+  /**
+   * Import a File from the student's device into the Personal Study Library
+   */
+  async importFile(file, folderId = null) {
+    if (!file) return null;
+    const userId = this.getCurrentUserId();
+    const fileId = `plf_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+    const info = await this.inspectUploadedFile(file);
+    const savedOk = await window.DATA.pdfStore.savePdf(fileId, file, {
+      userId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type || (info.fileKind === 'pdf' ? 'application/pdf' : 'application/octet-stream')
+    });
+    if (!savedOk) {
+      throw new Error('Failed to store file in local IndexedDB');
+    }
+
+    const state = this._loadState();
+    const normFolder = folderId || null;
+    const siblings = state.files.filter(f => (f.folderId || null) === normFolder);
+    const maxOrder = siblings.reduce((m, f) => Math.max(m, typeof f.orderIndex === 'number' ? f.orderIndex : 0), -1);
+
+    const cleanTitle = String(file.name || 'ملف دراسي').replace(/\.[^.]+$/, '');
+    const record = {
+      id: fileId,
+      userId,
+      folderId: normFolder,
+      title: cleanTitle,
+      name: file.name,
+      fileType: file.type || (info.fileKind === 'pdf' ? 'application/pdf' : 'image/png'),
+      fileKind: info.fileKind,
+      sizeBytes: file.size || 0,
+      size: this.formatFileSize(file.size || 0),
+      pages: info.pages || 1,
+      pages_count: info.pages || 1,
+      thumbnail: info.thumbnail || null,
+      orderIndex: maxOrder + 1,
+      date: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastOpenedAt: null,
+      lastPage: 1,
+      studyTimeSec: 0,
+      completedPages: []
+    };
+
+    state.files.push(record);
+    this._saveState(state);
+    return this.getFileById(fileId);
+  }
+
+  updateFile(fileId, updates = {}) {
+    const state = this._loadState();
+    const idx = state.files.findIndex(f => f.id === fileId);
+    if (idx === -1) return null;
+    state.files[idx] = {
+      ...state.files[idx],
+      ...(updates.title !== undefined ? { title: String(updates.title).trim() || state.files[idx].title } : {}),
+      ...(updates.folderId !== undefined ? { folderId: updates.folderId || null } : {}),
+      ...(updates.pages !== undefined ? { pages: updates.pages, pages_count: updates.pages } : {}),
+      ...(updates.lastOpenedAt !== undefined ? { lastOpenedAt: updates.lastOpenedAt } : {}),
+      ...(updates.lastPage !== undefined ? { lastPage: updates.lastPage } : {}),
+      ...(updates.studyTimeSec !== undefined ? { studyTimeSec: updates.studyTimeSec } : {}),
+      ...(updates.completedPages !== undefined ? { completedPages: updates.completedPages } : {}),
+      updatedAt: new Date().toISOString()
+    };
+    this._saveState(state);
+    return this.getFileById(fileId);
+  }
+
+  moveFile(fileId, targetFolderId = null) {
+    const state = this._loadState();
+    const idx = state.files.findIndex(f => f.id === fileId);
+    if (idx === -1) return null;
+    const normFolder = targetFolderId || null;
+    const siblings = state.files.filter(f => (f.folderId || null) === normFolder && f.id !== fileId);
+    const maxOrder = siblings.reduce((m, f) => Math.max(m, typeof f.orderIndex === 'number' ? f.orderIndex : 0), -1);
+    state.files[idx].folderId = normFolder;
+    state.files[idx].orderIndex = maxOrder + 1;
+    state.files[idx].updatedAt = new Date().toISOString();
+    this._saveState(state);
+    return this.getFileById(fileId);
+  }
+
+  reorderFiles(folderId = null, orderedFileIds = []) {
+    const state = this._loadState();
+    const normFolder = folderId || null;
+    const orderMap = new Map();
+    orderedFileIds.forEach((id, i) => orderMap.set(id, i));
+    state.files.forEach(f => {
+      if ((f.folderId || null) === normFolder && orderMap.has(f.id)) {
+        f.orderIndex = orderMap.get(f.id);
+      }
+    });
+    this._saveState(state);
+  }
+
+  async deleteFile(fileId, { keepRecordings = true } = {}) {
+    const state = this._loadState();
+    const exists = state.files.some(f => f.id === fileId);
+    if (!exists) return false;
+    state.files = state.files.filter(f => f.id !== fileId);
+    this._saveState(state);
+
+    if (window.DATA?.pdfStore) {
+      await window.DATA.pdfStore.deletePdf(fileId).catch(() => {});
+    }
+
+    if (!keepRecordings) {
+      const recs = this.getRecordingsForFile(fileId);
+      for (const r of recs) {
+        await this.deleteRecording(r.id);
+      }
+    }
+    return true;
+  }
+
+  searchLibrary(query = '') {
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) {
+      return { folders: [], files: [] };
+    }
+    const folders = this.getAllFolders().filter(f => (f.name || '').toLowerCase().includes(q));
+    const files = this.getAllFiles().filter(f =>
+      (f.title || '').toLowerCase().includes(q) ||
+      (f.name || '').toLowerCase().includes(q)
+    );
+    return { folders, files };
+  }
+
+  // ==================== FILE-LINKED AUDIO RECORDINGS SYSTEM ====================
+
+  _loadRecordings() {
+    try {
+      const raw = localStorage.getItem(this._recordingsKey());
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  _saveRecordings(list) {
+    try {
+      localStorage.setItem(this._recordingsKey(), JSON.stringify(Array.isArray(list) ? list : []));
+      window.dispatchEvent(new CustomEvent('kf-recordings-updated'));
+    } catch (e) {
+      console.warn('PersonalLibrary _saveRecordings error:', e);
+    }
+  }
+
+  getRecordingsForFile(fileId, { sortBy = 'date' } = {}) {
+    if (!fileId) return [];
+    const list = this._loadRecordings().filter(r => r && r.fileId === fileId);
+    if (sortBy === 'page') {
+      list.sort((a, b) => {
+        const pa = a.mode === 'page' ? (a.pageNumber || 1) : 0;
+        const pb = b.mode === 'page' ? (b.pageNumber || 1) : 0;
+        if (pa !== pb) return pa - pb;
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+    } else {
+      // Default sort by newest date first
+      list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    }
+    return list;
+  }
+
+  getRecordingsForPage(fileId, pageNumber) {
+    return this.getRecordingsForFile(fileId, { sortBy: 'date' }).filter(
+      r => r.mode === 'page' && Number(r.pageNumber) === Number(pageNumber)
+    );
+  }
+
+  async saveRecording({
+    id,
+    fileId,
+    fileName,
+    name,
+    mode = 'page', // 'page' | 'document'
+    pageNumber = 1,
+    pageTimestamps = [], // [{ page: 1, timeSec: 0, label: 'Page 1' }, ...]
+    durationSec = 0,
+    mimeType = 'audio/webm',
+    blob
+  }) {
+    const recId = id || `arec_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    if (blob && window.DATA?.audioStore) {
+      await window.DATA.audioStore.saveAudioBlob(recId, blob, {
+        fileId,
+        fileName,
+        name,
+        mode,
+        pageNumber,
+        durationSec,
+        fileType: mimeType
+      });
+    }
+
+    const list = this._loadRecordings();
+    const existingIdx = list.findIndex(r => r.id === recId);
+    const nowIso = new Date().toISOString();
+    const record = {
+      id: recId,
+      userId: this.getCurrentUserId(),
+      fileId,
+      fileName: fileName || '',
+      name: String(name || '').trim() || (mode === 'page' ? `تسجيل صفحة ${pageNumber}` : 'تسجيل المحاضرة كاملة'),
+      mode: mode === 'document' ? 'document' : 'page',
+      pageNumber: Number(pageNumber) || 1,
+      pageTimestamps: Array.isArray(pageTimestamps) ? pageTimestamps : [],
+      durationSec: Math.max(0, Math.round(Number(durationSec) || 0)),
+      mimeType: mimeType || 'audio/webm',
+      sizeBytes: blob ? blob.size : 0,
+      createdAt: existingIdx !== -1 ? list[existingIdx].createdAt : nowIso,
+      updatedAt: nowIso
+    };
+
+    if (existingIdx !== -1) {
+      list[existingIdx] = record;
+    } else {
+      list.unshift(record);
+    }
+    this._saveRecordings(list);
+    return record;
+  }
+
+  renameRecording(recordingId, newName) {
+    const clean = String(newName || '').trim();
+    if (!clean) return null;
+    const list = this._loadRecordings();
+    const idx = list.findIndex(r => r.id === recordingId);
+    if (idx === -1) return null;
+    list[idx].name = clean;
+    list[idx].updatedAt = new Date().toISOString();
+    this._saveRecordings(list);
+    return list[idx];
+  }
+
+  async deleteRecording(recordingId) {
+    const list = this._loadRecordings();
+    const filtered = list.filter(r => r.id !== recordingId);
+    this._saveRecordings(filtered);
+    if (window.DATA?.audioStore) {
+      await window.DATA.audioStore.deleteAudio(recordingId).catch(() => {});
+    }
+    return true;
+  }
+
+  async downloadRecording(recordingId) {
+    const list = this._loadRecordings();
+    const meta = list.find(r => r.id === recordingId);
+    if (!window.DATA?.audioStore) return false;
+    const audioRec = await window.DATA.audioStore.getAudioRecord(recordingId);
+    if (!audioRec || !audioRec.url) return false;
+
+    const ext = (audioRec.fileType || '').includes('mp4') ? 'm4a'
+      : (audioRec.fileType || '').includes('ogg') ? 'ogg'
+      : (audioRec.fileType || '').includes('wav') ? 'wav' : 'webm';
+    const safeName = (meta?.name || 'recording').replace(/[\\/:*?"<>|]+/g, '_');
+    const a = document.createElement('a');
+    a.href = audioRec.url;
+    a.download = `${safeName}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(audioRec.url), 5000);
+    return true;
+  }
+}
+
+window.PersonalLibrary = new PersonalLibraryService();
 
 /**
  * Modern Empty State UI Helper

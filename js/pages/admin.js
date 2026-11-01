@@ -587,12 +587,6 @@ window.AdminPage = (function () {
             <span>${isAr ? 'نظرة عامة' : 'Overview'}</span>
           </button>
 
-          <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'sheets' ? 'active' : ''}" data-tab="sheets">
-            <i data-lucide="file-text" style="width: 15px; height: 15px;"></i>
-            <span>${isAr ? 'الشيتات' : 'Sheets'}</span>
-            <span class="kf-segmented-badge">${sheets.length}</span>
-          </button>
-
           <button class="kf-segmented-btn admin-tab-btn ${activeTab === 'alerts' ? 'active' : ''}" data-tab="alerts">
             <i data-lucide="bell" style="width: 15px; height: 15px;"></i>
             <span>${isAr ? 'الإعلانات' : 'Alerts'}</span>
@@ -625,7 +619,6 @@ window.AdminPage = (function () {
         <!-- TAB CONTENT CONTAINER -->
         <div id="admin-tab-content">
           ${activeTab === 'overview' ? renderOverviewTab(isAr, sheets, alerts, subjects, students) : ''}
-          ${activeTab === 'sheets' ? renderSheetsTab(isAr, sheets, subjects) : ''}
           ${activeTab === 'alerts' ? renderAlertsTab(isAr, alerts) : ''}
           ${activeTab === 'students' ? renderStudentsTab(isAr, students) : ''}
           ${activeTab === 'sync' ? renderSyncTab(isAr, sheets) : ''}

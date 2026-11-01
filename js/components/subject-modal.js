@@ -832,15 +832,34 @@
 
       // Step 1: 5 Action buttons
       document.getElementById('sqm-action-sheets')?.addEventListener('click', () => {
-        SubjectModal.pushStep('step2', null, 'sheets');
+        SubjectModal.close();
+        if (window.ROUTER?.navigate) {
+          window.ROUTER.navigate('/sheets');
+        } else {
+          window.location.hash = '#/sheets';
+        }
       });
 
       document.getElementById('sqm-action-recordings')?.addEventListener('click', () => {
-        SubjectModal.pushStep('step2', null, 'recordings');
+        const subjId = SubjectModal.currentSubject?.id || '';
+        SubjectModal.close();
+        const target = subjId ? `/recordings?subject=${subjId}` : '/recordings';
+        if (window.ROUTER?.navigate) {
+          window.ROUTER.navigate(target);
+        } else {
+          window.location.hash = '#' + target;
+        }
       });
 
       document.getElementById('sqm-action-questions')?.addEventListener('click', () => {
-        SubjectModal.pushStep('step2', null, 'questions');
+        const subjId = SubjectModal.currentSubject?.id || '';
+        SubjectModal.close();
+        const target = subjId ? `/questions?subject=${subjId}` : '/questions';
+        if (window.ROUTER?.navigate) {
+          window.ROUTER.navigate(target);
+        } else {
+          window.location.hash = '#' + target;
+        }
       });
 
       document.getElementById('sqm-action-notes')?.addEventListener('click', () => {
