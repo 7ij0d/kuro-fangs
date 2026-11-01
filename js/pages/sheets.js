@@ -17,13 +17,18 @@ window.SheetsPage = {
   uploadStatusText: '',
   draggedItem: null, // { type: 'folder' | 'file', id: string }
 
-  async render(params = {}) {
+  async render(containerOrParams = {}, maybeParams = {}) {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
-    const container = document.getElementById('main-content');
+    const isDomEl = Boolean(containerOrParams && containerOrParams.nodeType === 1);
+    const container = isDomEl
+      ? containerOrParams
+      : (document.getElementById('app') || document.getElementById('main-content') || document.querySelector('.main-content'));
     if (!container) return;
 
-    if (params && params.folder !== undefined) {
-      this.currentFolderId = params.folder || null;
+    const rawParams = isDomEl ? (maybeParams || {}) : (containerOrParams || {});
+    const folderParam = typeof rawParams.get === 'function' ? rawParams.get('folder') : rawParams.folder;
+    if (folderParam !== undefined && folderParam !== null) {
+      this.currentFolderId = folderParam || null;
     }
 
     // Verify currentFolderId still exists
@@ -1241,7 +1246,7 @@ window.SheetsPage = {
         margin-bottom: 18px;
         flex-wrap: wrap;
       }
-      [data-theme="light"] .psl-header {
+      [data-theme="light"], [data-theme="kuro"] .psl-header {
         background: linear-gradient(145deg, #ffffff, #f8fafc);
         border-color: rgba(15, 23, 42, 0.09);
         box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
@@ -1308,7 +1313,7 @@ window.SheetsPage = {
         font-size: 0.78rem;
         color: var(--text-secondary, #cbd5e1);
       }
-      [data-theme="light"] .psl-stat-chip {
+      [data-theme="light"], [data-theme="kuro"] .psl-stat-chip {
         background: #f1f5f9;
         border-color: #e2e8f0;
         color: #334155;
@@ -1352,7 +1357,7 @@ window.SheetsPage = {
         color: var(--text-primary, #f8fafc);
         border-color: rgba(255, 255, 255, 0.12);
       }
-      [data-theme="light"] .psl-btn-secondary {
+      [data-theme="light"], [data-theme="kuro"] .psl-btn-secondary {
         background: #f1f5f9;
         color: #0f172a;
         border-color: #cbd5e1;
@@ -1473,7 +1478,7 @@ window.SheetsPage = {
         font-size: 0.83rem;
         font-family: inherit;
       }
-      [data-theme="light"] .psl-search-input {
+      [data-theme="light"], [data-theme="kuro"] .psl-search-input {
         background: #f8fafc;
         border-color: #cbd5e1;
         color: #0f172a;
@@ -1503,7 +1508,7 @@ window.SheetsPage = {
         font-family: inherit;
         cursor: pointer;
       }
-      [data-theme="light"] .psl-select {
+      [data-theme="light"], [data-theme="kuro"] .psl-select {
         background: #f8fafc;
         border-color: #cbd5e1;
         color: #0f172a;
@@ -1952,7 +1957,7 @@ window.SheetsPage = {
         box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
         overflow: hidden;
       }
-      [data-theme="light"] .psl-modal-card {
+      [data-theme="light"], [data-theme="kuro"] .psl-modal-card {
         background: #ffffff;
         border-color: #e2e8f0;
       }
@@ -2002,7 +2007,7 @@ window.SheetsPage = {
         font-size: 0.88rem;
         font-family: inherit;
       }
-      [data-theme="light"] .psl-input {
+      [data-theme="light"], [data-theme="kuro"] .psl-input {
         background: #f8fafc;
         border-color: #cbd5e1;
         color: #0f172a;

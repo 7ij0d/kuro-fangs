@@ -103,6 +103,26 @@ class Router {
         if (window.StudyRoomsPage && typeof window.StudyRoomsPage.render === 'function') {
           await window.StudyRoomsPage.render(container, params);
         }
+      },
+      '/': async (container, params) => {
+        if (window.HomePage && typeof window.HomePage.render === 'function') {
+          await window.HomePage.render(container, params);
+        }
+      },
+      '/sheets': async (container, params) => {
+        if (window.SheetsPage && typeof window.SheetsPage.render === 'function') {
+          await window.SheetsPage.render(container, params);
+        }
+      },
+      '/sheet-detail': async (container, params) => {
+        if (window.SheetDetailPage && typeof window.SheetDetailPage.render === 'function') {
+          await window.SheetDetailPage.render(container, params);
+        }
+      },
+      '/sheet/:id': async (container, id, params) => {
+        if (window.SheetDetailPage && typeof window.SheetDetailPage.render === 'function') {
+          await window.SheetDetailPage.render(container, id, params);
+        }
       }
     };
     this.currentPath = '';
