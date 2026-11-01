@@ -64,7 +64,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.SupabaseAuth.updateUI(window.SupabaseAuth.getUser());
     }
 
-    // Update Dark Sidebar Elements
+    // Update Sidebar Navigation Elements (Matching Reference Layout)
+    const sideHome = document.getElementById('side-nav-home');
+    if (sideHome) sideHome.textContent = isAr ? 'الرئيسية' : 'Home';
+
     const sideSub = document.getElementById('sidebar-brand-sub');
     if (sideSub) sideSub.textContent = t('brandSub');
 
@@ -81,34 +84,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sideSubjects) sideSubjects.textContent = t('navSubjects');
 
     const sideSheets = document.getElementById('side-nav-sheets');
-    if (sideSheets) sideSheets.textContent = t('sideNavSheets');
+    if (sideSheets) sideSheets.textContent = isAr ? 'المكتبة' : 'Library';
 
     const sideVideos = document.getElementById('side-nav-videos');
-    if (sideVideos) sideVideos.textContent = t('sideNavVideos');
+    if (sideVideos) sideVideos.textContent = isAr ? 'التسجيلات' : 'Recordings';
 
     const sideExams = document.getElementById('side-nav-exams');
     if (sideExams) sideExams.textContent = t('sideNavExams');
 
     const sideQuestions = document.getElementById('side-nav-questions');
-    if (sideQuestions) sideQuestions.textContent = t('sideNavQuestions');
+    if (sideQuestions) sideQuestions.textContent = isAr ? 'الأسئلة' : 'Questions';
 
     const sideFlashcards = document.getElementById('side-nav-flashcards');
     if (sideFlashcards) sideFlashcards.textContent = t('sideNavFlashcards');
 
-    const sideNotes = document.getElementById('side-nav-notes');
+    const sideMoreBtn = document.getElementById('side-nav-more-btn');
+    if (sideMoreBtn) sideMoreBtn.textContent = isAr ? 'المزيد' : 'More';
 
+    const sideProfile = document.getElementById('side-nav-profile');
+    if (sideProfile) sideProfile.textContent = isAr ? 'الملف الشخصي' : 'Student Profile';
+
+    const sideSettings = document.getElementById('side-nav-settings');
+    if (sideSettings) sideSettings.textContent = isAr ? 'الإعدادات' : 'Settings';
 
     const sideLectureSchedule = document.getElementById('side-nav-lecture-schedule');
-    if (sideLectureSchedule) sideLectureSchedule.textContent = t('sideNavLectureSchedule');
+    if (sideLectureSchedule) sideLectureSchedule.textContent = isAr ? 'جدول النظري' : 'Theory Lectures';
 
     const sidePracticalSchedule = document.getElementById('side-nav-practical-schedule');
-    if (sidePracticalSchedule) sidePracticalSchedule.textContent = t('sideNavPracticalSchedule');
+    if (sidePracticalSchedule) sidePracticalSchedule.textContent = isAr ? 'جدول العملي والعيادات' : 'Clinical & Lab';
 
     const sideExamsSchedule = document.getElementById('side-nav-exams-schedule');
-    if (sideExamsSchedule) sideExamsSchedule.textContent = t('sideNavExamsSchedule');
-
-    const sideSaved = document.getElementById('side-nav-saved');
-
+    if (sideExamsSchedule) sideExamsSchedule.textContent = isAr ? 'جدول الامتحانات' : 'Exam Schedules';
 
     const sideRewards = document.getElementById('side-nav-rewards');
     if (sideRewards) sideRewards.textContent = t('sideNavRewards');
@@ -123,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sideSoonGames) sideSoonGames.textContent = lang === 'ar' ? 'قريباً' : 'Soon';
 
     const sideAdmin = document.getElementById('side-nav-admin');
-    if (sideAdmin) sideAdmin.textContent = t('sideNavAdmin');
+    if (sideAdmin) sideAdmin.textContent = isAr ? 'بوابة الإدارة' : 'Admin Portal';
 
     const sideUserSub = document.getElementById('sidebar-user-sub');
     if (sideUserSub) sideUserSub.textContent = t('academicYear');
@@ -136,11 +142,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const navHome = document.getElementById('nav-item-home');
     if (navHome) navHome.textContent = isAr ? 'الرئيسية' : 'Home';
     const navSheets = document.getElementById('nav-item-sheets');
-    if (navSheets) navSheets.textContent = isAr ? 'الشيتات' : 'Sheets';
+    if (navSheets) navSheets.textContent = isAr ? 'المكتبة' : 'Library';
     const navRecordings = document.getElementById('nav-item-recordings');
     if (navRecordings) navRecordings.textContent = isAr ? 'التسجيلات' : 'Recordings';
     const navQuestions = document.getElementById('nav-item-questions');
-    if (navQuestions) navQuestions.textContent = isAr ? 'بنك الأسئلة' : 'Questions';
+    if (navQuestions) navQuestions.textContent = isAr ? 'الأسئلة' : 'Questions';
     const navSchedules = document.getElementById('nav-item-schedules');
     if (navSchedules) navSchedules.textContent = isAr ? 'الجداول' : 'Schedules';
     const navMore = document.getElementById('nav-item-more');
@@ -160,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (navAdmin) navAdmin.textContent = isAr ? 'بوابة الإدارة' : 'Admin Portal';
 
     const sideSchedules = document.getElementById('side-nav-schedules');
-    if (sideSchedules) sideSchedules.textContent = isAr ? 'الجداول الدراسية' : 'Schedules';
+    if (sideSchedules) sideSchedules.textContent = isAr ? 'الجداول' : 'Schedules';
 
     const sideStudyRooms = document.getElementById('side-nav-study-rooms');
     if (sideStudyRooms) sideStudyRooms.textContent = isAr ? 'غرف الدراسة' : 'Study Rooms';
@@ -175,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mbiHome = document.getElementById('mbi-label-home');
     if (mbiHome) mbiHome.textContent = isAr ? 'الرئيسية' : 'Home';
     const mbiSheets = document.getElementById('mbi-label-sheets');
-    if (mbiSheets) mbiSheets.textContent = isAr ? 'الشيتات' : 'Sheets';
+    if (mbiSheets) mbiSheets.textContent = isAr ? 'المكتبة' : 'Library';
     const mbiRecs = document.getElementById('mbi-label-recordings');
     if (mbiRecs) mbiRecs.textContent = isAr ? 'التسجيلات' : 'Recordings';
     const mbiQuestions = document.getElementById('mbi-label-questions');
@@ -186,6 +192,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (mbiScheds) mbiScheds.textContent = isAr ? 'الجداول' : 'Schedules';
     const mbiMore = document.getElementById('mbi-label-more');
     if (mbiMore) mbiMore.textContent = isAr ? 'المزيد' : 'More';
+
+    if (searchInput) {
+      searchInput.placeholder = isAr ? 'ابحث عن أي شيء...' : 'Search anything...';
+    }
 
     // Update Mobile "More" Bottom Sheet Texts
     const mmsTitle = document.getElementById('mms-sheet-title');
@@ -348,9 +358,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.detail) updateSoundUI(e.detail.enabled);
   });
 
-  // 6.3. Setup Header Center More Dropdown Controls
+  // 6.3. Setup Header Center More Dropdown & Sidebar More Submenu Controls
   const headerMoreWrap = document.getElementById('header-more-dropdown-wrap');
   const headerMoreBtn = document.getElementById('header-more-btn');
+  const sidebarMoreGroup = document.getElementById('sidebar-more-group');
+  const sidebarMoreToggleBtn = document.getElementById('sidebar-more-toggle-btn');
+
+  if (sidebarMoreToggleBtn && sidebarMoreGroup) {
+    sidebarMoreToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = sidebarMoreGroup.classList.toggle('open');
+      sidebarMoreToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  }
 
   if (headerMoreBtn && headerMoreWrap) {
     headerMoreBtn.addEventListener('click', (e) => {

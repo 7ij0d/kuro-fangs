@@ -1,0 +1,1324 @@
+/* ============================================================================
+   KURO FANGS — COMPLETE HOME DASHBOARD & NAVIGATION REDESIGN (v28.0)
+   Visual Direction: Warm Cream (#F8F5EE), Deep Burgundy (#7A1C2C), Minimal & Balanced
+   Covers: Desktop, iPad (Portrait & Landscape), Android Tablets, and Smartphones
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   1. BRAND CREST & SIDEBAR NAVIGATION (ALL VIEWPORTS)
+   ---------------------------------------------------------------------------- */
+.kf-brand-crest {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.kf-brand-crest svg {
+  display: block !important;
+}
+
+.sidebar-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  text-decoration: none !important;
+}
+
+.sidebar-brand-title {
+  font-size: 1.02rem !important;
+  font-weight: 850 !important;
+  color: #7A1C2C !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.15 !important;
+}
+
+[data-theme="dark"] .sidebar-brand-title,
+[data-theme="kuro-dark"] .sidebar-brand-title {
+  color: #FDA4AF !important;
+}
+
+/* Hide redundant section headers in sidebar for clean minimal list */
+#side-sec-learning,
+#side-sec-myspace,
+#sidebar-brand-sub {
+  display: none !important;
+}
+
+/* Collapsible More Group in Sidebar */
+.sidebar-more-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sidebar-more-toggle {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  text-align: start;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.sidebar-more-chevron {
+  width: 15px !important;
+  height: 15px !important;
+  margin-inline-start: auto;
+  color: currentColor;
+  opacity: 0.7;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-more-group.open .sidebar-more-chevron {
+  transform: rotate(180deg);
+}
+
+.sidebar-more-submenu {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding-inline-start: 12px;
+  margin-block-start: 2px;
+  border-inline-start: 2px solid rgba(122, 28, 44, 0.14);
+  margin-inline-start: 18px;
+}
+
+.sidebar-more-group.open .sidebar-more-submenu {
+  display: flex;
+}
+
+.sidebar-sub-item {
+  padding: 8px 12px !important;
+  font-size: 0.82rem !important;
+}
+
+/* Active Sidebar Item: Solid Deep Burgundy Pill (Matches Reference Mockup) */
+.app-sidebar .sidebar-menu-item {
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #3A2E30 !important;
+  gap: 12px !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.app-sidebar .sidebar-menu-item .sidebar-menu-icon-wrap {
+  color: #4A3B3E !important;
+}
+
+.app-sidebar .sidebar-menu-item .sidebar-menu-icon-wrap svg {
+  stroke: currentColor !important;
+  color: currentColor !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.app-sidebar .sidebar-menu-item:hover {
+  background: #EFE9DE !important;
+  color: #7A1C2C !important;
+}
+
+.app-sidebar .sidebar-menu-item:hover .sidebar-menu-icon-wrap {
+  color: #7A1C2C !important;
+}
+
+.app-sidebar .sidebar-menu-item.active {
+  background: #7A1C2C !important;
+  border-color: #7A1C2C !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(122, 28, 44, 0.22) !important;
+}
+
+.app-sidebar .sidebar-menu-item.active .sidebar-menu-icon-wrap,
+.app-sidebar .sidebar-menu-item.active .sidebar-menu-icon-wrap svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+[data-theme="dark"] .app-sidebar .sidebar-menu-item,
+[data-theme="kuro-dark"] .app-sidebar .sidebar-menu-item {
+  color: #D1CFD9 !important;
+}
+
+[data-theme="dark"] .app-sidebar .sidebar-menu-item .sidebar-menu-icon-wrap,
+[data-theme="kuro-dark"] .app-sidebar .sidebar-menu-item .sidebar-menu-icon-wrap {
+  color: #A6A3B5 !important;
+}
+
+[data-theme="dark"] .app-sidebar .sidebar-menu-item:hover,
+[data-theme="kuro-dark"] .app-sidebar .sidebar-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .app-sidebar .sidebar-menu-item.active,
+[data-theme="kuro-dark"] .app-sidebar .sidebar-menu-item.active {
+  background: #8B2234 !important;
+  border-color: #9E2A3E !important;
+  color: #FFFFFF !important;
+}
+
+/* ----------------------------------------------------------------------------
+   2. DESKTOP & TABLET DOCKED SIDEBAR + CLEAN TOP HEADER (>= 768px)
+   ---------------------------------------------------------------------------- */
+@media (min-width: 768px) and (min-height: 501px) {
+  :root {
+    --kf-docked-sidebar-w: 234px;
+  }
+
+  @media (max-width: 1099px) {
+    :root {
+      --kf-docked-sidebar-w: 210px;
+    }
+  }
+
+  body:not(.studio-fullscreen-active):not(.login-view-active) .app-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: var(--kf-docked-sidebar-w) !important;
+    max-width: var(--kf-docked-sidebar-w) !important;
+    height: 100dvh !important;
+    background: #F6F2E9 !important;
+    border-inline-end: 1px solid #EAE2D4 !important;
+    box-shadow: none !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(0) !important;
+    z-index: 200 !important;
+    padding-top: 0 !important;
+  }
+
+  html[dir="ltr"] body:not(.studio-fullscreen-active):not(.login-view-active) .app-sidebar {
+    left: 0 !important;
+    right: auto !important;
+  }
+
+  html[dir="rtl"] body:not(.studio-fullscreen-active):not(.login-view-active) .app-sidebar {
+    right: 0 !important;
+    left: auto !important;
+  }
+
+  [data-theme="dark"] body:not(.studio-fullscreen-active):not(.login-view-active) .app-sidebar,
+  [data-theme="kuro-dark"] body:not(.studio-fullscreen-active):not(.login-view-active) .app-sidebar {
+    background: #14131C !important;
+    border-inline-end-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .app-sidebar .sidebar-header {
+    height: 68px !important;
+    padding: 0 20px !important;
+    background: transparent !important;
+    border-bottom: none !important;
+  }
+
+  .app-sidebar .sidebar-close-btn,
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  .app-sidebar .sidebar-nav {
+    padding: 10px 14px !important;
+    gap: 5px !important;
+  }
+
+  .app-sidebar .sidebar-footer {
+    background: transparent !important;
+    border-top: 1px solid #EAE2D4 !important;
+    padding: 12px 14px !important;
+  }
+
+  [data-theme="dark"] .app-sidebar .sidebar-footer,
+  [data-theme="kuro-dark"] .app-sidebar .sidebar-footer {
+    border-top-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* Offset Main Content Wrapper by Docked Sidebar Width */
+  html[dir="ltr"] body:not(.studio-fullscreen-active):not(.login-view-active) .app-main-wrapper {
+    margin-left: var(--kf-docked-sidebar-w) !important;
+    margin-right: 0 !important;
+    width: calc(100% - var(--kf-docked-sidebar-w)) !important;
+    max-width: calc(100% - var(--kf-docked-sidebar-w)) !important;
+  }
+
+  html[dir="rtl"] body:not(.studio-fullscreen-active):not(.login-view-active) .app-main-wrapper {
+    margin-right: var(--kf-docked-sidebar-w) !important;
+    margin-left: 0 !important;
+    width: calc(100% - var(--kf-docked-sidebar-w)) !important;
+    max-width: calc(100% - var(--kf-docked-sidebar-w)) !important;
+  }
+
+  /* Clean Top Header on Desktop/Tablet: Search Bar on Start, Bell + Profile on End */
+  body:not(.studio-fullscreen-active):not(.login-view-active) .site-header {
+    height: 68px !important;
+    min-height: 68px !important;
+    padding: 0 28px !important;
+    background: rgba(248, 245, 238, 0.92) !important;
+    border-bottom: 1px solid rgba(234, 226, 212, 0.7) !important;
+    box-shadow: none !important;
+  }
+
+  [data-theme="dark"] body:not(.studio-fullscreen-active):not(.login-view-active) .site-header,
+  [data-theme="kuro-dark"] body:not(.studio-fullscreen-active):not(.login-view-active) .site-header {
+    background: rgba(18, 17, 24, 0.92) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+  }
+
+  /* Hide duplicate brand & center nav pills when Docked Sidebar is visible */
+  .site-header .header-left-group,
+  .site-header .header-nav-center,
+  .site-header .mobile-search-toggle-btn,
+  .site-header .mobile-search-close-btn {
+    display: none !important;
+  }
+
+  .site-header .header-right-tools {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+  }
+
+  /* Push Search Box to the start of the Top Header */
+  .site-header .header-right-tools .header-search-box {
+    margin-inline-end: auto !important;
+    width: min(420px, 52%) !important;
+    max-width: 420px !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .site-header .header-right-tools .header-search-box input {
+    width: 100% !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    background: #F1ECE2 !important;
+    border: 1px solid #E5DDD0 !important;
+    border-radius: 9999px !important;
+    padding-inline-start: 38px !important;
+    padding-inline-end: 16px !important;
+    font-size: 0.85rem !important;
+    color: #24181B !important;
+  }
+
+  .site-header .header-right-tools .header-search-box input:focus {
+    width: 100% !important;
+    background: #FFFFFF !important;
+    border-color: #7A1C2C !important;
+    box-shadow: 0 0 0 3px rgba(122, 28, 44, 0.10) !important;
+  }
+
+  [data-theme="dark"] .site-header .header-right-tools .header-search-box input,
+  [data-theme="kuro-dark"] .site-header .header-right-tools .header-search-box input {
+    background: #1E1C28 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #F5F2EB !important;
+  }
+
+  .site-header . main-content,
+  body:not(.studio-fullscreen-active) .main-content {
+    padding: 20px 28px 56px !important;
+    max-width: 1280px !important;
+  }
+
+  @media (max-width: 1024px) {
+    body:not(.studio-fullscreen-active) .main-content {
+      padding: 18px 20px 48px !important;
+    }
+    body:not(.studio-fullscreen-active):not(.login-view-active) .site-header {
+      padding: 0 20px !important;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   3. HOME DASHBOARD MASTER CONTAINER & WELCOME HERO BANNER
+   ---------------------------------------------------------------------------- */
+.kuro-dashboard-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.kuro-hero-workspace {
+  position: relative !important;
+  width: 100% !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: #F4ECE1 !important;
+  border: 1px solid #E6DDD0 !important;
+  box-shadow: 0 4px 18px rgba(48, 34, 38, 0.05) !important;
+  margin: 0 !important;
+}
+
+.kuro-hero-banner {
+  position: relative !important;
+  width: 100% !important;
+  height: 152px !important;
+  min-height: 152px !important;
+  max-height: 152px !important;
+  overflow: hidden !important;
+}
+
+.kuro-hero-bg-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: 75% center !important;
+  display: block !important;
+}
+
+.kuro-hero-vignette {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(90deg, rgba(249, 244, 236, 0.96) 0%, rgba(249, 244, 236, 0.86) 38%, rgba(249, 244, 236, 0.25) 62%, rgba(249, 244, 236, 0) 78%) !important;
+  z-index: 2 !important;
+}
+
+.kuro-hero-greeting-overlay {
+  position: absolute !important;
+  left: 28px !important;
+  right: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: clamp(240px, 48%, 480px) !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+
+.kuro-hero-greeting-title {
+  font-size: 1.45rem !important;
+  font-weight: 850 !important;
+  color: #6B1726 !important;
+  line-height: 1.2 !important;
+  margin: 0 0 5px !important;
+  letter-spacing: -0.02em !important;
+}
+
+.kuro-hero-greeting-sub {
+  font-size: 0.86rem !important;
+  font-weight: 550 !important;
+  color: #6F5E5C !important;
+  line-height: 1.35 !important;
+  margin: 0 0 12px !important;
+}
+
+.kuro-hero-date-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  padding: 5px 13px !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(122, 28, 44, 0.14) !important;
+  box-shadow: 0 2px 6px rgba(36, 24, 27, 0.04) !important;
+  color: #362A2C !important;
+  font-size: 0.78rem !important;
+  font-weight: 650 !important;
+}
+
+.kuro-hero-date-icon {
+  width: 14px !important;
+  height: 14px !important;
+  color: #7A1C2C !important;
+}
+
+/* ----------------------------------------------------------------------------
+   4. QUICK STATISTICS ROW (4 CARDS MATCHING REFERENCE PALETTE)
+   ---------------------------------------------------------------------------- */
+.kuro-study-summary-strip {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.kuro-summary-stat-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 13px !important;
+  padding: 14px 16px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #EAE2D6 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 10px rgba(36, 24, 27, 0.03), inset 0 1px 0 #FFFFFF !important;
+  text-decoration: none !important;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, border-color 0.18s ease !important;
+  min-width: 0 !important;
+}
+
+.kuro-summary-stat-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: #D8CBB8 !important;
+  box-shadow: 0 6px 16px rgba(36, 24, 27, 0.06) !important;
+}
+
+.kssc-icon-box {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.kssc-icon-box svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Reference Color Coding: Lavender (Time), Orange (Streak), Mint (Questions), Rose (Classes) */
+.stat-time .kssc-icon-box {
+  background: #F3EEFF !important;
+  color: #7C3AED !important;
+  border: 1px solid rgba(124, 58, 237, 0.15) !important;
+}
+
+.stat-streak .kssc-icon-box {
+  background: #FFF3E6 !important;
+  color: #EA580C !important;
+  border: 1px solid rgba(234, 88, 12, 0.16) !important;
+}
+
+.stat-questions .kssc-icon-box {
+  background: #E6F7F2 !important;
+  color: #0D9488 !important;
+  border: 1px solid rgba(13, 148, 136, 0.16) !important;
+}
+
+.stat-classes .kssc-icon-box {
+  background: #FCEEEF !important;
+  color: #9F1D35 !important;
+  border: 1px solid rgba(159, 29, 53, 0.16) !important;
+}
+
+.kssc-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+
+.kssc-val {
+  font-size: 1.25rem !important;
+  font-weight: 850 !important;
+  color: #24181B !important;
+  line-height: 1.15 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.kssc-label {
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  color: #796F70 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ----------------------------------------------------------------------------
+   5. BALANCED 2-COLUMN WORKSPACE: CONTINUE STUDYING + TODAY'S CLASSES
+   ---------------------------------------------------------------------------- */
+.kuro-home-two-col-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+  width: 100% !important;
+}
+
+.kuro-home-panel {
+  background: #FFFFFF !important;
+  border: 1px solid #EAE2D6 !important;
+  border-radius: 18px !important;
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  box-shadow: 0 2px 12px rgba(36, 24, 27, 0.03), inset 0 1px 0 #FFFFFF !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.kuro-home-panel-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.kuro-home-panel-title {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  font-size: 1.06rem !important;
+  font-weight: 800 !important;
+  color: #24181B !important;
+  margin: 0 !important;
+}
+
+.kuro-home-panel-title svg {
+  color: #7A1C2C !important;
+  width: 19px !important;
+  height: 19px !important;
+  flex-shrink: 0 !important;
+}
+
+.kuro-panel-arrow-link {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #5C4E50 !important;
+  background: transparent !important;
+  text-decoration: none !important;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease !important;
+}
+
+.kuro-panel-arrow-link:hover {
+  background: #F6F1E9 !important;
+  color: #7A1C2C !important;
+  transform: translateX(2px);
+}
+
+html[dir="rtl"] .kuro-panel-arrow-link:hover {
+  transform: translateX(-2px);
+}
+
+/* Continue Studying Inner Card */
+.kuro-cs-card-inner {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE8DC !important;
+  border-radius: 15px !important;
+  padding: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 13px !important;
+  flex: 1 !important;
+  justify-content: space-between !important;
+}
+
+.kuro-cs-file-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.kuro-cs-pdf-badge {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 13px !important;
+  background: #FCEEEF !important;
+  border: 1px solid rgba(159, 29, 53, 0.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.kuro-cs-pdf-doc {
+  width: 28px !important;
+  height: 34px !important;
+  border: 1.8px solid #C83246 !important;
+  border-radius: 5px !important;
+  background: #FFFFFF !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  padding-bottom: 4px !important;
+  position: relative !important;
+}
+
+.kuro-cs-pdf-tag {
+  background: #C83246 !important;
+  color: #FFFFFF !important;
+  font-size: 0.56rem !important;
+  font-weight: 850 !important;
+  padding: 1px 4px !important;
+  border-radius: 3px !important;
+  letter-spacing: 0.03em !important;
+  line-height: 1.1 !important;
+}
+
+.kuro-cs-file-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.kuro-cs-file-title {
+  font-size: 0.98rem !important;
+  font-weight: 800 !important;
+  color: #24181B !important;
+  margin: 0 0 4px !important;
+  line-height: 1.35 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.kuro-cs-file-folder {
+  font-size: 0.8rem !important;
+  font-weight: 550 !important;
+  color: #796F70 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.kuro-cs-meta-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: #6E625F !important;
+  padding-top: 2px !important;
+}
+
+.kuro-cs-page-stat {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: #4A3E40 !important;
+}
+
+.kuro-cs-page-stat svg {
+  color: #7A1C2C !important;
+}
+
+.kuro-cs-time-stat {
+  color: #8C7F7B !important;
+  font-size: 0.74rem !important;
+}
+
+.kuro-cs-progress-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.kuro-cs-progress-track {
+  flex: 1 !important;
+  height: 7px !important;
+  background: #EAE0D3 !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+}
+
+.kuro-cs-progress-fill {
+  height: 100% !important;
+  background: linear-gradient(90deg, #7A1C2C 0%, #9E2A3B 100%) !important;
+  border-radius: 9999px !important;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.kuro-cs-progress-pct {
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  color: #7A1C2C !important;
+  font-variant-numeric: tabular-nums !important;
+  flex-shrink: 0 !important;
+}
+
+.kuro-cs-primary-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 10px 18px !important;
+  border-radius: 12px !important;
+  background: #7A1C2C !important;
+  color: #FFFFFF !important;
+  font-size: 0.88rem !important;
+  font-weight: 750 !important;
+  text-decoration: none !important;
+  border: 1px solid #631421 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 12px rgba(122, 28, 44, 0.20) !important;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.16s ease, box-shadow 0.16s ease !important;
+  box-sizing: border-box !important;
+}
+
+.kuro-cs-primary-btn:hover {
+  background: #631421 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 16px rgba(122, 28, 44, 0.28) !important;
+}
+
+.kuro-cs-primary-btn:active {
+  transform: scale(0.985) !important;
+}
+
+/* Continue Studying Empty State */
+.kuro-cs-empty-state {
+  background: #FAF7F2 !important;
+  border: 1px dashed #E2D7C8 !important;
+  border-radius: 15px !important;
+  padding: 20px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 12px !important;
+  flex: 1 !important;
+  justify-content: center !important;
+}
+
+.kuro-cs-empty-badge {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 13px !important;
+  background: #FCEEEF !important;
+  border: 1px solid rgba(159, 29, 53, 0.16) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.kuro-pdf-emblem {
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+  color: #7A1C2C !important;
+  letter-spacing: 0.04em !important;
+}
+
+.kuro-cs-empty-text h3 {
+  font-size: 0.96rem !important;
+  font-weight: 800 !important;
+  color: #24181B !important;
+  margin: 0 0 4px !important;
+}
+
+.kuro-cs-empty-text p {
+  font-size: 0.8rem !important;
+  color: #796F70 !important;
+  margin: 0 !important;
+  line-height: 1.45 !important;
+  max-width: 380px !important;
+}
+
+/* Today's Classes Panel */
+.kuro-view-schedule-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 0.8rem !important;
+  font-weight: 750 !important;
+  color: #7A1C2C !important;
+  text-decoration: none !important;
+  padding: 5px 10px !important;
+  border-radius: 8px !important;
+  transition: background 0.16s ease !important;
+}
+
+.kuro-view-schedule-link:hover {
+  background: #FCEEEF !important;
+}
+
+.kuro-classes-body {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+}
+
+.kuro-today-classes-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.kuro-today-class-row {
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+  padding: 13px 16px !important;
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE8DC !important;
+  border-radius: 14px !important;
+  cursor: pointer !important;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.16s ease, border-color 0.16s ease !important;
+}
+
+.kuro-today-class-row:hover {
+  background: #F4EFE6 !important;
+  border-color: #DFD4C4 !important;
+  transform: translateY(-1px) !important;
+}
+
+.ktcr-accent-bar {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  inset-inline-start: 0 !important;
+  width: 4px !important;
+}
+
+.ktcr-icon-box {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  border: 1px solid transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  margin-inline-start: 2px !important;
+}
+
+.ktcr-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.ktcr-time-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+
+.ktcr-time {
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  color: #7A1C2C !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.ktcr-status-pill {
+  font-size: 0.68rem !important;
+  font-weight: 750 !important;
+  padding: 2px 8px !important;
+  border-radius: 9999px !important;
+  background: #F0EAE0 !important;
+  color: #6E5D53 !important;
+}
+
+.ktcr-status-pill.status-live {
+  background: #E6F7F2 !important;
+  color: #0D9488 !important;
+}
+
+.ktcr-status-pill.status-upcoming {
+  background: #FCEEEF !important;
+  color: #7A1C2C !important;
+}
+
+.ktcr-subject {
+  font-size: 0.94rem !important;
+  font-weight: 800 !important;
+  color: #24181B !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ktcr-hall {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 0.76rem !important;
+  font-weight: 550 !important;
+  color: #796F70 !important;
+}
+
+.ktcr-hall svg {
+  color: #9C8F8C !important;
+}
+
+.kuro-classes-empty {
+  background: #FAF7F2 !important;
+  border: 1px dashed #E2D7C8 !important;
+  border-radius: 15px !important;
+  padding: 24px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 10px !important;
+  flex: 1 !important;
+}
+
+.kuro-classes-empty-icon {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 13px !important;
+  background: #FCEEEF !important;
+  color: #7A1C2C !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.kuro-classes-empty-info h3 {
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  color: #24181B !important;
+  margin: 0 0 4px !important;
+}
+
+.kuro-classes-empty-info p {
+  font-size: 0.8rem !important;
+  color: #796F70 !important;
+  margin: 0 !important;
+  max-width: 340px !important;
+  line-height: 1.45 !important;
+}
+
+.kuro-classes-empty-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-top: 4px !important;
+  padding: 8px 16px !important;
+  border-radius: 9999px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #DFD2C3 !important;
+  color: #7A1C2C !important;
+  font-size: 0.8rem !important;
+  font-weight: 750 !important;
+  text-decoration: none !important;
+  transition: all 0.16s ease !important;
+}
+
+.kuro-classes-empty-btn:hover {
+  background: #FCEEEF !important;
+  border-color: rgba(122, 28, 44, 0.25) !important;
+}
+
+/* ----------------------------------------------------------------------------
+   6. QUICK ACCESS SHORTCUTS (COMPACT BOTTOM STRIP)
+   ---------------------------------------------------------------------------- */
+.kuro-quick-access-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.kuro-qa-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.kuro-qa-title {
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  color: #4A3E40 !important;
+  margin: 0 !important;
+}
+
+.kuro-qa-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.kuro-qa-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  padding: 12px 14px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #EAE2D6 !important;
+  border-radius: 14px !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 8px rgba(36, 24, 27, 0.025) !important;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.16s ease, box-shadow 0.16s ease !important;
+  min-width: 0 !important;
+}
+
+.kuro-qa-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: #D5C6B4 !important;
+  box-shadow: 0 6px 14px rgba(36, 24, 27, 0.06) !important;
+}
+
+.kuro-qa-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.kuro-qa-meta {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.kuro-qa-name {
+  font-size: 0.84rem !important;
+  font-weight: 750 !important;
+  color: #24181B !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.kuro-qa-sub {
+  font-size: 0.71rem !important;
+  color: #857977 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.kuro-qa-arrow {
+  color: #B0A39F !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* ----------------------------------------------------------------------------
+   7. TABLET & iPAD RESPONSIVE ADAPTATIONS (768px – 1199px)
+   ---------------------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .kuro-qa-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .kuro-summary-stat-card {
+    padding: 12px 13px !important;
+    gap: 10px !important;
+  }
+
+  .kssc-icon-box {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .kssc-val {
+    font-size: 1.12rem !important;
+  }
+}
+
+/* Portrait Tablet / Phablet (600px – 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
+  .kuro-home-two-col-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .kuro-qa-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   8. SMARTPHONE RESPONSIVE ARCHITECTURE (<= 599px — Matches Phone Mockup)
+   ---------------------------------------------------------------------------- */
+@media (max-width: 599px) {
+  .kuro-dashboard-container {
+    gap: 14px !important;
+  }
+
+  .kuro-hero-banner {
+    height: 132px !important;
+    min-height: 132px !important;
+    max-height: 132px !important;
+  }
+
+  .kuro-hero-greeting-overlay {
+    left: 16px !important;
+    width: 66% !important;
+  }
+
+  .kuro-hero-greeting-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 3px !important;
+  }
+
+  .kuro-hero-greeting-sub {
+    font-size: 0.75rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .kuro-hero-date-chip {
+    padding: 4px 10px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .kuro-hero-date-full {
+    display: none !important;
+  }
+
+  .kuro-hero-date-short {
+    display: inline !important;
+  }
+
+  /* 4-Column Compact Quick Statistics Strip on Phone (Matches Right Side of Reference Image) */
+  .kuro-study-summary-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .kuro-summary-stat-card {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 10px 6px !important;
+    gap: 6px !important;
+    border-radius: 14px !important;
+  }
+
+  .kssc-icon-box {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .kssc-icon-box svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .kssc-meta {
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .kssc-val {
+    font-size: 0.98rem !important;
+  }
+
+  .kssc-label {
+    font-size: 0.64rem !important;
+    max-width: 100% !important;
+  }
+
+  /* Stack Continue Studying & Today's Classes cleanly on phone */
+  .kuro-home-two-col-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .kuro-home-panel {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .kuro-cs-card-inner {
+    padding: 14px !important;
+    gap: 11px !important;
+  }
+
+  .kuro-cs-pdf-badge {
+    width: 46px !important;
+    height: 46px !important;
+  }
+
+  .kuro-cs-file-title {
+    font-size: 0.92rem !important;
+  }
+
+  /* Quick Access 2-Column Grid on Phone */
+  .kuro-qa-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .kuro-qa-card {
+    padding: 11px 12px !important;
+  }
+
+  .kuro-qa-sub {
+    display: none !important;
+  }
+}
+
+/* Dark Theme Support for Redesigned Home Panels */
+[data-theme="dark"] .kuro-home-panel,
+[data-theme="kuro-dark"] .kuro-home-panel,
+[data-theme="dark"] .kuro-summary-stat-card,
+[data-theme="kuro-dark"] .kuro-summary-stat-card,
+[data-theme="dark"] .kuro-qa-card,
+[data-theme="kuro-dark"] .kuro-qa-card {
+  background: #1B1924 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="dark"] .kuro-cs-card-inner,
+[data-theme="kuro-dark"] .kuro-cs-card-inner,
+[data-theme="dark"] .kuro-today-class-row,
+[data-theme="kuro-dark"] .kuro-today-class-row,
+[data-theme="dark"] .kuro-cs-empty-state,
+[data-theme="kuro-dark"] .kuro-cs-empty-state,
+[data-theme="dark"] .kuro-classes-empty,
+[data-theme="kuro-dark"] .kuro-classes-empty {
+  background: #23202E !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .kuro-home-panel-title,
+[data-theme="kuro-dark"] .kuro-home-panel-title,
+[data-theme="dark"] .kuro-cs-file-title,
+[data-theme="kuro-dark"] .kuro-cs-file-title,
+[data-theme="dark"] .ktcr-subject,
+[data-theme="kuro-dark"] .ktcr-subject,
+[data-theme="dark"] .kssc-val,
+[data-theme="kuro-dark"] .kssc-val,
+[data-theme="dark"] .kuro-qa-name,
+[data-theme="kuro-dark"] .kuro-qa-name,
+[data-theme="dark"] .kuro-cs-empty-text h3,
+[data-theme="kuro-dark"] .kuro-cs-empty-text h3,
+[data-theme="dark"] .kuro-classes-empty-info h3,
+[data-theme="kuro-dark"] .kuro-classes-empty-info h3 {
+  color: #F5F2EB !important;
+}
+
+[data-theme="dark"] .kuro-cs-file-folder,
+[data-theme="kuro-dark"] .kuro-cs-file-folder,
+[data-theme="dark"] .ktcr-hall,
+[data-theme="kuro-dark"] .ktcr-hall,
+[data-theme="dark"] .kssc-label,
+[data-theme="kuro-dark"] .kssc-label,
+[data-theme="dark"] .kuro-qa-sub,
+[data-theme="kuro-dark"] .kuro-qa-sub {
+  color: #A6A09E !important;
+}

@@ -234,11 +234,26 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     }
   } catch (e) {}
 
+  // User-scoped Storage keys so every student's annotations, bookmarks, and view state are private
+  const activeUserId = window.PersonalLibrary && typeof window.PersonalLibrary.getCurrentUserId === 'function'
+    ? window.PersonalLibrary.getCurrentUserId()
+    : 'guest';
+  const KEY_ANNOTS = `kf_kn_annotations_${activeUserId}_${sheet.id}`;
+  const KEY_BM = `kf_kn_bookmarks_${activeUserId}_${sheet.id}`;
+  const KEY_STATE = `kf_kn_viewstate_${activeUserId}_${sheet.id}`;
+  const KEY_HL_PRESETS = `kf_kn_hl_presets_${activeUserId}_v1`;
+  const KEY_PEN_PRESETS = `kf_kn_pen_presets_${activeUserId}_v1`;
+
   try {
     const subjId = sheet.subject_id || sheet.subjectId;
-    let sNameAr = sheet.subject_name_ar || (sheet.subject && sheet.subject.name_ar) || '';
-    let sNameEn = sheet.subject_name_en || (sheet.subject && sheet.subject.name_en) || '';
-    let sName = sheet.subject_name || (sheet.subject && sheet.subject.name) || '';
+    let folderName = '';
+    if (sheet.folderId && window.PersonalLibrary && typeof window.PersonalLibrary.getFolderById === 'function') {
+      const fObj = window.PersonalLibrary.getFolderById(sheet.folderId);
+      if (fObj && fObj.name) folderName = fObj.name;
+    }
+    let sNameAr = folderName || sheet.subject_name_ar || (sheet.subject && sheet.subject.name_ar) || '';
+    let sNameEn = folderName || sheet.subject_name_en || (sheet.subject && sheet.subject.name_en) || '';
+    let sName = folderName || sheet.subject_name || (sheet.subject && sheet.subject.name) || '';
     if ((!sNameAr || !sNameEn) && subjId && window.DATA && typeof window.DATA.getSubjects === 'function') {
       try {
         const subjs = window.DATA.getSubjects();
@@ -251,37 +266,38 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       } catch (err) {}
     }
 
-    localStorage.setItem(
-      'kf_last_opened_sheet',
-      JSON.stringify({
-        id: sheet.id,
-        title: sheet.title_en || sheet.title || sheet.title_ar || sheet.name,
-        title_ar: sheet.title_ar || sheet.title,
-        title_en: sheet.title_en || sheet.title,
-        subjectId: subjId,
-        subject_id: subjId,
-        subject_name: sName,
-        subject_name_ar: sNameAr,
-        subject_name_en: sNameEn,
-        timestamp: Date.now(),
-        openedAt: Date.now(),
-      })
-    );
+    if (window.PersonalLibrary && typeof window.PersonalLibrary.updateFile === 'function') {
+      window.PersonalLibrary.updateFile(sheet.id, {
+        lastOpenedAt: new Date().toISOString()
+      });
+    }
+
+    const lastOpenedPayload = JSON.stringify({
+      id: sheet.id,
+      userId: activeUserId,
+      folderId: sheet.folderId || null,
+      folderName: folderName || '',
+      fileKind: sheet.fileKind || 'pdf',
+      title: sheet.title_en || sheet.title || sheet.title_ar || sheet.name,
+      title_ar: sheet.title_ar || sheet.title || sheet.name,
+      title_en: sheet.title_en || sheet.title || sheet.name,
+      subjectId: subjId,
+      subject_id: subjId,
+      subject_name: sName,
+      subject_name_ar: sNameAr,
+      subject_name_en: sNameEn,
+      lastPage: Math.max(1, parseInt(sheet.lastPage, 10) || 1),
+      totalPages: Math.max(1, parseInt(sheet.pages || sheet.pages_count, 10) || 1),
+      timestamp: Date.now(),
+      openedAt: Date.now(),
+    });
+    localStorage.setItem('kf_last_opened_sheet', lastOpenedPayload);
+    localStorage.setItem(`kf_last_opened_sheet_${activeUserId}`, lastOpenedPayload);
   } catch (e) {}
 
   // Logical coordinate system per page (scales cleanly with zoom & rotation)
   const BASE_W = 720;
   const BASE_H = 960;
-
-  // User-scoped Storage keys so every student's annotations, bookmarks, and view state are private
-  const activeUserId = window.PersonalLibrary && typeof window.PersonalLibrary.getCurrentUserId === 'function'
-    ? window.PersonalLibrary.getCurrentUserId()
-    : 'guest';
-  const KEY_ANNOTS = `kf_kn_annotations_${activeUserId}_${sheet.id}`;
-  const KEY_BM = `kf_kn_bookmarks_${activeUserId}_${sheet.id}`;
-  const KEY_STATE = `kf_kn_viewstate_${activeUserId}_${sheet.id}`;
-  const KEY_HL_PRESETS = `kf_kn_hl_presets_${activeUserId}_v1`;
-  const KEY_PEN_PRESETS = `kf_kn_pen_presets_${activeUserId}_v1`;
 
   const safeJSON = (key, fallback, legacyKey = null) => {
     try {
@@ -465,6 +481,25 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           rightTab: state.rightTab,
         })
       );
+      if (window.PersonalLibrary && typeof window.PersonalLibrary.updateFile === 'function') {
+        window.PersonalLibrary.updateFile(sheet.id, {
+          lastPage: state.currentPage,
+          pages: state.totalPages,
+          lastOpenedAt: new Date().toISOString()
+        });
+      }
+      const rawLast = localStorage.getItem(`kf_last_opened_sheet_${activeUserId}`) || localStorage.getItem('kf_last_opened_sheet');
+      if (rawLast) {
+        const parsedLast = JSON.parse(rawLast);
+        if (parsedLast && parsedLast.id === sheet.id) {
+          parsedLast.lastPage = state.currentPage;
+          parsedLast.totalPages = state.totalPages;
+          parsedLast.timestamp = Date.now();
+          const updatedStr = JSON.stringify(parsedLast);
+          localStorage.setItem('kf_last_opened_sheet', updatedStr);
+          localStorage.setItem(`kf_last_opened_sheet_${activeUserId}`, updatedStr);
+        }
+      }
     } catch (e) {}
   };
 
