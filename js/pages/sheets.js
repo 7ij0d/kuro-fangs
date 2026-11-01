@@ -1,24 +1,25 @@
 /**
- * KURO FANGS — PERSONAL STUDY LIBRARY (المكتبة الدراسية الشخصية)
- * GoodNotes / Notability-Grade Personal Workspace (#/sheets)
- * - 100% Private per User Account (Zero default/admin sheets, zero hardcoded subjects/doctors)
- * - Nested Folders & Subfolders with Custom Colors, Icons & Breadcrumb Navigation
- * - Drag & Drop Reordering for Folders and Files + Drag File onto Folder to Move
- * - Multi-File Device Import (PDFs, Images, Handouts) stored in IndexedDB
- * - Instant launch into the Integrated Study Reader & Audio Recording Studio (#/sheet-detail)
+ * KURO FANGS — PERSONAL STUDY LIBRARY (Library / المكتبة الدراسية)
+ * Minimalist Modern UI matching the KURO FANGS Burgundy & Warm Cream Design System
+ * - Real Folders Grid with 3-dots menu, drag-and-drop reorder, and file drop targets
+ * - Recent Files (last 3 opened files with "View All ->" toggle) & real Page 1 PDF thumbnails
+ * - Full CRUD: Create/Rename/Delete Folders, Import PDFs & Images, Move/Rename/Delete Files
+ * - Grid View & List View switcher + live instant search
  */
 
 window.SheetsPage = {
   currentFolderId: null, // null = Root Library
   searchQuery: '',
   viewMode: 'grid', // 'grid' | 'list'
-  sortBy: 'custom', // 'custom' | 'date' | 'name' | 'pages'
+  showAllFiles: false, // false = show last 3 in Recent Files; true = show all
   isUploading: false,
   uploadStatusText: '',
   draggedItem: null, // { type: 'folder' | 'file', id: string }
+  openMenuId: null, // currently open 3-dots menu id
+  _thumbQueueRunning: false,
 
   async render(containerOrParams = {}, maybeParams = {}) {
-    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
+    const isAr = window.I18N ? window.I18N.getLang() === 'ar' : false;
     const isDomEl = Boolean(containerOrParams && containerOrParams.nodeType === 1);
     const container = isDomEl
       ? containerOrParams
@@ -40,109 +41,153 @@ window.SheetsPage = {
     this.renderWorkspace(container, isAr);
   },
 
+  formatFileTimestamp(file, isAr) {
+    const raw = file.lastOpenedAt || file.updatedAt || file.createdAt || file.date;
+    if (!raw) return isAr ? 'اليوم' : 'Today';
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return String(raw);
+
+    const now = new Date();
+    const isSameDay = (a, b) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+
+    const timeStr = d.toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+
+    if (isSameDay(d, now)) {
+      return isAr ? `اليوم، ${timeStr}` : `Today, ${timeStr}`;
+    }
+    if (isSameDay(d, yesterday)) {
+      return isAr ? `أمس، ${timeStr}` : `Yesterday, ${timeStr}`;
+    }
+
+    const dateStr = d.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+    return `${dateStr}, ${timeStr}`;
+  },
+
+  formatDisplayFileName(file) {
+    const rawTitle = String(file.title || file.name || 'Document').trim();
+    const isImage = file.fileKind === 'image';
+    if (isImage) return rawTitle;
+    if (/\.pdf$/i.test(rawTitle)) return rawTitle;
+    return `${rawTitle}.pdf`;
+  },
+
+  getFolderSvg(colorHex = '#8B1D2C', fillLight = '#F2DCE0', fillFront = '#F6E5E8', width = 40, height = 32) {
+    return `
+      <svg width="${width}" height="${height}" viewBox="0 0 46 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M3 9C3 6.79086 4.79086 5 7 5H17.3431C18.404 5 19.4214 5.42143 20.1716 6.17157L22.8284 8.82843C23.5786 9.57857 24.596 10 25.6569 10H39C41.2091 10 43 11.7909 43 14V31C43 33.2091 41.2091 35 39 35H7C4.79086 35 3 33.2091 3 31V9Z" fill="${fillLight}" stroke="${colorHex}" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M3 14.5H43V31C43 33.2091 41.2091 35 39 35H7C4.79086 35 3 33.2091 3 31V14.5Z" fill="${fillFront}" stroke="${colorHex}" stroke-width="2.2" stroke-linejoin="round"/>
+      </svg>
+    `;
+  },
+
   renderWorkspace(container, isAr) {
     const lib = window.PersonalLibrary;
     if (!lib) {
-      container.innerHTML = `<div style="padding:48px;text-align:center;">Loading Personal Library...</div>`;
+      container.innerHTML = `<div style="padding:48px;text-align:center;">Loading Library...</div>`;
       return;
     }
-
-    const user = window.AUTH && typeof window.AUTH.getUser === 'function' ? window.AUTH.getUser() : null;
-    const userName = user ? (user.name || user.username || (isAr ? 'طالب' : 'Student')) : (isAr ? 'طالب' : 'Student');
 
     const isSearching = this.searchQuery.trim().length > 0;
     const breadcrumbs = this.currentFolderId ? lib.getFolderBreadcrumbs(this.currentFolderId) : [];
     const currentFolder = this.currentFolderId ? lib.getFolderById(this.currentFolderId) : null;
 
     let folders = [];
-    let files = [];
+    let filesToDisplay = [];
+    let totalFilesInView = 0;
 
     if (isSearching) {
       const res = lib.searchLibrary(this.searchQuery);
       folders = res.folders;
-      files = res.files;
-    } else {
+      filesToDisplay = res.files;
+      totalFilesInView = res.files.length;
+    } else if (currentFolder) {
       folders = lib.getFoldersByParent(this.currentFolderId);
-      files = lib.getFilesByFolder(this.currentFolderId);
+      const folderFiles = lib.getFilesByFolder(this.currentFolderId);
+      filesToDisplay = folderFiles;
+      totalFilesInView = folderFiles.length;
+    } else {
+      // Root Library: Show Root Folders + Recent Files (or All Files if View All is active)
+      folders = lib.getFoldersByParent(null);
+      const allFiles = lib.getAllFiles().slice().sort((a, b) => {
+        const tA = new Date(a.lastOpenedAt || a.updatedAt || a.createdAt || 0).getTime();
+        const tB = new Date(b.lastOpenedAt || b.updatedAt || b.createdAt || 0).getTime();
+        return tB - tA;
+      });
+      totalFilesInView = allFiles.length;
+      filesToDisplay = this.showAllFiles ? allFiles : allFiles.slice(0, 3);
     }
-
-    // Apply file sorting if not custom order
-    if (this.sortBy === 'name') {
-      files = [...files].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    } else if (this.sortBy === 'date') {
-      files = [...files].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    } else if (this.sortBy === 'pages') {
-      files = [...files].sort((a, b) => (b.pages || 1) - (a.pages || 1));
-    }
-
-    const allFoldersCount = lib.getAllFolders().length;
-    const allFilesCount = lib.getAllFiles().length;
 
     container.innerHTML = `
-      <div class="psl-shell page-enter" id="psl-dropzone-root" dir="${isAr ? 'rtl' : 'ltr'}">
+      <div class="lib-page-shell" id="psl-dropzone-root" dir="${isAr ? 'rtl' : 'ltr'}">
         
-        <!-- Drag & Drop Full-Screen Overlay when dragging files from OS -->
-        <div class="psl-os-drop-overlay" id="psl-os-drop-overlay">
-          <div class="psl-os-drop-box">
-            <div class="psl-os-drop-icon">
-              <i data-lucide="upload-cloud" style="width:44px;height:44px;"></i>
+        <!-- OS File Drag & Drop Overlay -->
+        <div class="lib-os-drop-overlay" id="psl-os-drop-overlay">
+          <div class="lib-os-drop-box">
+            <div class="lib-os-drop-icon">
+              ${this.getFolderSvg('#8B1D2C', '#F2DCE0', '#F6E5E8', 52, 42)}
             </div>
             <h3>${isAr ? 'أفلت الملفات هنا لإضافتها إلى مكتبتك' : 'Drop files here to import into your library'}</h3>
             <p>${currentFolder
-              ? (isAr ? `سيتم حفظ الملفات مباشرة داخل مجلد "${this.escapeHtml(currentFolder.name)}"` : `Files will be imported directly into "${this.escapeHtml(currentFolder.name)}"`)
-              : (isAr ? 'يدعم ملفات PDF والصور والملازم الدراسية (يمكنك رفع عدة ملفات دفعة واحدة)' : 'Supports PDF, Images, and study handouts (Multi-file upload supported)')
+              ? (isAr ? `سيتم حفظ الملفات داخل "${this.escapeHtml(currentFolder.name)}"` : `Files will be imported into "${this.escapeHtml(currentFolder.name)}"`)
+              : (isAr ? 'يدعم ملفات PDF والصور (يمكنك رفع عدة ملفات دفعة واحدة)' : 'Supports PDF and images (Multi-file upload supported)')
             }</p>
           </div>
         </div>
 
-        <!-- Top Studio Header -->
-        <header class="psl-header">
-          <div class="psl-header-main">
-            <div class="psl-brand-row">
-              <div class="psl-brand-badge">
-                <i data-lucide="library" style="width:18px;height:18px;"></i>
-                <span>${isAr ? 'المكتبة الدراسية الشخصية' : 'PERSONAL STUDY LIBRARY'}</span>
-              </div>
-              <span class="psl-privacy-pill" title="${isAr ? 'ملفاتك ومجلداتك خاصة بحسابك فقط' : 'Your files and folders are strictly private to your account'}">
-                <i data-lucide="shield-check" style="width:13px;height:13px;"></i>
-                <span>${isAr ? `مساحة خاصة • ${this.escapeHtml(userName)}` : `Private Workspace • ${this.escapeHtml(userName)}`}</span>
-              </span>
+        <!-- 1. LIBRARY HEADER (Directly on page background — No heavy wrapper box) -->
+        <header class="lib-page-header">
+          <div class="lib-header-left">
+            <div class="lib-header-icon-wrap">
+              ${this.getFolderSvg('#8B1D2C', '#F2DCE0', '#F6E5E8', 46, 38)}
             </div>
-
-            <h1 class="psl-title">
-              ${currentFolder ? this.escapeHtml(currentFolder.name) : (isAr ? 'مكتبتي الدراسية' : 'My Study Library')}
-            </h1>
-            <p class="psl-subtitle">
-              ${currentFolder
-                ? (isAr ? 'نظم ملفاتك، أنشئ مجلدات فرعية، أو افتح أي ملف للدراسة والتسجيل الصوتي المباشر.' : 'Organize your files, create subfolders, or open any file to study and record audio.')
-                : (isAr ? 'مساحة عملك الخاصة على غرار GoodNotes — أنشئ مجلداتك الخاصة، ارفع ملفاتك، وادرس مع نظام التسجيل الصوتي المدمج.' : 'Your GoodNotes-style study workspace — create custom folders, import PDFs & images, and study with integrated audio recording.')
-              }
-            </p>
-
-            <div class="psl-stats-strip">
-              <div class="psl-stat-chip">
-                <i data-lucide="folder" style="width:14px;height:14px;"></i>
-                <span><strong>${allFoldersCount}</strong> ${isAr ? 'مجلد' : 'Folders'}</span>
-              </div>
-              <div class="psl-stat-chip">
-                <i data-lucide="file-text" style="width:14px;height:14px;"></i>
-                <span><strong>${allFilesCount}</strong> ${isAr ? 'ملف دراسي' : 'Study Files'}</span>
-              </div>
+            <div class="lib-header-titles">
+              ${currentFolder ? `
+                <nav class="lib-breadcrumbs" aria-label="Breadcrumb">
+                  <button type="button" class="lib-crumb-link" data-crumb-folder="">
+                    ${isAr ? 'المكتبة' : 'Library'}
+                  </button>
+                  ${breadcrumbs.map((b, idx) => `
+                    <span class="lib-crumb-sep">/</span>
+                    <button type="button" class="lib-crumb-link ${idx === breadcrumbs.length - 1 ? 'current' : ''}" data-crumb-folder="${b.id}">
+                      ${this.escapeHtml(b.name)}
+                    </button>
+                  `).join('')}
+                </nav>
+              ` : ''}
+              <h1 class="lib-main-title">
+                ${currentFolder ? this.escapeHtml(currentFolder.name) : (isAr ? 'المكتبة' : 'Library')}
+              </h1>
+              <p class="lib-main-subtitle">
+                ${currentFolder
+                  ? (isAr ? 'ملفاتك ومجلداتك الفرعية في هذا المجلد.' : 'Your study files in this folder.')
+                  : (isAr ? 'ملفاتك الدراسية في مكان واحد.' : 'Your study files in one place.')
+                }
+              </p>
             </div>
           </div>
 
-          <div class="psl-header-actions">
-            <button type="button" class="psl-btn psl-btn-secondary" id="psl-btn-new-folder">
-              <i data-lucide="folder-plus" style="width:17px;height:17px;"></i>
-              <span>${currentFolder
-                ? (isAr ? 'مجلد فرعي جديد' : 'New Subfolder')
-                : (isAr ? 'إنشاء مجلد جديد' : 'New Folder')
-              }</span>
+          <div class="lib-header-actions">
+            <button type="button" class="lib-btn lib-btn-new-folder" id="psl-btn-new-folder">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>${isAr ? 'مجلد جديد' : 'New Folder'}</span>
             </button>
 
-            <button type="button" class="psl-btn psl-btn-primary" id="psl-btn-import-files">
-              <i data-lucide="upload" style="width:17px;height:17px;"></i>
-              <span>${isAr ? 'رفع ملفات (PDF / صور)' : 'Import Files'}</span>
+            <button type="button" class="lib-btn lib-btn-import" id="psl-btn-import-files">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>${isAr ? 'استيراد ملفات' : 'Import Files'}</span>
             </button>
             <input type="file" id="psl-file-input" multiple accept=".pdf,application/pdf,image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="display:none;" />
           </div>
@@ -150,302 +195,246 @@ window.SheetsPage = {
 
         <!-- Upload Progress Banner -->
         ${this.isUploading ? `
-          <div class="psl-upload-banner">
-            <div class="psl-spinner"></div>
-            <span>${this.escapeHtml(this.uploadStatusText || (isAr ? 'جاري استيراد ومعالجة الملفات...' : 'Importing and processing files...'))}</span>
+          <div class="lib-upload-banner">
+            <div class="lib-spinner"></div>
+            <span>${this.escapeHtml(this.uploadStatusText || (isAr ? 'جاري استيراد الملفات...' : 'Importing files...'))}</span>
           </div>
         ` : ''}
 
-        <!-- Toolbar: Breadcrumbs + Search + Sort & View Switcher -->
-        <div class="psl-toolbar">
-          <nav class="psl-breadcrumbs" aria-label="Breadcrumb">
-            <button type="button" class="psl-crumb ${!this.currentFolderId ? 'active' : ''}" data-crumb-folder="">
-              <i data-lucide="home" style="width:15px;height:15px;"></i>
-              <span>${isAr ? 'المكتبة الرئيسية' : 'Root Library'}</span>
+        <!-- 2. SEARCH BAR & VIEW SWITCHER CONTAINER -->
+        <div class="lib-search-container">
+          <div class="lib-search-field-wrap">
+            <svg class="lib-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              type="search"
+              id="psl-search-input"
+              class="lib-search-input"
+              value="${this.escapeHtml(this.searchQuery)}"
+              placeholder="${isAr ? 'ابحث في الملفات أو المجلدات...' : 'Search files or folders...'}"
+              autocomplete="off"
+            />
+            ${this.searchQuery ? `
+              <button type="button" id="psl-search-clear" class="lib-search-clear" title="${isAr ? 'مسح' : 'Clear'}">✕</button>
+            ` : ''}
+          </div>
+
+          <div class="lib-view-toggle" role="group" aria-label="View Mode">
+            <button type="button" class="lib-view-btn ${this.viewMode === 'grid' ? 'active' : ''}" data-view="grid" title="${isAr ? 'عرض شبكي' : 'Grid View'}" aria-label="Grid View">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
             </button>
-            ${breadcrumbs.map((b, idx) => `
-              <span class="psl-crumb-sep"><i data-lucide="${isAr ? 'chevron-left' : 'chevron-right'}" style="width:14px;height:14px;"></i></span>
-              <button type="button" class="psl-crumb ${idx === breadcrumbs.length - 1 ? 'active' : ''}" data-crumb-folder="${b.id}">
-                <span>${this.escapeHtml(b.name)}</span>
-              </button>
-            `).join('')}
-          </nav>
-
-          <div class="psl-toolbar-controls">
-            <!-- Search Input -->
-            <div class="psl-search-box">
-              <i data-lucide="search" class="psl-search-icon" style="width:15px;height:15px;"></i>
-              <input
-                type="search"
-                id="psl-search-input"
-                class="psl-search-input"
-                value="${this.escapeHtml(this.searchQuery)}"
-                placeholder="${isAr ? 'ابحث عن مجلد أو ملف...' : 'Search folders or files...'}"
-              />
-              ${this.searchQuery ? `
-                <button type="button" id="psl-search-clear" class="psl-search-clear" title="${isAr ? 'مسح البحث' : 'Clear'}">✕</button>
-              ` : ''}
-            </div>
-
-            <!-- Sort Selector -->
-            <select id="psl-sort-select" class="psl-select" title="${isAr ? 'ترتيب الملفات' : 'Sort files'}">
-              <option value="custom" ${this.sortBy === 'custom' ? 'selected' : ''}>${isAr ? 'ترتيب مخصص (سحب وإفلات)' : 'Custom Order (Drag & Drop)'}</option>
-              <option value="date" ${this.sortBy === 'date' ? 'selected' : ''}>${isAr ? 'الأحدث إضافة' : 'Newest First'}</option>
-              <option value="name" ${this.sortBy === 'name' ? 'selected' : ''}>${isAr ? 'الاسم (أ - ي)' : 'Name (A - Z)'}</option>
-              <option value="pages" ${this.sortBy === 'pages' ? 'selected' : ''}>${isAr ? 'عدد الصفحات' : 'Page Count'}</option>
-            </select>
-
-            <!-- View Mode Toggle -->
-            <div class="psl-view-toggle">
-              <button type="button" class="psl-view-btn ${this.viewMode === 'grid' ? 'active' : ''}" data-view="grid" title="${isAr ? 'عرض شبكي' : 'Grid View'}">
-                <i data-lucide="grid" style="width:15px;height:15px;"></i>
-              </button>
-              <button type="button" class="psl-view-btn ${this.viewMode === 'list' ? 'active' : ''}" data-view="list" title="${isAr ? 'عرض قائمة' : 'List View'}">
-                <i data-lucide="list" style="width:15px;height:15px;"></i>
-              </button>
-            </div>
+            <button type="button" class="lib-view-btn ${this.viewMode === 'list' ? 'active' : ''}" data-view="list" title="${isAr ? 'عرض قائمة' : 'List View'}" aria-label="List View">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
           </div>
         </div>
 
-        <!-- Main Workspace Content -->
-        <div class="psl-content">
-          ${folders.length === 0 && files.length === 0 ? this.renderEmptyWorkspace(isAr, currentFolder, isSearching) : `
-            
-            <!-- FOLDERS SECTION -->
-            ${folders.length > 0 ? `
-              <section class="psl-section">
-                <div class="psl-section-header">
-                  <div class="psl-section-title">
-                    <i data-lucide="folders" style="width:17px;height:17px;color:var(--brand-accent,#0ea5e9);"></i>
-                    <h2>${currentFolder && !isSearching
-                      ? (isAr ? 'المجلدات الفرعية' : 'Subfolders')
-                      : (isAr ? 'المجلدات الدراسية' : 'Study Folders')
-                    }</h2>
-                    <span class="psl-count-pill">${folders.length}</span>
-                  </div>
-                  <span class="psl-drag-hint">
-                    <i data-lucide="move" style="width:13px;height:13px;"></i>
-                    <span>${isAr ? 'اسحب المجلدات لإعادة ترتيبها أو أفلت ملفاً فوق مجلد لنقله' : 'Drag folders to reorder or drop a file onto a folder to move it'}</span>
-                  </span>
-                </div>
+        <!-- 3. FOLDERS SECTION -->
+        ${(!currentFolder || folders.length > 0) ? `
+          <section class="lib-section">
+            <div class="lib-section-header">
+              <h2 class="lib-section-title">
+                ${currentFolder && !isSearching
+                  ? (isAr ? 'المجلدات الفرعية' : 'Subfolders')
+                  : (isAr ? 'المجلدات' : 'Folders')
+                }
+                <span class="lib-section-count">(${folders.length})</span>
+              </h2>
+            </div>
 
-                <div class="psl-folders-grid ${this.viewMode === 'list' ? 'list-mode' : ''}" id="psl-folders-grid">
-                  ${folders.map(folder => this.renderFolderCard(folder, lib, isAr)).join('')}
+            ${folders.length === 0 ? `
+              <div class="lib-empty-inline-card" id="psl-empty-btn-folder">
+                <div class="lib-empty-inline-icon">
+                  ${this.getFolderSvg('#8B1D2C', '#F2DCE0', '#F6E5E8', 34, 28)}
                 </div>
-              </section>
-            ` : ''}
-
-            <!-- FILES SECTION -->
-            <section class="psl-section">
-              <div class="psl-section-header">
-                <div class="psl-section-title">
-                  <i data-lucide="file-stack" style="width:17px;height:17px;color:#10b981;"></i>
-                  <h2>${currentFolder && !isSearching
-                    ? (isAr ? `ملفات "${this.escapeHtml(currentFolder.name)}"` : `Files in "${this.escapeHtml(currentFolder.name)}"`)
-                    : (isAr ? 'الملفات والمحاضرات' : 'Study Files & Handouts')
-                  }</h2>
-                  <span class="psl-count-pill">${files.length}</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <button type="button" class="psl-btn-inline-upload" id="psl-btn-inline-upload">
-                    <i data-lucide="plus-circle" style="width:14px;height:14px;"></i>
-                    <span>${isAr ? 'إضافة ملفات هنا' : 'Add files here'}</span>
-                  </button>
+                <div class="lib-empty-inline-text">
+                  <strong>${isAr ? 'لا توجد مجلدات بعد' : 'No folders yet'}</strong>
+                  <span>${isAr ? 'اضغط هنا لإنشاء أول مجلد دراسي لك وتنظيم ملفاتك.' : 'Click here to create your first study folder and organize your files.'}</span>
                 </div>
               </div>
+            ` : `
+              <div class="lib-folders-grid ${this.viewMode === 'list' ? 'list-mode' : ''}" id="psl-folders-grid">
+                ${folders.map(folder => this.renderFolderCard(folder, lib, isAr)).join('')}
+              </div>
+            `}
+          </section>
+        ` : ''}
 
-              ${files.length === 0 ? `
-                <div class="psl-folder-empty-dropzone" id="psl-empty-files-dropzone">
-                  <i data-lucide="file-plus-2" style="width:28px;height:28px;color:var(--text-muted);margin-bottom:8px;"></i>
-                  <p>${isAr ? 'لا توجد ملفات في هذا المستوى بعد — اضغط لرفع ملفات PDF أو صور أو اسحبها إلى هنا' : 'No files in this folder yet — click to import PDFs or images or drag them here'}</p>
-                </div>
-              ` : `
-                <div class="psl-files-grid ${this.viewMode === 'list' ? 'list-mode' : ''}" id="psl-files-grid">
-                  ${files.map(file => this.renderFileCard(file, lib, isAr)).join('')}
-                </div>
-              `}
-            </section>
+        <!-- 4. RECENT FILES / FOLDER FILES SECTION -->
+        <section class="lib-section">
+          <div class="lib-section-header">
+            <h2 class="lib-section-title">
+              ${isSearching
+                ? `${isAr ? 'نتائج الملفات' : 'Matching Files'} <span class="lib-section-count">(${filesToDisplay.length})</span>`
+                : currentFolder
+                  ? `${isAr ? 'الملفات' : 'Files'} <span class="lib-section-count">(${filesToDisplay.length})</span>`
+                  : (this.showAllFiles
+                      ? `${isAr ? 'جميع الملفات' : 'All Files'} <span class="lib-section-count">(${totalFilesInView})</span>`
+                      : (isAr ? 'الملفات الأخيرة' : 'Recent Files'))
+              }
+            </h2>
+
+            ${(!currentFolder && !isSearching && totalFilesInView > 0) ? `
+              <button type="button" class="lib-view-all-btn" id="psl-toggle-view-all">
+                <span>${this.showAllFiles ? (isAr ? 'عرض الأحدث فقط' : 'Show Recent') : (isAr ? 'عرض الكل' : 'View All')}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="${isAr ? 'transform:scaleX(-1);' : ''}"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            ` : ''}
+          </div>
+
+          ${filesToDisplay.length === 0 ? `
+            <div class="lib-empty-files-card" id="psl-empty-files-dropzone">
+              <div class="lib-empty-files-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8B1D2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <div class="lib-empty-files-text">
+                <strong>${isSearching
+                  ? (isAr ? 'لا توجد ملفات مطابقة للبحث' : 'No matching files found')
+                  : (isAr ? 'لا توجد ملفات مرفوعة بعد' : 'No study files imported yet')
+                }</strong>
+                <span>${isSearching
+                  ? (isAr ? 'جرب البحث بكلمات أخرى.' : 'Try searching with a different keyword.')
+                  : (isAr ? 'اضغط هنا أو على زر Import Files لرفع ملفات PDF أو الصور من جهازك.' : 'Click here or press Import Files to upload PDFs or images from your device.')
+                }</span>
+              </div>
+            </div>
+          ` : `
+            <div class="lib-files-grid ${this.viewMode === 'list' ? 'list-mode' : ''}" id="psl-files-grid">
+              ${filesToDisplay.map(file => this.renderFileCard(file, lib, isAr)).join('')}
+            </div>
           `}
-        </div>
+        </section>
       </div>
     `;
 
-    if (window.lucide) window.lucide.createIcons();
     this.bindEvents(container, isAr);
-  },
-
-  renderEmptyWorkspace(isAr, currentFolder, isSearching) {
-    if (isSearching) {
-      return `
-        <div class="psl-empty-state">
-          <div class="psl-empty-icon">
-            <i data-lucide="search-x" style="width:36px;height:36px;"></i>
-          </div>
-          <h3>${isAr ? 'لا توجد نتائج مطابقة لبحثك' : 'No matching folders or files'}</h3>
-          <p>${isAr ? 'جرب البحث بكلمات أخرى أو امسح مربع البحث للعودة لمكتبتك.' : 'Try another search term or clear the search filter.'}</p>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="psl-empty-state" id="psl-empty-workspace-card">
-        <div class="psl-empty-icon">
-          <i data-lucide="${currentFolder ? 'folder-open' : 'sparkles'}" style="width:38px;height:38px;"></i>
-        </div>
-        <h3>
-          ${currentFolder
-            ? (isAr ? `مجلد "${this.escapeHtml(currentFolder.name)}" فارغ حالياً` : `"${this.escapeHtml(currentFolder.name)}" is currently empty`)
-            : (isAr ? 'مساحة دراستك الشخصية جاهزة للتنظيم' : 'Your Personal Study Workspace is Ready')
-          }
-        </h3>
-        <p>
-          ${currentFolder
-            ? (isAr ? 'يمكنك إنشاء مجلدات فرعية داخل هذا المجلد (مثل: المراجعات، العمل العملي) أو رفع ملفات PDF والصور مباشرة من جهازك.' : 'Create subfolders inside this folder or import PDFs and images directly from your device.')
-            : (isAr ? 'لا توجد مواد أو ملفات مفروضة مسبقاً. أنشئ مجلداتك الخاصة بالمواد التي تدرسها (مثل: Oral Pathology) وارفع ملفاتك ومحاضراتك لتبدأ الدراسة والتدوين والتسجيل الصوتي.' : 'No pre-imposed subjects or files. Create your own folders (e.g., Oral Pathology) and import your lecture PDFs & images to annotate and record audio.')
-          }
-        </p>
-
-        <div class="psl-empty-actions">
-          <button type="button" class="psl-btn psl-btn-primary" id="psl-empty-btn-import">
-            <i data-lucide="upload-cloud" style="width:18px;height:18px;"></i>
-            <span>${isAr ? 'رفع ملفات من جهازك (PDF / صور)' : 'Import Files from Device'}</span>
-          </button>
-          <button type="button" class="psl-btn psl-btn-secondary" id="psl-empty-btn-folder">
-            <i data-lucide="folder-plus" style="width:18px;height:18px;"></i>
-            <span>${currentFolder ? (isAr ? 'إنشاء مجلد فرعي' : 'Create Subfolder') : (isAr ? 'إنشاء مجلد جديد' : 'Create New Folder')}</span>
-          </button>
-        </div>
-
-        <div class="psl-empty-features">
-          <div class="psl-feature-pill">
-            <i data-lucide="pen-tool" style="width:14px;height:14px;"></i>
-            <span>${isAr ? 'قلم، تظليل، أشكال، وملاحظات' : 'Pen, Highlighter, Shapes & Notes'}</span>
-          </div>
-          <div class="psl-feature-pill">
-            <i data-lucide="mic" style="width:14px;height:14px;"></i>
-            <span>${isAr ? 'تسجيل صوتي لكل صفحة أو للملف بالكامل' : 'Page & Full-Document Audio Recording'}</span>
-          </div>
-          <div class="psl-feature-pill">
-            <i data-lucide="lock" style="width:14px;height:14px;"></i>
-            <span>${isAr ? 'محفوظ محلياً وخاص بحسابك 100%' : '100% Private to Your Account'}</span>
-          </div>
-        </div>
-      </div>
-    `;
+    this.hydrateMissingThumbnails(filesToDisplay);
   },
 
   renderFolderCard(folder, lib, isAr) {
-    const colorObj = lib.FOLDER_COLORS.find(c => c.id === folder.color) || lib.FOLDER_COLORS[0];
     const counts = lib.getFolderCounts(folder.id);
+    const countNum = counts.totalFilesCount || 0;
     const filesLabel = isAr
-      ? `${counts.totalFilesCount} ${counts.totalFilesCount === 1 ? 'ملف' : 'ملفات'}`
-      : `${counts.totalFilesCount} ${counts.totalFilesCount === 1 ? 'file' : 'files'}`;
-    const subLabel = counts.subfoldersCount > 0
-      ? (isAr ? ` • ${counts.subfoldersCount} مجلد فرعي` : ` • ${counts.subfoldersCount} subfolder${counts.subfoldersCount > 1 ? 's' : ''}`)
-      : '';
+      ? `${countNum} ${countNum === 1 ? 'ملف' : 'ملفات'}`
+      : `${countNum} ${countNum === 1 ? 'file' : 'files'}`;
 
     return `
       <div
-        class="psl-folder-card"
+        class="lib-folder-card"
         draggable="true"
         data-folder-id="${folder.id}"
-        style="--fld-color:${colorObj.hex};--fld-bg:${colorObj.bg};--fld-border:${colorObj.border};"
       >
-        <div class="psl-folder-card-body" data-open-folder="${folder.id}">
-          <div class="psl-folder-icon-wrap">
-            <i data-lucide="${folder.icon || 'folder'}" style="width:24px;height:24px;"></i>
-          </div>
-          <div class="psl-folder-info">
-            <h3 class="psl-folder-name">${this.escapeHtml(folder.name)}</h3>
-            <div class="psl-folder-meta">
-              <span>${filesLabel}${subLabel}</span>
-            </div>
-          </div>
+        <button
+          type="button"
+          class="lib-dots-btn"
+          data-folder-dots="${folder.id}"
+          title="${isAr ? 'خيارات المجلد' : 'Folder options'}"
+          aria-label="Folder options"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+        </button>
+
+        <div class="lib-dots-menu" id="lib-folder-menu-${folder.id}">
+          <button type="button" class="lib-dots-item" data-open-folder="${folder.id}">
+            <span>📂</span>
+            <span>${isAr ? 'فتح المجلد' : 'Open Folder'}</span>
+          </button>
+          <button type="button" class="lib-dots-item" data-edit-folder="${folder.id}">
+            <span>✏️</span>
+            <span>${isAr ? 'إعادة التسمية' : 'Rename Folder'}</span>
+          </button>
+          <button type="button" class="lib-dots-item danger" data-delete-folder="${folder.id}">
+            <span>🗑️</span>
+            <span>${isAr ? 'حذف المجلد' : 'Delete Folder'}</span>
+          </button>
         </div>
 
-        <div class="psl-folder-actions">
-          <button type="button" class="psl-icon-btn" data-edit-folder="${folder.id}" title="${isAr ? 'تعديل اسم ولون المجلد' : 'Edit Folder'}">
-            <i data-lucide="edit-3" style="width:14px;height:14px;"></i>
-          </button>
-          <button type="button" class="psl-icon-btn danger" data-delete-folder="${folder.id}" title="${isAr ? 'حذف المجلد' : 'Delete Folder'}">
-            <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-          </button>
+        <div class="lib-folder-card-body" data-open-folder="${folder.id}">
+          <div class="lib-folder-icon">
+            ${this.getFolderSvg('#8B1D2C', '#F2DCE0', '#F6E5E8', 40, 32)}
+          </div>
+          <div class="lib-folder-info">
+            <h3 class="lib-folder-name" title="${this.escapeHtml(folder.name)}">${this.escapeHtml(folder.name)}</h3>
+            <span class="lib-folder-meta">${filesLabel}</span>
+          </div>
         </div>
       </div>
     `;
   },
 
   renderFileCard(file, lib, isAr) {
-    const recs = lib.getRecordingsForFile(file.id);
-    const recsCount = recs.length;
     const isImage = file.fileKind === 'image';
-    const pagesCount = file.pages || 1;
-    const lastPage = file.lastPage || 1;
-    const progressPct = pagesCount > 1 ? Math.min(100, Math.round((lastPage / pagesCount) * 100)) : (file.lastOpenedAt ? 100 : 0);
+    const displayName = this.formatDisplayFileName(file);
+    const timeLabel = this.formatFileTimestamp(file, isAr);
 
     return `
       <div
-        class="psl-file-card"
+        class="lib-file-card"
         draggable="true"
         data-file-id="${file.id}"
       >
-        <div class="psl-file-thumb" data-open-file="${file.id}">
-          ${file.thumbnail ? `
-            <img src="${file.thumbnail}" alt="${this.escapeHtml(file.title)}" loading="lazy" />
-          ` : `
-            <div class="psl-file-thumb-placeholder">
-              <i data-lucide="${isImage ? 'image' : 'file-text'}" style="width:34px;height:34px;"></i>
-              <span>${isImage ? 'IMG' : 'PDF'}</span>
-            </div>
-          `}
-          <div class="psl-file-badges">
-            <span class="psl-file-badge type">${isImage ? (isAr ? 'صورة' : 'IMG') : `${pagesCount} ${isAr ? 'ص' : 'p'}`}</span>
-            ${recsCount > 0 ? `
-              <span class="psl-file-badge audio" title="${isAr ? 'يحتوي على تسجيلات صوتية' : 'Has audio recordings'}">
-                <i data-lucide="mic" style="width:11px;height:11px;"></i>
-                <span>${recsCount}</span>
-              </span>
-            ` : ''}
-          </div>
-          <div class="psl-file-hover-cta">
-            <span><i data-lucide="book-open" style="width:15px;height:15px;"></i> ${isAr ? 'فتح للدراسة والتسجيل' : 'Open in Study Reader'}</span>
+        <div class="lib-file-preview" data-open-file="${file.id}">
+          <span class="lib-file-type-badge">${isImage ? 'IMG' : 'PDF'}</span>
+          <div class="lib-file-thumb-sheet">
+            ${file.thumbnail ? `
+              <img
+                id="psl-thumb-img-${file.id}"
+                src="${file.thumbnail}"
+                alt="${this.escapeHtml(displayName)}"
+                loading="lazy"
+              />
+            ` : `
+              <img
+                id="psl-thumb-img-${file.id}"
+                src=""
+                alt="${this.escapeHtml(displayName)}"
+                style="display:none;"
+              />
+              <div class="lib-file-thumb-fallback" id="psl-thumb-fallback-${file.id}">
+                <div class="lib-fallback-lines">
+                  <span class="l-title"></span>
+                  <span class="l-row"></span>
+                  <span class="l-row short"></span>
+                  <span class="l-row"></span>
+                  <span class="l-row med"></span>
+                </div>
+              </div>
+            `}
           </div>
         </div>
 
-        <div class="psl-file-body">
-          <div class="psl-file-main" data-open-file="${file.id}">
-            <h3 class="psl-file-title" title="${this.escapeHtml(file.title)}">${this.escapeHtml(file.title)}</h3>
-            <div class="psl-file-submeta">
-              <span>${file.size || ''}</span>
-              <span>•</span>
-              <span>${file.date || ''}</span>
-              ${file.lastOpenedAt ? `
-                <span>•</span>
-                <span style="color:var(--brand-accent,#38bdf8);">${isAr ? `صفحة ${lastPage}` : `P.${lastPage}`}</span>
-              ` : ''}
-            </div>
+        <div class="lib-file-footer">
+          <div class="lib-file-meta-wrap" data-open-file="${file.id}">
+            <h3 class="lib-file-name" title="${this.escapeHtml(displayName)}">${this.escapeHtml(displayName)}</h3>
+            <span class="lib-file-date">${this.escapeHtml(timeLabel)}</span>
           </div>
 
-          ${progressPct > 0 ? `
-            <div class="psl-file-progress" title="${isAr ? `تقدم القراءة: ${progressPct}%` : `Study progress: ${progressPct}%`}">
-              <div class="psl-file-progress-bar" style="width:${progressPct}%;"></div>
-            </div>
-          ` : ''}
-
-          <div class="psl-file-actions">
-            <button type="button" class="psl-file-open-btn" data-open-file="${file.id}">
-              <i data-lucide="play" style="width:13px;height:13px;"></i>
-              <span>${isAr ? 'دراسة' : 'Study'}</span>
+          <div class="lib-file-dots-wrap">
+            <button
+              type="button"
+              class="lib-dots-btn"
+              data-file-dots="${file.id}"
+              title="${isAr ? 'خيارات الملف' : 'File options'}"
+              aria-label="File options"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
             </button>
-            <div class="psl-file-icon-actions">
-              <button type="button" class="psl-icon-btn" data-move-file="${file.id}" title="${isAr ? 'نقل إلى مجلد آخر' : 'Move to Folder'}">
-                <i data-lucide="folder-input" style="width:14px;height:14px;"></i>
+
+            <div class="lib-dots-menu file-menu" id="lib-file-menu-${file.id}">
+              <button type="button" class="lib-dots-item" data-open-file="${file.id}">
+                <span>📖</span>
+                <span>${isAr ? 'فتح الملف' : 'Open File'}</span>
               </button>
-              <button type="button" class="psl-icon-btn" data-rename-file="${file.id}" title="${isAr ? 'إعادة تسمية الملف' : 'Rename File'}">
-                <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
+              <button type="button" class="lib-dots-item" data-rename-file="${file.id}">
+                <span>✏️</span>
+                <span>${isAr ? 'إعادة التسمية' : 'Rename File'}</span>
               </button>
-              <button type="button" class="psl-icon-btn danger" data-delete-file="${file.id}" title="${isAr ? 'حذف الملف' : 'Delete File'}">
-                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+              <button type="button" class="lib-dots-item" data-move-file="${file.id}">
+                <span>📁</span>
+                <span>${isAr ? 'نقل إلى مجلد' : 'Move to Folder'}</span>
+              </button>
+              <button type="button" class="lib-dots-item danger" data-delete-file="${file.id}">
+                <span>🗑️</span>
+                <span>${isAr ? 'حذف الملف' : 'Delete File'}</span>
               </button>
             </div>
           </div>
@@ -454,16 +443,74 @@ window.SheetsPage = {
     `;
   },
 
+  async hydrateMissingThumbnails(files) {
+    if (!Array.isArray(files) || files.length === 0 || !window.pdfjsLib || !window.DATA?.pdfStore) return;
+    if (this._thumbQueueRunning) return;
+    this._thumbQueueRunning = true;
+
+    try {
+      for (const file of files) {
+        if (!file || file.thumbnail || file.fileKind === 'image') continue;
+        try {
+          const rec = await window.DATA.pdfStore.getPdfRecord(file.id);
+          const blob = rec?.blob;
+          if (!blob) continue;
+          const ab = await blob.arrayBuffer();
+          const loadingTask = window.pdfjsLib.getDocument({ data: ab });
+          const pdfDoc = await loadingTask.promise;
+          const page1 = await pdfDoc.getPage(1);
+          const vp = page1.getViewport({ scale: 0.45 });
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(vp.width));
+          canvas.height = Math.max(1, Math.round(vp.height));
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          await page1.render({ canvasContext: ctx, viewport: vp }).promise;
+          const dataUrl = canvas.toDataURL('image/webp', 0.78);
+          if (dataUrl) {
+            window.PersonalLibrary?.updateFile(file.id, { thumbnail: dataUrl, pages: pdfDoc.numPages || file.pages || 1 });
+            const imgEl = document.getElementById(`psl-thumb-img-${file.id}`);
+            const fbEl = document.getElementById(`psl-thumb-fallback-${file.id}`);
+            if (imgEl) {
+              imgEl.src = dataUrl;
+              imgEl.style.display = 'block';
+            }
+            if (fbEl) {
+              fbEl.style.display = 'none';
+            }
+          }
+        } catch (e) {}
+      }
+    } finally {
+      this._thumbQueueRunning = false;
+    }
+  },
+
   bindEvents(container, isAr) {
     const lib = window.PersonalLibrary;
     const fileInput = container.querySelector('#psl-file-input');
 
+    // Close any open 3-dots menu on outside click
+    const closeAllMenus = () => {
+      container.querySelectorAll('.lib-dots-menu.open').forEach(m => m.classList.remove('open'));
+    };
+
+    if (!window._libOutsideClickBound) {
+      window._libOutsideClickBound = true;
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.lib-dots-btn') && !e.target.closest('.lib-dots-menu')) {
+          document.querySelectorAll('.lib-dots-menu.open').forEach(m => m.classList.remove('open'));
+        }
+      });
+    }
+
     // 1. Trigger File Upload Dialog
     const triggerUpload = () => fileInput?.click();
     container.querySelector('#psl-btn-import-files')?.addEventListener('click', triggerUpload);
-    container.querySelector('#psl-empty-btn-import')?.addEventListener('click', triggerUpload);
-    container.querySelector('#psl-btn-inline-upload')?.addEventListener('click', triggerUpload);
-    container.querySelector('#psl-empty-files-dropzone')?.addEventListener('click', triggerUpload);
+    container.querySelector('#psl-empty-files-dropzone')?.addEventListener('click', () => {
+      if (!this.searchQuery.trim()) triggerUpload();
+    });
 
     fileInput?.addEventListener('change', async (e) => {
       const filesList = Array.from(e.target.files || []);
@@ -517,7 +564,7 @@ window.SheetsPage = {
     container.querySelector('#psl-btn-new-folder')?.addEventListener('click', triggerNewFolder);
     container.querySelector('#psl-empty-btn-folder')?.addEventListener('click', triggerNewFolder);
 
-    // 4. Breadcrumb Navigation (and Drop File onto Breadcrumb to Move Up!)
+    // 4. Breadcrumb Navigation + Drop File onto Breadcrumb
     container.querySelectorAll('[data-crumb-folder]').forEach(btn => {
       btn.addEventListener('click', () => {
         const fid = btn.getAttribute('data-crumb-folder') || null;
@@ -564,12 +611,7 @@ window.SheetsPage = {
       this.renderWorkspace(container, isAr);
     });
 
-    // 6. Sort & View Mode
-    container.querySelector('#psl-sort-select')?.addEventListener('change', (e) => {
-      this.sortBy = e.target.value;
-      this.renderWorkspace(container, isAr);
-    });
-
+    // 6. View Mode Toggle (Grid / List) & View All Recent Files Toggle
     container.querySelectorAll('[data-view]').forEach(btn => {
       btn.addEventListener('click', () => {
         this.viewMode = btn.getAttribute('data-view') || 'grid';
@@ -577,9 +619,38 @@ window.SheetsPage = {
       });
     });
 
-    // 7. Folder Actions (Open, Edit, Delete, Drag & Drop Reorder, Drop File onto Folder)
+    container.querySelector('#psl-toggle-view-all')?.addEventListener('click', () => {
+      this.showAllFiles = !this.showAllFiles;
+      this.renderWorkspace(container, isAr);
+    });
+
+    // 7. Three-Dots Menus for Folders & Files
+    container.querySelectorAll('[data-folder-dots]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const fid = btn.getAttribute('data-folder-dots');
+        const menu = container.querySelector(`#lib-folder-menu-${fid}`);
+        const wasOpen = menu?.classList.contains('open');
+        closeAllMenus();
+        if (menu && !wasOpen) menu.classList.add('open');
+      });
+    });
+
+    container.querySelectorAll('[data-file-dots]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const fileId = btn.getAttribute('data-file-dots');
+        const menu = container.querySelector(`#lib-file-menu-${fileId}`);
+        const wasOpen = menu?.classList.contains('open');
+        closeAllMenus();
+        if (menu && !wasOpen) menu.classList.add('open');
+      });
+    });
+
+    // 8. Folder Actions (Open, Rename, Delete, Drag & Drop Reorder, Drop File onto Folder)
     container.querySelectorAll('[data-open-folder]').forEach(el => {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
         const fid = el.getAttribute('data-open-folder');
         if (fid) {
           this.currentFolderId = fid;
@@ -592,6 +663,7 @@ window.SheetsPage = {
     container.querySelectorAll('[data-edit-folder]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeAllMenus();
         const fid = btn.getAttribute('data-edit-folder');
         const folder = lib.getFolderById(fid);
         if (folder) {
@@ -603,6 +675,7 @@ window.SheetsPage = {
     container.querySelectorAll('[data-delete-folder]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeAllMenus();
         const fid = btn.getAttribute('data-delete-folder');
         const folder = lib.getFolderById(fid);
         if (folder) {
@@ -612,7 +685,7 @@ window.SheetsPage = {
     });
 
     // Folder Drag & Drop (Reordering folders OR dropping a file onto a folder)
-    const folderCards = Array.from(container.querySelectorAll('.psl-folder-card'));
+    const folderCards = Array.from(container.querySelectorAll('.lib-folder-card'));
     folderCards.forEach(card => {
       const fid = card.getAttribute('data-folder-id');
       card.addEventListener('dragstart', (e) => {
@@ -651,13 +724,11 @@ window.SheetsPage = {
         e.stopPropagation();
 
         if (this.draggedItem.type === 'file') {
-          // Move file into this folder!
           lib.moveFile(this.draggedItem.id, fid);
           this.draggedItem = null;
           window.showToast?.(isAr ? 'تم نقل الملف إلى المجلد بنجاح' : 'File moved into folder', { type: 'success' });
           this.renderWorkspace(container, isAr);
         } else if (this.draggedItem.type === 'folder' && this.draggedItem.id !== fid) {
-          // Reorder folders
           const ids = folderCards.map(c => c.getAttribute('data-folder-id'));
           const fromIdx = ids.indexOf(this.draggedItem.id);
           const toIdx = ids.indexOf(fid);
@@ -672,10 +743,11 @@ window.SheetsPage = {
       });
     });
 
-    // 8. File Actions (Open in PDF Reader, Move, Rename, Delete, Drag & Drop Reorder)
+    // 9. File Actions (Open in PDF Reader, Move, Rename, Delete, Drag & Drop)
     container.querySelectorAll('[data-open-file]').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeAllMenus();
         const fileId = el.getAttribute('data-open-file');
         if (fileId) {
           this.openFileInReader(fileId);
@@ -686,6 +758,7 @@ window.SheetsPage = {
     container.querySelectorAll('[data-move-file]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeAllMenus();
         const fileId = btn.getAttribute('data-move-file');
         const file = lib.getFileById(fileId);
         if (file) this.openMoveFileModal(file, container, isAr);
@@ -695,6 +768,7 @@ window.SheetsPage = {
     container.querySelectorAll('[data-rename-file]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeAllMenus();
         const fileId = btn.getAttribute('data-rename-file');
         const file = lib.getFileById(fileId);
         if (file) this.openRenameFileModal(file, container, isAr);
@@ -704,14 +778,15 @@ window.SheetsPage = {
     container.querySelectorAll('[data-delete-file]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeAllMenus();
         const fileId = btn.getAttribute('data-delete-file');
         const file = lib.getFileById(fileId);
         if (file) this.openDeleteFileModal(file, container, isAr);
       });
     });
 
-    // File Drag & Drop Reordering inside Folder
-    const fileCards = Array.from(container.querySelectorAll('.psl-file-card'));
+    // File Drag & Drop (for moving onto folders or reordering inside a folder)
+    const fileCards = Array.from(container.querySelectorAll('.lib-file-card'));
     fileCards.forEach(card => {
       const fileId = card.getAttribute('data-file-id');
       card.addEventListener('dragstart', (e) => {
@@ -750,7 +825,6 @@ window.SheetsPage = {
           if (fromIdx !== -1 && toIdx !== -1) {
             ids.splice(fromIdx, 1);
             ids.splice(toIdx, 0, this.draggedItem.id);
-            this.sortBy = 'custom';
             lib.reorderFiles(this.currentFolderId, ids);
             this.draggedItem = null;
             this.renderWorkspace(container, isAr);
@@ -765,7 +839,7 @@ window.SheetsPage = {
     if (!lib || !filesList || filesList.length === 0) return;
 
     this.isUploading = true;
-    let importedFiles = [];
+    const importedFiles = [];
 
     for (let i = 0; i < filesList.length; i++) {
       const f = filesList[i];
@@ -788,13 +862,13 @@ window.SheetsPage = {
 
     if (importedFiles.length === 1) {
       window.showToast?.(
-        isAr ? `تم استيراد "${importedFiles[0].title}" بنجاح! جاري فتح القارئ...` : `Imported "${importedFiles[0].title}"! Opening reader...`,
+        isAr ? `تم استيراد "${importedFiles[0].title}" بنجاح!` : `Imported "${importedFiles[0].title}"!`,
         { type: 'success' }
       );
       this.openFileInReader(importedFiles[0].id);
     } else if (importedFiles.length > 1) {
       window.showToast?.(
-        isAr ? `تم استيراد ${importedFiles.length} ملفات بنجاح إلى مكتبتك!` : `Successfully imported ${importedFiles.length} files!`,
+        isAr ? `تم استيراد ${importedFiles.length} ملفات بنجاح!` : `Imported ${importedFiles.length} files!`,
         { type: 'success' }
       );
     }
@@ -817,79 +891,46 @@ window.SheetsPage = {
     const lib = window.PersonalLibrary;
     document.getElementById('psl-modal-backdrop')?.remove();
 
-    let selectedColor = folder ? folder.color : 'sky';
-    let selectedIcon = folder ? folder.icon : 'folder';
     const initialName = folder ? folder.name : '';
 
     const backdrop = document.createElement('div');
     backdrop.id = 'psl-modal-backdrop';
-    backdrop.className = 'psl-modal-backdrop';
+    backdrop.className = 'lib-modal-backdrop';
     backdrop.dir = isAr ? 'rtl' : 'ltr';
 
     backdrop.innerHTML = `
-      <div class="psl-modal-card">
-        <div class="psl-modal-header">
+      <div class="lib-modal-card">
+        <div class="lib-modal-header">
           <h3>
-            <i data-lucide="${mode === 'edit' ? 'edit-3' : 'folder-plus'}" style="width:19px;height:19px;color:var(--brand-accent,#0ea5e9);"></i>
+            ${this.getFolderSvg('#8B1D2C', '#F2DCE0', '#F6E5E8', 24, 20)}
             <span>${mode === 'edit'
-              ? (isAr ? 'تعديل المجلد' : 'Edit Folder')
-              : (parentId ? (isAr ? 'إنشاء مجلد فرعي جديد' : 'Create New Subfolder') : (isAr ? 'إنشاء مجلد دراسي جديد' : 'Create Study Folder'))
+              ? (isAr ? 'إعادة تسمية المجلد' : 'Rename Folder')
+              : (parentId ? (isAr ? 'إنشاء مجلد فرعي جديد' : 'New Subfolder') : (isAr ? 'إنشاء مجلد جديد' : 'New Folder'))
             }</span>
           </h3>
-          <button type="button" class="psl-modal-close" id="psl-modal-close">✕</button>
+          <button type="button" class="lib-modal-close" id="psl-modal-close">✕</button>
         </div>
 
-        <form id="psl-folder-form" class="psl-modal-body">
-          <div class="psl-field">
+        <form id="psl-folder-form" class="lib-modal-body">
+          <div class="lib-field">
             <label>${isAr ? 'اسم المجلد' : 'Folder Name'}</label>
             <input
               type="text"
               id="psl-folder-name-input"
-              class="psl-input"
+              class="lib-input"
               value="${this.escapeHtml(initialName)}"
-              placeholder="${isAr ? 'مثال: Oral Pathology، المراجعات، المحاضرات...' : 'e.g., Oral Pathology, Reviews, Lectures...'}"
+              placeholder="${isAr ? 'مثال: Conservative, Fixed Prostho, Pathology...' : 'e.g., Conservative, Fixed Prostho, Pathology...'}"
               required
               autofocus
             />
           </div>
 
-          <div class="psl-field">
-            <label>${isAr ? 'لون المجلد' : 'Folder Color'}</label>
-            <div class="psl-color-grid" id="psl-color-grid">
-              ${lib.FOLDER_COLORS.map(c => `
-                <button
-                  type="button"
-                  class="psl-color-swatch ${c.id === selectedColor ? 'active' : ''}"
-                  data-color-id="${c.id}"
-                  style="--swatch-color:${c.hex};"
-                  title="${isAr ? c.labelAr : c.labelEn}"
-                ></button>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="psl-field">
-            <label>${isAr ? 'أيقونة المجلد' : 'Folder Icon'}</label>
-            <div class="psl-icon-grid" id="psl-icon-grid">
-              ${lib.FOLDER_ICONS.map(ic => `
-                <button
-                  type="button"
-                  class="psl-icon-choice ${ic === selectedIcon ? 'active' : ''}"
-                  data-icon-id="${ic}"
-                >
-                  <i data-lucide="${ic}" style="width:18px;height:18px;"></i>
-                </button>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="psl-modal-footer">
-            <button type="button" class="psl-btn psl-btn-secondary" id="psl-modal-cancel">
+          <div class="lib-modal-footer">
+            <button type="button" class="lib-btn lib-btn-new-folder" id="psl-modal-cancel">
               ${isAr ? 'إلغاء' : 'Cancel'}
             </button>
-            <button type="submit" class="psl-btn psl-btn-primary">
-              <i data-lucide="check" style="width:16px;height:16px;"></i>
-              <span>${mode === 'edit' ? (isAr ? 'حفظ التغييرات' : 'Save Changes') : (isAr ? 'إنشاء المجلد' : 'Create Folder')}</span>
+            <button type="submit" class="lib-btn lib-btn-import">
+              <span>${mode === 'edit' ? (isAr ? 'حفظ' : 'Save') : (isAr ? 'إنشاء المجلد' : 'Create Folder')}</span>
             </button>
           </div>
         </form>
@@ -897,26 +938,11 @@ window.SheetsPage = {
     `;
 
     document.body.appendChild(backdrop);
-    if (window.lucide) window.lucide.createIcons();
 
     const closeModal = () => backdrop.remove();
     backdrop.querySelector('#psl-modal-close')?.addEventListener('click', closeModal);
     backdrop.querySelector('#psl-modal-cancel')?.addEventListener('click', closeModal);
     backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
-
-    backdrop.querySelectorAll('[data-color-id]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedColor = btn.getAttribute('data-color-id');
-        backdrop.querySelectorAll('[data-color-id]').forEach(b => b.classList.toggle('active', b === btn));
-      });
-    });
-
-    backdrop.querySelectorAll('[data-icon-id]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedIcon = btn.getAttribute('data-icon-id');
-        backdrop.querySelectorAll('[data-icon-id]').forEach(b => b.classList.toggle('active', b === btn));
-      });
-    });
 
     backdrop.querySelector('#psl-folder-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -924,10 +950,10 @@ window.SheetsPage = {
       if (!nameVal) return;
 
       if (mode === 'edit' && folder) {
-        lib.updateFolder(folder.id, { name: nameVal, color: selectedColor, icon: selectedIcon });
-        window.showToast?.(isAr ? 'تم تحديث المجلد بنجاح' : 'Folder updated', { type: 'success' });
+        lib.updateFolder(folder.id, { name: nameVal });
+        window.showToast?.(isAr ? 'تم تحديث اسم المجلد' : 'Folder renamed', { type: 'success' });
       } else {
-        lib.createFolder({ name: nameVal, parentId, color: selectedColor, icon: selectedIcon });
+        lib.createFolder({ name: nameVal, parentId, color: 'rose', icon: 'folder' });
         window.showToast?.(isAr ? 'تم إنشاء المجلد بنجاح' : 'Folder created', { type: 'success' });
       }
       closeModal();
@@ -942,39 +968,37 @@ window.SheetsPage = {
 
     const backdrop = document.createElement('div');
     backdrop.id = 'psl-modal-backdrop';
-    backdrop.className = 'psl-modal-backdrop';
+    backdrop.className = 'lib-modal-backdrop';
     backdrop.dir = isAr ? 'rtl' : 'ltr';
 
     backdrop.innerHTML = `
-      <div class="psl-modal-card" style="max-width:440px;">
-        <div class="psl-modal-header">
-          <h3 style="color:#ef4444;">
-            <i data-lucide="alert-triangle" style="width:19px;height:19px;"></i>
+      <div class="lib-modal-card">
+        <div class="lib-modal-header">
+          <h3 style="color:#B91C1C;">
             <span>${isAr ? 'حذف المجلد' : 'Delete Folder'}</span>
           </h3>
-          <button type="button" class="psl-modal-close" id="psl-modal-close">✕</button>
+          <button type="button" class="lib-modal-close" id="psl-modal-close">✕</button>
         </div>
-        <div class="psl-modal-body">
-          <p style="margin:0 0 12px;color:var(--text-primary);font-weight:600;">
+        <div class="lib-modal-body">
+          <p style="margin:0 0 12px;color:#23191B;font-weight:700;">
             ${isAr ? `هل أنت متأكد من حذف مجلد "${this.escapeHtml(folder.name)}"؟` : `Are you sure you want to delete "${this.escapeHtml(folder.name)}"?`}
           </p>
           ${counts.totalFilesCount > 0 ? `
-            <p style="margin:0 0 16px;font-size:0.84rem;color:var(--text-secondary);line-height:1.5;">
+            <p style="margin:0 0 16px;font-size:0.86rem;color:#6E6264;line-height:1.5;">
               ${isAr
-                ? `يحتوي هذا المجلد على ${counts.totalFilesCount} ملف. يمكنك نقل الملفات إلى المستوى الأعلى أو حذف المجلد مع ملفاته.`
-                : `This folder contains ${counts.totalFilesCount} file(s). You can keep the files by moving them up, or delete everything.`}
+                ? `يحتوي هذا المجلد على ${counts.totalFilesCount} ملف. يمكنك الاحتفاظ بالملفات ونقلها للمكتبة الرئيسية أو حذف المجلد مع ملفاته.`
+                : `This folder contains ${counts.totalFilesCount} file(s). You can keep the files or delete everything.`}
             </p>
           ` : ''}
-          <div class="psl-modal-footer" style="flex-wrap:wrap;">
-            <button type="button" class="psl-btn psl-btn-secondary" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
+          <div class="lib-modal-footer" style="flex-wrap:wrap;">
+            <button type="button" class="lib-btn lib-btn-new-folder" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
             ${counts.totalFilesCount > 0 ? `
-              <button type="button" class="psl-btn psl-btn-secondary" id="psl-btn-keep-files" style="border-color:rgba(14,165,233,0.4);color:#38bdf8;">
-                ${isAr ? 'حذف المجلد والاحتفاظ بالملفات' : 'Delete Folder & Keep Files'}
+              <button type="button" class="lib-btn lib-btn-new-folder" id="psl-btn-keep-files">
+                ${isAr ? 'حذف المجلد والاحتفاظ بالملفات' : 'Keep Files'}
               </button>
             ` : ''}
-            <button type="button" class="psl-btn psl-btn-danger" id="psl-btn-confirm-delete">
-              <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
-              <span>${isAr ? 'حذف نهائي' : 'Delete All'}</span>
+            <button type="button" class="lib-btn lib-btn-import" id="psl-btn-confirm-delete" style="background:#B91C1C;border-color:#B91C1C;">
+              <span>${isAr ? 'حذف نهائي' : 'Delete'}</span>
             </button>
           </div>
         </div>
@@ -982,23 +1006,23 @@ window.SheetsPage = {
     `;
 
     document.body.appendChild(backdrop);
-    if (window.lucide) window.lucide.createIcons();
 
     const closeModal = () => backdrop.remove();
     backdrop.querySelector('#psl-modal-close')?.addEventListener('click', closeModal);
     backdrop.querySelector('#psl-modal-cancel')?.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
 
     backdrop.querySelector('#psl-btn-keep-files')?.addEventListener('click', async () => {
       await lib.deleteFolder(folder.id, { deleteFiles: false });
       closeModal();
-      window.showToast?.(isAr ? 'تم حذف المجلد ونقل ملفاته للمستوى الأعلى' : 'Folder deleted and files kept', { type: 'success' });
+      window.showToast?.(isAr ? 'تم حذف المجلد والاحتفاظ بالملفات' : 'Folder deleted, files kept', { type: 'success' });
       this.renderWorkspace(container, isAr);
     });
 
     backdrop.querySelector('#psl-btn-confirm-delete')?.addEventListener('click', async () => {
       await lib.deleteFolder(folder.id, { deleteFiles: true });
       closeModal();
-      window.showToast?.(isAr ? 'تم حذف المجلد بنجاح' : 'Folder deleted', { type: 'success' });
+      window.showToast?.(isAr ? 'تم حذف المجلد' : 'Folder deleted', { type: 'success' });
       this.renderWorkspace(container, isAr);
     });
   },
@@ -1015,37 +1039,34 @@ window.SheetsPage = {
 
     const backdrop = document.createElement('div');
     backdrop.id = 'psl-modal-backdrop';
-    backdrop.className = 'psl-modal-backdrop';
+    backdrop.className = 'lib-modal-backdrop';
     backdrop.dir = isAr ? 'rtl' : 'ltr';
 
     backdrop.innerHTML = `
-      <div class="psl-modal-card" style="max-width:460px;">
-        <div class="psl-modal-header">
+      <div class="lib-modal-card">
+        <div class="lib-modal-header">
           <h3>
-            <i data-lucide="folder-input" style="width:19px;height:19px;color:var(--brand-accent,#0ea5e9);"></i>
-            <span>${isAr ? 'نقل الملف إلى مجلد آخر' : 'Move File to Folder'}</span>
+            ${this.getFolderSvg('#8B1D2C', '#F2DCE0', '#F6E5E8', 24, 20)}
+            <span>${isAr ? 'نقل الملف إلى مجلد' : 'Move File to Folder'}</span>
           </h3>
-          <button type="button" class="psl-modal-close" id="psl-modal-close">✕</button>
+          <button type="button" class="lib-modal-close" id="psl-modal-close">✕</button>
         </div>
 
-        <form id="psl-move-form" class="psl-modal-body">
-          <p style="margin:0 0 12px;font-size:0.86rem;color:var(--text-secondary);">
-            ${isAr ? `اختر الوجهة الجديدة للملف "${this.escapeHtml(file.title)}":` : `Select destination folder for "${this.escapeHtml(file.title)}":`}
-          </p>
-          <div class="psl-field">
-            <select id="psl-move-target-select" class="psl-input">
-              <option value="" ${!file.folderId ? 'selected' : ''}>🏠 ${isAr ? 'المكتبة الرئيسية (خارج المجلدات)' : 'Root Library'}</option>
+        <form id="psl-move-form" class="lib-modal-body">
+          <div class="lib-field">
+            <label>${isAr ? `اختر المجلد للملف "${this.escapeHtml(file.title)}"` : `Select destination folder for "${this.escapeHtml(file.title)}"`}</label>
+            <select id="psl-move-target-select" class="lib-input">
+              <option value="" ${!file.folderId ? 'selected' : ''}>${isAr ? 'المكتبة الرئيسية (بدون مجلد)' : 'Root Library'}</option>
               ${allFolders.map(fld => `
                 <option value="${fld.id}" ${file.folderId === fld.id ? 'selected' : ''}>
-                  📁 ${this.escapeHtml(buildFolderPathLabel(fld))}
+                  ${this.escapeHtml(buildFolderPathLabel(fld))}
                 </option>
               `).join('')}
             </select>
           </div>
-          <div class="psl-modal-footer">
-            <button type="button" class="psl-btn psl-btn-secondary" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
-            <button type="submit" class="psl-btn psl-btn-primary">
-              <i data-lucide="check" style="width:15px;height:15px;"></i>
+          <div class="lib-modal-footer">
+            <button type="button" class="lib-btn lib-btn-new-folder" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
+            <button type="submit" class="lib-btn lib-btn-import">
               <span>${isAr ? 'نقل الملف' : 'Move File'}</span>
             </button>
           </div>
@@ -1054,11 +1075,11 @@ window.SheetsPage = {
     `;
 
     document.body.appendChild(backdrop);
-    if (window.lucide) window.lucide.createIcons();
 
     const closeModal = () => backdrop.remove();
     backdrop.querySelector('#psl-modal-close')?.addEventListener('click', closeModal);
     backdrop.querySelector('#psl-modal-cancel')?.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
 
     backdrop.querySelector('#psl-move-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1076,37 +1097,36 @@ window.SheetsPage = {
 
     const backdrop = document.createElement('div');
     backdrop.id = 'psl-modal-backdrop';
-    backdrop.className = 'psl-modal-backdrop';
+    backdrop.className = 'lib-modal-backdrop';
     backdrop.dir = isAr ? 'rtl' : 'ltr';
 
     backdrop.innerHTML = `
-      <div class="psl-modal-card" style="max-width:440px;">
-        <div class="psl-modal-header">
+      <div class="lib-modal-card">
+        <div class="lib-modal-header">
           <h3>
-            <i data-lucide="edit-2" style="width:18px;height:18px;color:var(--brand-accent,#0ea5e9);"></i>
             <span>${isAr ? 'إعادة تسمية الملف' : 'Rename File'}</span>
           </h3>
-          <button type="button" class="psl-modal-close" id="psl-modal-close">✕</button>
+          <button type="button" class="lib-modal-close" id="psl-modal-close">✕</button>
         </div>
-        <form id="psl-rename-file-form" class="psl-modal-body">
-          <div class="psl-field">
-            <label>${isAr ? 'الاسم الجديد للملف' : 'New File Title'}</label>
-            <input type="text" id="psl-rename-input" class="psl-input" value="${this.escapeHtml(file.title)}" required autofocus />
+        <form id="psl-rename-file-form" class="lib-modal-body">
+          <div class="lib-field">
+            <label>${isAr ? 'اسم الملف' : 'File Name'}</label>
+            <input type="text" id="psl-rename-input" class="lib-input" value="${this.escapeHtml(file.title)}" required autofocus />
           </div>
-          <div class="psl-modal-footer">
-            <button type="button" class="psl-btn psl-btn-secondary" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
-            <button type="submit" class="psl-btn psl-btn-primary">${isAr ? 'حفظ الاسم' : 'Save'}</button>
+          <div class="lib-modal-footer">
+            <button type="button" class="lib-btn lib-btn-new-folder" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
+            <button type="submit" class="lib-btn lib-btn-import">${isAr ? 'حفظ' : 'Save'}</button>
           </div>
         </form>
       </div>
     `;
 
     document.body.appendChild(backdrop);
-    if (window.lucide) window.lucide.createIcons();
 
     const closeModal = () => backdrop.remove();
     backdrop.querySelector('#psl-modal-close')?.addEventListener('click', closeModal);
     backdrop.querySelector('#psl-modal-cancel')?.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
 
     backdrop.querySelector('#psl-rename-file-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1122,38 +1142,29 @@ window.SheetsPage = {
 
   openDeleteFileModal(file, container, isAr) {
     const lib = window.PersonalLibrary;
-    const recs = lib.getRecordingsForFile(file.id);
     document.getElementById('psl-modal-backdrop')?.remove();
 
     const backdrop = document.createElement('div');
     backdrop.id = 'psl-modal-backdrop';
-    backdrop.className = 'psl-modal-backdrop';
+    backdrop.className = 'lib-modal-backdrop';
     backdrop.dir = isAr ? 'rtl' : 'ltr';
 
     backdrop.innerHTML = `
-      <div class="psl-modal-card" style="max-width:440px;">
-        <div class="psl-modal-header">
-          <h3 style="color:#ef4444;">
-            <i data-lucide="trash-2" style="width:19px;height:19px;"></i>
-            <span>${isAr ? 'حذف الملف الدراسي' : 'Delete Study File'}</span>
+      <div class="lib-modal-card">
+        <div class="lib-modal-header">
+          <h3 style="color:#B91C1C;">
+            <span>${isAr ? 'حذف الملف' : 'Delete File'}</span>
           </h3>
-          <button type="button" class="psl-modal-close" id="psl-modal-close">✕</button>
+          <button type="button" class="lib-modal-close" id="psl-modal-close">✕</button>
         </div>
-        <div class="psl-modal-body">
-          <p style="margin:0 0 12px;color:var(--text-primary);font-weight:600;">
-            ${isAr ? `هل تريد حذف "${this.escapeHtml(file.title)}"؟` : `Delete "${this.escapeHtml(file.title)}"?`}
+        <div class="lib-modal-body">
+          <p style="margin:0 0 16px;color:#23191B;font-weight:600;">
+            ${isAr ? `هل أنت متأكد من حذف "${this.escapeHtml(file.title)}"؟` : `Are you sure you want to delete "${this.escapeHtml(file.title)}"?`}
           </p>
-          ${recs.length > 0 ? `
-            <div style="padding:10px 12px;border-radius:10px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#fbbf24;font-size:0.82rem;margin-bottom:14px;">
-              🎙️ ${isAr
-                ? `يوجد ${recs.length} تسجيل صوتي مرتبط بهذا الملف. التسجيلات محفوظة بشكل مستقل ولن تضيع إلا إذا اخترت حذفها أيضاً.`
-                : `There are ${recs.length} audio recording(s) linked to this file.`}
-            </div>
-          ` : ''}
-          <div class="psl-modal-footer">
-            <button type="button" class="psl-btn psl-btn-secondary" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
-            <button type="button" class="psl-btn psl-btn-danger" id="psl-confirm-delete-file">
-              ${isAr ? 'حذف الملف' : 'Delete File'}
+          <div class="lib-modal-footer">
+            <button type="button" class="lib-btn lib-btn-new-folder" id="psl-modal-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
+            <button type="button" class="lib-btn lib-btn-import" id="psl-confirm-delete-file" style="background:#B91C1C;border-color:#B91C1C;">
+              ${isAr ? 'حذف الملف' : 'Delete'}
             </button>
           </div>
         </div>
@@ -1161,11 +1172,11 @@ window.SheetsPage = {
     `;
 
     document.body.appendChild(backdrop);
-    if (window.lucide) window.lucide.createIcons();
 
     const closeModal = () => backdrop.remove();
     backdrop.querySelector('#psl-modal-close')?.addEventListener('click', closeModal);
     backdrop.querySelector('#psl-modal-cancel')?.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
 
     backdrop.querySelector('#psl-confirm-delete-file')?.addEventListener('click', async () => {
       await lib.deleteFile(file.id, { keepRecordings: false });
@@ -1184,890 +1195,928 @@ window.SheetsPage = {
   },
 
   injectStyles() {
-    if (document.getElementById('psl-personal-library-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'psl-personal-library-styles';
+    let style = document.getElementById('psl-personal-library-styles');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'psl-personal-library-styles';
+      document.head.appendChild(style);
+    }
     style.textContent = `
-      .psl-shell {
-        max-width: 1320px;
+      /* ==========================================================================
+         KURO FANGS — MINIMALIST MODERN LIBRARY REDESIGN (v29.0)
+         Matches Reference Visual Direction: Warm Off-White (#FCFBF8), Burgundy (#8B1D2C),
+         Clean White Cards (#FFFFFF), Soft Borders (#EFEAE1), Zero Clutter
+         ========================================================================== */
+      .lib-page-shell {
+        max-width: 1240px;
         margin: 0 auto;
-        padding: 20px 20px 90px;
+        padding: 12px 28px 96px;
         position: relative;
-        min-height: calc(100vh - 90px);
+        min-height: calc(100vh - 80px);
+        color: #23191B;
+        font-family: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
       }
 
-      /* OS Drag Overlay */
-      .psl-os-drop-overlay {
+      /* 1. PAGE HEADER (Directly on page background, no bounding box) */
+      .lib-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+
+      .lib-header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .lib-header-icon-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .lib-header-titles {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .lib-breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 2px;
+      }
+
+      .lib-crumb-link {
+        background: none;
+        border: none;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #7A6E70;
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      .lib-crumb-link:hover,
+      .lib-crumb-link.drop-target {
+        background: #F2DCE0;
+        color: #8B1D2C;
+      }
+
+      .lib-crumb-link.current {
+        color: #8B1D2C;
+        font-weight: 700;
+      }
+
+      .lib-crumb-sep {
+        color: #B8AEB0;
+        font-size: 0.78rem;
+      }
+
+      .lib-main-title {
+        font-size: clamp(1.65rem, 2.3vw, 2.05rem);
+        font-weight: 800;
+        color: #23191B;
+        margin: 0;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      .lib-main-subtitle {
+        font-size: 0.92rem;
+        color: #6E6264;
+        margin: 0;
+        font-weight: 450;
+      }
+
+      .lib-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .lib-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 650;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        white-space: nowrap;
+      }
+
+      .lib-btn:active {
+        transform: scale(0.98);
+      }
+
+      .lib-btn-new-folder {
+        background: #FFFFFF;
+        color: #23191B;
+        border: 1px solid #DED7CD;
+        box-shadow: 0 1px 3px rgba(35, 25, 27, 0.03);
+      }
+
+      .lib-btn-new-folder:hover {
+        background: #F9F6F0;
+        border-color: #C7BEB2;
+      }
+
+      .lib-btn-import {
+        background: #8B1D2C;
+        color: #FFFFFF;
+        border: 1px solid #7A1826;
+        box-shadow: 0 4px 12px rgba(139, 29, 44, 0.18);
+      }
+
+      .lib-btn-import:hover {
+        background: #7A1826;
+      }
+
+      /* 2. SEARCH BAR & VIEW SWITCHER CONTAINER */
+      .lib-search-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        background: #FFFFFF;
+        border: 1px solid #EFEAE1;
+        border-radius: 16px;
+        padding: 10px 14px;
+        margin-bottom: 28px;
+        box-shadow: 0 2px 10px rgba(35, 25, 27, 0.02);
+      }
+
+      .lib-search-field-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex: 1;
+        max-width: 720px;
+        background: #F4F2EE;
+        border-radius: 11px;
+        height: 42px;
+        padding: 0 14px;
+        gap: 10px;
+        border: 1px solid transparent;
+        transition: border-color 0.16s ease, background 0.16s ease;
+      }
+
+      .lib-search-field-wrap:focus-within {
+        background: #FFFFFF;
+        border-color: #D8C7CA;
+      }
+
+      .lib-search-icon {
+        color: #6E6264;
+        flex-shrink: 0;
+      }
+
+      .lib-search-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        color: #23191B;
+        font-size: 0.9rem;
+        font-family: inherit;
+        outline: none;
+      }
+
+      .lib-search-input::placeholder {
+        color: #7A6E70;
+      }
+
+      .lib-search-clear {
+        background: none;
+        border: none;
+        color: #7A6E70;
+        cursor: pointer;
+        font-size: 0.85rem;
+        padding: 2px 4px;
+      }
+
+      .lib-view-toggle {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid #EDE7DE;
+        border-radius: 11px;
+        overflow: hidden;
+        background: #FFFFFF;
+        flex-shrink: 0;
+      }
+
+      .lib-view-btn {
+        width: 42px;
+        height: 38px;
+        border: none;
+        background: transparent;
+        color: #6E6264;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .lib-view-btn + .lib-view-btn {
+        border-inline-start: 1px solid #EDE7DE;
+      }
+
+      .lib-view-btn.active {
+        background: #F3DCE0;
+        color: #8B1D2C;
+      }
+
+      /* 3. SECTIONS (Folders & Recent Files) */
+      .lib-section {
+        margin-bottom: 30px;
+      }
+
+      .lib-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .lib-section-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #23191B;
+        margin: 0;
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+        letter-spacing: -0.01em;
+      }
+
+      .lib-section-count {
+        font-weight: 500;
+        color: #7A6E70;
+        font-size: 1.1rem;
+      }
+
+      .lib-view-all-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: none;
+        color: #7A1C2C;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 8px;
+        font-family: inherit;
+        transition: background 0.15s ease;
+      }
+
+      .lib-view-all-btn:hover {
+        background: rgba(139, 29, 44, 0.06);
+      }
+
+      /* 4. FOLDERS GRID & CARDS */
+      .lib-folders-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      @media (max-width: 1280px) {
+        .lib-folders-grid {
+          grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+        }
+      }
+
+      .lib-folders-grid.list-mode {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .lib-folder-card {
+        position: relative;
+        background: #FFFFFF;
+        border: 1px solid #EFEAE1;
+        border-radius: 16px;
+        padding: 18px 16px 16px;
+        box-shadow: 0 3px 12px rgba(35, 25, 27, 0.025);
+        transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .lib-folder-card:hover {
+        transform: translateY(-2px);
+        border-color: #DFC8CC;
+        box-shadow: 0 8px 20px rgba(35, 25, 27, 0.05);
+      }
+
+      .lib-folder-card.drag-over,
+      .lib-folder-card.drop-target {
+        border: 2px dashed #8B1D2C;
+        background: #FDF7F8;
+        transform: scale(1.02);
+      }
+
+      .lib-folder-card-body {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .lib-folders-grid.list-mode .lib-folder-card {
+        padding: 14px 18px;
+      }
+
+      .lib-folders-grid.list-mode .lib-folder-card-body {
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        padding-inline-end: 32px;
+      }
+
+      .lib-folder-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .lib-folder-info {
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .lib-folder-name {
+        font-size: 0.96rem;
+        font-weight: 750;
+        color: #23191B;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .lib-folder-meta {
+        font-size: 0.82rem;
+        color: #7A6E70;
+        font-weight: 500;
+      }
+
+      .lib-folder-card > .lib-dots-btn {
+        position: absolute;
+        top: 10px;
+        inset-inline-end: 8px;
+      }
+
+      .lib-folders-grid.list-mode .lib-folder-card > .lib-dots-btn {
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      /* 5. RECENT FILES GRID & CARDS */
+      .lib-files-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 320px));
+        gap: 18px;
+      }
+
+      @media (max-width: 1024px) {
+        .lib-files-grid {
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        }
+      }
+
+      .lib-files-grid.list-mode {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .lib-file-card {
+        position: relative;
+        background: #FFFFFF;
+        border: 1px solid #EFEAE1;
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 3px 12px rgba(35, 25, 27, 0.025);
+        transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .lib-file-card:hover {
+        transform: translateY(-2px);
+        border-color: #DFC8CC;
+        box-shadow: 0 10px 24px rgba(35, 25, 27, 0.06);
+      }
+
+      .lib-file-preview {
+        position: relative;
+        height: 138px;
+        border-radius: 12px;
+        background: #FAF8F5;
+        border: 1px solid #F1ECE3;
+        padding: 10px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .lib-file-type-badge {
+        position: absolute;
+        top: 8px;
+        inset-inline-start: 8px;
+        z-index: 2;
+        background: #7A1C2C;
+        color: #FFFFFF;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 3px 9px;
+        border-radius: 6px;
+        letter-spacing: 0.03em;
+      }
+
+      .lib-file-thumb-sheet {
+        width: 100%;
+        height: 100%;
+        background: #FFFFFF;
+        border: 1px solid #EAE4DA;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .lib-file-thumb-sheet img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        display: block;
+      }
+
+      .lib-file-thumb-fallback {
+        width: 100%;
+        height: 100%;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .lib-fallback-lines {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+
+      .lib-fallback-lines span {
+        display: block;
+        height: 5px;
+        border-radius: 3px;
+        background: #EFEAE1;
+      }
+
+      .lib-fallback-lines .l-title {
+        width: 55%;
+        height: 7px;
+        background: #E5CDD1;
+        margin-bottom: 3px;
+      }
+
+      .lib-fallback-lines .l-row.short { width: 65%; }
+      .lib-fallback-lines .l-row.med { width: 80%; }
+
+      .lib-file-footer {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 2px;
+      }
+
+      .lib-file-meta-wrap {
+        min-width: 0;
+        flex: 1;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .lib-file-name {
+        font-size: 0.95rem;
+        font-weight: 750;
+        color: #23191B;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .lib-file-date {
+        font-size: 0.8rem;
+        color: #7A6E70;
+        font-weight: 450;
+      }
+
+      .lib-file-dots-wrap {
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      /* List Mode for Files */
+      .lib-files-grid.list-mode .lib-file-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+        padding: 10px 16px;
+      }
+
+      .lib-files-grid.list-mode .lib-file-preview {
+        width: 96px;
+        height: 64px;
+        padding: 4px 8px;
+        flex-shrink: 0;
+      }
+
+      .lib-files-grid.list-mode .lib-file-footer {
+        margin-top: 0;
+        flex: 1;
+        align-items: center;
+      }
+
+      /* 6. THREE-DOTS BUTTON & CONTEXT MENU */
+      .lib-dots-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: #6E6264;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      .lib-dots-btn:hover {
+        background: #F4F1EC;
+        color: #23191B;
+      }
+
+      .lib-dots-menu {
+        position: absolute;
+        top: 36px;
+        inset-inline-end: 8px;
+        z-index: 60;
+        min-width: 165px;
+        background: #FFFFFF;
+        border: 1px solid #EAE2D6;
+        border-radius: 12px;
+        padding: 6px;
+        box-shadow: 0 12px 28px rgba(35, 25, 27, 0.12);
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .lib-dots-menu.file-menu {
+        top: auto;
+        bottom: 34px;
+        inset-inline-end: 0;
+      }
+
+      .lib-dots-menu.open {
+        display: flex;
+      }
+
+      .lib-dots-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        width: 100%;
+        padding: 8px 10px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #23191B;
+        cursor: pointer;
+        text-align: start;
+        font-family: inherit;
+      }
+
+      .lib-dots-item:hover {
+        background: #F6F2EC;
+      }
+
+      .lib-dots-item.danger {
+        color: #B91C1C;
+      }
+
+      .lib-dots-item.danger:hover {
+        background: #FEF2F2;
+      }
+
+      /* 7. EMPTY STATES & UPLOAD BANNER */
+      .lib-empty-inline-card,
+      .lib-empty-files-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px 22px;
+        background: #FFFFFF;
+        border: 1px dashed #DFD7CC;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: border-color 0.16s ease, background 0.16s ease;
+      }
+
+      .lib-empty-inline-card:hover,
+      .lib-empty-files-card:hover {
+        border-color: #8B1D2C;
+        background: #FDFBFA;
+      }
+
+      .lib-empty-inline-text,
+      .lib-empty-files-text {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .lib-empty-inline-text strong,
+      .lib-empty-files-text strong {
+        font-size: 0.95rem;
+        color: #23191B;
+      }
+
+      .lib-empty-inline-text span,
+      .lib-empty-files-text span {
+        font-size: 0.83rem;
+        color: #7A6E70;
+      }
+
+      .lib-upload-banner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #F9EBEE;
+        border: 1px solid #E5C2C8;
+        color: #8B1D2C;
+        font-weight: 700;
+        font-size: 0.86rem;
+        margin-bottom: 18px;
+      }
+
+      .lib-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2.2px solid rgba(139, 29, 44, 0.25);
+        border-top-color: #8B1D2C;
+        border-radius: 50%;
+        animation: libSpin 0.75s linear infinite;
+      }
+
+      @keyframes libSpin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* OS Drop Overlay */
+      .lib-os-drop-overlay {
         position: fixed;
         inset: 0;
         z-index: 9999;
-        background: rgba(9, 13, 22, 0.85);
-        backdrop-filter: blur(10px);
+        background: rgba(252, 251, 248, 0.9);
+        backdrop-filter: blur(8px);
         display: none;
         align-items: center;
         justify-content: center;
         padding: 24px;
       }
-      .psl-os-drop-overlay.active {
+
+      .lib-os-drop-overlay.active {
         display: flex;
       }
-      .psl-os-drop-box {
-        border: 2px dashed #38bdf8;
-        background: rgba(14, 165, 233, 0.08);
+
+      .lib-os-drop-box {
+        border: 2px dashed #8B1D2C;
+        background: #FFFFFF;
         border-radius: 20px;
-        padding: 48px 36px;
+        padding: 44px 36px;
         text-align: center;
-        max-width: 520px;
-        color: #f8fafc;
-      }
-      .psl-os-drop-icon {
-        width: 76px;
-        height: 76px;
-        border-radius: 20px;
-        background: rgba(14, 165, 233, 0.16);
-        color: #38bdf8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 16px;
+        max-width: 480px;
+        color: #23191B;
+        box-shadow: 0 20px 44px rgba(35, 25, 27, 0.08);
       }
 
-      /* Header */
-      .psl-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 20px;
-        padding: 26px 28px;
-        border-radius: 18px;
-        background: linear-gradient(145deg, rgba(17, 24, 39, 0.92), rgba(11, 15, 25, 0.96));
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 16px 36px rgba(0, 0, 0, 0.28);
-        margin-bottom: 18px;
-        flex-wrap: wrap;
-      }
-      [data-theme="light"], [data-theme="kuro"] .psl-header {
-        background: linear-gradient(145deg, #ffffff, #f8fafc);
-        border-color: rgba(15, 23, 42, 0.09);
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
-      }
-      .psl-brand-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
-      }
-      .psl-brand-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 5px 12px;
-        border-radius: 8px;
-        background: rgba(14, 165, 233, 0.14);
-        border: 1px solid rgba(14, 165, 233, 0.3);
-        color: #38bdf8;
-        font-size: 0.76rem;
-        font-weight: 800;
-        letter-spacing: 0.03em;
-      }
-      .psl-privacy-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 10px;
-        border-radius: 8px;
-        background: rgba(16, 185, 129, 0.12);
-        border: 1px solid rgba(16, 185, 129, 0.28);
-        color: #34d399;
-        font-size: 0.75rem;
-        font-weight: 700;
-      }
-      .psl-title {
-        font-size: clamp(1.35rem, 2.4vw, 1.85rem);
-        font-weight: 800;
-        color: var(--text-primary, #f8fafc);
-        margin: 0 0 6px;
-      }
-      .psl-subtitle {
-        font-size: 0.88rem;
-        color: var(--text-secondary, #94a3b8);
-        margin: 0 0 14px;
-        max-width: 680px;
-        line-height: 1.55;
-      }
-      .psl-stats-strip {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .psl-stat-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 12px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        font-size: 0.78rem;
-        color: var(--text-secondary, #cbd5e1);
-      }
-      [data-theme="light"], [data-theme="kuro"] .psl-stat-chip {
-        background: #f1f5f9;
-        border-color: #e2e8f0;
-        color: #334155;
-      }
-      .psl-header-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      /* Buttons */
-      .psl-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 18px;
-        border-radius: 10px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-        border: 1px solid transparent;
-        font-family: inherit;
-      }
-      .psl-btn:active {
-        transform: scale(0.98);
-      }
-      .psl-btn-primary {
-        background: linear-gradient(135deg, #0284c7, #0ea5e9);
-        color: #ffffff;
-        border-color: rgba(56, 189, 248, 0.4);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 6px 18px rgba(2, 132, 199, 0.32);
-      }
-      .psl-btn-primary:hover {
-        filter: brightness(1.08);
-      }
-      .psl-btn-secondary {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-primary, #f8fafc);
-        border-color: rgba(255, 255, 255, 0.12);
-      }
-      [data-theme="light"], [data-theme="kuro"] .psl-btn-secondary {
-        background: #f1f5f9;
-        color: #0f172a;
-        border-color: #cbd5e1;
-      }
-      .psl-btn-secondary:hover {
-        border-color: #38bdf8;
-      }
-      .psl-btn-danger {
-        background: #ef4444;
-        color: #ffffff;
-      }
-
-      /* Upload Banner */
-      .psl-upload-banner {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 18px;
-        border-radius: 12px;
-        background: rgba(14, 165, 233, 0.14);
-        border: 1px solid rgba(56, 189, 248, 0.35);
-        color: #38bdf8;
-        font-weight: 700;
-        font-size: 0.86rem;
-        margin-bottom: 16px;
-      }
-      .psl-spinner {
-        width: 18px;
-        height: 18px;
-        border: 2.5px solid rgba(56, 189, 248, 0.25);
-        border-top-color: #38bdf8;
-        border-radius: 50%;
-        animation: pslSpin 0.75s linear infinite;
-      }
-      @keyframes pslSpin {
-        to { transform: rotate(360deg); }
-      }
-
-      /* Toolbar */
-      .psl-toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 14px;
-        padding: 12px 16px;
-        border-radius: 14px;
-        background: var(--bg-card, rgba(17, 24, 39, 0.75));
-        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
-        margin-bottom: 22px;
-        flex-wrap: wrap;
-      }
-      .psl-breadcrumbs {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .psl-crumb {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 11px;
-        border-radius: 8px;
-        background: transparent;
-        border: 1px solid transparent;
-        color: var(--text-secondary, #94a3b8);
-        font-size: 0.83rem;
-        font-weight: 600;
-        cursor: pointer;
-        font-family: inherit;
-        transition: all 0.15s ease;
-      }
-      .psl-crumb:hover, .psl-crumb.drop-target {
-        background: rgba(14, 165, 233, 0.12);
-        color: #38bdf8;
-        border-color: rgba(56, 189, 248, 0.35);
-      }
-      .psl-crumb.active {
-        background: rgba(14, 165, 233, 0.14);
-        color: var(--text-primary, #f8fafc);
-        border-color: rgba(14, 165, 233, 0.3);
-        font-weight: 800;
-      }
-      .psl-crumb-sep {
-        color: var(--text-muted, #64748b);
-        display: inline-flex;
-      }
-
-      .psl-toolbar-controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-        flex: 1;
-        justify-content: flex-end;
-      }
-      .psl-search-box {
-        position: relative;
-        min-width: 230px;
-        max-width: 340px;
-        flex: 1;
-      }
-      .psl-search-icon {
-        position: absolute;
-        inset-inline-start: 11px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-muted, #64748b);
-        pointer-events: none;
-      }
-      .psl-search-input {
-        width: 100%;
-        padding: 8px 30px 8px 34px;
-        border-radius: 9px;
-        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--text-primary, #f8fafc);
-        font-size: 0.83rem;
-        font-family: inherit;
-      }
-      [data-theme="light"], [data-theme="kuro"] .psl-search-input {
-        background: #f8fafc;
-        border-color: #cbd5e1;
-        color: #0f172a;
-      }
-      .psl-search-input:focus {
-        outline: none;
-        border-color: #0ea5e9;
-      }
-      .psl-search-clear {
-        position: absolute;
-        inset-inline-end: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: var(--text-muted, #94a3b8);
-        cursor: pointer;
-        font-size: 0.8rem;
-      }
-      .psl-select {
-        padding: 8px 12px;
-        border-radius: 9px;
-        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
-        background: rgba(0, 0, 0, 0.22);
-        color: var(--text-primary, #f8fafc);
-        font-size: 0.8rem;
-        font-family: inherit;
-        cursor: pointer;
-      }
-      [data-theme="light"], [data-theme="kuro"] .psl-select {
-        background: #f8fafc;
-        border-color: #cbd5e1;
-        color: #0f172a;
-      }
-      .psl-view-toggle {
-        display: inline-flex;
-        border-radius: 9px;
-        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
-        overflow: hidden;
-      }
-      .psl-view-btn {
-        padding: 7px 10px;
-        background: transparent;
-        border: none;
-        color: var(--text-secondary, #94a3b8);
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-      }
-      .psl-view-btn.active {
-        background: rgba(14, 165, 233, 0.18);
-        color: #38bdf8;
-      }
-
-      /* Sections */
-      .psl-section {
-        margin-bottom: 28px;
-      }
-      .psl-section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      .lib-os-drop-icon {
         margin-bottom: 14px;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .psl-section-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .psl-section-title h2 {
-        font-size: 1.05rem;
-        font-weight: 800;
-        margin: 0;
-        color: var(--text-primary, #f8fafc);
-      }
-      .psl-count-pill {
-        padding: 2px 9px;
-        border-radius: 999px;
-        background: rgba(14, 165, 233, 0.14);
-        color: #38bdf8;
-        font-size: 0.75rem;
-        font-weight: 800;
-      }
-      .psl-drag-hint {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.75rem;
-        color: var(--text-muted, #64748b);
-      }
-      .psl-btn-inline-upload {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 8px;
-        background: rgba(16, 185, 129, 0.12);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        color: #34d399;
-        font-size: 0.78rem;
-        font-weight: 700;
-        cursor: pointer;
-        font-family: inherit;
       }
 
-      /* Folders Grid */
-      .psl-folders-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 14px;
-      }
-      .psl-folders-grid.list-mode {
-        grid-template-columns: 1fr;
-      }
-      .psl-folder-card {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 15px 16px;
-        border-radius: 14px;
-        background: var(--bg-card, rgba(17, 24, 39, 0.85));
-        border: 1px solid var(--fld-border, rgba(14, 165, 233, 0.3));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-        cursor: pointer;
-      }
-      .psl-folder-card:hover {
-        transform: translateY(-2px);
-        border-color: var(--fld-color, #0ea5e9);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
-      }
-      .psl-folder-card.drag-over, .psl-folder-card.drop-target {
-        border: 2px dashed var(--fld-color, #38bdf8);
-        background: var(--fld-bg);
-        transform: scale(1.02);
-      }
-      .psl-folder-card-body {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;
-        min-width: 0;
-      }
-      .psl-folder-icon-wrap {
-        width: 46px;
-        height: 46px;
-        border-radius: 12px;
-        background: var(--fld-bg);
-        border: 1px solid var(--fld-border);
-        color: var(--fld-color);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-      .psl-folder-info {
-        min-width: 0;
-        flex: 1;
-      }
-      .psl-folder-name {
-        font-size: 0.95rem;
-        font-weight: 800;
-        color: var(--text-primary, #f8fafc);
-        margin: 0 0 3px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .psl-folder-meta {
-        font-size: 0.76rem;
-        color: var(--text-secondary, #94a3b8);
-      }
-      .psl-folder-actions {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-
-      /* Files Grid */
-      .psl-files-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-        gap: 16px;
-      }
-      .psl-files-grid.list-mode {
-        grid-template-columns: 1fr;
-      }
-      .psl-files-grid.list-mode .psl-file-card {
-        flex-direction: row;
-        align-items: center;
-      }
-      .psl-files-grid.list-mode .psl-file-thumb {
-        width: 90px;
-        height: 76px;
-        flex-shrink: 0;
-      }
-      .psl-file-card {
-        display: flex;
-        flex-direction: column;
-        border-radius: 14px;
-        background: var(--bg-card, rgba(17, 24, 39, 0.88));
-        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
-        overflow: hidden;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .psl-file-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(56, 189, 248, 0.45);
-        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
-      }
-      .psl-file-card.drag-over {
-        border: 2px dashed #38bdf8;
-      }
-      .psl-file-thumb {
-        position: relative;
-        height: 156px;
-        background: linear-gradient(145deg, #0f172a, #1e293b);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        cursor: pointer;
-      }
-      .psl-file-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .psl-file-thumb-placeholder {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        color: #38bdf8;
-        font-weight: 800;
-        font-size: 0.75rem;
-      }
-      .psl-file-badges {
-        position: absolute;
-        top: 8px;
-        inset-inline-start: 8px;
-        display: flex;
-        gap: 6px;
-      }
-      .psl-file-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 0.7rem;
-        font-weight: 800;
-        backdrop-filter: blur(8px);
-      }
-      .psl-file-badge.type {
-        background: rgba(15, 23, 42, 0.82);
-        color: #e2e8f0;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-      }
-      .psl-file-badge.audio {
-        background: rgba(239, 68, 68, 0.88);
-        color: #ffffff;
-      }
-      .psl-file-hover-cta {
-        position: absolute;
-        inset: 0;
-        background: rgba(9, 13, 22, 0.72);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.18s ease;
-        color: #ffffff;
-        font-size: 0.82rem;
-        font-weight: 700;
-      }
-      .psl-file-thumb:hover .psl-file-hover-cta {
-        opacity: 1;
-      }
-      .psl-file-hover-cta span {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 7px 14px;
-        border-radius: 9px;
-        background: #0284c7;
-      }
-
-      .psl-file-body {
-        padding: 13px 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        flex: 1;
-      }
-      .psl-file-main {
-        cursor: pointer;
-      }
-      .psl-file-title {
-        font-size: 0.9rem;
-        font-weight: 800;
-        color: var(--text-primary, #f8fafc);
-        margin: 0 0 4px;
-        line-height: 1.35;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .psl-file-submeta {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.73rem;
-        color: var(--text-muted, #94a3b8);
-        flex-wrap: wrap;
-      }
-      .psl-file-progress {
-        height: 4px;
-        border-radius: 99px;
-        background: rgba(255, 255, 255, 0.08);
-        overflow: hidden;
-      }
-      .psl-file-progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #0ea5e9, #10b981);
-      }
-      .psl-file-actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-top: auto;
-        padding-top: 8px;
-        border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
-      }
-      .psl-file-open-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border-radius: 7px;
-        background: rgba(14, 165, 233, 0.14);
-        border: 1px solid rgba(14, 165, 233, 0.3);
-        color: #38bdf8;
-        font-size: 0.76rem;
-        font-weight: 800;
-        cursor: pointer;
-        font-family: inherit;
-      }
-      .psl-file-open-btn:hover {
-        background: #0284c7;
-        color: #ffffff;
-      }
-      .psl-file-icon-actions {
-        display: flex;
-        align-items: center;
-        gap: 3px;
-      }
-      .psl-icon-btn {
-        width: 28px;
-        height: 28px;
-        border-radius: 7px;
-        border: 1px solid transparent;
-        background: transparent;
-        color: var(--text-secondary, #94a3b8);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.15s ease;
-      }
-      .psl-icon-btn:hover {
-        background: rgba(255, 255, 255, 0.07);
-        color: var(--text-primary, #f8fafc);
-      }
-      .psl-icon-btn.danger:hover {
-        background: rgba(239, 68, 68, 0.14);
-        color: #ef4444;
-      }
-
-      /* Empty State */
-      .psl-empty-state {
-        text-align: center;
-        padding: 56px 24px;
-        border-radius: 18px;
-        background: var(--bg-card, rgba(17, 24, 39, 0.65));
-        border: 1.5px dashed var(--border-subtle, rgba(255, 255, 255, 0.14));
-        max-width: 680px;
-        margin: 24px auto;
-      }
-      .psl-empty-icon {
-        width: 72px;
-        height: 72px;
-        border-radius: 18px;
-        background: rgba(14, 165, 233, 0.12);
-        border: 1px solid rgba(14, 165, 233, 0.28);
-        color: #38bdf8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 18px;
-      }
-      .psl-empty-state h3 {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: var(--text-primary, #f8fafc);
-        margin: 0 0 8px;
-      }
-      .psl-empty-state p {
-        font-size: 0.88rem;
-        color: var(--text-secondary, #94a3b8);
-        max-width: 520px;
-        margin: 0 auto 24px;
-        line-height: 1.6;
-      }
-      .psl-empty-actions {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-bottom: 24px;
-      }
-      .psl-empty-features {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .psl-feature-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 11px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--text-secondary, #94a3b8);
-        font-size: 0.76rem;
-      }
-      .psl-folder-empty-dropzone {
-        padding: 36px 20px;
-        border-radius: 14px;
-        border: 1.5px dashed var(--border-subtle, rgba(255, 255, 255, 0.14));
-        text-align: center;
-        cursor: pointer;
-        color: var(--text-secondary, #94a3b8);
-        font-size: 0.85rem;
-        transition: all 0.18s ease;
-      }
-      .psl-folder-empty-dropzone:hover {
-        border-color: #38bdf8;
-        background: rgba(14, 165, 233, 0.05);
-      }
-
-      /* Modals */
-      .psl-modal-backdrop {
+      /* 8. MODALS */
+      .lib-modal-backdrop {
         position: fixed;
         inset: 0;
         z-index: 10000;
-        background: rgba(9, 13, 22, 0.78);
-        backdrop-filter: blur(8px);
+        background: rgba(35, 25, 27, 0.42);
+        backdrop-filter: blur(4px);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 16px;
       }
-      .psl-modal-card {
+
+      .lib-modal-card {
         width: 100%;
-        max-width: 480px;
-        border-radius: 16px;
-        background: var(--bg-card, #111827);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+        max-width: 440px;
+        background: #FFFFFF;
+        border: 1px solid #EAE2D6;
+        border-radius: 18px;
+        box-shadow: 0 24px 48px rgba(35, 25, 27, 0.16);
         overflow: hidden;
       }
-      [data-theme="light"], [data-theme="kuro"] .psl-modal-card {
-        background: #ffffff;
-        border-color: #e2e8f0;
-      }
-      .psl-modal-header {
+
+      .lib-modal-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
         padding: 16px 20px;
-        border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+        border-bottom: 1px solid #F1ECE3;
       }
-      .psl-modal-header h3 {
+
+      .lib-modal-header h3 {
         margin: 0;
         font-size: 1rem;
         font-weight: 800;
+        color: #23191B;
         display: flex;
         align-items: center;
-        gap: 8px;
-        color: var(--text-primary, #f8fafc);
+        gap: 9px;
       }
-      .psl-modal-close {
+
+      .lib-modal-close {
         background: none;
         border: none;
-        color: var(--text-muted, #94a3b8);
+        color: #7A6E70;
         font-size: 1rem;
         cursor: pointer;
       }
-      .psl-modal-body {
+
+      .lib-modal-body {
         padding: 20px;
       }
-      .psl-field {
+
+      .lib-field {
         margin-bottom: 16px;
       }
-      .psl-field label {
+
+      .lib-field label {
         display: block;
-        font-size: 0.8rem;
+        font-size: 0.82rem;
         font-weight: 700;
-        color: var(--text-secondary, #cbd5e1);
+        color: #4A3B3E;
         margin-bottom: 7px;
       }
-      .psl-input {
+
+      .lib-input {
         width: 100%;
         padding: 10px 13px;
-        border-radius: 9px;
-        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.14));
-        background: rgba(0, 0, 0, 0.25);
-        color: var(--text-primary, #f8fafc);
-        font-size: 0.88rem;
+        border-radius: 10px;
+        border: 1px solid #DED7CD;
+        background: #FAF8F5;
+        color: #23191B;
+        font-size: 0.9rem;
         font-family: inherit;
+        outline: none;
       }
-      [data-theme="light"], [data-theme="kuro"] .psl-input {
-        background: #f8fafc;
-        border-color: #cbd5e1;
-        color: #0f172a;
+
+      .lib-input:focus {
+        border-color: #8B1D2C;
+        background: #FFFFFF;
       }
-      .psl-color-grid {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .psl-color-swatch {
-        width: 32px;
-        height: 32px;
-        border-radius: 9px;
-        background: var(--swatch-color);
-        border: 2.5px solid transparent;
-        cursor: pointer;
-        transition: transform 0.15s ease;
-      }
-      .psl-color-swatch.active {
-        border-color: #ffffff;
-        box-shadow: 0 0 0 2px var(--swatch-color);
-        transform: scale(1.1);
-      }
-      .psl-icon-grid {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 8px;
-      }
-      .psl-icon-choice {
-        height: 38px;
-        border-radius: 9px;
-        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
-        background: rgba(255, 255, 255, 0.03);
-        color: var(--text-secondary, #94a3b8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-      }
-      .psl-icon-choice.active {
-        background: rgba(14, 165, 233, 0.18);
-        border-color: #0ea5e9;
-        color: #38bdf8;
-      }
-      .psl-modal-footer {
+
+      .lib-modal-footer {
         display: flex;
         justify-content: flex-end;
         gap: 10px;
         margin-top: 18px;
       }
 
-      @media (max-width: 640px) {
-        .psl-shell { padding: 14px 12px 84px; }
-        .psl-header { padding: 18px 16px; }
-        .psl-header-actions { width: 100%; }
-        .psl-header-actions .psl-btn { flex: 1; }
-        .psl-files-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 12px; }
-        .psl-file-thumb { height: 125px; }
+      /* 9. DARK MODE COMPATIBILITY */
+      [data-theme="dark"] .lib-page-shell,
+      [data-theme="kuro-dark"] .lib-page-shell {
+        color: #F4F1EA;
+      }
+      [data-theme="dark"] .lib-main-title,
+      [data-theme="kuro-dark"] .lib-main-title,
+      [data-theme="dark"] .lib-section-title,
+      [data-theme="kuro-dark"] .lib-section-title,
+      [data-theme="dark"] .lib-folder-name,
+      [data-theme="kuro-dark"] .lib-folder-name,
+      [data-theme="dark"] .lib-file-name,
+      [data-theme="kuro-dark"] .lib-file-name {
+        color: #F4F1EA;
+      }
+      [data-theme="dark"] .lib-search-container,
+      [data-theme="kuro-dark"] .lib-search-container,
+      [data-theme="dark"] .lib-folder-card,
+      [data-theme="kuro-dark"] .lib-folder-card,
+      [data-theme="dark"] .lib-file-card,
+      [data-theme="kuro-dark"] .lib-file-card,
+      [data-theme="dark"] .lib-btn-new-folder,
+      [data-theme="kuro-dark"] .lib-btn-new-folder,
+      [data-theme="dark"] .lib-empty-inline-card,
+      [data-theme="kuro-dark"] .lib-empty-inline-card,
+      [data-theme="dark"] .lib-empty-files-card,
+      [data-theme="kuro-dark"] .lib-empty-files-card,
+      [data-theme="dark"] .lib-modal-card,
+      [data-theme="kuro-dark"] .lib-modal-card,
+      [data-theme="dark"] .lib-dots-menu,
+      [data-theme="kuro-dark"] .lib-dots-menu {
+        background: #1B1924;
+        border-color: rgba(255, 255, 255, 0.09);
+        color: #F4F1EA;
+      }
+      [data-theme="dark"] .lib-search-field-wrap,
+      [data-theme="kuro-dark"] .lib-search-field-wrap,
+      [data-theme="dark"] .lib-file-preview,
+      [data-theme="kuro-dark"] .lib-file-preview {
+        background: #13111A;
+        border-color: rgba(255, 255, 255, 0.07);
+      }
+      [data-theme="dark"] .lib-search-input,
+      [data-theme="kuro-dark"] .lib-search-input {
+        color: #F4F1EA;
+      }
+
+      /* 10. RESPONSIVE DESIGN (iPad, Tablet, Mobile — Zero Horizontal Overflow) */
+      @media (max-width: 767px) {
+        .lib-page-shell {
+          padding: 12px 14px 92px;
+        }
+        .lib-page-header {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 14px;
+          margin-bottom: 18px;
+        }
+        .lib-header-actions {
+          width: 100%;
+        }
+        .lib-header-actions .lib-btn {
+          flex: 1;
+          height: 42px;
+          padding: 0 12px;
+          font-size: 0.84rem;
+        }
+        .lib-search-container {
+          padding: 8px 10px;
+          gap: 10px;
+          margin-bottom: 22px;
+        }
+        .lib-folders-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .lib-folder-card {
+          padding: 14px 12px;
+        }
+        .lib-files-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
       }
     `;
-    document.head.appendChild(style);
   }
 };

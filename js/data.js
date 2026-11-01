@@ -4191,6 +4191,7 @@ class PersonalLibraryService {
       ...(updates.pages !== undefined ? { pages: updates.pages, pages_count: updates.pages } : {}),
       ...(updates.lastOpenedAt !== undefined ? { lastOpenedAt: updates.lastOpenedAt } : {}),
       ...(updates.lastPage !== undefined ? { lastPage: updates.lastPage } : {}),
+      ...(updates.thumbnail !== undefined ? { thumbnail: updates.thumbnail } : {}),
       ...(updates.studyTimeSec !== undefined ? { studyTimeSec: updates.studyTimeSec } : {}),
       ...(updates.completedPages !== undefined ? { completedPages: updates.completedPages } : {}),
       updatedAt: new Date().toISOString()

@@ -771,24 +771,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     let customAvatar = null;
     let customName = null;
     try {
+      const authUser = window.AUTH && typeof window.AUTH.getUser === 'function' ? window.AUTH.getUser() : null;
       const userInfo = JSON.parse(localStorage.getItem('kf_user_info') || '{}');
-      if (userInfo.avatar && !String(userInfo.avatar).toLowerCase().includes('characters/kuro')) {
-        customAvatar = userInfo.avatar;
+      const candidateAvatar = authUser?.avatar || userInfo.avatar;
+      if (candidateAvatar && !String(candidateAvatar).toLowerCase().includes('characters/kuro')) {
+        customAvatar = candidateAvatar;
       }
+      const candidateName = authUser?.name || authUser?.username || userInfo.name;
       if (
-        userInfo.name &&
-        userInfo.name !== 'طالب أسنان' &&
-        userInfo.name !== 'Dental Student' &&
-        userInfo.name !== 'طالب كورو' &&
-        userInfo.name !== 'Kuro Student'
+        candidateName &&
+        candidateName !== 'طالب أسنان' &&
+        candidateName !== 'Dental Student' &&
+        candidateName !== 'طالب كورو' &&
+        candidateName !== 'Kuro Student'
       ) {
-        customName = userInfo.name;
+        customName = candidateName;
       }
     } catch (e) {}
 
-    if (customName) {
-      const sideName = document.querySelector('.sidebar-user-name');
-      if (sideName) sideName.textContent = customName;
+    const sideName = document.querySelector('.sidebar-user-name');
+    if (sideName && customName) {
+      sideName.textContent = customName;
+    }
+
+    const sideSub = document.getElementById('sidebar-user-sub');
+    if (sideSub) {
+      sideSub.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;">Cloud Verified <svg width="13" height="13" viewBox="0 0 24 24" fill="#CBD5E1" stroke="#475569" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg></span>`;
+    }
+
+    const sideAvatarBox = document.getElementById('sidebar-user-avatar-box');
+    if (sideAvatarBox) {
+      if (customAvatar) {
+        sideAvatarBox.innerHTML = `<img src="${customAvatar}" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+      } else {
+        const displayName = (customName || sideName?.textContent || 'T').trim();
+        const initial = displayName.charAt(0).toUpperCase() || 'T';
+        sideAvatarBox.textContent = initial;
+      }
     }
   };
 

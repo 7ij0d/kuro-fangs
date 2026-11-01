@@ -5,7 +5,13 @@
 - **Tech Stack**: Vanilla ES6+ SPA (`js/router.js`, `js/app.js`), HTML5 + CSS Custom Properties (`css/tokens.css`, `css/home-dashboard.css`), PDF.js v3.11.174 + IndexedDB local storage (`KF_PersonalLibrary_v1`), Cloudflare R2 + Supabase Auth/Realtime.
 
 ## 2. Done & Verified
-### Latest Update — PDF Reader Eraser Tool Upgrade: Stroke Erase & Partial Erase (`v28.2`)
+### Latest Update — Complete Minimalist Modern Library Redesign (`v29.0`)
+- **Library Page Redesign ([`js/pages/sheets.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/sheets.js), [`js/data.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/data.js#L4183-L4201), [`css/home-dashboard.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/css/home-dashboard.css#L1325-L1359))**:
+  - Redesigned `#/sheets` (`Library`) to match the reference mockup: warm cream page surface (`#FCFBF8`), direct page header with folder icon, `Library` title, `Your study files in one place.` subtitle, `+ New Folder` white outline button, and `Import Files` burgundy button (`#8B1D2C`).
+  - Added clean white Search & View Toggle container (`Search files or folders...` + `Grid View` / `List View` segmented toggle).
+  - Implemented `Folders (N)` equal-sized card grid with 3-dots options menu (`Open Folder`, `Rename Folder`, `Delete Folder`), drag-and-drop reordering, and drag-file-to-folder move support.
+  - Implemented `Recent Files` section displaying the last 3 opened files with a `View All →` toggle, real Page 1 PDF thumbnails (`hydrateMissingThumbnails`), burgundy `PDF` badge, `.pdf` file name, formatted timestamp (`Today, 10:24 PM`, `Yesterday, 6:17 PM`), and 3-dots options menu (`Open File`, `Rename File`, `Move to Folder`, `Delete File`).
+- **PDF Reader Eraser Tool Upgrade: Stroke Erase & Partial Erase (`v28.2`)**
 - **Eraser Tool Refactor ([`js/pages/sheet-detail.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/sheet-detail.js#L2996-L3526))**:
   - Permanently removed `Select Object` (`تحديد العنصر بالكامل`) and all object-selection deletion UI from the Eraser tool.
   - Implemented 2 dedicated Eraser modes in the popover menu: **1. `Stroke Erase` (`مسح الضربة بالكامل`)** — deletes the entire Pen or Highlighter stroke upon touching any point along its path (short, long, straight, curved, or dot); **2. `Partial Erase` (`المسح الجزئي`)** — splits and erases only the sub-segment touched by the eraser with adjustable `Small` / `Medium` / `Large` + slider sizes, full `Undo` / `Redo` support, and zero effect on PDF text, images, notes, or page objects.

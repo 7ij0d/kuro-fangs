@@ -206,6 +206,7 @@ class Router {
     // Toggle login-view-active class on body for auth / wizard screens
     const isFullPageAuth = path === '/login' || path === '/register-setup';
     document.body.classList.toggle('login-view-active', isFullPageAuth);
+    document.body.setAttribute('data-route', path || '/');
 
     // Auth state route guards
     if (window.AUTH) {

@@ -1322,3 +1322,38 @@ html[dir="rtl"] .kuro-panel-arrow-link:hover {
 [data-theme="kuro-dark"] .kuro-qa-sub {
   color: #A6A09E !important;
 }
+
+/* ----------------------------------------------------------------------------
+   12. LIBRARY ROUTE (/sheets) & SIDEBAR FOOTER REFINEMENTS (Matching Reference)
+   ---------------------------------------------------------------------------- */
+@media (min-width: 768px) and (min-height: 501px) {
+  .app-sidebar .sidebar-quick-settings {
+    display: none !important;
+  }
+
+  .app-sidebar .sidebar-user-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 6px 8px !important;
+    border-radius: 12px !important;
+  }
+
+  .app-sidebar .sidebar-user-card:hover {
+    background: rgba(122, 28, 44, 0.06) !important;
+  }
+
+  /* On Library (/sheets), hide duplicate top header search bar since Library has its own search container */
+  body[data-route="/sheets"]:not(.studio-fullscreen-active) .site-header {
+    background: transparent !important;
+    border-bottom: none !important;
+    backdrop-filter: none !important;
+    height: 60px !important;
+    min-height: 60px !important;
+  }
+
+  body[data-route="/sheets"]:not(.studio-fullscreen-active) .site-header #header-search-container {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
