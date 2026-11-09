@@ -127,9 +127,14 @@ class DataService {
     this.questions = this.getDefaultQuestions();
     this.flashcards = this.getDefaultFlashcards();
 
-    // 2. Purge legacy old sheets system cache from localStorage
+    // 2. Purge legacy old sheets & questions system cache from localStorage
     try {
-      ['kf_cloud_cached_sheets', 'kf_admin_custom_sheets', 'kf_sheets', 'kf_deleted_sheet_ids'].forEach(k => {
+      [
+        'kf_cloud_cached_sheets', 'kf_admin_custom_sheets', 'kf_sheets', 'kf_deleted_sheet_ids',
+        'kf_admin_questions', 'kf_questions', 'kf_cached_questions',
+        'kf_active_question_session', 'kf_all_question_sessions',
+        'kf_saved_quizzes', 'kf_weak_quizzes'
+      ].forEach(k => {
         try { localStorage.removeItem(k); } catch (err) {}
       });
     } catch (e) {}
@@ -141,18 +146,6 @@ class DataService {
         adminRecs.forEach(r => {
           if (!this.recordings.some(x => x.id === r.id)) {
             this.recordings.push(r);
-          }
-        });
-      }
-    } catch (e) {}
-
-    // 2c. Merge admin-created questions from localStorage
-    try {
-      const adminQs = JSON.parse(localStorage.getItem('kf_admin_questions') || '[]');
-      if (Array.isArray(adminQs)) {
-        adminQs.forEach(q => {
-          if (!this.questions.some(x => x.id === q.id)) {
-            this.questions.push(q);
           }
         });
       }
@@ -446,23 +439,12 @@ class DataService {
       }
       if (questionsRes.status === 'fulfilled' && questionsRes.value?.questions) {
         this.questions = questionsRes.value.questions;
-        // Clean legacy demo questions from localStorage
         try {
-          const rawAdmin = localStorage.getItem('kf_admin_questions');
-          if (rawAdmin) {
-            let adminQs = JSON.parse(rawAdmin);
-            if (Array.isArray(adminQs)) {
-              // Strip out obsolete demo questions (omdr, cons-endo, or old path demo items)
-              adminQs = adminQs.filter(q => q && q.id && !q.id.startsWith('q_omdr_') && !q.id.startsWith('q_cons_') && !q.id.startsWith('q_path_demo_'));
-              localStorage.setItem('kf_admin_questions', JSON.stringify(adminQs));
-              adminQs.forEach(q => {
-                if (!this.questions.some(x => x.id === q.id)) {
-                  this.questions.push(q);
-                }
-              });
-            }
-          }
+          localStorage.removeItem('kf_admin_questions');
         } catch (e) {}
+        if (typeof window.QuestionsPage !== 'undefined' && typeof window.QuestionsPage.renderCurrentView === 'function') {
+          try { window.QuestionsPage.renderCurrentView(); } catch (err) {}
+        }
       }
       if (flashcardsRes.status === 'fulfilled' && flashcardsRes.value?.flashcards) {
         this.flashcards = flashcardsRes.value.flashcards;
