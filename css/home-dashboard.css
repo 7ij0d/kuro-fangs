@@ -1357,3 +1357,43 @@ html[dir="rtl"] .kuro-panel-arrow-link:hover {
     pointer-events: none !important;
   }
 }
+
+/* ----------------------------------------------------------------------------
+   13. ACADEMIC YEAR GROUP HEADINGS (Recordings & Questions subject grids)
+   ---------------------------------------------------------------------------- */
+.kf-year-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block: 6px 0;
+}
+
+.kf-year-heading:not(:first-child) {
+  margin-block-start: 14px;
+}
+
+.kf-year-heading span {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #7A1C2C;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.kf-year-heading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #EAE2D4;
+}
+
+[data-theme="dark"] .kf-year-heading span,
+[data-theme="kuro-dark"] .kf-year-heading span {
+  color: #FDA4AF;
+}
+
+[data-theme="dark"] .kf-year-heading::after,
+[data-theme="kuro-dark"] .kf-year-heading::after {
+  background: rgba(255, 255, 255, 0.1);
+}

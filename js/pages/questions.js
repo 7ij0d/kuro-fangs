@@ -900,12 +900,14 @@ const QuestionsPage = {
 
     mainEl.innerHTML = `
       <div class="questions-subject-grid">
-        ${filtered.map(s => {
+        ${filtered.map((s, idx, arr) => {
+          const yearHeading = window.KFYearGroups ? window.KFYearGroups.headingFor(s, idx, arr, isAr) : '';
           const qCount = subjectStats[s.id] || 0;
           const title = isAr ? s.name_ar : s.name_en;
           const iconHtml = QuestionsPage.getSubjectIconHtml(s.icon);
 
           return `
+            ${yearHeading}
             <div class="q-subject-card" data-subj-id="${s.id}" role="button" tabindex="0">
               <div class="q-card-icon-box">
                 ${iconHtml}
@@ -1958,28 +1960,66 @@ const QuestionsPage = {
     const isAr = window.I18N ? window.I18N.getLang() === 'ar' : true;
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
-    container.style.gap = '8px';
-    container.innerHTML = refs.map((ref, idx) => {
-      const isSupporting = ref.source_type === 'supporting';
+    container.style.gap = '10px';
+
+    const getRelBadge = (ref) => {
+      const code = ref.relationship_code || (ref.source_type === 'exact' ? 'A' : (ref.source_type === 'paraphrased' ? 'B' : (ref.source_type === 'supporting' ? 'C' : 'A')));
+      switch (code) {
+        case 'A': return { label: isAr ? 'تطابق كامل • Exact' : 'Exact Match', bg: 'rgba(16, 185, 129, 0.15)', color: '#10B981', border: 'rgba(16, 185, 129, 0.3)' };
+        case 'B': return { label: isAr ? 'تطابق في المفهوم' : 'Paraphrased', bg: 'rgba(2, 132, 199, 0.15)', color: '#0284c7', border: 'rgba(2, 132, 199, 0.3)' };
+        case 'C': return { label: isAr ? 'معلومات مرتبطة' : 'Related Content', bg: 'rgba(217, 119, 6, 0.15)', color: '#d97706', border: 'rgba(217, 119, 6, 0.3)' };
+        case 'D': return { label: isAr ? 'مصادر متعددة' : 'Multiple Sources', bg: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6', border: 'rgba(139, 92, 246, 0.3)' };
+        case 'E': return { label: isAr ? 'خارج الشيتات السبعة' : 'Outside Sheets', bg: 'rgba(79, 70, 229, 0.15)', color: '#4f46e5', border: 'rgba(79, 70, 229, 0.3)' };
+        case 'F': return { label: isAr ? 'غير محدد المصدر' : 'Unidentified', bg: 'rgba(225, 29, 72, 0.15)', color: '#e11d48', border: 'rgba(225, 29, 72, 0.3)' };
+        default: return { label: isAr ? 'مصدر مؤكد' : 'Verified Source', bg: 'rgba(16, 185, 129, 0.15)', color: '#10B981', border: 'rgba(16, 185, 129, 0.3)' };
+      }
+    };
+
+    let headerHtml = '';
+    if (refs.length > 1) {
+      headerHtml = `
+        <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+          <i data-lucide="layers" style="width: 14px; height: 14px; color: var(--brand-accent);"></i>
+          <span>${isAr ? `يتوفر هذا السؤال على ${refs.length} مصادر داعمة — اختر المصدر للتحقق:` : `This question is supported by ${refs.length} sources — select a source to verify:`}</span>
+        </div>
+      `;
+    }
+
+    const buttonsHtml = refs.map((ref, idx) => {
       const pageNum = ref.page_number || ref.page || ref.page_ref || q.page_ref;
-      const pageLabel = pageNum ? (isAr ? ` (صفحة ${pageNum})` : ` (Page ${pageNum})`) : '';
-      const mainLabel = isSupporting
-        ? (isAr ? `عرض المصدر الداعم${pageLabel}` : `View Supporting Source${pageLabel}`)
-        : (isAr ? `عرض في الشيت${pageLabel}` : `View in Sheet${pageLabel}`);
-      const badgeLabel = isSupporting
-        ? (isAr ? 'مصدر داعم' : 'Supporting')
-        : (isAr ? 'مصدر مؤكد' : 'Exact Source');
+      const pageLabel = pageNum ? (isAr ? ` (ص ${pageNum})` : ` (p. ${pageNum})`) : '';
+      const sheetName = ref.sheet_title_ar || ref.sheet_title_en || ref.sheet_title || q.sheet_title_ar || q.sheet_title_en || (isAr ? 'الشيت المعتمد' : 'Official Sheet');
+      const relInfo = getRelBadge(ref);
+
+      const mainLabel = isAr
+        ? `Verify from Sheet | التحقق من الشيت${pageLabel}`
+        : `Verify from Sheet${pageLabel}`;
 
       return `
-        <button type="button" class="dt-btn-view-sheet ${isSupporting ? 'supporting' : 'exact'}" data-ref-idx="${idx}">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="${isSupporting ? 'compass' : 'file-search'}" style="width: 15px; height: 15px; flex-shrink: 0;"></i>
-            <span>${mainLabel}</span>
+        <div class="dt-verify-source-card" style="display: flex; flex-direction: column; gap: 6px; background: rgba(15, 23, 42, 0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px 12px; transition: all 0.2s ease;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="book-open" style="width: 14px; height: 14px; color: var(--brand-accent);"></i>
+              <span>${sheetName}</span>
+            </div>
+            <span style="font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${relInfo.bg}; color: ${relInfo.color}; border: 1px solid ${relInfo.border};">
+              ${relInfo.label}
+            </span>
           </div>
-          <span class="dt-source-type-pill ${isSupporting ? 'supporting' : 'exact'}">${badgeLabel}</span>
-        </button>
+          ${ref.source_text ? `
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic; direction: ltr; text-align: start; line-height: 1.35; max-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              «${ref.source_text}»
+            </div>
+          ` : ''}
+          <button type="button" class="btn btn-primary dt-btn-view-sheet" data-ref-idx="${idx}" style="font-size: 0.8rem; padding: 8px 14px; border-radius: 8px; justify-content: center; gap: 8px; font-weight: 700; margin-top: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+            <i data-lucide="file-check-2" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+            <span>${mainLabel}</span>
+          </button>
+        </div>
       `;
     }).join('');
+
+    container.innerHTML = headerHtml + buttonsHtml;
 
     container.querySelectorAll('.dt-btn-view-sheet').forEach(btn => {
       btn.addEventListener('click', (e) => {

@@ -228,7 +228,8 @@
                 ${isAr ? 'إعادة ضبط البحث' : 'Clear Search'}
               </button>
             </div>
-          ` : filteredSubjects.map(s => {
+          ` : filteredSubjects.map((s, idx, arr) => {
+            const yearHeading = window.KFYearGroups ? window.KFYearGroups.headingFor(s, idx, arr, isAr) : '';
             const title = isAr ? s.name_ar : s.name_en;
             const iconHtml = this.getSubjectIconHtml(s.icon);
             
@@ -239,6 +240,7 @@
               : (realCount === 1 ? '1 Recording' : `${realCount} Recordings`);
 
             return `
+              ${yearHeading}
               <div class="audio-subject-card" data-subj-id="${s.id}" role="button" tabindex="0">
                 <div class="audio-subj-icon-box">
                   ${iconHtml}
