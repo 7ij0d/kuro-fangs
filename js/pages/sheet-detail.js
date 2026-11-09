@@ -546,9 +546,9 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       <!-- 1. TOP HEADER (Responsive across Desktop, Tablet/iPad, and Mobile) -->
       <header class="kn-header" id="kn-header">
         <div class="kn-header-left">
-          <button class="kn-btn kn-btn-back" id="kn-btn-back" title="${t('رجوع', 'Back to Sheets')}">
+          <button class="kn-btn kn-btn-back" id="kn-btn-back" title="${t(onBackToQuestion ? 'الرجوع للسؤال' : 'رجوع', onBackToQuestion ? 'Back to Question' : 'Back to Sheets')}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            <span class="kn-btn-text">${t('رجوع', 'Back')}</span>
+            <span class="kn-btn-text">${t(onBackToQuestion ? 'الرجوع للسؤال' : 'رجوع', onBackToQuestion ? 'Back to Question' : 'Back')}</span>
           </button>
 
           <button class="kn-icon-btn ${state.leftSidebarOpen ? 'active' : ''}" id="kn-btn-left-sidebar" title="Toggle Pages Sidebar">
@@ -5851,7 +5851,11 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
 
   // Wire Header & Toolbar Buttons
   document.getElementById('kn-btn-back').onclick = () => {
-    navigateBackToSheets(sheet.subject_id || sheet.subjectId);
+    if (typeof onBackToQuestion === 'function') {
+      onBackToQuestion();
+    } else {
+      navigateBackToSheets(sheet.subject_id || sheet.subjectId);
+    }
   };
 
   // Global Interaction Mode Toggle (Browse Mode 👁 <-> Edit Mode ✎)
@@ -6432,7 +6436,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
 
   // Resolve PDF URL from all possible sheet properties & IndexedDB pdfStore
   async function resolvePdfUrl() {
-    let url = sheet.pdf_url || sheet.download_url || sheet.fileUrl || sheet.file_url || sheet.url || null;
+    let url = (sourceRef && (sourceRef.pdf_url || sourceRef.file_url)) || sheet.pdf_url || sheet.download_url || sheet.fileUrl || sheet.file_url || sheet.url || null;
     if (url === '#') url = null;
     if (!url && window.DATA?.pdfStore && typeof window.DATA.pdfStore.getPdfUrl === 'function') {
       try {

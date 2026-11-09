@@ -1745,6 +1745,56 @@ CREATE POLICY "Allow all delete on sheets"
                 <textarea id="add-q-explain-en" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); min-height: 60px;"></textarea>
               </div>
 
+              <!-- Source & Reference Linking (Section 4 Requirements) -->
+              <div style="grid-column: 1 / -1; background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 12px; padding: 16px; margin-top: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                  <h4 style="font-size: 0.85rem; font-weight: 800; color: #38BDF8; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="file-check-2" style="width: 16px; height: 16px;"></i>
+                    ${isAr ? 'ربط وتوثيق المصدر من الشيت (Source Verification & Linking)' : 'Sheet Source Linking & Attribution'}
+                  </h4>
+                  <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8; font-size: 0.7rem;">
+                    ${isAr ? 'تأكيد المصدر' : 'Verified Reference'}
+                  </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                  <div>
+                    <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                      ${isAr ? 'رقم الصفحة في الشيت (Page Number):' : 'Page Number in Sheet:'}
+                    </label>
+                    <input type="number" id="add-q-source-page" class="kf-input" min="1" placeholder="مثال: 11" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" />
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                      ${isAr ? 'تصنيف العلاقة بالمصدر (Attribution):' : 'Source Relationship:'}
+                    </label>
+                    <select id="add-q-source-type" class="kf-input" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);">
+                      <option value="exact">${isAr ? 'A — تطابق كامل وحرفي (Exact Match)' : 'A — Exact Match'}</option>
+                      <option value="paraphrased">${isAr ? 'B — تطابق في المفهوم العلمي (Paraphrased)' : 'B — Paraphrased Match'}</option>
+                      <option value="supporting">${isAr ? 'C — معلومات مرتبطة بالشيت (Related Content)' : 'C — Related Content'}</option>
+                      <option value="multiple">${isAr ? 'D — مشتق من أكثر من شيت (Multiple Sources)' : 'D — Multiple Sources'}</option>
+                      <option value="outside">${isAr ? 'E — خارج الشيتات السبعة (Outside Core Sheets)' : 'E — Outside 7 Sheets'}</option>
+                      <option value="unidentified">${isAr ? 'F — غير محدد المصدر (Unidentified)' : 'F — Unidentified Source'}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                      ${isAr ? 'ملف الـ PDF المصدري (PDF URL):' : 'Custom PDF URL (Optional):'}
+                    </label>
+                    <input type="text" id="add-q-pdf-url" class="kf-input" placeholder="data/sheets/oral-pathology-7-sheets.pdf" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary);" />
+                  </div>
+                </div>
+
+                <div style="margin-top: 12px;">
+                  <label style="display: block; font-size: 0.775rem; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">
+                    ${isAr ? 'النص والفقرة الداعمة من الشيت (Supporting Quote / Text):' : 'Supporting Quote from Sheet:'}
+                  </label>
+                  <textarea id="add-q-quote-ref" class="kf-input" placeholder="${isAr ? 'أدخل الاقتباس الحرفي الذي يدعم السؤال أو الإجابة من صفحة الشيت...' : 'Enter the verbatim quote supporting the question or answer...'}" style="width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); font-size: 0.85rem; color: var(--text-primary); min-height: 50px;"></textarea>
+                </div>
+              </div>
+
               <div style="grid-column: 1 / -1; margin-top: 14px;">
                 <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
                   <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
@@ -1756,15 +1806,18 @@ CREATE POLICY "Allow all delete on sheets"
         </div>
 
         <div class="kf-panel" style="margin-top: 20px;">
-          <div class="kf-panel-header">
+          <div class="kf-panel-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
             <div class="kf-panel-title">
               <i data-lucide="list" style="width: 18px; height: 18px;"></i>
-              <span>${isAr ? 'الأسئلة الحالية' : 'Existing Questions'}</span>
+              <span>${isAr ? 'الأسئلة الحالية وتوثيق المصادر' : 'Existing Questions & Source Linking'}</span>
+              <span class="badge" style="margin-inline-start: 8px;">${questions.length}</span>
             </div>
-            <span class="badge">${questions.length}</span>
+            <div style="flex: 1; max-width: 320px; min-width: 180px;">
+              <input type="text" id="admin-q-search" class="kf-input" placeholder="${isAr ? 'بحث في الأسئلة أو المصادر...' : 'Search questions or sources...'}" style="width: 100%; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle);" />
+            </div>
           </div>
           <div class="kf-panel-body" style="padding: 0;">
-            <div style="max-height: 400px; overflow-y: auto;">
+            <div id="admin-questions-list-container" style="max-height: 520px; overflow-y: auto;">
               ${questions.length === 0 ? `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">${isAr ? 'لا توجد أسئلة بعد.' : 'No questions yet.'}</div>` : 
                 questions.map(q => {
                   const sheetTitle = (isAr ? q.sheet_title_ar : q.sheet_title_en) || 'Unknown Sheet';
@@ -1772,20 +1825,57 @@ CREATE POLICY "Allow all delete on sheets"
                   const typeBadge = q.type === 'past_exam' 
                     ? `<span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">${isAr ? 'سنوات' : 'Past'}</span>`
                     : `<span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">${isAr ? 'تدريبي' : 'Practice'}</span>`;
-                  const textPreview = (q.text_ar || q.text_en || '').substring(0, 80) + '...';
+                  const textPreview = (q.text_ar || q.text_en || '').substring(0, 90) + '...';
+
+                  // Source reference resolution
+                  const ref = q.source_reference || (q.source_references && q.source_references[0]) || null;
+                  const relCode = ref?.relationship_code || (ref?.source_type === 'exact' ? 'A' : (ref?.source_type === 'paraphrased' ? 'B' : (ref?.source_type === 'supporting' ? 'C' : '')));
+                  
+                  let relBadge = '';
+                  if (relCode === 'A') relBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.25);">A • ${isAr ? 'تطابق كامل' : 'Exact'}</span>`;
+                  else if (relCode === 'B') relBadge = `<span class="badge" style="background: rgba(2, 132, 199, 0.12); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.25);">B • ${isAr ? 'تطابق مفهوم' : 'Paraphrased'}</span>`;
+                  else if (relCode === 'C') relBadge = `<span class="badge" style="background: rgba(217, 119, 6, 0.12); color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25);">C • ${isAr ? 'مرتبط' : 'Related'}</span>`;
+                  else if (relCode === 'D') relBadge = `<span class="badge" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25);">D • ${isAr ? 'متعدد' : 'Multiple'}</span>`;
+                  else if (relCode === 'E') relBadge = `<span class="badge" style="background: rgba(79, 70, 229, 0.12); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.25);">E • ${isAr ? 'خارج الشيتات' : 'Outside'}</span>`;
+                  else if (relCode === 'F') relBadge = `<span class="badge" style="background: rgba(225, 29, 72, 0.12); color: #e11d48; border: 1px solid rgba(225, 29, 72, 0.25);">F • ${isAr ? 'غير محدد' : 'Unidentified'}</span>`;
+
+                  const pageNum = ref?.page_number || q.page_ref;
+                  const pageBadge = pageNum ? `<span class="badge" style="background: rgba(56, 189, 248, 0.12); color: #0284c7; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.25);"><i data-lucide="file-text" style="width: 11px; height: 11px; margin-inline-end: 3px;"></i>${isAr ? `ص ${pageNum}` : `p. ${pageNum}`}</span>` : '';
+                  const multiBadge = (q.source_references && q.source_references.length > 1) ? `<span class="badge" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; font-weight: 700;">+${q.source_references.length - 1} ${isAr ? 'مصادر' : 'sources'}</span>` : '';
+
+                  const quoteSnippet = ref?.source_text ? `<div style="font-size: 0.725rem; color: var(--text-muted); font-style: italic; direction: ltr; margin-top: 3px; max-width: 550px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">«${ref.source_text}»</div>` : '';
+
+                  const searchFilterData = ((q.text_ar || '') + ' ' + (q.text_en || '') + ' ' + (q.id || '') + ' ' + (sheetTitle || '') + ' ' + (ref?.source_text || '')).toLowerCase().replace(/"/g, '');
+
                   return `
-                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                      <div>
-                        <div style="display: flex; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+                    <div class="admin-q-row" data-q-id="${q.id}" data-q-text="${searchFilterData}" style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: background 0.15s ease;">
+                      <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; gap: 6px; margin-bottom: 5px; flex-wrap: wrap; align-items: center;">
                           ${typeBadge}
                           <span class="badge" style="background: rgba(56, 189, 248, 0.1); color: #38BDF8;">${subjectName}</span>
                           <span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">${sheetTitle}</span>
+                          ${pageBadge}
+                          ${relBadge}
+                          ${multiBadge}
                         </div>
-                        <div style="font-size: 0.85rem; color: var(--text-primary); line-height: 1.4;">${textPreview}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-primary); line-height: 1.4; word-break: break-word;">${textPreview}</div>
+                        ${quoteSnippet}
                       </div>
-                      <button class="btn btn-sm btn-secondary btn-delete-q" data-q-id="${q.id}" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.25); min-width: 32px;">
-                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                      </button>
+                      <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                        ${pageNum ? `
+                          <button type="button" class="btn btn-sm btn-secondary btn-preview-q-source" data-q-id="${q.id}" title="${isAr ? 'معاينة في الشيت PDF' : 'Preview in Sheet PDF'}" style="font-size: 0.75rem; padding: 6px 10px; color: #0284c7; border-color: rgba(2, 132, 199, 0.3); background: rgba(2, 132, 199, 0.05); gap: 4px;">
+                            <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                            <span class="hide-mobile">${isAr ? 'معاينة' : 'Preview'}</span>
+                          </button>
+                        ` : ''}
+                        <button type="button" class="btn btn-sm btn-secondary btn-edit-q-source" data-q-id="${q.id}" title="${isAr ? 'تعديل المصدر والربط' : 'Edit Source & Link'}" style="font-size: 0.75rem; padding: 6px 10px; color: #8b5cf6; border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.05); gap: 4px;">
+                          <i data-lucide="sliders" style="width: 14px; height: 14px;"></i>
+                          <span class="hide-mobile">${isAr ? 'المصدر' : 'Source'}</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary btn-delete-q" data-q-id="${q.id}" title="${isAr ? 'حذف السؤال' : 'Delete Question'}" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.25); min-width: 32px; padding: 6px;">
+                          <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                      </div>
                     </div>
                   `;
                 }).join('')}
@@ -2718,6 +2808,37 @@ CREATE POLICY "Allow all delete on sheets"
       const sheet = window.DATA.sheets.find(s => s.id === sheetId);
       const subject = window.DATA.subjects?.find(s => s.id === subjectId) || {};
       
+      // Source & reference linking
+      const pageNum = parseInt(document.getElementById('add-q-source-page')?.value, 10) || null;
+      const sourceType = document.getElementById('add-q-source-type')?.value || 'exact';
+      const customPdfUrl = document.getElementById('add-q-pdf-url')?.value.trim() || sheet?.pdf_url || 'data/sheets/oral-pathology-7-sheets.pdf';
+      const quoteText = document.getElementById('add-q-quote-ref')?.value.trim() || '';
+
+      const letterMap = { exact: 'A', paraphrased: 'B', supporting: 'C', multiple: 'D', outside: 'E', unidentified: 'F' };
+      const relLetter = letterMap[sourceType] || 'A';
+      const relNameMap = {
+        A: 'Exact Match',
+        B: 'Paraphrased Match',
+        C: 'Related Content',
+        D: 'Multiple Sources',
+        E: 'Outside Core Sheets',
+        F: 'Unidentified Source'
+      };
+
+      const sourceRef = (pageNum || quoteText || customPdfUrl) ? {
+        subject_id: subjectId,
+        sheet_id: sheetId,
+        sheet_title_ar: sheet?.title_ar || sheet?.title || '',
+        sheet_title_en: sheet?.title_en || sheet?.title || '',
+        pdf_url: customPdfUrl,
+        page_number: pageNum,
+        source_type: (sourceType === 'supporting' || relLetter === 'C') ? 'supporting' : 'exact',
+        relationship_code: relLetter,
+        relationship_name: relNameMap[relLetter] || 'Exact Match',
+        source_text: quoteText,
+        is_direct: relLetter === 'A' || relLetter === 'B'
+      } : null;
+
       const q = {
         id: 'q_admin_' + Date.now(),
         subject_id: subjectId,
@@ -2743,13 +2864,355 @@ CREATE POLICY "Allow all delete on sheets"
         sheet_title_ar: sheet?.title_ar || sheet?.title || '',
         sheet_title_en: sheet?.title_en || sheet?.title || '',
         subject_name_ar: subject?.name_ar || '',
-        subject_name_en: subject?.name_en || ''
+        subject_name_en: subject?.name_en || '',
+        page_ref: pageNum,
+        source_reference: sourceRef,
+        source_references: sourceRef ? [sourceRef] : []
       };
       
       if (window.DATA.addQuestion) window.DATA.addQuestion(q);
-      window.showToast?.(isAr ? 'تمت إضافة السؤال' : 'Question added', {type: 'success'});
+      window.showToast?.(isAr ? 'تمت إضافة وتوثيق السؤال بنجاح' : 'Question added & attributed', {type: 'success'});
       render(container);
     });
+
+    // Search filter for existing questions list
+    const searchInput = document.getElementById('admin-q-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.trim().toLowerCase();
+        const rows = container.querySelectorAll('.admin-q-row');
+        rows.forEach(r => {
+          const text = r.getAttribute('data-q-text') || '';
+          if (!term || text.includes(term)) {
+            r.style.display = 'flex';
+          } else {
+            r.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // Direct PDF Preview button
+    container.querySelectorAll('.btn-preview-q-source').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const qId = btn.getAttribute('data-q-id');
+        const q = (window.DATA.questions || []).find(item => item.id === qId);
+        if (!q) return;
+        const ref = q.source_reference || (q.source_references && q.source_references[0]) || null;
+        const targetSheetId = ref?.sheet_id || q.sheet_id;
+        const targetPage = ref?.page_number || q.page_ref || 1;
+        if (!targetSheetId) {
+          window.showToast?.(isAr ? 'لم يتم تحديد شيت لهذا السؤال' : 'No sheet linked to this question', { type: 'error' });
+          return;
+        }
+        window.open(`#/sheet/${targetSheetId}?page=${targetPage}`, '_blank');
+      });
+    });
+
+    // Edit Source Attribution Modal opener
+    container.querySelectorAll('.btn-edit-q-source').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const qId = btn.getAttribute('data-q-id');
+        openEditSourceModal(qId, isAr, container);
+      });
+    });
+
+    // Modal implementation for full source management
+    function openEditSourceModal(qId, isAr, parentContainer) {
+      const q = (window.DATA.questions || []).find(item => item.id === qId);
+      if (!q) return;
+
+      let existingModal = document.getElementById('modal-edit-q-source');
+      if (existingModal) existingModal.remove();
+
+      let refs = [];
+      if (Array.isArray(q.source_references) && q.source_references.length > 0) {
+        refs = JSON.parse(JSON.stringify(q.source_references));
+      } else if (q.source_reference) {
+        refs = [JSON.parse(JSON.stringify(q.source_reference))];
+      } else {
+        refs = [{
+          subject_id: q.subject_id || 'oral-diseases',
+          sheet_id: q.sheet_id || '',
+          page_number: q.page_ref || 1,
+          relationship_code: 'A',
+          source_type: 'exact',
+          pdf_url: 'data/sheets/oral-pathology-7-sheets.pdf',
+          source_text: '',
+          is_direct: true
+        }];
+      }
+
+      const allSheets = window.DATA.sheets || [];
+      const relOptions = [
+        { code: 'A', type: 'exact', labelAr: 'A — تطابق كامل وحرفي (Exact Match • Direct)', labelEn: 'A — Exact Match (Direct)' },
+        { code: 'B', type: 'paraphrased', labelAr: 'B — تطابق في المفهوم العلمي (Paraphrased • Direct)', labelEn: 'B — Paraphrased Match (Direct)' },
+        { code: 'C', type: 'supporting', labelAr: 'C — معلومات مرتبطة بالشيت (Related Content • Supporting)', labelEn: 'C — Related Content (Supporting)' },
+        { code: 'D', type: 'multiple', labelAr: 'D — مشتق من أكثر من شيت (Multiple Sources)', labelEn: 'D — Multiple Sources' },
+        { code: 'E', type: 'outside', labelAr: 'E — خارج الشيتات السبعة (Outside Core Sheets)', labelEn: 'E — Outside 7 Sheets' },
+        { code: 'F', type: 'unidentified', labelAr: 'F — غير محدد المصدر (Unidentified Source)', labelEn: 'F — Unidentified Source' }
+      ];
+
+      const modal = document.createElement('div');
+      modal.id = 'modal-edit-q-source';
+      modal.style.cssText = 'position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 16px; overflow-y: auto;';
+
+      function renderModalContent() {
+        modal.innerHTML = `
+          <div class="kf-modal-box" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-subtle); border-radius: 16px; width: 100%; max-width: 780px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: rgba(56, 189, 248, 0.04);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; color: #0284c7;">
+                  <i data-lucide="file-check-2" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 1rem; font-weight: 800; color: var(--text-primary); margin: 0;">
+                    ${isAr ? 'إدارة وتوثيق مصادر السؤال' : 'Manage Question Sources & Attribution'}
+                  </h3>
+                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                    ${q.id} • ${refs.length} ${isAr ? 'مصادر مسجلة' : 'sources attached'}
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn-close-modal" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted); padding: 4px;">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+              </button>
+            </div>
+
+            <div style="padding: 14px 20px; background: rgba(15, 23, 42, 0.02); border-bottom: 1px solid var(--border-subtle);">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">${isAr ? 'نص السؤال:' : 'Question:'}</div>
+              <div style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600; line-height: 1.45; direction: ${q.text_ar ? 'rtl' : 'ltr'};">${q.text_ar || q.text_en}</div>
+              ${(q.text_ar && q.text_en) ? `<div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic; direction: ltr; margin-top: 4px;">${q.text_en}</div>` : ''}
+            </div>
+
+            <div id="modal-sources-list" style="padding: 16px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px;">
+              ${refs.map((ref, idx) => {
+                const currentRel = ref.relationship_code || (ref.source_type === 'exact' ? 'A' : (ref.source_type === 'paraphrased' ? 'B' : (ref.source_type === 'supporting' ? 'C' : 'A')));
+                return `
+                  <div class="source-edit-block" data-idx="${idx}" style="background: var(--bg-surface-subtle, rgba(248, 250, 252, 0.7)); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="badge" style="background: var(--brand-accent, #0284c7); color: #fff; font-size: 0.725rem; font-weight: 800;">
+                          ${isAr ? `المصدر #${idx + 1}` : `Source #${idx + 1}`}
+                        </span>
+                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">
+                          ${idx === 0 ? (isAr ? '(المصدر الأساسي)' : '(Primary Source)') : (isAr ? '(مصدر إضافي)' : '(Additional Source)')}
+                        </span>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" class="btn btn-sm btn-secondary btn-modal-preview-source" data-idx="${idx}" title="${isAr ? 'معاينة في الـ PDF' : 'Preview in PDF'}" style="font-size: 0.725rem; padding: 4px 8px; color: #0284c7; gap: 4px;">
+                          <i data-lucide="eye" style="width: 13px; height: 13px;"></i>
+                          <span>${isAr ? 'معاينة' : 'Preview'}</span>
+                        </button>
+                        ${refs.length > 1 ? `
+                          <button type="button" class="btn btn-sm btn-secondary btn-modal-delete-source" data-idx="${idx}" title="${isAr ? 'حذف هذا المصدر' : 'Remove source'}" style="font-size: 0.725rem; padding: 4px 8px; color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">
+                            <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                          </button>
+                        ` : ''}
+                      </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+                      <div>
+                        <label style="display: block; font-size: 0.725rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+                          ${isAr ? 'الشيت المعتمد:' : 'Target Sheet:'}
+                        </label>
+                        <select class="kf-input src-sheet-id" style="width: 100%; padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card);">
+                          ${allSheets.map(s => `
+                            <option value="${s.id}" ${(ref.sheet_id === s.id) ? 'selected' : ''}>
+                              ${s.title_en || s.title || s.title_ar}
+                            </option>
+                          `).join('')}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style="display: block; font-size: 0.725rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+                          ${isAr ? 'رقم الصفحة (Page Number):' : 'Page Number:'}
+                        </label>
+                        <input type="number" min="1" class="kf-input src-page-num" value="${ref.page_number || ''}" placeholder="مثال: 11" style="width: 100%; padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card);" />
+                      </div>
+
+                      <div>
+                        <label style="display: block; font-size: 0.725rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+                          ${isAr ? 'تصنيف العلاقة (Attribution):' : 'Relationship:'}
+                        </label>
+                        <select class="kf-input src-rel-code" style="width: 100%; padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card);">
+                          ${relOptions.map(ro => `
+                            <option value="${ro.code}" ${(currentRel === ro.code) ? 'selected' : ''}>
+                              ${isAr ? ro.labelAr : ro.labelEn}
+                            </option>
+                          `).join('')}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style="display: block; font-size: 0.725rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+                          ${isAr ? 'نوع المطابقة:' : 'Attribution Type:'}
+                        </label>
+                        <select class="kf-input src-is-direct" style="width: 100%; padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card);">
+                          <option value="true" ${(ref.is_direct !== false && currentRel !== 'C') ? 'selected' : ''}>${isAr ? 'مطابقة مباشرة (Direct Match)' : 'Direct Match'}</option>
+                          <option value="false" ${(ref.is_direct === false || currentRel === 'C') ? 'selected' : ''}>${isAr ? 'معلومات داعمة/مرتبطة (Related Content)' : 'Related / Supporting'}</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="margin-top: 8px;">
+                      <label style="display: block; font-size: 0.725rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+                        ${isAr ? 'مسار ملف الـ PDF (PDF URL):' : 'PDF File Path / URL:'}
+                      </label>
+                      <input type="text" class="kf-input src-pdf-url" value="${ref.pdf_url || 'data/sheets/oral-pathology-7-sheets.pdf'}" placeholder="data/sheets/oral-pathology-7-sheets.pdf" style="width: 100%; padding: 8px 10px; font-size: 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card);" />
+                    </div>
+
+                    <div style="margin-top: 8px;">
+                      <label style="display: block; font-size: 0.725rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+                        ${isAr ? 'النص المقتبس من الشيت (Supporting Quote / Verbatim Text):' : 'Verbatim Supporting Text / Quote:'}
+                      </label>
+                      <textarea class="kf-input src-quote-text" placeholder="${isAr ? 'اكتب أو الصق النص من الشيت الذي يؤكد صحة السؤال أو الإجابة...' : 'Enter the verbatim quote from the sheet...'}" style="width: 100%; padding: 8px 10px; font-size: 0.78rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card); min-height: 44px; direction: ltr; text-align: start;">${ref.source_text || ''}</textarea>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+
+              <div>
+                <button type="button" id="btn-modal-add-source" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 10px; border-style: dashed; border-color: rgba(56, 189, 248, 0.4); color: #0284c7; background: rgba(56, 189, 248, 0.04); gap: 6px;">
+                  <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+                  <span>${isAr ? '+ إضافة مصدر داعم آخر لهذا السؤال' : '+ Add Another Supporting Source'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div style="padding: 14px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.02); gap: 10px;">
+              <button type="button" class="btn btn-secondary btn-close-modal" style="font-size: 0.825rem; padding: 8px 16px;">
+                ${isAr ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button type="button" id="btn-modal-save-sources" class="btn btn-primary" style="font-size: 0.825rem; padding: 8px 20px; gap: 6px;">
+                <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                <span>${isAr ? 'حفظ وتثبيت التوثيق' : 'Save Source Attribution'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        if (window.lucide) window.lucide.createIcons();
+
+        modal.querySelectorAll('.btn-close-modal').forEach(b => {
+          b.onclick = () => modal.remove();
+        });
+
+        document.getElementById('btn-modal-add-source').onclick = () => {
+          syncCurrentInputs();
+          refs.push({
+            subject_id: q.subject_id || 'oral-diseases',
+            sheet_id: q.sheet_id || (allSheets[0]?.id || ''),
+            page_number: 1,
+            relationship_code: 'C',
+            source_type: 'supporting',
+            pdf_url: 'data/sheets/oral-pathology-7-sheets.pdf',
+            source_text: '',
+            is_direct: false
+          });
+          renderModalContent();
+        };
+
+        modal.querySelectorAll('.btn-modal-delete-source').forEach(b => {
+          b.onclick = () => {
+            const idx = parseInt(b.getAttribute('data-idx'), 10);
+            syncCurrentInputs();
+            if (refs.length > 1) {
+              refs.splice(idx, 1);
+              renderModalContent();
+            }
+          };
+        });
+
+        modal.querySelectorAll('.btn-modal-preview-source').forEach(b => {
+          b.onclick = () => {
+            syncCurrentInputs();
+            const idx = parseInt(b.getAttribute('data-idx'), 10);
+            const targetRef = refs[idx];
+            if (targetRef) {
+              const targetSheetId = targetRef.sheet_id || q.sheet_id;
+              const targetPage = targetRef.page_number || 1;
+              window.open(`#/sheet/${targetSheetId}?page=${targetPage}`, '_blank');
+            }
+          };
+        });
+
+        document.getElementById('btn-modal-save-sources').onclick = () => {
+          syncCurrentInputs();
+
+          q.source_references = refs;
+          q.source_reference = refs[0] || null;
+          if (refs[0]) {
+            if (refs[0].page_number) q.page_ref = refs[0].page_number;
+            if (refs[0].sheet_id) {
+              q.sheet_id = refs[0].sheet_id;
+              const matchedSheet = allSheets.find(s => s.id === refs[0].sheet_id);
+              if (matchedSheet) {
+                q.sheet_title_ar = matchedSheet.title_ar || matchedSheet.title;
+                q.sheet_title_en = matchedSheet.title_en || matchedSheet.title;
+              }
+            }
+          }
+
+          if (window.DATA.updateQuestion) {
+            window.DATA.updateQuestion(q);
+          }
+
+          if (typeof window.showToast === 'function') {
+            window.showToast(isAr ? 'تم حفظ وتوثيق مصادر السؤال بنجاح! 💾' : 'Question sources saved successfully! 💾', { type: 'success' });
+          }
+
+          modal.remove();
+          render(parentContainer);
+        };
+      }
+
+      function syncCurrentInputs() {
+        const blocks = modal.querySelectorAll('.source-edit-block');
+        blocks.forEach((blk, idx) => {
+          if (!refs[idx]) return;
+          const sheetSelect = blk.querySelector('.src-sheet-id');
+          const pageInput = blk.querySelector('.src-page-num');
+          const relSelect = blk.querySelector('.src-rel-code');
+          const isDirectSelect = blk.querySelector('.src-is-direct');
+          const pdfInput = blk.querySelector('.src-pdf-url');
+          const quoteTextarea = blk.querySelector('.src-quote-text');
+
+          const sheetId = sheetSelect ? sheetSelect.value : refs[idx].sheet_id;
+          const matchedSheet = allSheets.find(s => s.id === sheetId);
+
+          refs[idx].sheet_id = sheetId;
+          refs[idx].sheet_title_ar = matchedSheet?.title_ar || matchedSheet?.title || '';
+          refs[idx].sheet_title_en = matchedSheet?.title_en || matchedSheet?.title || '';
+          refs[idx].page_number = pageInput ? (parseInt(pageInput.value, 10) || null) : refs[idx].page_number;
+          refs[idx].relationship_code = relSelect ? relSelect.value : refs[idx].relationship_code;
+          
+          const isDir = isDirectSelect ? (isDirectSelect.value === 'true') : true;
+          refs[idx].is_direct = isDir;
+          refs[idx].source_type = (refs[idx].relationship_code === 'C' || !isDir) ? 'supporting' : 'exact';
+
+          const relNames = {
+            A: 'Exact Match',
+            B: 'Paraphrased Match',
+            C: 'Related Content',
+            D: 'Multiple Sources',
+            E: 'Outside Core Sheets',
+            F: 'Unidentified Source'
+          };
+          refs[idx].relationship_name = relNames[refs[idx].relationship_code] || 'Exact Match';
+
+          refs[idx].pdf_url = pdfInput ? pdfInput.value.trim() : (refs[idx].pdf_url || '');
+          refs[idx].source_text = quoteTextarea ? quoteTextarea.value.trim() : (refs[idx].source_text || '');
+        });
+      }
+
+      document.body.appendChild(modal);
+      renderModalContent();
+    }
 
     container.querySelectorAll('.btn-delete-q').forEach(btn => {
       btn.addEventListener('click', () => {

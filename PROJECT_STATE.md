@@ -1,34 +1,77 @@
 # PROJECT_STATE.md — KURO FANGS Educational Platform
 
 ## 1. Project Overview & Tech Stack
-- **Platform**: KURO FANGS (`https://kurofangs.id.ly/`) — Interactive bilingual (Arabic RTL / English LTR) dental education platform, Personal Study Library, GoodNotes-grade PDF Annotation Studio, Audio Lecture Sync, Question Bank, Study Rooms, and Academic Schedules.
-- **Tech Stack**: Vanilla ES6+ SPA (`js/router.js`, `js/app.js`), HTML5 + CSS Custom Properties (`css/tokens.css`, `css/home-dashboard.css`), PDF.js v3.11.174 + IndexedDB local storage (`KF_PersonalLibrary_v1`), Cloudflare R2 + Supabase Auth/Realtime.
+- **Platform**: KURO FANGS (`https://kurofangs.id.ly/`) — High-end bilingual (Arabic RTL / English LTR) dental education platform, Personal Study Library, GoodNotes-grade PDF Annotation Studio (`Kuro Notes`), Audio Lecture Sync, Question Bank, Study Rooms, and Academic Schedules.
+- **Tech Stack**: Vanilla ES6+ SPA (`js/router.js`, `js/app.js`), HTML5 + CSS Custom Properties, PDF.js v3.11.174 + Puppeteer headless Chrome testing pipeline, IndexedDB local storage (`KF_PersonalLibrary_v1`), Cloudflare R2 + Supabase Auth/Realtime.
+- **Workflow Architecture**: `Previous Years Questions → Subject Selection (oral-diseases) → Sheet Selection (9 Verified Sheets) → Interactive Questions & Quiz Runner → Verify from Sheet (Kuro Notes Split View)`.
+
+---
 
 ## 2. Done & Verified
-### Latest Update — Complete Minimalist Modern Library Redesign (`v29.0`)
-- **Library Page Redesign ([`js/pages/sheets.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/sheets.js), [`js/data.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/data.js#L4183-L4201), [`css/home-dashboard.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/css/home-dashboard.css#L1325-L1359))**:
-  - Redesigned `#/sheets` (`Library`) to match the reference mockup: warm cream page surface (`#FCFBF8`), direct page header with folder icon, `Library` title, `Your study files in one place.` subtitle, `+ New Folder` white outline button, and `Import Files` burgundy button (`#8B1D2C`).
-  - Added clean white Search & View Toggle container (`Search files or folders...` + `Grid View` / `List View` segmented toggle).
-  - Implemented `Folders (N)` equal-sized card grid with 3-dots options menu (`Open Folder`, `Rename Folder`, `Delete Folder`), drag-and-drop reordering, and drag-file-to-folder move support.
-  - Implemented `Recent Files` section displaying the last 3 opened files with a `View All →` toggle, real Page 1 PDF thumbnails (`hydrateMissingThumbnails`), burgundy `PDF` badge, `.pdf` file name, formatted timestamp (`Today, 10:24 PM`, `Yesterday, 6:17 PM`), and 3-dots options menu (`Open File`, `Rename File`, `Move to Folder`, `Delete File`).
-- **PDF Reader Eraser Tool Upgrade: Stroke Erase & Partial Erase (`v28.2`)**
-- **Eraser Tool Refactor ([`js/pages/sheet-detail.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/sheet-detail.js#L2996-L3526))**:
-  - Permanently removed `Select Object` (`تحديد العنصر بالكامل`) and all object-selection deletion UI from the Eraser tool.
-  - Implemented 2 dedicated Eraser modes in the popover menu: **1. `Stroke Erase` (`مسح الضربة بالكامل`)** — deletes the entire Pen or Highlighter stroke upon touching any point along its path (short, long, straight, curved, or dot); **2. `Partial Erase` (`المسح الجزئي`)** — splits and erases only the sub-segment touched by the eraser with adjustable `Small` / `Medium` / `Large` + slider sizes, full `Undo` / `Redo` support, and zero effect on PDF text, images, notes, or page objects.
-- **Fixed Library / Sheets Route Mounting ([`js/pages/sheets.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/sheets.js#L20-L41), [`js/router.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/router.js#L107-L126))**: Updated `SheetsPage.render(containerOrParams, maybeParams)` to accept the `#app` container element passed by `router.js` (`document.getElementById('app')`), pre-registered `/sheets` and `/sheet-detail` in `Router.constructor`, and aligned light-theme selectors with `[data-theme="kuro"]`.
-1. **Redesigned Navigation System ([`index.html`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/index.html), [`js/app.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/app.js), [`css/home-dashboard.css`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/css/home-dashboard.css))**:
-   - **Desktop & Tablet (`>= 768px`)**: Docked Sidebar (`234px` desktop, `210px` tablet/iPad) featuring the KURO FANGS crest emblem + wordmark and 7 streamlined items (`Home`, `Library`, `Recordings`, `Questions`, `Study Rooms`, `Schedules`, and collapsible `More` submenu preserving direct access to `Theory Lectures`, `Clinical & Lab`, `Exam Schedules`, `Student Profile`, `Settings`, and `Admin Portal`). Active navigation item highlighted with a deep burgundy pill (`#7A1C2C`).
-   - **Top Header Bar (`#site-header`)**: Clean header above the workspace with wide rounded search bar (`Search anything...`) and aligned user actions (Notifications Bell, User Profile Pill, Settings).
-   - **Mobile (`<= 767px`)**: Compact top bar (`[Menu] [KURO FANGS Crest & Name] ... [Search] [Bell] [Avatar Initial]`) and fixed Bottom Navigation Bar (`Home`, `Library`, `Recordings`, `Questions`, `More` bottom sheet) with zero horizontal overflow.
-2. **Compact Dynamic Welcome Banner ([`renderHeroSection`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/home.js#L134-L185))**:
-   - Displays dynamic greeting with the logged-in user's real name, motivational subtitle, real current date pill, and calm study desk illustration in a compact height (`152px` desktop/tablet, `132px` mobile).
-3. **4 Core Quick Statistics ([`renderStudySummaryStrip`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/home.js#L191-L321))**:
-   - Real-time metrics for `Study Time` (Study Rooms + Personal Library time), `Study Streak`, `Completed Questions`, and `Today's Classes`, styled with 4 horizontal cards on Desktop/Tablet and a compact 4-column unified strip on Mobile.
-4. **2-Column Balanced Main Workspace ([`renderContinueStudyingCard`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/home.js#L430-L534) & [`renderTodayClassesCard`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/home.js#L539-L639))**:
-   - **Continue Studying (`متابعة الدراسة`)**: Connected directly to `window.PersonalLibrary` and [`js/pages/sheet-detail.js`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/sheet-detail.js) view state (`lastPage`, `pages`, `folderName`, `lastOpenedAt`), showing PDF/IMG badge, file title, folder name, `Last page: X / Y`, progress percentage bar, and a one-click `Continue Studying` button that opens the PDF reader on the exact page where the student stopped. Includes an empty-state call-to-action when the Personal Library is empty.
-   - **Today's Classes (`محاضرات اليوم`)**: Real-time daily schedule list with colored vertical indicators, time range, status badge (`Live Now` / `Upcoming` / `Completed`), lecture title, hall badge, and `View Schedule →` link.
-5. **Quick Access Shortcuts ([`renderQuickAccessSection`](file:///C:/Users/Taha/.gemini/antigravity/scratch/kuro-fangs/js/pages/home.js#L644-L705))**:
-   - Bottom shortcut strip for 1-tap navigation to `Library`, `Recordings`, `Questions`, `Study Rooms`, and `Schedules`.
 
-## 3. Immediate Next Step
-- Monitor student feedback on the new Home Dashboard & Personal Study Library workflow (`#/sheets` ↔ `#/sheet-detail`), and optionally add folder-level study time breakdowns or pinned favorite files in a future iteration.
+### A. Previous Years Questions & Deep Source Linking Integration (`v33.0`)
+1. **Preservation & Non-Destructive Extension**:
+   - Zero modifications to the underlying platform architecture, routing, or database structure.
+   - Enhanced `DataService` (`js/data.js`), `QuestionsPage` (`js/pages/questions.js`), `SheetDetailPage` (`js/pages/sheet-detail.js`), and `AdminPage` (`js/pages/admin.js`).
+2. **Data Model & Attribution Population**:
+   - `data/sheets.json`: Added 9 verified sheets for Oral Pathology (`oral-diseases`), including the 7 core sheets, Chapter 8 (General Oral Pathology), and Chapter 9 (Academic Review), all linked to `data/sheets/oral-pathology-7-sheets.pdf`.
+   - `data/questions.json`: 655 exam questions fully populated with complete metadata:
+     - `subject_id` (`oral-diseases`), `sheet_id` (`sh_oral_path_*`)
+     - `source_reference` & `source_references` array supporting multi-source verification.
+     - `relationship_code` & `relationship_name`:
+       - `A`: Exact Match (`تطابق كامل وحرفي`)
+       - `B`: Paraphrased Match (`تطابق في المفهوم العلمي`)
+       - `C`: Related Content (`معلومات داعمة/مرتبطة`)
+       - `D`: Multiple Sources (`مشتق من أكثر من شيت`)
+       - `E`: Outside 7 Sheets (`خارج الشيتات السبعة`)
+       - `F`: Unidentified Source (`غير محدد المصدر`)
+     - `page_number` & `source_text` (verbatim supporting quote).
+3. **"Verify from Sheet | التحقق من الشيت" Button**:
+   - Integrated prominently into question cards and the quiz runner modal.
+   - Dynamic label: `Verify from Sheet | التحقق من الشيت (ص X)` with relationship classification badge and quote snippet.
+   - Multi-source selector: When a question depends on multiple sheets/pages, students can pick which supporting source to verify.
+   - Seamless navigation: Opens `SheetDetailPage` directly at the target page without reloading or downloading duplicate PDFs.
+   - Visual Focus & Dock: Highlights supporting text on the page and mounts `#kn-source-ref-dock` with direct action controls.
+   - Effortless Return: Prominent `الرجوع للسؤال | Back to Question` button in both the sticky bottom dock and the top navigation header instantly closes the PDF pane and returns the student to their quiz state.
+4. **Admin Panel Source Management (`js/pages/admin.js`)**:
+   - Form Submission: `form-add-q` captures custom PDF URL, page number, source relationship code (A–F), and verbatim supporting quote.
+   - Question Directory: Added search bar filtering across all 655 questions live by question text, subject, sheet, or quote.
+   - Direct PDF Preview: One-click `معاينة | Preview` button on every question row opens the sheet PDF at that exact page in a new tab.
+   - Edit Source Attribution Modal (`#modal-edit-q-source`):
+     - Displays question text and current attribution metadata.
+     - Allows editing target sheet, page number, attribution classification (A–F), and supporting quote.
+     - Direct vs. Related toggle indicator.
+     - Multi-Source Management: `+ إضافة مصدر داعم آخر لهذا السؤال` allows attaching secondary and tertiary sources dynamically.
+     - Real-time PDF preview from inside the modal.
+     - Immediate persistence via `window.DATA.updateQuestion()`.
+
+---
+
+## 3. Verification & Automated Test Results
+- **Automated Puppeteer E2E Test Suite (`tests/verify_kuro_source_linking.js`)**:
+  - `✓ Questions subjects view loaded successfully`
+  - `✓ Oral Pathology subject selected: true`
+  - `✓ Sheets rendered for Oral Pathology: 18 sheets found`
+  - `✓ Dental Caries sheet quiz trigger clicked: true`
+  - `✓ Question type selected (All Questions): true`
+  - `✓ Quiz runner modal active: true`
+  - `✓ "Verify from Sheet" action buttons found: 2 (Label: "Verify from Sheet (p. 11)")`
+  - `✓ PDF Split View Active: true & PDF Pane Displayed: true`
+  - `✓ Kuro Notes Workspace Mounted: true & Source Reference Dock Mounted: true`
+  - `✓ Back to Question Button: "Back to Question"`
+  - `✓ Split View Closed and Returned to Question: true`
+  - `✓ Admin Add Question Source Fields Present: true`
+  - `✓ Admin Questions Search Input Present: true`
+  - `✓ Admin Existing Question Rows: 655 questions listed`
+  - `✓ Admin Preview in Sheet Buttons: 655 buttons & Edit Source Attribution Buttons: 655 buttons`
+  - `✓ Filtered Questions matching "caries": 62 rows visible`
+  - `✓ Edit Source Modal Opened: true (Page 81, Rel B, Verbatim quote verified)`
+  - `✓ Add Source Button Present: true & Save Sources Button Present: true`
+  - `✓ Source Blocks after "+ Add Another Source": 2 sources verified`
+  - **All test assertions exited with Code 0 (100% Success)**.
+
+---
+
+## 4. Immediate Next Step
+- The system is completely deployed in the local Kuro Fangs platform (`C:\Users\Taha\.gemini\antigravity\scratch\kuro-fangs`).
+- Ready for live student study sessions and admin source refinement.
