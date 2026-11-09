@@ -3,45 +3,39 @@
 ## 1. Project Overview & Tech Stack
 - **Platform**: KURO FANGS (`https://kurofangs.id.ly/`) — High-end bilingual (Arabic RTL / English LTR) dental education platform, Personal Study Library, GoodNotes-grade PDF Annotation Studio (`Kuro Notes`), Audio Lecture Sync, Question Bank, Study Rooms, and Academic Schedules.
 - **Tech Stack**: Vanilla ES6+ SPA (`js/router.js`, `js/app.js`), HTML5 + CSS Custom Properties, PDF.js v3.11.174 + Puppeteer headless Chrome testing pipeline, `pdf-lib` v1.17.1 vector document assembler, IndexedDB local storage (`KF_PersonalLibrary_v1`), Cloudflare R2 + Supabase Auth/Realtime.
-- **Workflow Architecture**: `Previous Years Questions → Subject Selection (oral-diseases) → Sheet Selection (9 Verified Sheets) → Interactive Questions & Quiz Runner → Verify from Sheet (Kuro Notes Split View)`.
+- **Workflow Architecture**: `Previous Years Questions → Subject Selection (Oral Pathology) → Sheet Selection (9 Verified Sheets) → Interactive Questions & Quiz Runner → Verify from Sheet (Kuro Notes Split View)`.
 
 ---
 
 ## 2. Done & Verified
 
-### A. Integrated Page-by-Page Master Book (Pharma Book Architecture) (`v34.0`)
-- **Direct Reference Emulation**:
-  - Replicated the exact student-centric architecture of the user's reference book (`Pharma 1 (2)(1) معدلة.pdf`).
-  - **Sequential Interleaving Engine**:
-    - **Original Sheet Page**: Retains 100% of the vector drawings, clinical schemes, histological slides, and doctor lecture notes.
-    - **Followed Immediately by**: The exact past exam questions testing that specific page, marked with a prominent top-right pill badge: `Page X`.
-    - **Card Design**: Clean white background, double-border elevation, options with letter pills (`A`, `B`, `C`, `D`), and the correct answer highlighted in fresh emerald green (`#dcfce7` / `#10b981`) with evidence quotes.
-- **Audited Metrics**:
-  - **Total Pages in Book**: **388 Pages**.
-  - **All 7 Core Sheets Covered**:
-    - Sheet 1: Dental Caries (Pages 1–11)
-    - Sheet 2: Disorders of Dental Pulp (Pages 12–27)
-    - Sheet 3: Diseases of Periapical Tissues (Pages 28–39)
-    - Sheet 4: Cysts of the Jaw (Pages 40–76)
-    - Sheet 5: Developmental Disturbances of Teeth (Pages 77–94)
-    - Sheet 6: Disturbances of Oral & Paraoral Structures (Pages 95–112)
-    - Sheet 7: Oral Non-Odontogenic Epithelial Tumors (Pages 113–131)
-  - **Supplementary Chapters Included**:
-    - Chapter 8: General Oral Pathology Review (246 Questions)
-    - Chapter 9: Comprehensive Clinical & Final Preparation (58 Questions)
-  - **Total Questions Interleaved**: **Exactly 655 Questions**.
-- **Deliverables Saved**:
-  - Desktop: `C:\Users\Taha\Desktop\Oral_Pathology_Exam_Book\ORAL_PATHOLOGY_INTEGRATED_PAGE_BY_PAGE_BOOK.pdf` (88.96 MB, 388 pages)
-  - Artifact: `C:\Users\Taha\.gemini\antigravity\brain\097ac63e-f0ef-4ec0-87b2-ccf00a62d23b\ORAL_PATHOLOGY_INTEGRATED_PAGE_BY_PAGE_BOOK.pdf`
+### A. Pristine Direct Questions & Defect Purge (`v35.1`)
+- **Strict Quality Filtration Executed**:
+  - Filtered out all **353 malformed / corrupted / incomplete items** from the raw extracted database:
+    - Purged questions with dummy placeholder options (`Option A`, `Option B`).
+    - Purged questions with swallowed option stems (e.g. `results in: a) Demineralization...`).
+    - Purged questions with broken cross-references (e.g. `a and b` when option A was lost or options shifted).
+    - Purged questions with missing or out-of-range correct answer indices.
+    - Purged questions with duplicate options (e.g. `acetic acid` and `Acetic acid`).
+    - Purged near-duplicate question variations (e.g. Wickham's striae, Lichen planus).
+- **Final Direct Exam Bank**:
+  - Retained **218 pristine, authentic, 100% direct exam questions**:
+    - Core Sheets 1–7: **107 questions** (directly linked page-by-page to lecture sheets).
+    - Chapter 8 (General Oral Pathology Review): **103 questions**.
+    - Chapter 9 (Final Review): **8 questions**.
+    - All questions have 4 full, clearly phrased options (A, B, C, D) and verified answer keys.
 
-### B. Bug Fixes in Kuro Notes Viewer (`v33.1`)
-- **Sagittal Midline Clipping Fixed**:
-  - Fixed flexbox centering overflow bug in Arabic RTL mode by forcing `direction: ltr !important` on `.kn-document-viewport`.
-  - Replaced forced 1.35x zoom with automatic `fit-width` inside Split View so full text lines are 100% visible from left to right.
-- **Git Push Deployed**:
-  - Commit `0db90ce` pushed to `origin/main` on GitHub, updating the live website `https://kurofangs.id.ly/`.
+### B. Master Highlighted Book Regenerated (`v35.1`)
+- **Regenerated File Delivered**:
+  - **Desktop Path**: `C:\Users\Taha\Desktop\Oral_Pathology_Exam_Book\ORAL_PATHOLOGY_HIGHLIGHTED_MASTER_BOOK.pdf`
+  - **File Size**: **54.86 MB** — **235 pages**.
+  - **Page-by-Page Integration**:
+    - Sheet pages retain original vector illustrations, clinical slides, and active translucent study highlights (Amber for repeated facts, Yellow for standard exam facts).
+    - Only pages with verified, direct exam questions have an interleaved question page badged with `Page X`.
+    - Page 2 of Sheet 1 (from user screenshot) now cleanly displays the lecture sheet with zero defective question pages.
+  - **Artifact**: `C:\Users\Taha\.gemini\antigravity\brain\097ac63e-f0ef-4ec0-87b2-ccf00a62d23b\ORAL_PATHOLOGY_HIGHLIGHTED_MASTER_BOOK.pdf`.
 
 ---
 
 ## 3. Immediate Next Step
-- The master 388-page integrated book is ready on the desktop for immediate student revision, printing, and tablet study.
+- Push clean question database to GitHub repository to update `kurofangs.id.ly`.
