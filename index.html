@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Instant Academic Study Hero Banner Preload & In-Memory Priming -->
-  <link rel="preload" as="image" href="assets/hero/academic-study-hero.jpg?v=29.0" fetchpriority="high" type="image/jpeg" />
+  <link rel="preload" as="image" href="assets/hero/academic-study-hero.jpg?v=29.1" fetchpriority="high" type="image/jpeg" />
 
   <!-- Lucide Icons CDN (jsdelivr primary + unpkg fallback) -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -35,17 +35,17 @@
   </script>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/tokens.css?v=29.0" />
-  <link rel="stylesheet" href="css/base.css?v=29.0" />
-  <link rel="stylesheet" href="css/layout.css?v=29.0" />
-  <link rel="stylesheet" href="css/components.css?v=29.0" />
+  <link rel="stylesheet" href="css/tokens.css?v=29.1" />
+  <link rel="stylesheet" href="css/base.css?v=29.1" />
+  <link rel="stylesheet" href="css/layout.css?v=29.1" />
+  <link rel="stylesheet" href="css/components.css?v=29.1" />
   <!-- Final product polish: paper-like study surface and touch-first controls -->
-  <link rel="stylesheet" href="css/polish.css?v=29.0" />
-  <link rel="stylesheet" href="css/auth.css?v=29.0" />
-  <link rel="stylesheet" href="css/study-rooms.css?v=29.0" />
-  <link rel="stylesheet" href="css/tablet-responsive.css?v=29.0" />
-  <link rel="stylesheet" href="css/mobile-responsive.css?v=29.0" />
-  <link rel="stylesheet" href="css/home-dashboard.css?v=29.0" />
+  <link rel="stylesheet" href="css/polish.css?v=29.1" />
+  <link rel="stylesheet" href="css/auth.css?v=29.1" />
+  <link rel="stylesheet" href="css/study-rooms.css?v=29.1" />
+  <link rel="stylesheet" href="css/tablet-responsive.css?v=29.1" />
+  <link rel="stylesheet" href="css/mobile-responsive.css?v=29.1" />
+  <link rel="stylesheet" href="css/home-dashboard.css?v=29.1" />
 </head>
 <body id="app-body">
   <!-- ==========================================================================
@@ -134,21 +134,6 @@
           <div class="sidebar-more-submenu" id="sidebar-more-submenu">
             <!-- MY SPACE Section -->
             <div class="sidebar-section-title" id="side-sec-myspace">MY SPACE</div>
-
-            <a href="#/lecture-schedule" class="sidebar-menu-item sidebar-sub-item" data-route="/lecture-schedule">
-              <span class="sidebar-menu-icon-wrap"><i data-lucide="book-open"></i></span>
-              <span class="sidebar-menu-text" id="side-nav-lecture-schedule">Theory Lectures Schedule</span>
-            </a>
-
-            <a href="#/practical-schedule" class="sidebar-menu-item sidebar-sub-item" data-route="/practical-schedule">
-              <span class="sidebar-menu-icon-wrap"><i data-lucide="microscope"></i></span>
-              <span class="sidebar-menu-text" id="side-nav-practical-schedule">Clinical & Lab Schedule</span>
-            </a>
-
-            <a href="#/exams" class="sidebar-menu-item sidebar-sub-item" data-route="/exams">
-              <span class="sidebar-menu-icon-wrap"><i data-lucide="calendar-check"></i></span>
-              <span class="sidebar-menu-text" id="side-nav-exams-schedule">Official Exam Schedules</span>
-            </a>
 
             <a href="#/profile" class="sidebar-menu-item sidebar-sub-item" data-route="/profile">
               <span class="sidebar-menu-icon-wrap"><i data-lucide="user"></i></span>
@@ -415,26 +400,6 @@
         </a>
       </div>
 
-      <!-- Direct Timetable Shortcuts -->
-      <div class="mms-section-label" id="mms-sec-timetables">TIMETABLES & EXAMS</div>
-      <div class="mms-links-list">
-        <a href="#/lecture-schedule" class="mms-list-item" data-route="/lecture-schedule">
-          <span class="mms-item-icon"><i data-lucide="book-open"></i></span>
-          <span class="mms-item-text" id="mms-item-theory">Theory Lectures Schedule</span>
-          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
-        </a>
-        <a href="#/practical-schedule" class="mms-list-item" data-route="/practical-schedule">
-          <span class="mms-item-icon"><i data-lucide="microscope"></i></span>
-          <span class="mms-item-text" id="mms-item-practical">Clinical & Lab Schedule</span>
-          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
-        </a>
-        <a href="#/exams" class="mms-list-item" data-route="/exams">
-          <span class="mms-item-icon"><i data-lucide="calendar-check"></i></span>
-          <span class="mms-item-text" id="mms-item-exams">Official Exam Schedules</span>
-          <i data-lucide="chevron-right" class="mms-item-arrow"></i>
-        </a>
-      </div>
-
       <!-- Platform & Account -->
       <div class="mms-section-label" id="mms-sec-platform">PLATFORM & ACCOUNT</div>
       <div class="mms-links-list">
@@ -484,43 +449,47 @@
   </aside>
 
   <!-- JavaScript Modules -->
-  <script src="js/i18n.js?v=29.0"></script>
-  <script src="js/audio-fx.js?v=29.0"></script>
-  <script src="js/character-theme.js?v=29.0"></script>
-  <script src="js/store.js?v=29.0"></script>
-  <script src="js/components/toast.js?v=29.0"></script>
-  <script src="js/components/auth-modal.js?v=29.0"></script>
-  <script src="js/components/avatar-modal.js?v=29.0"></script>
-  <script src="js/supabase.js?v=29.0"></script>
-  <script src="js/auth.js?v=29.0"></script>
-  <script src="js/data.js?v=29.0"></script>
-  <script src="js/data-clinical.js?v=29.0"></script>
-  <script src="js/components/subject-modal.js?v=29.0"></script>
-  <script src="js/components/sheet-edit-modal.js?v=29.0"></script>
-  <script src="js/components/notifications-center.js?v=29.0"></script>
-  <script src="js/components/sheet-copy-engine.js?v=29.0"></script>
-  <script src="js/components/settings-menu.js?v=29.0"></script>
-  <script src="js/router.js?v=29.0"></script>
-  <script src="js/pages/login.js?v=29.0"></script>
-  <script src="js/pages/register-setup.js?v=29.0"></script>
-  <script src="js/pages/home.js?v=29.0"></script>
-  <script src="js/pages/sheets.js?v=29.0"></script>
-  <script src="js/components/pdf-source-matcher.js?v=29.0"></script>
-  <script src="js/pages/sheet-detail.js?v=29.0"></script>
-  <script src="js/pages/recordings.js?v=29.0"></script>
-  <script src="js/pages/exams.js?v=29.0"></script>
-  <script src="js/pages/quizzes.js?v=29.0"></script>
-  <script src="js/pages/questions.js?v=29.0"></script>
-  <script src="js/pages/flashcards.js?v=29.0"></script>
-  <script src="js/pages/study-rooms.js?v=29.0"></script>
-  <script src="js/pages/previous-years.js?v=29.0"></script>
-  <script src="js/pages/rewards.js?v=29.0"></script>
-  <script src="js/pages/games.js?v=29.0"></script>
-  <script src="js/git-sync.js?v=29.0"></script>
-  <script src="js/pages/admin.js?v=29.0"></script>
-  <script src="js/pages/profile.js?v=29.0"></script>
-  <script src="js/pages/settings.js?v=29.0"></script>
-  <script src="js/pages/secondary.js?v=29.0"></script>
-  <script src="js/app.js?v=29.0"></script>
+  <script src="js/i18n.js?v=29.1"></script>
+  <script src="js/audio-fx.js?v=29.1"></script>
+  <script src="js/character-theme.js?v=29.1"></script>
+  <script src="js/store.js?v=29.1"></script>
+  <script src="js/components/toast.js?v=29.1"></script>
+  <script src="js/components/auth-modal.js?v=29.1"></script>
+  <script src="js/components/avatar-modal.js?v=29.1"></script>
+  <script src="js/supabase.js?v=29.1"></script>
+  <script src="js/auth.js?v=29.1"></script>
+  <script src="js/data.js?v=29.1"></script>
+  <script src="js/data-clinical.js?v=29.1"></script>
+  <script src="js/components/subject-modal.js?v=29.1"></script>
+  <script src="js/components/sheet-edit-modal.js?v=29.1"></script>
+  <script src="js/components/notifications-center.js?v=29.1"></script>
+  <script src="js/components/sheet-copy-engine.js?v=29.1"></script>
+  <script src="js/components/settings-menu.js?v=29.1"></script>
+  <script src="js/router.js?v=29.1"></script>
+  <script src="js/pages/login.js?v=29.1"></script>
+  <script src="js/pages/register-setup.js?v=29.1"></script>
+  <script src="js/pages/home.js?v=29.1"></script>
+  <script src="js/pages/sheets.js?v=29.1"></script>
+  <script src="js/components/document-processor.js?v=29.1"></script>
+  <script src="js/components/exam-question-parser.js?v=29.1"></script>
+  <script src="js/components/pdf-source-matcher.js?v=29.1"></script>
+  <script src="js/components/hybrid-source-matcher.js?v=29.1"></script>
+  <script src="js/components/exam-book-generator.js?v=29.1"></script>
+  <script src="js/pages/sheet-detail.js?v=29.1"></script>
+  <script src="js/pages/recordings.js?v=29.1"></script>
+  <script src="js/pages/exams.js?v=29.1"></script>
+  <script src="js/pages/quizzes.js?v=29.1"></script>
+  <script src="js/pages/questions.js?v=29.1"></script>
+  <script src="js/pages/flashcards.js?v=29.1"></script>
+  <script src="js/pages/study-rooms.js?v=29.1"></script>
+  <script src="js/pages/previous-years.js?v=29.1"></script>
+  <script src="js/pages/rewards.js?v=29.1"></script>
+  <script src="js/pages/games.js?v=29.1"></script>
+  <script src="js/git-sync.js?v=29.1"></script>
+  <script src="js/pages/admin.js?v=29.1"></script>
+  <script src="js/pages/profile.js?v=29.1"></script>
+  <script src="js/pages/settings.js?v=29.1"></script>
+  <script src="js/pages/secondary.js?v=29.1"></script>
+  <script src="js/app.js?v=29.1"></script>
 </body>
 </html>
