@@ -13906,6 +13906,7 @@ a:focus:not(:focus-visible) {
   align-items: center;
   padding: 28px 24px 64px;
   outline: none;
+  direction: ltr !important; /* Critical: PDF documents and coordinates are LTR; prevents RTL flex centering sagittal cutoff */
 }
 
 .kn-pages-container {
@@ -15258,6 +15259,17 @@ a:focus:not(:focus-visible) {
   height: 100% !important;
   max-height: 100% !important;
   border-radius: 18px !important;
+}
+
+#dt-quiz-stage-container.dt-split-active .kn-document-viewport {
+  direction: ltr !important;
+  padding: 16px 8px 64px !important;
+  overflow-x: auto !important;
+}
+
+#dt-quiz-stage-container.dt-split-active .kn-page-card {
+  max-width: 100% !important;
+  margin: 0 auto !important;
 }
 
 #dt-quiz-stage-container.dt-split-active #kn-top-header {

@@ -336,15 +336,15 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     hasAutoFocusedSource: false,
     isSplitView: isSplitView,
     isMobileFlow: isMobileFlow,
-    zoom: savedView.zoom || (isSplitView ? 1.15 : 1.0),
-    zoomMode: savedView.zoomMode || 'custom', // 'custom' | 'fit-width' | 'fit-page'
+    zoom: isSplitView ? 0.95 : (savedView.zoom || 1.0),
+    zoomMode: isSplitView ? 'fit-width' : (savedView.zoomMode || 'custom'), // 'custom' | 'fit-width' | 'fit-page'
     rotation: savedView.rotation || 0, // 0, 90, 180, 270
     // Global Interaction Mode
     interactionMode: 'browse', // 'browse' | 'edit'
     activeTool: null,
     toolPopoverOpen: false,
-    leftSidebarOpen: savedView.leftSidebarOpen !== undefined ? savedView.leftSidebarOpen : (isDesktop || isTablet),
-    rightSidebarOpen: savedView.rightSidebarOpen !== undefined ? savedView.rightSidebarOpen : isDesktop,
+    leftSidebarOpen: isSplitView ? false : (savedView.leftSidebarOpen !== undefined ? savedView.leftSidebarOpen : (isDesktop || isTablet)),
+    rightSidebarOpen: isSplitView ? false : (savedView.rightSidebarOpen !== undefined ? savedView.rightSidebarOpen : isDesktop),
     rightSidebarSize: savedView.rightSidebarSize || 'standard', // 'compact' | 'standard' | 'expanded'
     leftTab: savedView.leftTab || 'pages', // 'pages' | 'bookmarks' | 'annotations'
     rightTab: savedView.rightTab === 'notes' ? 'notes' : 'audio', // 'audio' | 'notes'
@@ -1146,8 +1146,13 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
     const card = pagesContainer?.querySelector(`.kn-page-card[data-page="${pageNum}"]`);
     if (!viewport || !card || !bounds) return;
 
-    if (autoZoom && state.zoom < 1.3) {
-      setZoom(1.35, 'custom');
+    if (autoZoom) {
+      if (isSplitView || viewport.clientWidth < 850) {
+        // In split view, fit full page width comfortably so NO text is ever clipped horizontally/sagittally
+        setZoom(1.0, 'fit-width');
+      } else if (state.zoom < 1.0) {
+        setZoom(1.1, 'custom');
+      }
     }
 
     setTimeout(() => {
@@ -1158,8 +1163,16 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
       const targetY = cardTop + (bounds.y * s);
       const targetScrollTop = Math.max(0, targetY - (viewport.clientHeight / 3));
 
+      let targetScrollLeft = 0;
+      if (updatedCard.offsetWidth > viewport.clientWidth) {
+        const cardLeft = updatedCard.offsetLeft;
+        const targetX = cardLeft + ((bounds.x || 0) * s);
+        targetScrollLeft = Math.max(0, targetX - (viewport.clientWidth / 2));
+      }
+
       viewport.scrollTo({
         top: targetScrollTop,
+        left: targetScrollLeft,
         behavior: 'smooth'
       });
 
@@ -1171,7 +1184,7 @@ async function renderKuroNotesSheet(containerOrId, sheetIdOrQuery, maybeQuery, o
           el.classList.add('pulse-attention');
         });
       }
-    }, 80);
+    }, 100);
   }
 
   function mountSourceReferenceDock(matchResult) {
