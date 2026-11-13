@@ -9,24 +9,30 @@
 
 ## 2. Done & Verified
 
-### A. Dedicated Essay Corner: "ركن الأسئلة المقالية — شوف الحل" (`v35.4`)
-- **Delivered Files in `C:\Users\Taha\Desktop\تست باثو`**:
-  1. `ركن_الاسئلة_المقالية_مع_الحل_النموذجي.pdf` (5.19 MB):
-     - Isolated collection of all **208 pure essay/written questions** from past faculty exams.
-     - Covers definitions (Define), enumerations (Enumerate/List), etiology (Causes of), clinical manifestations, radiographic signs, and clinical diagnostic scenarios.
-     - Each card presents the question prompt, followed immediately by the **"شوف الحل / الحل النموذجي المعتمد"** box with structured points and exact sheet/page references.
-  2. `ركن_الاسئلة_المقالية_تفاعلي_شوف_الحل.html` (Interactive Web App):
-     - Interactive toggle button: **`[👁️ شوف الحل (Model Answer)]`** on each question card to reveal/hide the solution smoothly.
-     - Instant search, "إظهار جميع الحلول" toggle button, and responsive mobile/tablet layout.
-
-### B. Master Books & Unified Archives in `تست باثو`
-1. `كتاب_الاورال_باثولوجي_المجمع_الشامل_مع_صفحات_الكتاب.pdf` (108.96 MB, 484 pages — includes all 131 highlighted lecture sheet pages interleaved with past exam MCQs and related/unknown sections).
-2. `كتاب_اورال_باثولوجي_7_شيتات_مع_الهايلايتات.pdf` (54.06 MB, 203 pages — 7 curriculum sheets only).
-3. `الملف_المجمع_الشامل_لكافة_الاسئلة.pdf` (25.93 MB, all 655 questions annotated).
-4. `الملف_المجمع_الشامل_لكافة_الاسئلة.html` (1.59 MB, live search & tabs).
-5. `الملف_المجمع_الشامل_لكافة_الاسئلة.csv` (Excel spreadsheet UTF-8 BOM).
+### A. Full Architectural Reorganization of Master Questions File (`v36.0`)
+- **Delivered File**: `C:\Users\Taha\Desktop\تست باثو\الملف_المجمع_الشامل_لكافة_الاسئلة.html` (2.30 MB) and `.pdf` (23.63 MB) & `.csv` (0.39 MB).
+- **Core Implementations Based on Directives**:
+  1. **Ascending Order by Source Page**:
+     - All questions reordered strictly ascendingly from Page 1 to the last page based on their occurrence in the original exam PDF sources (`طه 1` and `2025/2026`).
+     - Every card badged with original source page and question number: `[📄 المصدر: صفحة X (سؤال Y)]`.
+  2. **Scientific Sources & Deep Verification**:
+     - Linked to the official lecture sheet name and textbook sheet page: `[📖 الشيت X • صفحة Y من الشيت الأصلي]`.
+     - Quote from official lecture sheet text included on every question.
+     - Interactive modal button: `[🔍 فتح المصدر والتحقق]` displays the scientific evidence and supporting context in an elegant popup drawer.
+     - Verified answer with scientific rationale displayed clearly.
+  3. **Strict Categorization into 3 Distinct Groups**:
+     - **Group 1: Multiple Choice Questions (MCQ)**: 501 questions (ordered by source page).
+     - **Group 2: True or False Questions**: 13 questions (ordered by source page).
+     - **Group 3: Written Questions (رتن ومقالي)**: 141 questions (ordered by source page).
+     - Dedicated switchable tabs with counts and instant search & sheet filters.
+  4. **Systematic Separation of Swallowed Option A**:
+     - Successfully identified and unmerged Option (A) on **191 questions** where option text had been concatenated into the stem (e.g. `results in: a) Demineralization...`).
+     - Reconstructed the clean stem and restored Option A as choice 1, realigning choices B, C, D, E.
+     - Combo options such as `C (a and b)` or `D (All of the above)` now make 100% logical sense.
+  5. **No Questions Deleted for Formatting Flaws**:
+     - Retained 100% of questions from the source files. Incomplete options are preserved as-is with clear explanatory badges without inventing fake choices.
 
 ---
 
 ## 3. Immediate Next Step
-- Fully tested and delivered to the user.
+- Final verification complete. Report back to user with full explanation.
