@@ -9,45 +9,24 @@
 
 ## 2. Done & Verified
 
-### A. Dedicated Desktop Deliverable: "تست باثو" (`v35.2`)
-- **Desktop Folder**: `C:\Users\Taha\Desktop\تست باثو`
-  1. `كتاب_اورال_باثولوجي_7_شيتات_مع_الهايلايتات.pdf` (54.06 MB, 203 pages):
-     - Contains **ONLY the 7 core curriculum sheets** (Pages 1–131).
-     - 1,497 translucent vector study highlights on exam facts and definitions (Amber for repeated facts, Yellow for exam facts).
-     - Followed by deduplicated, direct faculty exam questions badged with `Page X` (107 direct questions for the 7 sheets).
-     - Chapters 8 and 9 completely excluded.
-  2. `تقرير_الاسئلة_المحذوفة_تفاعلي.html` (Interactive HTML with search & filters):
-     - Live search by question text, sheet name, or defect reason.
-     - Documents all 437 excluded questions with full stem, options, and transparent reasons.
-  3. `جدول_الاسئلة_المحذوفة_للاكسل.csv` (Excel-ready with UTF-8 BOM):
-     - Formatted spreadsheet with columns: Question ID, Sheet Name, Sheet Page, Exam File, Exam Page, Defect Category, Detailed Reason, Stem, Choices, Answer.
-  4. `تقرير_الاسئلة_المحذوفة_مع_اسباب_الحذف.md` (Markdown documentation).
-  5. `بيانات_الاسئلة_المحذوفة.json` (Structured JSON dataset).
-  6. `اقرأني_فهرس_المحتويات.txt` (Summary index).
-- **Desktop Root Direct Files**:
-  - `C:\Users\Taha\Desktop\تست باثو - كتاب ال 7 شيتات مع الهايلايتات.pdf`
-  - `C:\Users\Taha\Desktop\تست باثو - جدول الاسئلة المحذوفة.csv`
+### A. Dedicated Essay Corner: "ركن الأسئلة المقالية — شوف الحل" (`v35.4`)
+- **Delivered Files in `C:\Users\Taha\Desktop\تست باثو`**:
+  1. `ركن_الاسئلة_المقالية_مع_الحل_النموذجي.pdf` (5.19 MB):
+     - Isolated collection of all **208 pure essay/written questions** from past faculty exams.
+     - Covers definitions (Define), enumerations (Enumerate/List), etiology (Causes of), clinical manifestations, radiographic signs, and clinical diagnostic scenarios.
+     - Each card presents the question prompt, followed immediately by the **"شوف الحل / الحل النموذجي المعتمد"** box with structured points and exact sheet/page references.
+  2. `ركن_الاسئلة_المقالية_تفاعلي_شوف_الحل.html` (Interactive Web App):
+     - Interactive toggle button: **`[👁️ شوف الحل (Model Answer)]`** on each question card to reveal/hide the solution smoothly.
+     - Instant search, "إظهار جميع الحلول" toggle button, and responsive mobile/tablet layout.
 
-### B. Defect Audit Summary (437 Questions Excluded)
-- **Breakdown by Reason Category**:
-  - نقص في الخيارات (أقل من 3 خيارات / صواب وخطأ مبتورة): 183 سؤالاً
-  - دمج الخيار (a) داخل نص السؤال مما أفسد الخيارات: 136 سؤالاً
-  - تكرار متطابق 100%: 84 سؤالاً
-  - شبه مكرر أو صياغة غير مباشرة: 28 سؤالاً
-  - خيارات ربط مشوهة (a and b بدون خيارات واضحة): 3 أسئلة
-  - تكرار نفس الخيار مرتين داخل السؤال: 3 أسئلة
-- **Breakdown by Sheet**:
-  - Sheet 1 (Dental Caries): 30
-  - Sheet 2 (Disorders of Dental Pulp): 35
-  - Sheet 3 (Periapical Diseases): 37
-  - Sheet 4 (Cysts of the Jaw): 59
-  - Sheet 5 (Developmental Disturbances of Teeth): 47
-  - Sheet 6 (Oral & Paraoral Structures): 12
-  - Sheet 7 (Oral Epithelial Tumors): 24
-  - Outside Core 7 Sheets (Salivary Glands, Bone, Infections, etc.): 143
-  - Unidentified / General Review: 50
+### B. Master Books & Unified Archives in `تست باثو`
+1. `كتاب_الاورال_باثولوجي_المجمع_الشامل_مع_صفحات_الكتاب.pdf` (108.96 MB, 484 pages — includes all 131 highlighted lecture sheet pages interleaved with past exam MCQs and related/unknown sections).
+2. `كتاب_اورال_باثولوجي_7_شيتات_مع_الهايلايتات.pdf` (54.06 MB, 203 pages — 7 curriculum sheets only).
+3. `الملف_المجمع_الشامل_لكافة_الاسئلة.pdf` (25.93 MB, all 655 questions annotated).
+4. `الملف_المجمع_الشامل_لكافة_الاسئلة.html` (1.59 MB, live search & tabs).
+5. `الملف_المجمع_الشامل_لكافة_الاسئلة.csv` (Excel spreadsheet UTF-8 BOM).
 
 ---
 
 ## 3. Immediate Next Step
-- Everything complete and verified on Desktop. Deliver clear Libyan Arabic summary to user with direct paths.
+- Fully tested and delivered to the user.
